@@ -5,6 +5,7 @@
 
 #include "WireCellNav/SliceDataSource.h"
 #include "TApplication.h"
+#include "TCanvas.h"
 #include "TStyle.h"
 #include "TH1F.h"
 #include <iostream>
@@ -16,11 +17,13 @@ using namespace std;
 
 int main(int argc, char* argv[])
 {
-  
-  
+  if (argc < 2) {
+      cerr << "usage: wire-cell-2dtoy /path/to/ChannelWireGeometry.txt" << endl;
+      return 1;
+  }
 
   WireCellSst::GeomDataSource gds(argv[1]);
-  WireCell2dToy::FrameDataSource fds(10,&gds);
+  WireCell2dToy::FrameDataSource fds(10, gds);
 
   std::vector<float> ex = gds.extent();
   cerr << "Extent: "
@@ -34,7 +37,8 @@ int main(int argc, char* argv[])
   fds.jump(1);
   WireCell::Frame frame = fds.get();
   cout << frame.traces.size() << endl;
-  cout << fds.mctruth.size() << endl;
+  const WireCell::PointValueVector& mctruth = fds.cell_charges();
+  cout << mctruth.size() << endl;
 
   WireCell::SliceDataSource sds(fds);
   sds.jump(0);
@@ -51,20 +55,24 @@ int main(int argc, char* argv[])
   
   TApplication theApp("theApp",&argc,argv);
   theApp.SetReturnFromRun(true);
-  WireCell2dToy::ToyEventDisplay display;
+
+  TCanvas c1("ToyMC","ToyMC",800,600);
+  c1.Draw();
+
+  WireCell2dToy::ToyEventDisplay display(c1, gds);
   
   gStyle->SetOptStat(0);
 
   // // display.init(0,10.3698,-2.33/2.,2.33/2.);
   display.init();
-  display.draw_mc(1,fds.mctruth,"");
-  display.draw_mc(2,fds.mctruth,"TEXTsame");
+  display.draw_mc(1,mctruth,"");
+  display.draw_mc(2,mctruth,"TEXTsame");
   
   
-  display.draw_slice(slice,gds,"same");
+  display.draw_slice(slice,"same");
  
   display.draw_cells(toytiling.get_allcell(),"*same");
-  display.draw_mc(3,fds.mctruth,"*same");
+  display.draw_mc(3,mctruth,"*same");
 
   theApp.Run();
   

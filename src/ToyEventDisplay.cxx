@@ -1,24 +1,41 @@
-#include "WireCellData/Units.h"
 #include "WireCell2dToy/ToyEventDisplay.h"
+#include "WireCellData/Units.h"
+#include "WireCellData/Point.h"
 #include "TGraph.h"
 #include "TLine.h"
 #include <iostream>
 
 using namespace WireCell2dToy;
 
-ToyEventDisplay::ToyEventDisplay(){
-  c1 = new TCanvas("ToyMC","ToyMC",800,600);
-  c1->Draw();
+ToyEventDisplay::ToyEventDisplay(TPad& pad, const WireCell::GeomDataSource& gds)
+    : pad(pad)
+    , gds(gds)
+    , h1(0)
+    , g1(0)
+    , g2(0)
+{
 }
 
-ToyEventDisplay::~ToyEventDisplay(){
-  delete c1;
-  delete h1;
-  delete g1;
-  delete g2;
+ToyEventDisplay::~ToyEventDisplay()
+{
+    this->clear();
+}
+void ToyEventDisplay::clear()
+{
+    if (h1) {
+	delete h1;
+    }
+    if (g1) {
+	delete g1;
+    }
+    if (g2) { 
+	delete g2;
+    }
 }
 
-int ToyEventDisplay::init(float x_min=4.9, float x_max=6.1, float y_min=-1.1, float y_max=1.1){
+int ToyEventDisplay::init(float x_min, float x_max, float y_min, float y_max)
+{
+  this->clear();
   h1 = new TH2F("h1","h1",1000,x_min,x_max,1000,y_min,y_max);
   h1->SetTitle("Wires and True Hits");
   h1->GetYaxis()->SetNdivisions(506);
@@ -28,20 +45,23 @@ int ToyEventDisplay::init(float x_min=4.9, float x_max=6.1, float y_min=-1.1, fl
   return 0;
 }
 
-int ToyEventDisplay::draw_mc(int flag, WireCell::PointCVector mctruth, TString option){
-  
+int ToyEventDisplay::draw_mc(int flag, const WireCell::PointValueVector& mctruth, TString option)
+{
+  pad.cd();
+
   if (flag==1){
     h1->Draw(option);
   }else if (flag==2){
     h1->Reset();
     for (int i=0;i!=mctruth.size();i++){
-      h1->Fill(mctruth[i].z/units::m,mctruth[i].y/units::m-0.02,int(mctruth[i].charge*10)/10.);
+      h1->Fill(mctruth[i].first.z/units::m,mctruth[i].first.y/units::m-0.02,int(mctruth[i].second*10)/10.);
     }
     h1->Draw(option);
   }else if (flag==3){
+    if (g1) delete g1;
     g1 = new TGraph();
     for (int i=0;i!=mctruth.size();i++){
-      g1->SetPoint(i,mctruth[i].z/units::m,mctruth[i].y/units::m);
+      g1->SetPoint(i,mctruth[i].first.z/units::m,mctruth[i].first.y/units::m);
     }
     g1->SetMarkerColor(2);
     g1->SetMarkerSize(0.6);
@@ -52,8 +72,10 @@ int ToyEventDisplay::draw_mc(int flag, WireCell::PointCVector mctruth, TString o
   return 0;
 }
 
-int ToyEventDisplay::draw_slice(WireCell::Slice slice, WireCellSst::GeomDataSource gds, TString option){
-  
+int ToyEventDisplay::draw_slice(const WireCell::Slice& slice, TString option)
+{
+  pad.cd();
+
   WireCell::Channel::Group group = slice.group();
   //std::cout << group.size() << std::endl;
   
@@ -85,7 +107,11 @@ int ToyEventDisplay::draw_slice(WireCell::Slice slice, WireCellSst::GeomDataSour
 }
 
 
-int ToyEventDisplay::draw_cells(WireCell::GeomCellSelection cellall ,TString option){
+int ToyEventDisplay::draw_cells(const WireCell::GeomCellSelection& cellall, TString option)
+{
+  pad.cd();
+
+  if (g2) delete g2;
   g2 = new TGraph();
   for (int i=0;i!=cellall.size();i++){
     g2->SetPoint(i,cellall[i]->center().z/units::m,cellall[i]->center().y/units::m);

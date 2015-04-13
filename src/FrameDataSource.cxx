@@ -1,12 +1,13 @@
 #include "WireCell2dToy/FrameDataSource.h"
+#include "WireCellData/Point.h"
 #include "TRandom.h"
 
 WireCell2dToy::FrameDataSource::FrameDataSource(int nevents,
-		WireCellSst::GeomDataSource *gds1   )
+						const WireCell::GeomDataSource& gds)
     : WireCell::FrameDataSource()
+    , Nevent(nevents)
+    , gds(gds)
 {
-  Nevent = nevents;
-  gds = gds1;
 }
 WireCell2dToy::FrameDataSource::~FrameDataSource()
 {
@@ -21,6 +22,7 @@ int WireCell2dToy::FrameDataSource::jump(int frame_number)
 {
   if (frame_number >= Nevent) frame_number = Nevent;
 
+  // fixme: we need to centralize random number seeding!
   gRandom->SetSeed(frame_number);
   frame.clear();
   mctruth.clear();
@@ -28,7 +30,7 @@ int WireCell2dToy::FrameDataSource::jump(int frame_number)
   //main code to construct a frame
   // first create many traces and initialize the channel number
   std::vector <WireCell::Trace> traces(8400);
-  for (int i=0;i!=8400;i++){
+  for (int i=0;i!=8400;i++){	// fixme: use the gds?
     traces[i].chid = i;
     traces[i].tbin = 0;
     traces[i].charge.push_back(0);
@@ -37,6 +39,7 @@ int WireCell2dToy::FrameDataSource::jump(int frame_number)
   int npoint = gRandom->Uniform(5,20);
   float charge;
 
+  // fixme: use the gds?
   //generate point inside a 1m by 1m region
   Double_t y_low = -1 * units::m, y_high = 1 * units::m;
   Double_t z_low = 5 * units::m, z_high = 6 * units::m;
@@ -52,24 +55,19 @@ int WireCell2dToy::FrameDataSource::jump(int frame_number)
     p.z = gRandom->Uniform(z_low, z_high);
     
     charge = gRandom->Uniform(5,30);
-    WireCell::PointC pc;
-    pc.x = p.x;
-    pc.y = p.y;
-    pc.z = p.z;
-    pc.charge = charge;
-    mctruth.push_back(pc);
+    mctruth.push_back(WireCell::PointValue(p,charge));
     
 
     for (int j=0;j!=3;j++){
       plane = static_cast<WireCell::WirePlaneType_t>(j);
-      wire_closest = gds->closest(p,plane);
+      wire_closest = gds.closest(p,plane);
       traces[wire_closest->channel()].charge[0] += charge;
     }
   }
   
 
   // only save the ones with non-zero charge into a frame
-  for (int i=0;i!=8400;i++){
+  for (int i=0;i!=8400;i++){	// fixme: where does 8400 come from?  use the gds?
     if (traces[i].charge[0] >0){
       // add 5% uncertainties 
       traces[i].charge[0] = gRandom->Gaus(traces[i].charge[0],0.05*traces[i].charge[0]);
