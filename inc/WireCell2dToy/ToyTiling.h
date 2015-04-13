@@ -6,35 +6,34 @@
 #include "WireCellNav/SliceDataSource.h"
 #include "WireCellSst/GeomDataSource.h"
 
-namespace WireCell {
+namespace WireCell2dToy {
     /**
      *  A bogus tiling class that doesn't do anything.
      */
-    class ToyTiling : public TilingBase { 
+    class ToyTiling : public WireCell::TilingBase { 
     public:
       ToyTiling();
+	// fixme: tiling should not know about slices data.
       ToyTiling(WireCell::Slice slice,WireCellSst::GeomDataSource gds);
       virtual ~ToyTiling();
       
-	GeomWireSelection wires(const GeomCell& cell) const;
-	GeomCellSelection cells(const GeomWire& wire) const;
-	virtual GeomCell* cell(const GeomWireSelection& wires) const;
-	const GeomCell* thecell(const GeomWireSelection& wires) const;
+	WireCell::GeomWireSelection wires(const WireCell::GeomCell& cell) const;
+	WireCell::GeomCellSelection cells(const WireCell::GeomWire& wire) const;
+	const WireCell::GeomCell* cell(const WireCell::GeomWireSelection& wires) const;
 
-	GeomCellSelection get_allcell(){ return cell_all;}
-	GeomWireSelection get_allwire(){ return wire_all;}
+	WireCell::GeomCellSelection get_allcell(){ return cell_all;}
+	WireCell::GeomWireSelection get_allwire(){ return wire_all;}
 
-	GeomWireSelection wire_u;
-	GeomWireSelection wire_v;
-	GeomWireSelection wire_w;
+    private:
+	WireCell::GeomWireSelection wire_u;
+	WireCell::GeomWireSelection wire_v;
+	WireCell::GeomWireSelection wire_w;
 
-	GeomCellSelection cell_all;
-	GeomWireSelection wire_all;
+	WireCell::GeomCellSelection cell_all;
+	WireCell::GeomWireSelection wire_all;
 	
-	GeomCellMap cellmap;
-	GeomWireMap wiremap;
-
-	
+	WireCell::GeomCellMap cellmap;
+	WireCell::GeomWireMap wiremap;
 
     };
 }

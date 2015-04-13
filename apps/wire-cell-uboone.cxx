@@ -54,7 +54,7 @@ int main(int argc, char* argv[])
     sds.jump(i);
     WireCell::Slice slice = sds.get();
     if ( slice.group().size() >0){
-      WireCell::ToyTiling toytiling(slice,gds);
+      WireCell2dToy::ToyTiling toytiling(slice,gds);
       
       GeomCellSelection allcell = toytiling.get_allcell();
       GeomWireSelection allwire = toytiling.get_allwire();

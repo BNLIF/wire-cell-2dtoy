@@ -5,11 +5,11 @@
 
 using namespace WireCell;
 
-ToyTiling::ToyTiling()
+WireCell2dToy::ToyTiling::ToyTiling()
 {
 }
 
-ToyTiling::ToyTiling(WireCell::Slice slice,WireCellSst::GeomDataSource gds){
+WireCell2dToy::ToyTiling::ToyTiling(WireCell::Slice slice,WireCellSst::GeomDataSource gds){
   WireCell::Channel::Group group = slice.group();
   for (int i=0;i!=group.size();i++){
     const WireCell::GeomWire *wire = gds.by_channel_segment(group.at(i).first,0);
@@ -159,7 +159,7 @@ ToyTiling::ToyTiling(WireCell::Slice slice,WireCellSst::GeomDataSource gds){
 }
 
 
-ToyTiling::~ToyTiling()
+WireCell2dToy::ToyTiling::~ToyTiling()
 {
   //delete all the cells
   for (int i=0;i!=cell_all.size();i++){
@@ -167,7 +167,7 @@ ToyTiling::~ToyTiling()
   }
 }
 
-GeomWireSelection ToyTiling::wires(const GeomCell& cell) const
+GeomWireSelection WireCell2dToy::ToyTiling::wires(const GeomCell& cell) const
 {
   if (cellmap.find(&cell) == cellmap.end()){
     //not found 
@@ -179,7 +179,7 @@ GeomWireSelection ToyTiling::wires(const GeomCell& cell) const
     
 }
 	
-GeomCellSelection ToyTiling::cells(const GeomWire& wire) const
+GeomCellSelection WireCell2dToy::ToyTiling::cells(const GeomWire& wire) const
 {
   if (wiremap.find(&wire) == wiremap.end()){
     return GeomCellSelection();
@@ -188,13 +188,8 @@ GeomCellSelection ToyTiling::cells(const GeomWire& wire) const
   }
 }
 
-GeomCell* ToyTiling::cell(const GeomWireSelection& wires) const
-{
-  return 0;
-}
 
-
-const GeomCell* ToyTiling::thecell(const GeomWireSelection& wires) const
+const GeomCell* WireCell2dToy::ToyTiling::cell(const GeomWireSelection& wires) const
 {
   if (wires.size()!=3) return 0;
   const GeomWire *wire1 = wires[0];

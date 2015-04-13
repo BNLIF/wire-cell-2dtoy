@@ -22,15 +22,15 @@ ToyEventDisplay::~ToyEventDisplay()
 }
 void ToyEventDisplay::clear()
 {
-    if (h1) {
-	delete h1;
-    }
-    if (g1) {
-	delete g1;
-    }
-    if (g2) { 
-	delete g2;
-    }
+    // if (h1) {
+    // 	delete h1;
+    // }
+    // if (g1) {
+    // 	delete g1;
+    // }
+    // if (g2) { 
+    // 	delete g2;
+    // }
 }
 
 int ToyEventDisplay::init(float x_min, float x_max, float y_min, float y_max)
@@ -58,7 +58,7 @@ int ToyEventDisplay::draw_mc(int flag, const WireCell::PointValueVector& mctruth
     }
     h1->Draw(option);
   }else if (flag==3){
-    if (g1) delete g1;
+      //if (g1) delete g1;
     g1 = new TGraph();
     for (int i=0;i!=mctruth.size();i++){
       g1->SetPoint(i,mctruth[i].first.z/units::m,mctruth[i].first.y/units::m);
@@ -111,7 +111,7 @@ int ToyEventDisplay::draw_cells(const WireCell::GeomCellSelection& cellall, TStr
 {
   pad.cd();
 
-  if (g2) delete g2;
+  //if (g2) delete g2;
   g2 = new TGraph();
   for (int i=0;i!=cellall.size();i++){
     g2->SetPoint(i,cellall[i]->center().z/units::m,cellall[i]->center().y/units::m);
