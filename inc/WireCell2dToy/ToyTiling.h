@@ -23,24 +23,30 @@ namespace WireCell2dToy {
       
       WireCell::GeomCellSelection get_allcell(){ return cell_all;}
       WireCell::GeomWireSelection get_allwire(){ return wire_all;}
-      
-      //an algorithm to do one-time merge for all the connected cell
-      int merge_cell_one_time();
-      
+      int get_ncell(){return ncell;}
 
+      WireCell::GeomWireSelection get_wire_u(){ return wire_u;}
+      WireCell::GeomWireSelection get_wire_v(){ return wire_v;}
+      WireCell::GeomWireSelection get_wire_w(){return wire_w;}
+      WireCell::GeomWireSelection get_wire_all(){ return wire_all;}
 
-    private:
+    protected:
       WireCell::GeomWireSelection wire_u;
       WireCell::GeomWireSelection wire_v;
       WireCell::GeomWireSelection wire_w;
-      
-      WireCell::GeomCellSelection cell_all;
       WireCell::GeomWireSelection wire_all;
+      int ncell;
+
+      WireCell::GeomCellSelection cell_all;
       
       WireCell::GeomCellMap cellmap;
       WireCell::GeomWireMap wiremap;
+      
+      
 
-      int ncell;
+      //
+
+      
       
     };
 }
