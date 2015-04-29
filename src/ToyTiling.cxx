@@ -25,7 +25,7 @@ WireCell2dToy::ToyTiling::ToyTiling(WireCell::Slice slice,WireCellSst::GeomDataS
 
   float dis_u[2],dis_v[2],dis_w[2],
     dis_puv[4],dis_puw[4],dis_pwv[4];
-  int ncell = 1;
+  ncell = 1;
 
   //std::cout << "Wire Counts: " << wire_u.size() << " " << wire_v.size() << " " << wire_w.size() << std::endl;
 
@@ -141,15 +141,12 @@ WireCell2dToy::ToyTiling::ToyTiling(WireCell::Slice slice,WireCellSst::GeomDataS
       
       // initialize uw and vw points
       // if (flag==1){
-	
-	
 	// check order 
 	//	pcell = cell->boundary();
 	// std::cout << "Cell Count: " << pcell.size() << " " << cell->cross_section() << std::endl;
 	// for (int k=0;k!=pcell.size();k++){
 	//   std::cout << pcell[k].y << " " << pcell[k].z << " " << std::atan2(pcell[k].z - cell->center().z, pcell[k].y-cell->center().y) << std::endl;
 	// }
-
       // }
     }
   }
