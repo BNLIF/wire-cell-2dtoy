@@ -40,6 +40,43 @@ WireCell2dToy::MergeToyTiling::MergeToyTiling(WireCell2dToy::ToyTiling tiling){
   
   while(further_merge(cell_all,tiling.get_ncell()));
     
+
+  // Now construct the map
+  for (int i=0;i!=cell_all.size();i++){
+    const MergeGeomCell *cell = (MergeGeomCell*)cell_all[i];
+    GeomWireSelection wiresel;
+        
+    for (int j=0;j!=cell->get_allcell().size();j++){
+      const GeomCell *scell = cell->get_allcell()[j];
+      //std::cout << i << " " << scell->ident()<< " " << tiling.wires(*scell).size() << std::endl;
+      for (int k=0;k!=tiling.wires(*scell).size();k++){
+	const GeomWire *wire = tiling.wires(*scell)[k];
+	wiresel.push_back(wire);
+
+	//also do the wiremap
+	if (wiremap.find(wire) == wiremap.end()){
+	  GeomCellSelection cellsel;
+	  cellsel.push_back(cell);
+	  wiremap[wire]= cellsel;
+	}else{
+	  int flag = 0;
+	  for (int n=0;n!=wiremap[wire].size();n++){
+	    if (cell == wiremap[wire].at(n)){
+	      flag = 1;
+	      break;
+	    }
+	  }
+	  if(flag==0){
+	    wiremap[wire].push_back(cell);
+	  }
+	}
+
+      }
+    }
+
+    cellmap[cell] = wiresel;
+    //std::cout << wiresel.size() << std::endl;
+  }
 }
 
 int WireCell2dToy::MergeToyTiling::further_merge(WireCell::GeomCellSelection &allcell, int ncell){
