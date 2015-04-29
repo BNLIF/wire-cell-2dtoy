@@ -38,6 +38,7 @@ namespace WireCell2dToy {
 
 	/// Draw a selection of cells
 	virtual int draw_cells(const WireCell::GeomCellSelection& cellall ,TString option);
+	virtual int draw_mergecells(const WireCell::GeomCellSelection& cellall ,TString option);
 
 	/// Clear visual the event display data.
 	void clear();

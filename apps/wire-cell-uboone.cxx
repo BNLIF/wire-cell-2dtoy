@@ -103,6 +103,7 @@ int main(int argc, char* argv[])
     display.draw_slice(slice,"");
     
     display.draw_cells(toytiling.get_allcell(),"*same");
+    display.draw_mergecells(mergetiling.get_allcell(),"*same");
     //display.draw_mc(3,fds.mctruth,"*same");
     
     theApp.Run();

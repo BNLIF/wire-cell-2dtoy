@@ -123,3 +123,20 @@ int ToyEventDisplay::draw_cells(const WireCell::GeomCellSelection& cellall, TStr
   
   return 0;
 }
+
+
+int ToyEventDisplay::draw_mergecells(const WireCell::GeomCellSelection& cellall, TString option)
+{
+  pad.cd();
+  
+  g2 = new TGraph();
+  for (int i=0;i!=cellall.size();i++){
+    g2->SetPoint(i,cellall[i]->center().z/units::m,cellall[i]->center().y/units::m);
+  }
+  g2->SetMarkerColor(2);
+  g2->SetMarkerSize(0.8);
+  g2->Draw(option);
+  g2->SetMarkerStyle(21);
+  
+  return 0;
+}
