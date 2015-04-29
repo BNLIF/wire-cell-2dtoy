@@ -136,7 +136,7 @@ int ToyEventDisplay::draw_mergecells(const WireCell::GeomCellSelection& cellall,
   g2->SetMarkerColor(2);
   g2->SetMarkerSize(0.8);
   g2->Draw(option);
-  g2->SetMarkerStyle(21);
+  g2->SetMarkerStyle(24);
   
   return 0;
 }
