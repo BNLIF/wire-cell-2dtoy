@@ -66,9 +66,9 @@ int main(int argc, char* argv[])
       
       for (int j=0;j!=allcell.size();j++){
 	Point p = allcell[j]->center();
-	x[ncount] = i;
-	y[ncount] = p.y;
-	z[ncount] = p.z;
+	x[ncount] = i*0.32*units::cm;
+	y[ncount] = p.y/units::cm;
+	z[ncount] = p.z/units::cm;
 	ncount ++;
       }
       
