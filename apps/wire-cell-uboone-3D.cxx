@@ -13,6 +13,7 @@
 #include "TH1F.h"
 #include "TFile.h"
 #include "TGraph2D.h"
+#include "TFile.h"
 #include <iostream>
 using namespace WireCell;
 using namespace std;
@@ -96,6 +97,10 @@ int main(int argc, char* argv[])
   TGraph2D *g = new TGraph2D(ncount,x,y,z);
   g->Draw("p");
 
+  TFile *file = new TFile("shower3D.root","RECREATE");
+  g->Write("shower3D");
+  file->Write();
+  file->Close();
 
   theApp.Run();
   return 0;
