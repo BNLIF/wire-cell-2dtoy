@@ -4,6 +4,7 @@
 #include "WireCell2dToy/ToyEventDisplay.h"
 #include "WireCell2dToy/ToyTiling.h"
 #include "WireCell2dToy/MergeToyTiling.h"
+#include "WireCell2dToy/TruthToyTiling.h"
 #include "WireCellData/MergeGeomCell.h"
 //#include "WireCellNav/SliceDataSource.h"
 
@@ -99,19 +100,26 @@ int main(int argc, char* argv[])
 
   const int N = 100000;
   Double_t x[N],y[N],z[N];
+  Double_t xt[N],yt[N],zt[N];
   int ncount = 0;
+  int ncount_t = 0;
   
-  int i=454;
-  //for (int i=0;i!=sds.size();i++){
+  //int i=454;
+  for (int i=0;i!=sds.size();i++){
     sds.jump(i);
     WireCell::Slice slice = sds.get();
     if ( slice.group().size() >0){
       WireCell2dToy::ToyTiling toytiling(slice,gds);
       WireCell2dToy::MergeToyTiling mergetiling(toytiling);
+      WireCell2dToy::TruthToyTiling truthtiling(toytiling,pvv,i,gds);
+     
+
       
       GeomCellSelection allcell = toytiling.get_allcell();
       GeomCellSelection allmcell = mergetiling.get_allcell();
       GeomWireSelection allwire = mergetiling.get_allwire();
+      
+      
 
       for (int j=0;j!=allcell.size();j++){
 	Point p = allcell[j]->center();
@@ -121,7 +129,19 @@ int main(int argc, char* argv[])
 	ncount ++;
       }
 
-      // cout << i << " " << allcell.size() << endl;
+      cout << i << " " << allmcell.size() << " " << allwire.size() << endl;
+
+      CellChargeMap ccmap = truthtiling.ccmap();
+
+      for (auto it = ccmap.begin();it!=ccmap.end(); it++){
+	Point p = it->first->center();
+      	xt[ncount_t] = i*0.32*units::cm;
+      	yt[ncount_t] = p.y/units::cm;
+      	zt[ncount_t] = p.z/units::cm;
+      	ncount_t ++;
+       	// cout << it->second << endl;
+      }
+      
 
     // int sum = 0;
     // for (int j=0;j!=allmcell.size();j++){
@@ -152,39 +172,44 @@ int main(int argc, char* argv[])
   // cout << toytiling.cellmap[allcell.at(0)].size() << endl;
   // //  
 
-  
-    TApplication theApp("theApp",&argc,argv);
-    theApp.SetReturnFromRun(true);
+      
+    // TApplication theApp("theApp",&argc,argv);
+    // theApp.SetReturnFromRun(true);
     
-    TCanvas c1("ToyMC","ToyMC",800,600);
-    c1.Draw();
+    // TCanvas c1("ToyMC","ToyMC",800,600);
+    // c1.Draw();
     
-    WireCell2dToy::ToyEventDisplay display(c1, gds);
+    // WireCell2dToy::ToyEventDisplay display(c1, gds);
     
-    gStyle->SetOptStat(0);
+    // gStyle->SetOptStat(0);
     
-    display.init(0,10.3698,-2.33/2.,2.33/2.);
-    //display.init(0.6,1.0,0.0,0.3);
-    //display.init(0.6,0.7,0.07,0.12);
-    //display.init();
-    display.draw_mc(1,WireCell::PointValueVector(),"");
-    //display.draw_mc(1,fds.mctruth,"");
-    //display.draw_mc(2,fds.mctruth,"TEXT");
+    // display.init(0,10.3698,-2.33/2.,2.33/2.);
+    // //display.init(0.6,1.0,0.0,0.3);
+    // //display.init(0.6,0.7,0.07,0.12);
+    // //display.init();
+    // display.draw_mc(1,WireCell::PointValueVector(),"");
+    // //display.draw_mc(1,fds.mctruth,"");
+    // //display.draw_mc(2,fds.mctruth,"TEXT");
     
     
-    display.draw_slice(slice,"");
+    // display.draw_slice(slice,"");
     
-    display.draw_cells(toytiling.get_allcell(),"*same");
-    display.draw_mergecells(mergetiling.get_allcell(),"*same");
-    //display.draw_mc(3,fds.mctruth,"*same");
+    // display.draw_cells(toytiling.get_allcell(),"*same");
+    // //display.draw_mergecells(mergetiling.get_allcell(),"*same");
+    // display.draw_truthcells(ccmap,"*same");
+    // //display.draw_mc(3,fds.mctruth,"*same");
     
-    theApp.Run();
-    //}
+    // theApp.Run();
+    }
   }
 
+    cout << ncount << endl;
     TGraph2D *g = new TGraph2D(ncount,x,y,z);
+    TGraph2D *gt = new TGraph2D(ncount_t,xt,yt,zt);
     TFile *file = new TFile("shower3D.root","RECREATE");
-  g->Write("shower3D");
+
+    g->Write("shower3D");
+    gt->Write("shower3D_truth");
   file->Write();
   file->Close();
 

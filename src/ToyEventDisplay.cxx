@@ -140,3 +140,26 @@ int ToyEventDisplay::draw_mergecells(const WireCell::GeomCellSelection& cellall,
   
   return 0;
 }
+
+
+
+int ToyEventDisplay::draw_truthcells(const WireCell::CellChargeMap& ccmap, TString option)
+{
+  pad.cd();
+  
+  g2 = new TGraph();
+  int i=0;
+  for (auto it = ccmap.begin();it!=ccmap.end(); it++){
+    WireCell::Point p = it->first->center();
+    // if (it->second > 2000){
+      g2->SetPoint(i,p.z/units::m,p.y/units::m);
+      i++;
+      //}
+  }
+  g2->SetMarkerColor(8);
+  g2->SetMarkerSize(0.8);
+  g2->Draw(option);
+  g2->SetMarkerStyle(26);
+  
+  return 0;
+}
