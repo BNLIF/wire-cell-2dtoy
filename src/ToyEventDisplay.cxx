@@ -42,6 +42,8 @@ int ToyEventDisplay::init(float x_min, float x_max, float y_min, float y_max)
   h1->GetXaxis()->SetNdivisions(506);
   h1->SetYTitle("Z (m)");
   h1->SetXTitle("Y (m)");
+  h1->SetBinContent(0,0,1);
+  h1->GetZaxis()->SetRangeUser(charge_min,charge_max);
   return 0;
 }
 
@@ -50,7 +52,9 @@ int ToyEventDisplay::draw_mc(int flag, const WireCell::PointValueVector& mctruth
   pad.cd();
 
   if (flag==1){
+    
     h1->Draw(option);
+    
   }else if (flag==2){
     h1->Reset();
     for (int i=0;i!=mctruth.size();i++){
@@ -160,6 +164,114 @@ int ToyEventDisplay::draw_truthcells(const WireCell::CellChargeMap& ccmap, TStri
   g2->SetMarkerSize(0.8);
   g2->Draw(option);
   g2->SetMarkerStyle(26);
+  
+  return 0;
+}
+
+int ToyEventDisplay::draw_truthcells_charge(const WireCell::CellChargeMap& ccmap, TString option, int FI)
+{
+  pad.cd();
+
+  //  g2 = new TGraph();
+  //int i=0;
+
+  Double_t x[100],y[100];
+
+  for (auto it = ccmap.begin();it!=ccmap.end(); it++){
+    //WireCell::Point p = it->first->center();
+    
+    WireCell::PointVector boundary = it->first->boundary();
+    int n = 0;
+    for (int i=0;i!=boundary.size();i++){
+      x[n] = boundary[i].z/units::m;
+      y[n] = boundary[i].y/units::m;
+      n++;
+    }
+    x[n] = x[0];
+    y[n] = y[0];
+    n++;
+    g3 = new TPolyLine(n,x,y);
+
+    float charge = it->second;
+    int color = (charge - charge_min)/(charge_max-charge_min)*254;
+    if (color <0) color = 0;
+    if (color>254) color =254;
+    
+
+    
+    color += FI;
+    g3->Draw(option);
+    g3->SetFillColor(color);
+    
+    
+  }
+  
+  return 0;
+}
+
+
+int ToyEventDisplay::draw_wires_charge(const WireCell::WireChargeMap& wcmap, TString option, int FI)
+{
+  pad.cd();
+  Double_t x[100],y[100];
+
+  for (auto it = wcmap.begin();it!=wcmap.end(); it++){
+
+    const WireCell::GeomWire *wire = it->first;
+    float charge = it->second;
+    
+    float pitch = gds.pitch(wire->plane());
+    float angle = gds.angle(wire->plane());
+    
+    
+    x[0] = wire->point1().z/units::m - pitch/2./units::m/std::cos(angle/units::radian); 
+    y[0] = wire->point1().y/units::m;
+    x[1] = wire->point2().z/units::m - pitch/2./units::m/std::cos(angle/units::radian);
+    y[1] = wire->point2().y/units::m;
+    x[3] = wire->point1().z/units::m + pitch/2./units::m/std::cos(angle/units::radian);
+    y[3] = wire->point1().y/units::m;
+    x[2] = wire->point2().z/units::m + pitch/2./units::m/std::cos(angle/units::radian);
+    y[2] = wire->point2().y/units::m;
+    x[4] = x[0];
+    y[4] = y[0];
+    g3 = new TPolyLine(5,x,y);
+
+    int color = (charge - charge_min)/(charge_max-charge_min)*254;
+    if (color <0) color = 0;
+    if (color>254) color =254;
+    color += FI;
+    g3->Draw(option);
+    g3->SetFillColor(color);
+  
+  }
+  return 0;
+}
+
+
+
+int ToyEventDisplay::draw_cells_charge(const WireCell::GeomCellSelection& cellall, TString option)
+{
+  pad.cd();
+
+ 
+  Double_t x[100],y[100];
+  for (int i=0;i!=cellall.size();i++){
+    
+    WireCell::PointVector boundary = cellall[i]->boundary();
+    int n = 0;
+    for (int i=0;i!=boundary.size();i++){
+      x[n] = boundary[i].z/units::m;
+      y[n] = boundary[i].y/units::m;
+      n++;
+    }
+    x[n] = x[0];
+    y[n] = y[0];
+    n++;
+    g3 = new TPolyLine(n,x,y);
+    g3->Draw(option);
+    g3->SetFillColor(10);
+  }
+ 
   
   return 0;
 }

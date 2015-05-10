@@ -23,6 +23,7 @@
 #include "TH1F.h"
 #include "TFile.h"
 #include "TGraph2D.h"
+#include "TColor.h"
 #include <iostream>
 
 using namespace WireCell;
@@ -104,8 +105,8 @@ int main(int argc, char* argv[])
   int ncount = 0;
   int ncount_t = 0;
   
-  //int i=454;
-  for (int i=0;i!=sds.size();i++){
+  int i=454;
+  //for (int i=0;i!=sds.size();i++){
     sds.jump(i);
     WireCell::Slice slice = sds.get();
     if ( slice.group().size() >0){
@@ -119,6 +120,7 @@ int main(int argc, char* argv[])
       GeomCellSelection allmcell = mergetiling.get_allcell();
       GeomWireSelection allwire = mergetiling.get_allwire();
       
+     
       
 
       for (int j=0;j!=allcell.size();j++){
@@ -133,16 +135,28 @@ int main(int argc, char* argv[])
 
       CellChargeMap ccmap = truthtiling.ccmap();
 
+      Double_t charge_min = 10000;
+      Double_t charge_max = 0;
+
       for (auto it = ccmap.begin();it!=ccmap.end(); it++){
 	Point p = it->first->center();
       	xt[ncount_t] = i*0.32*units::cm;
       	yt[ncount_t] = p.y/units::cm;
       	zt[ncount_t] = p.z/units::cm;
       	ncount_t ++;
+
+	float charge = it->second;
+	if (charge > charge_max) charge_max = charge;
+	if (charge < charge_min) charge_min = charge;
        	// cout << it->second << endl;
       }
       
-
+      WireChargeMap wcmap = toytiling.wcmap();
+      for (auto it = wcmap.begin();it!=wcmap.end(); it++){
+	float charge = it->second;
+	if (charge > charge_max) charge_max = charge;
+	if (charge < charge_min) charge_min = charge;
+      }
     // int sum = 0;
     // for (int j=0;j!=allmcell.size();j++){
     //   sum += ((WireCell::MergeGeomCell*)allmcell[j])->get_allcell().size() ;
@@ -173,34 +187,54 @@ int main(int argc, char* argv[])
   // //  
 
       
-    // TApplication theApp("theApp",&argc,argv);
-    // theApp.SetReturnFromRun(true);
+    TApplication theApp("theApp",&argc,argv);
+    theApp.SetReturnFromRun(true);
     
-    // TCanvas c1("ToyMC","ToyMC",800,600);
-    // c1.Draw();
+    TCanvas c1("ToyMC","ToyMC",800,600);
+    c1.Draw();
     
-    // WireCell2dToy::ToyEventDisplay display(c1, gds);
+    WireCell2dToy::ToyEventDisplay display(c1, gds);
+    display.charge_min = charge_min;
+    display.charge_max = charge_max;
+
+
+    gStyle->SetOptStat(0);
     
-    // gStyle->SetOptStat(0);
+    const Int_t NRGBs = 5;
+    const Int_t NCont = 255;
+    Int_t MyPalette[NCont];
+    Double_t stops[NRGBs] = {0.0, 0.34, 0.61, 0.84, 1.0};
+    Double_t red[NRGBs] = {0.0, 0.0, 0.87 ,1.0, 0.51};
+    Double_t green[NRGBs] = {0.0, 0.81, 1.0, 0.2 ,0.0};
+    Double_t blue[NRGBs] = {0.51, 1.0, 0.12, 0.0, 0.0};
+    Int_t FI = TColor::CreateGradientColorTable(NRGBs, stops, red, green, blue, NCont);
+    gStyle->SetNumberContours(NCont);
+    for (int kk=0;kk!=NCont;kk++) MyPalette[kk] = FI+kk;
+    gStyle->SetPalette(NCont,MyPalette);
+
     
-    // display.init(0,10.3698,-2.33/2.,2.33/2.);
-    // //display.init(0.6,1.0,0.0,0.3);
-    // //display.init(0.6,0.7,0.07,0.12);
-    // //display.init();
-    // display.draw_mc(1,WireCell::PointValueVector(),"");
-    // //display.draw_mc(1,fds.mctruth,"");
-    // //display.draw_mc(2,fds.mctruth,"TEXT");
+
+    //display.init(0,10.3698,-2.33/2.,2.33/2.);
+    display.init(1.1,1.8,0.7,1.0);
+    
+    display.draw_mc(1,WireCell::PointValueVector(),"colz");
+    //display.draw_mc(1,fds.mctruth,"");
+    //display.draw_mc(2,fds.mctruth,"TEXT");
     
     
-    // display.draw_slice(slice,"");
+
+    //display.draw_slice(slice,"");
     
-    // display.draw_cells(toytiling.get_allcell(),"*same");
-    // //display.draw_mergecells(mergetiling.get_allcell(),"*same");
-    // display.draw_truthcells(ccmap,"*same");
-    // //display.draw_mc(3,fds.mctruth,"*same");
+    //display.draw_cells(toytiling.get_allcell(),"*same");
+    //display.draw_mergecells(mergetiling.get_allcell(),"*same");
+    //display.draw_truthcells(ccmap,"*same");
+    display.draw_wires_charge(wcmap,"Fsame",FI);
+    display.draw_cells_charge(toytiling.get_allcell(),"Fsame");
+    display.draw_truthcells_charge(ccmap,"Fsame",FI);
+    //display.draw_mc(3,fds.mctruth,"*same");
     
-    // theApp.Run();
-    }
+    theApp.Run();
+      //    }
   }
 
     cout << ncount << endl;

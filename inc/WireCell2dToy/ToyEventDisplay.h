@@ -9,6 +9,7 @@
 #include "TH2F.h"
 #include "TString.h"
 #include "TGraph.h"
+#include "TPolyLine.h"
 
 namespace WireCell2dToy {
 
@@ -21,6 +22,7 @@ namespace WireCell2dToy {
 	TH2F *h1;
 	TGraph *g1;
 	TGraph *g2;
+	TPolyLine *g3;
     
     public:
 	/// Create a ToyEventDisplay drawing into the given TPad using the given GeomDataSource.
@@ -40,9 +42,14 @@ namespace WireCell2dToy {
 	virtual int draw_cells(const WireCell::GeomCellSelection& cellall ,TString option);
 	virtual int draw_mergecells(const WireCell::GeomCellSelection& cellall ,TString option);
 	virtual int draw_truthcells(const WireCell::CellChargeMap& ccmap,TString option);
+	virtual int draw_truthcells_charge(const WireCell::CellChargeMap& ccmap,TString option, int FI);
+	virtual int draw_wires_charge(const WireCell::WireChargeMap& wcmap,TString option, int FI);
+	virtual int draw_cells_charge(const WireCell::GeomCellSelection& cellall ,TString option);
 
 	/// Clear visual the event display data.
 	void clear();
+
+	Double_t charge_min, charge_max;
     };
 
 }
