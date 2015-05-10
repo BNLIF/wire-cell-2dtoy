@@ -14,11 +14,11 @@ WireCell2dToy::ToyTiling::ToyTiling(WireCell::Slice slice,WireCellSst::GeomDataS
   for (int i=0;i!=group.size();i++){
     const WireCell::GeomWire *wire = gds.by_channel_segment(group.at(i).first,0);
     wire_all.push_back(wire);
-    if (wire->plane() == static_cast<WireCell::WirePlaneType_t>(0)){
+    if (wire->plane() == kUwire){
       wire_u.push_back(wire);
-    }else if (wire->plane() == static_cast<WireCell::WirePlaneType_t>(1)){
+    }else if (wire->plane() == kVwire){
       wire_v.push_back(wire);
-    }else if (wire->plane() == static_cast<WireCell::WirePlaneType_t>(2)){
+    }else if (wire->plane() == kYwire){
       wire_w.push_back(wire);
     }
   }
@@ -31,30 +31,29 @@ WireCell2dToy::ToyTiling::ToyTiling(WireCell::Slice slice,WireCellSst::GeomDataS
 
 
   for (int i=0;i!=wire_u.size();i++){
-    dis_u[0] = gds.wire_dist(*wire_u[i]) - gds.pitch(static_cast<WireCell::WirePlaneType_t>(0))/2.;
-    dis_u[1] = gds.wire_dist(*wire_u[i]) + gds.pitch(static_cast<WireCell::WirePlaneType_t>(0))/2.;
+    dis_u[0] = gds.wire_dist(*wire_u[i]) - gds.pitch(kUwire)/2.;
+    dis_u[1] = gds.wire_dist(*wire_u[i]) + gds.pitch(kUwire)/2.;
     for (int j=0;j!=wire_v.size();j++){
-      dis_v[0] = gds.wire_dist(*wire_v[j]) - gds.pitch(static_cast<WireCell::WirePlaneType_t>(1))/2.;
-      dis_v[1] = gds.wire_dist(*wire_v[j]) + gds.pitch(static_cast<WireCell::WirePlaneType_t>(1))/2.;
+      dis_v[0] = gds.wire_dist(*wire_v[j]) - gds.pitch(kVwire)/2.;
+      dis_v[1] = gds.wire_dist(*wire_v[j]) + gds.pitch(kVwire)/2.;
       
       //four vertices around
-      PointVector puv;
+      PointVector puv(4);
       
-      puv.push_back(gds.crossing_point(dis_u[0],dis_v[0],static_cast<WireCell::WirePlaneType_t>(0),static_cast<WireCell::WirePlaneType_t>(1)));
-      puv.push_back(gds.crossing_point(dis_u[0],dis_v[1],static_cast<WireCell::WirePlaneType_t>(0),static_cast<WireCell::WirePlaneType_t>(1)));
-      puv.push_back(gds.crossing_point(dis_u[1],dis_v[1],static_cast<WireCell::WirePlaneType_t>(0),static_cast<WireCell::WirePlaneType_t>(1)));
-      puv.push_back(gds.crossing_point(dis_u[1],dis_v[0],static_cast<WireCell::WirePlaneType_t>(0),static_cast<WireCell::WirePlaneType_t>(1)));
-      
+      gds.crossing_point(dis_u[0],dis_v[0],kUwire,kVwire, puv[0]);
+      gds.crossing_point(dis_u[0],dis_v[1],kUwire,kVwire, puv[1]);
+      gds.crossing_point(dis_u[1],dis_v[1],kUwire,kVwire, puv[2]);
+      gds.crossing_point(dis_u[1],dis_v[0],kUwire,kVwire, puv[3]);
       
       for (int k=0;k!=4;k++){
-	dis_puv[k] = gds.wire_dist(puv[k],static_cast<WireCell::WirePlaneType_t>(2));
+	dis_puv[k] = gds.wire_dist(puv[k],kYwire);
       }
       
       for (int k=0;k!=wire_w.size();k++){
 	int flag = 0;
 	PointVector pcell;
-	dis_w[0] = gds.wire_dist(*wire_w[k]) - gds.pitch(static_cast<WireCell::WirePlaneType_t>(2))/2.;
-  	dis_w[1] = gds.wire_dist(*wire_w[k]) + gds.pitch(static_cast<WireCell::WirePlaneType_t>(2))/2.;	
+	dis_w[0] = gds.wire_dist(*wire_w[k]) - gds.pitch(kYwire)/2.;
+  	dis_w[1] = gds.wire_dist(*wire_w[k]) + gds.pitch(kYwire)/2.;	
 	
 	for (int m = 0;m!=4;m++){
 	  if (dis_puv[m] > dis_w[0] && dis_puv[m] < dis_w[1]){
@@ -64,25 +63,25 @@ WireCell2dToy::ToyTiling::ToyTiling(WireCell::Slice slice,WireCellSst::GeomDataS
 	}
 	
 	if (flag==1 ) {
-	  PointVector puw;
-	  puw.push_back(gds.crossing_point(dis_u[0],dis_w[0],static_cast<WireCell::WirePlaneType_t>(0),static_cast<WireCell::WirePlaneType_t>(2)));
-	  puw.push_back(gds.crossing_point(dis_u[0],dis_w[1],static_cast<WireCell::WirePlaneType_t>(0),static_cast<WireCell::WirePlaneType_t>(2)));
-	  puw.push_back(gds.crossing_point(dis_u[1],dis_w[1],static_cast<WireCell::WirePlaneType_t>(0),static_cast<WireCell::WirePlaneType_t>(2)));
-	  puw.push_back(gds.crossing_point(dis_u[1],dis_w[0],static_cast<WireCell::WirePlaneType_t>(0),static_cast<WireCell::WirePlaneType_t>(2)));
+	  PointVector puw(4);
+	  gds.crossing_point(dis_u[0],dis_w[0],kUwire,kYwire, puw[0]);
+	  gds.crossing_point(dis_u[0],dis_w[1],kUwire,kYwire, puw[1]);
+	  gds.crossing_point(dis_u[1],dis_w[1],kUwire,kYwire, puw[2]);
+	  gds.crossing_point(dis_u[1],dis_w[0],kUwire,kYwire, puw[3]);
 
 	  for (int k=0;k!=4;k++){
-	    dis_puw[k] = gds.wire_dist(puw[k],static_cast<WireCell::WirePlaneType_t>(1));
+	    dis_puw[k] = gds.wire_dist(puw[k],kVwire);
 	    if (dis_puw[k] > dis_v[0] && dis_puw[k] < dis_v[1]){
 	      pcell.push_back(puw[k]);
 	    }
 	  }
-	  PointVector pwv;
-	  pwv.push_back(gds.crossing_point(dis_v[0],dis_w[0],static_cast<WireCell::WirePlaneType_t>(1),static_cast<WireCell::WirePlaneType_t>(2)));
-	  pwv.push_back(gds.crossing_point(dis_v[0],dis_w[1],static_cast<WireCell::WirePlaneType_t>(1),static_cast<WireCell::WirePlaneType_t>(2)));
-	  pwv.push_back(gds.crossing_point(dis_v[1],dis_w[1],static_cast<WireCell::WirePlaneType_t>(1),static_cast<WireCell::WirePlaneType_t>(2)));
-	  pwv.push_back(gds.crossing_point(dis_v[1],dis_w[0],static_cast<WireCell::WirePlaneType_t>(1),static_cast<WireCell::WirePlaneType_t>(2)));
+	  PointVector pwv(4);
+	  gds.crossing_point(dis_v[0],dis_w[0],kVwire,kYwire, pwv[0]);
+	  gds.crossing_point(dis_v[0],dis_w[1],kVwire,kYwire, pwv[1]);
+	  gds.crossing_point(dis_v[1],dis_w[1],kVwire,kYwire, pwv[2]);
+	  gds.crossing_point(dis_v[1],dis_w[0],kVwire,kYwire, pwv[3]);
 	  for (int k=0;k!=4;k++){
-	    dis_pwv[k] = gds.wire_dist(pwv[k],static_cast<WireCell::WirePlaneType_t>(0));
+	    dis_pwv[k] = gds.wire_dist(pwv[k],kUwire);
 	    if (dis_pwv[k] > dis_u[0] && dis_pwv[k] < dis_u[1]){
 	      pcell.push_back(pwv[k]);
 	    }
