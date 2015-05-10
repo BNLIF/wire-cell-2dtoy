@@ -105,9 +105,9 @@ int main(int argc, char* argv[])
   int ncount = 0;
   int ncount_t = 0;
   
-  //int i=400;
-  //for (int i=0;i!=sds.size();i++){
-  for (int i=450;i!=460;i++){
+  //int i=454;
+  for (int i=0;i!=sds.size();i++){
+  // for (int i=450;i!=460;i++){
     sds.jump(i);
     WireCell::Slice slice = sds.get();
     if ( slice.group().size() >0){

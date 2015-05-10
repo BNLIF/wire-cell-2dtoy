@@ -2,6 +2,8 @@
 #include "WireCellData/GeomCell.h"
 #include "WireCellData/GeomWire.h"
 #include "WireCellData/MergeGeomCell.h"
+#include "WireCellData/MergeGeomWire.h"
+
 #include <cmath>
 
 using namespace WireCell;
@@ -11,8 +13,7 @@ WireCell2dToy::MergeToyTiling::MergeToyTiling(WireCell2dToy::ToyTiling tiling){
   wire_u = tiling.get_wire_u();
   wire_v = tiling.get_wire_v();
   wire_w = tiling.get_wire_w();
-  wire_all = tiling.get_wire_all();
-
+  
   // goal is to create merged version of 
   // cell_all
   // cellmap
@@ -40,6 +41,39 @@ WireCell2dToy::MergeToyTiling::MergeToyTiling(WireCell2dToy::ToyTiling tiling){
   
   while(further_merge(cell_all,tiling.get_ncell()));
     
+  // Now merge all the wires   wire_all
+  int ident_wire = 50000;
+  for (int i=0;i!=cell_all.size();i++){
+    
+    for (int k=0;k!=3;k++){
+      WirePlaneType_t plane = (WirePlaneType_t)k;
+      GeomCellSelection call =  ((MergeGeomCell*)cell_all[i])->get_allcell();
+      MergeGeomWire *mwire;
+      int flag = 0;
+
+      for (int j=0;j!=call.size();j++){
+	GeomWireSelection wires = tiling.wires(*call[j]);
+	for (int nwire = 0; nwire!=wires.size();nwire++){
+	  if (wires[nwire]->plane()==plane){
+	    if (flag==0){
+	      mwire = new MergeGeomWire(ident_wire,*wires[nwire]);
+	      ident_wire++;
+	      flag = 1;
+	    }else {
+	      mwire->AddWire(*wires[nwire]);
+	    }
+	  }
+	}
+      }
+      
+      
+      wire_all.push_back(mwire);
+    }
+  }
+  while(further_mergewire(wire_all,50000));
+  
+  
+
 
   // Now construct the map
   for (int i=0;i!=cell_all.size();i++){
@@ -50,34 +84,71 @@ WireCell2dToy::MergeToyTiling::MergeToyTiling(WireCell2dToy::ToyTiling tiling){
       const GeomCell *scell = cell->get_allcell()[j];
       //std::cout << i << " " << scell->ident()<< " " << tiling.wires(*scell).size() << std::endl;
       for (int k=0;k!=tiling.wires(*scell).size();k++){
-	const GeomWire *wire = tiling.wires(*scell)[k];
-	wiresel.push_back(wire);
+  	const GeomWire *wire = tiling.wires(*scell)[k];
+  	wiresel.push_back(wire);
 
-	//also do the wiremap
-	if (wiremap.find(wire) == wiremap.end()){
-	  GeomCellSelection cellsel;
-	  cellsel.push_back(cell);
-	  wiremap[wire]= cellsel;
-	}else{
-	  int flag = 0;
-	  for (int n=0;n!=wiremap[wire].size();n++){
-	    if (cell == wiremap[wire].at(n)){
-	      flag = 1;
-	      break;
-	    }
-	  }
-	  if(flag==0){
-	    wiremap[wire].push_back(cell);
-	  }
-	}
+  	//also do the wiremap
+  	if (wiremap1.find(wire) == wiremap1.end()){
+  	  GeomCellSelection cellsel;
+  	  cellsel.push_back(cell);
+  	  wiremap1[wire]= cellsel;
+  	}else{
+  	  int flag = 0;
+  	  for (int n=0;n!=wiremap1[wire].size();n++){
+  	    if (cell == wiremap1[wire].at(n)){
+  	      flag = 1;
+  	      break;
+  	    }
+  	  }
+  	  if(flag==0){
+  	    wiremap1[wire].push_back(cell);
+  	  }
+  	}
 
       }
     }
 
-    cellmap[cell] = wiresel;
-    //std::cout << wiresel.size() << std::endl;
+    cellmap1[cell] = wiresel;
   }
+
+  
+  
+
 }
+
+int WireCell2dToy::MergeToyTiling::further_mergewire(WireCell::GeomWireSelection &allwire, int nwire){
+
+  WireCell::GeomWireSelection tempwire = allwire;
+  allwire.clear();
+  
+  for (int i=0;i!=tempwire.size();i++){
+    MergeGeomWire *wire = (MergeGeomWire*)tempwire[i];
+    int flag=0;
+    for (int k=0;k!=allwire.size();k++){
+      if (((MergeGeomWire*)allwire[k])->AddWire(*wire)){
+	flag = 1;
+	break;
+      }
+    }
+      
+    if(flag==0){
+      MergeGeomWire *mwire = new MergeGeomWire(nwire,*wire);
+      nwire++;
+      allwire.push_back(mwire);
+    }
+  }
+  
+  int diff = tempwire.size() - allwire.size();
+  
+  for (int i=0;i!=tempwire.size();i++){
+    tempwire[i] = 0;
+  }
+  
+  return diff;
+}
+
+
+
 
 int WireCell2dToy::MergeToyTiling::further_merge(WireCell::GeomCellSelection &allcell, int ncell){
   WireCell::GeomCellSelection tempcell = allcell;
