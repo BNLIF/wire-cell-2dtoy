@@ -202,7 +202,9 @@ int ToyEventDisplay::draw_truthcells_charge(const WireCell::CellChargeMap& ccmap
     color += FI;
     g3->Draw(option);
     g3->SetFillColor(color);
-    
+    g3->SetLineColor(2);
+    g3->SetLineWidth(1.5);
+    g3->Draw("fsame");
     
   }
   
