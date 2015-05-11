@@ -2,7 +2,7 @@
 
 using namespace WireCell;
 
-WireCell2dToy::TruthToyTiling::TruthToyTiling(WireCell2dToy::ToyTiling tiling, const WireCell::PointValueVector &pvv, int tbin, const GeomDataSource& gds){
+WireCell2dToy::TruthToyTiling::TruthToyTiling(WireCell2dToy::ToyTiling& tiling, const WireCell::PointValueVector &pvv, int tbin, const GeomDataSource& gds){
   for (int itruth = 0; itruth < pvv.size(); ++itruth){
     if (pvv[itruth].first.x == tbin){
       const Point& p = pvv[itruth].first; // get the point

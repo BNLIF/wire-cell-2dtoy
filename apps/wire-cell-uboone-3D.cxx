@@ -56,7 +56,9 @@ int main(int argc, char* argv[])
   Double_t x[N],y[N],z[N];
   
   int ncount = 0;
-  for (int i=0; i!=sds.size();i++){
+  int i=1140;{
+  
+    //for (int i=0; i!=sds.size();i++){
     sds.jump(i);
     WireCell::Slice slice = sds.get();
     if ( slice.group().size() >0){
@@ -73,10 +75,10 @@ int main(int argc, char* argv[])
 	ncount ++;
       }
       
-      
-
       // GeomCellSelection allmcell = mergetiling.get_allcell();
-      //GeomWireSelection allwire = mergetiling.get_allwire();
+      // GeomWireSelection allwire = mergetiling.get_allwire();
+
+      // cout << i << " " << allmcell.size() << " " << allwire.size() << endl;
 
       // int sum = 0;
       // for (int j=0;j!=allmcell.size();j++){
@@ -104,7 +106,7 @@ int main(int argc, char* argv[])
   file->Write();
   file->Close();
 
-  theApp.Run();
+  //theApp.Run();
   return 0;
   
 } // main()

@@ -9,7 +9,7 @@ WireCell2dToy::ToyTiling::ToyTiling()
 {
 }
 
-WireCell2dToy::ToyTiling::ToyTiling(WireCell::Slice slice,WireCellSst::GeomDataSource gds){
+WireCell2dToy::ToyTiling::ToyTiling(const WireCell::Slice& slice,WireCellSst::GeomDataSource& gds){
   WireCell::Channel::Group group = slice.group();
   for (int i=0;i!=group.size();i++){
     const WireCell::GeomWire *wire = gds.by_channel_segment(group.at(i).first,0);
@@ -169,8 +169,18 @@ WireCell2dToy::ToyTiling::~ToyTiling()
 {
   //delete all the cells
   for (int i=0;i!=cell_all.size();i++){
-    cell_all[i] = 0;
+    delete cell_all[i];
   }
+
+  wire_u.clear();
+  wire_v.clear();
+  wire_w.clear();
+  wire_all.clear();
+  cell_all.clear();
+  cellmap.clear();
+  wiremap.clear();
+  wirechargemap.clear();
+  
 }
 
 GeomWireSelection WireCell2dToy::ToyTiling::wires(const GeomCell& cell) const
