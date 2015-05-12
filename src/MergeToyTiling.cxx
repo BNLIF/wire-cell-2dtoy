@@ -72,69 +72,110 @@ WireCell2dToy::MergeToyTiling::MergeToyTiling(WireCell2dToy::ToyTiling& tiling){
   	}
       }
       
-      // if ( flag!= call.size()){
-      // 	for (int j=0;j!=call.size();j++){
-      // 	  GeomWireSelection wires = tiling.wires(*call[j]);
-      // 	  for (int nwire = 0; nwire!=wires.size();nwire++){
-      // 	    std::cout << wires[nwire]->plane() << " " << wires[nwire]->ident() << " " << plane << std::endl;
-      // 	  }
-      // 	}
-      // }
-      
-      // if (flag==1)
-      //  	std::cout << mwire->get_allwire().size() << " " << call.size() << std::endl;
+     
       
       wire_all.push_back(mwire);
     }
   }
 
- 
-
-  
-
   while(further_mergewire(wire_all,50000));
   
 
+  // Now construc the wire map;
+  for (int i=0;i!=wire_all.size();i++){
+    MergeGeomWire *mwire = (MergeGeomWire*)wire_all[i];
+    GeomWireSelection wires = mwire->get_allwire();
+    wwsmap[mwire] = wires;
+    for (int j=0;j!=wires.size();j++){
+      wwmap[wires[j]] = mwire;
+    }
+  }
 
-  // // // Now construct the map
-  // // for (int i=0;i!=cell_all.size();i++){
-  // //   const MergeGeomCell *cell = (MergeGeomCell*)cell_all[i];
-  // //   GeomWireSelection wiresel;
+
+  // Now construct the map
+  for (int i=0;i!=cell_all.size();i++){
+    const MergeGeomCell *cell = (MergeGeomCell*)cell_all[i];
+    GeomWireSelection wiresel;
         
-  // //   for (int j=0;j!=cell->get_allcell().size();j++){
-  // //     const GeomCell *scell = cell->get_allcell()[j];
-  // //     //std::cout << i << " " << scell->ident()<< " " << tiling.wires(*scell).size() << std::endl;
-  // //     for (int k=0;k!=tiling.wires(*scell).size();k++){
-  // // 	const GeomWire *wire = tiling.wires(*scell)[k];
-  // // 	wiresel.push_back(wire);
+    for (int j=0;j!=cell->get_allcell().size();j++){
+      const GeomCell *scell = cell->get_allcell()[j];
+      //std::cout << i << " " << scell->ident()<< " " << tiling.wires(*scell).size() << std::endl;
+      for (int k=0;k!=tiling.wires(*scell).size();k++){
+  	const GeomWire *wire = tiling.wires(*scell)[k];
+  	wiresel.push_back(wire);
 
-  // // 	//also do the wiremap
-  // // 	if (wiremap1.find(wire) == wiremap1.end()){
-  // // 	  GeomCellSelection cellsel;
-  // // 	  cellsel.push_back(cell);
-  // // 	  wiremap1[wire]= cellsel;
-  // // 	}else{
-  // // 	  int flag = 0;
-  // // 	  for (int n=0;n!=wiremap1[wire].size();n++){
-  // // 	    if (cell == wiremap1[wire].at(n)){
-  // // 	      flag = 1;
-  // // 	      break;
-  // // 	    }
-  // // 	  }
-  // // 	  if(flag==0){
-  // // 	    wiremap1[wire].push_back(cell);
-  // // 	  }
-  // // 	}
+  	//also do the wiremap
+  	if (wiremap1.find(wire) == wiremap1.end()){
+  	  GeomCellSelection cellsel;
+  	  cellsel.push_back(cell);
+  	  wiremap1[wire]= cellsel;
+  	}else{
+  	  int flag = 0;
+  	  for (int n=0;n!=wiremap1[wire].size();n++){
+  	    if (cell == wiremap1[wire].at(n)){
+  	      flag = 1;
+  	      break;
+  	    }
+  	  }
+  	  if(flag==0){
+  	    wiremap1[wire].push_back(cell);
+  	  }
+  	}
 
-  // //     }
-  // //   }
+      }
+    }
 
-  // //   cellmap1[cell] = wiresel;
-  // // }
+    cellmap1[cell] = wiresel;
+  }
 
 
-  // //Now construct the real map
-  
+  //Now construct the real map
+  //loop through merged cells
+  for (int i=0;i!=cell_all.size();i++){
+    const MergeGeomCell *cell = (MergeGeomCell*)cell_all[i];
+    for (int j=0;j!=cellmap1[cell].size();j++){
+      const GeomWire *wire = (cellmap1[cell])[j];
+      const MergeGeomWire *mwire = (MergeGeomWire*)wwmap[wire];
+
+      if (cellmap.find(cell) == cellmap.end()){
+	GeomWireSelection wiresel;
+	wiresel.push_back(mwire);
+	cellmap[cell] = wiresel;
+      }else{
+	GeomWireSelection wiresel = cellmap[cell];
+	int flag = 0;
+	for (int k=0; k!=wiresel.size();k++){
+	  if (wiresel[k] == mwire){
+	    flag = 1;
+	    break;
+	  }
+	}
+	if (flag==0){
+	  cellmap[cell].push_back(mwire);
+	}
+      }
+      
+      
+      if (wiremap.find(mwire) == wiremap.end()){
+	GeomCellSelection cellsel;
+	cellsel.push_back(cell);
+	wiremap[mwire] = cellsel;
+      }else{
+	GeomCellSelection cellsel = wiremap[mwire];
+	int flag = 0;
+	for (int k=0; k!=cellsel.size();k++){
+	  if (cellsel[k] == cell){
+	    flag = 1;
+	    break;
+	  }
+	}
+	if (flag==0){
+	  wiremap[mwire].push_back(cell);
+	}
+      }
+
+    }
+  }
   
 
 }
@@ -156,7 +197,14 @@ WireCell2dToy::MergeToyTiling::~MergeToyTiling(){
   cell_all.clear();
   cellmap.clear();
   wiremap.clear();
+
+  cellmap1.clear();
+  wiremap1.clear();
+
   wirechargemap.clear();
+
+  wwmap.clear();
+  wwsmap.clear();
 }
 
 

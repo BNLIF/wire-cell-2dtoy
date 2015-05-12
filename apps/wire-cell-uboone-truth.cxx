@@ -119,7 +119,7 @@ int main(int argc, char* argv[])
       
       GeomCellSelection allcell = toytiling.get_allcell();
       GeomCellSelection allmcell = mergetiling.get_allcell();
-      GeomWireSelection allwire = mergetiling.get_allwire();
+      GeomWireSelection allmwire = mergetiling.get_allwire();
       
      
       
@@ -132,7 +132,16 @@ int main(int argc, char* argv[])
 	ncount ++;
       }
 
-      cout << i << " " << allmcell.size() << " " << allwire.size() << endl;
+      cout << i << " " << allmcell.size() << " " << allmwire.size() << endl;
+      
+      // for (int j=0;j!=allmcell.size();j++){
+      // 	cout << mergetiling.wires(*allmcell[j]).size() << endl;
+      // }
+
+      for (int j=0;j!=allmwire.size();j++){
+	cout << mergetiling.cells(*allmwire[j]).size() << endl;
+      }
+
 
       CellChargeMap ccmap = truthtiling.ccmap();
 

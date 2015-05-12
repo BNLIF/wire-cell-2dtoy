@@ -14,9 +14,13 @@ namespace WireCell2dToy{
     int further_merge(WireCell::GeomCellSelection &allcell, int ncell);
     int further_mergewire(WireCell::GeomWireSelection &allwire, int nwire);
 
-  /* private: */
-  /*   WireCell::GeomCellMap cellmap1; */
-  /*   WireCell::GeomWireMap wiremap1; */
+  private:
+    WireCell::GeomCellMap cellmap1;
+    WireCell::GeomWireMap wiremap1;
+
+    WireCell::GeomWireWireMap wwmap; // wire to merged wire
+    WireCell::GeomWireWiresMap wwsmap; // merged wire to wires
+    
   };
 }
 #endif
