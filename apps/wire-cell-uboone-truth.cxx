@@ -90,7 +90,7 @@ int main(int argc, char* argv[])
   // }
 
 
-  WireCell::GenerativeFDS gfds(toydep,gds,800,5);
+  WireCell::GenerativeFDS gfds(toydep,gds,2400,5);
   gfds.jump(1);
 
   WireCellSst::ToyuBooNESliceDataSource sds(gfds,2000); //set threshold at 2000 electrons
