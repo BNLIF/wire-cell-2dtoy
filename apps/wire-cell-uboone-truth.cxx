@@ -103,21 +103,25 @@ int main(int argc, char* argv[])
   int ncount = 0;
   int ncount_t = 0;
   
-  //int i=454;{
+
+  WireCell2dToy::ToyTiling **toytiling = new WireCell2dToy::ToyTiling*[2400];
+  WireCell2dToy::MergeToyTiling **mergetiling = new WireCell2dToy::MergeToyTiling*[2400];
+  WireCell2dToy::TruthToyTiling **truthtiling = new WireCell2dToy::TruthToyTiling*[2400];
+  
+
   for (int i=0;i!=sds.size();i++){
-  // for (int i=450;i!=460;i++){
     sds.jump(i);
     WireCell::Slice slice = sds.get();
     if ( slice.group().size() >0){
-      WireCell2dToy::ToyTiling toytiling(slice,gds);
-      WireCell2dToy::MergeToyTiling mergetiling(toytiling);
-      WireCell2dToy::TruthToyTiling truthtiling(toytiling,pvv,i,gds);
+      toytiling[i] = new WireCell2dToy::ToyTiling(slice,gds);
+      mergetiling[i] = new WireCell2dToy::MergeToyTiling(*toytiling[i]);
+      truthtiling[i] = new WireCell2dToy::TruthToyTiling(*toytiling[i],pvv,i,gds);
      
 
       
-      GeomCellSelection allcell = toytiling.get_allcell();
-      GeomCellSelection allmcell = mergetiling.get_allcell();
-      GeomWireSelection allmwire = mergetiling.get_allwire();
+      GeomCellSelection allcell = toytiling[i]->get_allcell();
+      GeomCellSelection allmcell = mergetiling[i]->get_allcell();
+      GeomWireSelection allmwire = mergetiling[i]->get_allwire();
       
      
       
@@ -131,17 +135,15 @@ int main(int argc, char* argv[])
       }
 
       //cout << i << " " << allmcell.size() << " " << allmwire.size() << endl;
-      
       // for (int j=0;j!=allmcell.size();j++){
       // 	cout << mergetiling.wires(*allmcell[j]).size() << endl;
       // }
-
       // for (int j=0;j!=allmwire.size();j++){
       // 	cout << mergetiling.cells(*allmwire[j]).size() << endl;
       // }
 
 
-      CellChargeMap ccmap = truthtiling.ccmap();
+      CellChargeMap ccmap = truthtiling[i]->ccmap();
 
       Double_t charge_min = 10000;
       Double_t charge_max = 0;
@@ -243,13 +245,13 @@ int main(int argc, char* argv[])
     }
   }
 
-    cout << ncount << endl;
-    TGraph2D *g = new TGraph2D(ncount,x,y,z);
-    TGraph2D *gt = new TGraph2D(ncount_t,xt,yt,zt);
-    TFile *file = new TFile("shower3D.root","RECREATE");
-
-    g->Write("shower3D");
-    gt->Write("shower3D_truth");
+  cout << ncount << endl;
+  TGraph2D *g = new TGraph2D(ncount,x,y,z);
+  TGraph2D *gt = new TGraph2D(ncount_t,xt,yt,zt);
+  TFile *file = new TFile("shower3D.root","RECREATE");
+  
+  g->Write("shower3D");
+  gt->Write("shower3D_truth");
   file->Write();
   file->Close();
 
