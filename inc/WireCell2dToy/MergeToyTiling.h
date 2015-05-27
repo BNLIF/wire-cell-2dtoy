@@ -6,13 +6,13 @@
 namespace WireCell2dToy{
   class MergeToyTiling : public WireCell2dToy::ToyTiling {
   public:
-    MergeToyTiling(WireCell2dToy::ToyTiling& tiling);
+    MergeToyTiling(WireCell2dToy::ToyTiling& tiling, int time_slice=-1);
     ~MergeToyTiling();
 
     const WireCell::GeomCell* cell(const WireCell::GeomWireSelection& wires)const ;
     
-    int further_merge(WireCell::GeomCellSelection &allcell, int ncell);
-    int further_mergewire(WireCell::GeomWireSelection &allwire, int nwire);
+    int further_merge(WireCell::GeomCellSelection &allcell, int ncell, int time_slice);
+    int further_mergewire(WireCell::GeomWireSelection &allwire, int nwire, int time_slice);
 
   private:
     WireCell::GeomCellMap cellmap1;
