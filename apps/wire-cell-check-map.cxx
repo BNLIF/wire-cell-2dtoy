@@ -6,6 +6,8 @@
 #include "WireCell2dToy/MergeToyTiling.h"
 #include "WireCell2dToy/TruthToyTiling.h"
 #include "WireCellData/MergeGeomCell.h"
+#include "WireCellData/MergeGeomWire.h"
+
 #include "WireCellData/GeomCluster.h"
 //#include "WireCellNav/SliceDataSource.h"
 
@@ -129,6 +131,7 @@ int main(int argc, char* argv[])
       truthtiling[i] = new WireCell2dToy::TruthToyTiling(*toytiling[i],pvv,i,gds);
       
       GeomCellSelection allcell = toytiling[i]->get_allcell();
+      GeomWireSelection allwire = toytiling[i]->get_allwire();
       GeomCellSelection allmcell = mergetiling[i]->get_allcell();
       GeomWireSelection allmwire = mergetiling[i]->get_allwire();
       
@@ -208,8 +211,13 @@ int main(int argc, char* argv[])
       // ncount_mcell += allmcell.size();
       // cout << i << " " << allmcell.size() << " " << allmwire.size() << " " << cluster_set.size()  << endl;
       // for (int j=0;j!=allmwire.size();j++){
-      // 	cout << mergetiling.cells(*allmwire[j]).size() << endl;
+      // 	cout << mergetiling[i]->cells(*allmwire[j]).size() << endl;
       // }
+
+      // for (int j=0;j!=allmcell.size();j++){
+      //  	cout << mergetiling[i]->wires(*allmcell[j]).size() << endl;
+      // }  
+      
 
 
       CellChargeMap ccmap = truthtiling[i]->ccmap();
@@ -295,7 +303,7 @@ int main(int argc, char* argv[])
       double sum1 = 0, sum2 = 0, sum3 = 0;
 
       for (int j=0;j!=windex;j++){
-	cout << j << " " << Vwire_tcharge[j]<< " " << Vwire_charge[j] << " " << (Vwire_tcharge[j] - Vwire_charge[j]) << endl;
+	//cout << j << " " << Vwire_tcharge[j]<< " " << Vwire_charge[j] << " " << (Vwire_tcharge[j] - Vwire_charge[j]) << endl;
 	sum1 += Vwire_tcharge[j]; 
 	sum2 += Vwire_charge[j];
       }
@@ -303,9 +311,107 @@ int main(int argc, char* argv[])
 	sum3 += Vcell_charge[j];
       }
 
-      cout << sum1/3. << " " << sum2/3. << " " << sum3 << endl;
+      cout << "Single Cell Check: " << sum1/3. << " " << sum2/3. << " " << sum3 << endl;
       
       // Vcell_charge.Print();
+
+
+      // Check Mapping of Merged Cell and Wire
+      WireIndexMap mwimap;
+      WireIndexMap swimap;
+      CellIndexMap mcimap;
+
+      int mcindex = 0;
+      int mwindex = 0;
+      int swindex = 0;
+
+      for (int j=0;j!=allmcell.size();j++){
+	//construct merged cell index
+	const MergeGeomCell *mcell = (MergeGeomCell*)allmcell[j];
+	if (cimap.find(mcell) == cimap.end()){
+	  mcimap[mcell] = mcindex;
+	  mcindex ++;
+
+	  const GeomWireSelection wires = mergetiling[i]->wires(*allmcell[j]);
+	  // cout << wires.size() << endl;
+	  for (int k=0;k!=wires.size();k++){
+	    //construct merged wire index
+	    const MergeGeomWire *mwire = (MergeGeomWire*)wires[k];
+	    if (mwimap.find(mwire) == mwimap.end()){
+	      mwimap[mwire] = mwindex;
+	      mwindex ++;
+
+	      //construct single wire index
+	      GeomWireSelection swires = mwire->get_allwire();
+	      for (int kk = 0; kk!=swires.size(); kk++){
+	       	const GeomWire* wire1 = swires[kk];
+	       	if (swimap.find(wire1) == swimap.end()){
+	       	  swimap[wire1] = swindex;
+	       	  swindex ++;
+	       	}
+	      }
+
+	    }
+	  }
+
+	}
+      }
+
+      // cout << mcindex << " " << mwindex << " " << swindex << " " << allmcell.size() << " " << allmwire.size() << " " << allwire.size() << endl;
+      
+      TVectorD Vmwire_lcharge(mwindex);
+      TVectorD Vmwire_rcharge(mwindex);
+
+      TVectorD Vswire_charge(swindex);
+      TVectorD Vmcell_charge(mcindex);
+
+      TMatrixD MA(mwindex,mcindex);
+      TMatrixD MB(mwindex,swindex);
+
+      for (int j=0;j!=allwire.size();j++){
+	int index = swimap[allwire[j]];
+	float charge = wcmap[allwire[j]];
+	Vswire_charge[index] =charge;
+      }
+      // Vswire_charge.Print();
+      for (int j = 0;j!=allmcell.size();j++){
+	int index = mcimap[allmcell[j]];
+	float charge = 0;
+	for (int k=0; k!=((const MergeGeomCell*)allmcell[j])->get_allcell().size(); k++){
+	  charge += ccmap[((const MergeGeomCell*)allmcell[j])->get_allcell().at(k)];
+	}
+	Vmcell_charge[index] = charge;
+      }
+      // Vmcell_charge.Print();
+
+      for (int j=0;j!=allmwire.size();j++){
+	int index = mwimap[allmwire[j]];
+	//construct MA
+	for (int k=0; k!=mergetiling[i]->cells(*allmwire[j]).size();k++){
+	  int index1 = mcimap[mergetiling[i]->cells(*allmwire[j]).at(k)];
+	  MA(index,index1) = 1;
+	}
+
+	//construct MB
+	for (int k=0;k!=((MergeGeomWire*)allmwire[j])->get_allwire().size();k++){
+	  int index1 = swimap[((MergeGeomWire*)allmwire[j])->get_allwire().at(k)];
+	  MB(index,index1) = 1;
+	}
+
+      }
+      // MA.Print();
+      //MB.Print();
+
+      Vmwire_lcharge = MB * Vswire_charge;
+      Vmwire_rcharge = MA * Vmcell_charge;
+      
+      sum1 = 0; sum2 = 0;
+      for (int j=0;j!= mwindex;j++){
+	sum1 += Vmwire_lcharge[j];
+	sum2 += Vmwire_rcharge[j];
+	//cout << Vmwire_lcharge[j] << " " << Vmwire_rcharge[j] << " " << Vmwire_lcharge[j] -Vmwire_rcharge[j] << endl;
+      }
+      cout << "Merged Cell Check: " << sum1/3. << " " << sum2/3. << endl;
 
       // for (auto it = wcmap.begin();it!=wcmap.end(); it++){
       // 	float charge = it->second;
@@ -342,51 +448,51 @@ int main(int argc, char* argv[])
   // //  
 
       
-    TApplication theApp("theApp",&argc,argv);
-    theApp.SetReturnFromRun(true);
+    // TApplication theApp("theApp",&argc,argv);
+    // theApp.SetReturnFromRun(true);
     
-    TCanvas c1("ToyMC","ToyMC",800,600);
-    c1.Draw();
+    // TCanvas c1("ToyMC","ToyMC",800,600);
+    // c1.Draw();
     
-    WireCell2dToy::ToyEventDisplay display(c1, gds);
-    display.charge_min = charge_min;
-    display.charge_max = charge_max;
+    // WireCell2dToy::ToyEventDisplay display(c1, gds);
+    // display.charge_min = charge_min;
+    // display.charge_max = charge_max;
 
 
-    gStyle->SetOptStat(0);
+    // gStyle->SetOptStat(0);
     
-    const Int_t NRGBs = 5;
-    const Int_t NCont = 255;
-    Int_t MyPalette[NCont];
-    Double_t stops[NRGBs] = {0.0, 0.34, 0.61, 0.84, 1.0};
-    Double_t red[NRGBs] = {0.0, 0.0, 0.87 ,1.0, 0.51};
-    Double_t green[NRGBs] = {0.0, 0.81, 1.0, 0.2 ,0.0};
-    Double_t blue[NRGBs] = {0.51, 1.0, 0.12, 0.0, 0.0};
-    Int_t FI = TColor::CreateGradientColorTable(NRGBs, stops, red, green, blue, NCont);
-    gStyle->SetNumberContours(NCont);
-    for (int kk=0;kk!=NCont;kk++) MyPalette[kk] = FI+kk;
-    gStyle->SetPalette(NCont,MyPalette);
+    // const Int_t NRGBs = 5;
+    // const Int_t NCont = 255;
+    // Int_t MyPalette[NCont];
+    // Double_t stops[NRGBs] = {0.0, 0.34, 0.61, 0.84, 1.0};
+    // Double_t red[NRGBs] = {0.0, 0.0, 0.87 ,1.0, 0.51};
+    // Double_t green[NRGBs] = {0.0, 0.81, 1.0, 0.2 ,0.0};
+    // Double_t blue[NRGBs] = {0.51, 1.0, 0.12, 0.0, 0.0};
+    // Int_t FI = TColor::CreateGradientColorTable(NRGBs, stops, red, green, blue, NCont);
+    // gStyle->SetNumberContours(NCont);
+    // for (int kk=0;kk!=NCont;kk++) MyPalette[kk] = FI+kk;
+    // gStyle->SetPalette(NCont,MyPalette);
 
     
 
-    display.init(0,10.3698,-2.33/2.,2.33/2.);
-    //display.init(1.1,1.8,0.7,1.0);
+    // display.init(0,10.3698,-2.33/2.,2.33/2.);
+    // //display.init(1.1,1.8,0.7,1.0);
     
-    display.draw_mc(1,WireCell::PointValueVector(),"colz");
+    // display.draw_mc(1,WireCell::PointValueVector(),"colz");
     
     
 
-    display.draw_slice(slice,"");
-    display.draw_cells(toytiling[i]->get_allcell(),"*same");
-    display.draw_mergecells(mergetiling[i]->get_allcell(),"*same",1); //0 is normal, 1 is only draw the ones containt the truth cell
-    display.draw_truthcells(ccmap,"*same");
+    // display.draw_slice(slice,"");
+    // display.draw_cells(toytiling[i]->get_allcell(),"*same");
+    // display.draw_mergecells(mergetiling[i]->get_allcell(),"*same",1); //0 is normal, 1 is only draw the ones containt the truth cell
+    // display.draw_truthcells(ccmap,"*same");
     
-    //display.draw_wires_charge(wcmap,"Fsame",FI);
-    // display.draw_cells_charge(toytiling.get_allcell(),"Fsame");
-    // display.draw_truthcells_charge(ccmap,"lFsame",FI);
+    // //display.draw_wires_charge(wcmap,"Fsame",FI);
+    // // display.draw_cells_charge(toytiling.get_allcell(),"Fsame");
+    // // display.draw_truthcells_charge(ccmap,"lFsame",FI);
     
     
-    theApp.Run();
+    // theApp.Run();
     }
   }
 
