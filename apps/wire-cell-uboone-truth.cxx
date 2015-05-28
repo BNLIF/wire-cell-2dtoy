@@ -9,7 +9,6 @@
 #include "WireCellData/GeomCluster.h"
 //#include "WireCellNav/SliceDataSource.h"
 
-
 #include "WireCellNav/FrameDataSource.h"
 #include "WireCellNav/SimDataSource.h"
 #include "WireCellNav/SliceDataSource.h"
@@ -229,6 +228,7 @@ int main(int argc, char* argv[])
 	if (charge < charge_min) charge_min = charge;
        	// cout << it->second << endl;
       }
+
 
       //loop through merged cell and compare with truth cells
       for (int j=0;j!=allmcell.size();j++){
