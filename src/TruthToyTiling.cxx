@@ -3,12 +3,17 @@
 using namespace WireCell;
 
 WireCell2dToy::TruthToyTiling::TruthToyTiling(WireCell2dToy::ToyTiling& tiling, const WireCell::PointValueVector &pvv, int tbin, const GeomDataSource& gds){
+  
+  // float sum = 0;
   for (int itruth = 0; itruth < pvv.size(); ++itruth){
     if (pvv[itruth].first.x == tbin){
       const Point& p = pvv[itruth].first; // get the point
       float charge = pvv[itruth].second;
+      
+      
 
       if (gds.contained_yz(p)){
+	//	sum += charge;
 	const GeomWire* wire_u = gds.closest(p, static_cast<WirePlaneType_t>(0));
 	const GeomWire* wire_v = gds.closest(p, static_cast<WirePlaneType_t>(1));
 	const GeomWire* wire_w = gds.closest(p, static_cast<WirePlaneType_t>(2));
@@ -24,14 +29,20 @@ WireCell2dToy::TruthToyTiling::TruthToyTiling(WireCell2dToy::ToyTiling& tiling, 
 	  //Point pp = cell->center();
 	  //	std::cout << pp.x << " " << pp.y << " " << pp.z << std::endl;
 	  
+
 	  if (cellchargemap.find(cell) == cellchargemap.end()){
 	    //not found
 	    cellchargemap[cell] = charge;
 	  }else{
 	    cellchargemap[cell] += charge;
 	  }
+	}else{
+	  // std::cout << charge << std::endl;
 	}
       }
     }
   }
+  
+  //std::cout << "Xin " << sum << std::endl;
+
 }
