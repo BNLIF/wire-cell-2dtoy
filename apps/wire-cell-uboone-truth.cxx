@@ -6,6 +6,8 @@
 #include "WireCell2dToy/MergeToyTiling.h"
 #include "WireCell2dToy/TruthToyTiling.h"
 #include "WireCellData/MergeGeomCell.h"
+#include "WireCellData/GeomCluster.h"
+//#include "WireCellNav/SliceDataSource.h"
 
 #include "WireCellNav/FrameDataSource.h"
 #include "WireCellNav/SimDataSource.h"
@@ -101,52 +103,122 @@ int main(int argc, char* argv[])
   int ncount = 0;
   int ncount_t = 0;
   
-  //int i=454;{
+
+  WireCell2dToy::ToyTiling **toytiling = new WireCell2dToy::ToyTiling*[2400];
+  WireCell2dToy::MergeToyTiling **mergetiling = new WireCell2dToy::MergeToyTiling*[2400];
+  WireCell2dToy::TruthToyTiling **truthtiling = new WireCell2dToy::TruthToyTiling*[2400];
+  
+  //add in cluster
+  GeomClusterSet cluster_set, cluster_delset;
+  
+  int ncount_mcell = 0;
+  
+
+  // int i=186;{
   for (int i=0;i!=sds.size();i++){
-  // for (int i=450;i!=460;i++){
+    //for (int i=365;i!=378;i++){
+ 
     sds.jump(i);
     WireCell::Slice slice = sds.get();
     if ( slice.group().size() >0){
-      WireCell2dToy::ToyTiling toytiling(slice,gds);
-      WireCell2dToy::MergeToyTiling mergetiling(toytiling);
-      WireCell2dToy::TruthToyTiling truthtiling(toytiling,pvv,i,gds);
+      toytiling[i] = new WireCell2dToy::ToyTiling(slice,gds);
+      mergetiling[i] = new WireCell2dToy::MergeToyTiling(*toytiling[i],i);
+      truthtiling[i] = new WireCell2dToy::TruthToyTiling(*toytiling[i],pvv,i,gds);
+      
+      GeomCellSelection allcell = toytiling[i]->get_allcell();
+      GeomCellSelection allmcell = mergetiling[i]->get_allcell();
+      GeomWireSelection allmwire = mergetiling[i]->get_allwire();
+      
      
+      if (cluster_set.empty()){
+	// if cluster is empty, just insert all the mcell, each as a cluster
+       	for (int j=0;j!=allmcell.size();j++){
+	  GeomCluster *cluster = new GeomCluster(*((MergeGeomCell*)allmcell[j]));
+	  cluster_set.insert(cluster);
+	}
+      }else{
+	for (int j=0;j!=allmcell.size();j++){
+	  int flag = 0;
+	  int flag_save = 0;
+	  GeomCluster *cluster_save = 0;
+	  
+	  cluster_delset.clear();
 
-      
-      GeomCellSelection allcell = toytiling.get_allcell();
-      GeomCellSelection allmcell = mergetiling.get_allcell();
-      GeomWireSelection allmwire = mergetiling.get_allwire();
-      
-     
+	  // for (auto it = cluster_set.begin();it!=cluster_set.end();it++){
+	  //   if (i==318)
+	  //     cout << "b " << (*it)->get_allcell().size() << endl;
+	  // } 
+	  
+
+	  // loop through merged cell
+	  for (auto it = cluster_set.begin();it!=cluster_set.end();it++){
+	    //loop through clusters
+	   
+	    flag += (*it)->AddCell(*((MergeGeomCell*)allmcell[j]));
+	    if (flag==1 && flag != flag_save){
+	      cluster_save = *it;
+	    }else if (flag>1 && flag != flag_save){
+	      cluster_save->MergeCluster(*(*it));
+	      cluster_delset.insert(*it);
+	    }
+	    flag_save = flag;
+	    // if (i==318)
+	    //   cout << "c " << flag << endl;
+	  }
+
+	  for (auto it = cluster_delset.begin();it!=cluster_delset.end();it++){
+	    cluster_set.erase(*it);
+	    delete (*it);
+	  }
+	  
+	  
+
+	  // if (i==318)
+	  //   cout << j << " " << flag << endl;
+	  if (flag==0){
+	    GeomCluster *cluster = new GeomCluster(*((MergeGeomCell*)allmcell[j]));
+	    cluster_set.insert(cluster);
+	  }
+
+	  // for (auto it = cluster_set.begin();it!=cluster_set.end();it++){
+	  //   if (i==318)
+	  //     cout << (*it)->get_allcell().size() << endl;
+	  // }
+	  
+	}
+      }
       
 
       for (int j=0;j!=allcell.size();j++){
 	Point p = allcell[j]->center();
-	x[ncount] = i*0.32*units::cm;
+	x[ncount] = i*0.32;
 	y[ncount] = p.y/units::cm;
 	z[ncount] = p.z/units::cm;
 	ncount ++;
       }
 
-      //cout << i << " " << allmcell.size() << " " << allmwire.size() << endl;
+
+      int ncount_mcell_cluster = 0;
+      for (auto it = cluster_set.begin();it!=cluster_set.end();it++){
+	ncount_mcell_cluster += (*it)->get_allcell().size();
+      }
+      ncount_mcell += allmcell.size();
+      cout << i << " " << allmcell.size() << " " << allmwire.size() << " " << cluster_set.size()  << endl;
       
-      // for (int j=0;j!=allmcell.size();j++){
-      // 	cout << mergetiling.wires(*allmcell[j]).size() << endl;
-      // }
 
       // for (int j=0;j!=allmwire.size();j++){
       // 	cout << mergetiling.cells(*allmwire[j]).size() << endl;
       // }
 
 
-      CellChargeMap ccmap = truthtiling.ccmap();
+      CellChargeMap ccmap = truthtiling[i]->ccmap();
 
       Double_t charge_min = 10000;
       Double_t charge_max = 0;
 
       for (auto it = ccmap.begin();it!=ccmap.end(); it++){
 	Point p = it->first->center();
-      	xt[ncount_t] = i*0.32*units::cm;
+      	xt[ncount_t] = i*0.32;
       	yt[ncount_t] = p.y/units::cm;
       	zt[ncount_t] = p.z/units::cm;
       	ncount_t ++;
@@ -157,6 +229,16 @@ int main(int argc, char* argv[])
        	// cout << it->second << endl;
       }
 
+
+      //loop through merged cell and compare with truth cells
+      for (int j=0;j!=allmcell.size();j++){
+	MergeGeomCell *mcell = (MergeGeomCell*)allmcell[j];
+	mcell->CheckContainTruthCell(ccmap);
+	// 	cout << mergetiling.wires(*allmcell[j]).size() << endl;
+      }
+
+
+      
       // WireChargeMap wcmap = toytiling.wcmap();
       // for (auto it = wcmap.begin();it!=wcmap.end(); it++){
       // 	float charge = it->second;
@@ -220,16 +302,16 @@ int main(int argc, char* argv[])
 
     
 
-    // //display.init(0,10.3698,-2.33/2.,2.33/2.);
-    // display.init(1.1,1.8,0.7,1.0);
+    // display.init(0,10.3698,-2.33/2.,2.33/2.);
+    // //display.init(1.1,1.8,0.7,1.0);
     
     // display.draw_mc(1,WireCell::PointValueVector(),"colz");
     
     
 
     // display.draw_slice(slice,"");
-    // display.draw_cells(toytiling.get_allcell(),"*same");
-    // display.draw_mergecells(mergetiling.get_allcell(),"*same");
+    // display.draw_cells(toytiling[i]->get_allcell(),"*same");
+    // display.draw_mergecells(mergetiling[i]->get_allcell(),"*same",1); //0 is normal, 1 is only draw the ones containt the truth cell
     // display.draw_truthcells(ccmap,"*same");
     
     // // display.draw_wires_charge(wcmap,"Fsame",FI);
@@ -241,13 +323,39 @@ int main(int argc, char* argv[])
     }
   }
 
-    cout << ncount << endl;
-    TGraph2D *g = new TGraph2D(ncount,x,y,z);
-    TGraph2D *gt = new TGraph2D(ncount_t,xt,yt,zt);
-    TFile *file = new TFile("shower3D.root","RECREATE");
+  int ncount_mcell_cluster = 0;
+  for (auto it = cluster_set.begin();it!=cluster_set.end();it++){
+    ncount_mcell_cluster += (*it)->get_allcell().size();
+  }
 
-    g->Write("shower3D");
-    gt->Write("shower3D_truth");
+
+  cout << "Summary: " << ncount << " " << ncount_mcell << " " << ncount_mcell_cluster << endl;
+  TGraph2D *g = new TGraph2D(ncount,x,y,z);
+  TGraph2D *gt = new TGraph2D(ncount_t,xt,yt,zt);
+  TFile *file = new TFile("shower3D.root","RECREATE");
+  g->Write("shower3D");
+  gt->Write("shower3D_truth");
+
+  //save cluster
+  int ncluster = 0;
+  for (auto it = cluster_set.begin();it!=cluster_set.end();it++){
+    ncount = 0;
+    for (int i=0; i!=(*it)->get_allcell().size();i++){
+      const MergeGeomCell *mcell = (const MergeGeomCell*)((*it)->get_allcell().at(i));
+      for (int j=0; j!=mcell->get_allcell().size();j++){
+  	Point p = mcell->get_allcell().at(j)->center();
+  	x[ncount] = mcell->GetTimeSlice()*0.32;
+  	y[ncount] = p.y/units::cm;
+  	z[ncount] = p.z/units::cm;
+  	ncount ++;
+      }
+    }
+    // cout << ncount << endl;
+    TGraph2D *g1 = new TGraph2D(ncount,x,y,z);
+    g1->Write(Form("cluster_%d",ncluster));
+    ncluster ++;
+  }
+
   file->Write();
   file->Close();
 

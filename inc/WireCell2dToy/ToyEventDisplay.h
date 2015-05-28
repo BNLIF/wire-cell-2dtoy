@@ -2,6 +2,7 @@
 #define WIRECELL2DTOY_TOYEVENTDISPLAY_H
 #include "WireCellData/Point.h"
 #include "WireCellData/GeomCell.h"
+#include "WireCellData/MergeGeomCell.h"
 
 #include "WireCellNav/SliceDataSource.h"
 #include "WireCellNav/GeomDataSource.h"
@@ -40,7 +41,7 @@ namespace WireCell2dToy {
 
 	/// Draw a selection of cells
 	virtual int draw_cells(const WireCell::GeomCellSelection& cellall ,TString option);
-	virtual int draw_mergecells(const WireCell::GeomCellSelection& cellall ,TString option);
+	virtual int draw_mergecells(const WireCell::GeomCellSelection& cellall ,TString option, int flag=0);
 	virtual int draw_truthcells(const WireCell::CellChargeMap& ccmap,TString option);
 	virtual int draw_truthcells_charge(const WireCell::CellChargeMap& ccmap,TString option, int FI);
 	virtual int draw_wires_charge(const WireCell::WireChargeMap& wcmap,TString option, int FI);

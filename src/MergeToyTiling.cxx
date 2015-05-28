@@ -8,7 +8,7 @@
 
 using namespace WireCell;
 
-WireCell2dToy::MergeToyTiling::MergeToyTiling(WireCell2dToy::ToyTiling& tiling){
+WireCell2dToy::MergeToyTiling::MergeToyTiling(WireCell2dToy::ToyTiling& tiling, int time_slice){
   ncell = tiling.get_ncell();
   wire_u = tiling.get_wire_u();
   wire_v = tiling.get_wire_v();
@@ -34,13 +34,14 @@ WireCell2dToy::MergeToyTiling::MergeToyTiling(WireCell2dToy::ToyTiling& tiling){
       
       if(flag==0){
 	MergeGeomCell *mcell = new MergeGeomCell(ncell,*cell);
-      	ncell++;
+      	mcell->SetTimeSlice(time_slice);
+	ncell++;
 	cell_all.push_back(mcell);
       }
     }
   }
   
-  while(further_merge(cell_all,tiling.get_ncell()));
+  while(further_merge(cell_all,tiling.get_ncell(),time_slice));
     
 
 
@@ -63,6 +64,7 @@ WireCell2dToy::MergeToyTiling::MergeToyTiling(WireCell2dToy::ToyTiling& tiling){
    	  if (wires[nwire]->plane()==plane){
 	    if (flag==0){
 	      mwire = new MergeGeomWire(ident_wire,*wires[nwire]);
+	      mwire->SetTimeSlice(time_slice);
 	      ident_wire++;
 	      flag = 1;
 	    }else {
@@ -78,7 +80,7 @@ WireCell2dToy::MergeToyTiling::MergeToyTiling(WireCell2dToy::ToyTiling& tiling){
     }
   }
 
-  while(further_mergewire(wire_all,50000));
+  while(further_mergewire(wire_all,50000,time_slice));
   
 
   // Now construc the wire map;
@@ -208,7 +210,7 @@ WireCell2dToy::MergeToyTiling::~MergeToyTiling(){
 }
 
 
-int WireCell2dToy::MergeToyTiling::further_mergewire(WireCell::GeomWireSelection &allwire, int nwire){
+int WireCell2dToy::MergeToyTiling::further_mergewire(WireCell::GeomWireSelection &allwire, int nwire, int time_slice){
 
   WireCell::GeomWireSelection tempwire = allwire;
   allwire.clear();
@@ -225,6 +227,7 @@ int WireCell2dToy::MergeToyTiling::further_mergewire(WireCell::GeomWireSelection
       
     if(flag==0){
       MergeGeomWire *mwire = new MergeGeomWire(nwire,*wire);
+      mwire->SetTimeSlice(time_slice);
       nwire++;
       allwire.push_back(mwire);
     }
@@ -253,7 +256,7 @@ int WireCell2dToy::MergeToyTiling::further_mergewire(WireCell::GeomWireSelection
 
 
 
-int WireCell2dToy::MergeToyTiling::further_merge(WireCell::GeomCellSelection &allcell, int ncell){
+int WireCell2dToy::MergeToyTiling::further_merge(WireCell::GeomCellSelection &allcell, int ncell,int time_slice){
   WireCell::GeomCellSelection tempcell = allcell;
   allcell.clear();
   
@@ -269,6 +272,7 @@ int WireCell2dToy::MergeToyTiling::further_merge(WireCell::GeomCellSelection &al
       
       if(flag==0){
       	MergeGeomCell *mcell = new MergeGeomCell(ncell,*cell);
+	mcell->SetTimeSlice(time_slice);
 	ncell++;
 	allcell.push_back(mcell);
       }
