@@ -111,8 +111,7 @@ WireCell2dToy::ToyTiling::ToyTiling(const WireCell::Slice& slice,WireCellSst::Ge
 	  wiresel.push_back(wire_w[k]);	
 	  cellmap[cell]=wiresel;
 	  
-	  //fillwiremap
-	  
+	  //fill wiremap
 	  if (wiremap.find(wire_u[i]) == wiremap.end()){
 	    //not found
 	    GeomCellSelection cellsel;

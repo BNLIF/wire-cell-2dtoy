@@ -22,28 +22,30 @@ ToyEventDisplay::~ToyEventDisplay()
 }
 void ToyEventDisplay::clear()
 {
-    // if (h1) {
-    // 	delete h1;
-    // }
-    // if (g1) {
-    // 	delete g1;
-    // }
-    // if (g2) { 
-    // 	delete g2;
-    // }
+    if (h1) {
+      delete h1;
+    }
+    if (g1) {
+      delete g1;
+    }
+    if (g2) { 
+      delete g2;
+    }
 }
 
 int ToyEventDisplay::init(float x_min, float x_max, float y_min, float y_max)
 {
   this->clear();
+
   h1 = new TH2F("h1","h1",1000,x_min,x_max,1000,y_min,y_max);
   h1->SetTitle("Wires and True Hits");
   h1->GetYaxis()->SetNdivisions(506);
   h1->GetXaxis()->SetNdivisions(506);
-  h1->SetYTitle("Z (m)");
-  h1->SetXTitle("Y (m)");
+  h1->SetXTitle("Z (m)");
+  h1->SetYTitle("Y (m)");
   h1->SetBinContent(0,0,1);
   h1->GetZaxis()->SetRangeUser(charge_min,charge_max);
+
   return 0;
 }
 
@@ -52,7 +54,6 @@ int ToyEventDisplay::draw_mc(int flag, const WireCell::PointValueVector& mctruth
   pad.cd();
 
   if (flag==1){
-    
     h1->Draw(option);
     
   }else if (flag==2){
@@ -104,8 +105,7 @@ int ToyEventDisplay::draw_slice(const WireCell::Slice& slice, TString option)
     			  wire->point2().z/units::m  ,wire->point2().y/units::m);
     l3->SetLineColor(2);
     l3->Draw(option);
-  
-  
+ 
   }
   return 0;
 }

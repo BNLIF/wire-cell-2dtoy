@@ -6,8 +6,6 @@
 #include "WireCell2dToy/MergeToyTiling.h"
 #include "WireCell2dToy/TruthToyTiling.h"
 #include "WireCellData/MergeGeomCell.h"
-//#include "WireCellNav/SliceDataSource.h"
-
 
 #include "WireCellNav/FrameDataSource.h"
 #include "WireCellNav/SimDataSource.h"
@@ -158,7 +156,7 @@ int main(int argc, char* argv[])
 	if (charge < charge_min) charge_min = charge;
        	// cout << it->second << endl;
       }
-      
+
       // WireChargeMap wcmap = toytiling.wcmap();
       // for (auto it = wcmap.begin();it!=wcmap.end(); it++){
       // 	float charge = it->second;
