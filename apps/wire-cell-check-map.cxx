@@ -328,7 +328,7 @@ int main(int argc, char* argv[])
       for (int j=0;j!=allmcell.size();j++){
 	//construct merged cell index
 	const MergeGeomCell *mcell = (MergeGeomCell*)allmcell[j];
-	if (cimap.find(mcell) == cimap.end()){
+	if (mcimap.find(mcell) == mcimap.end()){
 	  mcimap[mcell] = mcindex;
 	  mcindex ++;
 

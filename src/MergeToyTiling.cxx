@@ -13,6 +13,7 @@ WireCell2dToy::MergeToyTiling::MergeToyTiling(WireCell2dToy::ToyTiling& tiling, 
   wire_u = tiling.get_wire_u();
   wire_v = tiling.get_wire_v();
   wire_w = tiling.get_wire_w();
+  wirechargemap = tiling.wcmap();
   
   // goal is to create merged version of 
   // cell_all
