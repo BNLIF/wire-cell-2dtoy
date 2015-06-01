@@ -90,11 +90,9 @@ WireCell2dToy::ToyMatrix::ToyMatrix(WireCell2dToy::ToyTiling& toytiling, WireCel
   // MB->Print();
   // MBT->Print();
   // Vy->Print();
+
+  Solve();
 }
-
-
-
-
 
 WireCell2dToy::ToyMatrix::~ToyMatrix(){
   
@@ -121,6 +119,11 @@ int WireCell2dToy::ToyMatrix::Solve(){
 	(*dCx)[i] = sqrt( (*Vx)(i,i)) * 1000.;
       }
 
+      TVectorD sol = (*MB) * (*Wy) - (*MA) * (*Cx);
+      TVectorD sol1 =  (*VBy_inv) * sol;
+      chi2 = sol * (sol1)/1e6;
+
+      //std::cout << chi2 << std::endl;
       //      for (int i=0;i!=mcindex;i++){
       //	std::cout << (*Cx)[i] << " " << (*dCx)[i]*1000. << std::endl;
       //}
@@ -130,6 +133,18 @@ int WireCell2dToy::ToyMatrix::Solve(){
   }
   return solve_flag;
 }
+
+double WireCell2dToy::ToyMatrix::Get_Cell_Charge( const WireCell::GeomCell *cell, int flag )  {
+  // flag == 1 charge
+  // flag == 2 uncertainty
+  int index = mcimap[cell];
+  if (flag==1){
+    return (*Cx)[index];
+  }else if (flag==2){
+    return (*dCx)[index];
+  }
+}
+
 
 void WireCell2dToy::ToyMatrix::Buildup_index(WireCell2dToy::MergeToyTiling& mergetiling){
 
