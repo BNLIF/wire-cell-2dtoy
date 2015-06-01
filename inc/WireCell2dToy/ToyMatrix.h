@@ -15,6 +15,8 @@ namespace WireCell2dToy{
     ToyMatrix(WireCell2dToy::ToyTiling& toytiling, WireCell2dToy::MergeToyTiling& mergetiling);
     virtual ~ToyMatrix();
 
+    int Solve();
+
     float Get_Chi2(){return chi2;};
     float Get_Solve_Flag(){return solve_flag;};
 

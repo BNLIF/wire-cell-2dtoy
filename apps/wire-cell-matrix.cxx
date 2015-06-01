@@ -82,7 +82,7 @@ int main(int argc, char* argv[])
   WireCell::GenerativeFDS gfds(toydep,gds,2400,5);
   gfds.jump(1);
 
-  WireCellSst::ToyuBooNESliceDataSource sds(gfds,0); //set threshold at 2000 electrons
+  WireCellSst::ToyuBooNESliceDataSource sds(gfds,1500); //set threshold at 2000 electrons
 
   
 
@@ -104,9 +104,9 @@ int main(int argc, char* argv[])
   int ncount_mcell = 0;
   
 
-  int i=365;{
-    // for (int i=0;i!=sds.size();i++){
-    // for (int i=365;i!=378;i++){
+  int i=360;{
+  //for (int i=0;i!=sds.size();i++){
+  // for (int i=365;i!=378;i++){
  
     sds.jump(i);
     WireCell::Slice slice = sds.get();
@@ -115,46 +115,47 @@ int main(int argc, char* argv[])
       mergetiling[i] = new WireCell2dToy::MergeToyTiling(*toytiling[i],i);
       truthtiling[i] = new WireCell2dToy::TruthToyTiling(*toytiling[i],pvv,i,gds);
       toymatrix[i] = new WireCell2dToy::ToyMatrix(*toytiling[i],*mergetiling[i]);
+      toymatrix[i]->Solve();
       
-      // GeomCellSelection allcell = toytiling[i]->get_allcell();
-      // GeomWireSelection allwire = toytiling[i]->get_allwire();
-      // GeomCellSelection allmcell = mergetiling[i]->get_allcell();
-      // GeomWireSelection allmwire = mergetiling[i]->get_allwire();
+      GeomCellSelection allcell = toytiling[i]->get_allcell();
+      GeomWireSelection allwire = toytiling[i]->get_allwire();
+      GeomCellSelection allmcell = mergetiling[i]->get_allcell();
+      GeomWireSelection allmwire = mergetiling[i]->get_allwire();
       
-      // for (int j=0;j!=allcell.size();j++){
-      // 	Point p = allcell[j]->center();
-      // 	x[ncount] = i*0.32;
-      // 	y[ncount] = p.y/units::cm;
-      // 	z[ncount] = p.z/units::cm;
-      // 	ncount ++;
-      // }
+      for (int j=0;j!=allcell.size();j++){
+      	Point p = allcell[j]->center();
+      	x[ncount] = i*0.32;
+      	y[ncount] = p.y/units::cm;
+      	z[ncount] = p.z/units::cm;
+      	ncount ++;
+      }
 
 
-      // CellChargeMap ccmap = truthtiling[i]->ccmap();
-      // Double_t charge_min = 10000;
-      // Double_t charge_max = 0;
+      CellChargeMap ccmap = truthtiling[i]->ccmap();
+      Double_t charge_min = 10000;
+      Double_t charge_max = 0;
 
-      // for (auto it = ccmap.begin();it!=ccmap.end(); it++){
-      // 	Point p = it->first->center();
-      // 	xt[ncount_t] = i*0.32;
-      // 	yt[ncount_t] = p.y/units::cm;
-      // 	zt[ncount_t] = p.z/units::cm;
-      // 	ncount_t ++;
+      for (auto it = ccmap.begin();it!=ccmap.end(); it++){
+      	Point p = it->first->center();
+      	xt[ncount_t] = i*0.32;
+      	yt[ncount_t] = p.y/units::cm;
+      	zt[ncount_t] = p.z/units::cm;
+      	ncount_t ++;
 
-      // 	float charge = it->second;
-      // 	if (charge > charge_max) charge_max = charge;
-      // 	if (charge < charge_min) charge_min = charge;
-      //  	// cout << it->second << endl;
-      // }
+      	float charge = it->second;
+      	if (charge > charge_max) charge_max = charge;
+      	if (charge < charge_min) charge_min = charge;
+       	// cout << it->second << endl;
+      }
 
-      // //loop through merged cell and compare with truth cells
-      // for (int j=0;j!=allmcell.size();j++){
-      // 	MergeGeomCell *mcell = (MergeGeomCell*)allmcell[j];
-      // 	mcell->CheckContainTruthCell(ccmap);
-      // 	//cout << mergetiling.wires(*allmcell[j]).size() << endl;
-      // }
+      //loop through merged cell and compare with truth cells
+      for (int j=0;j!=allmcell.size();j++){
+      	MergeGeomCell *mcell = (MergeGeomCell*)allmcell[j];
+      	mcell->CheckContainTruthCell(ccmap);
+      	//cout << mergetiling.wires(*allmcell[j]).size() << endl;
+      }
       
-      //      WireChargeMap wcmap = toytiling[i]->wcmap();
+           WireChargeMap wcmap = toytiling[i]->wcmap();
 
 
 
@@ -359,51 +360,51 @@ int main(int argc, char* argv[])
   // //  
 
       
-    // TApplication theApp("theApp",&argc,argv);
-    // theApp.SetReturnFromRun(true);
+    TApplication theApp("theApp",&argc,argv);
+    theApp.SetReturnFromRun(true);
     
-    // TCanvas c1("ToyMC","ToyMC",800,600);
-    // c1.Draw();
+    TCanvas c1("ToyMC","ToyMC",800,600);
+    c1.Draw();
     
-    // WireCell2dToy::ToyEventDisplay display(c1, gds);
-    // display.charge_min = charge_min;
-    // display.charge_max = charge_max;
+    WireCell2dToy::ToyEventDisplay display(c1, gds);
+    display.charge_min = charge_min;
+    display.charge_max = charge_max;
 
 
-    // gStyle->SetOptStat(0);
+    gStyle->SetOptStat(0);
     
-    // const Int_t NRGBs = 5;
-    // const Int_t NCont = 255;
-    // Int_t MyPalette[NCont];
-    // Double_t stops[NRGBs] = {0.0, 0.34, 0.61, 0.84, 1.0};
-    // Double_t red[NRGBs] = {0.0, 0.0, 0.87 ,1.0, 0.51};
-    // Double_t green[NRGBs] = {0.0, 0.81, 1.0, 0.2 ,0.0};
-    // Double_t blue[NRGBs] = {0.51, 1.0, 0.12, 0.0, 0.0};
-    // Int_t FI = TColor::CreateGradientColorTable(NRGBs, stops, red, green, blue, NCont);
-    // gStyle->SetNumberContours(NCont);
-    // for (int kk=0;kk!=NCont;kk++) MyPalette[kk] = FI+kk;
-    // gStyle->SetPalette(NCont,MyPalette);
+    const Int_t NRGBs = 5;
+    const Int_t NCont = 255;
+    Int_t MyPalette[NCont];
+    Double_t stops[NRGBs] = {0.0, 0.34, 0.61, 0.84, 1.0};
+    Double_t red[NRGBs] = {0.0, 0.0, 0.87 ,1.0, 0.51};
+    Double_t green[NRGBs] = {0.0, 0.81, 1.0, 0.2 ,0.0};
+    Double_t blue[NRGBs] = {0.51, 1.0, 0.12, 0.0, 0.0};
+    Int_t FI = TColor::CreateGradientColorTable(NRGBs, stops, red, green, blue, NCont);
+    gStyle->SetNumberContours(NCont);
+    for (int kk=0;kk!=NCont;kk++) MyPalette[kk] = FI+kk;
+    gStyle->SetPalette(NCont,MyPalette);
 
     
 
-    // display.init(0,10.3698,-2.33/2.,2.33/2.);
-    // //display.init(1.1,1.8,0.7,1.0);
+    display.init(0,10.3698,-2.33/2.,2.33/2.);
+    //display.init(1.1,1.8,0.7,1.0);
     
-    // display.draw_mc(1,WireCell::PointValueVector(),"colz");
+    display.draw_mc(1,WireCell::PointValueVector(),"colz");
     
     
 
-    // display.draw_slice(slice,"");
-    // display.draw_cells(toytiling[i]->get_allcell(),"*same");
-    // display.draw_mergecells(mergetiling[i]->get_allcell(),"*same",1); //0 is normal, 1 is only draw the ones containt the truth cell
-    // display.draw_truthcells(ccmap,"*same");
+    display.draw_slice(slice,"");
+    display.draw_cells(toytiling[i]->get_allcell(),"*same");
+    display.draw_mergecells(mergetiling[i]->get_allcell(),"*same",1); //0 is normal, 1 is only draw the ones containt the truth cell
+    display.draw_truthcells(ccmap,"*same");
     
-    // //display.draw_wires_charge(wcmap,"Fsame",FI);
-    // // display.draw_cells_charge(toytiling.get_allcell(),"Fsame");
-    // // display.draw_truthcells_charge(ccmap,"lFsame",FI);
+    //display.draw_wires_charge(wcmap,"Fsame",FI);
+    // display.draw_cells_charge(toytiling.get_allcell(),"Fsame");
+    // display.draw_truthcells_charge(ccmap,"lFsame",FI);
     
     
-    // theApp.Run();
+    theApp.Run();
     }
   }
 
