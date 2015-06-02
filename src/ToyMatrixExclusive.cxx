@@ -92,21 +92,22 @@ WireCell2dToy::ToyMatrixExclusive::ToyMatrixExclusive(WireCell2dToy::ToyMatrix &
   // Cx = new TVectorD(mcindex);
   // dCx = new TVectorD(mcindex);
   
-
+  //  std::cout << mwindex << std::endl;
   ncount = 0;
   int flag1 = 1;
   int ncount1 = 0;
-  while(!Solve(flag,toymatrix) && ncount1 < 100){
+  while( ncount1 < 100){
     for (int i=0;i!=flag.size();i++){
       for (int j=0; j!=mcindex-numz-1; j++){
+	if (Solve(flag,toymatrix)==1 && chi2 < mwindex + 5*sqrt(mwindex)) flag1 = 0;
 	move(flag,i,mcindex);
-	if (Solve(flag,toymatrix)==1) flag1 = 0;
+  
       }
     }
     if (flag1 == 0) ncount1 ++;
   }
-  
 
+  //Solve(flag,toymatrix);
 
   
 }
@@ -158,19 +159,27 @@ int WireCell2dToy::ToyMatrixExclusive::Solve(std::vector<int>& flag, WireCell2dT
     *MC_inv = *MC;
     MC_inv->Invert();
     *Cxt = (*MC_inv) * (*MAT) * (*VBy_inv) * (*MB) * (*Wy);
+    *Vx_inv = (*MAT) * (*VBy_inv) * (*MA);
+    *Vx = *Vx_inv;
+    Vx->Invert();
+    
+    for (int i=0;i!=mcindex-numz;i++){
+      (*dCxt)[i] = sqrt( (*Vx)(i,i)) * 1000.;
+    }
+    
     
     
     TVectorD sol = (*MB) * (*Wy) - (*MA) * (*Cxt);
     TVectorD sol1 =  (*VBy_inv) * sol;
     chi2t = sol * (sol1)/1e6;
-    if (chi2t < chi2){
-      *Vx_inv = (*MAT) * (*VBy_inv) * (*MA);
-      *Vx = *Vx_inv;
-      Vx->Invert();
-      
-      for (int i=0;i!=mcindex-numz;i++){
-	(*dCxt)[i] = sqrt( (*Vx)(i,i)) * 1000.;
+    
+    for (int i=0;i!=mcindex-numz;i++){
+      if ((*Cxt)[i] <0){
+	chi2t += 10*pow((*Cxt)[i]/(*dCxt)[i],2);
       }
+    }
+
+    if (chi2t < chi2){
       //copy the Cx etc      
       chi2 = chi2t;
       toymatrix.Set_chi2(chi2);
@@ -186,7 +195,10 @@ int WireCell2dToy::ToyMatrixExclusive::Solve(std::vector<int>& flag, WireCell2dT
 	  toymatrix.Set_error(0,i);
 	}
       }
-      //std::cout << "xin: " << chi2 << " " << ncount << std::endl;
+      // for (int i=0;i!=numz;i++){
+      // 	std::cout << flag[i] << std::endl;
+      // }
+      std::cout << "xin: " << chi2 << " " << ncount << std::endl;
     }
     //std::cout << det << std::endl;
     return 1;

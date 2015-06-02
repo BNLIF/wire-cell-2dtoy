@@ -7,6 +7,7 @@
 #include "WireCell2dToy/TruthToyTiling.h"
 #include "WireCell2dToy/ToyMatrix.h"
 #include "WireCell2dToy/ToyMatrixExclusive.h"
+#include "WireCell2dToy/ToyMetric.h"
 
 #include "WireCellData/MergeGeomCell.h"
 #include "WireCellData/MergeGeomWire.h"
@@ -100,14 +101,17 @@ int main(int argc, char* argv[])
   WireCell2dToy::ToyMatrix **toymatrix = new WireCell2dToy::ToyMatrix*[2400];
   WireCell2dToy::ToyMatrixExclusive **toymatrix_ex = new WireCell2dToy::ToyMatrixExclusive*[2400];
   
+  WireCell2dToy::ToyMetric toymetric;
+
+
   //add in cluster
   GeomClusterSet cluster_set, cluster_delset;
   
   int ncount_mcell = 0;
   
 
-  int i=454;{
-    //for (int i=0;i!=sds.size();i++){
+  // int i=454;{
+  for (int i=0;i!=sds.size();i++){
     // for (int i=365;i!=378;i++){
  
     sds.jump(i);
@@ -117,9 +121,9 @@ int main(int argc, char* argv[])
       mergetiling[i] = new WireCell2dToy::MergeToyTiling(*toytiling[i],i);
       truthtiling[i] = new WireCell2dToy::TruthToyTiling(*toytiling[i],pvv,i,gds);
       toymatrix[i] = new WireCell2dToy::ToyMatrix(*toytiling[i],*mergetiling[i]);
-      
       if (toymatrix[i]->Get_Solve_Flag()==0)
        	toymatrix_ex[i] = new WireCell2dToy::ToyMatrixExclusive(*toymatrix[i]);
+      
       
 
 
@@ -128,16 +132,26 @@ int main(int argc, char* argv[])
       GeomCellSelection allmcell = mergetiling[i]->get_allcell();
       GeomWireSelection allmwire = mergetiling[i]->get_allwire();
       
-      for (int j=0;j!=allcell.size();j++){
-      	Point p = allcell[j]->center();
-      	x[ncount] = i*0.32;
-      	y[ncount] = p.y/units::cm;
-      	z[ncount] = p.z/units::cm;
-      	ncount ++;
+      GeomCellSelection calmcell;
+      for (int j=0;j!=allmcell.size();j++){
+	MergeGeomCell *mcell = (MergeGeomCell*)allmcell[j];
+	double charge = toymatrix[i]->Get_Cell_Charge(mcell,1);
+	double charge_err = toymatrix[i]->Get_Cell_Charge(mcell,2);
+	if (charge + charge_err > 2000) calmcell.push_back(mcell);
       }
+      
+
+      // for (int j=0;j!=allcell.size();j++){
+      // 	Point p = allcell[j]->center();
+      // 	x[ncount] = i*0.32;
+      // 	y[ncount] = p.y/units::cm;
+      // 	z[ncount] = p.z/units::cm;
+      // 	ncount ++;
+      // }
 
 
       CellChargeMap ccmap = truthtiling[i]->ccmap();
+      toymetric.Add(allmcell,*toymatrix[i],ccmap);
       Double_t charge_min = 10000;
       Double_t charge_max = 0;
 
@@ -154,15 +168,16 @@ int main(int argc, char* argv[])
        	// cout << it->second << endl;
       }
 
-      //loop through merged cell and compare with truth cells
-      for (int j=0;j!=allmcell.size();j++){
-      	MergeGeomCell *mcell = (MergeGeomCell*)allmcell[j];
-      	if (mcell->CheckContainTruthCell(ccmap)) 
-	  cout << "xin: " << toymatrix[i]->Get_mcindex(mcell) << endl;
-      	//cout << mergetiling.wires(*allmcell[j]).size() << endl;
-      }
       
-      WireChargeMap wcmap = toytiling[i]->wcmap();
+      // //loop through merged cell and compare with truth cells
+      // for (int j=0;j!=allmcell.size();j++){
+      // 	MergeGeomCell *mcell = (MergeGeomCell*)allmcell[j];
+      // 	if (mcell->CheckContainTruthCell(ccmap)) 
+      // 	  cout << "xin: " << toymatrix[i]->Get_mcindex(mcell) << endl;
+      // 	//cout << mergetiling.wires(*allmcell[j]).size() << endl;
+      // }
+      
+      // WireChargeMap wcmap = toytiling[i]->wcmap();
 
 
 
@@ -357,7 +372,7 @@ int main(int argc, char* argv[])
 
     // GeomCellSelection allcell = toytiling.get_allcell();
     // GeomWireSelection allwire = toytiling.get_allwire();
-    // cout << i << " " << allcell.size() << " " << allwire.size() << endl;
+      cout << i << " " << allmcell.size() << " " << allmwire.size() << endl;
     //
     //}
   
@@ -401,9 +416,10 @@ int main(int argc, char* argv[])
     
     
 
-    // display.draw_slice(slice,"");
+    // // display.draw_slice(slice,"");
     // display.draw_cells(toytiling[i]->get_allcell(),"*same");
-    // display.draw_mergecells(mergetiling[i]->get_allcell(),"*same",1); //0 is normal, 1 is only draw the ones containt the truth cell
+    // //display.draw_mergecells(mergetiling[i]->get_allcell(),"*same",1); //0 is normal, 1 is only draw the ones containt the truth cell
+    // display.draw_mergecells(calmcell,"*same",0); //0 is normal, 1 is only draw the ones containt the truth cell
     // display.draw_truthcells(ccmap,"*same");
     
     // //display.draw_wires_charge(wcmap,"Fsame",FI);
@@ -425,7 +441,7 @@ int main(int argc, char* argv[])
   // g->Write("shower3D");
   // gt->Write("shower3D_truth");
 
-  
+  toymetric.Print();
 
   return 0;
   
