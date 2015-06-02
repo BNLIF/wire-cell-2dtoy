@@ -4,7 +4,7 @@ using namespace WireCell;
 
 WireCell2dToy::TruthToyTiling::TruthToyTiling(WireCell2dToy::ToyTiling& tiling, const WireCell::PointValueVector &pvv, int tbin, const GeomDataSource& gds){
   
-  // float sum = 0;
+  float sum = 0;
   for (int itruth = 0; itruth < pvv.size(); ++itruth){
     if (pvv[itruth].first.x == tbin){
       const Point& p = pvv[itruth].first; // get the point
@@ -13,10 +13,14 @@ WireCell2dToy::TruthToyTiling::TruthToyTiling(WireCell2dToy::ToyTiling& tiling, 
       
 
       if (gds.contained_yz(p)){
-	//	sum += charge;
-	const GeomWire* wire_u = gds.closest(p, static_cast<WirePlaneType_t>(0));
-	const GeomWire* wire_v = gds.closest(p, static_cast<WirePlaneType_t>(1));
-	const GeomWire* wire_w = gds.closest(p, static_cast<WirePlaneType_t>(2));
+
+	Point p1 = p;// hack for now, gap in the tiling ... 
+	//gds.avoid_gap(p1);
+	
+	sum += charge;
+	const GeomWire* wire_u = gds.closest(p1, static_cast<WirePlaneType_t>(0));
+	const GeomWire* wire_v = gds.closest(p1, static_cast<WirePlaneType_t>(1));
+	const GeomWire* wire_w = gds.closest(p1, static_cast<WirePlaneType_t>(2));
 	
 	GeomWireSelection wires;
 	wires.push_back(wire_u);
@@ -26,6 +30,7 @@ WireCell2dToy::TruthToyTiling::TruthToyTiling(WireCell2dToy::ToyTiling& tiling, 
 	const GeomCell* cell = tiling.cell(wires);
 	
 	if (cell!=0){
+	  
 	  //Point pp = cell->center();
 	  //	std::cout << pp.x << " " << pp.y << " " << pp.z << std::endl;
 	  
@@ -37,12 +42,16 @@ WireCell2dToy::TruthToyTiling::TruthToyTiling(WireCell2dToy::ToyTiling& tiling, 
 	    cellchargemap[cell] += charge;
 	  }
 	}else{
+	  // Point pp = cell->center();
+	  //gds.avoid_gap(p1);
+	  // std::cout << p.x << " " << p.y << " " << p.z << " " << std::endl;
+	  // std::cout << p1.x << " " << p1.y << " " << p1.z << " " << charge << std::endl;
 	  // std::cout << charge << std::endl;
 	}
       }
     }
   }
   
-  //std::cout << "Xin " << sum << std::endl;
+  std::cout << "Xin " << sum << std::endl;
 
 }

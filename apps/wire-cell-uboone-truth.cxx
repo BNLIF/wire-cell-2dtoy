@@ -115,7 +115,9 @@ int main(int argc, char* argv[])
   
 
   int i=178;{
-    //for (int i=0;i!=sds.size();i++){
+  //int i=455;{
+  //int i=332;{
+  //for (int i=0;i!=sds.size();i++){
     //for (int i=365;i!=378;i++){
  
     sds.jump(i);
@@ -309,7 +311,7 @@ int main(int argc, char* argv[])
     
     
 
-    //display.draw_slice(slice,"");
+    display.draw_slice(slice,"");
     display.draw_cells(toytiling[i]->get_allcell(),"*same");
     display.draw_mergecells(mergetiling[i]->get_allcell(),"*same",1); //0 is normal, 1 is only draw the ones containt the truth cell
     display.draw_truthcells(ccmap,"*same");

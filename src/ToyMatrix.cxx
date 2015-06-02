@@ -34,41 +34,44 @@ WireCell2dToy::ToyMatrix::ToyMatrix(WireCell2dToy::ToyTiling& toytiling, WireCel
     GeomWireSelection allwire = toytiling.get_allwire();
     WireChargeMap wcmap = toytiling.wcmap();
     for (int j=0;j!=allwire.size();j++){
-      int index = swimap[allwire[j]];
-      float charge = wcmap[allwire[j]];
-      (*Wy)[index] =charge;
-      // fill covariance matrix as well
-      // Vy ...
-      // need to differentiate which plane it is
-      WirePlaneType_t plane = allwire[j]->plane();
-      Double_t charge_noise;
-      if (plane == 0){
-	charge_noise = 14000*0.05;
-      }else if (plane==1){
-	charge_noise = 14000*0.03;
-      }else if (plane==2){
-	charge_noise = 14000*0.02;
+      if (swimap.find(allwire[j])!=swimap.end()){
+	int index = swimap[allwire[j]];
+	float charge = wcmap[allwire[j]];
+	(*Wy)[index] =charge;
+	// fill covariance matrix as well
+	// Vy ...
+	// need to differentiate which plane it is
+	WirePlaneType_t plane = allwire[j]->plane();
+	Double_t charge_noise;
+	if (plane == 0){
+	  charge_noise = 14000*0.05;
+	}else if (plane==1){
+	  charge_noise = 14000*0.03;
+	}else if (plane==2){
+	  charge_noise = 14000*0.02;
+	}
+	(*Vy)(index,index) = (charge_noise*charge_noise + 0.05*0.05 * charge*charge)/1e6;
       }
-      (*Vy)(index,index) = (charge_noise*charge_noise + 0.05*0.05 * charge*charge)/1e6;
     }
     
     
     GeomWireSelection allmwire = mergetiling.get_allwire();
     for (int j=0;j!=allmwire.size();j++){
-      int index = mwimap[allmwire[j]];
-      //construct MA
-      for (int k=0; k!=mergetiling.cells(*allmwire[j]).size();k++){
-	int index1 = mcimap[mergetiling.cells(*allmwire[j]).at(k)];
-	(*MA)(index,index1) = 1;
-      }
-      
-      //construct MB
-      for (int k=0;k!=((MergeGeomWire*)allmwire[j])->get_allwire().size();k++){
-	int index1 = swimap[((MergeGeomWire*)allmwire[j])->get_allwire().at(k)];
-	(*MB)(index,index1) = 1;
+      if (mwimap.find(allmwire[j])!=mwimap.end()){
+	int index = mwimap[allmwire[j]];
+	//construct MA
+	for (int k=0; k!=mergetiling.cells(*allmwire[j]).size();k++){
+	  int index1 = mcimap[mergetiling.cells(*allmwire[j]).at(k)];
+	  (*MA)(index,index1) = 1;
+	}
+	
+	//construct MB
+	for (int k=0;k!=((MergeGeomWire*)allmwire[j])->get_allwire().size();k++){
+	  int index1 = swimap[((MergeGeomWire*)allmwire[j])->get_allwire().at(k)];
+	  (*MB)(index,index1) = 1;
+	}
       }
     }
-    
     
     
     // // construct the rest of matrix
@@ -108,6 +111,9 @@ WireCell2dToy::ToyMatrix::~ToyMatrix(){
 int WireCell2dToy::ToyMatrix::Solve(){
   
   double det = MC->Determinant();
+
+  //  std::cout << det << std::endl;
+  
   if (fabs(det)>1e-5){
     *MC_inv = *MC;
     MC_inv->Invert();

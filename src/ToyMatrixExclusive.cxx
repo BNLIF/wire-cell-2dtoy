@@ -92,24 +92,33 @@ WireCell2dToy::ToyMatrixExclusive::ToyMatrixExclusive(WireCell2dToy::ToyMatrix &
   // Cx = new TVectorD(mcindex);
   // dCx = new TVectorD(mcindex);
   
-  //  std::cout << mwindex << std::endl;
+  std::cout << numz << " " << flag.size() << " " << mcindex-numz-1 << std::endl;
   ncount = 0;
   int flag1 = 1;
   int ncount1 = 0;
-  while( ncount1 < 100 && ncount <1e6){
-    if (ncount%100000==0) std::cout << ncount << std::endl;
-    for (int i=0;i!=flag.size();i++){
-      for (int j=0; j!=mcindex-numz-1; j++){
-	if (Solve(flag,toymatrix)==1 && chi2 < mwindex + 5*sqrt(mwindex)) flag1 = 0;
-	move(flag,i,mcindex);
   
+  int limit = TMath::Factorial(mcindex)/TMath::Factorial(numz)/TMath::Factorial(mcindex-numz);
+  
+  std::cout << limit << std::endl;
+
+  if (flag.size()!=0){
+
+    while( ncount1 < 100 && ncount <1e7 && ncount < 2*limit){
+      if (ncount%100000==0 && ncount !=0) std::cout << ncount << std::endl;
+      for (int i=0;i!=flag.size();i++){
+	for (int j=0; j!=mcindex-numz-1; j++){
+	  if (Solve(flag,toymatrix)==1 && chi2 < mwindex + 5*sqrt(mwindex)) flag1 = 0;
+	  move(flag,i,mcindex);
+	}
       }
+      if (flag1 == 0) ncount1 ++;
     }
-    if (flag1 == 0) ncount1 ++;
+    
+
+  }else{
+    
+    Solve(flag,toymatrix);
   }
-
-  //Solve(flag,toymatrix);
-
   
 }
 
@@ -170,13 +179,18 @@ int WireCell2dToy::ToyMatrixExclusive::Solve(std::vector<int>& flag, WireCell2dT
     
     
     
+    
+
     TVectorD sol = (*MB) * (*Wy) - (*MA) * (*Cxt);
+
+    //sol.Print();
+    
     TVectorD sol1 =  (*VBy_inv) * sol;
     chi2t = sol * (sol1)/1e6;
     
     for (int i=0;i!=mcindex-numz;i++){
       if ((*Cxt)[i] <0){
-	chi2t += 10*pow((*Cxt)[i]/(*dCxt)[i],2);
+	chi2t += pow((*Cxt)[i]/(*dCxt)[i],2);
       }
     }
 

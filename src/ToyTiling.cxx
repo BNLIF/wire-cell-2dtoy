@@ -11,10 +11,13 @@ WireCell2dToy::ToyTiling::ToyTiling()
 
 WireCell2dToy::ToyTiling::ToyTiling(const WireCell::Slice& slice,WireCellSst::GeomDataSource& gds){
   WireCell::Channel::Group group = slice.group();
+  //double sum = 0;
   for (int i=0;i!=group.size();i++){
     const WireCell::GeomWire *wire = gds.by_channel_segment(group.at(i).first,0);
-    float charge = group.at(i).second;
     
+    float charge = group.at(i).second;
+    // sum += charge;
+
     if (wirechargemap.find(wire) == wirechargemap.end()){
       //not found
       wirechargemap[wire] = charge;
@@ -159,6 +162,7 @@ WireCell2dToy::ToyTiling::ToyTiling(const WireCell::Slice& slice,WireCellSst::Ge
     }
   }
   
+  // std::cout << sum << std::endl;
   //std::cout << wire_u.size() << " " << wire_v.size() << " " << wire_w.size() << std::endl;
   
 }
