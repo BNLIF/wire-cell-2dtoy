@@ -119,6 +119,14 @@ int main(int argc, char* argv[])
     if ( slice.group().size() >0){
       toytiling[i] = new WireCell2dToy::ToyTiling(slice,gds);
       mergetiling[i] = new WireCell2dToy::MergeToyTiling(*toytiling[i],i);
+
+      GeomCellSelection allcell = toytiling[i]->get_allcell();
+      GeomWireSelection allwire = toytiling[i]->get_allwire();
+      GeomCellSelection allmcell = mergetiling[i]->get_allcell();
+      GeomWireSelection allmwire = mergetiling[i]->get_allwire();
+      
+      cout << i << " " << allmcell.size() << " " << allmwire.size() << endl;
+
       truthtiling[i] = new WireCell2dToy::TruthToyTiling(*toytiling[i],pvv,i,gds);
       toymatrix[i] = new WireCell2dToy::ToyMatrix(*toytiling[i],*mergetiling[i]);
       if (toymatrix[i]->Get_Solve_Flag()==0)
@@ -127,11 +135,9 @@ int main(int argc, char* argv[])
       
 
 
-      GeomCellSelection allcell = toytiling[i]->get_allcell();
-      GeomWireSelection allwire = toytiling[i]->get_allwire();
-      GeomCellSelection allmcell = mergetiling[i]->get_allcell();
-      GeomWireSelection allmwire = mergetiling[i]->get_allwire();
       
+
+
       GeomCellSelection calmcell;
       for (int j=0;j!=allmcell.size();j++){
 	MergeGeomCell *mcell = (MergeGeomCell*)allmcell[j];
@@ -372,7 +378,7 @@ int main(int argc, char* argv[])
 
     // GeomCellSelection allcell = toytiling.get_allcell();
     // GeomWireSelection allwire = toytiling.get_allwire();
-      cout << i << " " << allmcell.size() << " " << allmwire.size() << endl;
+      
     //
     //}
   

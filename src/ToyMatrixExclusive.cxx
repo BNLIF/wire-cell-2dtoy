@@ -96,7 +96,8 @@ WireCell2dToy::ToyMatrixExclusive::ToyMatrixExclusive(WireCell2dToy::ToyMatrix &
   ncount = 0;
   int flag1 = 1;
   int ncount1 = 0;
-  while( ncount1 < 100){
+  while( ncount1 < 100 && ncount <1e6){
+    if (ncount%100000==0) std::cout << ncount << std::endl;
     for (int i=0;i!=flag.size();i++){
       for (int j=0; j!=mcindex-numz-1; j++){
 	if (Solve(flag,toymatrix)==1 && chi2 < mwindex + 5*sqrt(mwindex)) flag1 = 0;
