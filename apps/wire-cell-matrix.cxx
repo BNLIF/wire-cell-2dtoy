@@ -6,6 +6,7 @@
 #include "WireCell2dToy/MergeToyTiling.h"
 #include "WireCell2dToy/TruthToyTiling.h"
 #include "WireCell2dToy/ToyMatrix.h"
+#include "WireCell2dToy/ToyMatrixExclusive.h"
 
 #include "WireCellData/MergeGeomCell.h"
 #include "WireCellData/MergeGeomWire.h"
@@ -97,6 +98,7 @@ int main(int argc, char* argv[])
   WireCell2dToy::MergeToyTiling **mergetiling = new WireCell2dToy::MergeToyTiling*[2400];
   WireCell2dToy::TruthToyTiling **truthtiling = new WireCell2dToy::TruthToyTiling*[2400];
   WireCell2dToy::ToyMatrix **toymatrix = new WireCell2dToy::ToyMatrix*[2400];
+  WireCell2dToy::ToyMatrixExclusive **toymatrix_ex = new WireCell2dToy::ToyMatrixExclusive*[2400];
   
   //add in cluster
   GeomClusterSet cluster_set, cluster_delset;
@@ -104,9 +106,9 @@ int main(int argc, char* argv[])
   int ncount_mcell = 0;
   
 
-  int i=360;{
-  //for (int i=0;i!=sds.size();i++){
-  // for (int i=365;i!=378;i++){
+  int i=454;{
+    //for (int i=0;i!=sds.size();i++){
+    // for (int i=365;i!=378;i++){
  
     sds.jump(i);
     WireCell::Slice slice = sds.get();
@@ -115,8 +117,12 @@ int main(int argc, char* argv[])
       mergetiling[i] = new WireCell2dToy::MergeToyTiling(*toytiling[i],i);
       truthtiling[i] = new WireCell2dToy::TruthToyTiling(*toytiling[i],pvv,i,gds);
       toymatrix[i] = new WireCell2dToy::ToyMatrix(*toytiling[i],*mergetiling[i]);
-
       
+      if (toymatrix[i]->Get_Solve_Flag()==0)
+       	toymatrix_ex[i] = new WireCell2dToy::ToyMatrixExclusive(*toymatrix[i]);
+      
+
+
       GeomCellSelection allcell = toytiling[i]->get_allcell();
       GeomWireSelection allwire = toytiling[i]->get_allwire();
       GeomCellSelection allmcell = mergetiling[i]->get_allcell();
@@ -151,11 +157,12 @@ int main(int argc, char* argv[])
       //loop through merged cell and compare with truth cells
       for (int j=0;j!=allmcell.size();j++){
       	MergeGeomCell *mcell = (MergeGeomCell*)allmcell[j];
-      	mcell->CheckContainTruthCell(ccmap);
+      	if (mcell->CheckContainTruthCell(ccmap)) 
+	  cout << "xin: " << toymatrix[i]->Get_mcindex(mcell) << endl;
       	//cout << mergetiling.wires(*allmcell[j]).size() << endl;
       }
       
-           WireChargeMap wcmap = toytiling[i]->wcmap();
+      WireChargeMap wcmap = toytiling[i]->wcmap();
 
 
 

@@ -19,6 +19,7 @@ namespace WireCell2dToy{
 
     double Get_Chi2(){return chi2;};
     float Get_Solve_Flag(){return solve_flag;};
+    int Get_mcindex(){return mcindex;};
 
     const TMatrixD* Get_MA(){return MA;};
     const TMatrixD* Get_MB(){return MB;};
@@ -33,7 +34,7 @@ namespace WireCell2dToy{
     const TMatrixD* Get_MC_inv(){return MC_inv;};
     
     double Get_Cell_Charge( const WireCell::GeomCell *cell, int flag = 1) ;
-    
+    int Get_mcindex(const WireCell::GeomCell *cell){ return mcimap[cell];};
 
   protected:
 

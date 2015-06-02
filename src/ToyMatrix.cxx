@@ -3,7 +3,7 @@
 using namespace WireCell;
 
 WireCell2dToy::ToyMatrix::ToyMatrix(WireCell2dToy::ToyTiling& toytiling, WireCell2dToy::MergeToyTiling& mergetiling){
-  solve_flag = 0;
+  solve_flag = -1;
   chi2 = -1;
   
   // build up index
@@ -84,6 +84,8 @@ WireCell2dToy::ToyMatrix::ToyMatrix(WireCell2dToy::ToyTiling& toytiling, WireCel
     VBy_inv->Invert();
     
     *MC = (*MAT) * (*VBy_inv) * (*MA);
+    solve_flag = 0;
+    Solve();
   }
   // MA->Print();
   // MAT->Print();
@@ -91,7 +93,7 @@ WireCell2dToy::ToyMatrix::ToyMatrix(WireCell2dToy::ToyTiling& toytiling, WireCel
   // MBT->Print();
   // Vy->Print();
 
-  Solve();
+  
 }
 
 WireCell2dToy::ToyMatrix::~ToyMatrix(){
@@ -104,33 +106,33 @@ WireCell2dToy::ToyMatrix::~ToyMatrix(){
 }
 
 int WireCell2dToy::ToyMatrix::Solve(){
-  if (mcindex >0){
-    Double_t det = MC->Determinant();
-    if (fabs(det)>1e-5){
-      *MC_inv = *MC;
-      MC_inv->Invert();
-      *Cx = (*MC_inv) * (*MAT) * (*VBy_inv) * (*MB) * (*Wy);
-
-      *Vx_inv = (*MAT) * (*VBy_inv) * (*MA);
-      *Vx = *Vx_inv;
-      Vx->Invert();
-
-      for (int i=0;i!=mcindex;i++){
-	(*dCx)[i] = sqrt( (*Vx)(i,i)) * 1000.;
-      }
-
-      TVectorD sol = (*MB) * (*Wy) - (*MA) * (*Cx);
-      TVectorD sol1 =  (*VBy_inv) * sol;
-      chi2 = sol * (sol1)/1e6;
-
-      //std::cout << chi2 << std::endl;
-      //      for (int i=0;i!=mcindex;i++){
-      //	std::cout << (*Cx)[i] << " " << (*dCx)[i]*1000. << std::endl;
-      //}
-
-      solve_flag = 1;
+  
+  Double_t det = MC->Determinant();
+  if (fabs(det)>1e-5){
+    *MC_inv = *MC;
+    MC_inv->Invert();
+    *Cx = (*MC_inv) * (*MAT) * (*VBy_inv) * (*MB) * (*Wy);
+    
+    *Vx_inv = (*MAT) * (*VBy_inv) * (*MA);
+    *Vx = *Vx_inv;
+    Vx->Invert();
+    
+    for (int i=0;i!=mcindex;i++){
+      (*dCx)[i] = sqrt( (*Vx)(i,i)) * 1000.;
     }
+    
+    TVectorD sol = (*MB) * (*Wy) - (*MA) * (*Cx);
+    TVectorD sol1 =  (*VBy_inv) * sol;
+    chi2 = sol * (sol1)/1e6;
+    
+    //std::cout << chi2 << std::endl;
+    //      for (int i=0;i!=mcindex;i++){
+    //	std::cout << (*Cx)[i] << " " << (*dCx)[i]*1000. << std::endl;
+    //}
+    
+    solve_flag = 1;
   }
+  
   return solve_flag;
 }
 
