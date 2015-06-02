@@ -20,6 +20,8 @@ namespace WireCell2dToy{
     double Get_Chi2(){return chi2;};
     float Get_Solve_Flag(){return solve_flag;};
     int Get_mcindex(){return mcindex;};
+    int Get_mwindex(){return mwindex;};
+    int Get_swindex(){return swindex;};
 
     const TMatrixD* Get_MA(){return MA;};
     const TMatrixD* Get_MB(){return MB;};
@@ -32,9 +34,14 @@ namespace WireCell2dToy{
     const TMatrixD* Get_Vx_inv(){return Vx_inv;};
     const TMatrixD* Get_MC(){return MC;};
     const TMatrixD* Get_MC_inv(){return MC_inv;};
+    const TVectorD* Get_Wy(){return Wy;};
     
     double Get_Cell_Charge( const WireCell::GeomCell *cell, int flag = 1) ;
     int Get_mcindex(const WireCell::GeomCell *cell){ return mcimap[cell];};
+
+    void Set_chi2(double chi2t){chi2 = chi2t;};
+    void Set_value(double value, int index){ (*Cx)[index] = value;};
+    void Set_error(double value, int index){ (*dCx)[index] = value;};
 
   protected:
 

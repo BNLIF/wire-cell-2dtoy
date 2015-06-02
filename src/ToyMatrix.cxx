@@ -107,7 +107,7 @@ WireCell2dToy::ToyMatrix::~ToyMatrix(){
 
 int WireCell2dToy::ToyMatrix::Solve(){
   
-  Double_t det = MC->Determinant();
+  double det = MC->Determinant();
   if (fabs(det)>1e-5){
     *MC_inv = *MC;
     MC_inv->Invert();
