@@ -97,13 +97,13 @@ WireCell2dToy::ToyMatrixExclusive::ToyMatrixExclusive(WireCell2dToy::ToyMatrix &
   int flag1 = 1;
   int ncount1 = 0;
   
-  int limit = TMath::Factorial(mcindex)/TMath::Factorial(numz)/TMath::Factorial(mcindex-numz);
+  double limit = TMath::Factorial(mcindex)/TMath::Factorial(numz)/TMath::Factorial(mcindex-numz);
   
   std::cout << limit << std::endl;
 
   if (flag.size()!=0){
 
-    while( ncount1 < 100 && ncount <1e7 && ncount < 2*limit){
+    while( ncount1 < 100 && ncount <1e7 && ncount < fabs(2*limit)){
       if (ncount%100000==0 && ncount !=0) std::cout << ncount << std::endl;
       for (int i=0;i!=flag.size();i++){
 	for (int j=0; j!=mcindex-numz-1; j++){
@@ -190,7 +190,7 @@ int WireCell2dToy::ToyMatrixExclusive::Solve(std::vector<int>& flag, WireCell2dT
     
     for (int i=0;i!=mcindex-numz;i++){
       if ((*Cxt)[i] <0){
-	chi2t += pow((*Cxt)[i]/(*dCxt)[i],2);
+	chi2t += 10*pow((*Cxt)[i]/(*dCxt)[i],2);
       }
     }
 

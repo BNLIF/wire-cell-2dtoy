@@ -168,10 +168,10 @@ int ToyEventDisplay::draw_truthcells(const WireCell::CellChargeMap& ccmap, TStri
   int i=0;
   for (auto it = ccmap.begin();it!=ccmap.end(); it++){
     WireCell::Point p = it->first->center();
-    // if (it->second > 2000){
+    if (it->second > 2000){
       g2->SetPoint(i,p.z/units::m,p.y/units::m);
       i++;
-      //}
+    }
   }
   g2->SetMarkerColor(8);
   g2->SetMarkerSize(0.8);
