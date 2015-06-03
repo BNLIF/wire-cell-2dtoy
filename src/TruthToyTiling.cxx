@@ -43,15 +43,15 @@ WireCell2dToy::TruthToyTiling::TruthToyTiling(WireCell2dToy::ToyTiling& tiling, 
 	  }
 	}else{
 	  // Point pp = cell->center();
-	  //gds.avoid_gap(p1);
+	  // gds.avoid_gap(p1);
 	  // std::cout << p.x << " " << p.y << " " << p.z << " " << std::endl;
-	  // std::cout << p1.x << " " << p1.y << " " << p1.z << " " << charge << std::endl;
+	  //std::cout << itruth << " " << p1.x << " " << p1.y << " " << p1.z << " " << charge << std::endl;
 	  // std::cout << charge << std::endl;
 	}
       }
     }
   }
   
-  std::cout << "Xin " << sum << std::endl;
+  //  std::cout << "Xin " << sum << std::endl;
 
 }
