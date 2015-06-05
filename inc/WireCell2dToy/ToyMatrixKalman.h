@@ -33,8 +33,8 @@ namespace WireCell2dToy {
     TMatrixDEigen *Eigen;
     TVectorD *EigenValue;
 
-    TMatrixD *MA, *MAT;
-    TMatrixD *MC, *MC_inv;
+    /* TMatrixD *MA, *MAT; */
+    /* TMatrixD *MC, *MC_inv; */
   };
 }
 #endif
