@@ -5,6 +5,7 @@ using namespace WireCell;
 #include "TMath.h"
 
 WireCell2dToy::ToyMatrixIterate::ToyMatrixIterate(WireCell2dToy::ToyMatrix &toymatrix){
+  prev_ncount = -1;
   ncount = 0;
   nlevel = 0;
   toymatrixkalman = new WireCell2dToy::ToyMatrixKalman(toymatrix);
@@ -26,11 +27,15 @@ void WireCell2dToy::ToyMatrixIterate::Iterate(WireCell2dToy::ToyMatrixKalman &to
 	std::vector<int> already_removed = toymatrix.Get_already_removed();
 	already_removed.push_back(i);
 	WireCell2dToy::ToyMatrixKalman *kalman = new ToyMatrixKalman(already_removed,toymatrix.Get_no_need_remove(),toymatrix1);
+	//move to "no need to remove"??
+	toymatrix.Get_no_need_remove().push_back(i);
 	//	std::cout << nlevel << std::endl;
 	//if (nlevel<5){
 	Iterate(*kalman,toymatrix1);
 	ncount += kalman->Get_ncount();
-	std::cout << ncount << std::endl;
+	if (ncount != prev_ncount)
+	  std::cout << ncount << std::endl;
+	prev_ncount = ncount;
 	nlevel --;
 	//}else{
 	//std::cout << nlevel << std::endl;

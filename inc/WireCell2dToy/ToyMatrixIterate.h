@@ -14,6 +14,7 @@ namespace WireCell2dToy {
   protected:
     void Iterate(WireCell2dToy::ToyMatrixKalman &toymatrixkalman,WireCell2dToy::ToyMatrix &toymatrix);
     int ncount;
+    int prev_ncount;
     int nlevel;
     WireCell2dToy::ToyMatrixKalman *toymatrixkalman;
  };
