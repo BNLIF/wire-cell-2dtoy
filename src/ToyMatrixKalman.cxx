@@ -87,51 +87,51 @@ void WireCell2dToy::ToyMatrixKalman::init(WireCell2dToy::ToyMatrix &toymatrix){
       }
     }
   }else{
-    *MC_inv = *MC;
-    MC_inv->Invert();
+    // *MC_inv = *MC;
+    // MC_inv->Invert();
     
-    const TMatrixD *MB = toymatrix.Get_MB();
-    const TVectorD *Wy = toymatrix.Get_Wy();
+    // const TMatrixD *MB = toymatrix.Get_MB();
+    // const TVectorD *Wy = toymatrix.Get_Wy();
     
-    TVectorD *Cxt = new TVectorD(mcindex-n_removed);
-    TVectorD *dCxt = new TVectorD(mcindex-n_removed);
-    TMatrixD *Vx = new TMatrixD(mcindex-n_removed,mcindex-n_removed);
-    TMatrixD *Vx_inv = new TMatrixD(mcindex-n_removed,mcindex-n_removed);
+    // TVectorD *Cxt = new TVectorD(mcindex-n_removed);
+    // TVectorD *dCxt = new TVectorD(mcindex-n_removed);
+    // TMatrixD *Vx = new TMatrixD(mcindex-n_removed,mcindex-n_removed);
+    // TMatrixD *Vx_inv = new TMatrixD(mcindex-n_removed,mcindex-n_removed);
 
-    *Cxt = (*MC_inv) * (*MAT) * (*VBy_inv) * (*MB) * (*Wy);
-    *Vx_inv = (*MAT) * (*VBy_inv) * (*MA);
-    *Vx = *Vx_inv;
-    Vx->Invert();
+    // *Cxt = (*MC_inv) * (*MAT) * (*VBy_inv) * (*MB) * (*Wy);
+    // *Vx_inv = (*MAT) * (*VBy_inv) * (*MA);
+    // *Vx = *Vx_inv;
+    // Vx->Invert();
     
-    for (int i=0;i!=mcindex-n_removed;i++){
-      (*dCxt)[i] = sqrt( (*Vx)(i,i)) * 1000.;
-    }
+    // for (int i=0;i!=mcindex-n_removed;i++){
+    //   (*dCxt)[i] = sqrt( (*Vx)(i,i)) * 1000.;
+    // }
 
-    TVectorD sol = (*MB) * (*Wy) - (*MA) * (*Cxt);
-    TVectorD sol1 =  (*VBy_inv) * sol;
-    double chi2 = sol * (sol1)/1e6;
+    // TVectorD sol = (*MB) * (*Wy) - (*MA) * (*Cxt);
+    // TVectorD sol1 =  (*VBy_inv) * sol;
+    // double chi2 = sol * (sol1)/1e6;
     
     
-    if (chi2 < toymatrix.Get_Chi2() || toymatrix.Get_Chi2()==-1){
-      //copy the Cx etc      
-      toymatrix.Set_chi2(chi2);
-      int index = 0;
-      for (int i=0;i!=mcindex;i++){
-    	auto it = find(already_removed.begin(),already_removed.end(),i);
-    	if (it==already_removed.end()){
-    	  toymatrix.Set_value((*Cxt)[index],i);
-    	  toymatrix.Set_error((*dCxt)[index],i);
-    	  index ++;
-    	}else{
-    	  toymatrix.Set_value(0,i);
-    	  toymatrix.Set_error(0,i);
-    	}
-      }
-    }
+    // if (chi2 < toymatrix.Get_Chi2() || toymatrix.Get_Chi2()==-1){
+    //   //copy the Cx etc      
+    //   toymatrix.Set_chi2(chi2);
+    //   int index = 0;
+    //   for (int i=0;i!=mcindex;i++){
+    // 	auto it = find(already_removed.begin(),already_removed.end(),i);
+    // 	if (it==already_removed.end()){
+    // 	  toymatrix.Set_value((*Cxt)[index],i);
+    // 	  toymatrix.Set_error((*dCxt)[index],i);
+    // 	  index ++;
+    // 	}else{
+    // 	  toymatrix.Set_value(0,i);
+    // 	  toymatrix.Set_error(0,i);
+    // 	}
+    //   }
+    // }
 
     //std::cout << ncount << " " << chi2 << " " << toymatrix.Get_Chi2() << std::endl;
     ncount ++;
-    delete dCxt, Cxt, Vx, Vx_inv;
+    // delete dCxt, Cxt, Vx, Vx_inv;
   }
   
 }
