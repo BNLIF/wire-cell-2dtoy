@@ -13,6 +13,9 @@ namespace WireCell2dToy {
 
     int Get_numz(){return numz;};
     int Get_ncount(){return ncount;};
+    std::vector<int>& Get_already_removed(){return already_removed;};
+    std::vector<int>& Get_no_need_remove(){return no_need_remove;};
+    int Get_mcindex(){return mcindex;};
 
   protected:
     void init(WireCell2dToy::ToyMatrix &toymatrix);

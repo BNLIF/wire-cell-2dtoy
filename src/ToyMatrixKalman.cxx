@@ -10,6 +10,7 @@ void WireCell2dToy::ToyMatrixKalman::init(WireCell2dToy::ToyMatrix &toymatrix){
   mwindex = toymatrix.Get_mwindex();
   swindex = toymatrix.Get_swindex();
 
+  //  std::cout << " Xin " << already_removed.size() << " " << no_need_remove.size() << std::endl;
   
   int n_removed = already_removed.size();
 
@@ -22,14 +23,14 @@ void WireCell2dToy::ToyMatrixKalman::init(WireCell2dToy::ToyMatrix &toymatrix){
   const TMatrixD *MA_big = toymatrix.Get_MA();
   const TMatrixD *VBy_inv = toymatrix.Get_VBy_inv();
 
-  int index = 0;
+  int index2 = 0;
   for (int i=0;i!=mcindex;i++){
-    auto it = find(already_removed.begin(),already_removed.end(),i);
-    if (it==already_removed.end()){
+    auto it1 = find(already_removed.begin(),already_removed.end(),i);
+    if (it1==already_removed.end()){
       for (int j=0;j!=mwindex;j++){
-	(*MA)(j,index) = (*MA_big)(j,i);
+	(*MA)(j,index2) = (*MA_big)(j,i);
       }
-      index ++;
+      index2 ++;
     }
   }
   MAT->Transpose(*MA);
@@ -38,28 +39,31 @@ void WireCell2dToy::ToyMatrixKalman::init(WireCell2dToy::ToyMatrix &toymatrix){
   Eigen = new TMatrixDEigen(*MC);
   EigenValue = new TVectorD(Eigen->GetEigenValuesRe());
     
-  for (int i=0;i!=mcindex;i++){
+  for (int i=0;i!=mcindex-n_removed;i++){
     if (fabs((*EigenValue)[i])<1e-5){
       numz ++;
     }
   }
+  //  std::cout << " Xin " << numz<< std::endl;
+
 
   if (numz!=0){
     for (int i=0;i!=mcindex;i++){ //loop all possibility
-      auto it = find(already_removed.begin(),already_removed.end(),i);
-      if (it==already_removed.end()){ // not in removed
+      auto it1 = find(already_removed.begin(),already_removed.end(),i);
+      auto it2 = find(no_need_remove.begin(),no_need_remove.end(),i);
+      if (it1==already_removed.end() && it2 == no_need_remove.end()){ // not in removed
 	TMatrixD *MA1 = new TMatrixD(mwindex,mcindex-n_removed-1);
 	TMatrixD *MA1T = new TMatrixD(mcindex-n_removed-1,mwindex);
 	TMatrixD *MC1 = new TMatrixD(mcindex-n_removed-1,mcindex-n_removed-1);
 	
-	index = 0;
+	int index1 = 0;
 	for (int k=0;k!=mcindex;k++){
-	  auto it = find(already_removed.begin(),already_removed.end(),k);
-	  if (it==already_removed.end() && k!=i){
+	  auto it1 = find(already_removed.begin(),already_removed.end(),k);
+	  if (it1==already_removed.end() && k!=i ){
 	    for (int j=0;j!=mwindex;j++){
-	      (*MA1)(j,index) = (*MA_big)(j,k);
+	      (*MA1)(j,index1) = (*MA_big)(j,k);
 	    }
-	    index ++;
+	    index1 ++;
 	  }
 	}
 	MA1T->Transpose(*MA1);
@@ -79,7 +83,7 @@ void WireCell2dToy::ToyMatrixKalman::init(WireCell2dToy::ToyMatrix &toymatrix){
 	if (numz == numz1) no_need_remove.push_back(i);
 	
 	delete MA1, MA1T, MC1;
-	// delete Eigen1, EigenValue1;
+	delete Eigen1, EigenValue1;
       }
     }
   }else{
@@ -99,7 +103,7 @@ void WireCell2dToy::ToyMatrixKalman::init(WireCell2dToy::ToyMatrix &toymatrix){
     *Vx = *Vx_inv;
     Vx->Invert();
     
-    for (int i=0;i!=mcindex-numz;i++){
+    for (int i=0;i!=mcindex-n_removed;i++){
       (*dCxt)[i] = sqrt( (*Vx)(i,i)) * 1000.;
     }
 
@@ -108,24 +112,24 @@ void WireCell2dToy::ToyMatrixKalman::init(WireCell2dToy::ToyMatrix &toymatrix){
     double chi2 = sol * (sol1)/1e6;
     
     
-    if (chi2 < toymatrix.Get_Chi2()){
+    if (chi2 < toymatrix.Get_Chi2() || toymatrix.Get_Chi2()==-1){
       //copy the Cx etc      
       toymatrix.Set_chi2(chi2);
-      index = 0;
+      int index = 0;
       for (int i=0;i!=mcindex;i++){
-	auto it = find(already_removed.begin(),already_removed.end(),i);
-	if (it==already_removed.end()){
-	  toymatrix.Set_value((*Cxt)[index],i);
-	  toymatrix.Set_error((*dCxt)[index],i);
-	  index ++;
-	}else{
-	  toymatrix.Set_value(0,i);
-	  toymatrix.Set_error(0,i);
-	}
+    	auto it = find(already_removed.begin(),already_removed.end(),i);
+    	if (it==already_removed.end()){
+    	  toymatrix.Set_value((*Cxt)[index],i);
+    	  toymatrix.Set_error((*dCxt)[index],i);
+    	  index ++;
+    	}else{
+    	  toymatrix.Set_value(0,i);
+    	  toymatrix.Set_error(0,i);
+    	}
       }
     }
 
-
+    //std::cout << ncount << " " << chi2 << " " << toymatrix.Get_Chi2() << std::endl;
     ncount ++;
     delete dCxt, Cxt, Vx, Vx_inv;
   }

@@ -8,6 +8,7 @@
 #include "WireCell2dToy/ToyMatrix.h"
 #include "WireCell2dToy/ToyMatrixExclusive.h"
 #include "WireCell2dToy/ToyMatrixKalman.h"
+#include "WireCell2dToy/ToyMatrixIterate.h"
 #include "WireCell2dToy/ToyMetric.h"
 
 #include "WireCellData/MergeGeomCell.h"
@@ -100,7 +101,7 @@ int main(int argc, char* argv[])
   WireCell2dToy::MergeToyTiling **mergetiling = new WireCell2dToy::MergeToyTiling*[2400];
   WireCell2dToy::TruthToyTiling **truthtiling = new WireCell2dToy::TruthToyTiling*[2400];
   WireCell2dToy::ToyMatrix **toymatrix = new WireCell2dToy::ToyMatrix*[2400];
-  WireCell2dToy::ToyMatrixKalman **toymatrix_kal = new WireCell2dToy::ToyMatrixKalman*[2400];
+  WireCell2dToy::ToyMatrixIterate **toymatrix_it = new WireCell2dToy::ToyMatrixIterate*[2400];
   
   WireCell2dToy::ToyMetric toymetric;
 
@@ -111,7 +112,8 @@ int main(int argc, char* argv[])
   int ncount_mcell = 0;
   
 
-  int i=454;{
+//int i=454;{
+  int i=329;{
   //int i=135;{
   //for (int i=0;i!=sds.size();i++){
     // for (int i=365;i!=378;i++){
@@ -132,7 +134,8 @@ int main(int argc, char* argv[])
       truthtiling[i] = new WireCell2dToy::TruthToyTiling(*toytiling[i],pvv,i,gds);
       toymatrix[i] = new WireCell2dToy::ToyMatrix(*toytiling[i],*mergetiling[i]);
       if (toymatrix[i]->Get_Solve_Flag()==0)
-	toymatrix_kal[i] = new WireCell2dToy::ToyMatrixKalman(*toymatrix[i]);
+	//	cout << i << endl;
+	toymatrix_it[i] = new WireCell2dToy::ToyMatrixIterate(*toymatrix[i]);
       
       
 
