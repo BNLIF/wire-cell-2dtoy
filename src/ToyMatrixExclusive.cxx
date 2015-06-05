@@ -103,7 +103,7 @@ WireCell2dToy::ToyMatrixExclusive::ToyMatrixExclusive(WireCell2dToy::ToyMatrix &
 
   if (flag.size()!=0){
 
-    while( ncount1 < 100 && ncount <1e7 && ncount < fabs(2*limit)){
+    while( ncount1 < 100 && ncount <1e6 && ncount < fabs(2*limit)){
       if (ncount%100000==0 && ncount !=0) std::cout << ncount << std::endl;
       for (int i=0;i!=flag.size();i++){
 	for (int j=0; j!=mcindex-numz-1; j++){
