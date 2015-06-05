@@ -26,22 +26,27 @@ void WireCell2dToy::ToyMatrixIterate::Iterate(WireCell2dToy::ToyMatrixKalman &to
       if (it1 == toymatrix.Get_already_removed().end() && it2 == toymatrix.Get_no_need_remove().end()){
 	std::vector<int> already_removed = toymatrix.Get_already_removed();
 	already_removed.push_back(i);
-	WireCell2dToy::ToyMatrixKalman *kalman = new ToyMatrixKalman(already_removed,toymatrix.Get_no_need_remove(),toymatrix1);
-	//move to "no need to remove"??
-	toymatrix.Get_no_need_remove().push_back(i);
+	WireCell2dToy::ToyMatrixKalman kalman(already_removed,toymatrix.Get_no_need_remove(),toymatrix1);
+
+	
+
 	//	std::cout << nlevel << std::endl;
 	//if (nlevel<5){
-	Iterate(*kalman,toymatrix1);
-	ncount += kalman->Get_ncount();
+	Iterate(kalman,toymatrix1);
+	//move to "no need to remove"??
+	toymatrix.Get_no_need_remove().push_back(i);
+
+	ncount += kalman.Get_ncount();
 	if (ncount != prev_ncount)
 	  std::cout << ncount << std::endl;
 	prev_ncount = ncount;
 	nlevel --;
+
 	//}else{
 	//std::cout << nlevel << std::endl;
 	//}
 	
-	delete kalman;
+	//	delete kalman;
       }
     }
     
