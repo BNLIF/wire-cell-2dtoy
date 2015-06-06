@@ -15,10 +15,12 @@ namespace WireCell2dToy{
     void Print();
     
   private:
-    int rm_cell_true;
-    int rm_cell_false;
-    int el_cell_true;
-    int el_cell_false;
+    int rm_cell_true;  float charge_rm_cell_true;
+    int rm_cell_false; float charge_rm_cell_false;
+    int el_cell_true;  float charge_el_cell_true;
+    int el_cell_false; float charge_el_cell_false;
+
+
     int threshold = 2000;
   };
 }

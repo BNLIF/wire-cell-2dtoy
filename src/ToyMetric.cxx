@@ -24,12 +24,16 @@ void WireCell2dToy::ToyMetric::Add(GeomCellSelection &allmcell,WireCell2dToy::To
     
     if (pass_threshold == true && contain_truth == true){
       rm_cell_true ++;
+      charge_rm_cell_true += mcell->GetTruthCharge();
     }else if (pass_threshold == true && contain_truth == false){
       rm_cell_false ++;
+      charge_rm_cell_false += charge;
     }else if (pass_threshold == false && contain_truth == true){
       el_cell_true ++ ;
+      charge_el_cell_true += mcell->GetTruthCharge();
     }else if (pass_threshold == false && contain_truth == false){
       el_cell_false ++;
+      charge_el_cell_false += charge;
     }
     
   }
@@ -37,8 +41,8 @@ void WireCell2dToy::ToyMetric::Add(GeomCellSelection &allmcell,WireCell2dToy::To
 }
 
 void WireCell2dToy::ToyMetric::Print(){
-  std::cout << "Remaining Cells Containing Truth     : " << rm_cell_true << std::endl;
-  std::cout << "Remaining Cells Not Containing Truth : " << rm_cell_false << std::endl;
-  std::cout << "Eliminated Cells Containing Truth    : " << el_cell_true << std::endl;
-  std::cout << "Eliminated Cells Not Containing Truth: " << el_cell_false << std::endl;
+  std::cout << "Remaining Cells Containing Truth     : " << rm_cell_true << " " << charge_rm_cell_true << std::endl;
+  std::cout << "Remaining Cells Not Containing Truth : " << rm_cell_false << " " << charge_rm_cell_false << std::endl;
+  std::cout << "Eliminated Cells Containing Truth    : " << el_cell_true << " " << charge_el_cell_true << std::endl;
+  std::cout << "Eliminated Cells Not Containing Truth: " << el_cell_false << " " << charge_el_cell_false << std::endl;
 }
