@@ -113,10 +113,17 @@ void WireCell2dToy::ToyMatrixKalman::init(WireCell2dToy::ToyMatrix& toymatrix){
     TVectorD sol1 =  (*VBy_inv) * sol;
     double chi2 = sol * (sol1)/1e6;
     
+    for (int i=0;i!=mcindex-already_removed.size();i++){
+      if (Cxt[i] <0){
+	chi2 += 10*pow(Cxt[i]/dCxt[i],2);
+      }
+    }
+
     
     if (chi2 < toymatrix.Get_Chi2() || toymatrix.Get_Chi2()==-1){
       //copy the Cx etc      
       toymatrix.Set_chi2(chi2);
+      toymatrix.Set_ndf(mwindex - (mcindex - already_removed.size()) );
       int index = 0;
       for (int i=0;i!=mcindex;i++){
     	auto it = find(already_removed.begin(),already_removed.end(),i);

@@ -198,6 +198,8 @@ int WireCell2dToy::ToyMatrixExclusive::Solve(std::vector<int>& flag, WireCell2dT
       //copy the Cx etc      
       chi2 = chi2t;
       toymatrix.Set_chi2(chi2);
+      toymatrix.Set_ndf(mwindex - (mcindex - flag.size()) );
+     
       index = 0;
       for (int i=0;i!=mcindex;i++){
 	auto it = find(flag.begin(),flag.end(),i);

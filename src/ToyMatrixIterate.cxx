@@ -12,7 +12,7 @@ WireCell2dToy::ToyMatrixIterate::ToyMatrixIterate(WireCell2dToy::ToyMatrix &toym
  
   toymatrixkalman = new WireCell2dToy::ToyMatrixKalman(toymatrix);
   
-  std::cout << toymatrixkalman->Get_numz() << std::endl;
+  std::cout << "Number of zeros: " << toymatrixkalman->Get_numz() << std::endl;
 
   Iterate(*toymatrixkalman,toymatrix);
 }
@@ -44,13 +44,13 @@ void WireCell2dToy::ToyMatrixIterate::Iterate(WireCell2dToy::ToyMatrixKalman &to
 	ncount += kalman.Get_ncount();
 
 
-	if (ncount != prev_ncount)
-	  std::cout << ncount << 
-	    " " << already_removed.at(0) << " " << already_removed.at(1) << " " << already_removed.at(2) << " " << already_removed.at(3) << " " << already_removed.at(4) << " " << already_removed.at(5) << 
-	    // " " << already_removed.at(6) << " " << already_removed.at(7) << " " << already_removed.at(8) << " " << already_removed.at(9) << " " << already_removed.at(10) << " " << already_removed.at(11) << 
-	    //" " << already_removed.at(12) << " " << already_removed.at(13) << " " << already_removed.at(14) << " " << already_removed.at(15) << " " << already_removed.at(16) << " " << already_removed.at(17) << 
-	    //" " << already_removed.at(18) << " " << already_removed.at(19) << " " << already_removed.at(20) << " " << already_removed.at(21) << " " << already_removed.at(22) << " " << already_removed.at(23) << 
-	    "  " <<  toymatrix.Get_no_need_remove().size() << std::endl;
+	// if (ncount != prev_ncount)
+	//   std::cout << ncount << 
+	//     " " << already_removed.at(0) << " " << already_removed.at(1) << " " << already_removed.at(2) << " " << already_removed.at(3) << " " << already_removed.at(4) << " " << already_removed.at(5) << 
+	//     // " " << already_removed.at(6) << " " << already_removed.at(7) << " " << already_removed.at(8) << " " << already_removed.at(9) << " " << already_removed.at(10) << " " << already_removed.at(11) << 
+	//     //" " << already_removed.at(12) << " " << already_removed.at(13) << " " << already_removed.at(14) << " " << already_removed.at(15) << " " << already_removed.at(16) << " " << already_removed.at(17) << 
+	//     //" " << already_removed.at(18) << " " << already_removed.at(19) << " " << already_removed.at(20) << " " << already_removed.at(21) << " " << already_removed.at(22) << " " << already_removed.at(23) << 
+	//     "  " <<  toymatrix.Get_no_need_remove().size() << std::endl;
 
 	prev_ncount = ncount;
 	nlevel --;

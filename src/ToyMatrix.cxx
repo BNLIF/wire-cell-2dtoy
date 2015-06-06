@@ -131,6 +131,8 @@ int WireCell2dToy::ToyMatrix::Solve(){
     TVectorD sol1 =  (*VBy_inv) * sol;
     chi2 = sol * (sol1)/1e6;
     
+    ndf = mwindex - mcindex;
+    
     //std::cout << chi2 << std::endl;
     //      for (int i=0;i!=mcindex;i++){
     //	std::cout << (*Cx)[i] << " " << (*dCx)[i]*1000. << std::endl;

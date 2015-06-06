@@ -42,6 +42,8 @@ namespace WireCell2dToy{
     void Set_chi2(double chi2t){chi2 = chi2t;};
     void Set_value(double value, int index){ (*Cx)[index] = value;};
     void Set_error(double value, int index){ (*dCx)[index] = value;};
+    void Set_ndf(double ndf1){ndf = ndf1;};
+    int Get_ndf(){return ndf;};
 
   protected:
 
@@ -54,6 +56,7 @@ namespace WireCell2dToy{
 
     TVectorD *Wy, *Cx, *dCx;
     double chi2;
+    int ndf;
     int solve_flag;
 
     void Buildup_index(WireCell2dToy::MergeToyTiling& mergetiling);
