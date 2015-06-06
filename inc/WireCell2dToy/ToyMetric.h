@@ -13,6 +13,7 @@ namespace WireCell2dToy{
 
     void Add(WireCell::GeomCellSelection &allmcell, WireCell2dToy::ToyMatrix& toymatrix, WireCell::CellChargeMap& ccmap);
     void Print();
+    void AddSolve(int cond);
     
   private:
     int rm_cell_true;  float charge_rm_cell_true;
@@ -20,6 +21,7 @@ namespace WireCell2dToy{
     int el_cell_true;  float charge_el_cell_true;
     int el_cell_false; float charge_el_cell_false;
 
+    int solve_condition[3];
 
     int threshold = 2000;
   };

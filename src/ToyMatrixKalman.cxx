@@ -124,6 +124,7 @@ void WireCell2dToy::ToyMatrixKalman::init(WireCell2dToy::ToyMatrix& toymatrix){
       //copy the Cx etc      
       toymatrix.Set_chi2(chi2);
       toymatrix.Set_ndf(mwindex - (mcindex - already_removed.size()) );
+      toymatrix.Set_Solve_Flag(2);
       int index = 0;
       for (int i=0;i!=mcindex;i++){
     	auto it = find(already_removed.begin(),already_removed.end(),i);

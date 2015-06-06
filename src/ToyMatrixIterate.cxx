@@ -10,11 +10,21 @@ WireCell2dToy::ToyMatrixIterate::ToyMatrixIterate(WireCell2dToy::ToyMatrix &toym
   nlevel = 0;
 
  
-  toymatrixkalman = new WireCell2dToy::ToyMatrixKalman(toymatrix);
-  
-  std::cout << "Number of zeros: " << toymatrixkalman->Get_numz() << std::endl;
+  toymatrixkalman = new WireCell2dToy::ToyMatrixKalman(toymatrix);  
+  //std::cout << "Number of zeros: " << toymatrixkalman->Get_numz() << std::endl;
 
-  Iterate(*toymatrixkalman,toymatrix);
+  estimated_loop = TMath::Factorial(toymatrix.Get_mcindex())/TMath::Factorial(toymatrix.Get_mcindex()-toymatrixkalman->Get_numz())/TMath::Factorial(toymatrixkalman->Get_numz())/25.;
+  std::cout << estimated_loop << std::endl;
+
+  if (estimated_loop < 1e6){
+    time_flag = 0;
+    Iterate(*toymatrixkalman,toymatrix);
+  }
+  //if not use time information ... 
+}
+
+void WireCell2dToy::ToyMatrixIterate::UseTime(WireCell2dToy::ToyMatrix &toybefore, WireCell2dToy::ToyMatrix &toyafter){
+  
 }
 
 

@@ -93,7 +93,7 @@ int main(int argc, char* argv[])
   WireCell::GenerativeFDS gfds(toydep,gds,2400,5);
   gfds.jump(1);
 
-  WireCellSst::ToyuBooNESliceDataSource sds(gfds,2000); //set threshold at 2000 electrons
+  WireCellSst::ToyuBooNESliceDataSource sds(gfds,1500); //set threshold at 2000 electrons
 
   
 
@@ -114,9 +114,9 @@ int main(int argc, char* argv[])
   int ncount_mcell = 0;
   
 
-  int i=178;{
+  //int i=178;{
   //int i=455;{
-  //int i=332;{
+  int i=352;{
   //for (int i=0;i!=sds.size();i++){
     //for (int i=365;i!=378;i++){
  
@@ -311,7 +311,7 @@ int main(int argc, char* argv[])
     
     
 
-    display.draw_slice(slice,"");
+    //display.draw_slice(slice,"");
     display.draw_cells(toytiling[i]->get_allcell(),"*same");
     display.draw_mergecells(mergetiling[i]->get_allcell(),"*same",1); //0 is normal, 1 is only draw the ones containt the truth cell
     display.draw_truthcells(ccmap,"*same");

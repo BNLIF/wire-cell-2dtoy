@@ -115,9 +115,10 @@ int main(int argc, char* argv[])
   //  int i=454;{ // 46, 26
   // int i=329;{  // 18, 6,
   // int i=344;{ // 29 14
-  int i=459;{ // 23, 8,   5e5 
-    //for (int i=0;i!=sds.size();i++){
-    // for (int i=365;i!=378;i++){
+  //int i=459;{ // 23, 8,   5e5 
+  //int i = 351;{
+  //for (int i=0;i!=sds.size();i++){
+  for (int i=348;i!=354;i++){
  
     sds.jump(i);
     WireCell::Slice slice = sds.get();
@@ -149,7 +150,7 @@ int main(int argc, char* argv[])
 	double charge = toymatrix[i]->Get_Cell_Charge(mcell,1);
 	double charge_err = toymatrix[i]->Get_Cell_Charge(mcell,2);
 	
-	cout << "Recon: " << j << " " << charge << " " << charge_err << endl;
+	//	cout << "Recon: " << j << " " << charge << " " << charge_err << endl;
 
 	if (charge + charge_err > 2000) calmcell.push_back(mcell);
       }
@@ -159,7 +160,11 @@ int main(int argc, char* argv[])
 
 
       CellChargeMap ccmap = truthtiling[i]->ccmap();
-      toymetric.Add(allmcell,*toymatrix[i],ccmap);
+      if (toymatrix[i]->Get_Solve_Flag()!=0)
+	toymetric.Add(allmcell,*toymatrix[i],ccmap);
+
+      toymetric.AddSolve(toymatrix[i]->Get_Solve_Flag());
+
       Double_t charge_min = 10000;
       Double_t charge_max = 0;
 
@@ -175,15 +180,15 @@ int main(int argc, char* argv[])
       	if (charge < charge_min) charge_min = charge;
        	// cout << it->second << endl;
       }
-      toymetric.Print();
       
-      //loop through merged cell and compare with truth cells
-      for (int j=0;j!=allmcell.size();j++){
-      	MergeGeomCell *mcell = (MergeGeomCell*)allmcell[j];
-      	if (mcell->CheckContainTruthCell(ccmap)) 
-      	  cout << "True: " << toymatrix[i]->Get_mcindex(mcell) << " " << mcell->GetTruthCharge()<< endl;
-      	//cout << mergetiling.wires(*allmcell[j]).size() << endl;
-      }
+      
+      // //loop through merged cell and compare with truth cells
+      // for (int j=0;j!=allmcell.size();j++){
+      // 	MergeGeomCell *mcell = (MergeGeomCell*)allmcell[j];
+      // 	if (mcell->CheckContainTruthCell(ccmap)) 
+      // 	  cout << "True: " << toymatrix[i]->Get_mcindex(mcell) << " " << mcell->GetTruthCharge()<< endl;
+      // 	//cout << mergetiling.wires(*allmcell[j]).size() << endl;
+      // }
       
       // WireChargeMap wcmap = toytiling[i]->wcmap();
 
@@ -191,52 +196,52 @@ int main(int argc, char* argv[])
 
 
       
-    TApplication theApp("theApp",&argc,argv);
-    theApp.SetReturnFromRun(true);
+    // TApplication theApp("theApp",&argc,argv);
+    // theApp.SetReturnFromRun(true);
     
-    TCanvas c1("ToyMC","ToyMC",800,600);
-    c1.Draw();
+    // TCanvas c1("ToyMC","ToyMC",800,600);
+    // c1.Draw();
     
-    WireCell2dToy::ToyEventDisplay display(c1, gds);
-    display.charge_min = charge_min;
-    display.charge_max = charge_max;
+    // WireCell2dToy::ToyEventDisplay display(c1, gds);
+    // display.charge_min = charge_min;
+    // display.charge_max = charge_max;
 
 
-    gStyle->SetOptStat(0);
+    // gStyle->SetOptStat(0);
     
-    const Int_t NRGBs = 5;
-    const Int_t NCont = 255;
-    Int_t MyPalette[NCont];
-    Double_t stops[NRGBs] = {0.0, 0.34, 0.61, 0.84, 1.0};
-    Double_t red[NRGBs] = {0.0, 0.0, 0.87 ,1.0, 0.51};
-    Double_t green[NRGBs] = {0.0, 0.81, 1.0, 0.2 ,0.0};
-    Double_t blue[NRGBs] = {0.51, 1.0, 0.12, 0.0, 0.0};
-    Int_t FI = TColor::CreateGradientColorTable(NRGBs, stops, red, green, blue, NCont);
-    gStyle->SetNumberContours(NCont);
-    for (int kk=0;kk!=NCont;kk++) MyPalette[kk] = FI+kk;
-    gStyle->SetPalette(NCont,MyPalette);
+    // const Int_t NRGBs = 5;
+    // const Int_t NCont = 255;
+    // Int_t MyPalette[NCont];
+    // Double_t stops[NRGBs] = {0.0, 0.34, 0.61, 0.84, 1.0};
+    // Double_t red[NRGBs] = {0.0, 0.0, 0.87 ,1.0, 0.51};
+    // Double_t green[NRGBs] = {0.0, 0.81, 1.0, 0.2 ,0.0};
+    // Double_t blue[NRGBs] = {0.51, 1.0, 0.12, 0.0, 0.0};
+    // Int_t FI = TColor::CreateGradientColorTable(NRGBs, stops, red, green, blue, NCont);
+    // gStyle->SetNumberContours(NCont);
+    // for (int kk=0;kk!=NCont;kk++) MyPalette[kk] = FI+kk;
+    // gStyle->SetPalette(NCont,MyPalette);
 
     
 
-    display.init(0,10.3698,-2.33/2.,2.33/2.);
-    //display.init(1.1,1.8,0.7,1.0);
+    // display.init(0,10.3698,-2.33/2.,2.33/2.);
+    // //display.init(1.1,1.8,0.7,1.0);
     
-    display.draw_mc(1,WireCell::PointValueVector(),"colz");
+    // display.draw_mc(1,WireCell::PointValueVector(),"colz");
     
     
 
-    // display.draw_slice(slice,"");
-    display.draw_cells(toytiling[i]->get_allcell(),"*same");
-    //display.draw_mergecells(mergetiling[i]->get_allcell(),"*same",1); //0 is normal, 1 is only draw the ones containt the truth cell
-    display.draw_mergecells(calmcell,"*same",0); //0 is normal, 1 is only draw the ones containt the truth cell
-    display.draw_truthcells(ccmap,"*same");
+    // // display.draw_slice(slice,""); // draw wire 
+    // display.draw_cells(toytiling[i]->get_allcell(),"*same");
+    // //display.draw_mergecells(mergetiling[i]->get_allcell(),"*same",1); //0 is normal, 1 is only draw the ones containt the truth cell
+    // display.draw_mergecells(calmcell,"*same",0); //0 is normal, 1 is only draw the ones containt the truth cell
+    // display.draw_truthcells(ccmap,"*same");
     
-    // display.draw_wires_charge(wcmap,"Fsame",FI);
-    // display.draw_cells_charge(toytiling.get_allcell(),"Fsame");
-    // display.draw_truthcells_charge(ccmap,"lFsame",FI);
+    // // display.draw_wires_charge(wcmap,"Fsame",FI);
+    // // display.draw_cells_charge(toytiling.get_allcell(),"Fsame");
+    // // display.draw_truthcells_charge(ccmap,"lFsame",FI);
     
     
-    theApp.Run();
+    // theApp.Run();
     }
   }
 
@@ -250,7 +255,7 @@ int main(int argc, char* argv[])
   // g->Write("shower3D");
   // gt->Write("shower3D_truth");
 
-  // toymetric.Print();
+  toymetric.Print();
 
   return 0;
   

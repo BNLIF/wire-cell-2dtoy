@@ -7,6 +7,20 @@ WireCell2dToy::ToyMetric::ToyMetric(){
   rm_cell_false = 0;
   el_cell_true = 0;
   el_cell_false = 0;
+
+  solve_condition[0] = 0;
+  solve_condition[1] = 0;
+  solve_condition[2] = 0;
+}
+
+void WireCell2dToy::ToyMetric::AddSolve(int cond){
+  if (cond ==0 ){
+    solve_condition[0] ++;
+  }else if (cond==1){
+    solve_condition[1] ++;
+  }else{
+    solve_condition[2]++;
+  }
 }
 
 WireCell2dToy::ToyMetric::~ToyMetric(){
@@ -45,4 +59,8 @@ void WireCell2dToy::ToyMetric::Print(){
   std::cout << "Remaining Cells Not Containing Truth : " << rm_cell_false << " " << charge_rm_cell_false << std::endl;
   std::cout << "Eliminated Cells Containing Truth    : " << el_cell_true << " " << charge_el_cell_true << std::endl;
   std::cout << "Eliminated Cells Not Containing Truth: " << el_cell_false << " " << charge_el_cell_false << std::endl;
+
+  std::cout << "Not       Solved Case: " << solve_condition[0] << std::endl;
+  std::cout << "Direct    Solved Case: " << solve_condition[1] << std::endl;
+  std::cout << "Iterative Solved Case: " << solve_condition[2] << std::endl;
 }

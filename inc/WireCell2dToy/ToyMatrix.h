@@ -43,8 +43,9 @@ namespace WireCell2dToy{
     void Set_value(double value, int index){ (*Cx)[index] = value;};
     void Set_error(double value, int index){ (*dCx)[index] = value;};
     void Set_ndf(double ndf1){ndf = ndf1;};
+    void Set_Solve_Flag(float solve_flag1){solve_flag=solve_flag1;};
     int Get_ndf(){return ndf;};
-
+    
   protected:
 
     int Solve();
