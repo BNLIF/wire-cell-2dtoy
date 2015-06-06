@@ -33,7 +33,7 @@ void WireCell2dToy::ToyMetric::Add(GeomCellSelection &allmcell,WireCell2dToy::To
     double charge_err = toymatrix.Get_Cell_Charge(mcell,2);
     bool pass_threshold = false;
     //std::cout << charge << " " << charge_err << std::endl;
-    if (charge + charge_err > threshold) pass_threshold = true;
+    if (charge  > threshold) pass_threshold = true;
     bool contain_truth = mcell->CheckContainTruthCell(ccmap);
     
     if (pass_threshold == true && contain_truth == true){
