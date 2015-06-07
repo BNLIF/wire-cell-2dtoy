@@ -8,7 +8,7 @@ namespace WireCell2dToy {
   class ToyMatrixKalman {
   public:
     ToyMatrixKalman(WireCell2dToy::ToyMatrix &toymatrix);
-    ToyMatrixKalman(std::vector<int>& already_removed1, std::vector<int>& no_need_remove1 ,WireCell2dToy::ToyMatrix &toymatrix);
+    ToyMatrixKalman(std::vector<int>& already_removed1, std::vector<int>& no_need_remove1 ,WireCell2dToy::ToyMatrix &toymatrix, int check);
     virtual ~ToyMatrixKalman();
 
     int Get_numz(){return numz;};
@@ -16,6 +16,7 @@ namespace WireCell2dToy {
     std::vector<int>& Get_already_removed(){return already_removed;};
     std::vector<int>& Get_no_need_remove(){return no_need_remove;};
     int Get_mcindex(){return mcindex;};
+    int Cal_numz(WireCell2dToy::ToyMatrix &toymatrix);
 
   protected:
     void init(WireCell2dToy::ToyMatrix &toymatrix);
@@ -32,6 +33,8 @@ namespace WireCell2dToy {
 
     TMatrixDEigen *Eigen;
     TVectorD *EigenValue;
+
+    int check_flag;
 
     /* TMatrixD *MA, *MAT; */
     /* TMatrixD *MC, *MC_inv; */

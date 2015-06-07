@@ -111,8 +111,14 @@ int main(int argc, char* argv[])
   
   int ncount_mcell = 0;
 
-  int start_num = 339;
-  int end_num = 342;
+  // int start_num = 0 ;
+  // int end_num = sds.size()-1;
+
+  int start_num = 385;
+  int end_num = 387;
+
+  // int start_num = 341;
+  // int end_num = 345;
 
   //  int i=454;{ // 46, 26
   // int i=329;{  // 18, 6,
@@ -124,7 +130,8 @@ int main(int argc, char* argv[])
  
     sds.jump(i);
     WireCell::Slice slice = sds.get();
-    if ( slice.group().size() >0){
+    //if ( slice.group().size() >0){
+      
       toytiling[i] = new WireCell2dToy::ToyTiling(slice,gds);
       mergetiling[i] = new WireCell2dToy::MergeToyTiling(*toytiling[i],i);
 
@@ -244,20 +251,23 @@ int main(int argc, char* argv[])
     
     
     // theApp.Run();
-    }
+      // }
   }
+
+  toymetric.Print();
+  std::cout << "Starting Time" << std::endl;
 
   if (start_num != end_num){
     int first_solve;
     for (int i=start_num; i!=end_num+1;i++){
       if (toymatrix[i]->Get_Solve_Flag()!=0){
-  	first_solve = i;
+	first_solve = i;
   	break;
       }
     }
   
 
-    for (int i=first_solve+1;i<end_num-1;i++){
+    for (int i=first_solve+1;i<=end_num-1;i++){
       if (toymatrix[i]->Get_Solve_Flag()==0){
   	toymatrix_it[i]->UseTime(*toymatrix[i-1],*toymatrix[i],*toymatrix[i+1],*mergetiling[i-1],*mergetiling[i],*mergetiling[i+1]);
 
@@ -267,7 +277,7 @@ int main(int argc, char* argv[])
   	  toymetric.Add(allmcell,*toymatrix[i],ccmap);
   	toymetric.AddSolve(toymatrix[i]->Get_Solve_Flag());
 
-	cout << "chi2: " << toymatrix[i]->Get_Chi2() << endl;
+	cout << "chi2: " << i << " " << toymatrix[i]->Get_Chi2() << endl;
 	cout << "NDF: " << toymatrix[i]->Get_ndf() << endl;
       }
     }
@@ -281,12 +291,12 @@ int main(int argc, char* argv[])
   	toymetric.Add(allmcell,*toymatrix[end_num],ccmap);
       toymetric.AddSolve(toymatrix[end_num]->Get_Solve_Flag());
 
-      cout << "chi2: " << toymatrix[end_num]->Get_Chi2() << endl;
+      cout << "chi2: " << end_num << " " << toymatrix[end_num]->Get_Chi2() << endl;
       cout << "NDF: " << toymatrix[end_num]->Get_ndf() << endl;
     }
       
     // go to early ones 
-     for (int i=first_solve-1;i>start_num+1;i--){
+     for (int i=first_solve-1;i>=start_num+1;i--){
       if (toymatrix[i]->Get_Solve_Flag()==0){
   	toymatrix_it[i]->UseTime(*toymatrix[i-1],*toymatrix[i],*toymatrix[i+1],*mergetiling[i-1],*mergetiling[i],*mergetiling[i+1]);
 
@@ -296,7 +306,7 @@ int main(int argc, char* argv[])
   	  toymetric.Add(allmcell,*toymatrix[i],ccmap);
   	toymetric.AddSolve(toymatrix[i]->Get_Solve_Flag());
 	
-	cout << "chi2: " << toymatrix[i]->Get_Chi2() << endl;
+	cout << "chi2: " << i << " " << toymatrix[i]->Get_Chi2() << endl;
 	cout << "NDF: " << toymatrix[i]->Get_ndf() << endl;
       }
     }
@@ -310,7 +320,7 @@ int main(int argc, char* argv[])
   	toymetric.Add(allmcell,*toymatrix[start_num],ccmap);
       toymetric.AddSolve(toymatrix[start_num]->Get_Solve_Flag());
 
-      cout << "chi2: " << toymatrix[start_num]->Get_Chi2() << endl;
+      cout << "chi2: " << start_num << " " << toymatrix[start_num]->Get_Chi2() << endl;
       cout << "NDF: " << toymatrix[start_num]->Get_ndf() << endl;
     }
     

@@ -2,6 +2,42 @@
 using namespace WireCell;
 
 #include "TMath.h"
+
+int WireCell2dToy::ToyMatrixKalman::Cal_numz(WireCell2dToy::ToyMatrix &toymatrix){
+  
+
+  TMatrixD MA2(mwindex,no_need_remove.size());
+  TMatrixD MA2T(no_need_remove.size(),mwindex);
+  TMatrixD MC2(no_need_remove.size(),no_need_remove.size());
+	    
+  const TMatrixD *MA_big = toymatrix.Get_MA();
+  const TMatrixD *VBy_inv = toymatrix.Get_VBy_inv();
+
+  int index2 = 0;
+  for (int k=0;k!=mcindex;k++){ //loop all possibility
+    auto it3 = find(no_need_remove.begin(),no_need_remove.end(),k);
+    if (it3 != no_need_remove.end()){ // not in removed
+      for (int j=0;j!=mwindex;j++){
+	MA2(j,index2) = (*MA_big)(j,k);
+      }
+      index2 ++;
+    }
+  }
+	    
+  MA2T.Transpose(MA2);
+  MC2 = (MA2T) * (*VBy_inv) * (MA2);
+  TMatrixDEigen Eigen2(MC2);
+  TVectorD EigenValue2(Eigen2.GetEigenValuesRe());
+	    
+  int numz2 = 0;
+  for (int k=0;k!=no_need_remove.size();k++){
+    if (fabs(EigenValue2[k])<1e-5){
+      numz2 ++;
+    }
+  }
+  return numz2;
+}
+
 void WireCell2dToy::ToyMatrixKalman::init(WireCell2dToy::ToyMatrix& toymatrix){
   ncount = 0;
   numz = 0;
@@ -73,19 +109,56 @@ void WireCell2dToy::ToyMatrixKalman::init(WireCell2dToy::ToyMatrix& toymatrix){
     	  }
     	}
      	MA1T.Transpose(MA1);
-	MC1 = (MA1T) * (*VBy_inv) * (MA1);
+    	MC1 = (MA1T) * (*VBy_inv) * (MA1);
 	
-	TMatrixDEigen Eigen1(MC1);
-	TVectorD EigenValue1(Eigen1.GetEigenValuesRe());
+    	TMatrixDEigen Eigen1(MC1);
+    	TVectorD EigenValue1(Eigen1.GetEigenValuesRe());
 	
-	int numz1 = 0;
-	for (int k=0;k!=mcindex-n_removed-1;k++){
-	  if (fabs(EigenValue1[k])<1e-5){
-	    numz1 ++;
+    	int numz1 = 0;
+    	for (int k=0;k!=mcindex-n_removed-1;k++){
+    	  if (fabs(EigenValue1[k])<1e-5){
+    	    numz1 ++;
+    	  }
+    	}
+	
+    	if (numz == numz1) {
+	  
+	  if (check_flag!=0){
+	  //   TMatrixD MA2(mwindex,no_need_remove.size()+1);
+	  //   TMatrixD MA2T(no_need_remove.size()+1,mwindex);
+	  //   TMatrixD MC2(no_need_remove.size()+1,no_need_remove.size()+1);
+	    
+	  //   int index2 = 0;
+	  //   for (int k=0;k!=mcindex;k++){ //loop all possibility
+	  //     auto it3 = find(no_need_remove.begin(),no_need_remove.end(),k);
+	  //     if (it3 != no_need_remove.end() || k==i){ // not in removed
+	  //   	for (int j=0;j!=mwindex;j++){
+	  //   	  MA2(j,index2) = (*MA_big)(j,k);
+	  //   	}
+	  //   	index2 ++;
+	  //     }
+	  //   }
+	    
+	  //   MA2T.Transpose(MA2);
+	  //   MC2 = (MA2T) * (*VBy_inv) * (MA2);
+	  //   TMatrixDEigen Eigen2(MC2);
+	  //   TVectorD EigenValue2(Eigen2.GetEigenValuesRe());
+	    
+	  //   int numz2 = 0;
+	  //   for (int k=0;k!=no_need_remove.size()+1;k++){
+	  //     if (fabs(EigenValue2[k])<1e-5){
+	  //   	numz2 ++;
+	  //     }
+	  //   }
+	  //   if (numz2==0){
+	    no_need_remove.push_back(i);
+	    // }else{
+	    // //   //std::cout << numz2 << std::endl;
+	    // }
+	  }else{
+	    no_need_remove.push_back(i);
 	  }
 	}
-	
-	if (numz == numz1) no_need_remove.push_back(i);
       }
     }
   }else{
@@ -145,6 +218,7 @@ void WireCell2dToy::ToyMatrixKalman::init(WireCell2dToy::ToyMatrix& toymatrix){
 }
 
 WireCell2dToy::ToyMatrixKalman::ToyMatrixKalman(WireCell2dToy::ToyMatrix& toymatrix){
+  check_flag = 0;
   init(toymatrix);
        
   //  std::cout << numz << std::endl;
@@ -152,9 +226,10 @@ WireCell2dToy::ToyMatrixKalman::ToyMatrixKalman(WireCell2dToy::ToyMatrix& toymat
 }
 
 
-WireCell2dToy::ToyMatrixKalman::ToyMatrixKalman(std::vector<int>& already_removed1, std::vector<int>& no_need_remove1, WireCell2dToy::ToyMatrix& toymatrix){
+WireCell2dToy::ToyMatrixKalman::ToyMatrixKalman(std::vector<int>& already_removed1, std::vector<int>& no_need_remove1, WireCell2dToy::ToyMatrix& toymatrix, int check){
   already_removed = already_removed1;
   no_need_remove = no_need_remove1;
+  check_flag = check;
   init(toymatrix);
        
   //  std::cout << numz << std::endl;

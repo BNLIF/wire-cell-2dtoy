@@ -44,6 +44,19 @@ WireCell2dToy::MergeToyTiling::MergeToyTiling(WireCell2dToy::ToyTiling& tiling, 
   
   while(further_merge(cell_all,tiling.get_ncell(),time_slice));
     
+  MergeGeomCellSet mset;
+  // rank the merged cell ... 
+  for (int i=0;i!=cell_all.size();i++){
+    MergeGeomCell *mcell = (MergeGeomCell*)cell_all[i];
+    mset.insert(mcell);
+  }
+  
+  cell_all.clear();
+  for (auto it = mset.begin();it!=mset.end();it++){
+    cell_all.push_back(*it);
+    //std::cout << (*it)->cross_section() << std::endl;
+  }
+
 
 
   // Now merge all the wires   wire_all

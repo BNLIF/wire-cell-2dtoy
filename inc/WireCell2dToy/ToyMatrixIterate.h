@@ -18,6 +18,8 @@ namespace WireCell2dToy {
     
   protected:
     void Iterate(WireCell2dToy::ToyMatrixKalman &toymatrixkalman,WireCell2dToy::ToyMatrix &toymatrix);
+    void Iterate_simple(WireCell2dToy::ToyMatrixKalman &toymatrixkalman,WireCell2dToy::ToyMatrix &toymatrix);
+    void Iterate_simple1(WireCell2dToy::ToyMatrixKalman &toymatrixkalman,WireCell2dToy::ToyMatrix &toymatrix);
     void find_subset(WireCell2dToy::ToyMatrixKalman &toymatrixkalman,WireCell2dToy::ToyMatrix &toymatrix,  std::vector<int>& vec);
     int ncount;
     int prev_ncount;
