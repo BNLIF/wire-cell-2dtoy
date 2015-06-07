@@ -90,10 +90,12 @@ int main(int argc, char* argv[])
 
   
 
-  const int N = 100000;
-  Double_t x[N],y[N],z[N];
-  Double_t xt[N],yt[N],zt[N];
+  // const int N = 100000;
+  // Double_t x[N],y[N],z[N];
+  // Double_t x1[N],y1[N],z1[N], charge_r1[N];
+  // Double_t xt[N],yt[N],zt[N], charge_t[N];
   int ncount = 0;
+  int ncount1 = 0;
   int ncount_t = 0;
   
 
@@ -111,11 +113,11 @@ int main(int argc, char* argv[])
   
   int ncount_mcell = 0;
 
-  // int start_num = 0 ;
-  // int end_num = sds.size()-1;
+  int start_num = 0 ;
+  int end_num = sds.size()-1;
 
-  int start_num = 385;
-  int end_num = 387;
+  // int start_num = 0;
+  // int end_num = 345;
 
   // int start_num = 341;
   // int end_num = 345;
@@ -177,18 +179,7 @@ int main(int argc, char* argv[])
       Double_t charge_min = 10000;
       Double_t charge_max = 0;
 
-      for (auto it = ccmap.begin();it!=ccmap.end(); it++){
-      	Point p = it->first->center();
-      	xt[ncount_t] = i*0.32;
-      	yt[ncount_t] = p.y/units::cm;
-      	zt[ncount_t] = p.z/units::cm;
-      	ncount_t ++;
-
-      	float charge = it->second;
-      	if (charge > charge_max) charge_max = charge;
-      	if (charge < charge_min) charge_min = charge;
-       	// cout << it->second << endl;
-      }
+     
       
       
       // //loop through merged cell and compare with truth cells
@@ -327,12 +318,108 @@ int main(int argc, char* argv[])
   }
 
 
+  TFile *file = new TFile("shower3D.root","RECREATE");
+  TTree *t_true = new TTree("T_true","T_true");
+  TTree *t_rec = new TTree("T_rec","T_rec");
+  TTree *t_rec_charge = new TTree("T_rec_charge","T_rec_charge");
+  
+  Double_t x_save, y_save, z_save;
+  Double_t charge_save;
+  Double_t chi2_save;
+  Double_t ndf_save;
+  Double_t ncell_save;
+
+  t_true->SetDirectory(file);
+  t_true->Branch("x",&x_save,"x/D");
+  t_true->Branch("y",&y_save,"y/D");
+  t_true->Branch("z",&z_save,"z/D");
+  t_true->Branch("q",&charge_save,"q/D");
+  
+  t_rec->SetDirectory(file);
+  t_rec->Branch("x",&x_save,"x/D");
+  t_rec->Branch("y",&y_save,"y/D");
+  t_rec->Branch("z",&z_save,"z/D");
+  
+  t_rec_charge->SetDirectory(file);
+  t_rec_charge->Branch("x",&x_save,"x/D");
+  t_rec_charge->Branch("y",&y_save,"y/D");
+  t_rec_charge->Branch("z",&z_save,"z/D");
+  t_rec_charge->Branch("q",&charge_save,"q/D");
+  t_rec_charge->Branch("ncell",&ncell_save,"ncell/D");
+  t_rec_charge->Branch("chi2",&chi2_save,"chi2/D");
+  t_rec_charge->Branch("ndf",&ndf_save,"ndf/D");
+
+  TGraph2D *g = new TGraph2D();
+  TGraph2D *gt = new TGraph2D();
+  TGraph2D *g_rec = new TGraph2D();
+
+
+  //save results 
+  for (int i=start_num;i!=end_num+1;i++){
+    //truth
+    CellChargeMap ccmap = truthtiling[i]->ccmap();
+    for (auto it = ccmap.begin();it!=ccmap.end(); it++){
+      Point p = it->first->center();
+      x_save = i*0.32;
+      y_save = p.y/units::cm;
+      z_save = p.z/units::cm;
+      charge_save = it->second;
+      
+      gt->SetPoint(ncount_t,x_save,y_save,z_save);
+      t_true->Fill();
+            
+      ncount_t ++;
+    }
+    
+    //recon 1
+    GeomCellSelection allcell = toytiling[i]->get_allcell();
+    for (int j=0;j!=allcell.size();j++){
+      Point p = allcell[j]->center();
+      x_save = i*0.32;
+      y_save = p.y/units::cm;
+      z_save = p.z/units::cm;
+      
+
+      g->SetPoint(ncount,x_save,y_save,z_save);
+      t_rec->Fill();
+
+      ncount ++;
+    }
+
+    //recon 2 with charge
+    GeomCellSelection allmcell = mergetiling[i]->get_allcell();
+    for (int j=0;j!=allmcell.size();j++){
+      MergeGeomCell *mcell = (MergeGeomCell*)allmcell[j];
+      double charge = toymatrix[i]->Get_Cell_Charge(mcell,1);
+      if (charge>2000){
+	//truth
+	for (int k=0;k!=mcell->get_allcell().size();k++){
+	  Point p = mcell->get_allcell().at(k)->center();
+	  x_save = i*0.32;
+	  y_save = p.y/units::cm;
+	  z_save = p.z/units::cm;
+	  charge_save = charge/mcell->get_allcell().size();
+	  ncell_save = mcell->get_allcell().size();
+	  chi2_save = toymatrix[i]->Get_Chi2();
+	  ndf_save = toymatrix[i]->Get_ndf();
+
+	  g_rec->SetPoint(ncount1,x_save,y_save,z_save);
+	  t_rec_charge->Fill();
+	  
+	  ncount1 ++;
+	}
+      }
+    }
+
+  }
  
-  // TGraph2D *g = new TGraph2D(ncount,x,y,z);
-  // TGraph2D *gt = new TGraph2D(ncount_t,xt,yt,zt);
-  // TFile *file = new TFile("shower3D.root","RECREATE");
-  // g->Write("shower3D");
-  // gt->Write("shower3D_truth");
+  
+
+  g->Write("shower3D");
+  gt->Write("shower3D_truth");
+  g_rec->Write("shower3D_charge");
+  file->Write();
+  file->Close();
 
   toymetric.Print();
 

@@ -246,7 +246,7 @@ void WireCell2dToy::ToyMatrixIterate::Iterate_simple(WireCell2dToy::ToyMatrixKal
 }
 
 void WireCell2dToy::ToyMatrixIterate::Iterate_simple1(WireCell2dToy::ToyMatrixKalman &toymatrix,WireCell2dToy::ToyMatrix &toymatrix1){
-  if (toymatrix.Get_numz()!=0&& toymatrix.Cal_numz(toymatrix1)==0&& (toymatrix1.Get_Chi2()<0 || toymatrix1.Get_Chi2()>3*toymatrix1.Get_ndf()) && ncount <2e5){
+  if (toymatrix.Get_numz()!=0&& toymatrix.Cal_numz(toymatrix1)==0&& (toymatrix1.Get_Chi2()<0 || toymatrix1.Get_Chi2()>3*toymatrix1.Get_ndf()) && ncount <1e5){
     for (int i=0;i!=toymatrix.Get_mcindex();i++){
       auto it1 = find(toymatrix.Get_already_removed().begin(),toymatrix.Get_already_removed().end(),i);
       auto it2 = find(toymatrix.Get_no_need_remove().begin(),toymatrix.Get_no_need_remove().end(),i);
