@@ -113,11 +113,11 @@ int main(int argc, char* argv[])
   
   int ncount_mcell = 0;
 
-  int start_num = 0 ;
-  int end_num = sds.size()-1;
+  // int start_num = 0 ;
+  // int end_num = sds.size()-1;
 
-  // int start_num = 0;
-  // int end_num = 345;
+  int start_num =426;
+  int end_num = sds.size()-1;
 
   // int start_num = 341;
   // int end_num = 345;
