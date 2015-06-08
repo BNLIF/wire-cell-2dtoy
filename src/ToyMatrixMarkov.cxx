@@ -15,17 +15,21 @@ WireCell2dToy::ToyMatrixMarkov::ToyMatrixMarkov(WireCell2dToy::ToyMatrix *toymat
   
   toymatrixkalman = new WireCell2dToy::ToyMatrixKalman(*toymatrix);  // hold the current results 
   
-  while (ncount < 5){
-    std::cout << ncount << " " << cur_chi2 << std::endl;
+  while (ncount < 1e4 
+	 && (cur_chi2 > 5*(cur_dof+0.1) || ncount < 6000) 
+	 && (cur_chi2 > 4*(cur_dof+0.1) || ncount < 3000) 
+	 && (cur_chi2 > 3*(cur_dof+0.1) || ncount < 1500) 
+	 && (cur_chi2 > 2*(cur_dof+0.1) || ncount < 800) 
+	 ){
+    if (ncount == 1 || (ncount % 1000 ==0&&ncount >0) )
+      std::cout << "MCMC: " << ncount << " " << cur_chi2 << " " << cur_dof << std::endl;
+    
     make_guess();
     next_chi2 = toymatrix->Get_Chi2();
     next_dof = toymatrix->Get_ndf();
-    if (next_chi2 < cur_chi2){
-      ncount ++;
-    }
   }
   
-  
+  //  std::cout << cur_chi2 << " " << ncount << std::endl;
   
 
   
@@ -37,6 +41,9 @@ WireCell2dToy::ToyMatrixMarkov::~ToyMatrixMarkov(){
 }
 
 void WireCell2dToy::ToyMatrixMarkov::make_guess(){
+  
+  ncount ++; 
+  
   if (first_flag ==0){
     Iterate(*toymatrixkalman);
     first_flag = 1;
@@ -44,6 +51,8 @@ void WireCell2dToy::ToyMatrixMarkov::make_guess(){
   //need to save the results???
   
   cur_chi2 = toymatrix->Get_Chi2();
+ 
+
   cur_dof = toymatrix->Get_ndf();
 
   toymatrix->Update_pred();
@@ -105,6 +114,8 @@ void WireCell2dToy::ToyMatrixMarkov::make_guess(){
     //   " " << cell_res.at(i) << " " << std::endl;
   }
 
+
+  cell_set.clear();
   //rank stuff ... 
   // first probability, second bias
   for (int i=0;i!= (*allmcell).size();i++){
@@ -114,6 +125,8 @@ void WireCell2dToy::ToyMatrixMarkov::make_guess(){
   
   CellRankSet xp,middle,bad_one;
   
+  
+
   
   toymatrixkalman->Get_no_need_remove().clear();
   toymatrixkalman->Get_already_removed().clear();

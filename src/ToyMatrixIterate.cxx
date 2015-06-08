@@ -109,7 +109,7 @@ void WireCell2dToy::ToyMatrixIterate::UseTime(WireCell2dToy::ToyMatrix &toybefor
   
  
 
-  if (toycur.Get_Chi2() > 3*toycur.Get_ndf()){
+  if (toycur.Get_Chi2() > 3*(toycur.Get_ndf()+0.1)){
     no_need_remove.clear();
     already_removed.clear();
     delete toymatrixkalman;
@@ -217,7 +217,7 @@ void WireCell2dToy::ToyMatrixIterate::Iterate_simple(WireCell2dToy::ToyMatrixKal
   int ncount_cut = 50000;
   
   //std::cout << "Simple " << nlevel << " " << ncount << std::endl;
-  if (toymatrix.Get_numz()!=0&& toymatrix.Cal_numz(toymatrix1)==0&& (ncount < ncount_cut&&(toymatrix1.Get_Chi2()<0 || toymatrix1.Get_Chi2()>1.5*toymatrix1.Get_ndf()))){
+  if (toymatrix.Get_numz()!=0&& toymatrix.Cal_numz(toymatrix1)==0&& (ncount < ncount_cut&&(toymatrix1.Get_Chi2()<0 || toymatrix1.Get_Chi2()>1.5*(toymatrix1.Get_ndf()+0.1)))){
     for (int i=0;i!=toymatrix.Get_mcindex();i++){
       auto it1 = find(toymatrix.Get_already_removed().begin(),toymatrix.Get_already_removed().end(),i);
       auto it2 = find(toymatrix.Get_no_need_remove().begin(),toymatrix.Get_no_need_remove().end(),i);
@@ -248,7 +248,7 @@ void WireCell2dToy::ToyMatrixIterate::Iterate_simple(WireCell2dToy::ToyMatrixKal
 	prev_ncount = ncount;
 	nlevel --;
 
-	if (!(ncount < ncount_cut &&(toymatrix1.Get_Chi2()<0 || toymatrix1.Get_Chi2()>1.5*toymatrix1.Get_ndf())&& toymatrix.Cal_numz(toymatrix1)==0)) 
+	if (!(ncount < ncount_cut &&(toymatrix1.Get_Chi2()<0 || toymatrix1.Get_Chi2()>1.5*(toymatrix1.Get_ndf()+0.1))&& toymatrix.Cal_numz(toymatrix1)==0)) 
 	  break;
 
       }
@@ -260,7 +260,7 @@ void WireCell2dToy::ToyMatrixIterate::Iterate_simple1(WireCell2dToy::ToyMatrixKa
   nlevel ++;
   int ncount_cut = 100000;
   //std::cout << "Simple1 " << nlevel << " " << ncount << std::endl;
-  if (toymatrix.Get_numz()!=0&& toymatrix.Cal_numz(toymatrix1)==0&& (toymatrix1.Get_Chi2()<0 || toymatrix1.Get_Chi2()>3*toymatrix1.Get_ndf()) && ncount < ncount_cut){
+  if (toymatrix.Get_numz()!=0&& toymatrix.Cal_numz(toymatrix1)==0&& (toymatrix1.Get_Chi2()<0 || toymatrix1.Get_Chi2()>3*(toymatrix1.Get_ndf()+0.1)) && ncount < ncount_cut){
     for (int i=0;i!=toymatrix.Get_mcindex();i++){
       auto it1 = find(toymatrix.Get_already_removed().begin(),toymatrix.Get_already_removed().end(),i);
       auto it2 = find(toymatrix.Get_no_need_remove().begin(),toymatrix.Get_no_need_remove().end(),i);
@@ -280,7 +280,7 @@ void WireCell2dToy::ToyMatrixIterate::Iterate_simple1(WireCell2dToy::ToyMatrixKa
 	prev_ncount = ncount;
 	nlevel --;
 
-	if (!((toymatrix1.Get_Chi2()<0 || toymatrix1.Get_Chi2()>3*toymatrix1.Get_ndf()) && ncount < ncount_cut&& toymatrix.Cal_numz(toymatrix1)==0))
+	if (!((toymatrix1.Get_Chi2()<0 || toymatrix1.Get_Chi2()>3*(toymatrix1.Get_ndf()+0.1)) && ncount < ncount_cut&& toymatrix.Cal_numz(toymatrix1)==0))
 	  break;
 
       }

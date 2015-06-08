@@ -11,6 +11,8 @@ WireCell2dToy::ToyMetric::ToyMetric(){
   solve_condition[0] = 0;
   solve_condition[1] = 0;
   solve_condition[2] = 0;
+
+  threshold = 2000;
 }
 
 void WireCell2dToy::ToyMetric::AddSolve(int cond){

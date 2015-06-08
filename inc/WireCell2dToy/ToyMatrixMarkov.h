@@ -54,11 +54,12 @@ namespace WireCell2dToy{
 
     std::vector<int>    next_cell_status; // to be predicted which one is off from beginning
    
-    double_t cur_chi2; //current chi2
-    double_t cur_dof;
+    double cur_chi2; //current chi2
+    double cur_chi2_save;
+    double cur_dof;
     
-    double_t next_chi2; // chi2 for the next cell
-    double_t next_dof;
+    double next_chi2; // chi2 for the next cell
+    double next_dof;
   };
 }
 

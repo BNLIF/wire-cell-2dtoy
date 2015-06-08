@@ -104,11 +104,11 @@ int main(int argc, char* argv[])
   
   int ncount_mcell = 0;
 
-  // int start_num = 0 ;
-  // int end_num = sds.size()-1;
+  int start_num = 0 ;
+  int end_num = sds.size()-1;
 
-  int start_num =350;
-  int end_num = 350;
+  // int start_num =418;
+  // int end_num = 418;
 
   //int i=454;{ // 46, 26
   for (int i=start_num;i!=end_num+1;i++){

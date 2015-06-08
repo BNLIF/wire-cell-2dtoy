@@ -23,7 +23,7 @@ namespace WireCell2dToy{
 
     int solve_condition[3];
 
-    int threshold = 2000;
+    int threshold;
   };
 }
 #endif
