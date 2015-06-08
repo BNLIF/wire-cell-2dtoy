@@ -151,23 +151,23 @@ int main(int argc, char* argv[])
     Double_t charge_min = 10000;
     Double_t charge_max = 0;
 
-    //Print Residual
-    for (int j=0;j!=allmcell.size();j++){
-      //add true charge 
-      MergeGeomCell *mcell = (MergeGeomCell*)allmcell[j];
-      mcell->CheckContainTruthCell(ccmap);
+    // //Print Residual
+    // for (int j=0;j!=allmcell.size();j++){
+    //   //add true charge 
+    //   MergeGeomCell *mcell = (MergeGeomCell*)allmcell[j];
+    //   mcell->CheckContainTruthCell(ccmap);
 
      
-      std::cout << toymatrix_markov[i]->Get_cur_cell_status().at(j) << " " 
-		<< toymatrix_markov[i]->Get_cur_cell_pol().at(j) << " " 
-		<< toymatrix_markov[i]->Get_cell_res().at(j) << " " 
-		<< toymatrix_markov[i]->Get_cell_charge().at(j) << " "
-		<< mcell->GetTruthCharge() << " ";
+    //   std::cout << toymatrix_markov[i]->Get_cur_cell_status().at(j) << " " 
+    // 		<< toymatrix_markov[i]->Get_cur_cell_pol().at(j) << " " 
+    // 		<< toymatrix_markov[i]->Get_cell_res().at(j) << " " 
+    // 		<< toymatrix_markov[i]->Get_cell_charge().at(j) << " "
+    // 		<< mcell->GetTruthCharge() << " ";
       
-      std::cout << toymatrix_markov[i]->Get_cell_charge().at(j)/toymatrix_markov[i]->Get_cell_res().at(j);
+    //   std::cout << toymatrix_markov[i]->Get_cell_charge().at(j)/toymatrix_markov[i]->Get_cell_res().at(j);
       
-      std::cout << std::endl;
-    }
+    //   std::cout << std::endl;
+    // }
     
           
     // //loop through merged cell and compare with truth cells
