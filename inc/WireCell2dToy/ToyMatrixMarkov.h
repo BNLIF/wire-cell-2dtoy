@@ -21,6 +21,9 @@ namespace WireCell2dToy{
   class ToyMatrixMarkov {
   public:
     ToyMatrixMarkov(WireCell2dToy::ToyMatrix *toymatrix1,WireCell::GeomCellSelection *allmcell1);
+    
+    ToyMatrixMarkov(WireCell2dToy::ToyMatrix &toybefore, WireCell2dToy::ToyMatrix &toycur, WireCell2dToy::ToyMatrix &toyafter, WireCell2dToy::MergeToyTiling &mergebefore, WireCell2dToy::MergeToyTiling &mergecur, WireCell2dToy::MergeToyTiling &mergeafter, WireCell::GeomCellSelection *allmcell1);
+
     virtual ~ToyMatrixMarkov();
 
     std::vector<int>& Get_cur_cell_status(){ return cur_cell_status;};
@@ -31,6 +34,7 @@ namespace WireCell2dToy{
     
 
   protected:
+    void find_subset(WireCell2dToy::ToyMatrixKalman &toymatrix,WireCell2dToy::ToyMatrix &toymatrix1, std::vector<int>& vec);
     void make_guess();
     void Iterate(WireCell2dToy::ToyMatrixKalman &toykalman);
     
@@ -43,6 +47,9 @@ namespace WireCell2dToy{
 
     //store the MC information
     int mcindex;
+
+    std::vector<int> use_time; //to be added
+
     
     std::vector<int>    cur_cell_status; // which one is off from beginning
     std::vector<int>    cur_cell_index;
