@@ -115,14 +115,14 @@ int main(int argc, char* argv[])
   
   int ncount_mcell = 0;
 
-  int start_num = 0 ;
-  int end_num = sds.size()-1;
+  // int start_num = 0 ;
+  // int end_num = sds.size()-1;
 
   // int start_num =0;
   // int end_num = sds.size()-1;
 
-  // int start_num = 462;
-  // int end_num = 465;
+  int start_num = 462;
+  int end_num = 465;
 
   //  int i=454;{ // 46, 26
   // int i=329;{  // 18, 6,
@@ -415,6 +415,12 @@ int main(int argc, char* argv[])
 	}
       }
     }
+
+    //save all results
+    // file->Write(Form("toytiling_%d",i),toytiling[i]);
+    // file->Write(Form("mergetiling_%d",i),mergetiling[i]);
+    // file->Write(Form("truthtiling_%d",i),truthtiling[i]);
+    // file->Write(Form("toymatrix_%d",i),toymatrix[i]);
 
   }
  
