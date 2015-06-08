@@ -104,49 +104,53 @@ WireCell2dToy::ToyTiling::ToyTiling(const WireCell::Slice& slice,WireCellSst::Ge
 	  
 	  //order all the points by phi angle
 	  GeomCell *cell = new GeomCell(ncell,pcell);
-	  
-	  //std::cout << i << " " << j << " " << k << " " << pcell.size() << " " << cell->center().z/units::m << " " << cell->center().y/units::m << std::endl;
-
-	  // fill cellmap
-	  GeomWireSelection wiresel;
-	  wiresel.push_back(wire_u[i]);
-	  wiresel.push_back(wire_v[j]);
-	  wiresel.push_back(wire_w[k]);	
-	  cellmap[cell]=wiresel;
-	  
-	  //fill wiremap
-	  if (wiremap.find(wire_u[i]) == wiremap.end()){
-	    //not found
-	    GeomCellSelection cellsel;
-	    cellsel.push_back(cell);
-	    wiremap[wire_u[i]]=cellsel;
+	  Point cell_center = cell->center();
+	  if (gds.contained_yz(cell_center)){
+	    //std::cout << i << " " << j << " " << k << " " << pcell.size() << " " << cell->center().z/units::m << " " << cell->center().y/units::m << std::endl;
+	    
+	    // fill cellmap
+	    GeomWireSelection wiresel;
+	    wiresel.push_back(wire_u[i]);
+	    wiresel.push_back(wire_v[j]);
+	    wiresel.push_back(wire_w[k]);	
+	    cellmap[cell]=wiresel;
+	    
+	    //fill wiremap
+	    if (wiremap.find(wire_u[i]) == wiremap.end()){
+	      //not found
+	      GeomCellSelection cellsel;
+	      cellsel.push_back(cell);
+	      wiremap[wire_u[i]]=cellsel;
+	    }else{
+	      //found
+	      wiremap[wire_u[i]].push_back(cell);
+	    }
+	    
+	    if (wiremap.find(wire_v[j]) == wiremap.end()){
+	      //not found
+	      GeomCellSelection cellsel;
+	      cellsel.push_back(cell);
+	      wiremap[wire_v[j]]=cellsel;
+	    }else{
+	      //found
+	      wiremap[wire_v[j]].push_back(cell);
+	    }
+	    
+	    if (wiremap.find(wire_w[k]) == wiremap.end()){
+	      //not found
+	      GeomCellSelection cellsel;
+	      cellsel.push_back(cell);
+	      wiremap[wire_w[k]]=cellsel;
+	    }else{
+	      //found
+	      wiremap[wire_w[k]].push_back(cell);
+	    }
+	    
+	    cell_all.push_back(cell);
+	    ncell++;
 	  }else{
-	    //found
-	    wiremap[wire_u[i]].push_back(cell);
+	    delete cell;
 	  }
-	  
-	  if (wiremap.find(wire_v[j]) == wiremap.end()){
-	    //not found
-	    GeomCellSelection cellsel;
-	    cellsel.push_back(cell);
-	    wiremap[wire_v[j]]=cellsel;
-	  }else{
-	    //found
-	    wiremap[wire_v[j]].push_back(cell);
-	  }
-	  
-	  if (wiremap.find(wire_w[k]) == wiremap.end()){
-	    //not found
-	    GeomCellSelection cellsel;
-	    cellsel.push_back(cell);
-	    wiremap[wire_w[k]]=cellsel;
-	  }else{
-	    //found
-	    wiremap[wire_w[k]].push_back(cell);
-	  }
-	  
-	  cell_all.push_back(cell);
-	  ncell++;
 	}
       }
       

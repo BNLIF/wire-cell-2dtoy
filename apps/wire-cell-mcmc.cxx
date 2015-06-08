@@ -157,12 +157,16 @@ int main(int argc, char* argv[])
       MergeGeomCell *mcell = (MergeGeomCell*)allmcell[j];
       mcell->CheckContainTruthCell(ccmap);
 
+     
       std::cout << toymatrix_markov[i]->Get_cur_cell_status().at(j) << " " 
 		<< toymatrix_markov[i]->Get_cur_cell_pol().at(j) << " " 
 		<< toymatrix_markov[i]->Get_cell_res().at(j) << " " 
 		<< toymatrix_markov[i]->Get_cell_charge().at(j) << " "
-		<< mcell->GetTruthCharge() << " "
-		<< std::endl;
+		<< mcell->GetTruthCharge() << " ";
+      
+      std::cout << toymatrix_markov[i]->Get_cell_charge().at(j)/toymatrix_markov[i]->Get_cell_res().at(j);
+      
+      std::cout << std::endl;
     }
     
           
