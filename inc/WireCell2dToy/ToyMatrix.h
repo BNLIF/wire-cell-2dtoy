@@ -38,6 +38,7 @@ namespace WireCell2dToy{
     
     double Get_Cell_Charge( const WireCell::GeomCell *cell, int flag = 1) ;
     int Get_mcindex(const WireCell::GeomCell *cell){ return mcimap[cell];};
+    double Get_residual(const WireCell::GeomCell *cell);
 
     void Set_chi2(double chi2t){chi2 = chi2t;};
     void Set_value(double value, int index){ (*Cx)[index] = value;};
@@ -45,6 +46,8 @@ namespace WireCell2dToy{
     void Set_ndf(double ndf1){ndf = ndf1;};
     void Set_Solve_Flag(float solve_flag1){solve_flag=solve_flag1;};
     int Get_ndf(){return ndf;};
+    
+    void Update_pred();
     
   protected:
 
@@ -56,6 +59,9 @@ namespace WireCell2dToy{
     TMatrixD *MC, *MC_inv;
 
     TVectorD *Wy, *Cx, *dCx;
+    
+    TVectorD *MWy_pred, *MWy;
+
     double chi2;
     int ndf;
     int solve_flag;

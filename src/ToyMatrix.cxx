@@ -28,6 +28,10 @@ WireCell2dToy::ToyMatrix::ToyMatrix(WireCell2dToy::ToyTiling& toytiling, WireCel
     
     //Construct Vector
     Wy = new TVectorD(swindex);
+    
+    MWy = new TVectorD(mwindex);
+    MWy_pred = new TVectorD(mwindex);
+
     Cx = new TVectorD(mcindex);
     dCx = new TVectorD(mcindex);
     
@@ -99,6 +103,22 @@ WireCell2dToy::ToyMatrix::ToyMatrix(WireCell2dToy::ToyTiling& toytiling, WireCel
   
 }
 
+void WireCell2dToy::ToyMatrix::Update_pred(){
+  *MWy = (*MB) * (*Wy);
+  *MWy_pred = (*MA) * (*Cx);
+}
+
+double WireCell2dToy::ToyMatrix::Get_residual(const WireCell::GeomCell *cell){
+  double res=0;
+  int index = mcimap[cell];
+
+  for (int i=0;i!=mwindex;i++){
+    res += (*MA)(i,index) * fabs((*MWy)[i] - (*MWy_pred)[i]);
+  }
+  
+  return res;
+}
+
 WireCell2dToy::ToyMatrix::~ToyMatrix(){
   
   
@@ -106,6 +126,7 @@ WireCell2dToy::ToyMatrix::~ToyMatrix(){
   delete Vy, VBy, Vx, VBy_inv, Vx_inv;
   delete MC, MC_inv;
   delete Wy, Cx, dCx;
+  delete MWy_pred, MWy;
 }
 
 int WireCell2dToy::ToyMatrix::Solve(){

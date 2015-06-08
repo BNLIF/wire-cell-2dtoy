@@ -129,7 +129,7 @@ int main(int argc, char* argv[])
     truthtiling[i] = new WireCell2dToy::TruthToyTiling(*toytiling[i],pvv,i,gds);
     toymatrix[i] = new WireCell2dToy::ToyMatrix(*toytiling[i],*mergetiling[i]);
     if (toymatrix[i]->Get_Solve_Flag()==0)
-      toymatrix_markov[i] = new WireCell2dToy::ToyMatrixMarkov(toymatrix[i]);
+      toymatrix_markov[i] = new WireCell2dToy::ToyMatrixMarkov(toymatrix[i],&allmcell);
       
     cout << "chi2: " << toymatrix[i]->Get_Chi2() << endl;
     cout << "NDF: " << toymatrix[i]->Get_ndf() << endl;
@@ -150,6 +150,21 @@ int main(int argc, char* argv[])
     
     Double_t charge_min = 10000;
     Double_t charge_max = 0;
+
+    //Print Residual
+    for (int j=0;j!=allmcell.size();j++){
+      //add true charge 
+      MergeGeomCell *mcell = (MergeGeomCell*)allmcell[j];
+      mcell->CheckContainTruthCell(ccmap);
+
+      std::cout << toymatrix_markov[i]->Get_cur_cell_status().at(j) << " " 
+		<< toymatrix_markov[i]->Get_cur_cell_pol().at(j) << " " 
+		<< toymatrix_markov[i]->Get_cell_res().at(j) << " " 
+		<< toymatrix_markov[i]->Get_cell_charge().at(j) << " "
+		<< mcell->GetTruthCharge() << " "
+		<< std::endl;
+    }
+    
           
     // //loop through merged cell and compare with truth cells
     // for (int j=0;j!=allmcell.size();j++){
