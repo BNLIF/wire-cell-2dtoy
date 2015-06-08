@@ -116,7 +116,7 @@ int main(int argc, char* argv[])
   // int start_num = 0 ;
   // int end_num = sds.size()-1;
 
-  int start_num =426;
+  int start_num =0;
   int end_num = sds.size()-1;
 
   // int start_num = 341;

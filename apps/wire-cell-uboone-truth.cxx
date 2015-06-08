@@ -61,34 +61,9 @@ int main(int argc, char* argv[])
   
 
   
- 
-
-  // WireCell::SimDataSource* sim = dynamic_cast<WireCell::SimDataSource*>(fds);
-  // if (!sim) {
-  //   cerr << "ERROR: the FDS is not also an SimDS " << endl;
-  //   return 2;
-  // }
-  // fds->jump(1);
-  // WireCell::SimTruthSelection sts = sim->truth();
-  // cerr << "Got " << sts.size() << " true hits" << endl;
-  // for (size_t itruth = 0; itruth < sts.size(); ++itruth) {
-  //   const WireCell::SimTruth* st = sts[itruth];
-  //   cerr << "Hit: "
-  // 	 << " @ (" << st->x() << " " << st->y() << " " << st->z() << ")"
-  // 	 << " q=" << st->charge()
-  // 	 << " tdc=" << st->tdc()
-  // 	 << endl;
-  // }
-  // cout << units::cm << endl;
-
-
   WireCell::ToyDepositor toydep(fds);
   const PointValueVector pvv = toydep.depositions(1);
   
-  // for (int itruth = 0; itruth < pvv.size(); ++itruth){
-  //   cout << pvv[itruth].first.x << " " << pvv[itruth].first.y << " " << pvv[itruth].first.z << " " << pvv[itruth].second << endl;
-  // }
-
 
   WireCell::GenerativeFDS gfds(toydep,gds,2400,5);
   gfds.jump(1);
@@ -116,8 +91,8 @@ int main(int argc, char* argv[])
 
   //int i=178;{
   //int i=455;{
-  int i=351;{
-  //for (int i=0;i!=sds.size();i++){
+  //int i=441;{
+  for (int i=0;i!=sds.size();i++){
     //for (int i=365;i!=378;i++){
  
     sds.jump(i);
@@ -133,76 +108,76 @@ int main(int argc, char* argv[])
       
      
       if (cluster_set.empty()){
-	// if cluster is empty, just insert all the mcell, each as a cluster
+  	// if cluster is empty, just insert all the mcell, each as a cluster
        	for (int j=0;j!=allmcell.size();j++){
-	  GeomCluster *cluster = new GeomCluster(*((MergeGeomCell*)allmcell[j]));
-	  cluster_set.insert(cluster);
-	}
+  	  GeomCluster *cluster = new GeomCluster(*((MergeGeomCell*)allmcell[j]));
+  	  cluster_set.insert(cluster);
+  	}
       }else{
-	for (int j=0;j!=allmcell.size();j++){
-	  int flag = 0;
-	  int flag_save = 0;
-	  GeomCluster *cluster_save = 0;
+  	for (int j=0;j!=allmcell.size();j++){
+  	  int flag = 0;
+  	  int flag_save = 0;
+  	  GeomCluster *cluster_save = 0;
 	  
-	  cluster_delset.clear();
+  	  cluster_delset.clear();
 
-	  // for (auto it = cluster_set.begin();it!=cluster_set.end();it++){
-	  //   if (i==318)
-	  //     cout << "b " << (*it)->get_allcell().size() << endl;
-	  // } 
+  	  // for (auto it = cluster_set.begin();it!=cluster_set.end();it++){
+  	  //   if (i==318)
+  	  //     cout << "b " << (*it)->get_allcell().size() << endl;
+  	  // } 
 	  
 
-	  // loop through merged cell
-	  for (auto it = cluster_set.begin();it!=cluster_set.end();it++){
-	    //loop through clusters
+  	  // loop through merged cell
+  	  for (auto it = cluster_set.begin();it!=cluster_set.end();it++){
+  	    //loop through clusters
 	   
-	    flag += (*it)->AddCell(*((MergeGeomCell*)allmcell[j]));
-	    if (flag==1 && flag != flag_save){
-	      cluster_save = *it;
-	    }else if (flag>1 && flag != flag_save){
-	      cluster_save->MergeCluster(*(*it));
-	      cluster_delset.insert(*it);
-	    }
-	    flag_save = flag;
-	    // if (i==318)
-	    //   cout << "c " << flag << endl;
-	  }
+  	    flag += (*it)->AddCell(*((MergeGeomCell*)allmcell[j]));
+  	    if (flag==1 && flag != flag_save){
+  	      cluster_save = *it;
+  	    }else if (flag>1 && flag != flag_save){
+  	      cluster_save->MergeCluster(*(*it));
+  	      cluster_delset.insert(*it);
+  	    }
+  	    flag_save = flag;
+  	    // if (i==318)
+  	    //   cout << "c " << flag << endl;
+  	  }
 
-	  for (auto it = cluster_delset.begin();it!=cluster_delset.end();it++){
-	    cluster_set.erase(*it);
-	    delete (*it);
-	  }
+  	  for (auto it = cluster_delset.begin();it!=cluster_delset.end();it++){
+  	    cluster_set.erase(*it);
+  	    delete (*it);
+  	  }
 	  
 	  
 
-	  // if (i==318)
-	  //   cout << j << " " << flag << endl;
-	  if (flag==0){
-	    GeomCluster *cluster = new GeomCluster(*((MergeGeomCell*)allmcell[j]));
-	    cluster_set.insert(cluster);
-	  }
+  	  // if (i==318)
+  	  //   cout << j << " " << flag << endl;
+  	  if (flag==0){
+  	    GeomCluster *cluster = new GeomCluster(*((MergeGeomCell*)allmcell[j]));
+  	    cluster_set.insert(cluster);
+  	  }
 
-	  // for (auto it = cluster_set.begin();it!=cluster_set.end();it++){
-	  //   if (i==318)
-	  //     cout << (*it)->get_allcell().size() << endl;
-	  // }
+  	  // for (auto it = cluster_set.begin();it!=cluster_set.end();it++){
+  	  //   if (i==318)
+  	  //     cout << (*it)->get_allcell().size() << endl;
+  	  // }
 	  
-	}
+  	}
       }
       
 
       for (int j=0;j!=allcell.size();j++){
-	Point p = allcell[j]->center();
-	x[ncount] = i*0.32;
-	y[ncount] = p.y/units::cm;
-	z[ncount] = p.z/units::cm;
-	ncount ++;
+  	Point p = allcell[j]->center();
+  	x[ncount] = i*0.32;
+  	y[ncount] = p.y/units::cm;
+  	z[ncount] = p.z/units::cm;
+  	ncount ++;
       }
 
 
       int ncount_mcell_cluster = 0;
       for (auto it = cluster_set.begin();it!=cluster_set.end();it++){
-	ncount_mcell_cluster += (*it)->get_allcell().size();
+  	ncount_mcell_cluster += (*it)->get_allcell().size();
       }
       ncount_mcell += allmcell.size();
       cout << i << " " << allmcell.size() << " " << allmwire.size() << " " << cluster_set.size()  << endl;
@@ -219,24 +194,24 @@ int main(int argc, char* argv[])
       Double_t charge_max = 0;
 
       for (auto it = ccmap.begin();it!=ccmap.end(); it++){
-	Point p = it->first->center();
+  	Point p = it->first->center();
       	xt[ncount_t] = i*0.32;
       	yt[ncount_t] = p.y/units::cm;
       	zt[ncount_t] = p.z/units::cm;
       	ncount_t ++;
 
-	float charge = it->second;
-	if (charge > charge_max) charge_max = charge;
-	if (charge < charge_min) charge_min = charge;
+  	float charge = it->second;
+  	if (charge > charge_max) charge_max = charge;
+  	if (charge < charge_min) charge_min = charge;
        	// cout << it->second << endl;
       }
 
 
       //loop through merged cell and compare with truth cells
       for (int j=0;j!=allmcell.size();j++){
-	MergeGeomCell *mcell = (MergeGeomCell*)allmcell[j];
-	mcell->CheckContainTruthCell(ccmap);
-	// 	cout << mergetiling.wires(*allmcell[j]).size() << endl;
+  	MergeGeomCell *mcell = (MergeGeomCell*)allmcell[j];
+  	mcell->CheckContainTruthCell(ccmap);
+  	// 	cout << mergetiling.wires(*allmcell[j]).size() << endl;
       }
 
 
@@ -277,51 +252,51 @@ int main(int argc, char* argv[])
   // //  
 
       
-    TApplication theApp("theApp",&argc,argv);
-    theApp.SetReturnFromRun(true);
+    // TApplication theApp("theApp",&argc,argv);
+    // theApp.SetReturnFromRun(true);
     
-    TCanvas c1("ToyMC","ToyMC",800,600);
-    c1.Draw();
+    // TCanvas c1("ToyMC","ToyMC",800,600);
+    // c1.Draw();
     
-    WireCell2dToy::ToyEventDisplay display(c1, gds);
-    display.charge_min = charge_min;
-    display.charge_max = charge_max;
+    // WireCell2dToy::ToyEventDisplay display(c1, gds);
+    // display.charge_min = charge_min;
+    // display.charge_max = charge_max;
 
 
-    gStyle->SetOptStat(0);
+    // gStyle->SetOptStat(0);
     
-    const Int_t NRGBs = 5;
-    const Int_t NCont = 255;
-    Int_t MyPalette[NCont];
-    Double_t stops[NRGBs] = {0.0, 0.34, 0.61, 0.84, 1.0};
-    Double_t red[NRGBs] = {0.0, 0.0, 0.87 ,1.0, 0.51};
-    Double_t green[NRGBs] = {0.0, 0.81, 1.0, 0.2 ,0.0};
-    Double_t blue[NRGBs] = {0.51, 1.0, 0.12, 0.0, 0.0};
-    Int_t FI = TColor::CreateGradientColorTable(NRGBs, stops, red, green, blue, NCont);
-    gStyle->SetNumberContours(NCont);
-    for (int kk=0;kk!=NCont;kk++) MyPalette[kk] = FI+kk;
-    gStyle->SetPalette(NCont,MyPalette);
+    // const Int_t NRGBs = 5;
+    // const Int_t NCont = 255;
+    // Int_t MyPalette[NCont];
+    // Double_t stops[NRGBs] = {0.0, 0.34, 0.61, 0.84, 1.0};
+    // Double_t red[NRGBs] = {0.0, 0.0, 0.87 ,1.0, 0.51};
+    // Double_t green[NRGBs] = {0.0, 0.81, 1.0, 0.2 ,0.0};
+    // Double_t blue[NRGBs] = {0.51, 1.0, 0.12, 0.0, 0.0};
+    // Int_t FI = TColor::CreateGradientColorTable(NRGBs, stops, red, green, blue, NCont);
+    // gStyle->SetNumberContours(NCont);
+    // for (int kk=0;kk!=NCont;kk++) MyPalette[kk] = FI+kk;
+    // gStyle->SetPalette(NCont,MyPalette);
 
     
 
-    display.init(0,10.3698,-2.33/2.,2.33/2.);
-    //display.init(1.1,1.8,0.7,1.0);
+    // display.init(0,10.3698,-2.33/2.,2.33/2.);
+    // //display.init(1.1,1.8,0.7,1.0);
     
-    display.draw_mc(1,WireCell::PointValueVector(),"colz");
+    // display.draw_mc(1,WireCell::PointValueVector(),"colz");
     
     
 
-    //display.draw_slice(slice,"");
-    display.draw_cells(toytiling[i]->get_allcell(),"*same");
-    display.draw_mergecells(mergetiling[i]->get_allcell(),"*same",1); //0 is normal, 1 is only draw the ones containt the truth cell
-    display.draw_truthcells(ccmap,"*same");
+    // //display.draw_slice(slice,"");
+    // display.draw_cells(toytiling[i]->get_allcell(),"*same");
+    // display.draw_mergecells(mergetiling[i]->get_allcell(),"*same",1); //0 is normal, 1 is only draw the ones containt the truth cell
+    // display.draw_truthcells(ccmap,"*same");
     
-    // display.draw_wires_charge(wcmap,"Fsame",FI);
-    // display.draw_cells_charge(toytiling.get_allcell(),"Fsame");
-    // display.draw_truthcells_charge(ccmap,"lFsame",FI);
+    // // display.draw_wires_charge(wcmap,"Fsame",FI);
+    // // display.draw_cells_charge(toytiling.get_allcell(),"Fsame");
+    // // display.draw_truthcells_charge(ccmap,"lFsame",FI);
     
     
-    theApp.Run();
+    // theApp.Run();
     }
   }
 
