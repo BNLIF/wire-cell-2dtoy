@@ -71,9 +71,10 @@ void WireCell2dToy::ToyMatrixIterate::UseTime(WireCell2dToy::ToyMatrix &toybefor
   }
   no_need_remove.clear();
   
+
+  
   delete toymatrixkalman;
   toymatrixkalman = new WireCell2dToy::ToyMatrixKalman(already_removed, no_need_remove, toycur,1);
-  
   std::cout << "With Time: " << toymatrixkalman->Get_numz() << " " << allmcell_c.size() << " " <<  already_removed.size() << std::endl;
   // Find a sub-set that is not degenerated
   // put things into no_need_remove
@@ -86,9 +87,10 @@ void WireCell2dToy::ToyMatrixIterate::UseTime(WireCell2dToy::ToyMatrix &toybefor
   delete toymatrixkalman;
   toymatrixkalman = new WireCell2dToy::ToyMatrixKalman(already_removed, no_need_remove, toycur,1);
   toycur.Set_Solve_Flag(0);
+  toycur.Set_chi2(-1);
+
   //std::cout << "With Time: " << toymatrixkalman->Get_numz() << std::endl;
   
-
   
   estimated_loop = TMath::Factorial(toycur.Get_mcindex()-no_need_remove.size())/TMath::Factorial(toycur.Get_mcindex()-no_need_remove.size()-toymatrixkalman->Get_numz())/TMath::Factorial(toymatrixkalman->Get_numz())/5;
   std::cout << "With Time: " << estimated_loop << " " << toycur.Get_mcindex() << " " << no_need_remove.size() << " " << toymatrixkalman->Get_numz() <<std::endl;
@@ -96,7 +98,9 @@ void WireCell2dToy::ToyMatrixIterate::UseTime(WireCell2dToy::ToyMatrix &toybefor
   
   if (estimated_loop < 1e6){
     time_flag = 1;
+    // std::cout << toycur.Get_Solve_Flag() << " " << toycur.Get_Chi2() << " " << toycur.Get_ndf() << std::endl;
     Iterate(*toymatrixkalman,toycur);
+    //std::cout << toycur.Get_Solve_Flag() << " " << toycur.Get_Chi2() << " " << toycur.Get_ndf() << std::endl;
   }else{
     time_flag = 0;
     //start with the smallest area? need a reasonable chi-square, and a limit of iterations

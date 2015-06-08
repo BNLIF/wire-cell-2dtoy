@@ -119,8 +119,8 @@ int main(int argc, char* argv[])
   int start_num =0;
   int end_num = sds.size()-1;
 
-  // int start_num = 341;
-  // int end_num = 345;
+  // int start_num = 462;
+  // int end_num = 465;
 
   //  int i=454;{ // 46, 26
   // int i=329;{  // 18, 6,
@@ -270,6 +270,8 @@ int main(int argc, char* argv[])
 
 	cout << "chi2: " << i << " " << toymatrix[i]->Get_Chi2() << endl;
 	cout << "NDF: " << toymatrix[i]->Get_ndf() << endl;
+
+	//toymetric.Print();
       }
     }
      
