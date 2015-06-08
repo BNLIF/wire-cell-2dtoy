@@ -2,7 +2,7 @@
 
 using namespace WireCell;
 #include "TMath.h"
-
+#include "TRandom.h"
 
 
 
@@ -14,7 +14,19 @@ WireCell2dToy::ToyMatrixMarkov::ToyMatrixMarkov(WireCell2dToy::ToyMatrix *toymat
   mcindex = toymatrix->Get_mcindex();
   
   toymatrixkalman = new WireCell2dToy::ToyMatrixKalman(*toymatrix);  // hold the current results 
-  make_guess();
+  
+  while (ncount < 5){
+    std::cout << ncount << " " << cur_chi2 << std::endl;
+    make_guess();
+    next_chi2 = toymatrix->Get_Chi2();
+    next_dof = toymatrix->Get_ndf();
+    if (next_chi2 < cur_chi2){
+      ncount ++;
+    }
+  }
+  
+  
+  
 
   
 
@@ -76,17 +88,17 @@ void WireCell2dToy::ToyMatrixMarkov::make_guess(){
       }
       
       if (ratio > 10.){
-	cell_prob.push_back(0.9); 
+	cell_prob.push_back(0.8); 
       }else if (ratio <=10 && ratio>=-10.){
-	cell_prob.push_back(0.7);
+	cell_prob.push_back(0.6);
       }else{
-	cell_prob.push_back(0.05);
+	cell_prob.push_back(0.2);
       }
     }else{
       if (cell_res.at(i) > 1000){
-	cell_prob.push_back(0.5);
+	cell_prob.push_back(0.6);
       }else{
-	cell_prob.push_back(0.1);
+	cell_prob.push_back(0.4);
       }
     }
     //   std::cout << cur_cell_status.at(i) << " " << cur_cell_pol.at(i) <<
@@ -96,14 +108,89 @@ void WireCell2dToy::ToyMatrixMarkov::make_guess(){
   //rank stuff ... 
   // first probability, second bias
   for (int i=0;i!= (*allmcell).size();i++){
-    CellRankPair a(i,cell_prob.at(i)+cell_res.at(i)/max_res/10.);
+    CellRankPair a(i,cell_prob.at(i)+gRandom->Uniform(0,1)/100.);
     cell_set.insert(a);
   }
-
-  // for (auto it= cell_set.begin(); it!=cell_set.end();it++){
-  //   std::cout << (*it).first << " " << (*it).second << std::endl;
-  // }
   
+  CellRankSet xp,middle,bad_one;
+  
+  
+  toymatrixkalman->Get_no_need_remove().clear();
+  toymatrixkalman->Get_already_removed().clear();
+  
+  //fill three cases
+  for (auto it= cell_set.begin(); it!=cell_set.end();it++){
+    //std::cout << (*it).first << " " << (*it).second << std::endl;
+    int index = (*it).first ;
+    double score = (*it).second;
+    CellRankPair a(index,score);
+    double r = gRandom->Uniform(0,1);
+    if (r < cell_prob.at(index)){ 
+      // start to insert
+      if (xp.size()==0){
+	
+	xp.insert(a);
+	toymatrixkalman->Get_no_need_remove().push_back(index);
+      }else{
+	//first push in and judge 
+	toymatrixkalman->Get_no_need_remove().push_back(index);
+	if (toymatrixkalman->Cal_numz(*toymatrix)==0){
+	  xp.insert(a);
+	}else{
+	  bad_one.insert(a);
+	  toymatrixkalman->Get_no_need_remove().pop_back();
+	}
+      }
+    }else{
+      middle.insert(a);
+    } 
+  }
+
+  //std::cout << xp.size() << " " << middle.size() << " " << bad_one.size() << std::endl;
+
+  while (middle.size()!=0){
+    std::vector<int> del_list;
+    for (auto it = middle.begin();it!=middle.end();it++){
+      double r = gRandom->Uniform(0,1);
+      int index = (*it).first ;
+      double score = (*it).second;
+      CellRankPair a(index,score);
+      
+      if (r < cell_prob.at(index)){ 
+	del_list.push_back(index);
+	//  	middle.erase(it);
+	toymatrixkalman->Get_no_need_remove().push_back(index);
+	if (toymatrixkalman->Cal_numz(*toymatrix)==0){
+	  xp.insert(a);
+	}else{
+	  bad_one.insert(a);
+	  toymatrixkalman->Get_no_need_remove().pop_back();
+	}
+      }
+    }
+    
+    for (int i = 0; i!=del_list.size();i++){
+      for (auto it = middle.begin();it!=middle.end();it++){
+	if ((*it).first == del_list.at(i)){
+	  middle.erase(it);
+	  break;
+	}
+      }
+    }
+    
+  }
+
+  //std::cout << xp.size() << " " << middle.size() << " " << bad_one.size() << std::endl;
+ 
+  for (int i=0;i!=mcindex;i++){
+    auto it = find(toymatrixkalman->Get_no_need_remove().begin(),toymatrixkalman->Get_no_need_remove().end(),i);
+    if (it==toymatrixkalman->Get_no_need_remove().end())
+      toymatrixkalman->Get_already_removed().push_back(i);
+  }
+  toymatrixkalman->Get_no_need_remove().clear();
+  
+  toymatrixkalman->init(*toymatrix);
+  //std::cout << toymatrixkalman->Get_already_removed().size() << std::endl;
 }
 
 void WireCell2dToy::ToyMatrixMarkov::Iterate(WireCell2dToy::ToyMatrixKalman &toykalman){

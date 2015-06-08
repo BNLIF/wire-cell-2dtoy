@@ -17,9 +17,10 @@ namespace WireCell2dToy {
     std::vector<int>& Get_no_need_remove(){return no_need_remove;};
     int Get_mcindex(){return mcindex;};
     int Cal_numz(WireCell2dToy::ToyMatrix &toymatrix);
-
-  protected:
     void init(WireCell2dToy::ToyMatrix &toymatrix);
+    
+  protected:
+    
     
     std::vector<int> already_removed;
     std::vector<int> no_need_remove;

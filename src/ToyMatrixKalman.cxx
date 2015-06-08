@@ -46,7 +46,7 @@ void WireCell2dToy::ToyMatrixKalman::init(WireCell2dToy::ToyMatrix& toymatrix){
   mwindex = toymatrix.Get_mwindex();
   swindex = toymatrix.Get_swindex();
 
-  //  std::cout << " Xin " << already_removed.size() << " " << no_need_remove.size() << std::endl;
+  //std::cout << " Xin " << already_removed.size() << " " << no_need_remove.size() << std::endl;
   
   int n_removed = already_removed.size();
 
@@ -192,7 +192,12 @@ void WireCell2dToy::ToyMatrixKalman::init(WireCell2dToy::ToyMatrix& toymatrix){
       }
     }
 
-    
+    std::cout << numz << " " << chi2 << " ";
+    for (int i=0;i!=already_removed.size();i++){
+      std::cout << already_removed.at(i) << " ";
+    }
+    std::cout << std::endl;
+
     if (chi2 < toymatrix.Get_Chi2() || toymatrix.Get_Chi2()==-1){
       //copy the Cx etc      
       toymatrix.Set_chi2(chi2);
