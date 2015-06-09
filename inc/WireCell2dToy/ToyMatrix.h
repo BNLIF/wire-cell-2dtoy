@@ -13,7 +13,8 @@ namespace WireCell2dToy{
   class ToyMatrix {
   public:
     ToyMatrix(WireCell2dToy::ToyTiling& toytiling, WireCell2dToy::MergeToyTiling& mergetiling);
-    ToyMatrix(WireCell2dToy::ToyTiling& toytiling, WireCell2dToy::MergeToyTiling& mergetiling, int svd_flag1);
+ToyMatrix(WireCell2dToy::ToyTiling& toytiling, WireCell2dToy::MergeToyTiling& mergetiling, int abc);
+   
     virtual ~ToyMatrix();
 
     
@@ -71,6 +72,7 @@ namespace WireCell2dToy{
     int solve_flag;
 
     void Buildup_index(WireCell2dToy::MergeToyTiling& mergetiling);
+   
 
     WireCell::WireIndexMap mwimap, swimap;
     WireCell::CellIndexMap mcimap;

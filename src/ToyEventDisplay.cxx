@@ -290,3 +290,29 @@ int ToyEventDisplay::draw_cells_charge(const WireCell::GeomCellSelection& cellal
   
   return 0;
 }
+
+int ToyEventDisplay::draw_reconcells(const WireCell::GeomCellSelection& cellall, WireCell2dToy::ToyMatrix *toymatrix ,TString option){
+  
+  pad.cd();
+  g2 = new TGraph();
+  int ncount = 0;
+  for (int i=0;i!=cellall.size();i++){
+    WireCell::MergeGeomCell *mcell = (WireCell::MergeGeomCell*)cellall[i];
+    if (toymatrix->Get_Cell_Charge(mcell)>1500){
+      WireCell::GeomCellSelection acell = mcell->get_allcell();
+      for (int j=0;j!=acell.size();j++){
+	g2->SetPoint(ncount,acell[j]->center().z/units::m,acell[j]->center().y/units::m);
+	ncount ++;
+      }
+    }
+  }
+  
+  g2->SetMarkerColor(4);
+  g2->SetMarkerSize(0.8);
+  g2->Draw(option);
+  g2->SetMarkerStyle(21);
+  
+  return 0;
+
+  
+}

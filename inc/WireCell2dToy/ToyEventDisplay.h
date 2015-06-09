@@ -4,6 +4,9 @@
 #include "WireCellData/GeomCell.h"
 #include "WireCellData/MergeGeomCell.h"
 
+
+#include "WireCell2dToy/ToyMatrix.h"
+
 #include "WireCellNav/SliceDataSource.h"
 #include "WireCellNav/GeomDataSource.h"
 #include "TPad.h"
@@ -46,6 +49,10 @@ namespace WireCell2dToy {
 	virtual int draw_truthcells_charge(const WireCell::CellChargeMap& ccmap,TString option, int FI);
 	virtual int draw_wires_charge(const WireCell::WireChargeMap& wcmap,TString option, int FI);
 	virtual int draw_cells_charge(const WireCell::GeomCellSelection& cellall ,TString option);
+
+	virtual int draw_reconcells(const WireCell::GeomCellSelection& cellall, WireCell2dToy::ToyMatrix *toymatrix ,TString option);
+
+	
 
 	/// Clear visual the event display data.
 	void clear();

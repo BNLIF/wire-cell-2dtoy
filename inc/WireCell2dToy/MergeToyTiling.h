@@ -6,6 +6,7 @@
 namespace WireCell2dToy{
   class MergeToyTiling : public WireCell2dToy::ToyTiling {
   public:
+    MergeToyTiling(){};
     MergeToyTiling(WireCell2dToy::ToyTiling& tiling, int time_slice=-1);
     ~MergeToyTiling();
 
@@ -15,6 +16,8 @@ namespace WireCell2dToy{
     int further_mergewire(WireCell::GeomWireSelection &allwire, int nwire, int time_slice);
 
   private:
+    
+
     WireCell::GeomCellMap cellmap1;
     WireCell::GeomWireMap wiremap1;
 
