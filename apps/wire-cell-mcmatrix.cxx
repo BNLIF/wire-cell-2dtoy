@@ -118,11 +118,11 @@ int main(int argc, char* argv[])
   // int start_num = 0 ;
   // int end_num = sds.size()-1;
 
-  // int start_num =0;
-  // int end_num = sds.size()-1;
+  int start_num =0;
+  int end_num = sds.size()-1;
 
-  int start_num = 462;
-  int end_num = 465;
+  // int start_num = 400;
+  // int end_num = 462;
 
   //  int i=454;{ // 46, 26
   // int i=329;{  // 18, 6,
@@ -157,19 +157,19 @@ int main(int argc, char* argv[])
       
 
 
-      GeomCellSelection calmcell;
-      for (int j=0;j!=allmcell.size();j++){
-	MergeGeomCell *mcell = (MergeGeomCell*)allmcell[j];
-	double charge = toymatrix[i]->Get_Cell_Charge(mcell,1);
-	double charge_err = toymatrix[i]->Get_Cell_Charge(mcell,2);
+      // GeomCellSelection calmcell;
+      // for (int j=0;j!=allmcell.size();j++){
+      // 	MergeGeomCell *mcell = (MergeGeomCell*)allmcell[j];
+      // 	double charge = toymatrix[i]->Get_Cell_Charge(mcell,1);
+      // 	double charge_err = toymatrix[i]->Get_Cell_Charge(mcell,2);
 	
-	//	cout << "Recon: " << j << " " << charge << " " << charge_err << endl;
+      // 	//	cout << "Recon: " << j << " " << charge << " " << charge_err << endl;
 
-	if (charge + charge_err > 2000) calmcell.push_back(mcell);
-      }
+      // 	if (charge > 2000) calmcell.push_back(mcell);
+      // }
       
+      //
 
-      
 
 
       CellChargeMap ccmap = truthtiling[i]->ccmap();
@@ -323,6 +323,77 @@ int main(int argc, char* argv[])
   }
 
 
+  //do clustering ... 
+   for (int i=start_num;i!=end_num+1;i++){
+     //GeomCellSelection allcell = toytiling[i]->get_allcell();
+     GeomCellSelection pallmcell = mergetiling[i]->get_allcell();
+     GeomCellSelection allmcell;
+     for (int j=0;j!=pallmcell.size();j++){
+       const GeomCell* mcell = pallmcell[j];
+       if (toymatrix[i]->Get_Cell_Charge(mcell)>2000){
+	 allmcell.push_back(mcell);
+       }
+     }
+     //GeomWireSelection allmwire = mergetiling[i]->get_allwire();
+          
+
+     if (cluster_set.empty()){
+       // if cluster is empty, just insert all the mcell, each as a cluster
+       for (int j=0;j!=allmcell.size();j++){
+	 GeomCluster *cluster = new GeomCluster(*((MergeGeomCell*)allmcell[j]));
+	 cluster_set.insert(cluster);
+       }
+     }else{
+       for (int j=0;j!=allmcell.size();j++){
+	 int flag = 0;
+	 int flag_save = 0;
+	 GeomCluster *cluster_save = 0;
+	 
+	 cluster_delset.clear();
+	 
+	 // loop through merged cell
+	 for (auto it = cluster_set.begin();it!=cluster_set.end();it++){
+	   //loop through clusters
+	   
+	   flag += (*it)->AddCell(*((MergeGeomCell*)allmcell[j]));
+	   if (flag==1 && flag != flag_save){
+	     cluster_save = *it;
+	   }else if (flag>1 && flag != flag_save){
+	     cluster_save->MergeCluster(*(*it));
+	     cluster_delset.insert(*it);
+	   }
+	   flag_save = flag;
+  	   
+	 }
+	 
+	 for (auto it = cluster_delset.begin();it!=cluster_delset.end();it++){
+	   cluster_set.erase(*it);
+	   delete (*it);
+	 }
+	 
+	 if (flag==0){
+	   GeomCluster *cluster = new GeomCluster(*((MergeGeomCell*)allmcell[j]));
+	   cluster_set.insert(cluster);
+	 }
+	 
+       }
+     }
+
+     int ncount_mcell_cluster = 0;
+      for (auto it = cluster_set.begin();it!=cluster_set.end();it++){
+  	ncount_mcell_cluster += (*it)->get_allcell().size();
+      }
+      ncount_mcell += allmcell.size();
+      cout << i << " " << allmcell.size()  << " " << cluster_set.size()  << endl;
+   }
+
+   int ncount_mcell_cluster = 0;
+   for (auto it = cluster_set.begin();it!=cluster_set.end();it++){
+     ncount_mcell_cluster += (*it)->get_allcell().size();
+   }
+   cout << "Summary: " << ncount << " " << ncount_mcell << " " << ncount_mcell_cluster << endl;
+
+
   TFile *file = new TFile("shower3D.root","RECREATE");
   TTree *t_true = new TTree("T_true","T_true");
   TTree *t_rec = new TTree("T_rec","T_rec");
@@ -429,6 +500,30 @@ int main(int argc, char* argv[])
   g->Write("shower3D");
   gt->Write("shower3D_truth");
   g_rec->Write("shower3D_charge");
+
+  const int N = 100000;
+  Double_t x[N],y[N],z[N];
+  //save cluster
+  int ncluster = 0;
+  for (auto it = cluster_set.begin();it!=cluster_set.end();it++){
+    ncount = 0;
+    for (int i=0; i!=(*it)->get_allcell().size();i++){
+      const MergeGeomCell *mcell = (const MergeGeomCell*)((*it)->get_allcell().at(i));
+      for (int j=0; j!=mcell->get_allcell().size();j++){
+  	Point p = mcell->get_allcell().at(j)->center();
+  	x[ncount] = mcell->GetTimeSlice()*0.32;
+  	y[ncount] = p.y/units::cm;
+  	z[ncount] = p.z/units::cm;
+  	ncount ++;
+      }
+    }
+    // cout << ncount << endl;
+    TGraph2D *g1 = new TGraph2D(ncount,x,y,z);
+    g1->Write(Form("cluster_%d",ncluster));
+    ncluster ++;
+  }
+
+
   file->Write();
   file->Close();
 

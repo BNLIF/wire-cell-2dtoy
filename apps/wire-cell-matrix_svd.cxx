@@ -154,7 +154,7 @@ int main(int argc, char* argv[])
 	
 	//	cout << "Recon: " << j << " " << charge << " " << charge_err << endl;
 
-	if (charge + charge_err > 2000) calmcell.push_back(mcell);
+	if (charge > 2000) calmcell.push_back(mcell);
       }
       
 
