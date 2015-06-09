@@ -4,6 +4,25 @@ using namespace WireCell;
 
 #include "TMath.h"
 
+WireCell2dToy::ToyMatrixIterate::ToyMatrixIterate(WireCell2dToy::ToyMatrix &toymatrix, std::vector<int>& already_removed){
+  prev_ncount = -1;
+  ncount = 0;
+  nlevel = 0;
+  
+  std::vector<int> no_need_remove;
+
+  toymatrixkalman = new WireCell2dToy::ToyMatrixKalman(already_removed, no_need_remove, toymatrix, 0);  
+  //std::cout << "Number of zeros: " << toymatrixkalman->Get_numz() << std::endl;
+
+  estimated_loop = TMath::Factorial(toymatrix.Get_mcindex())/TMath::Factorial(toymatrix.Get_mcindex()-toymatrixkalman->Get_numz())/TMath::Factorial(toymatrixkalman->Get_numz())/25.;
+  std::cout << estimated_loop << std::endl;
+
+  if (estimated_loop < 1e6){
+    time_flag = 0;
+    Iterate(*toymatrixkalman,toymatrix);
+  }
+}
+
 WireCell2dToy::ToyMatrixIterate::ToyMatrixIterate(WireCell2dToy::ToyMatrix &toymatrix){
   prev_ncount = -1;
   ncount = 0;

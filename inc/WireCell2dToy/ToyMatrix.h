@@ -50,9 +50,13 @@ ToyMatrix(WireCell2dToy::ToyTiling& toytiling, WireCell2dToy::MergeToyTiling& me
     int Get_ndf(){return ndf;};
     
     void Update_pred();
+
+    std::vector<int>& Get_svd_removed(){return svd_removed;};
     
   protected:
 
+    std::vector<int> svd_removed;
+    
     int Solve();
     int Solve_SVD();
 

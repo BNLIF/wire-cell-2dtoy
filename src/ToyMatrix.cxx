@@ -94,11 +94,19 @@ WireCell2dToy::ToyMatrix::ToyMatrix(WireCell2dToy::ToyTiling& toytiling, WireCel
     VBy_inv->Invert();
     
     *MC = (*MAT) * (*VBy_inv) * (*MA);
+    double det = MC->Determinant();
+    
     solve_flag = 0;
     if (svd_flag==0){
-      Solve();
+      if (det > 1e-5)
+	Solve();
     }else{
-      Solve_SVD();
+      if (det > 1e-5){
+	Solve();
+      }else{
+	Solve_SVD();
+      }
+      //Solve_SVD();
     }
   }
   // MA->Print();
@@ -244,11 +252,11 @@ WireCell2dToy::ToyMatrix::~ToyMatrix(){
 
 int WireCell2dToy::ToyMatrix::Solve(){
   
-  double det = MC->Determinant();
+  // double det = MC->Determinant();
 
   //  std::cout << det << std::endl;
   
-  if (fabs(det)>1e-5){
+  //if (fabs(det)>1e-5){
     *MC_inv = *MC;
     MC_inv->Invert();
     *Cx = (*MC_inv) * (*MAT) * (*VBy_inv) * (*MB) * (*Wy);
@@ -273,38 +281,94 @@ int WireCell2dToy::ToyMatrix::Solve(){
     //}
     
     solve_flag = 1;
-  }
+    //}
   
   return solve_flag;
 }
 
 int WireCell2dToy::ToyMatrix::Solve_SVD(){
   
+  // if (svd_removed.size()!=0){
+  //   //update *MC
+  //   int n_removed = svd_removed.size();
+  //   TMatrixD MA2(mwindex,mcindex - n_removed);
+  //   TMatrixD MA2T(mcindex - n_removed,mwindex);
+    
+  //   int index2 = 0;
+  //   for (int k=0;k!=mcindex;k++){ //loop all possibility
+  //     auto it3 = find(svd_removed.begin(),svd_removed.end(),k);
+  //     if (it3 != svd_removed.end()){ // not in removed
+  // 	for (int j=0;j!=mwindex;j++){
+  // 	  MA2(j,index2) = (*MA)(j,k);
+  // 	}
+  // 	index2 ++;
+  //     }
+  //   }
+  //   MA2T.Transpose(MA2);
+  //   TMatrixD MC2(mcindex-svd_removed.size(),mcindex-svd_removed.size());
+  //   TMatrixD MC2_inv(mcindex-svd_removed.size(),mcindex-svd_removed.size());
+
+  //   MC2 = MA2T * (*VBy_inv) * MA2;
+  //   TDecompSVD svd(MC2);
+  //   MC2_inv = svd.Invert();
+     
+        
+  //   TVectorD Cxt(mcindex-n_removed);
+  //   TVectorD dCxt(mcindex-n_removed);
+  //   TMatrixD Vxt(mcindex-n_removed,mcindex-n_removed);
+  //   TMatrixD Vxt_inv(mcindex-n_removed,mcindex-n_removed);
+    
+  //   Cxt = (MC2_inv) * (MA2T) * (*VBy_inv) * (*MB) * (*Wy);
+  //   Vxt_inv = (MA2T) * (*VBy_inv) * (MA2);
+  //   Vxt = Vxt_inv;
+  //   Vxt.Invert();
+    
+  //   for (int i=0;i!=mcindex-n_removed;i++){
+  //     dCxt[i] = sqrt( Vxt(i,i)) * 1000.;
+  //   }
+
+  //   TVectorD sol = (*MB) * (*Wy) - (MA2) * (Cxt);
+  //   TVectorD sol1 =  (*VBy_inv) * sol;
+  //   chi2 = sol * (sol1)/1e6;
+  //   ndf = mwindex - mcindex + n_removed;
+  //   for (int i=0;i!=mcindex-n_removed;i++){
+  //     if (Cxt[i] <0){
+  // 	chi2 += 10*pow(Cxt[i]/dCxt[i],2);
+  //     }
+  //   }
+
+  //   int index = 0;
+  //   for (int i=0;i!=mcindex;i++){
+  //     auto it = find(svd_removed.begin(),svd_removed.end(),i);
+  //     if (it==svd_removed.end()){
+  // 	(*Cx)[i] = Cxt[index];
+  // 	(*dCx)[i] = dCxt[index];
+  // 	index ++;
+  //     }else{
+  // 	(*Cx)[i] = 0.;
+  // 	(*dCx)[i] = 0.;
+  //     }
+  //   }
+
+
+  // }else{
   TDecompSVD svd(*MC);
-  
   *MC_inv = svd.Invert();
-  
-  
-  
   *Cx = (*MC_inv) * (*MAT) * (*VBy_inv) * (*MB) * (*Wy);
-  
   *Vx_inv = (*MAT) * (*VBy_inv) * (*MA);
   *Vx = *Vx_inv;
   Vx->Invert();
-  
   for (int i=0;i!=mcindex;i++){
     (*dCx)[i] = sqrt( (*Vx)(i,i)) * 1000.;
+    if ((*Cx)[i]<0) svd_removed.push_back(i);
   }
-  
   TVectorD sol = (*MB) * (*Wy) - (*MA) * (*Cx);
   TVectorD sol1 =  (*VBy_inv) * sol;
-  chi2 = sol * (sol1)/1e6;
-  
-  ndf = mwindex - mcindex;
-  
-  solve_flag = 1;
-  
-  
+  //chi2 = sol * (sol1)/1e6;
+  //ndf = mwindex - mcindex;
+  solve_flag = 0;
+  //}
+    
   return solve_flag;
 }
 
