@@ -13,6 +13,7 @@ namespace WireCell2dToy{
   class ToyMatrix {
   public:
     ToyMatrix(WireCell2dToy::ToyTiling& toytiling, WireCell2dToy::MergeToyTiling& mergetiling);
+    ToyMatrix(WireCell2dToy::ToyTiling& toytiling, WireCell2dToy::MergeToyTiling& mergetiling, int svd_flag1);
     virtual ~ToyMatrix();
 
     
@@ -52,6 +53,9 @@ namespace WireCell2dToy{
   protected:
 
     int Solve();
+    int Solve_SVD();
+
+    int svd_flag;
 
     TMatrixD *MA, *MB, *MAT, *MBT;
     TMatrixD *Vy, *VBy, *Vx, *VBy_inv, *Vx_inv;
