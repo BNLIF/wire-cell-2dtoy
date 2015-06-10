@@ -4,7 +4,8 @@
 
 using namespace WireCell;
 
-WireCell2dToy::CaveToyTiling::CaveToyTiling(WireCell2dToy::MergeToyTiling& mergetiling, WireCell2dToy::ToyMatrix& toymatrix){
+WireCell2dToy::CaveToyTiling::CaveToyTiling(WireCell2dToy::ToyTiling *toytiling1, WireCell2dToy::MergeToyTiling& mergetiling, WireCell2dToy::ToyMatrix& toymatrix){
+  toytiling = toytiling1;
   // create cell_all_save, 
   GeomCellCellMap tmp_ccmap;
   GeomCellCellMap tmp_ccmap_inv;
@@ -106,9 +107,18 @@ WireCell2dToy::CaveToyTiling::CaveToyTiling(WireCell2dToy::MergeToyTiling& merge
   //std::cout << cells.size() << " " <<  std::endl;
 
   
+  
   // and then create cell_to_remove all the cells at the boundary
-  // add a function to the merge_wire to return boundary wires
-  // judge if a cell is associated with a wire 
+  // how???
+  for (int i=0;i!=cell_all_save.size();i++){
+    MergeGeomCell *mcell = (MergeGeomCell*)cell_all_save[i];
+    mcell->FindEdges(); 
+    //    std::cout << mcell->cross_section() << std::endl; //area ranked from small to big
+    // rank from big cell to smaller cell 
+    // then rank smaller area to larger area
+  }
+  
+
   
   // create a function to move current to save 
   // create a function to construct current from save

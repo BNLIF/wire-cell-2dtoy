@@ -127,7 +127,7 @@ int main(int argc, char* argv[])
 
     
     // for now put this part here
-    cavetiling[i] = new WireCell2dToy::CaveToyTiling(*mergetiling[i],*toymatrix[i]);
+    cavetiling[i] = new WireCell2dToy::CaveToyTiling(toytiling[i],*mergetiling[i],*toymatrix[i]);
     
     //blobtiling[i] = new WireCell2dToy::BlobToyTiling(*toytiling[i],*mergetiling[i],*toymatrix[i],i,5);
     //blobmatrix[i] = new WireCell2dToy::ToyMatrix(*toytiling[i],*blobtiling[i]);
