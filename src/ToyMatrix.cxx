@@ -211,7 +211,10 @@ WireCell2dToy::ToyMatrix::ToyMatrix(WireCell2dToy::ToyTiling& toytiling, WireCel
     
     *MC = (*MAT) * (*VBy_inv) * (*MA);
     solve_flag = 0;
-    Solve();
+    double det = MC->Determinant();
+    if (det > 1e-5){
+      Solve();
+    }
   }
   // MA->Print();
   // MAT->Print();

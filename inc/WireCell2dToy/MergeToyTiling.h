@@ -15,7 +15,8 @@ namespace WireCell2dToy{
     int further_merge(WireCell::GeomCellSelection &allcell, int ncell, int time_slice);
     int further_mergewire(WireCell::GeomWireSelection &allwire, int nwire, int time_slice);
 
-  private:
+   
+  protected:
     
 
     WireCell::GeomCellMap cellmap1;
