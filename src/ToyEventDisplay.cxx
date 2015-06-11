@@ -114,7 +114,7 @@ int ToyEventDisplay::draw_slice(const WireCell::Slice& slice, TString option)
 }
 
 
-int ToyEventDisplay::draw_cells(const WireCell::GeomCellSelection& cellall, TString option)
+int ToyEventDisplay::draw_cells(const WireCell::GeomCellSelection& cellall, TString option, int color)
 {
   pad.cd();
 
@@ -123,7 +123,7 @@ int ToyEventDisplay::draw_cells(const WireCell::GeomCellSelection& cellall, TStr
   for (int i=0;i!=cellall.size();i++){
     g2->SetPoint(i,cellall[i]->center().z/units::m,cellall[i]->center().y/units::m);
   }
-  g2->SetMarkerColor(4);
+  g2->SetMarkerColor(color);
   g2->SetMarkerSize(0.8);
   g2->Draw(option);
   g2->SetMarkerStyle(21);
@@ -291,7 +291,7 @@ int ToyEventDisplay::draw_cells_charge(const WireCell::GeomCellSelection& cellal
   return 0;
 }
 
-int ToyEventDisplay::draw_reconcells(const WireCell::GeomCellSelection& cellall, WireCell2dToy::ToyMatrix *toymatrix ,TString option){
+int ToyEventDisplay::draw_reconcells(const WireCell::GeomCellSelection& cellall, WireCell2dToy::ToyMatrix *toymatrix ,TString option, int color){
   
   pad.cd();
   g2 = new TGraph();
@@ -307,7 +307,7 @@ int ToyEventDisplay::draw_reconcells(const WireCell::GeomCellSelection& cellall,
     }
   }
   
-  g2->SetMarkerColor(4);
+  g2->SetMarkerColor(color);
   g2->SetMarkerSize(0.8);
   g2->Draw(option);
   g2->SetMarkerStyle(21);

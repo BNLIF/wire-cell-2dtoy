@@ -43,14 +43,14 @@ namespace WireCell2dToy {
 	virtual int draw_slice(const WireCell::Slice& slice, TString option);
 
 	/// Draw a selection of cells
-	virtual int draw_cells(const WireCell::GeomCellSelection& cellall ,TString option);
+	virtual int draw_cells(const WireCell::GeomCellSelection& cellall ,TString option,int color=4);
 	virtual int draw_mergecells(const WireCell::GeomCellSelection& cellall ,TString option, int flag=0);
 	virtual int draw_truthcells(const WireCell::CellChargeMap& ccmap,TString option);
 	virtual int draw_truthcells_charge(const WireCell::CellChargeMap& ccmap,TString option, int FI);
 	virtual int draw_wires_charge(const WireCell::WireChargeMap& wcmap,TString option, int FI);
 	virtual int draw_cells_charge(const WireCell::GeomCellSelection& cellall ,TString option);
 
-	virtual int draw_reconcells(const WireCell::GeomCellSelection& cellall, WireCell2dToy::ToyMatrix *toymatrix ,TString option);
+	virtual int draw_reconcells(const WireCell::GeomCellSelection& cellall, WireCell2dToy::ToyMatrix *toymatrix ,TString option, int color = 4);
 
 	
 

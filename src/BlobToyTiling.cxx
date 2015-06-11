@@ -44,7 +44,7 @@ WireCell2dToy::BlobToyTiling::BlobToyTiling(WireCell2dToy::ToyTiling& toytiling,
   GeomCellSelection cellall = mergetiling.get_allcell();
   for (int i=0;i!=cellall.size();i++){
     MergeGeomCell *mcell = (WireCell::MergeGeomCell*)cellall[i];
-    if (toymatrix.Get_Cell_Charge(mcell)>1500){
+    if (toymatrix.Get_Cell_Charge(mcell)+toymatrix.Get_Cell_Charge(mcell,2)>0){
       GeomCellSelection acell = mcell->get_allcell();
       //put all the single cells in here
       remain_cells.insert(remain_cells.end(),acell.begin(),acell.end());
