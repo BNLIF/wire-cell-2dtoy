@@ -132,8 +132,8 @@ int main(int argc, char* argv[])
   Double_t charge_max = 0;
     
   int ncount_mcell = 0;
-  int start_num =454;
-  int end_num = 454;
+  int start_num =185;
+  int end_num = 185;
   // int start_num =440;
   // int end_num = 440;
     

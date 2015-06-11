@@ -5,7 +5,8 @@ using namespace WireCell;
 
 int WireCell2dToy::ToyMatrixKalman::Cal_numz(WireCell2dToy::ToyMatrix &toymatrix){
   
-
+  //std::cout << no_need_remove.size() << std::endl;
+  if (no_need_remove.size()!=0){
   TMatrixD MA2(mwindex,no_need_remove.size());
   TMatrixD MA2T(no_need_remove.size(),mwindex);
   TMatrixD MC2(no_need_remove.size(),no_need_remove.size());
@@ -36,6 +37,9 @@ int WireCell2dToy::ToyMatrixKalman::Cal_numz(WireCell2dToy::ToyMatrix &toymatrix
     }
   }
   return numz2;
+  }else{
+    return 0;
+  }
 }
 
 void WireCell2dToy::ToyMatrixKalman::init(WireCell2dToy::ToyMatrix& toymatrix){
@@ -46,7 +50,7 @@ void WireCell2dToy::ToyMatrixKalman::init(WireCell2dToy::ToyMatrix& toymatrix){
   mwindex = toymatrix.Get_mwindex();
   swindex = toymatrix.Get_swindex();
 
-  //std::cout << " Xin " << already_removed.size() << " " << no_need_remove.size() << std::endl;
+  
   
   int n_removed = already_removed.size();
 
@@ -56,12 +60,15 @@ void WireCell2dToy::ToyMatrixKalman::init(WireCell2dToy::ToyMatrix& toymatrix){
   // MC = new TMatrixD(mcindex-n_removed,mcindex-n_removed);
   // MC_inv = new TMatrixD(mcindex-n_removed,mcindex-n_removed);
 
+  //std::cout << " Xin " << already_removed.size() << " " << no_need_remove.size() << std::endl;
+
     TMatrixD MA(mwindex,mcindex-n_removed);
     TMatrixD MAT(mcindex-n_removed,mwindex);
 
     TMatrixD MC(mcindex-n_removed,mcindex-n_removed);
     TMatrixD MC_inv(mcindex-n_removed,mcindex-n_removed);
 
+   
 
     const TMatrixD *MA_big = toymatrix.Get_MA();
     const TMatrixD *VBy_inv = toymatrix.Get_VBy_inv();
@@ -77,7 +84,11 @@ void WireCell2dToy::ToyMatrixKalman::init(WireCell2dToy::ToyMatrix& toymatrix){
     }
   }
   MAT.Transpose(MA);
+
+  
   MC = (MAT) * (*VBy_inv) * (MA);
+  
+
 
   TMatrixDEigen Eigen(MC);
   TVectorD EigenValue(Eigen.GetEigenValuesRe());
@@ -109,6 +120,7 @@ void WireCell2dToy::ToyMatrixKalman::init(WireCell2dToy::ToyMatrix& toymatrix){
     	  }
     	}
      	MA1T.Transpose(MA1);
+	
     	MC1 = (MA1T) * (*VBy_inv) * (MA1);
 	
     	TMatrixDEigen Eigen1(MC1);
@@ -172,11 +184,12 @@ void WireCell2dToy::ToyMatrixKalman::init(WireCell2dToy::ToyMatrix& toymatrix){
     TVectorD dCxt(mcindex-n_removed);
     TMatrixD Vx(mcindex-n_removed,mcindex-n_removed);
     TMatrixD Vx_inv(mcindex-n_removed,mcindex-n_removed);
-
+    
     Cxt = (MC_inv) * (MAT) * (*VBy_inv) * (*MB) * (*Wy);
     Vx_inv = (MAT) * (*VBy_inv) * (MA);
     Vx = Vx_inv;
     Vx.Invert();
+    
     
     for (int i=0;i!=mcindex-n_removed;i++){
       dCxt[i] = sqrt( Vx(i,i)) * 1000.;

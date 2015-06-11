@@ -115,11 +115,12 @@ int main(int argc, char* argv[])
   
   int ncount_mcell = 0;
 
-  // int start_num = 0 ;
-  // int end_num = sds.size()-1;
-
-  int start_num =0;
+  int start_num = 0 ;
   int end_num = sds.size()-1;
+
+  //int start_num =446;
+  //int end_num = 446;
+  // int end_num = sds.size()-1;
 
   // int start_num = 400;
   // int end_num = 462;
@@ -149,7 +150,7 @@ int main(int argc, char* argv[])
       truthtiling[i] = new WireCell2dToy::TruthToyTiling(*toytiling[i],pvv,i,gds);
       toymatrix[i] = new WireCell2dToy::ToyMatrix(*toytiling[i],*mergetiling[i]);
       if (toymatrix[i]->Get_Solve_Flag()==0)
-	toymatrix_it[i] = new WireCell2dToy::ToyMatrixIterate(*toymatrix[i]);
+      	toymatrix_it[i] = new WireCell2dToy::ToyMatrixIterate(*toymatrix[i]);
       
       cout << "chi2: " << toymatrix[i]->Get_Chi2() << endl;
       cout << "NDF: " << toymatrix[i]->Get_ndf() << endl;
