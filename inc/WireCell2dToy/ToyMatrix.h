@@ -49,6 +49,9 @@ ToyMatrix(WireCell2dToy::ToyTiling& toytiling, WireCell2dToy::MergeToyTiling& me
     void Set_Solve_Flag(float solve_flag1){solve_flag=solve_flag1;};
     int Get_ndf(){return ndf;};
     
+    void Set_blob(int num1){num_blob = num1;};
+    int Get_blob(){return num_blob;};
+
     void Update_pred();
 
     std::vector<int>& Get_svd_removed(){return svd_removed;};
@@ -56,7 +59,8 @@ ToyMatrix(WireCell2dToy::ToyTiling& toytiling, WireCell2dToy::MergeToyTiling& me
   protected:
 
     std::vector<int> svd_removed;
-    
+    int num_blob;
+
     int Solve();
     int Solve_SVD();
 

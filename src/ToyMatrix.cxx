@@ -8,6 +8,7 @@ WireCell2dToy::ToyMatrix::ToyMatrix(WireCell2dToy::ToyTiling& toytiling, WireCel
   solve_flag = -1;
   chi2 = -1;
   svd_flag = svd_flag1;
+  num_blob = 0;
   
   // build up index
   Buildup_index(mergetiling);
@@ -124,6 +125,7 @@ WireCell2dToy::ToyMatrix::ToyMatrix(WireCell2dToy::ToyTiling& toytiling, WireCel
   solve_flag = -1;
   chi2 = -1;
   svd_flag = 0;
+  num_blob = 0;
   
   // build up index
   Buildup_index(mergetiling);

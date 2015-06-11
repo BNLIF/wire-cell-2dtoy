@@ -132,15 +132,28 @@ int main(int argc, char* argv[])
   Double_t charge_max = 0;
     
   int ncount_mcell = 0;
-  int start_num =185;
-  int end_num = 185;
-  // int start_num =440;
-  // int end_num = 440;
-    
   
+  //simple cosmic
+  // int start_num =186;
+  // int end_num = 186;
+
+
+  //nue cc 
+  // int start_num =356;
+  // int end_num = 356;
+    
+  //delta 
+  int start_num =680;
+  int end_num = 680;
+
+  //complicated blob
+  // int start_num = 454;
+  // int end_num = 454;
+  
+  WireCell::Slice slice;
   for (int i=start_num;i!=end_num+1;i++){
     sds.jump(i);
-    WireCell::Slice slice = sds.get();
+    slice = sds.get();
           
     toytiling[i] = new WireCell2dToy::ToyTiling(slice,gds);
     mergetiling[i] = new WireCell2dToy::MergeToyTiling(*toytiling[i],i);
@@ -161,11 +174,29 @@ int main(int argc, char* argv[])
     cout << "chi2: " << toymatrix[i]->Get_Chi2() << endl;
     cout << "NDF: " << toymatrix[i]->Get_ndf() << endl;
 
+    int num_blob = 0;
     for (int j=0;j!=allmcell.size();j++){
       MergeGeomCell *mcell =(MergeGeomCell*)allmcell.at(j);
       
       double charge =toymatrix[i]->Get_Cell_Charge(mcell);
       if (charge>2000){
+	mcell->FindEdges();
+	// std::cout << mcell->get_allcell().size() << " " << mcell->get_edgecells().size() << std::endl;
+	
+	if(mcell->IsBlob()) {
+	  num_blob ++; 
+	  // GeomWireSelection n_mwires = mergetiling[i]->wires(*mcell);
+	  // for (int k=0;k!=n_mwires.size();k++){
+	  //   int ncells = 0;
+	  //   for (int kk= 0; kk!=mergetiling[i]->cells(*n_mwires.at(k)).size();kk++){
+	  //     if (toymatrix[i]->Get_Cell_Charge(mergetiling[i]->cells(*n_mwires.at(k)).at(kk))>2000){
+	  // 	ncells ++;
+	  //     }
+	  //   }
+	  //   std::cout << ncells << std::endl;
+	  // }
+	}
+	
 	mcell->FindCorners(toytiling[i]->cmap(), toytiling[i]->wmap());
 	GeomCellSelection corners = mcell->get_cornercells();
 	total_corner_cells.insert(total_corner_cells.end(),corners.begin(),corners.end());
@@ -188,6 +219,10 @@ int main(int argc, char* argv[])
 	}
       }
     }
+
+    toymatrix[i]->Set_blob(num_blob);
+    
+    cout << "# of blobs " << toymatrix[i]->Get_blob() << endl;
 
     
     // // for now put this part here

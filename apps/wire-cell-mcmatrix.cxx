@@ -402,6 +402,7 @@ int main(int argc, char* argv[])
   
   Double_t x_save, y_save, z_save;
   Double_t charge_save;
+  Double_t ncharge_save;
   Double_t chi2_save;
   Double_t ndf_save;
   Double_t ncell_save;
@@ -422,6 +423,7 @@ int main(int argc, char* argv[])
   t_rec_charge->Branch("y",&y_save,"y/D");
   t_rec_charge->Branch("z",&z_save,"z/D");
   t_rec_charge->Branch("q",&charge_save,"q/D");
+  t_rec_charge->Branch("nq",&ncharge_save,"nq/D");
   t_rec_charge->Branch("ncell",&ncell_save,"ncell/D");
   t_rec_charge->Branch("chi2",&chi2_save,"chi2/D");
   t_rec_charge->Branch("ndf",&ndf_save,"ndf/D");
@@ -476,6 +478,7 @@ int main(int argc, char* argv[])
 	  y_save = p.y/units::cm;
 	  z_save = p.z/units::cm;
 	  charge_save = charge/mcell->get_allcell().size();
+	  ncharge_save = mcell->get_allcell().size();
 	  ncell_save = mcell->get_allcell().size();
 	  chi2_save = toymatrix[i]->Get_Chi2();
 	  ndf_save = toymatrix[i]->Get_ndf();
