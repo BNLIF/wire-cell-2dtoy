@@ -30,9 +30,9 @@ namespace WireCell2dToy {
       WireCell::GeomWireSelection get_wire_w(){return wire_w;}
       WireCell::GeomWireSelection get_wire_all(){ return wire_all;}
 
-      WireCell::WireChargeMap wcmap(){return wirechargemap;};
-      WireCell::GeomCellMap cmap(){return cellmap;};
-      WireCell::GeomWireMap wmap(){return wiremap;};
+      WireCell::WireChargeMap& wcmap(){return wirechargemap;};
+      WireCell::GeomCellMap& cmap(){return cellmap;};
+      WireCell::GeomWireMap& wmap(){return wiremap;};
 
     protected:
       WireCell::GeomWireSelection wire_u;

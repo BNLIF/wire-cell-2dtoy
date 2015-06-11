@@ -174,6 +174,7 @@ int ToyEventDisplay::draw_truthcells(const WireCell::CellChargeMap& ccmap, TStri
     }
   }
   g2->SetMarkerColor(8);
+  //g2->SetMarkerColor(1);
   g2->SetMarkerSize(0.8);
   g2->Draw(option);
   g2->SetMarkerStyle(26);

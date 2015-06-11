@@ -36,7 +36,25 @@
 using namespace WireCell;
 using namespace std;
 
-
+double rms(double a1, double a2, double a3){
+  double ave = (a1 + a2 + a3)/3.;
+  double rms1 = sqrt(pow(a1-ave,2) + pow(a2-ave,2));
+  double rms2 = sqrt(pow(a2-ave,2) + pow(a3-ave,2));
+  double rms3 = sqrt(pow(a1-ave,2) + pow(a3-ave,2));
+  
+  double rms;
+  if (rms1 < rms2){
+    rms = rms1;
+  }else{
+    rms = rms2;
+  } 
+  if (rms > rms3){
+    rms = rms3;
+  }
+  
+  //double rms  = sqrt((pow(a1-ave,2) + pow(a2-ave,2) + pow(a3-ave,2))/2.);
+  return rms;
+}
 
 
 int main(int argc, char* argv[])
@@ -103,13 +121,23 @@ int main(int argc, char* argv[])
   
   GeomCellSelection total_cells;
   GeomCellSelection total_recon_cells;
+  GeomCellSelection total_corner_cells;
   CellChargeMap total_ccmap;
   
+  CellChargeMap total_scrms;
+  CellChargeMap total_scmap;
+
+
+  Double_t charge_min = 10000;
+  Double_t charge_max = 0;
+    
   int ncount_mcell = 0;
-  int start_num =450;
-  int end_num = 460;
-  //int i=454;{
-    //for (int i=0;i!=sds.size();i++){
+  int start_num =454;
+  int end_num = 454;
+  // int start_num =440;
+  // int end_num = 440;
+    
+  
   for (int i=start_num;i!=end_num+1;i++){
     sds.jump(i);
     WireCell::Slice slice = sds.get();
@@ -128,12 +156,38 @@ int main(int argc, char* argv[])
 
 
     toymatrix[i] = new WireCell2dToy::ToyMatrix(*toytiling[i],*mergetiling[i]);
-    
     if (toymatrix[i]->Get_Solve_Flag()==0)
-      toymatrix_markov[i] = new WireCell2dToy::ToyMatrixMarkov(toymatrix[i],&allmcell);
-    
+      toymatrix_markov[i] = new WireCell2dToy::ToyMatrixMarkov(toymatrix[i],&allmcell);    
     cout << "chi2: " << toymatrix[i]->Get_Chi2() << endl;
     cout << "NDF: " << toymatrix[i]->Get_ndf() << endl;
+
+    for (int j=0;j!=allmcell.size();j++){
+      MergeGeomCell *mcell =(MergeGeomCell*)allmcell.at(j);
+      
+      double charge =toymatrix[i]->Get_Cell_Charge(mcell);
+      if (charge>2000){
+	mcell->FindCorners(toytiling[i]->cmap(), toytiling[i]->wmap());
+	GeomCellSelection corners = mcell->get_cornercells();
+	total_corner_cells.insert(total_corner_cells.end(),corners.begin(),corners.end());
+	for (int k=0;k!=mcell->get_allcell().size();k++){
+	  total_recon_cells.push_back(mcell->get_allcell().at(k));
+	  //get charge
+	  double sc_charge = 0;
+	  GeomCellMap scmap = toytiling[i]->cmap();
+	  WireChargeMap wcmap = toytiling[i]->wcmap();
+	  GeomWireSelection wires = scmap[mcell->get_allcell().at(k)];
+	  double aa[3];
+	  for (int q=0;q!=wires.size();q++){
+	    sc_charge += wcmap[wires.at(q)];
+	    aa[q] = wcmap[wires.at(q)];
+	  }
+	  total_scmap[mcell->get_allcell().at(k)] = sc_charge/3;
+	  total_scrms[mcell->get_allcell().at(k)] = rms(aa[0],aa[1],aa[2])*3./sc_charge;
+	  if (sc_charge/3 > charge_max) charge_max = sc_charge/3;
+	  if (sc_charge/3 < charge_min) charge_min = sc_charge/3;
+	}
+      }
+    }
 
     
     // // for now put this part here
@@ -161,8 +215,7 @@ int main(int argc, char* argv[])
     //   blobmetric.Add(ballmcell,*blobmatrix[i],ccmap);
     // blobmetric.AddSolve(blobmatrix[i]->Get_Solve_Flag());
     
-    Double_t charge_min = 10000;
-    Double_t charge_max = 0;
+    
     
     for (auto it = ccmap.begin();it!=ccmap.end(); it++){
       Point p = it->first->center();
@@ -201,12 +254,17 @@ int main(int argc, char* argv[])
   theApp.SetReturnFromRun(true);
   
   TCanvas c1("ToyMC","ToyMC",800,600);
-  c1.Draw();
+  //TCanvas c2("ToyMC","ToyMC",800,600);
   
   WireCell2dToy::ToyEventDisplay display(c1, gds);
-  display.charge_min = 0;
-  display.charge_max = 10.;
+  //WireCell2dToy::ToyEventDisplay display1(c2, gds);
+  display.charge_min = charge_min;
+  display.charge_max = charge_max;
+  // display.charge_min = 0.;
+  // display.charge_max = 1.;
   
+  // display1.charge_min = charge_min;
+  // display1.charge_max = charge_max;
   
   gStyle->SetOptStat(0);
   
@@ -223,18 +281,29 @@ int main(int argc, char* argv[])
   gStyle->SetPalette(NCont,MyPalette);
   
   display.init(0,10.3698,-2.33/2.,2.33/2.);
-  //display.init(1.4,1.7,0.5,1.2);
+  //display.init(1.4,1.65,0.7,1.0);
+  // display1.init(1.4,1.65,0.7,1.0);
+  
   
   display.draw_mc(1,WireCell::PointValueVector(),"colz");
   
   //display.draw_slice(slice,"");
   display.draw_cells(total_cells,"*same");
   //display.draw_mergecells(mergetiling[i]->get_allcell(),"*same",1); //0 is normal, 1 is only draw the ones containt the truth cell
-  // 
+  
+  display.draw_cells(total_recon_cells,"*same",1);
+  //display.draw_truthcells_charge(total_ccmap,"*same",FI);
+  //display.draw_truthcells_charge(total_scmap,"*same",FI);
+  //display.draw_truthcells_charge(total_scrms,"*same",FI);
+  display.draw_truthcells(total_ccmap,"*same");
+  display.draw_cells(total_corner_cells,"*same",2);
   //display.draw_reconcells(mergetiling[i]->get_allcell(),toymatrix[i],"*same",1);
   //display.draw_reconcells(blobtiling[i]->get_allcell(),blobmatrix[i],"*same",2);
-  display.draw_truthcells(total_ccmap,"*same");
   
+  // display1.draw_mc(1,WireCell::PointValueVector(),"colz");
+  // display1.draw_truthcells_charge(total_ccmap,"*same",FI);
+  
+
   theApp.Run();
   
   
