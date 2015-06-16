@@ -52,8 +52,8 @@ int main(int argc, char* argv[])
   WireCellSst::ToyuBooNESliceDataSource sds(fds,1);
   
   // int i=1129;{
-  //int i=1135;{
-  for (int i=0;i!=sds.size();i++){
+  int i=331;{
+  //for (int i=0;i!=sds.size();i++){
   //for (int i=1143;i!=1145;i++){
   sds.jump(i);
   WireCell::Slice slice = sds.get();
@@ -118,32 +118,32 @@ int main(int argc, char* argv[])
   // //  
 
   
-    // TApplication theApp("theApp",&argc,argv);
-    // theApp.SetReturnFromRun(true);
+    TApplication theApp("theApp",&argc,argv);
+    theApp.SetReturnFromRun(true);
     
-    // TCanvas c1("ToyMC","ToyMC",800,600);
-    // c1.Draw();
+    TCanvas c1("ToyMC","ToyMC",800,600);
+    c1.Draw();
     
-    // WireCell2dToy::ToyEventDisplay display(c1, gds);
+    WireCell2dToy::ToyEventDisplay display(c1, gds);
     
-    // gStyle->SetOptStat(0);
+    gStyle->SetOptStat(0);
     
-    // display.init(0,10.3698,-2.33/2.,2.33/2.);
-    // //display.init(0.6,1.0,0.0,0.3);
-    // //display.init(0.6,0.7,0.07,0.12);
-    // //display.init();
-    // display.draw_mc(1,WireCell::PointValueVector(),"");
-    // //display.draw_mc(1,fds.mctruth,"");
-    // //display.draw_mc(2,fds.mctruth,"TEXT");
+    display.init(0,10.3698,-2.33/2.,2.33/2.);
+    //display.init(0.6,1.0,0.0,0.3);
+    //display.init(0.6,0.7,0.07,0.12);
+    //display.init();
+    display.draw_mc(1,WireCell::PointValueVector(),"");
+    //display.draw_mc(1,fds.mctruth,"");
+    //display.draw_mc(2,fds.mctruth,"TEXT");
     
     
-    // display.draw_slice(slice,"");
+    display.draw_slice(slice,"");
     
-    // display.draw_cells(toytiling.get_allcell(),"*same");
-    // display.draw_mergecells(mergetiling.get_allcell(),"*same");
-    // //display.draw_mc(3,fds.mctruth,"*same");
+    display.draw_cells(toytiling.get_allcell(),"*same");
+    display.draw_mergecells(mergetiling.get_allcell(),"*same");
+    //display.draw_mc(3,fds.mctruth,"*same");
     
-    // theApp.Run();
+    theApp.Run();
   }
   }
 

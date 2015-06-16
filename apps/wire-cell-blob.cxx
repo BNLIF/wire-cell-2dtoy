@@ -134,8 +134,8 @@ int main(int argc, char* argv[])
   int ncount_mcell = 0;
   
   //simple cosmic
-  // int start_num =186;
-  // int end_num = 186;
+  int start_num =185;
+  int end_num = 185;
 
 
   //nue cc 
@@ -143,12 +143,12 @@ int main(int argc, char* argv[])
   // int end_num = 356;
     
   //delta 
-  int start_num =680;
-  int end_num = 680;
+  // int start_num =680;
+  // int end_num = 680;
 
   //complicated blob
-  // int start_num = 454;
-  // int end_num = 454;
+  // int start_num = 452;
+  // int end_num = 456;
   
   WireCell::Slice slice;
   for (int i=start_num;i!=end_num+1;i++){
@@ -316,13 +316,13 @@ int main(int argc, char* argv[])
   gStyle->SetPalette(NCont,MyPalette);
   
   display.init(0,10.3698,-2.33/2.,2.33/2.);
-  //display.init(1.4,1.65,0.7,1.0);
+  //display.init(8.61,8.66,0.0,0.06);
   // display1.init(1.4,1.65,0.7,1.0);
   
   
   display.draw_mc(1,WireCell::PointValueVector(),"colz");
   
-  //display.draw_slice(slice,"");
+  display.draw_slice(slice,"");
   display.draw_cells(total_cells,"*same");
   //display.draw_mergecells(mergetiling[i]->get_allcell(),"*same",1); //0 is normal, 1 is only draw the ones containt the truth cell
   
