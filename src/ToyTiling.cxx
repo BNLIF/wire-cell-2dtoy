@@ -51,7 +51,7 @@ WireCell2dToy::ToyTiling::ToyTiling(const WireCell::Slice& slice,WireCellSst::Ge
       dis_v[1] = gds.wire_dist(*wire_v[j]) + gds.pitch(kVwire)/2.;
       
       //four vertices around
-      PointVector puv(4);
+      std::vector<Vector> puv(4);
       
       gds.crossing_point(dis_u[0],dis_v[0],kUwire,kVwire, puv[0]);
       gds.crossing_point(dis_u[0],dis_v[1],kUwire,kVwire, puv[1]);
@@ -76,7 +76,7 @@ WireCell2dToy::ToyTiling::ToyTiling(const WireCell::Slice& slice,WireCellSst::Ge
 	}
 	
 	if (flag==1 ) {
-	  PointVector puw(4);
+	  std::vector<Vector> puw(4);
 	  gds.crossing_point(dis_u[0],dis_w[0],kUwire,kYwire, puw[0]);
 	  gds.crossing_point(dis_u[0],dis_w[1],kUwire,kYwire, puw[1]);
 	  gds.crossing_point(dis_u[1],dis_w[1],kUwire,kYwire, puw[2]);
@@ -88,7 +88,7 @@ WireCell2dToy::ToyTiling::ToyTiling(const WireCell::Slice& slice,WireCellSst::Ge
 	      pcell.push_back(puw[k]);
 	    }
 	  }
-	  PointVector pwv(4);
+	  std::vector<Vector> pwv(4);
 	  gds.crossing_point(dis_v[0],dis_w[0],kVwire,kYwire, pwv[0]);
 	  gds.crossing_point(dis_v[0],dis_w[1],kVwire,kYwire, pwv[1]);
 	  gds.crossing_point(dis_v[1],dis_w[1],kVwire,kYwire, pwv[2]);

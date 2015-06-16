@@ -52,7 +52,7 @@ int main(int argc, char* argv[])
   
   
   WireCellSst::GeomDataSource gds(argv[1]);
-  std::vector<float> ex = gds.extent();
+  std::vector<double> ex = gds.extent();
   cerr << "Extent: "
        << " x:" << ex[0]/units::mm << " mm"
        << " y:" << ex[1]/units::m << " m"
