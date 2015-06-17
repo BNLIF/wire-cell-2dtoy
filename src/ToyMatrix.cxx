@@ -4,11 +4,67 @@
 
 using namespace WireCell;
 
+void WireCell2dToy::ToyMatrix::JudgeSimpleBlob(WireCell2dToy::ToyTiling& toytiling, WireCell2dToy::MergeToyTiling& mergetiling){
+   GeomCellSelection allmcell = mergetiling.get_allcell();
+   num_blob = 0;
+   for (int j=0;j!=allmcell.size();j++){
+     MergeGeomCell *mcell =(MergeGeomCell*)allmcell.at(j);
+     
+     double charge =Get_Cell_Charge(mcell);
+     if (charge>2000){
+       mcell->FindEdges();
+       // 	// std::cout << mcell->get_allcell().size() << " " << mcell->get_edgecells().size() << std::endl;
+       if(mcell->IsBlob()) {
+	 mcell->FindCorners(toytiling.cmap(), toytiling.wmap());
+	 num_blob ++; 
+    // 	  // GeomWireSelection n_mwires = mergetiling[i]->wires(*mcell);
+    // 	  // for (int k=0;k!=n_mwires.size();k++){
+    // 	  //   int ncells = 0;
+    // 	  //   for (int kk= 0; kk!=mergetiling[i]->cells(*n_mwires.at(k)).size();kk++){
+    // 	  //     if (toymatrix[i]->Get_Cell_Charge(mergetiling[i]->cells(*n_mwires.at(k)).at(kk))>2000){
+    // 	  // 	ncells ++;
+    // 	  //     }
+    // 	  //   }
+    // 	  //   std::cout << ncells << std::endl;
+       }
+     }
+     
+     
+    // 	GeomCellSelection corners = mcell->get_cornercells();
+    // 	total_corner_cells.insert(total_corner_cells.end(),corners.begin(),corners.end());
+    // 	for (int k=0;k!=mcell->get_allcell().size();k++){
+    // 	  total_recon_cells.push_back(mcell->get_allcell().at(k));
+    // 	  //get charge
+    // 	  double sc_charge = 0;
+    // 	  GeomCellMap scmap = toytiling[i]->cmap();
+    // 	  WireChargeMap wcmap = toytiling[i]->wcmap();
+    // 	  GeomWireSelection wires = scmap[mcell->get_allcell().at(k)];
+    // 	  double aa[3];
+    // 	  for (int q=0;q!=wires.size();q++){
+    // 	    sc_charge += wcmap[wires.at(q)];
+    // 	    aa[q] = wcmap[wires.at(q)];
+    // 	  }
+    // 	  total_scmap[mcell->get_allcell().at(k)] = sc_charge/3;
+    // 	  total_scrms[mcell->get_allcell().at(k)] = rms(aa[0],aa[1],aa[2])*3./sc_charge;
+    // 	  if (sc_charge/3 > charge_max) charge_max = sc_charge/3;
+    // 	  if (sc_charge/3 < charge_min) charge_min = sc_charge/3;
+    // 	}
+    //   }
+   }
+
+    // toymatrix[i]->Set_blob(num_blob);
+    
+    // cout << "# of blobs " << toymatrix[i]->Get_blob() << endl;
+
+}
+
+
 WireCell2dToy::ToyMatrix::ToyMatrix(WireCell2dToy::ToyTiling& toytiling, WireCell2dToy::MergeToyTiling& mergetiling, int svd_flag1){
   solve_flag = -1;
   chi2 = -1;
   svd_flag = svd_flag1;
   num_blob = 0;
+  simple_blob_reduction = false;
   
   // build up index
   Buildup_index(mergetiling);
@@ -126,7 +182,7 @@ WireCell2dToy::ToyMatrix::ToyMatrix(WireCell2dToy::ToyTiling& toytiling, WireCel
   chi2 = -1;
   svd_flag = 0;
   num_blob = 0;
-  
+  simple_blob_reduction = false;
   // build up index
   Buildup_index(mergetiling);
   

@@ -13,7 +13,7 @@ namespace WireCell2dToy{
   class ToyMatrix {
   public:
     ToyMatrix(WireCell2dToy::ToyTiling& toytiling, WireCell2dToy::MergeToyTiling& mergetiling);
-ToyMatrix(WireCell2dToy::ToyTiling& toytiling, WireCell2dToy::MergeToyTiling& mergetiling, int abc);
+    ToyMatrix(WireCell2dToy::ToyTiling& toytiling, WireCell2dToy::MergeToyTiling& mergetiling, int abc);
    
     virtual ~ToyMatrix();
 
@@ -49,17 +49,25 @@ ToyMatrix(WireCell2dToy::ToyTiling& toytiling, WireCell2dToy::MergeToyTiling& me
     void Set_Solve_Flag(float solve_flag1){solve_flag=solve_flag1;};
     int Get_ndf(){return ndf;};
     
-    void Set_blob(int num1){num_blob = num1;};
+    //void Set_blob(int num1){num_blob = num1;};
     int Get_blob(){return num_blob;};
+    bool GetSimpleBlobReduction(){return simple_blob_reduction;};
+    void JudgeSimpleBlob(WireCell2dToy::ToyTiling& toytiling, WireCell2dToy::MergeToyTiling& mergetiling);
+    
 
     void Update_pred();
 
     std::vector<int>& Get_svd_removed(){return svd_removed;};
     
+    
+
   protected:
 
     std::vector<int> svd_removed;
+
     int num_blob;
+    bool simple_blob_reduction;
+
 
     int Solve();
     int Solve_SVD();
