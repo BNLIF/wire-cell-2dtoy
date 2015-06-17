@@ -1,2 +1,2 @@
 #!/usr/bin/env python
-bld.make_package('WireCell2dToy', use='WireCellNav WireCellData WireCellTiling WireCellSst')
+bld.make_package('WireCell2dToy', use='WireCellNav WireCellData WireCellTiling WireCellSst lsp')
