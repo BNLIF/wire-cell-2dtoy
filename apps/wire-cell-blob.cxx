@@ -66,7 +66,7 @@ int main(int argc, char* argv[])
   
   
   WireCellSst::GeomDataSource gds(argv[1]);
-  std::vector<float> ex = gds.extent();
+  std::vector<double> ex = gds.extent();
   cerr << "Extent: "
        << " x:" << ex[0]/units::mm << " mm"
        << " y:" << ex[1]/units::m << " m"
@@ -259,7 +259,7 @@ int main(int argc, char* argv[])
       zt[ncount_t] = p.z/units::cm;
       ncount_t ++;
       
-      float charge = it->second;
+      double charge = it->second;
       if (charge > charge_max) charge_max = charge;
       if (charge < charge_min) charge_min = charge;
       // cout << it->second << endl;

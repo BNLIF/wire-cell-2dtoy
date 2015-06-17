@@ -46,7 +46,7 @@ int main(int argc, char* argv[])
   
   
   WireCellSst::GeomDataSource gds(argv[1]);
-  std::vector<float> ex = gds.extent();
+  std::vector<double> ex = gds.extent();
   cerr << "Extent: "
        << " x:" << ex[0]/units::mm << " mm"
        << " y:" << ex[1]/units::m << " m"
@@ -233,7 +233,7 @@ int main(int argc, char* argv[])
       	zt[ncount_t] = p.z/units::cm;
       	ncount_t ++;
 
-	float charge = it->second;
+	double charge = it->second;
 	if (charge > charge_max) charge_max = charge;
 	if (charge < charge_min) charge_min = charge;
        	// cout << it->second << endl;
@@ -377,14 +377,14 @@ int main(int argc, char* argv[])
 	//cout << allwire[j]->channel() << endl;
 	if (swimap.find(allwire[j])!=swimap.end()){
 	  int index = swimap[allwire[j]];
-	  float charge = wcmap[allwire[j]];
+	  double charge = wcmap[allwire[j]];
 	  Vswire_charge[index] =charge;
 	}
       }
       // Vswire_charge.Print();
       for (int j = 0;j!=allmcell.size();j++){
 	int index = mcimap[allmcell[j]];
-	float charge = 0;
+	double charge = 0;
 	for (int k=0; k!=((const MergeGeomCell*)allmcell[j])->get_allcell().size(); k++){
 	  charge += ccmap[((const MergeGeomCell*)allmcell[j])->get_allcell().at(k)];
 	}
@@ -424,7 +424,7 @@ int main(int argc, char* argv[])
 	cout << "Merged Cell Check: " << i << " " << sum1/3. << " " << sum2/3. << endl;
 
       // for (auto it = wcmap.begin();it!=wcmap.end(); it++){
-      // 	float charge = it->second;
+      // 	double charge = it->second;
       // 	if (charge > charge_max) charge_max = charge;
       // 	if (charge < charge_min) charge_min = charge;
       // }
