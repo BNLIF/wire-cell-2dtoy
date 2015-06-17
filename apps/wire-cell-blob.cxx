@@ -174,55 +174,7 @@ int main(int argc, char* argv[])
     cout << "chi2: " << toymatrix[i]->Get_Chi2() << endl;
     cout << "NDF: " << toymatrix[i]->Get_ndf() << endl;
 
-    // int num_blob = 0;
-    // for (int j=0;j!=allmcell.size();j++){
-    //   MergeGeomCell *mcell =(MergeGeomCell*)allmcell.at(j);
-      
-    //   double charge =toymatrix[i]->Get_Cell_Charge(mcell);
-    //   if (charge>2000){
-    // 	mcell->FindEdges();
-    // 	// std::cout << mcell->get_allcell().size() << " " << mcell->get_edgecells().size() << std::endl;
-	
-    // 	if(mcell->IsBlob()) {
-    // 	  num_blob ++; 
-    // 	  // GeomWireSelection n_mwires = mergetiling[i]->wires(*mcell);
-    // 	  // for (int k=0;k!=n_mwires.size();k++){
-    // 	  //   int ncells = 0;
-    // 	  //   for (int kk= 0; kk!=mergetiling[i]->cells(*n_mwires.at(k)).size();kk++){
-    // 	  //     if (toymatrix[i]->Get_Cell_Charge(mergetiling[i]->cells(*n_mwires.at(k)).at(kk))>2000){
-    // 	  // 	ncells ++;
-    // 	  //     }
-    // 	  //   }
-    // 	  //   std::cout << ncells << std::endl;
-    // 	  // }
-    // 	}
-	
-    // 	mcell->FindCorners(toytiling[i]->cmap(), toytiling[i]->wmap());
-    // 	GeomCellSelection corners = mcell->get_cornercells();
-    // 	total_corner_cells.insert(total_corner_cells.end(),corners.begin(),corners.end());
-    // 	for (int k=0;k!=mcell->get_allcell().size();k++){
-    // 	  total_recon_cells.push_back(mcell->get_allcell().at(k));
-    // 	  //get charge
-    // 	  double sc_charge = 0;
-    // 	  GeomCellMap scmap = toytiling[i]->cmap();
-    // 	  WireChargeMap wcmap = toytiling[i]->wcmap();
-    // 	  GeomWireSelection wires = scmap[mcell->get_allcell().at(k)];
-    // 	  double aa[3];
-    // 	  for (int q=0;q!=wires.size();q++){
-    // 	    sc_charge += wcmap[wires.at(q)];
-    // 	    aa[q] = wcmap[wires.at(q)];
-    // 	  }
-    // 	  total_scmap[mcell->get_allcell().at(k)] = sc_charge/3;
-    // 	  total_scrms[mcell->get_allcell().at(k)] = rms(aa[0],aa[1],aa[2])*3./sc_charge;
-    // 	  if (sc_charge/3 > charge_max) charge_max = sc_charge/3;
-    // 	  if (sc_charge/3 < charge_min) charge_min = sc_charge/3;
-    // 	}
-    //   }
-    // }
-
-    // toymatrix[i]->Set_blob(num_blob);
     
-    // cout << "# of blobs " << toymatrix[i]->Get_blob() << endl;
 
     
     // // for now put this part here
