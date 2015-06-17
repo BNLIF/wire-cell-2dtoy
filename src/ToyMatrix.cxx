@@ -13,21 +13,41 @@ void WireCell2dToy::ToyMatrix::JudgeSimpleBlob(WireCell2dToy::ToyTiling& toytili
      double charge =Get_Cell_Charge(mcell);
      if (charge>2000){
        mcell->FindEdges();
-       // 	// std::cout << mcell->get_allcell().size() << " " << mcell->get_edgecells().size() << std::endl;
+       // std::cout << mcell->get_allcell().size() << " " << mcell->get_edgecells().size() << std::endl;
+       int nwire = 0, max_wire = 0;
+       int ncell = 0;
        if(mcell->IsBlob()) {
 	 mcell->FindCorners(toytiling.cmap(), toytiling.wmap());
 	 num_blob ++; 
-    // 	  // GeomWireSelection n_mwires = mergetiling[i]->wires(*mcell);
-    // 	  // for (int k=0;k!=n_mwires.size();k++){
-    // 	  //   int ncells = 0;
-    // 	  //   for (int kk= 0; kk!=mergetiling[i]->cells(*n_mwires.at(k)).size();kk++){
-    // 	  //     if (toymatrix[i]->Get_Cell_Charge(mergetiling[i]->cells(*n_mwires.at(k)).at(kk))>2000){
-    // 	  // 	ncells ++;
-    // 	  //     }
-    // 	  //   }
-    // 	  //   std::cout << ncells << std::endl;
-
-	 //find simple blob ... 
+	 // GeomWireSelection n_mwires = mergetiling[i]->wires(*mcell);
+	 // for (int k=0;k!=n_mwires.size();k++){
+	 //   int ncells = 0;
+	 //   for (int kk= 0; kk!=mergetiling[i]->cells(*n_mwires.at(k)).size();kk++){
+	 //     if (toymatrix[i]->Get_Cell_Charge(mergetiling[i]->cells(*n_mwires.at(k)).at(kk))>2000){
+	 // 	ncells ++;
+	 //     }
+	 //   }
+	 //   std::cout << ncells << std::endl;
+	 
+	 // find simple blob ... 
+	 // find the merged wire regarding the merged blob
+	 GeomWireSelection wires = mergetiling.wires(*mcell);
+	 // find the number of wires 
+	 for (int k =0; k!=wires.size();k++){
+	   MergeGeomWire* mwire = (MergeGeomWire*)wires.at(k);
+	   nwire += mwire->get_allwire().size();
+	   if (mwire->get_allwire().size() > max_wire) 
+	     max_wire = mwire->get_allwire().size();
+	   GeomCellSelection cells = mergetiling.cells(*mwire);
+	   for (int kk=0; kk!= cells.size(); kk++){
+	     if (cells.at(kk) != mcell){
+	       ncell += ((MergeGeomCell*)cells.at(kk))->get_allcell().size();
+	     }
+	   }
+	 }
+	 nwire -= max_wire;
+	 // for the merged blob passed the cut, find the number of cells
+	 std::cout << "Xin: " << nwire << " " << max_wire << " " << ncell << std::endl;
 	 
        }
      }

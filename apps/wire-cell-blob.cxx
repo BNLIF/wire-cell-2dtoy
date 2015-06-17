@@ -84,15 +84,17 @@ int main(int argc, char* argv[])
     return 1;
   }
   
-
+  
   
   WireCell::ToyDepositor toydep(fds);
   const PointValueVector pvv = toydep.depositions(1);
   
-
+  
+   
   WireCell::GenerativeFDS gfds(toydep,gds,2400,5);
   gfds.jump(1);
 
+  
   WireCellSst::ToyuBooNESliceDataSource sds(gfds,1500); //set threshold at 2000 electrons
 
   
@@ -154,7 +156,8 @@ int main(int argc, char* argv[])
   for (int i=start_num;i!=end_num+1;i++){
     sds.jump(i);
     slice = sds.get();
-          
+    
+    
     toytiling[i] = new WireCell2dToy::ToyTiling(slice,gds);
     mergetiling[i] = new WireCell2dToy::MergeToyTiling(*toytiling[i],i);
     truthtiling[i] = new WireCell2dToy::TruthToyTiling(*toytiling[i],pvv,i,gds);
