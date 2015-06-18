@@ -91,7 +91,7 @@ int main(int argc, char* argv[])
   
   
    
-  WireCell::GenerativeFDS gfds(toydep,gds,2400,5,0.5*1.6*units::millimeter);
+  WireCell::GenerativeFDS gfds(toydep,gds,2400,5,2.0*1.6*units::millimeter);
   gfds.jump(1);
 
   

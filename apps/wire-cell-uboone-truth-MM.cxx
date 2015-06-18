@@ -102,7 +102,7 @@ int main(int argc, char* argv[])
   // Make GenerativeFDS to represent reco info using SimChannels for now (eventually replace with actual CalWire output)
   WireCell::ToyDepositor toydep(fds);
   const PointValueVector pvv = toydep.depositions(1);
-  WireCell::GenerativeFDS gfds(toydep,gds,binsPerFrame,totalFrames,0.5*1.6*units::millimeter);
+  WireCell::GenerativeFDS gfds(toydep,gds,binsPerFrame,totalFrames,2.0*1.6*units::millimeter);
   gfds.jump(1); // NB: look at first frame only for now
 
   // Create MicroBooNE SDS using GenerativeFDS (used for per-slice tiling)
