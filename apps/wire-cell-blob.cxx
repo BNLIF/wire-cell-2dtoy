@@ -136,8 +136,8 @@ int main(int argc, char* argv[])
   int ncount_mcell = 0;
   
   //simple cosmic
-  int start_num =185;
-  int end_num = 185;
+  // int start_num =185;
+  // int end_num = 185;
 
 
   //nue cc 
@@ -145,12 +145,12 @@ int main(int argc, char* argv[])
   // int end_num = 356;
     
   //delta 
-  // int start_num =680;
-  // int end_num = 680;
+  int start_num =680;
+  int end_num = 680;
 
   //complicated blob
-  // int start_num = 452;
-  // int end_num = 456;
+  // int start_num = 454;
+  // int end_num = 454;
   
   WireCell::Slice slice;
   for (int i=start_num;i!=end_num+1;i++){
@@ -177,6 +177,7 @@ int main(int argc, char* argv[])
     cout << "chi2: " << toymatrix[i]->Get_Chi2() << endl;
     cout << "NDF: " << toymatrix[i]->Get_ndf() << endl;
 
+    toymatrix[i]->JudgeSimpleBlob(*toytiling[i],*mergetiling[i]);
     
 
     
@@ -298,89 +299,89 @@ int main(int argc, char* argv[])
   
   
   
-  TFile *file = new TFile("shower3D.root","RECREATE");
-  TGraph2D *g = new TGraph2D();
-  TGraph2D *gt = new TGraph2D();
-  TGraph2D *g_rec = new TGraph2D();
-  Double_t x_save, y_save, z_save;
-  Double_t charge_save;
-  Double_t chi2_save;
-  Double_t ndf_save;
-  Double_t ncell_save;
-  ncount = 0;
-  int ncount1 = 0;
-  ncount_t = 0;
-  //save results 
-  for (int i=start_num;i!=end_num+1;i++){
-    //truth
-    CellChargeMap ccmap = truthtiling[i]->ccmap();
-    for (auto it = ccmap.begin();it!=ccmap.end(); it++){
-      Point p = it->first->center();
-      x_save = i*0.32;
-      y_save = p.y/units::cm;
-      z_save = p.z/units::cm;
-      charge_save = it->second;
+  // TFile *file = new TFile("shower3D.root","RECREATE");
+  // TGraph2D *g = new TGraph2D();
+  // TGraph2D *gt = new TGraph2D();
+  // TGraph2D *g_rec = new TGraph2D();
+  // Double_t x_save, y_save, z_save;
+  // Double_t charge_save;
+  // Double_t chi2_save;
+  // Double_t ndf_save;
+  // Double_t ncell_save;
+  // ncount = 0;
+  // int ncount1 = 0;
+  // ncount_t = 0;
+  // //save results 
+  // for (int i=start_num;i!=end_num+1;i++){
+  //   //truth
+  //   CellChargeMap ccmap = truthtiling[i]->ccmap();
+  //   for (auto it = ccmap.begin();it!=ccmap.end(); it++){
+  //     Point p = it->first->center();
+  //     x_save = i*0.32;
+  //     y_save = p.y/units::cm;
+  //     z_save = p.z/units::cm;
+  //     charge_save = it->second;
       
-      gt->SetPoint(ncount_t,x_save,y_save,z_save);
-      //t_true->Fill();
+  //     gt->SetPoint(ncount_t,x_save,y_save,z_save);
+  //     //t_true->Fill();
             
-      ncount_t ++;
-    }
+  //     ncount_t ++;
+  //   }
     
-    //recon 1
-    GeomCellSelection allcell = toytiling[i]->get_allcell();
-    for (int j=0;j!=allcell.size();j++){
+  //   //recon 1
+  //   GeomCellSelection allcell = toytiling[i]->get_allcell();
+  //   for (int j=0;j!=allcell.size();j++){
       
-      Point p = allcell[j]->center();
-      x_save = i*0.32;
-      y_save = p.y/units::cm;
-      z_save = p.z/units::cm;
+  //     Point p = allcell[j]->center();
+  //     x_save = i*0.32;
+  //     y_save = p.y/units::cm;
+  //     z_save = p.z/units::cm;
       
 
-      g->SetPoint(ncount,x_save,y_save,z_save);
-      //t_rec->Fill();
+  //     g->SetPoint(ncount,x_save,y_save,z_save);
+  //     //t_rec->Fill();
 
-      ncount ++;
-    }
+  //     ncount ++;
+  //   }
 
-    //recon 2 with charge
-    GeomCellSelection allmcell = mergetiling[i]->get_allcell();
-    for (int j=0;j!=allmcell.size();j++){
-      MergeGeomCell *mcell = (MergeGeomCell*)allmcell[j];
-      double charge = toymatrix[i]->Get_Cell_Charge(mcell,1);
-      if (charge>2000){
-	//truth
-	for (int k=0;k!=mcell->get_allcell().size();k++){
-	  Point p = mcell->get_allcell().at(k)->center();
-	  x_save = i*0.32;
-	  y_save = p.y/units::cm;
-	  z_save = p.z/units::cm;
-	  charge_save = charge/mcell->get_allcell().size();
-	  ncell_save = mcell->get_allcell().size();
-	  chi2_save = toymatrix[i]->Get_Chi2();
-	  ndf_save = toymatrix[i]->Get_ndf();
+  //   //recon 2 with charge
+  //   GeomCellSelection allmcell = mergetiling[i]->get_allcell();
+  //   for (int j=0;j!=allmcell.size();j++){
+  //     MergeGeomCell *mcell = (MergeGeomCell*)allmcell[j];
+  //     double charge = toymatrix[i]->Get_Cell_Charge(mcell,1);
+  //     if (charge>2000){
+  // 	//truth
+  // 	for (int k=0;k!=mcell->get_allcell().size();k++){
+  // 	  Point p = mcell->get_allcell().at(k)->center();
+  // 	  x_save = i*0.32;
+  // 	  y_save = p.y/units::cm;
+  // 	  z_save = p.z/units::cm;
+  // 	  charge_save = charge/mcell->get_allcell().size();
+  // 	  ncell_save = mcell->get_allcell().size();
+  // 	  chi2_save = toymatrix[i]->Get_Chi2();
+  // 	  ndf_save = toymatrix[i]->Get_ndf();
 
-	  g_rec->SetPoint(ncount1,x_save,y_save,z_save);
-	  //  t_rec_charge->Fill();
+  // 	  g_rec->SetPoint(ncount1,x_save,y_save,z_save);
+  // 	  //  t_rec_charge->Fill();
 	  
-	  ncount1 ++;
-	}
-      }
-    }
+  // 	  ncount1 ++;
+  // 	}
+  //     }
+  //   }
 
-    //save all results
-    // file->Write(Form("toytiling_%d",i),toytiling[i]);
-    // file->Write(Form("mergetiling_%d",i),mergetiling[i]);
-    // file->Write(Form("truthtiling_%d",i),truthtiling[i]);
-    // file->Write(Form("toymatrix_%d",i),toymatrix[i]);
+  //   //save all results
+  //   // file->Write(Form("toytiling_%d",i),toytiling[i]);
+  //   // file->Write(Form("mergetiling_%d",i),mergetiling[i]);
+  //   // file->Write(Form("truthtiling_%d",i),truthtiling[i]);
+  //   // file->Write(Form("toymatrix_%d",i),toymatrix[i]);
 
-  }
+  // }
 
-  g->Write("shower3D");
-  gt->Write("shower3D_truth");
-  g_rec->Write("shower3D_charge");
-  file->Write();
-  file->Close();
+  // g->Write("shower3D");
+  // gt->Write("shower3D_truth");
+  // g_rec->Write("shower3D_charge");
+  // file->Write();
+  // file->Close();
   
   
   return 0;

@@ -17,7 +17,7 @@ void WireCell2dToy::ToyMatrix::JudgeSimpleBlob(WireCell2dToy::ToyTiling& toytili
        int nwire = 0, max_wire = 0;
        int ncell = 0;
        if(mcell->IsBlob()) {
-	 mcell->FindCorners(toytiling.cmap(), toytiling.wmap());
+	 // mcell->FindCorners(toytiling.cmap(), toytiling.wmap());
 	 num_blob ++; 
 	 // GeomWireSelection n_mwires = mergetiling[i]->wires(*mcell);
 	 // for (int k=0;k!=n_mwires.size();k++){
@@ -35,6 +35,7 @@ void WireCell2dToy::ToyMatrix::JudgeSimpleBlob(WireCell2dToy::ToyTiling& toytili
 	 // find the number of wires 
 	 for (int k =0; k!=wires.size();k++){
 	   MergeGeomWire* mwire = (MergeGeomWire*)wires.at(k);
+	   //std::cout << mwire->get_allwire().size() << std::endl;
 	   nwire += mwire->get_allwire().size();
 	   if (mwire->get_allwire().size() > max_wire) 
 	     max_wire = mwire->get_allwire().size();
@@ -47,8 +48,12 @@ void WireCell2dToy::ToyMatrix::JudgeSimpleBlob(WireCell2dToy::ToyTiling& toytili
 	 }
 	 nwire -= max_wire;
 	 // for the merged blob passed the cut, find the number of cells
-	 std::cout << "Xin: " << nwire << " " << max_wire << " " << ncell << std::endl;
-	 
+	 //std::cout << "Xin: " << nwire << " " << max_wire << " " << ncell << std::endl;
+	 if (ncell < nwire){
+	   mcell->SetSimpleBlob(true);
+	 }else{
+	   mcell->SetSimpleBlob(true);
+	 }
        }
      }
      

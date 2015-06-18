@@ -106,6 +106,7 @@ WireCell2dToy::MergeToyTiling::MergeToyTiling(WireCell2dToy::ToyTiling& tiling, 
   for (int i=0;i!=wire_all.size();i++){
     MergeGeomWire *mwire = (MergeGeomWire*)wire_all[i];
     GeomWireSelection wires = mwire->get_allwire();
+    //std::cout << wires.size() << std::endl;
     wwsmap[mwire] = wires;
     for (int j=0;j!=wires.size();j++){
       wwmap[wires[j]] = mwire;
