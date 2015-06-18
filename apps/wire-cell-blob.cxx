@@ -136,13 +136,13 @@ int main(int argc, char* argv[])
   int ncount_mcell = 0;
   
   //simple cosmic
-  int start_num =185;
-  int end_num = 185;
+  // int start_num =185;
+  // int end_num = 185;
 
 
   //nue cc 
-  // int start_num =356;
-  // int end_num = 356;
+  int start_num =356;
+  int end_num = 356;
     
   //delta 
   // int start_num =680;
@@ -179,6 +179,7 @@ int main(int argc, char* argv[])
 
     toymatrix[i]->JudgeSimpleBlob(*toytiling[i],*mergetiling[i]);
     
+    //save stuff for display ... 
     for (int j=0;j!=allmcell.size();j++){
       MergeGeomCell *mcell =(MergeGeomCell*)allmcell.at(j);
       double charge =toymatrix[i]->Get_Cell_Charge(mcell);
@@ -187,13 +188,12 @@ int main(int argc, char* argv[])
 	  total_recon_cells.push_back(mcell->get_allcell().at(k));
 	}
       }
-
       if (mcell->IsSimpleBlob() == true){
 	GeomCellSelection corners = mcell->get_cornercells();
      	total_corner_cells.insert(total_corner_cells.end(),corners.begin(),corners.end());
       }
     }
-
+    cout << toymatrix[i]->GetSimpleBlobReduction() << endl;
 
     
     // // for now put this part here

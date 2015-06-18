@@ -51,8 +51,9 @@ void WireCell2dToy::ToyMatrix::JudgeSimpleBlob(WireCell2dToy::ToyTiling& toytili
 	 //std::cout << "Xin: " << nwire << " " << max_wire << " " << ncell << std::endl;
 	 if (ncell < nwire){
 	   mcell->SetSimpleBlob(true);
+	   simple_blob_reduction = true;
 	 }else{
-	   mcell->SetSimpleBlob(true);
+	   mcell->SetSimpleBlob(false);
 	 }
        }
      }
