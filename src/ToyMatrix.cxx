@@ -17,7 +17,7 @@ void WireCell2dToy::ToyMatrix::JudgeSimpleBlob(WireCell2dToy::ToyTiling& toytili
        int nwire = 0, max_wire = 0;
        int ncell = 0;
        if(mcell->IsBlob()) {
-	 // mcell->FindCorners(toytiling.cmap(), toytiling.wmap());
+	 mcell->FindCorners(toytiling.cmap(), toytiling.wmap());
 	 num_blob ++; 
 	 // GeomWireSelection n_mwires = mergetiling[i]->wires(*mcell);
 	 // for (int k=0;k!=n_mwires.size();k++){

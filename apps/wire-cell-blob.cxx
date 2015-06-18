@@ -136,8 +136,8 @@ int main(int argc, char* argv[])
   int ncount_mcell = 0;
   
   //simple cosmic
-  // int start_num =185;
-  // int end_num = 185;
+  int start_num =185;
+  int end_num = 185;
 
 
   //nue cc 
@@ -145,8 +145,8 @@ int main(int argc, char* argv[])
   // int end_num = 356;
     
   //delta 
-  int start_num =680;
-  int end_num = 680;
+  // int start_num =680;
+  // int end_num = 680;
 
   //complicated blob
   // int start_num = 454;
@@ -179,6 +179,21 @@ int main(int argc, char* argv[])
 
     toymatrix[i]->JudgeSimpleBlob(*toytiling[i],*mergetiling[i]);
     
+    for (int j=0;j!=allmcell.size();j++){
+      MergeGeomCell *mcell =(MergeGeomCell*)allmcell.at(j);
+      double charge =toymatrix[i]->Get_Cell_Charge(mcell);
+      if (charge > 2000){
+	for (int k=0;k!=mcell->get_allcell().size();k++){
+	  total_recon_cells.push_back(mcell->get_allcell().at(k));
+	}
+      }
+
+      if (mcell->IsSimpleBlob() == true){
+	GeomCellSelection corners = mcell->get_cornercells();
+     	total_corner_cells.insert(total_corner_cells.end(),corners.begin(),corners.end());
+      }
+    }
+
 
     
     // // for now put this part here
@@ -287,7 +302,7 @@ int main(int argc, char* argv[])
   //display.draw_truthcells_charge(total_scmap,"*same",FI);
   //display.draw_truthcells_charge(total_scrms,"*same",FI);
   display.draw_truthcells(total_ccmap,"*same");
-  //display.draw_cells(total_corner_cells,"*same",2);
+  display.draw_cells(total_corner_cells,"*same",2);
   //display.draw_reconcells(mergetiling[i]->get_allcell(),toymatrix[i],"*same",1);
   //display.draw_reconcells(blobtiling[i]->get_allcell(),blobmatrix[i],"*same",2);
   
