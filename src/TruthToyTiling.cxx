@@ -6,7 +6,7 @@ WireCell2dToy::TruthToyTiling::TruthToyTiling(WireCell2dToy::ToyTiling& tiling, 
   
   float sum = 0;
   for (int itruth = 0; itruth < pvv.size(); ++itruth){
-    if (pvv[itruth].first.x == tbin){
+    if (int(pvv[itruth].first.x/2.0/1.6/units::mm) == tbin){
       const Point& p = pvv[itruth].first; // get the point
       float charge = pvv[itruth].second;
       

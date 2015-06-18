@@ -4,6 +4,11 @@ WireCell2dToy::SimpleBlobToyTiling::SimpleBlobToyTiling(WireCell2dToy::ToyTiling
   toytiling = &toytiling1;
   mergetiling = &mergetiling1;
   toymatrix = &toymatrix1;
+
+  if (toymatrix->GetSimpleBlobReduction()){
+    //do stuff here
+    
+  }
   
 }
 
