@@ -287,7 +287,7 @@ int main(int argc, char* argv[])
   //display.draw_truthcells_charge(total_scmap,"*same",FI);
   //display.draw_truthcells_charge(total_scrms,"*same",FI);
   display.draw_truthcells(total_ccmap,"*same");
-  display.draw_cells(total_corner_cells,"*same",2);
+  //display.draw_cells(total_corner_cells,"*same",2);
   //display.draw_reconcells(mergetiling[i]->get_allcell(),toymatrix[i],"*same",1);
   //display.draw_reconcells(blobtiling[i]->get_allcell(),blobmatrix[i],"*same",2);
   
