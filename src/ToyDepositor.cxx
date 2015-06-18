@@ -24,7 +24,7 @@ const PointValueVector& ToyDepositor::depositions(int frame_number) const{
   for (size_t itruth = 0; itruth < sts.size(); ++itruth) {
      const WireCell::SimTruth* st = sts[itruth];
      PointValue p;
-     p.first.x = int(st->x() *units::cm/units::mm/1.6/2.); //merge 2 us into one
+     p.first.x = st->x() * units::cm;
      p.first.y = st->y() * units::cm;
      p.first.z = st->z() * units::cm;
      p.second = st->charge();
