@@ -41,14 +41,14 @@ void WireCell2dToy::ToyMatrix::JudgeSimpleBlob(WireCell2dToy::ToyTiling& toytili
 	     max_wire = mwire->get_allwire().size();
 	   GeomCellSelection cells = mergetiling.cells(*mwire);
 	   for (int kk=0; kk!= cells.size(); kk++){
-	     if (cells.at(kk) != mcell){
+	     if (cells.at(kk) != mcell && Get_Cell_Charge(cells.at(kk))>2000){
 	       ncell += ((MergeGeomCell*)cells.at(kk))->get_allcell().size();
 	     }
 	   }
 	 }
 	 nwire -= max_wire;
 	 // for the merged blob passed the cut, find the number of cells
-	 //std::cout << "Xin: " << nwire << " " << max_wire << " " << ncell << std::endl;
+	 std::cout << "Xin: " << nwire << " " << max_wire << " " << ncell << std::endl;
 	 if (ncell < nwire){
 	   mcell->SetSimpleBlob(true);
 	   simple_blob_reduction = true;

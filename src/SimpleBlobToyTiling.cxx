@@ -1,6 +1,8 @@
 #include "WireCell2dToy/SimpleBlobToyTiling.h"
 using namespace WireCell;
-WireCell2dToy::SimpleBlobToyTiling::SimpleBlobToyTiling(WireCell2dToy::ToyTiling& toytiling1, WireCell2dToy::MergeToyTiling& mergetiling1, WireCell2dToy::ToyMatrix& toymatrix1){
+WireCell2dToy::SimpleBlobToyTiling::SimpleBlobToyTiling(WireCell2dToy::ToyTiling& toytiling1, WireCell2dToy::MergeToyTiling& mergetiling1, WireCell2dToy::ToyMatrix& toymatrix1,
+							WireCell2dToy::MergeToyTiling& prev_mergetiling, WireCell2dToy::ToyMatrix& prev_toymatrix,
+							WireCell2dToy::MergeToyTiling& next_mergetiling, WireCell2dToy::ToyMatrix& next_toymatrix){
   toytiling = &toytiling1;
   mergetiling = &mergetiling1;
   toymatrix = &toymatrix1;
@@ -24,6 +26,8 @@ WireCell2dToy::SimpleBlobToyTiling::SimpleBlobToyTiling(WireCell2dToy::ToyTiling
 	    for (int k=0;k!=cells.size();k++){
 	      if (k==0){
 		mcorner_cell = new MergeGeomCell(10000,*cells.at(k));
+		mcorner_cell->ewires.insert(index1);
+		mcorner_cell->ewires.insert(index2);
 	      }else{
 		mcorner_cell->AddCell(*cells.at(k));
 	      }
@@ -42,6 +46,10 @@ WireCell2dToy::SimpleBlobToyTiling::SimpleBlobToyTiling(WireCell2dToy::ToyTiling
 		if (it!=tcells.end()){
 		  delete mcorner_cell;
 		  flag1 = 1;
+		  ((MergeGeomCell*)corner_smcells[nsimple_blob].at(k))->ewires.insert(index1);
+		  ((MergeGeomCell*)corner_smcells[nsimple_blob].at(k))->ewires.insert(index2);
+		  
+
 		  for (int kk = 0;kk!=cells.size();kk++){
 		    auto it1 = find(tcells.begin(),tcells.end(),cells.at(kk));
 		    if (it1!=tcells.end()){
@@ -75,7 +83,11 @@ WireCell2dToy::SimpleBlobToyTiling::SimpleBlobToyTiling(WireCell2dToy::ToyTiling
     
     std::cout << "SimpleBlobTiling: "<< nsimple_blob << " " << corner_smcells[0].size() << " " << corner_mcells[0].size() << std::endl;
     for (int j=0;j!=corner_smcells[0].size();j++){
-      std::cout << ((MergeGeomCell*)corner_smcells[0].at(j))->get_allcell().size() << std::endl;
+      std::cout << ((MergeGeomCell*)corner_smcells[0].at(j))->get_allcell().size() << " ";
+      for (auto it = ((MergeGeomCell*)corner_smcells[0].at(j))->ewires.begin(); it!= ((MergeGeomCell*)corner_smcells[0].at(j))->ewires.end(); it++){
+	std::cout << *it << " ";
+      }
+      std::cout << std::endl;
     }
 
   }

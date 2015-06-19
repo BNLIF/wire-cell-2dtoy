@@ -137,8 +137,8 @@ int main(int argc, char* argv[])
   int ncount_mcell = 0;
   
   //simple cosmic
-  int start_num =185;
-  int end_num = 185;
+  int start_num =184;
+  int end_num = 186;
 
 
   //nue cc 
@@ -200,12 +200,7 @@ int main(int argc, char* argv[])
      	//total_corner_cells.insert(total_corner_cells.end(),corners.begin(),corners.end());
       }
     }
-    //cout << toymatrix[i]->GetSimpleBlobReduction() << endl;
-
     
-    
-    // for now put this part here
-    blobtiling[i] = new WireCell2dToy::SimpleBlobToyTiling(*toytiling[i],*mergetiling[i],*toymatrix[i]);
     
     // blobmatrix[i] = new WireCell2dToy::ToyMatrix(*toytiling[i],*blobtiling[i]);
 
@@ -253,10 +248,22 @@ int main(int argc, char* argv[])
       // 	cout << mergetiling.wires(*allmcell[j]).size() << endl;
     }
     
-    
-   
-    
   }
+  
+  //use time information
+  for (int i=start_num;i!=end_num+1;i++){
+    if (toymatrix[i]->GetSimpleBlobReduction()){
+      if (i==start_num){
+	blobtiling[i] = new WireCell2dToy::SimpleBlobToyTiling(*toytiling[i],*mergetiling[i],*toymatrix[i],*mergetiling[i+1],*toymatrix[i+1],*mergetiling[i+1],*toymatrix[i+1]);
+      }else if (i==end_num){
+	blobtiling[i] = new WireCell2dToy::SimpleBlobToyTiling(*toytiling[i],*mergetiling[i],*toymatrix[i],*mergetiling[i-1],*toymatrix[i-1],*mergetiling[i-1],*toymatrix[i-1]);
+      }else{
+	blobtiling[i] = new WireCell2dToy::SimpleBlobToyTiling(*toytiling[i],*mergetiling[i],*toymatrix[i],*mergetiling[i-1],*toymatrix[i-1],*mergetiling[i+1],*toymatrix[i+1]);
+      }
+    }
+  }
+  
+
 
   toymetric.Print();
   std::cout << std::endl;
