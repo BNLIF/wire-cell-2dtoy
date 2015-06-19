@@ -137,13 +137,13 @@ int main(int argc, char* argv[])
   int ncount_mcell = 0;
   
   //simple cosmic
-  int start_num =184;
-  int end_num = 187;
+  // int start_num =184;
+  // int end_num = 187;
 
 
   //nue cc 
-  // int start_num =355;
-  // int end_num = 357;
+  int start_num =355;
+  int end_num = 357;
     
   //delta 
   // int start_num =680;
