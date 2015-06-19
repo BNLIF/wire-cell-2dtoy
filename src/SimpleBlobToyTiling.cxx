@@ -63,9 +63,19 @@ WireCell2dToy::SimpleBlobToyTiling::SimpleBlobToyTiling(WireCell2dToy::ToyTiling
 	    //save the special cells ...  //need to add time later ... 
 	    if (flag1==0){
 	      if (flag!=-1){
+		// if (corner_smcells.at(nsimple_blob) == corner_smcells.end()){
+		//   GeomCellSelection cellss;
+		//   corner_smcells.push_back(cellss);
+		// }
 		corner_smcells[nsimple_blob].push_back(mcorner_cell);
+		
 	      }else{
+		// if (corner_mcells.at(nsimple_blob) == corner_mcells.end()){
+		//   GeomCellSelection cellss;
+		//   corner_mcells.push_back(cellss);
+		// }
 		corner_mcells[nsimple_blob].push_back(mcorner_cell);
+		  
 	      }
 	    }
 	    
@@ -127,9 +137,9 @@ WireCell2dToy::SimpleBlobToyTiling::SimpleBlobToyTiling(WireCell2dToy::ToyTiling
 
 
 	nsimple_blob ++;
-	if (nsimple_blob >= 10) {
-	  break;
-	}
+	// if (nsimple_blob >= 10) {
+	//   break;
+	// }
 	
       }
     }

@@ -138,12 +138,12 @@ int main(int argc, char* argv[])
   
   //simple cosmic
   // int start_num =184;
-  // int end_num = 186;
+  // int end_num = 187;
 
 
   //nue cc 
   int start_num =355;
-  int end_num = 356;
+  int end_num = 357;
     
   //delta 
   // int start_num =680;
