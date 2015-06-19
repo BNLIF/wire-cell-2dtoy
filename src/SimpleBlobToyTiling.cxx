@@ -35,31 +35,32 @@ WireCell2dToy::SimpleBlobToyTiling::SimpleBlobToyTiling(WireCell2dToy::ToyTiling
 	    }
 	    int flag1 = 0;
 	    
-	    if (flag!=-1){
-	      for (int k=0;k!=corner_smcells[nsimple_blob].size();k++){
-		// see if any previous merged cell contain this cell
-		// if so, add all cells to this merged cell 
-		// and delete this cell
-		// change flag1 value;
-		GeomCellSelection tcells = ((MergeGeomCell*)corner_smcells[nsimple_blob].at(k))->get_allcell();
-		auto it = find(tcells.begin(),tcells.end(),cells.at(flag));
-		if (it!=tcells.end()){
-		  delete mcorner_cell;
-		  flag1 = 1;
-		  ((MergeGeomCell*)corner_smcells[nsimple_blob].at(k))->ewires.insert(index1);
-		  ((MergeGeomCell*)corner_smcells[nsimple_blob].at(k))->ewires.insert(index2);
+	    // if (flag!=-1){
+	    //   for (int k=0;k!=corner_smcells[nsimple_blob].size();k++){
+	    // 	// see if any previous merged cell contain this cell
+	    // 	// if so, add all cells to this merged cell 
+	    // 	// and delete this cell
+	    // 	// change flag1 value;
+	    // 	GeomCellSelection tcells = ((MergeGeomCell*)corner_smcells[nsimple_blob].at(k))->get_allcell();
+	    // 	auto it = find(tcells.begin(),tcells.end(),cells.at(flag));
+	    // 	if (it!=tcells.end()){
+	    // 	  delete mcorner_cell;
+	    // 	  flag1 = 1;
+	    // 	  ((MergeGeomCell*)corner_smcells[nsimple_blob].at(k))->ewires.insert(index1);
+	    // 	  ((MergeGeomCell*)corner_smcells[nsimple_blob].at(k))->ewires.insert(index2);
 		  
 
-		  for (int kk = 0;kk!=cells.size();kk++){
-		    auto it1 = find(tcells.begin(),tcells.end(),cells.at(kk));
-		    if (it1!=tcells.end()){
-		      ((MergeGeomCell*)corner_smcells[nsimple_blob].at(k))->AddCell(*cells.at(kk));
-		    }
-		  }
-		}
-	      }
-	    }
-	  //save the special cells ...  //need to add time later ... 
+	    // 	  for (int kk = 0;kk!=cells.size();kk++){
+	    // 	    auto it1 = find(tcells.begin(),tcells.end(),cells.at(kk));
+	    // 	    if (it1==tcells.end()){
+	    // 	      ((MergeGeomCell*)corner_smcells[nsimple_blob].at(k))->AddCell(*cells.at(kk));
+	    // 	    }
+	    // 	  }
+		  
+	    // 	}
+	    //   }
+	    // }
+	    //save the special cells ...  //need to add time later ... 
 	    if (flag1==0){
 	      if (flag!=-1){
 		corner_smcells[nsimple_blob].push_back(mcorner_cell);
@@ -72,14 +73,68 @@ WireCell2dToy::SimpleBlobToyTiling::SimpleBlobToyTiling(WireCell2dToy::ToyTiling
 
 	}
 
+	// going through the mcells array and judge if any of them are special
+	// if so move to the smcells
+	for (auto it = corner_mcells[nsimple_blob].end()-1; it>=corner_mcells[nsimple_blob].begin();it--){
+	  MergeGeomCell *mcell = (MergeGeomCell*) (*it);
+	  
+	  // for (int j=0;j!=mcell->get_allcell().size();j++){
+	  //   std::cout << j << " " << mcell->get_allcell().at(j)->center().y << " " << mcell->get_allcell().at(j)->center().z << " " << std::endl;
+	  // }
+
+	  int flag = 0;
+	  //see previous time slice
+	  for (int j=0;j!=prev_mergetiling.get_allcell().size();j++){
+	    MergeGeomCell *prev_mcell = (MergeGeomCell*) prev_mergetiling.get_allcell().at(j);
+	    if (prev_toymatrix.Get_Cell_Charge(prev_mcell)>2000){
+	      
+	      // for (int k=0;k!=prev_mcell->get_allcell().size();k++){
+	      // 	std::cout << k << " " << prev_mcell->get_allcell().at(k)->center().y << " " << prev_mcell->get_allcell().at(k)->center().z << " " << std::endl;
+	      // }
+	      // std::cout << it - corner_mcells[nsimple_blob].begin() << " " << mcell->get_allcell().size() << " " << prev_mcell->get_allcell().size() << " " << mcell->Overlap(*prev_mcell) << std::endl;
+
+	      if (mcell->Overlap1(*prev_mcell)){
+	      	std::cout << mcell->center().y << " " << mcell->center().z << " " <<
+	      	  prev_mcell->center().y << " " << prev_mcell->center().z << std::endl;
+	      	//std::cout << it - corner_mcells[nsimple_blob].begin();
+	      	flag = 1;
+	      	break;
+	      }
+	    }
+	  }
+	  
+	  //see next time slice
+	  if (flag==0){
+	    for (int j=0;j!=next_mergetiling.get_allcell().size();j++){
+	      MergeGeomCell *next_mcell = (MergeGeomCell*) next_mergetiling.get_allcell().at(j);
+	      if (next_toymatrix.Get_Cell_Charge(next_mcell)>2000){
+		if (mcell->Overlap1(*next_mcell)){
+		  flag = 1;
+		  break;
+		}
+	      }
+	    }
+	  }
+	  
+	  
+	  if (flag==1){
+	    corner_smcells[nsimple_blob].push_back(mcell);
+	    corner_mcells[nsimple_blob].pop_back();
+	  }
+	  
+	}
+
+
+
 	nsimple_blob ++;
 	if (nsimple_blob >= 10) {
 	  break;
 	}
-
+	
       }
     }
 
+    
     
     std::cout << "SimpleBlobTiling: "<< nsimple_blob << " " << corner_smcells[0].size() << " " << corner_mcells[0].size() << std::endl;
     for (int j=0;j!=corner_smcells[0].size();j++){

@@ -48,7 +48,7 @@ void WireCell2dToy::ToyMatrix::JudgeSimpleBlob(WireCell2dToy::ToyTiling& toytili
 	 }
 	 nwire -= max_wire;
 	 // for the merged blob passed the cut, find the number of cells
-	 std::cout << "Xin: " << nwire << " " << max_wire << " " << ncell << std::endl;
+	 //std::cout << "Xin: " << nwire << " " << max_wire << " " << ncell << std::endl;
 	 if (ncell < nwire){
 	   mcell->SetSimpleBlob(true);
 	   simple_blob_reduction = true;
