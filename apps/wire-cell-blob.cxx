@@ -138,7 +138,7 @@ int main(int argc, char* argv[])
   
   //simple cosmic
   int start_num =184;
-  int end_num = 186;
+  int end_num = 187;
 
 
   //nue cc 

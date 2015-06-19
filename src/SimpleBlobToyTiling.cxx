@@ -32,12 +32,16 @@ WireCell2dToy::SimpleBlobToyTiling::SimpleBlobToyTiling(WireCell2dToy::ToyTiling
 	    for (int k=0;k!=cells.size();k++){
 	      if (k==0){
 		mcorner_cell = new MergeGeomCell(10000,*cells.at(k));
+		cell_rank[mcorner_cell] = 0;
 		mcorner_cell->ewires.insert(index1);
 		mcorner_cell->ewires.insert(index2);
 	      }else{
 		mcorner_cell->AddCell(*cells.at(k));
 	      }
-	      if (indexmap[cells.at(k)] == 3) flag=k;
+	      if (indexmap[cells.at(k)] == 3) {
+		flag=k;
+		cell_rank[mcorner_cell] += 5; // should be adjusted later?
+	      }
 	    }
 	    int flag1 = 0;
 	    
@@ -54,15 +58,12 @@ WireCell2dToy::SimpleBlobToyTiling::SimpleBlobToyTiling(WireCell2dToy::ToyTiling
 	    // 	  flag1 = 1;
 	    // 	  ((MergeGeomCell*)corner_smcells[nsimple_blob].at(k))->ewires.insert(index1);
 	    // 	  ((MergeGeomCell*)corner_smcells[nsimple_blob].at(k))->ewires.insert(index2);
-		  
-
 	    // 	  for (int kk = 0;kk!=cells.size();kk++){
 	    // 	    auto it1 = find(tcells.begin(),tcells.end(),cells.at(kk));
 	    // 	    if (it1==tcells.end()){
 	    // 	      ((MergeGeomCell*)corner_smcells[nsimple_blob].at(k))->AddCell(*cells.at(kk));
 	    // 	    }
 	    // 	  }
-		  
 	    // 	}
 	    //   }
 	    // }
@@ -89,54 +90,76 @@ WireCell2dToy::SimpleBlobToyTiling::SimpleBlobToyTiling(WireCell2dToy::ToyTiling
 
 	}
 
+	// going through smcells array and properly calculate index
+	for (auto it = corner_smcells[nsimple_blob].begin(); it!=corner_smcells[nsimple_blob].end();it++){
+	  MergeGeomCell *mcell = (MergeGeomCell*) (*it);
+	  for (int j=0;j!=prev_mergetiling.get_allcell().size();j++){
+	    MergeGeomCell *prev_mcell = (MergeGeomCell*) prev_mergetiling.get_allcell().at(j);
+	    if (prev_toymatrix.Get_Cell_Charge(prev_mcell)>2000){
+	      int temp_val = mcell->Overlap1(*prev_mcell);
+	      if (temp_val){
+		cell_rank[mcell] += temp_val;
+		break;
+	      }
+	    }
+	  }
+	  //see next time slice
+	  for (int j=0;j!=next_mergetiling.get_allcell().size();j++){
+	    MergeGeomCell *next_mcell = (MergeGeomCell*) next_mergetiling.get_allcell().at(j);
+	    if (next_toymatrix.Get_Cell_Charge(next_mcell)>2000){
+	      int temp_val = mcell->Overlap1(*next_mcell);
+	      if (temp_val){
+		cell_rank[mcell] += temp_val;
+		break;
+	      }
+	    }
+	  }
+	}
+	
 	// going through the mcells array and judge if any of them are special
 	// if so move to the smcells
-	for (auto it = corner_mcells[nsimple_blob].end()-1; it>=corner_mcells[nsimple_blob].begin();it--){
+	for (auto it = corner_mcells[nsimple_blob].begin(); it!=corner_mcells[nsimple_blob].end();it++){
 	  MergeGeomCell *mcell = (MergeGeomCell*) (*it);
-	  
-	  // for (int j=0;j!=mcell->get_allcell().size();j++){
-	  //   std::cout << j << " " << mcell->get_allcell().at(j)->center().y << " " << mcell->get_allcell().at(j)->center().z << " " << std::endl;
-	  // }
-
 	  int flag = 0;
 	  //see previous time slice
 	  for (int j=0;j!=prev_mergetiling.get_allcell().size();j++){
 	    MergeGeomCell *prev_mcell = (MergeGeomCell*) prev_mergetiling.get_allcell().at(j);
 	    if (prev_toymatrix.Get_Cell_Charge(prev_mcell)>2000){
-	      
-	      // for (int k=0;k!=prev_mcell->get_allcell().size();k++){
-	      // 	std::cout << k << " " << prev_mcell->get_allcell().at(k)->center().y << " " << prev_mcell->get_allcell().at(k)->center().z << " " << std::endl;
-	      // }
-	      // std::cout << it - corner_mcells[nsimple_blob].begin() << " " << mcell->get_allcell().size() << " " << prev_mcell->get_allcell().size() << " " << mcell->Overlap(*prev_mcell) << std::endl;
-
-	      if (mcell->Overlap1(*prev_mcell)){
-	      	std::cout << mcell->center().y << " " << mcell->center().z << " " <<
-	      	  prev_mcell->center().y << " " << prev_mcell->center().z << std::endl;
-	      	//std::cout << it - corner_mcells[nsimple_blob].begin();
-	      	flag = 1;
+	      int temp_val = mcell->Overlap1(*prev_mcell);
+	      if (temp_val){
+		cell_rank[mcell] += temp_val;
+		flag = 1;
 	      	break;
 	      }
 	    }
 	  }
-	  
 	  //see next time slice
-	  if (flag==0){
-	    for (int j=0;j!=next_mergetiling.get_allcell().size();j++){
-	      MergeGeomCell *next_mcell = (MergeGeomCell*) next_mergetiling.get_allcell().at(j);
-	      if (next_toymatrix.Get_Cell_Charge(next_mcell)>2000){
-		if (mcell->Overlap1(*next_mcell)){
-		  flag = 1;
-		  break;
-		}
+	  for (int j=0;j!=next_mergetiling.get_allcell().size();j++){
+	    MergeGeomCell *next_mcell = (MergeGeomCell*) next_mergetiling.get_allcell().at(j);
+	    if (next_toymatrix.Get_Cell_Charge(next_mcell)>2000){
+	      int temp_val = mcell->Overlap1(*next_mcell);
+	      if (temp_val){
+		cell_rank[mcell] += temp_val;
+		flag = 1;
+		break;
 	      }
 	    }
 	  }
-	  	  
 	  if (flag==1){
 	    corner_smcells[nsimple_blob].push_back(mcell);
-	    corner_mcells[nsimple_blob].pop_back();
 	  }
 	}
+	for (auto it = corner_smcells[nsimple_blob].begin(); it!=corner_smcells[nsimple_blob].end();it++){
+	  MergeGeomCell *mcell = (MergeGeomCell*) (*it);
+	  auto itq = find( corner_mcells[nsimple_blob].begin(),  corner_mcells[nsimple_blob].end(), mcell);
+	  if (itq != corner_mcells[nsimple_blob].end()){
+	    corner_mcells[nsimple_blob].erase(itq);
+	  }
+	}
+
+	
+
+
 
 	//now put everything into hypo_ccells
 	if (hypo_ccells.size() < nsimple_blob + 1){
@@ -184,7 +207,6 @@ WireCell2dToy::SimpleBlobToyTiling::SimpleBlobToyTiling(WireCell2dToy::ToyTiling
 	      flag_new = 0;
 	      flag_merge = 1;
 	    }
-	    
 	  }
 	  
 	  
@@ -219,8 +241,6 @@ WireCell2dToy::SimpleBlobToyTiling::SimpleBlobToyTiling(WireCell2dToy::ToyTiling
 	  // 	flag_new = 1;
 	  //     }
 	  //   }
-	    
-	    
 	  //   if (flag_new == 1 && corner_mcells[nsimple_blob].size()!=0){
 	  //     //insert an element and delete one ... 
 	  //     GeomCellSelection qc;
@@ -249,7 +269,11 @@ WireCell2dToy::SimpleBlobToyTiling::SimpleBlobToyTiling(WireCell2dToy::ToyTiling
     
     std::cout << "SimpleBlobTiling: "<< nsimple_blob << " " << corner_smcells[0].size() << " " << corner_mcells[0].size() << " " << hypo_ccells.at(0).size() << std::endl;
     for (int j=0;j!=hypo_ccells.at(0).size();j++){
-      std::cout << hypo_ccells.at(0).at(j).size() <<std::endl;
+      std::cout << hypo_ccells.at(0).at(j).size() << " ";
+      for (int k = 0;k!= hypo_ccells.at(0).at(j).size();k++){
+	std::cout << cell_rank[hypo_ccells.at(0).at(j).at(k)] << " ";
+      }
+      std::cout << std::endl;
     }
     // for (int j=0;j!=corner_smcells[0].size();j++){
     //   std::cout << ((MergeGeomCell*)corner_smcells[0].at(j))->get_allcell().size() << " ";

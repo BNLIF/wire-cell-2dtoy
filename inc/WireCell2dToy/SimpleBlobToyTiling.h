@@ -29,6 +29,7 @@ namespace WireCell2dToy{
     
     //save the second pass results to use for hypothesis formation
     std::vector<WireCell::GeomCellSelectionV> hypo_ccells;
+    WireCell::CellIndexMap cell_rank;
     
   };
 }
