@@ -7,6 +7,12 @@ WireCell2dToy::SimpleBlobToyTiling::SimpleBlobToyTiling(WireCell2dToy::ToyTiling
   mergetiling = &mergetiling1;
   toymatrix = &toymatrix1;
   
+
+  //save the first pass results
+  WireCell::GeomCellSelectionV corner_mcells;
+  WireCell::GeomCellSelectionV corner_smcells;
+  
+
   nsimple_blob = 0;
   MergeGeomCell *mcorner_cell;
   if (toymatrix->GetSimpleBlobReduction()){
@@ -63,17 +69,17 @@ WireCell2dToy::SimpleBlobToyTiling::SimpleBlobToyTiling(WireCell2dToy::ToyTiling
 	    //save the special cells ...  //need to add time later ... 
 	    if (flag1==0){
 	      if (flag!=-1){
-		// if (corner_smcells.at(nsimple_blob) == corner_smcells.end()){
-		//   GeomCellSelection cellss;
-		//   corner_smcells.push_back(cellss);
-		// }
+		if (corner_smcells.size() < nsimple_blob + 1){
+		  GeomCellSelection cellss;
+		  corner_smcells.push_back(cellss);
+		}
 		corner_smcells[nsimple_blob].push_back(mcorner_cell);
 		
 	      }else{
-		// if (corner_mcells.at(nsimple_blob) == corner_mcells.end()){
-		//   GeomCellSelection cellss;
-		//   corner_mcells.push_back(cellss);
-		// }
+		if (corner_mcells.size() < nsimple_blob + 1){
+		  GeomCellSelection cellss;
+		  corner_mcells.push_back(cellss);
+		}
 		corner_mcells[nsimple_blob].push_back(mcorner_cell);
 		  
 	      }
@@ -125,15 +131,110 @@ WireCell2dToy::SimpleBlobToyTiling::SimpleBlobToyTiling(WireCell2dToy::ToyTiling
 	      }
 	    }
 	  }
-	  
-	  
+	  	  
 	  if (flag==1){
 	    corner_smcells[nsimple_blob].push_back(mcell);
 	    corner_mcells[nsimple_blob].pop_back();
 	  }
-	  
 	}
 
+	//now put everything into hypo_ccells
+	if (hypo_ccells.size() < nsimple_blob + 1){
+	  GeomCellSelectionV qcv; // vector of vector
+	  
+	  // first deal with smcells
+	  // do a loop, and insert the first element, 
+	  // do a loop, and merge anything that can be merged, erase, if none
+	  // insert the second element until nothing in the smcells;
+	  int flag_new = 1; //insert?
+	  int flag_merge = 0; //merge?
+	  while(corner_smcells[nsimple_blob].size()){
+	    if (flag_merge == 1 && corner_smcells[nsimple_blob].size()!=0){
+	      int temp_flag = 0;
+	      //do the merge part
+	      for (int j=0;j!=corner_smcells[nsimple_blob].size();j++){
+	        MergeGeomCell* mcell1 = (MergeGeomCell*) corner_smcells[nsimple_blob].at(j);
+		for (int k = 0;k!=qcv.size();k++){
+		  for (int kk=0;kk!=qcv.at(k).size();kk++){
+		    MergeGeomCell* mcell2 = (MergeGeomCell*) qcv.at(k).at(kk);
+		    if (mcell1->Overlap1(*mcell2)){
+		      qcv.at(k).push_back(mcell1);
+		      corner_smcells[nsimple_blob].erase(corner_smcells[nsimple_blob].begin() + j);
+		      temp_flag = 1;
+		      break;
+		    }
+		  }
+		  if (temp_flag==1) break;
+		}
+		if (temp_flag==1) break;
+	      }
+	      if (temp_flag == 0){
+		flag_merge = 0;
+		flag_new = 1;
+	      }
+	    }
+	    
+	    
+	    if (flag_new == 1 && corner_smcells[nsimple_blob].size()!=0){
+	      //insert an element and delete one ... 
+	      GeomCellSelection qc;
+	      qc.push_back(corner_smcells[nsimple_blob].at(corner_smcells[nsimple_blob].size()-1));
+	      qcv.push_back(qc);
+	      corner_smcells[nsimple_blob].pop_back();
+	      flag_new = 0;
+	      flag_merge = 1;
+	    }
+	    
+	  }
+	  
+	  
+	  // then deal with mcells
+	  if (corner_mcells[nsimple_blob].size()!=0)
+	    qcv.push_back(corner_mcells[nsimple_blob]);
+
+	  // flag_new = 1; //insert?
+	  // flag_merge = 0; //merge?
+	  // while(corner_mcells[nsimple_blob].size()){
+	  //   if (flag_merge == 1 && corner_mcells[nsimple_blob].size()!=0){
+	  //     int temp_flag = 0;
+	  //     //do the merge part
+	  //     for (int j=0;j!=corner_mcells[nsimple_blob].size();j++){
+	  //       MergeGeomCell* mcell1 = (MergeGeomCell*) corner_mcells[nsimple_blob].at(j);
+	  // 	for (int k = 0;k!=qcv.size();k++){
+	  // 	  for (int kk=0;kk!=qcv.at(k).size();kk++){
+	  // 	    MergeGeomCell* mcell2 = (MergeGeomCell*) qcv.at(k).at(kk);
+	  // 	    if (mcell1->Overlap1(*mcell2)){
+	  // 	      qcv.at(k).push_back(mcell1);
+	  // 	      corner_mcells[nsimple_blob].erase(corner_mcells[nsimple_blob].begin() + j);
+	  // 	      temp_flag = 1;
+	  // 	      break;
+	  // 	    }
+	  // 	  }
+	  // 	  if (temp_flag==1) break;
+	  // 	}
+	  // 	if (temp_flag==1) break;
+	  //     }
+	  //     if (temp_flag == 0){
+	  // 	flag_merge = 0;
+	  // 	flag_new = 1;
+	  //     }
+	  //   }
+	    
+	    
+	  //   if (flag_new == 1 && corner_mcells[nsimple_blob].size()!=0){
+	  //     //insert an element and delete one ... 
+	  //     GeomCellSelection qc;
+	  //     qc.push_back(corner_mcells[nsimple_blob].at(corner_mcells[nsimple_blob].size()-1));
+	  //     qcv.push_back(qc);
+	  //     corner_mcells[nsimple_blob].pop_back();
+	  //     flag_new = 0;
+	  //     flag_merge = 1;
+	  //   }
+	  // }
+
+	  
+	  hypo_ccells.push_back(qcv); //save things in ... 
+	}
 
 
 	nsimple_blob ++;
@@ -146,25 +247,36 @@ WireCell2dToy::SimpleBlobToyTiling::SimpleBlobToyTiling(WireCell2dToy::ToyTiling
 
     
     
-    std::cout << "SimpleBlobTiling: "<< nsimple_blob << " " << corner_smcells[0].size() << " " << corner_mcells[0].size() << std::endl;
-    for (int j=0;j!=corner_smcells[0].size();j++){
-      std::cout << ((MergeGeomCell*)corner_smcells[0].at(j))->get_allcell().size() << " ";
-      for (auto it = ((MergeGeomCell*)corner_smcells[0].at(j))->ewires.begin(); it!= ((MergeGeomCell*)corner_smcells[0].at(j))->ewires.end(); it++){
-	std::cout << *it << " ";
-      }
-      std::cout << std::endl;
+    std::cout << "SimpleBlobTiling: "<< nsimple_blob << " " << corner_smcells[0].size() << " " << corner_mcells[0].size() << " " << hypo_ccells.at(0).size() << std::endl;
+    for (int j=0;j!=hypo_ccells.at(0).size();j++){
+      std::cout << hypo_ccells.at(0).at(j).size() <<std::endl;
     }
+    // for (int j=0;j!=corner_smcells[0].size();j++){
+    //   std::cout << ((MergeGeomCell*)corner_smcells[0].at(j))->get_allcell().size() << " ";
+    //   for (auto it = ((MergeGeomCell*)corner_smcells[0].at(j))->ewires.begin(); it!= ((MergeGeomCell*)corner_smcells[0].at(j))->ewires.end(); it++){
+    // 	std::cout << *it << " ";
+    //   }
+    //   std::cout << std::endl;
+    // }
 
   }
 }
 
 WireCell2dToy::SimpleBlobToyTiling::~SimpleBlobToyTiling(){
-  for (int i=0;i!=nsimple_blob;i++){
-    for (int j=0;j!=corner_mcells[i].size();j++){
-      delete corner_mcells[i].at(j);
-    }
-    for (int j=0;j!=corner_smcells[i].size();j++){
-      delete corner_smcells[i].at(j);
+  // for (int i=0;i!=nsimple_blob;i++){
+  //   for (int j=0;j!=corner_mcells[i].size();j++){
+  //     delete corner_mcells[i].at(j);
+  //   }
+  //   for (int j=0;j!=corner_smcells[i].size();j++){
+  //     delete corner_smcells[i].at(j);
+  //   }
+  // }
+
+  for (int i = 0 ;i!=hypo_ccells.size(); i++){
+    for (int j = 0; j!=hypo_ccells.at(i).size();j++){
+      for (int k=0;k!=hypo_ccells.at(i).at(j).size();k++){
+	delete hypo_ccells.at(i).at(j).at(k);
+      }
     }
   }
 }

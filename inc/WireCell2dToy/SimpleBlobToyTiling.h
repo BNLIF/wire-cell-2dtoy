@@ -22,8 +22,13 @@ namespace WireCell2dToy{
     WireCell2dToy::ToyMatrix *toymatrix;
     
     int nsimple_blob; //smaller than 5 for now
-    WireCell::GeomCellSelection corner_mcells[10];
-    WireCell::GeomCellSelection corner_smcells[10];
+    /* WireCell::GeomCellSelection corner_mcells[10]; */
+    /* WireCell::GeomCellSelection corner_smcells[10]; */
+        
+   
+    
+    //save the second pass results to use for hypothesis formation
+    std::vector<WireCell::GeomCellSelectionV> hypo_ccells;
     
   };
 }
