@@ -5,7 +5,7 @@
 #include "WireCell2dToy/ToyTiling.h"
 #include "WireCell2dToy/MergeToyTiling.h"
 #include "WireCell2dToy/TruthToyTiling.h"
-#include "WireCell2dToy/BlobToyTiling.h"
+#include "WireCell2dToy/SimpleBlobToyTiling.h"
 
 
 #include "WireCellData/MergeGeomCell.h"
@@ -109,13 +109,14 @@ int main(int argc, char* argv[])
   WireCell2dToy::ToyTiling **toytiling = new WireCell2dToy::ToyTiling*[2400];
   WireCell2dToy::MergeToyTiling **mergetiling = new WireCell2dToy::MergeToyTiling*[2400];
   WireCell2dToy::TruthToyTiling **truthtiling = new WireCell2dToy::TruthToyTiling*[2400];
-  WireCell2dToy::BlobToyTiling **blobtiling = new WireCell2dToy::BlobToyTiling*[2400];
+  WireCell2dToy::SimpleBlobToyTiling **blobtiling = new WireCell2dToy::SimpleBlobToyTiling*[2400];
   
   WireCell2dToy::ToyMatrix **toymatrix = new WireCell2dToy::ToyMatrix*[2400];
   WireCell2dToy::ToyMatrixMarkov **toymatrix_markov = new WireCell2dToy::ToyMatrixMarkov*[2400];
-  WireCell2dToy::ToyMatrix **blobmatrix = new WireCell2dToy::ToyMatrix*[2400];
   
-  WireCell2dToy::ToyMatrixMarkov **blobmatrix_markov = new WireCell2dToy::ToyMatrixMarkov*[2400];
+  //WireCell2dToy::ToyMatrix **blobmatrix = new WireCell2dToy::ToyMatrix*[2400];
+  
+  //WireCell2dToy::ToyMatrixMarkov **blobmatrix_markov = new WireCell2dToy::ToyMatrixMarkov*[2400];
   WireCell2dToy::ToyMetric toymetric, blobmetric;
  
   //add in cluster
@@ -136,13 +137,13 @@ int main(int argc, char* argv[])
   int ncount_mcell = 0;
   
   //simple cosmic
-  // int start_num =185;
-  // int end_num = 185;
+  int start_num =185;
+  int end_num = 185;
 
 
   //nue cc 
-  int start_num =355;
-  int end_num = 357;
+  // int start_num =356;
+  // int end_num = 356;
     
   //delta 
   // int start_num =680;
@@ -190,14 +191,22 @@ int main(int argc, char* argv[])
       }
       if (mcell->IsSimpleBlob() == true){
 	GeomCellSelection corners = mcell->get_cornercells();
-     	total_corner_cells.insert(total_corner_cells.end(),corners.begin(),corners.end());
+	CellIndexMap indexmap = mcell->get_cornercells_index();
+	for (int k=0;k!=corners.size();k++){
+	  if (indexmap[corners.at(k)]>=2){
+	    total_corner_cells.push_back(corners.at(k));
+	  }
+	}
+     	//total_corner_cells.insert(total_corner_cells.end(),corners.begin(),corners.end());
       }
     }
-    cout << toymatrix[i]->GetSimpleBlobReduction() << endl;
+    //cout << toymatrix[i]->GetSimpleBlobReduction() << endl;
 
     
-    // // for now put this part here
-    // blobtiling[i] = new WireCell2dToy::BlobToyTiling(*toytiling[i],*mergetiling[i],*toymatrix[i],i,2);
+    
+    // for now put this part here
+    blobtiling[i] = new WireCell2dToy::SimpleBlobToyTiling(*toytiling[i],*mergetiling[i],*toymatrix[i]);
+    
     // blobmatrix[i] = new WireCell2dToy::ToyMatrix(*toytiling[i],*blobtiling[i]);
 
     // GeomCellSelection ballmcell = blobtiling[i]->get_allcell();
@@ -302,7 +311,7 @@ int main(int argc, char* argv[])
   //display.draw_truthcells_charge(total_scmap,"*same",FI);
   //display.draw_truthcells_charge(total_scrms,"*same",FI);
   display.draw_truthcells(total_ccmap,"*same");
-  //display.draw_cells(total_corner_cells,"*same",2);
+  display.draw_cells(total_corner_cells,"*same",2);
   //display.draw_reconcells(mergetiling[i]->get_allcell(),toymatrix[i],"*same",1);
   //display.draw_reconcells(blobtiling[i]->get_allcell(),blobmatrix[i],"*same",2);
   

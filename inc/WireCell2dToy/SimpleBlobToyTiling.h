@@ -17,6 +17,11 @@ namespace WireCell2dToy{
     WireCell2dToy::ToyTiling *toytiling;
     WireCell2dToy::MergeToyTiling *mergetiling;
     WireCell2dToy::ToyMatrix *toymatrix;
+    
+    int nsimple_blob; //smaller than 5 for now
+    WireCell::GeomCellSelection corner_mcells[10];
+    WireCell::GeomCellSelection corner_smcells[10];
+    
   };
 }
 
