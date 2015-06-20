@@ -10,9 +10,6 @@ WireCell2dToy::SimpleBlobToyTiling::SimpleBlobToyTiling(WireCell2dToy::ToyTiling
   toymatrix = &toymatrix1;
   
 
-  
-  
-
   nsimple_blob = 0;
   MergeGeomCell *mcorner_cell;
   if (toymatrix->GetSimpleBlobReduction()){
@@ -20,6 +17,8 @@ WireCell2dToy::SimpleBlobToyTiling::SimpleBlobToyTiling(WireCell2dToy::ToyTiling
     for (int i=0;i!=mcells.size();i++){
       MergeGeomCell *mcell = (MergeGeomCell*)mcells.at(i);
       if (mcell->IsSimpleBlob() && mcell->IsBlob()){
+	sbcells.push_back(mcell);
+	
 	CellIndexMap indexmap = mcell->get_cornercells_index();
 	
 	for (int j=0;j!=12;j++){
@@ -169,8 +168,8 @@ WireCell2dToy::SimpleBlobToyTiling::SimpleBlobToyTiling(WireCell2dToy::ToyTiling
     
     //form the hypothesis and do the test ... 
     ncount = 0;
-    
-    
+    FormHypo();
+    DoTiling();
 
     // std::cout << "SimpleBlobTiling: "<< nsimple_blob << " " << corner_smcells[0].size() << " " << corner_mcells[0].size() << " " << hypo_ccells.at(0).size() << std::endl;
     // for (int j=0;j!=hypo_ccells.at(0).size();j++){
@@ -184,6 +183,147 @@ WireCell2dToy::SimpleBlobToyTiling::SimpleBlobToyTiling(WireCell2dToy::ToyTiling
 
   }
 }
+
+void WireCell2dToy::SimpleBlobToyTiling::DoTiling(){
+  
+  
+  GeomWireSelection mwires; //save all the merged wires
+  GeomCellSelection mcells; // save other cells, and any associated cells
+  //use merge tiling to do stuff
+
+  //save the first pass merge wires
+  for (int i=0;i!=sbcells.size();i++){
+    MergeGeomCell* mcell = (MergeGeomCell*) sbcells.at(i);
+    if (flag_cell.at(i)!=0){
+      GeomWireSelection wires = mergetiling->wires(*mcell);
+      for (int j=0;j!=wires.size();j++){
+	mwires.push_back(wires.at(j));
+      }
+    }
+  }
+
+  //save the first pass merged wires;
+  for (int i=0;i!=mwires.size();i++){
+    MergeGeomWire* mwire = (MergeGeomWire*) mwires.at(i);
+    GeomCellSelection cells = mergetiling->cells(*mwire);
+    for (int j=0;j!=cells.size();j++){
+      if (toymatrix->Get_Cell_Charge(cells.at(j))>2000){
+	auto it = find(sbcells.begin(),sbcells.end(),cells.at(j));
+	if (it==sbcells.end()){
+	  mcells.push_back(cells.at(j));
+	}
+      }
+    }
+  }
+  
+  //save all ... 
+  int flag = 1;
+  while(flag){
+    flag = 0;
+    //do wires
+    for (int i=0;i!=mcells.size();i++){
+      MergeGeomCell* mcell = (MergeGeomCell*)mcells.at(i);
+      GeomWireSelection wires = mergetiling->wires(*mcell);
+      for (int j=0;j!=wires.size();j++){
+	MergeGeomWire* mwire = (MergeGeomWire*)wires.at(j);
+	auto it = find(mwires.begin(),mwires.end(),mwire);
+	if (it == mwires.end()){
+	  flag = 1;
+	  mwires.push_back(mwire);
+	}
+      }
+    }
+    //do cells
+    for (int i=0;i!=mwires.size();i++){
+      MergeGeomWire* mwire = (MergeGeomWire*)mwires.at(i);
+      GeomCellSelection cells = mergetiling->cells(*mwire);
+      for (int j=0;j!=cells.size();j++){
+	MergeGeomCell* mcell = (MergeGeomCell*)cells.at(j);
+	auto it = find(mcells.begin(),mcells.end(),mcell);
+	auto it1 = find(sbcells.begin(),sbcells.end(),mcell);
+	if (it==mcells.end() && it1 == sbcells.end()){
+	  flag = 1;
+	  mcells.push_back(mcell);
+	}
+      }
+    }
+  }
+
+  //use hypothesis to save stuff
+  //save all the cells;
+  cell_all.clear();
+  for (int i = 0;i!=sbcells.size();i++){
+    WireCell2dToy::HypoSelection hypos = cur_hypo.at(i);
+    MergeGeomCell* mcell = (MergeGeomCell*) sbcells.at(i);
+    for (int j=0;j!=mcell->get_allcell().size();j++){
+      const GeomCell* cell = mcell->get_allcell().at(j);
+      for (int k=0;k!=hypos.size();k++){
+	WireCell2dToy::ToyHypothesis *hypo = (WireCell2dToy::ToyHypothesis*) hypos.at(k);
+	if (hypo->IsInside(*cell)){
+	  cell_all.push_back(cell);
+	  break;
+	}
+      }
+    }
+  }
+  
+  for (int i=0;i!=mcells.size();i++){
+    MergeGeomCell* mcell = (MergeGeomCell*) mcells.at(i);
+    for (int j=0;j!=mcell->get_allcell().size();j++){
+      const GeomCell* cell = mcell->get_allcell().at(j);
+      cell_all.push_back(cell);
+    }
+  }
+  
+  wire_all.clear();
+  wire_u.clear();
+  wire_v.clear();
+  wire_w.clear();
+
+  for (int i=0;i!=mwires.size();i++){
+    MergeGeomWire* mwire = (MergeGeomWire*)mwires.at(i);
+    for (int j=0;j!=mwire->get_allwire().size();j++){
+      const GeomWire* wire = mwire->get_allwire().at(j);
+      wire_all.push_back(wire);
+      if (wire->plane() == ((WirePlaneType_t)0)){
+	wire_u.push_back(wire);
+      }else if (wire->plane() == ((WirePlaneType_t)1)){
+	wire_v.push_back(wire);
+      }else{
+	wire_w.push_back(wire);
+      }
+    }
+  }
+    
+  //use toy tiling to do association
+  cellmap.clear();
+  wiremap.clear();
+
+  GeomCellMap cmap = toytiling->cmap();
+  GeomWireMap wmap = toytiling->wmap();
+  
+  for (int i=0;i!=cell_all.size();i++){
+    const GeomCell* cell = cell_all.at(i);
+    cellmap[cell] = cmap[cell];
+  }
+  for (int i=0;i!=wire_all.size();i++){
+    const GeomWire* wire = wire_all.at(i);
+    GeomCellSelection cells = wmap[wire];
+    GeomCellSelection ncells;
+    for (int j=0;j!=cells.size();j++){
+      const GeomCell* cell = cells.at(j);
+      auto it = find(cell_all.begin(),cell_all.end(),cell);
+      if (it != cell_all.end()){
+	ncells.push_back(cell);
+      }
+    }
+    wiremap[wire] = ncells;
+  }
+  
+  
+  
+}
+
 
 void WireCell2dToy::SimpleBlobToyTiling::FormHypo(){
   ClearHypo();

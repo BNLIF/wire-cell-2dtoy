@@ -69,7 +69,7 @@ bool WireCell2dToy::ToyHypothesis::IsInside(Point p){
   return val;
 }
 
-bool WireCell2dToy::ToyHypothesis::IsInside(GeomCell& cell){
+bool WireCell2dToy::ToyHypothesis::IsInside(const GeomCell& cell){
   bool val = false;
   PointVector pv = cell.boundary();
   for (int i=0;i!=pv.size();i++){

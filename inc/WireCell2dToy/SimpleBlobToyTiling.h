@@ -21,6 +21,7 @@ namespace WireCell2dToy{
     void Organize(int nsimple_blob);
     void FormHypo();
     void ClearHypo();
+    void DoTiling();
 
     WireCell2dToy::ToyTiling *toytiling;
     WireCell2dToy::MergeToyTiling *mergetiling;
@@ -39,6 +40,7 @@ namespace WireCell2dToy{
     WireCell::GeomCellSelectionV first_cell;
     WireCell::GeomCellSelectionV second_cell;
     WireCell::GeomCellSelectionV other_cell;
+    WireCell::GeomCellSelection sbcells;
     std::vector<int> flag_cell;
     
     int ncount;

@@ -10,7 +10,7 @@ namespace WireCell2dToy{
     ~ToyHypothesis();
     double CalValue(WireCell::Point p, WireCell::Point p1, WireCell::Point p2);
     bool IsInside(WireCell::Point p);
-    bool IsInside(WireCell::GeomCell& cell);
+    bool IsInside(const WireCell::GeomCell& cell);
     
     
   private:
