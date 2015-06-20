@@ -17,6 +17,8 @@ namespace WireCell2dToy{
 			);
     ~SimpleBlobToyTiling();
   private:
+    void Organize(int nsimple_blob);
+
     WireCell2dToy::ToyTiling *toytiling;
     WireCell2dToy::MergeToyTiling *mergetiling;
     WireCell2dToy::ToyMatrix *toymatrix;
@@ -25,11 +27,17 @@ namespace WireCell2dToy{
     /* WireCell::GeomCellSelection corner_mcells[10]; */
     /* WireCell::GeomCellSelection corner_smcells[10]; */
         
-   
-    
-    //save the second pass results to use for hypothesis formation
-    std::vector<WireCell::GeomCellSelectionV> hypo_ccells;
+    //save the first pass results
+    WireCell::GeomCellSelectionV corner_mcells;
+    WireCell::GeomCellSelectionV corner_smcells;
     WireCell::CellIndexMap cell_rank;
+
+    //save the second pass results to use for hypothesis formation
+    WireCell::GeomCellSelectionV first_cell;
+    WireCell::GeomCellSelectionV second_cell;
+    WireCell::GeomCellSelectionV other_cell;
+    std::vector<int> flag_cell;
+    
     
   };
 }
