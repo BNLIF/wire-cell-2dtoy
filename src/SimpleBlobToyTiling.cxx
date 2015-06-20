@@ -329,6 +329,7 @@ void WireCell2dToy::SimpleBlobToyTiling::Organize(int nsimple_blob){
 	}
 		
 	if (flag==0){
+	  //find the ones containing any of them ... 
 	  for (int i=0;i!=corner_smcells.at(nsimple_blob).size();i++){
 	    MergeGeomCell *mcell = (MergeGeomCell*) corner_smcells.at(nsimple_blob).at(i);
 	    int flag1 = 0;
@@ -361,8 +362,67 @@ void WireCell2dToy::SimpleBlobToyTiling::Organize(int nsimple_blob){
       }
     }else{
       GeomCellSelection cells;
+      std::set<int> edge_wires;
+      for (int i=0;i!=first_cell.at(nsimple_blob).size();i++){
+	MergeGeomCell* mcell = (MergeGeomCell*) first_cell.at(nsimple_blob).at(i);
+	for (auto it = mcell->ewires.begin(); it!=mcell->ewires.end(); it++){
+	  edge_wires.insert(*it);
+	}
+      }
+      std::vector<int> found;
+	for (int i=0;i!=6;i++){
+	  if (edge_wires.find(i)!=edge_wires.end()){
+	    found.push_back(i);
+	  }
+	}
+      
+
+      //second first try to find the ones does not contain the same as the existing one
+      for (int i=0;i!=corner_smcells.at(nsimple_blob).size();i++){
+	MergeGeomCell *mcell = (MergeGeomCell*) corner_smcells.at(nsimple_blob).at(i);
+	int flag1 = 1;
+	for (int j=0;j!=found.size();j++){
+	  if (mcell->ewires.find(found.at(j))!=mcell->ewires.end()){
+	    flag1 = 0;
+	  }
+	}
+	if (flag1==1){
+	  cells.push_back(mcell);
+	}
+      }
+      for (int i=0;i!=corner_mcells.at(nsimple_blob).size();i++){
+	MergeGeomCell *mcell = (MergeGeomCell*) corner_mcells.at(nsimple_blob).at(i);
+	int flag1 = 1;
+	for (int j=0;j!=found.size();j++){
+	  if (mcell->ewires.find(found.at(j))!=mcell->ewires.end()){
+	    flag1 = 0;
+	  }
+	}
+	if (flag1==1){
+	  cells.push_back(mcell);
+	}
+      }
       second_cell.push_back(cells);
+      //put the rest to other 
+      cells.clear();
+      for (int i=0;i!=corner_smcells.at(nsimple_blob).size();i++){
+	MergeGeomCell *mcell = (MergeGeomCell*) corner_smcells.at(nsimple_blob).at(i);
+	auto it = find(second_cell.at(nsimple_blob).begin(),second_cell.at(nsimple_blob).end(),mcell);
+	auto it1 = find(first_cell.at(nsimple_blob).begin(),first_cell.at(nsimple_blob).end(),mcell);
+	if (it==second_cell.at(nsimple_blob).end() && it1 == first_cell.at(nsimple_blob).end()){
+	  cells.push_back(mcell);
+	}
+      }
+      for (int i=0;i!=corner_mcells.at(nsimple_blob).size();i++){
+	MergeGeomCell *mcell = (MergeGeomCell*) corner_mcells.at(nsimple_blob).at(i);
+	auto it = find(second_cell.at(nsimple_blob).begin(),second_cell.at(nsimple_blob).end(),mcell);
+	auto it1 = find(first_cell.at(nsimple_blob).begin(),first_cell.at(nsimple_blob).end(),mcell);
+	if (it==second_cell.at(nsimple_blob).end() && it1 == first_cell.at(nsimple_blob).end()){
+	  cells.push_back(mcell);
+	}
+      }
       other_cell.push_back(cells);
+      flag_cell.at(nsimple_blob) = 1;
     }
   }else{
     GeomCellSelection cells;
