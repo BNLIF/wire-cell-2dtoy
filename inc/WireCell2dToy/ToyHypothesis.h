@@ -16,7 +16,8 @@ namespace WireCell2dToy{
   private:
     WireCell::Point p1[2],p2[2],pc[2];
   };
+  typedef std::vector<const WireCell2dToy::ToyHypothesis*> HypoSelection;
 }
-typedef std::vector<const WireCell2dToy::ToyHypothesis*> HypoSelection;
+
 
 #endif

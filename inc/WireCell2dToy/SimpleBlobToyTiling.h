@@ -7,6 +7,7 @@
 #include "WireCellData/GeomWire.h"
 #include "WireCellData/MergeGeomCell.h"
 #include "WireCellData/MergeGeomWire.h"
+#include "WireCell2dToy/ToyHypothesis.h"
 
 namespace WireCell2dToy{
   class SimpleBlobToyTiling : public WireCell2dToy::MergeToyTiling {
@@ -18,6 +19,8 @@ namespace WireCell2dToy{
     ~SimpleBlobToyTiling();
   private:
     void Organize(int nsimple_blob);
+    void FormHypo();
+    void ClearHypo();
 
     WireCell2dToy::ToyTiling *toytiling;
     WireCell2dToy::MergeToyTiling *mergetiling;
@@ -38,6 +41,9 @@ namespace WireCell2dToy{
     WireCell::GeomCellSelectionV other_cell;
     std::vector<int> flag_cell;
     
+    int ncount;
+
+    std::vector<WireCell2dToy::HypoSelection> cur_hypo;
     
   };
 }

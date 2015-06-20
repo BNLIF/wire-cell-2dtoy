@@ -1,4 +1,6 @@
 #include "WireCell2dToy/SimpleBlobToyTiling.h"
+#include "TRandom.h"
+
 using namespace WireCell;
 WireCell2dToy::SimpleBlobToyTiling::SimpleBlobToyTiling(WireCell2dToy::ToyTiling& toytiling1, WireCell2dToy::MergeToyTiling& mergetiling1, WireCell2dToy::ToyMatrix& toymatrix1,
 							WireCell2dToy::MergeToyTiling& prev_mergetiling, WireCell2dToy::ToyMatrix& prev_toymatrix,
@@ -165,7 +167,11 @@ WireCell2dToy::SimpleBlobToyTiling::SimpleBlobToyTiling(WireCell2dToy::ToyTiling
     }
 
     
+    //form the hypothesis and do the test ... 
+    ncount = 0;
     
+    
+
     // std::cout << "SimpleBlobTiling: "<< nsimple_blob << " " << corner_smcells[0].size() << " " << corner_mcells[0].size() << " " << hypo_ccells.at(0).size() << std::endl;
     // for (int j=0;j!=hypo_ccells.at(0).size();j++){
     //   std::cout << hypo_ccells.at(0).at(j).size() << " ";
@@ -178,6 +184,186 @@ WireCell2dToy::SimpleBlobToyTiling::SimpleBlobToyTiling(WireCell2dToy::ToyTiling
 
   }
 }
+
+void WireCell2dToy::SimpleBlobToyTiling::FormHypo(){
+  ClearHypo();
+  
+  if (ncount == 0){
+    for (int i=0;i!=nsimple_blob;i++){
+      WireCell2dToy::HypoSelection hypos;
+
+      if (flag_cell.at(i) == 1){
+	// only one hypothsis to connect highest and second highest
+	MergeGeomCell *mcell1 = (MergeGeomCell*) first_cell.at(i).at(0);
+	MergeGeomCell *mcell2 = (MergeGeomCell*) second_cell.at(i).at(0);
+	WireCell2dToy::ToyHypothesis *hypo = new WireCell2dToy::ToyHypothesis(*mcell1,*mcell2);
+	hypos.push_back(hypo);
+      }else if (flag_cell.at(i) == 2){
+	// two hypothesis, highest and second highest, and then highest to the third
+	MergeGeomCell *mcell1 = (MergeGeomCell*) first_cell.at(i).at(0);
+	MergeGeomCell *mcell2 = (MergeGeomCell*) second_cell.at(i).at(0);
+	MergeGeomCell *mcell3 = (MergeGeomCell*) other_cell.at(i).at(0);
+	WireCell2dToy::ToyHypothesis *hypo = new WireCell2dToy::ToyHypothesis(*mcell1,*mcell2);
+	hypos.push_back(hypo);
+	hypo = new WireCell2dToy::ToyHypothesis(*mcell1,*mcell3);
+	hypos.push_back(hypo);
+      }else if (flag_cell.at(i) == 3){
+	// two hypothesis, highest to third, and second highest to third
+	MergeGeomCell *mcell1 = (MergeGeomCell*) first_cell.at(i).at(0);
+	MergeGeomCell *mcell2 = (MergeGeomCell*) second_cell.at(i).at(0);
+	MergeGeomCell *mcell3 = (MergeGeomCell*) other_cell.at(i).at(0);
+	MergeGeomCell *mcell4;
+	std::set<int> edge_wires;
+      	for (auto it = mcell1->ewires.begin(); it!=mcell1->ewires.end(); it++){
+	  edge_wires.insert(*it);
+	}
+	for (auto it = mcell2->ewires.begin(); it!=mcell2->ewires.end(); it++){
+	  edge_wires.insert(*it);
+	}
+	for (auto it = mcell3->ewires.begin(); it!=mcell3->ewires.end(); it++){
+	  edge_wires.insert(*it);
+	}
+	std::vector<int> not_found;
+	for (int j=0;j!=6;j++){
+	  if (edge_wires.find(j)==edge_wires.end()){
+	    not_found.push_back(j);
+	  }
+	}
+	for (int j=1;j<other_cell.at(i).size();j++){
+	  mcell4 = (MergeGeomCell*) other_cell.at(i).at(j);
+	  int flag = 1;
+	  for (int k=0;k!=not_found.size();k++){
+	    auto it = mcell4->ewires.find(not_found.at(k));
+	    if (it == mcell4->ewires.end()){
+	      flag = 0;
+	      break;
+	    }
+	  }
+	  if (flag==1) break;
+	}
+	
+	WireCell2dToy::ToyHypothesis *hypo = new WireCell2dToy::ToyHypothesis(*mcell1,*mcell3);
+	hypos.push_back(hypo);
+	hypo = new WireCell2dToy::ToyHypothesis(*mcell2,*mcell4);
+	hypos.push_back(hypo);
+      }
+      cur_hypo.push_back(hypos);
+    }
+  }else{
+    //start to randomize ... 
+    for (int i=0;i!=nsimple_blob;i++){
+      WireCell2dToy::HypoSelection hypos;
+      if (flag_cell.at(i) == 1){
+	// single track (change to two tracks)
+	int n = gRandom->Uniform(0,first_cell.at(i).size());
+	MergeGeomCell *mcell1 = (MergeGeomCell*) first_cell.at(i).at(n);
+	n = gRandom->Uniform(0,second_cell.at(i).size());
+	MergeGeomCell *mcell2 = (MergeGeomCell*) second_cell.at(i).at(n);
+	n = gRandom->Uniform(0,other_cell.at(i).size());
+	MergeGeomCell *mcell3 = (MergeGeomCell*) other_cell.at(i).at(n);
+	WireCell2dToy::ToyHypothesis *hypo = new WireCell2dToy::ToyHypothesis(*mcell1,*mcell2);
+	hypos.push_back(hypo);
+	n = gRandom->Uniform(0.1,1.9);
+	if (n==0){
+	  hypo = new WireCell2dToy::ToyHypothesis(*mcell1,*mcell3);
+	  hypos.push_back(hypo);
+	}else{
+	  hypo = new WireCell2dToy::ToyHypothesis(*mcell2,*mcell3);
+	  hypos.push_back(hypo);
+	}
+      }else if (flag_cell.at(i) == 2){
+	// two hypothesis, highest and second highest, and then highest to the third
+	int n = gRandom->Uniform(0,first_cell.at(i).size());
+	MergeGeomCell *mcell1 = (MergeGeomCell*) first_cell.at(i).at(n);
+	n = gRandom->Uniform(0,second_cell.at(i).size());
+	MergeGeomCell *mcell2 = (MergeGeomCell*) second_cell.at(i).at(n);
+	n = gRandom->Uniform(0,other_cell.at(i).size());
+	MergeGeomCell *mcell3 = (MergeGeomCell*) other_cell.at(i).at(n);
+	WireCell2dToy::ToyHypothesis *hypo = new WireCell2dToy::ToyHypothesis(*mcell1,*mcell2);
+	hypos.push_back(hypo);
+	n = gRandom->Uniform(0.1,1.9);
+	if (n==0){
+	  hypo = new WireCell2dToy::ToyHypothesis(*mcell1,*mcell3);
+	  hypos.push_back(hypo);
+	}else{
+	  hypo = new WireCell2dToy::ToyHypothesis(*mcell2,*mcell3);
+	  hypos.push_back(hypo);
+	}
+      }else if (flag_cell.at(i) == 3){
+	// two hypothesis, highest to third, and second highest to third
+	int n = gRandom->Uniform(0,first_cell.at(i).size());
+	MergeGeomCell *mcell1 = (MergeGeomCell*) first_cell.at(i).at(n);
+	n = gRandom->Uniform(0,second_cell.at(i).size());
+	MergeGeomCell *mcell2 = (MergeGeomCell*) second_cell.at(i).at(n);
+	n = gRandom->Uniform(0,other_cell.at(i).size());
+	MergeGeomCell *mcell3 = (MergeGeomCell*) other_cell.at(i).at(n);
+	MergeGeomCell *mcell4;
+	std::set<int> edge_wires;
+      	for (auto it = mcell1->ewires.begin(); it!=mcell1->ewires.end(); it++){
+	  edge_wires.insert(*it);
+	}
+	for (auto it = mcell2->ewires.begin(); it!=mcell2->ewires.end(); it++){
+	  edge_wires.insert(*it);
+	}
+	for (auto it = mcell3->ewires.begin(); it!=mcell3->ewires.end(); it++){
+	  edge_wires.insert(*it);
+	}
+	std::vector<int> not_found;
+	for (int j=0;j!=6;j++){
+	  if (edge_wires.find(j)==edge_wires.end()){
+	    not_found.push_back(j);
+	  }
+	}
+	
+	//need to improve later .. no random here
+	for (int j=1;j<other_cell.at(i).size();j++){
+	  mcell4 = (MergeGeomCell*) other_cell.at(i).at(j);
+	  int flag = 1;
+	  for (int k=0;k!=not_found.size();k++){
+	    auto it = mcell4->ewires.find(not_found.at(k));
+	    if (it == mcell4->ewires.end()){
+	      flag = 0;
+	      break;
+	    }
+	  }
+	  if (flag==1) break;
+	}
+	n = gRandom->Uniform(0.1,2.9);
+	if (n==0){
+	  WireCell2dToy::ToyHypothesis *hypo = new WireCell2dToy::ToyHypothesis(*mcell1,*mcell2);
+	  hypos.push_back(hypo);
+	  hypo = new WireCell2dToy::ToyHypothesis(*mcell3,*mcell4);
+	  hypos.push_back(hypo);
+	}else if (n==1){
+	  WireCell2dToy::ToyHypothesis *hypo = new WireCell2dToy::ToyHypothesis(*mcell1,*mcell3);
+	  hypos.push_back(hypo);
+	  hypo = new WireCell2dToy::ToyHypothesis(*mcell2,*mcell4);
+	  hypos.push_back(hypo);
+	}else if (n==2){
+	  WireCell2dToy::ToyHypothesis *hypo = new WireCell2dToy::ToyHypothesis(*mcell1,*mcell4);
+	  hypos.push_back(hypo);
+	  hypo = new WireCell2dToy::ToyHypothesis(*mcell2,*mcell3);
+	  hypos.push_back(hypo);
+	}
+	
+	
+      }
+      cur_hypo.push_back(hypos);
+    }
+  }
+  ncount ++;
+}
+
+void WireCell2dToy::SimpleBlobToyTiling::ClearHypo(){
+  if (cur_hypo.size() !=0){
+    for (int i = 0;i!=cur_hypo.size();i++){
+      for (int j=0;j!=cur_hypo.at(i).size();j++){
+	delete cur_hypo.at(i).at(j);
+      }
+    }
+  }
+}
+
 
 void WireCell2dToy::SimpleBlobToyTiling::Organize(int nsimple_blob){
   //fill the first rank, second rank and third rank and flag ... 
