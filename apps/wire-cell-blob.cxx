@@ -125,6 +125,7 @@ int main(int argc, char* argv[])
   GeomCellSelection total_cells;
   GeomCellSelection total_recon_cells;
   GeomCellSelection total_corner_cells;
+  GeomCellSelection total_blob_cells;
   CellChargeMap total_ccmap;
   
   CellChargeMap total_scrms;
@@ -137,8 +138,8 @@ int main(int argc, char* argv[])
   int ncount_mcell = 0;
   
   //simple cosmic
-  int start_num =184;
-  int end_num = 186;
+  // int start_num =184;
+  // int end_num = 187;
 
 
   //nue cc 
@@ -146,8 +147,8 @@ int main(int argc, char* argv[])
   // int end_num = 357;
     
   //delta 
-  // int start_num =680;
-  // int end_num = 680;
+  int start_num =678;
+  int end_num = 682;
 
   //complicated blob
   // int start_num = 454;
@@ -260,6 +261,14 @@ int main(int argc, char* argv[])
       }else{
 	blobtiling[i] = new WireCell2dToy::SimpleBlobToyTiling(*toytiling[i],*mergetiling[i],*toymatrix[i],*mergetiling[i-1],*toymatrix[i-1],*mergetiling[i+1],*toymatrix[i+1]);
       }
+      
+      //save stuff
+      GeomCellSelection blob_cells = blobtiling[i]->get_allcell();
+      
+      for (int k=0;k!=blob_cells.size();k++){
+	total_blob_cells.push_back(blob_cells.at(k));
+      }
+      
     }
   }
   
@@ -317,8 +326,12 @@ int main(int argc, char* argv[])
   //display.draw_truthcells_charge(total_ccmap,"*same",FI);
   //display.draw_truthcells_charge(total_scmap,"*same",FI);
   //display.draw_truthcells_charge(total_scrms,"*same",FI);
-  display.draw_truthcells(total_ccmap,"*same");
+  display.draw_cells(total_blob_cells,"*same",6);
   display.draw_cells(total_corner_cells,"*same",2);
+  display.draw_truthcells(total_ccmap,"*same");
+ 
+
+
   //display.draw_reconcells(mergetiling[i]->get_allcell(),toymatrix[i],"*same",1);
   //display.draw_reconcells(blobtiling[i]->get_allcell(),blobmatrix[i],"*same",2);
   

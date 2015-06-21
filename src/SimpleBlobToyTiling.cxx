@@ -17,8 +17,8 @@ WireCell2dToy::SimpleBlobToyTiling::SimpleBlobToyTiling(WireCell2dToy::ToyTiling
     for (int i=0;i!=mcells.size();i++){
       MergeGeomCell *mcell = (MergeGeomCell*)mcells.at(i);
       if (mcell->IsSimpleBlob() && mcell->IsBlob()){
+	//save all the simple blob
 	sbcells.push_back(mcell);
-	
 	CellIndexMap indexmap = mcell->get_cornercells_index();
 	
 	for (int j=0;j!=12;j++){
@@ -28,6 +28,7 @@ WireCell2dToy::SimpleBlobToyTiling::SimpleBlobToyTiling(WireCell2dToy::ToyTiling
 	  if (cells.size()!=0){
 	    //std::cout << index1 << " " << index2 << " " << cells.size() << std::endl;
 	    int flag = -1;
+	    //form merged cell and start to fill rank ... 
 	    for (int k=0;k!=cells.size();k++){
 	      if (k==0){
 		mcorner_cell = new MergeGeomCell(10000,*cells.at(k));
@@ -66,6 +67,7 @@ WireCell2dToy::SimpleBlobToyTiling::SimpleBlobToyTiling(WireCell2dToy::ToyTiling
 	    // 	}
 	    //   }
 	    // }
+
 	    //save the special cells ...  //need to add time later ... 
 	    if (flag1==0){
 	      if (flag!=-1){
@@ -155,7 +157,8 @@ WireCell2dToy::SimpleBlobToyTiling::SimpleBlobToyTiling(WireCell2dToy::ToyTiling
 	    corner_mcells[nsimple_blob].erase(itq);
 	  }
 	}
-
+	
+	//save stuff into the first, second and third ... 
 	Organize(nsimple_blob);
 	
 	nsimple_blob ++;
@@ -186,9 +189,9 @@ WireCell2dToy::SimpleBlobToyTiling::SimpleBlobToyTiling(WireCell2dToy::ToyTiling
 
 void WireCell2dToy::SimpleBlobToyTiling::DoTiling(){
   
-  
   GeomWireSelection mwires; //save all the merged wires
   GeomCellSelection mcells; // save other cells, and any associated cells
+  GeomCellSelection mcells_no;
   //use merge tiling to do stuff
 
   //save the first pass merge wires
@@ -202,6 +205,8 @@ void WireCell2dToy::SimpleBlobToyTiling::DoTiling(){
     }
   }
 
+  //std::cout << "xin1: " << mcells.size() << " " << mwires.size() << std::endl; 
+
   //save the first pass merged wires;
   for (int i=0;i!=mwires.size();i++){
     MergeGeomWire* mwire = (MergeGeomWire*) mwires.at(i);
@@ -212,9 +217,13 @@ void WireCell2dToy::SimpleBlobToyTiling::DoTiling(){
 	if (it==sbcells.end()){
 	  mcells.push_back(cells.at(j));
 	}
+      }else{
+	mcells_no.push_back(cells.at(j));
       }
     }
   }
+  // std::cout << "xin2: " << mcells.size() << " " << mwires.size() << std::endl; 
+
   
   //save all ... 
   int flag = 1;
@@ -241,24 +250,31 @@ void WireCell2dToy::SimpleBlobToyTiling::DoTiling(){
 	MergeGeomCell* mcell = (MergeGeomCell*)cells.at(j);
 	auto it = find(mcells.begin(),mcells.end(),mcell);
 	auto it1 = find(sbcells.begin(),sbcells.end(),mcell);
-	if (it==mcells.end() && it1 == sbcells.end()){
+	auto it2 = find(mcells_no.begin(),mcells_no.end(),mcell);
+	if (it==mcells.end() && it1 == sbcells.end() && it2 == mcells_no.end()){
 	  flag = 1;
 	  mcells.push_back(mcell);
 	}
       }
     }
   }
+  //std::cout << "xin3: " << mcells.size() << " " << mwires.size() << std::endl; 
+
+
 
   //use hypothesis to save stuff
   //save all the cells;
   cell_all.clear();
-  for (int i = 0;i!=sbcells.size();i++){
+  for (int i = 0; i!=sbcells.size();i++){
     WireCell2dToy::HypoSelection hypos = cur_hypo.at(i);
     MergeGeomCell* mcell = (MergeGeomCell*) sbcells.at(i);
     for (int j=0;j!=mcell->get_allcell().size();j++){
       const GeomCell* cell = mcell->get_allcell().at(j);
       for (int k=0;k!=hypos.size();k++){
 	WireCell2dToy::ToyHypothesis *hypo = (WireCell2dToy::ToyHypothesis*) hypos.at(k);
+
+	//std::cout << i << " " << j << " " << k << " " << hypo->IsInside(*cell) << std::endl;
+
 	if (hypo->IsInside(*cell)){
 	  cell_all.push_back(cell);
 	  break;
@@ -286,11 +302,11 @@ void WireCell2dToy::SimpleBlobToyTiling::DoTiling(){
       const GeomWire* wire = mwire->get_allwire().at(j);
       wire_all.push_back(wire);
       if (wire->plane() == ((WirePlaneType_t)0)){
-	wire_u.push_back(wire);
+  	wire_u.push_back(wire);
       }else if (wire->plane() == ((WirePlaneType_t)1)){
-	wire_v.push_back(wire);
+  	wire_v.push_back(wire);
       }else{
-	wire_w.push_back(wire);
+  	wire_w.push_back(wire);
       }
     }
   }
@@ -314,7 +330,7 @@ void WireCell2dToy::SimpleBlobToyTiling::DoTiling(){
       const GeomCell* cell = cells.at(j);
       auto it = find(cell_all.begin(),cell_all.end(),cell);
       if (it != cell_all.end()){
-	ncells.push_back(cell);
+  	ncells.push_back(cell);
       }
     }
     wiremap[wire] = ncells;
@@ -331,7 +347,6 @@ void WireCell2dToy::SimpleBlobToyTiling::FormHypo(){
   if (ncount == 0){
     for (int i=0;i!=nsimple_blob;i++){
       WireCell2dToy::HypoSelection hypos;
-
       if (flag_cell.at(i) == 1){
 	// only one hypothsis to connect highest and second highest
 	MergeGeomCell *mcell1 = (MergeGeomCell*) first_cell.at(i).at(0);
@@ -345,13 +360,23 @@ void WireCell2dToy::SimpleBlobToyTiling::FormHypo(){
 	MergeGeomCell *mcell3 = (MergeGeomCell*) other_cell.at(i).at(0);
 	WireCell2dToy::ToyHypothesis *hypo = new WireCell2dToy::ToyHypothesis(*mcell1,*mcell2);
 	hypos.push_back(hypo);
-	hypo = new WireCell2dToy::ToyHypothesis(*mcell1,*mcell3);
+	
+	//do the smallest distance
+	double dis1 = pow(mcell1->center().y-mcell3->center().y,2) + pow(mcell1->center().z-mcell3->center().z,2);
+	double dis2 = pow(mcell2->center().y-mcell3->center().y,2) + pow(mcell2->center().z-mcell3->center().z,2);
+	
+	if (dis1 < dis2){
+	  hypo = new WireCell2dToy::ToyHypothesis(*mcell1,*mcell3);
+	}else{
+	  hypo = new WireCell2dToy::ToyHypothesis(*mcell2,*mcell3);
+	}
 	hypos.push_back(hypo);
       }else if (flag_cell.at(i) == 3){
 	// two hypothesis, highest to third, and second highest to third
 	MergeGeomCell *mcell1 = (MergeGeomCell*) first_cell.at(i).at(0);
 	MergeGeomCell *mcell2 = (MergeGeomCell*) second_cell.at(i).at(0);
 	MergeGeomCell *mcell3 = (MergeGeomCell*) other_cell.at(i).at(0);
+
 	MergeGeomCell *mcell4;
 	std::set<int> edge_wires;
       	for (auto it = mcell1->ewires.begin(); it!=mcell1->ewires.end(); it++){
@@ -381,7 +406,6 @@ void WireCell2dToy::SimpleBlobToyTiling::FormHypo(){
 	  }
 	  if (flag==1) break;
 	}
-	
 	WireCell2dToy::ToyHypothesis *hypo = new WireCell2dToy::ToyHypothesis(*mcell1,*mcell3);
 	hypos.push_back(hypo);
 	hypo = new WireCell2dToy::ToyHypothesis(*mcell2,*mcell4);
@@ -513,6 +537,7 @@ void WireCell2dToy::SimpleBlobToyTiling::Organize(int nsimple_blob){
 
   flag_cell.push_back(0);
   
+  //find the maximum ranked cell
   for (int i=0;i!=corner_smcells.at(nsimple_blob).size();i++){
     MergeGeomCell *mcell = (MergeGeomCell*) corner_smcells.at(nsimple_blob).at(i);
     if (cell_rank[mcell] > max){
@@ -522,8 +547,11 @@ void WireCell2dToy::SimpleBlobToyTiling::Organize(int nsimple_blob){
   }
 
   if (max !=0){
+    //if found
     GeomCellSelection cells;
     cells.push_back(corner_smcells.at(nsimple_blob).at(max_bin));
+
+
     // loop through everything and fill in everything connected
     int flag = 1;
     while(flag){
@@ -534,7 +562,7 @@ void WireCell2dToy::SimpleBlobToyTiling::Organize(int nsimple_blob){
 	if (it==cells.end()){
 	  for (int j=0;j!=cells.size();j++){
 	    MergeGeomCell *mcell1 = (MergeGeomCell*) cells.at(j);
-	    if (mcell1->Overlap1(*mcell)){
+	    if (mcell1->Overlap1(*mcell) ){
 	      flag = 1;
 	      cells.push_back(mcell);
 	      break;
@@ -555,9 +583,24 @@ void WireCell2dToy::SimpleBlobToyTiling::Organize(int nsimple_blob){
 	max_bin = i;
       }
     }
-    if (max!=0){
+
+    if (max!=0){ //if found
       GeomCellSelection cells1;
       cells1.push_back(corner_smcells.at(nsimple_blob).at(max_bin));
+      
+      // fill in all the stuff with rank > 8
+      for (int i = 0; i!=corner_smcells.at(nsimple_blob).size();i++){
+	MergeGeomCell *mcell = (MergeGeomCell*) corner_smcells.at(nsimple_blob).at(i);
+	auto it = find(cells1.begin(),cells1.end(),mcell);
+	  auto it1 = find(first_cell.at(nsimple_blob).begin(),first_cell.at(nsimple_blob).end(),mcell);
+	  if (it==cells1.end() && it1 == first_cell.at(nsimple_blob).end()){
+	    //std::cout << cell_rank[mcell] << std::endl;
+	    if (cell_rank[mcell] >=3){
+	      cells1.push_back(mcell);
+	    }
+	  }
+      }
+
       // loop through everything and fill in everything connected
       flag = 1;
       while(flag){
@@ -687,6 +730,8 @@ void WireCell2dToy::SimpleBlobToyTiling::Organize(int nsimple_blob){
 	other_cell.push_back(cells);
       }
     }else{
+
+      // only find the first ... 
       GeomCellSelection cells;
       std::set<int> edge_wires;
       for (int i=0;i!=first_cell.at(nsimple_blob).size();i++){
