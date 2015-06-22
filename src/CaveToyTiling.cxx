@@ -150,3 +150,4 @@ const WireCell::GeomCell* WireCell2dToy::CaveToyTiling::cell(const WireCell::Geo
 {
   return 0;
 }
+ClassImp(WireCell2dToy::CaveToyTiling);

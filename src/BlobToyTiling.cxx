@@ -255,3 +255,5 @@ WireCell2dToy::BlobToyTiling::~BlobToyTiling(){
   wirechargemap.clear();
 
 }
+
+ClassImp(WireCell2dToy::BlobToyTiling);

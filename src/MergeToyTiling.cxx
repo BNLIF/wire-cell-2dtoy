@@ -312,3 +312,5 @@ const WireCell::GeomCell* WireCell2dToy::MergeToyTiling::cell(const WireCell::Ge
 {
   return 0;
 }
+
+ClassImp(WireCell2dToy::MergeToyTiling);

@@ -1171,3 +1171,5 @@ WireCell2dToy::SimpleBlobToyTiling::~SimpleBlobToyTiling(){
   //   }
   // }
 }
+
+ClassImp(WireCell2dToy::SimpleBlobToyTiling);

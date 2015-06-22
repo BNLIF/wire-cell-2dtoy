@@ -43,6 +43,7 @@ namespace WireCell2dToy{
     
    
 
+   ClassDef(CaveToyTiling,1);
    
     
   };

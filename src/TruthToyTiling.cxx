@@ -55,3 +55,5 @@ WireCell2dToy::TruthToyTiling::TruthToyTiling(WireCell2dToy::ToyTiling& tiling, 
   //  std::cout << "Xin " << sum << std::endl;
 
 }
+ClassImp(WireCell2dToy::TruthToyTiling);
+

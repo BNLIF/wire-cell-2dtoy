@@ -9,6 +9,8 @@
 #include "WireCellData/MergeGeomCell.h"
 #include "WireCellData/MergeGeomWire.h"
 
+#include "Rtypes.h"
+
 namespace WireCell2dToy{
   class BlobToyTiling : public WireCell2dToy::MergeToyTiling {
   public:
@@ -34,7 +36,7 @@ namespace WireCell2dToy{
    
 
    
-    
+      ClassDef(BlobToyTiling,1);
   };
 }
 #endif

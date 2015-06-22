@@ -6,6 +6,8 @@
 #include "WireCellNav/SliceDataSource.h"
 #include "WireCellSst/GeomDataSource.h"
 
+#include "Rtypes.h"
+
 namespace WireCell2dToy {
     /**
      *  A bogus tiling class that doesn't do anything.
@@ -53,6 +55,12 @@ namespace WireCell2dToy {
 
       
       
+	ClassDef(ToyTiling,1);
+
     };
+
 }
+
+
+
 #endif

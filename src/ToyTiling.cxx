@@ -248,3 +248,5 @@ const GeomCell* WireCell2dToy::ToyTiling::cell(const GeomWireSelection& wires) c
   return 0;
 
 }
+
+ClassImp(WireCell2dToy::ToyTiling);

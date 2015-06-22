@@ -9,6 +9,8 @@
 #include "WireCellData/MergeGeomWire.h"
 #include "WireCell2dToy/ToyHypothesis.h"
 
+#include "Rtypes.h"
+
 namespace WireCell2dToy{
   class SimpleBlobToyTiling : public WireCell2dToy::MergeToyTiling {
   public:
@@ -83,7 +85,7 @@ namespace WireCell2dToy{
     WireCell::CellIndexMap scimap_save;
     
 
-
+      ClassDef(SimpleBlobToyTiling,1);
     
   };
 }
