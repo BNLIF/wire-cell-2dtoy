@@ -56,7 +56,7 @@ namespace WireCell2dToy{
     int ncount;
     double cur_chi2;
     // cell_all, wire_all, cellmap, wiremap wire_u, wire_v, wire_w 
-    TVectorD *Cx, *dCx;
+    std::vector<double> Cx, dCx;
     std::vector<WireCell2dToy::HypoSelection> cur_hypo;
     
     int scindex;
@@ -66,7 +66,7 @@ namespace WireCell2dToy{
 
     //save all the results
     double chi2_save;
-    TVectorD *Cx_save, *dCx_save;
+    std::vector<double> Cx_save, dCx_save;
     WireCell::GeomWireSelection wire_u_save;
     WireCell::GeomWireSelection wire_v_save;
     WireCell::GeomWireSelection wire_w_save;

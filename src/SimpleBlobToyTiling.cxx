@@ -18,9 +18,9 @@ double WireCell2dToy::SimpleBlobToyTiling::Get_Cell_Charge( const WireCell::Geom
   // flag == 2 uncertainty
   int index = scimap_save[cell];
   if (flag==1){
-    return (*Cx_save)[index];
+    return Cx_save.at(index);
   }else if (flag==2){
-    return (*dCx_save)[index];
+    return dCx_save.at(index);
   }
 }
 
@@ -191,27 +191,35 @@ WireCell2dToy::SimpleBlobToyTiling::SimpleBlobToyTiling(WireCell2dToy::ToyTiling
       }
     }
 
-    Cx = new TVectorD(10);
-    dCx = new TVectorD(10);
-    Cx_save = new TVectorD(10);
-    dCx_save = new TVectorD(10);
+   
 
     //form the hypothesis and do the test ... 
     ncount = 0;
+
+    //std::cout << "xin1" << std::endl;
     FormHypo();
+    //std::cout << "xin1" << std::endl;
     DoTiling();
+    //std::cout << "xin1" << std::endl;
     cur_chi2 = CalChi2();
+    //std::cout << "xin1" << std::endl;
     SaveResult();
-    
-    while(cur_chi2 > 0.2 && ncount < 100){
+    // std::cout << "xin1" << std::endl;
+    while(cur_chi2 > 5 && ncount < 100){
+      //std::cout << cur_chi2 << std::endl;
+      
       FormHypo();
+      // std::cout << "xin1" << std::endl;
       DoTiling();
+      //std::cout << "xin1" << std::endl;
       cur_chi2 = CalChi2();
+      //std::cout << "xin2" << std::endl;
+      //std::cout << cur_chi2 << std::endl;
       if (cur_chi2 < chi2_save)
-       	SaveResult();
+    	SaveResult();
     }
 
-    std::cout << "DeBlob Chi2: " << cur_chi2 << std::endl;
+    std::cout << "DeBlob Chi2: " << cur_chi2 << " " << cell_all.size() << std::endl;
     
     
     
@@ -248,9 +256,8 @@ double WireCell2dToy::SimpleBlobToyTiling::CalChi2(){
   TMatrixD Vx(scindex,scindex);
   TMatrixD Vx_inv(scindex,scindex);
 
-  delete Cx, dCx;
-  Cx = new TVectorD(scindex);
-  dCx = new TVectorD(scindex);
+
+  TVectorD VCx(scindex);
   
   // fill wire charge
   WireChargeMap wcmap = toytiling->wcmap();
@@ -320,18 +327,26 @@ double WireCell2dToy::SimpleBlobToyTiling::CalChi2(){
   TDecompSVD svd(MC);
   MC_inv = svd.Invert();
   
-  *Cx = MC_inv * MAT * Vy_inv * Wy;
+  VCx = MC_inv * MAT * Vy_inv * Wy;
   Vx_inv = MAT * Vy_inv * MA;
   TDecompSVD svd1(Vx_inv);
   Vx = svd1.Invert();
+
+  Cx.clear();
+  dCx.clear();
   for (int i = 0; i!=scindex; i++){
-    (*dCx)[i] = sqrt( Vx(i,i)) * 1000.;
+    if (Vx(i,i)>=0){
+      dCx.push_back(sqrt( Vx(i,i)) * 1000.);
+    }else{
+      dCx.push_back(0);
+    }
+    Cx.push_back(VCx[i]);
     //std::cout << i << " " << (*Cx)[i] << " " << (*dCx)[i] << std::endl;
   }
   //  std::cout << std::endl;
 
 
-  Wy_pred = MA * (*Cx);
+  Wy_pred = MA * VCx;
   TVectorD r1 = Vy_inv * (Wy - Wy_pred);
   TVectorD r2 = Wy - Wy_pred;
   chi2 = r1 * r2 / 1e6;
@@ -373,34 +388,57 @@ void WireCell2dToy::SimpleBlobToyTiling::Buildup_index(){
 
 void WireCell2dToy::SimpleBlobToyTiling::SaveResult(){
   chi2_save = cur_chi2;
-  if (hypo_save.size() !=0){
-    for (int i = 0;i!=hypo_save.size();i++){
-      for (int j=0;j!=hypo_save.at(i).size();j++){
-	delete hypo_save.at(i).at(j);
-      }
-    }
-  }
-  hypo_save.clear();
-  hypo_save = cur_hypo;
-  
+  //  std::cout << "abc1 " <<std::endl;
+  // if (hypo_save.size() !=0){
+  //   for (int i = 0;i!=hypo_save.size();i++){
+  //     for (int j=0;j!=hypo_save.at(i).size();j++){
+  // 	delete hypo_save.at(i).at(j);
+  //     }
+  //     hypo_save.at(i).clear();
+  //   }
+  //   hypo_save.clear();
+  // }
+  // hypo_save = cur_hypo;
+  //std::cout << "abc2 " <<std::endl;
+
+  wire_u_save.clear();
+  wire_v_save.clear();
+  wire_w_save.clear();
+  wire_all_save.clear();
+  cell_all_save.clear();
+
   wire_u_save = wire_u;
   wire_v_save = wire_v;
   wire_w_save = wire_w;
   wire_all_save = wire_all;
   cell_all_save = cell_all;
-  
+
+   Cx_save.clear();
+  dCx_save.clear();
+  Cx_save = Cx;
+  dCx_save = dCx;
+
+  //  std::cout << "abc3 " <<std::endl;
+
+  cellmap_save.clear();
+  wiremap_save.clear();
+
   cellmap_save = cellmap;
   wiremap_save = wiremap;
   
-  delete Cx_save, dCx_save;
-  Cx_save = new TVectorD(*Cx);
-  dCx_save = new TVectorD(*dCx);
+  //  std::cout << "abc4 " <<std::endl;
 
+  scimap_save.clear();
+  swimap_save.clear();
+  
   scindex_save = scindex;
   swindex_save = swindex;
   swimap_save = swimap;
   scimap_save = scimap;
-  
+
+  //  std::cout << "abc6 " <<std::endl;
+
+ 
 }
 
 
