@@ -120,11 +120,11 @@ int main(int argc, char* argv[])
   
   int ncount_mcell = 0;
 
-  // int start_num = 0 ;
-  // int end_num = sds.size()-1;
+  int start_num = 0 ;
+  int end_num = sds.size()-1;
 
-  int start_num =180;
-  int end_num = 190;
+  // int start_num =180;
+  // int end_num = 190;
   // int end_num = sds.size()-1;
 
   // int start_num = 400;
@@ -332,6 +332,7 @@ int main(int argc, char* argv[])
   //use time information
   std::cout << "Reduce Blob" << std::endl; 
   for (int i=start_num;i!=end_num+1;i++){
+    std::cout << "Check Blob " << i << std::endl;
     //std::cout << toymatrix[i]->GetSimpleBlobReduction() << std::endl;
     toymatrix[i]->JudgeSimpleBlob(*toytiling[i],*mergetiling[i]);
     //std::cout << toymatrix[i]->GetSimpleBlobReduction() << std::endl;

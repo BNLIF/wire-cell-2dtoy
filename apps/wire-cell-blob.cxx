@@ -142,8 +142,8 @@ int main(int argc, char* argv[])
   int ncount_mcell = 0;
   
   //simple cosmic
-  int start_num =180;
-  int end_num = 190;
+  int start_num =132;
+  int end_num = 133;
 
 
   //nue cc 
@@ -334,7 +334,7 @@ int main(int argc, char* argv[])
   //display.draw_truthcells_charge(total_scmap,"*same",FI);
   //display.draw_truthcells_charge(total_scrms,"*same",FI);
   display.draw_cells(total_blob_cells,"*same",6);
-  display.draw_cells(total_corner_cells,"*same",2);
+  // display.draw_cells(total_corner_cells,"*same",2);
   display.draw_truthcells(total_ccmap,"*same");
  
 

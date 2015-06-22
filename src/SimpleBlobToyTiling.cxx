@@ -42,6 +42,15 @@ WireCell2dToy::SimpleBlobToyTiling::SimpleBlobToyTiling(WireCell2dToy::ToyTiling
       if (mcell->IsSimpleBlob() && mcell->IsBlob()){
 	//save all the simple blob
 	sbcells.push_back(mcell);
+	if (corner_smcells.size() < nsimple_blob + 1){
+	  GeomCellSelection cellss;
+	  corner_smcells.push_back(cellss);
+	}
+	if (corner_mcells.size() < nsimple_blob + 1){
+	  GeomCellSelection cellss;
+	  corner_mcells.push_back(cellss);
+	}
+	
 	CellIndexMap indexmap = mcell->get_cornercells_index();
 	
 	for (int j=0;j!=12;j++){
@@ -94,25 +103,18 @@ WireCell2dToy::SimpleBlobToyTiling::SimpleBlobToyTiling(WireCell2dToy::ToyTiling
 	    //save the special cells ...  //need to add time later ... 
 	    if (flag1==0){
 	      if (flag!=-1){
-		if (corner_smcells.size() < nsimple_blob + 1){
-		  GeomCellSelection cellss;
-		  corner_smcells.push_back(cellss);
-		}
+		
 		corner_smcells[nsimple_blob].push_back(mcorner_cell);
 		
 	      }else{
-		if (corner_mcells.size() < nsimple_blob + 1){
-		  GeomCellSelection cellss;
-		  corner_mcells.push_back(cellss);
-		}
+		
 		corner_mcells[nsimple_blob].push_back(mcorner_cell);
 		  
 	      }
 	    }
-	    
 	  }
-
 	}
+       
 
 	// going through smcells array and properly calculate index
 	for (auto it = corner_smcells[nsimple_blob].begin(); it!=corner_smcells[nsimple_blob].end();it++){
