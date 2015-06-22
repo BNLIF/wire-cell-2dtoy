@@ -190,12 +190,12 @@ WireCell2dToy::SimpleBlobToyTiling::SimpleBlobToyTiling(WireCell2dToy::ToyTiling
     cur_chi2 = CalChi2();
     SaveResult();
     
-    while(cur_chi2 > 0.2&&ncount < 100){
+    while(cur_chi2 > 0.2 && ncount < 100){
       FormHypo();
       DoTiling();
       cur_chi2 = CalChi2();
       if (cur_chi2 < chi2_save)
-    	SaveResult();
+       	SaveResult();
     }
 
     std::cout << "DeBlob Chi2: " << cur_chi2 << std::endl;
@@ -546,7 +546,10 @@ void WireCell2dToy::SimpleBlobToyTiling::DoTiling(){
 
 
 void WireCell2dToy::SimpleBlobToyTiling::FormHypo(){
-  ClearHypo();
+  // std::cout << ncount << std::endl;
+   ClearHypo();
+
+   //std::cout << ncount << std::endl;
   
   if (ncount == 0){
     for (int i=0;i!=nsimple_blob;i++){
@@ -753,7 +756,9 @@ void WireCell2dToy::SimpleBlobToyTiling::ClearHypo(){
       for (int j=0;j!=cur_hypo.at(i).size();j++){
 	delete cur_hypo.at(i).at(j);
       }
+      cur_hypo.at(i).clear();
     }
+    cur_hypo.clear();
   }
 }
 
