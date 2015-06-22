@@ -332,7 +332,7 @@ int main(int argc, char* argv[])
   //use time information
   std::cout << "Reduce Blob" << std::endl; 
   for (int i=start_num;i!=end_num+1;i++){
-    std::cout << "Check Blob " << i << std::endl;
+    //std::cout << "Check Blob " << i << std::endl;
     //std::cout << toymatrix[i]->GetSimpleBlobReduction() << std::endl;
     toymatrix[i]->JudgeSimpleBlob(*toytiling[i],*mergetiling[i]);
     //std::cout << toymatrix[i]->GetSimpleBlobReduction() << std::endl;

@@ -9,7 +9,8 @@ WireCell2dToy::ToyTiling::ToyTiling()
 {
 }
 
-WireCell2dToy::ToyTiling::ToyTiling(const WireCell::Slice& slice,WireCellSst::GeomDataSource& gds){
+
+WireCell2dToy::ToyTiling::ToyTiling(const WireCell::Slice& slice,WireCell::GeomDataSource& gds){
   WireCell::Channel::Group group = slice.group();
   //double sum = 0;
   for (int i=0;i!=group.size();i++){
