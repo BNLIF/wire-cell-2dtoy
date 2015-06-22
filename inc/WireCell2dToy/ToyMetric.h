@@ -16,9 +16,9 @@ namespace WireCell2dToy{
     void AddSolve(int cond);
     
   private:
-    int rm_cell_true;  float charge_rm_cell_true;
+    int rm_cell_true;  float charge_rm_cell_true; float Tcharge_rm_cell_true;
     int rm_cell_false; float charge_rm_cell_false;
-    int el_cell_true;  float charge_el_cell_true;
+    int el_cell_true;  float charge_el_cell_true; float Tcharge_el_cell_true;
     int el_cell_false; float charge_el_cell_false;
 
     int solve_condition[3];

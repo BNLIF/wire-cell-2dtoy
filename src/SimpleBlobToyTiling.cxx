@@ -12,6 +12,19 @@
 
 
 using namespace WireCell;
+
+double WireCell2dToy::SimpleBlobToyTiling::Get_Cell_Charge( const WireCell::GeomCell *cell, int flag )  {
+  // flag == 1 charge
+  // flag == 2 uncertainty
+  int index = scimap_save[cell];
+  if (flag==1){
+    return (*Cx_save)[index];
+  }else if (flag==2){
+    return (*dCx_save)[index];
+  }
+}
+
+
 WireCell2dToy::SimpleBlobToyTiling::SimpleBlobToyTiling(WireCell2dToy::ToyTiling& toytiling1, WireCell2dToy::MergeToyTiling& mergetiling1, WireCell2dToy::ToyMatrix& toymatrix1,
 							WireCell2dToy::MergeToyTiling& prev_mergetiling, WireCell2dToy::ToyMatrix& prev_toymatrix,
 							WireCell2dToy::MergeToyTiling& next_mergetiling, WireCell2dToy::ToyMatrix& next_toymatrix){

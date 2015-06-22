@@ -8,6 +8,11 @@ WireCell2dToy::ToyMetric::ToyMetric(){
   el_cell_true = 0;
   el_cell_false = 0;
 
+  charge_rm_cell_true = 0; Tcharge_rm_cell_true = 0;
+  charge_rm_cell_false = 0;
+  charge_el_cell_true = 0;   Tcharge_el_cell_true = 0;
+  charge_el_cell_false = 0;
+
   solve_condition[0] = 0;
   solve_condition[1] = 0;
   solve_condition[2] = 0;
@@ -40,13 +45,15 @@ void WireCell2dToy::ToyMetric::Add(GeomCellSelection &allmcell,WireCell2dToy::To
     
     if (pass_threshold == true && contain_truth == true){
       rm_cell_true ++;
-      charge_rm_cell_true += mcell->GetTruthCharge();
+      charge_rm_cell_true += charge;
+      Tcharge_rm_cell_true += mcell->GetTruthCharge();
     }else if (pass_threshold == true && contain_truth == false){
       rm_cell_false ++;
       charge_rm_cell_false += charge;
     }else if (pass_threshold == false && contain_truth == true){
       el_cell_true ++ ;
-      charge_el_cell_true += mcell->GetTruthCharge();
+      charge_el_cell_true += charge;
+      Tcharge_el_cell_true += mcell->GetTruthCharge();
     }else if (pass_threshold == false && contain_truth == false){
       el_cell_false ++;
       charge_el_cell_false += charge;
@@ -57,10 +64,15 @@ void WireCell2dToy::ToyMetric::Add(GeomCellSelection &allmcell,WireCell2dToy::To
 }
 
 void WireCell2dToy::ToyMetric::Print(){
-  std::cout << "Remaining Cells Containing Truth     : " << rm_cell_true << " " << charge_rm_cell_true << std::endl;
-  std::cout << "Remaining Cells Not Containing Truth : " << rm_cell_false << " " << charge_rm_cell_false << std::endl;
-  std::cout << "Eliminated Cells Containing Truth    : " << el_cell_true << " " << charge_el_cell_true << std::endl;
-  std::cout << "Eliminated Cells Not Containing Truth: " << el_cell_false << " " << charge_el_cell_false << std::endl;
+  // std::cout << "Remaining Cells Containing Truth     : " << rm_cell_true << " " << charge_rm_cell_true << std::endl;
+  // std::cout << "Remaining Cells Not Containing Truth : " << rm_cell_false << " " << charge_rm_cell_false << std::endl;
+  // std::cout << "Eliminated Cells Containing Truth    : " << el_cell_true << " " << charge_el_cell_true << std::endl;
+  // std::cout << "Eliminated Cells Not Containing Truth: " << el_cell_false << " " << charge_el_cell_false << std::endl;
+
+  std::cout << "Remaining Cells Containing Truth     : " << rm_cell_true << "  charge:" << charge_rm_cell_true << " true charge:" << Tcharge_rm_cell_true << std::endl;
+  std::cout << "Remaining Cells Not Containing Truth : " << rm_cell_false << "  charge:" << charge_rm_cell_false << std::endl;
+  std::cout << "Eliminated Cells Containing Truth    : " << el_cell_true << "  charge:" << charge_el_cell_true << " true charge:" << Tcharge_el_cell_true << std::endl;
+  std::cout << "Eliminated Cells Not Containing Truth: " << el_cell_false << "  charge:" << charge_el_cell_false << std::endl;
 
   std::cout << "Not       Solved Case: " << solve_condition[0] << std::endl;
   std::cout << "Direct    Solved Case: " << solve_condition[1] << std::endl;

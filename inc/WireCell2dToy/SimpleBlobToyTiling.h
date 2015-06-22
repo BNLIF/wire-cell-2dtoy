@@ -17,6 +17,12 @@ namespace WireCell2dToy{
 			 WireCell2dToy::MergeToyTiling& next_mergetiling, WireCell2dToy::ToyMatrix& next_toymatrix
 			);
     ~SimpleBlobToyTiling();
+    
+    
+    double Get_Cell_Charge( const WireCell::GeomCell *cell, int flag = 1) ;
+    WireCell::GeomCellSelection Get_Cells(){return cell_all_save;};
+    WireCell::GeomCellSelection Get_SB_Cells(){return sbcells;};
+
   private:
     void Organize(int nsimple_blob);
     void FormHypo();

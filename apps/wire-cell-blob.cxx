@@ -15,6 +15,8 @@
 #include "WireCell2dToy/ToyMatrixIterate.h"
 #include "WireCell2dToy/ToyMatrixMarkov.h"
 #include "WireCell2dToy/ToyMetric.h"
+#include "WireCell2dToy/BlobMetric.h"
+
 
 #include "WireCellNav/FrameDataSource.h"
 #include "WireCellNav/SimDataSource.h"
@@ -117,7 +119,8 @@ int main(int argc, char* argv[])
   //WireCell2dToy::ToyMatrix **blobmatrix = new WireCell2dToy::ToyMatrix*[2400];
   
   //WireCell2dToy::ToyMatrixMarkov **blobmatrix_markov = new WireCell2dToy::ToyMatrixMarkov*[2400];
-  WireCell2dToy::ToyMetric toymetric, blobmetric;
+  WireCell2dToy::ToyMetric toymetric;
+  WireCell2dToy::BlobMetric blobmetric;
  
   //add in cluster
   GeomClusterSet cluster_set, cluster_delset;
@@ -138,13 +141,13 @@ int main(int argc, char* argv[])
   int ncount_mcell = 0;
   
   //simple cosmic
-  int start_num =184;
-  int end_num = 187;
+  // int start_num =184;
+  // int end_num = 187;
 
 
   //nue cc 
-  // int start_num =355;
-  // int end_num = 357;
+  int start_num =355;
+  int end_num = 357;
     
   //delta 
   // int start_num =678;
@@ -222,9 +225,6 @@ int main(int argc, char* argv[])
 	toymetric.Add(allmcell,*toymatrix[i],ccmap);
     toymetric.AddSolve(toymatrix[i]->Get_Solve_Flag());
     
-    // if (blobmatrix[i]->Get_Solve_Flag()!=0)
-    //   blobmetric.Add(ballmcell,*blobmatrix[i],ccmap);
-    // blobmetric.AddSolve(blobmatrix[i]->Get_Solve_Flag());
     
     
     
@@ -264,11 +264,11 @@ int main(int argc, char* argv[])
       
       //save stuff
       GeomCellSelection blob_cells = blobtiling[i]->get_allcell();
-      
       for (int k=0;k!=blob_cells.size();k++){
 	total_blob_cells.push_back(blob_cells.at(k));
       }
-      
+      CellChargeMap ccmap = truthtiling[i]->ccmap();
+      blobmetric.Add(*blobtiling[i],ccmap);
     }
   }
   
