@@ -22,6 +22,10 @@ namespace WireCell2dToy{
     void FormHypo();
     void ClearHypo();
     void DoTiling();
+    double CalChi2();
+    void SaveResult();
+    void Buildup_index();
+    
 
     WireCell2dToy::ToyTiling *toytiling;
     WireCell2dToy::MergeToyTiling *mergetiling;
@@ -44,8 +48,36 @@ namespace WireCell2dToy{
     std::vector<int> flag_cell;
     
     int ncount;
-
+    double cur_chi2;
+    // cell_all, wire_all, cellmap, wiremap wire_u, wire_v, wire_w 
+    TVectorD *Cx, *dCx;
     std::vector<WireCell2dToy::HypoSelection> cur_hypo;
+    
+    int scindex;
+    int swindex;
+    WireCell::WireIndexMap swimap;
+    WireCell::CellIndexMap scimap;
+
+    //save all the results
+    double chi2_save;
+    TVectorD *Cx_save, *dCx_save;
+    WireCell::GeomWireSelection wire_u_save;
+    WireCell::GeomWireSelection wire_v_save;
+    WireCell::GeomWireSelection wire_w_save;
+    WireCell::GeomWireSelection wire_all_save;
+    WireCell::GeomCellSelection cell_all_save;
+    WireCell::GeomCellMap cellmap_save;
+    WireCell::GeomWireMap wiremap_save;
+    std::vector<WireCell2dToy::HypoSelection> hypo_save;
+    
+
+    int scindex_save;
+    int swindex_save;
+    WireCell::WireIndexMap swimap_save;
+    WireCell::CellIndexMap scimap_save;
+    
+
+
     
   };
 }

@@ -1,5 +1,15 @@
 #include "WireCell2dToy/SimpleBlobToyTiling.h"
 #include "TRandom.h"
+#include "TDecompSVD.h"
+
+// #include <lsp/nnls.h>
+
+//#include <boost/numeric/ublas/matrix.hpp>
+//#include <boost/numeric/ublas/vector.hpp>
+//#include <boost/numeric/ublas/io.hpp>
+
+//#include <sstream>
+
 
 using namespace WireCell;
 WireCell2dToy::SimpleBlobToyTiling::SimpleBlobToyTiling(WireCell2dToy::ToyTiling& toytiling1, WireCell2dToy::MergeToyTiling& mergetiling1, WireCell2dToy::ToyMatrix& toymatrix1,
@@ -168,12 +178,30 @@ WireCell2dToy::SimpleBlobToyTiling::SimpleBlobToyTiling(WireCell2dToy::ToyTiling
       }
     }
 
-    
+    Cx = new TVectorD(10);
+    dCx = new TVectorD(10);
+    Cx_save = new TVectorD(10);
+    dCx_save = new TVectorD(10);
+
     //form the hypothesis and do the test ... 
     ncount = 0;
     FormHypo();
     DoTiling();
+    cur_chi2 = CalChi2();
+    SaveResult();
+    
+    while(cur_chi2 > 0.2&&ncount < 100){
+      FormHypo();
+      DoTiling();
+      cur_chi2 = CalChi2();
+      if (cur_chi2 < chi2_save)
+    	SaveResult();
+    }
 
+    std::cout << "DeBlob Chi2: " << cur_chi2 << std::endl;
+    
+    
+    
     // std::cout << "SimpleBlobTiling: "<< nsimple_blob << " " << corner_smcells[0].size() << " " << corner_mcells[0].size() << " " << hypo_ccells.at(0).size() << std::endl;
     // for (int j=0;j!=hypo_ccells.at(0).size();j++){
     //   std::cout << hypo_ccells.at(0).at(j).size() << " ";
@@ -186,6 +214,182 @@ WireCell2dToy::SimpleBlobToyTiling::SimpleBlobToyTiling(WireCell2dToy::ToyTiling
 
   }
 }
+
+double WireCell2dToy::SimpleBlobToyTiling::CalChi2(){
+  //using namespace boost::numeric::ublas;
+
+  double chi2;
+  Buildup_index();
+  TMatrixD MA(swindex,scindex);
+  TMatrixD MAT(scindex,swindex);
+ 
+  TMatrixD Vy(swindex,swindex);
+  TMatrixD Vy_inv(swindex,swindex);
+ 
+  TVectorD Wy(swindex);
+  TVectorD Wy_pred(swindex);
+  
+  TMatrixD MC(scindex,scindex);
+  TMatrixD MC_inv(scindex,scindex);
+
+  TMatrixD Vx(scindex,scindex);
+  TMatrixD Vx_inv(scindex,scindex);
+
+  delete Cx, dCx;
+  Cx = new TVectorD(scindex);
+  dCx = new TVectorD(scindex);
+  
+  // fill wire charge
+  WireChargeMap wcmap = toytiling->wcmap();
+  for (int i=0; i!=wire_all.size();i++){
+    int index = swimap[wire_all.at(i)];
+    float charge = wcmap[wire_all.at(i)];
+    Wy[index] =charge;
+    WirePlaneType_t plane = wire_all.at(i)->plane();
+    Double_t charge_noise;
+    if (plane == 0){
+      charge_noise = 14000*0.05;
+    }else if (plane==1){
+      charge_noise = 14000*0.03;
+    }else if (plane==2){
+      charge_noise = 14000*0.02;
+    }
+    Vy(index,index) = (charge_noise*charge_noise + 0.05*0.05 * charge*charge)/1e6;
+  }
+  
+  //fill MA
+  for (int i=0;i!=wire_all.size();i++){
+    int index = swimap[wire_all.at(i)];
+    for (int j=0;j!=wiremap[wire_all.at(i)].size();j++){
+      int index1 = scimap[wiremap[wire_all.at(i)].at(j)];
+      MA(index,index1) = 1;
+    }
+  }
+  
+  MAT.Transpose(MA);
+  Vy_inv = Vy;
+  Vy_inv.Invert();
+
+  MC = MAT * Vy_inv * MA;
+
+
+  // //Now try NNLS  need to improve
+  // int m = scindex, n = swindex;
+
+  // std::cout << m << " " << n << std::endl;
+
+  // matrix < double > NNLS_A(n,m);
+  // vector < double > NNLS_b(n);
+    
+  // //fill value ...
+  // for (int i = 0;i!=n;i++){
+  //   NNLS_b(i) = Wy[i];
+  //   //std::cout << i << " " << Wy[i] << std::endl;
+  //   for (int j=0;j!=m;j++){
+  //     NNLS_A(i,j) = MA(i,j);
+  //     //std::cout << i << " " << j << " " << MA(i,j) << std::endl;
+  //   }
+  // }
+
+  // lsp::nnls< matrix< double >, vector< double >  > nnls( NNLS_A, NNLS_b );
+  // vector< double > NNLS_x(m);
+  // matrix< double > NNLS_cov(m,m);
+  // nnls.solve( NNLS_x , NNLS_cov );
+  
+  // // save results and calculate chi2 
+  // for (int i=0;i!=scindex;i++){
+  //   (*Cx)[i] = NNLS_x(i);
+  //   (*dCx)[i] = sqrt(NNLS_cov(i,i));
+  // }
+
+
+  //SVD solution
+  TDecompSVD svd(MC);
+  MC_inv = svd.Invert();
+  
+  *Cx = MC_inv * MAT * Vy_inv * Wy;
+  Vx_inv = MAT * Vy_inv * MA;
+  TDecompSVD svd1(Vx_inv);
+  Vx = svd1.Invert();
+  for (int i = 0; i!=scindex; i++){
+    (*dCx)[i] = sqrt( Vx(i,i)) * 1000.;
+    //std::cout << i << " " << (*Cx)[i] << " " << (*dCx)[i] << std::endl;
+  }
+  //  std::cout << std::endl;
+
+
+  Wy_pred = MA * (*Cx);
+  TVectorD r1 = Vy_inv * (Wy - Wy_pred);
+  TVectorD r2 = Wy - Wy_pred;
+  chi2 = r1 * r2 / 1e6;
+
+
+  return chi2;
+}
+
+void WireCell2dToy::SimpleBlobToyTiling::Buildup_index(){
+  scindex = 0;
+  swindex = 0;
+  
+  scimap.clear();
+  swimap.clear();
+  
+
+  
+  for (int j=0;j!=cell_all.size();j++){
+    //construct merged cell index
+    const GeomCell *cell = cell_all[j];
+    if (scimap.find(cell) == scimap.end()){
+      scimap[cell] = scindex;
+      scindex ++;
+      
+      const GeomWireSelection wires = cellmap[cell];
+      for (int k=0;k!=wires.size();k++){
+	//construct merged wire index
+	const GeomWire *wire = wires[k];
+	if (swimap.find(wire) == swimap.end()){
+	  swimap[wire] = swindex;
+	  swindex ++;
+	}
+      }
+    }
+  }
+  
+}
+
+
+void WireCell2dToy::SimpleBlobToyTiling::SaveResult(){
+  chi2_save = cur_chi2;
+  if (hypo_save.size() !=0){
+    for (int i = 0;i!=hypo_save.size();i++){
+      for (int j=0;j!=hypo_save.at(i).size();j++){
+	delete hypo_save.at(i).at(j);
+      }
+    }
+  }
+  hypo_save.clear();
+  hypo_save = cur_hypo;
+  
+  wire_u_save = wire_u;
+  wire_v_save = wire_v;
+  wire_w_save = wire_w;
+  wire_all_save = wire_all;
+  cell_all_save = cell_all;
+  
+  cellmap_save = cellmap;
+  wiremap_save = wiremap;
+  
+  delete Cx_save, dCx_save;
+  Cx_save = new TVectorD(*Cx);
+  dCx_save = new TVectorD(*dCx);
+
+  scindex_save = scindex;
+  swindex_save = swindex;
+  swimap_save = swimap;
+  scimap_save = scimap;
+  
+}
+
 
 void WireCell2dToy::SimpleBlobToyTiling::DoTiling(){
   
@@ -443,6 +647,15 @@ void WireCell2dToy::SimpleBlobToyTiling::FormHypo(){
 	MergeGeomCell *mcell2 = (MergeGeomCell*) second_cell.at(i).at(n);
 	n = gRandom->Uniform(0,other_cell.at(i).size());
 	MergeGeomCell *mcell3 = (MergeGeomCell*) other_cell.at(i).at(n);
+	int nnn = 0;
+	while(mcell3 == mcell2 && nnn<20){
+	  n = gRandom->Uniform(0,second_cell.at(i).size());
+	  MergeGeomCell *mcell2 = (MergeGeomCell*) second_cell.at(i).at(n);
+	  n = gRandom->Uniform(0,other_cell.at(i).size());
+	  MergeGeomCell *mcell3 = (MergeGeomCell*) other_cell.at(i).at(n);
+	  nnn ++;
+	}
+
 	WireCell2dToy::ToyHypothesis *hypo = new WireCell2dToy::ToyHypothesis(*mcell1,*mcell2);
 	hypos.push_back(hypo);
 	n = gRandom->Uniform(0.1,1.9);
@@ -461,6 +674,17 @@ void WireCell2dToy::SimpleBlobToyTiling::FormHypo(){
 	MergeGeomCell *mcell2 = (MergeGeomCell*) second_cell.at(i).at(n);
 	n = gRandom->Uniform(0,other_cell.at(i).size());
 	MergeGeomCell *mcell3 = (MergeGeomCell*) other_cell.at(i).at(n);
+
+	int nnn = 0;
+	while(mcell3 == mcell2 && nnn<20){
+	  n = gRandom->Uniform(0,second_cell.at(i).size());
+	  MergeGeomCell *mcell2 = (MergeGeomCell*) second_cell.at(i).at(n);
+	  n = gRandom->Uniform(0,other_cell.at(i).size());
+	  MergeGeomCell *mcell3 = (MergeGeomCell*) other_cell.at(i).at(n);
+	  nnn ++;
+	}
+	
+
 	MergeGeomCell *mcell4;
 	std::set<int> edge_wires;
       	for (auto it = mcell1->ewires.begin(); it!=mcell1->ewires.end(); it++){
@@ -492,6 +716,11 @@ void WireCell2dToy::SimpleBlobToyTiling::FormHypo(){
 	  }
 	  if (flag==1) break;
 	}
+	
+
+
+
+
 	n = gRandom->Uniform(0.1,2.9);
 	if (n==0){
 	  WireCell2dToy::ToyHypothesis *hypo = new WireCell2dToy::ToyHypothesis(*mcell1,*mcell2);
@@ -588,18 +817,7 @@ void WireCell2dToy::SimpleBlobToyTiling::Organize(int nsimple_blob){
       GeomCellSelection cells1;
       cells1.push_back(corner_smcells.at(nsimple_blob).at(max_bin));
       
-      // fill in all the stuff with rank > 8
-      for (int i = 0; i!=corner_smcells.at(nsimple_blob).size();i++){
-	MergeGeomCell *mcell = (MergeGeomCell*) corner_smcells.at(nsimple_blob).at(i);
-	auto it = find(cells1.begin(),cells1.end(),mcell);
-	  auto it1 = find(first_cell.at(nsimple_blob).begin(),first_cell.at(nsimple_blob).end(),mcell);
-	  if (it==cells1.end() && it1 == first_cell.at(nsimple_blob).end()){
-	    //std::cout << cell_rank[mcell] << std::endl;
-	    if (cell_rank[mcell] >=3){
-	      cells1.push_back(mcell);
-	    }
-	  }
-      }
+  
 
       // loop through everything and fill in everything connected
       flag = 1;
@@ -728,6 +946,20 @@ void WireCell2dToy::SimpleBlobToyTiling::Organize(int nsimple_blob){
 	  flag_cell.at(nsimple_blob) = 2;
 	}
 	other_cell.push_back(cells);
+
+	// fill in all the stuff with rank > 8
+	for (int i = 0; i!=corner_smcells.at(nsimple_blob).size();i++){
+	  MergeGeomCell *mcell = (MergeGeomCell*) corner_smcells.at(nsimple_blob).at(i);
+	  auto it = find(cells1.begin(),cells1.end(),mcell);
+      	  auto it1 = find(first_cell.at(nsimple_blob).begin(),first_cell.at(nsimple_blob).end(),mcell);
+      	  if (it==cells1.end() && it1 == first_cell.at(nsimple_blob).end()){
+      	    //std::cout << cell_rank[mcell] << std::endl;
+      	    if (cell_rank[mcell] >=3){
+      	      second_cell.at(nsimple_blob).push_back(mcell);
+      	    }
+      	  }
+	}
+	
       }
     }else{
 
