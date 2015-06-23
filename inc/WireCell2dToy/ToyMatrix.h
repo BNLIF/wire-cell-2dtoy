@@ -12,6 +12,7 @@
 namespace WireCell2dToy{
   class ToyMatrix {
   public:
+    ToyMatrix();
     ToyMatrix(WireCell2dToy::ToyTiling& toytiling, WireCell2dToy::MergeToyTiling& mergetiling);
     ToyMatrix(WireCell2dToy::ToyTiling& toytiling, WireCell2dToy::MergeToyTiling& mergetiling, int abc);
    

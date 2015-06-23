@@ -16,8 +16,10 @@
 #pragma link C++ class WireCell2dToy::CaveToyTiling+;
 #pragma link C++ class WireCell2dToy::MergeToyTiling;
 #pragma link C++ class WireCell2dToy::TruthToyTiling;
-// #pragma link C++ class WireCell2dToy::ToyMatrix;
-// #pragma link C++ class WireCell2dToy::ToyMatrixIterate;
-// #pragma link C++ class WireCell2dToy::ToyMatrixMarkov;
+
+#pragma link C++ class WireCell2dToy::ToyMatrix;
+#pragma link C++ class WireCell2dToy::ToyMatrixIterate;
+#pragma link C++ class WireCell2dToy::ToyMatrixMarkov;
+#pragma link C++ class WireCell2dToy::SimpleBlobToyTiling;
 
 #endif

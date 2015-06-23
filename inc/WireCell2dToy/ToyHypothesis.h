@@ -6,6 +6,7 @@
 namespace WireCell2dToy{
   class ToyHypothesis {
   public:
+    ToyHypothesis();
     ToyHypothesis(WireCell::MergeGeomCell& mcell1, WireCell::MergeGeomCell& mcell2);
     ~ToyHypothesis();
     double CalValue(WireCell::Point p, WireCell::Point p1, WireCell::Point p2);

@@ -120,11 +120,11 @@ int main(int argc, char* argv[])
   
   int ncount_mcell = 0;
 
-  int start_num = 0 ;
-  int end_num = sds.size()-1;
+  // int start_num = 0 ;
+  // int end_num = sds.size()-1;
 
-  // int start_num =180;
-  // int end_num = 190;
+  int start_num =180;
+  int end_num = 181;
   // int end_num = sds.size()-1;
 
   // int start_num = 400;
@@ -601,6 +601,57 @@ int main(int argc, char* argv[])
     g1->Write(Form("cluster_%d",ncluster));
     ncluster ++;
   }
+
+  WireCell2dToy::ToyTiling* tt1;
+  WireCell2dToy::MergeToyTiling* tt2;
+  WireCell2dToy::TruthToyTiling* tt3;
+
+  WireCell2dToy::ToyMatrix* tt4;
+  WireCell2dToy::ToyMatrixIterate* tt5;
+  WireCell2dToy::ToyMatrixMarkov* tt6;
+  WireCell2dToy::SimpleBlobToyTiling *tt7;
+  int time_slice;
+  
+  TTree* ttree = new TTree("T","T");
+  ttree->Branch("time_slice",&time_slice,"time_slice/I");
+  ttree->Branch("toytiling",&tt1);
+  //ttree->Branch("truthtiling",&tt3);
+  //ttree->Branch("mergetiling",&tt2);
+
+  
+  //ttree->Branch("toymatrix",&tt4);
+  // ttree->Branch("toymatrix_ite",&tt5);
+  // ttree->Branch("toymatrix_markov",&tt6);
+  //ttree->Branch("blobtiling",&tt7);
+  
+
+  ttree->SetDirectory(file);
+  for (int i=start_num;i!=end_num+1;i++){
+    tt1 = toytiling[i];
+    //tt3 = truthtiling[i];
+
+    //tt2 = mergetiling[i];
+  
+
+    //tt4 = toymatrix[i];
+    // tt5 = toymatrix_it[i];
+    // tt6 = toymatrix_markov[i];
+    //tt7 = blobtiling[i];
+    
+    time_slice = i;
+    ttree->Fill();
+  }
+
+  // TTree *ttree1 = new TTree("TC","TC");
+  // GeomCluster *cluster;
+  // ttree1->Branch("cluster",&cluster);
+  // ttree1->SetDirectory(file);
+  // for (auto it = cluster_set.begin();it!=cluster_set.end();it++){
+  //   cluster = *it;
+  //   ttree1->Fill();
+  // }
+  
+ 
 
 
   file->Write();

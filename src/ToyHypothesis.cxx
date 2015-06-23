@@ -1,5 +1,14 @@
 #include "WireCell2dToy/ToyHypothesis.h"
 using namespace WireCell;
+WireCell2dToy::ToyHypothesis::ToyHypothesis(){
+  pc[0] = Point();
+  pc[1] = Point();
+  p1[0] = Point();
+  p1[1] = Point();
+  p2[0] = Point();
+  p2[1] = Point();
+  
+}
 
 WireCell2dToy::ToyHypothesis::ToyHypothesis(MergeGeomCell& mcell1, MergeGeomCell& mcell2){
   pc[0] = mcell1.center();

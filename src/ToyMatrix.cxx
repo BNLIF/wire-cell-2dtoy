@@ -87,6 +87,41 @@ void WireCell2dToy::ToyMatrix::JudgeSimpleBlob(WireCell2dToy::ToyTiling& toytili
 
 }
 
+WireCell2dToy::ToyMatrix::ToyMatrix(){
+  solve_flag = -1;
+  chi2 = -1;
+  svd_flag = 0;
+  num_blob = 0;
+  simple_blob_reduction = false;
+
+  mwindex = 1;
+  mcindex = 1;
+
+  MA = new TMatrixD(mwindex,mcindex);
+    MB = new TMatrixD(mwindex,swindex);
+    MAT = new TMatrixD(mcindex,mwindex);
+    MBT = new TMatrixD(swindex,mwindex);
+    
+    Vy = new TMatrixD(swindex,swindex);
+    VBy = new TMatrixD(mwindex,mwindex);
+    VBy_inv = new TMatrixD(mwindex,mwindex);
+    Vx = new TMatrixD(mcindex,mcindex);
+    Vx_inv = new TMatrixD(mcindex,mcindex);
+    
+    MC = new TMatrixD(mcindex,mcindex);
+    MC_inv = new TMatrixD(mcindex,mcindex);
+    
+    //Construct Vector
+    Wy = new TVectorD(swindex);
+    
+    MWy = new TVectorD(mwindex);
+    MWy_pred = new TVectorD(mwindex);
+
+    Cx = new TVectorD(mcindex);
+    dCx = new TVectorD(mcindex);
+
+}
+
 
 WireCell2dToy::ToyMatrix::ToyMatrix(WireCell2dToy::ToyTiling& toytiling, WireCell2dToy::MergeToyTiling& mergetiling, int svd_flag1){
   solve_flag = -1;

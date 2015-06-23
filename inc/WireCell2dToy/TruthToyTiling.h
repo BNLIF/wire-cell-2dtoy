@@ -10,7 +10,10 @@
 namespace WireCell2dToy{
   class TruthToyTiling : public WireCell2dToy::ToyTiling {
   public:
+    TruthToyTiling(){};
+    ~TruthToyTiling(){};
     TruthToyTiling(WireCell2dToy::ToyTiling& tiling, const WireCell::PointValueVector &pvv, int tbin, const WireCell::GeomDataSource& gds);
+    
     float charge(const WireCell::GeomCell& cell) const {return cellchargemap.find(&cell)->second;};
     
     WireCell::CellChargeMap ccmap(){return cellchargemap;};
