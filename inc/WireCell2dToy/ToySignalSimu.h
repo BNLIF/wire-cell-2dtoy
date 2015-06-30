@@ -4,6 +4,7 @@
 #include "WireCellNav/FrameDataSource.h"
 #include "WireCellNav/GeomDataSource.h"
 #include "TH1F.h"
+#include "TGraph.h"
 
 namespace WireCell2dToy {
   class ToySignalSimuFDS : public WireCell::FrameDataSource
@@ -27,6 +28,10 @@ namespace WireCell2dToy {
     TH1F **hu;
     TH1F **hv;
     TH1F **hw;
+
+    TGraph *gu, *gv, *gw;
+
+    TH1F *hur, *hvr, *hwr;
     
   };
 }

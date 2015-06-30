@@ -34,8 +34,25 @@ WireCell2dToy::ToySignalSimuFDS::ToySignalSimuFDS(WireCell::FrameDataSource& fds
     hw[i] = new TH1F(Form("W_%d",i),Form("W_%d",i),bins_per_frame,0,bins_per_frame);
   }
   
-#include "data.txt"
+  #include "data.txt"
 
+  gu = new TGraph(5000,xu,yu);
+  gv = new TGraph(5000,xv,yv);
+  gw = new TGraph(5000,xw,yw);
+
+  hur = new TH1F("hur","hur",bins_per_frame,0,bins_per_frame); // half us tick
+  hvr = new TH1F("hvr","hvr",bins_per_frame,0,bins_per_frame); // half us tick
+  hwr = new TH1F("hwr","hwr",bins_per_frame,0,bins_per_frame); // half us tick
+  
+  for (int i=0; i!=bins_per_frame; i++){  
+    double time = hur->GetBinCenter(i+1)/2.-50;
+    hur->SetBinContent(i+1,gu->Eval(time));
+    hvr->SetBinContent(i+1,gv->Eval(time));
+    hwr->SetBinContent(i+1,gw->Eval(time));
+  } 
+  
+  
+  
 }
 
 int WireCell2dToy::ToySignalSimuFDS::size() const{
@@ -127,4 +144,11 @@ WireCell2dToy::ToySignalSimuFDS::~ToySignalSimuFDS(){
   }
   delete hw;
 
+  delete gu;
+  delete gv;
+  delete gw;
+
+  delete hur;
+  delete hvr;
+  delete hwr;
 }
