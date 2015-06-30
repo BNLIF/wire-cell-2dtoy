@@ -88,7 +88,8 @@ int main(int argc, char* argv[])
   WireCell::GenerativeFDS gfds(toydep,gds,9600,5,1.6*units::millimeter);
   WireCell2dToy::ToySignalSimuFDS simu_fds(gfds,gds,9600,5);
   
-  //gfds.jump(1);
+  simu_fds.jump(1);
+  simu_fds.Save();
   // WireCellSst::ToyuBooNESliceDataSource sds(gfds,1500); //set threshold at 2000 electrons
   // int start_num =180;
   // int end_num = 181;

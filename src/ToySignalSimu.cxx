@@ -1,10 +1,11 @@
 #include "WireCell2dToy/ToySignalSimu.h"
 
 #include "WireCellData/GeomWire.h"
+#include "TFile.h"
 
 using namespace WireCell;
 
-WireCell2dToy::ToySignalSimuFDS::ToySignalSimuFDS(const WireCell::FrameDataSource& fds, const WireCell::GeomDataSource& gds,
+WireCell2dToy::ToySignalSimuFDS::ToySignalSimuFDS(WireCell::FrameDataSource& fds, const WireCell::GeomDataSource& gds,
 						  int bins_per_frame, int nframes_total)
   : fds(fds)
   , gds(gds)
@@ -39,7 +40,66 @@ int WireCell2dToy::ToySignalSimuFDS::size() const{
   return max_frames;
 }
 
+void WireCell2dToy::ToySignalSimuFDS::Save(){
+  TFile *file = new TFile("temp.root","RECREATE");
+  for (int i=0;i!=nwire_u;i++){
+    TH1F *huu = (TH1F*)hu[i]->Clone(Form("U1_%d",i));
+  }
+  for (int i=0;i!=nwire_v;i++){
+    TH1F *hvv = (TH1F*)hv[i]->Clone(Form("V1_%d",i));
+  }
+  for (int i=0;i!=nwire_w;i++){
+    TH1F *hww = (TH1F*)hw[i]->Clone(Form("W1_%d",i));
+  }
+  file->Write();
+  file->Close();
+}
+
 int WireCell2dToy::ToySignalSimuFDS::jump(int frame_number){
+  // do simulation
+  for (int i=0;i!=nwire_u;i++){
+    hu[i]->Reset();
+  }
+  for (int i=0;i!=nwire_v;i++){
+    hv[i]->Reset();
+  }
+  for (int i=0;i!=nwire_w;i++){
+    hw[i]->Reset();
+  }
+  
+  fds.jump(frame_number);
+  
+  //fill in the data ... 
+  const Frame& frame = fds.get();
+  size_t ntraces = frame.traces.size();
+  for (size_t ind=0; ind<ntraces; ++ind) {
+    const Trace& trace = frame.traces[ind];
+    int tbin = trace.tbin;
+    int chid = trace.chid;
+    int nbins = trace.charge.size();
+
+    
+    TH1F *htemp;
+    if (chid < nwire_u){
+      htemp = hu[chid];
+    }else if (chid < nwire_u + nwire_v){
+      htemp = hv[chid - nwire_u];
+    }else{
+      htemp = hw[chid - nwire_u - nwire_v];
+    }
+
+    for (int j = 0; j!= nbins; j++){
+      float charge = htemp->GetBinContent(tbin + 1 + j);
+      charge += trace.charge.at(j);
+      htemp->SetBinContent(tbin+1+j,charge);
+    }
+    //std::cout << chid << std::endl;
+  }
+  // std::cout << nwire_u << " " << nwire_v << " " << nwire_w << std::endl;
+
+  
+
+
   return 0;
 }
 
