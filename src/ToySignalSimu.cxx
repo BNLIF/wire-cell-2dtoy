@@ -4,6 +4,7 @@
 #include "TFile.h"
 #include "TVirtualFFT.h"
 #include "TRandom.h"
+#include "TF1.h"
 
 using namespace WireCell;
 
@@ -147,10 +148,10 @@ int WireCell2dToy::ToySignalSimuFDS::jump(int frame_number){
     ifft->SetPointsComplex(value_re,value_im);
     ifft->Transform();
     fb = TH1::TransformHisto(ifft,fb,"Re");
-    // for (int j=0;j!=bins_per_frame;j++){
-    //   double content = fb->GetBinContent(j+1);
-    //   hu[i]->SetBinContent(j+1,content);
-    // }
+    for (int j=0;j!=bins_per_frame;j++){
+      double content = fb->GetBinContent(j+1);
+      hu[i]->SetBinContent(j+1,content);
+    }
   }
   //V-plane
   hmr = hvr->FFT(hmr,"MAG");  
@@ -168,6 +169,10 @@ int WireCell2dToy::ToySignalSimuFDS::jump(int frame_number){
     ifft->SetPointsComplex(value_re,value_im);
     ifft->Transform();
     fb = TH1::TransformHisto(ifft,fb,"Re");
+    for (int j=0;j!=bins_per_frame;j++){
+      double content = fb->GetBinContent(j+1);
+      hv[i]->SetBinContent(j+1,content);
+    }
   }
   //W-plane
   hmr = hwr->FFT(hmr,"MAG");  
@@ -185,12 +190,29 @@ int WireCell2dToy::ToySignalSimuFDS::jump(int frame_number){
     ifft->SetPointsComplex(value_re,value_im);
     ifft->Transform();
     fb = TH1::TransformHisto(ifft,fb,"Re");
+    for (int j=0;j!=bins_per_frame;j++){
+      double content = fb->GetBinContent(j+1);
+      hw[i]->SetBinContent(j+1,content);
+    }
   }
-
   
   // add in random noise
   
+  
   // do FFT again to remove response function and apply filter
+
+  TF1 *filter_u = new TF1("filter_u","(x>0.0)*gaus*exp(-0.5*pow(x/[3],[4]))");
+  double par[5]={1.73/0.959301, 1.69, 1.55, 0.19, 3.75};
+  filter_u->SetParameters(par);
+
+  TF1 *filter_v = new TF1("filter_v","(x>0.0)*gaus*exp(-0.5*pow(x/[3],[4]))");
+  double par1[5]={1.74/0.941034, 1.46, 1.33, 0.23, 4.89};
+  filter_v->SetParameters(par1);
+
+  TF1 *filter_y = new TF1("filter_y","(x>0.0)*[0]*exp(-0.5*(((x-[1])/[2])^2)^[3])");
+  double par2[4]={1.03/0.995635, 0.08, 0.15, 2.17};
+  filter_y->SetParameters(par2);
+
 
   // correct the baseline 
 
