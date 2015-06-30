@@ -34,6 +34,8 @@ WireCell2dToy::ToySignalSimuFDS::ToySignalSimuFDS(WireCell::FrameDataSource& fds
     hw[i] = new TH1F(Form("W_%d",i),Form("W_%d",i),bins_per_frame,0,bins_per_frame);
   }
   
+#include "data.txt"
+
 }
 
 int WireCell2dToy::ToySignalSimuFDS::size() const{
@@ -94,10 +96,18 @@ int WireCell2dToy::ToySignalSimuFDS::jump(int frame_number){
       htemp->SetBinContent(tbin+1+j,charge);
     }
     //std::cout << chid << std::endl;
+    // std::cout << nwire_u << " " << nwire_v << " " << nwire_w << std::endl;
   }
-  // std::cout << nwire_u << " " << nwire_v << " " << nwire_w << std::endl;
-
   
+  // do FFT to convolute with response function
+  
+  // add in random noise
+  
+  // do FFT again to remove response function and apply filter
+
+  // correct the baseline 
+
+  // fill the frame data ... 
 
 
   return 0;
