@@ -28,6 +28,7 @@
 #include "WireCellData/SimTruth.h"
 #include "WireCell2dToy/ToyDepositor.h"
 #include "WireCellNav/GenerativeFDS.h"
+#include "WireCell2dToy/ToySignalSimu.h"
 
 #include "TApplication.h"
 #include "TCanvas.h"
@@ -84,14 +85,10 @@ int main(int argc, char* argv[])
   const PointValueVector pvv = toydep.depositions(1);
   
   
-
-
-  WireCell::GenerativeFDS gfds(toydep,gds,2400,5,2.0*1.6*units::millimeter);
-  gfds.jump(1);
-
-
-
-
+  WireCell::GenerativeFDS gfds(toydep,gds,9600,5,1.6*units::millimeter);
+  WireCell2dToy::ToySignalSimuFDS simu_fds(gfds,gds,9600,5);
+  
+  //gfds.jump(1);
   // WireCellSst::ToyuBooNESliceDataSource sds(gfds,1500); //set threshold at 2000 electrons
   // int start_num =180;
   // int end_num = 181;
