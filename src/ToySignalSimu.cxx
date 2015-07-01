@@ -92,10 +92,10 @@ int WireCell2dToy::ToySignalSimuFDS::jump(int frame_number){
   fds.jump(frame_number);
   
   //fill in the data ... 
-  const Frame& frame = fds.get();
-  size_t ntraces = frame.traces.size();
+  const Frame& frame1 = fds.get();
+  size_t ntraces = frame1.traces.size();
   for (size_t ind=0; ind<ntraces; ++ind) {
-    const Trace& trace = frame.traces[ind];
+    const Trace& trace = frame1.traces[ind];
     int tbin = trace.tbin;
     int chid = trace.chid;
     int nbins = trace.charge.size();
@@ -304,13 +304,127 @@ int WireCell2dToy::ToySignalSimuFDS::jump(int frame_number){
     }
   }
   // correct the baseline 
-  
-  
+  //U-plane first
+  for (int i=0;i!=nwire_u;i++){
+    double max = hu[i]->GetMaximum();
+    double min = hu[i]->GetMinimum();
+    int nbin = max - min;
+    TH1F *h1 = new TH1F("h1","h1",nbin,min,max);
+    for (int j=0;j!=bins_per_frame;j++){
+      h1->Fill(hu[i]->GetBinContent(j+1));
+    }
+    float ped = h1->GetMaximum();
+    float ave=0,ncount = 0;
+    for (int j=0;j!=bins_per_frame;j++){
+      if (fabs(hu[i]->GetBinContent(j+1)-ped)<5){
+	ave +=hu[i]->GetBinContent(j+1);
+	ncount ++;
+      }
+    }
+    if (ncount==0) ncount=1;
+    ave = ave/ncount;
+    for (int j=0;j!=bins_per_frame;j++){
+      double content = hu[i]->GetBinContent(j+1);
+      content -= ave;
+      hu[i]->SetBinContent(j+1,content);
+    }
+    delete h1;
+  }
+  //V-plane
+  for (int i=0;i!=nwire_v;i++){
+    double max = hv[i]->GetMaximum();
+    double min = hv[i]->GetMinimum();
+    int nbin = max - min;
+    
+    TH1F *h1 = new TH1F("h1","h1",nbin,min,max);
+    for (int j=0;j!=bins_per_frame;j++){
+      h1->Fill(hv[i]->GetBinContent(j+1));
+    }
+    float ped = h1->GetMaximum();
+    float ave=0,ncount = 0;
+    for (int j=0;j!=bins_per_frame;j++){
+      if (fabs(hv[i]->GetBinContent(j+1)-ped)<5){
+	ave +=hv[i]->GetBinContent(j+1);
+	ncount ++;
+      }
+    }
+    if (ncount==0) ncount=1;
+    ave = ave/ncount;
+    for (int j=0;j!=bins_per_frame;j++){
+      double content = hv[i]->GetBinContent(j+1);
+      content -= ave;
+      hv[i]->SetBinContent(j+1,content);
+    }
+    delete h1;
+  }
+  //W-plane
+  for (int i=0;i!=nwire_w;i++){
+    double max = hw[i]->GetMaximum();
+    double min = hw[i]->GetMinimum();
+    int nbin = max - min;
+    
+    TH1F *h1 = new TH1F("h1","h1",nbin,min,max);
+    for (int j=0;j!=bins_per_frame;j++){
+      h1->Fill(hw[i]->GetBinContent(j+1));
+    }
+    float ped = h1->GetMaximum();
+    float ave=0,ncount = 0;
+    for (int j=0;j!=bins_per_frame;j++){
+      if (fabs(hw[i]->GetBinContent(j+1)-ped)<5){
+	ave +=hw[i]->GetBinContent(j+1);
+	ncount ++;
+      }
+    }
+    if (ncount==0) ncount=1;
+    ave = ave/ncount;
+    for (int j=0;j!=bins_per_frame;j++){
+      double content = hw[i]->GetBinContent(j+1);
+      content -= ave;
+      hw[i]->SetBinContent(j+1,content);
+    }
+    delete h1;
+  }
 
   // fill the frame data ... 
-
-
-  return 0;
+  frame.clear();
+  
+  //U-plane
+  for (int i=0;i!=nwire_u;i++){
+    Trace t;
+    t.chid = i;
+    t.tbin = 0;
+    t.charge.resize(bins_per_frame, 0.0);
+    for (int j=0;j!=bins_per_frame;j++){
+      t.charge.at(j) = hu[i]->GetBinContent(j+1);
+    }
+    frame.traces.push_back(t);
+  }
+  //V-plane
+  for (int i=0;i!=nwire_v;i++){
+    Trace t;
+    t.chid = i+nwire_u;
+    t.tbin = 0;
+    t.charge.resize(bins_per_frame, 0.0);
+    for (int j=0;j!=bins_per_frame;j++){
+      t.charge.at(j) = hv[i]->GetBinContent(j+1);
+    }
+    frame.traces.push_back(t);
+  }
+  //W-plane
+  for (int i=0;i!=nwire_w;i++){
+    Trace t;
+    t.chid = i + nwire_u + nwire_v;
+    t.tbin = 0;
+    t.charge.resize(bins_per_frame, 0.0);
+    for (int j=0;j!=bins_per_frame;j++){
+      t.charge.at(j) = hw[i]->GetBinContent(j+1);
+    }
+    frame.traces.push_back(t);
+  }
+  
+  
+  frame.index = frame_number;
+  return frame.index;
 }
 
 WireCell2dToy::ToySignalSimuFDS::~ToySignalSimuFDS(){
