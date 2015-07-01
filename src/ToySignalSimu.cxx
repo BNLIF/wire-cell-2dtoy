@@ -132,6 +132,12 @@ int WireCell2dToy::ToySignalSimuFDS::jump(int frame_number){
   TVirtualFFT *ifft;
   TH1 *fb = 0;
 
+  // add in random noise
+  double noise[2]={0.48,0.6};
+  for (int i=0;i!=2;i++){
+    noise[i] = 7.8/4.7;
+  }
+
   //U-plane first
   hmr = hur->FFT(hmr,"MAG");  
   hpr = hur->FFT(hpr,"PH");
@@ -141,15 +147,15 @@ int WireCell2dToy::ToySignalSimuFDS::jump(int frame_number){
     for (int j=0;j!=bins_per_frame;j++){
       double rho = hm->GetBinContent(j+1)*hmr->GetBinContent(j+1);
       double phi = hp->GetBinContent(j+1) + hpr->GetBinContent(j+1);
-      value_re[j] = rho*cos(phi)/9600.;
-      value_im[j] = rho*sin(phi)/9600.;
+      value_re[j] = rho*cos(phi)/bins_per_frame;
+      value_im[j] = rho*sin(phi)/bins_per_frame;
     }
     ifft = TVirtualFFT::FFT(1,&n,"C2R M K");
     ifft->SetPointsComplex(value_re,value_im);
     ifft->Transform();
     fb = TH1::TransformHisto(ifft,fb,"Re");
     for (int j=0;j!=bins_per_frame;j++){
-      double content = fb->GetBinContent(j+1);
+      int content = fb->GetBinContent(j+1) * 7.8*4096./2000. + gRandom->Gaus(0,noise[1]);
       hu[i]->SetBinContent(j+1,content);
     }
   }
@@ -162,15 +168,15 @@ int WireCell2dToy::ToySignalSimuFDS::jump(int frame_number){
     for (int j=0;j!=bins_per_frame;j++){
       double rho = hm->GetBinContent(j+1)*hmr->GetBinContent(j+1);
       double phi = hp->GetBinContent(j+1) + hpr->GetBinContent(j+1);
-      value_re[j] = rho*cos(phi)/9600.;
-      value_im[j] = rho*sin(phi)/9600.;
+      value_re[j] = rho*cos(phi)/bins_per_frame;
+      value_im[j] = rho*sin(phi)/bins_per_frame;
     }
     ifft = TVirtualFFT::FFT(1,&n,"C2R M K");
     ifft->SetPointsComplex(value_re,value_im);
     ifft->Transform();
     fb = TH1::TransformHisto(ifft,fb,"Re");
     for (int j=0;j!=bins_per_frame;j++){
-      double content = fb->GetBinContent(j+1);
+      int content = fb->GetBinContent(j+1)*7.8*4096./2000. + gRandom->Gaus(0,noise[1]);
       hv[i]->SetBinContent(j+1,content);
     }
   }
@@ -183,21 +189,19 @@ int WireCell2dToy::ToySignalSimuFDS::jump(int frame_number){
     for (int j=0;j!=bins_per_frame;j++){
       double rho = hm->GetBinContent(j+1)*hmr->GetBinContent(j+1);
       double phi = hp->GetBinContent(j+1) + hpr->GetBinContent(j+1);
-      value_re[j] = rho*cos(phi)/9600.;
-      value_im[j] = rho*sin(phi)/9600.;
+      value_re[j] = rho*cos(phi)/bins_per_frame;
+      value_im[j] = rho*sin(phi)/bins_per_frame;
     }
     ifft = TVirtualFFT::FFT(1,&n,"C2R M K");
     ifft->SetPointsComplex(value_re,value_im);
     ifft->Transform();
     fb = TH1::TransformHisto(ifft,fb,"Re");
     for (int j=0;j!=bins_per_frame;j++){
-      double content = fb->GetBinContent(j+1);
+      int content = fb->GetBinContent(j+1)*7.8*4096./2000. + gRandom->Gaus(0,noise[0]);
       hw[i]->SetBinContent(j+1,content);
     }
   }
-  
-  // add in random noise
-  
+    
   
   // do FFT again to remove response function and apply filter
 
@@ -209,12 +213,99 @@ int WireCell2dToy::ToySignalSimuFDS::jump(int frame_number){
   double par1[5]={1.74/0.941034, 1.46, 1.33, 0.23, 4.89};
   filter_v->SetParameters(par1);
 
-  TF1 *filter_y = new TF1("filter_y","(x>0.0)*[0]*exp(-0.5*(((x-[1])/[2])^2)^[3])");
+  TF1 *filter_w = new TF1("filter_y","(x>0.0)*[0]*exp(-0.5*(((x-[1])/[2])^2)^[3])");
   double par2[4]={1.03/0.995635, 0.08, 0.15, 2.17};
-  filter_y->SetParameters(par2);
+  filter_w->SetParameters(par2);
 
+  //U-plane first
+  hmr = hur->FFT(hmr,"MAG");  
+  hpr = hur->FFT(hpr,"PH");
+  for (int i=0;i!=nwire_u;i++){
+    hm = hu[i]->FFT(hm,"MAG");
+    hp = hu[i]->FFT(hp,"PH");
+    for (int j=0;j!=bins_per_frame;j++){
+      double freq;
+      if (j < bins_per_frame/2.){
+	freq = j/(1.*bins_per_frame)*2.;
+      }else{
+	freq = (bins_per_frame - j)/(1.*bins_per_frame)*2.;
+      }
 
+      double rho = hm->GetBinContent(j+1)/hmr->GetBinContent(j+1)*filter_u->Eval(freq);
+      double phi = hp->GetBinContent(j+1) - hpr->GetBinContent(j+1);
+      value_re[j] = rho*cos(phi)/bins_per_frame;
+      value_im[j] = rho*sin(phi)/bins_per_frame;
+
+      //std::cout << i << rho << " " << phi << " " << freq << std::endl;
+    }
+    ifft = TVirtualFFT::FFT(1,&n,"C2R M K");
+    ifft->SetPointsComplex(value_re,value_im);
+    ifft->Transform();
+    fb = TH1::TransformHisto(ifft,fb,"Re");
+    for (int j=0;j!=bins_per_frame;j++){
+      double content = fb->GetBinContent(j+1) /( 7.8*4096./2000.);
+      hu[i]->SetBinContent(j+1,content);
+    }
+  }
+  //V-plane
+  hmr = hvr->FFT(hmr,"MAG");  
+  hpr = hvr->FFT(hpr,"PH");
+  for (int i=0;i!=nwire_v;i++){
+    hm = hv[i]->FFT(hm,"MAG");
+    hp = hv[i]->FFT(hp,"PH");
+    for (int j=0;j!=bins_per_frame;j++){
+      double freq;
+      if (j < bins_per_frame/2.){
+	freq = j/(1.*bins_per_frame)*2.;
+      }else{
+	freq = (bins_per_frame - j)/(1.*bins_per_frame)*2.;
+      }
+
+      double rho = hm->GetBinContent(j+1)/hmr->GetBinContent(j+1)*filter_v->Eval(freq);
+      double phi = hp->GetBinContent(j+1) - hpr->GetBinContent(j+1);
+      value_re[j] = rho*cos(phi)/bins_per_frame;
+      value_im[j] = rho*sin(phi)/bins_per_frame;
+    }
+    ifft = TVirtualFFT::FFT(1,&n,"C2R M K");
+    ifft->SetPointsComplex(value_re,value_im);
+    ifft->Transform();
+    fb = TH1::TransformHisto(ifft,fb,"Re");
+    for (int j=0;j!=bins_per_frame;j++){
+      double content = fb->GetBinContent(j+1) /( 7.8*4096./2000.);
+      hv[i]->SetBinContent(j+1,content);
+    }
+  }
+  //W-plane
+  hmr = hwr->FFT(hmr,"MAG");  
+  hpr = hwr->FFT(hpr,"PH");
+  for (int i=0;i!=nwire_w;i++){
+    hm = hw[i]->FFT(hm,"MAG");
+    hp = hw[i]->FFT(hp,"PH");
+    for (int j=0;j!=bins_per_frame;j++){
+      double freq;
+      if (j < bins_per_frame/2.){
+	freq = j/(1.*bins_per_frame)*2.;
+      }else{
+	freq = (bins_per_frame - j)/(1.*bins_per_frame)*2.;
+      }
+
+      double rho = hm->GetBinContent(j+1)/hmr->GetBinContent(j+1)*filter_w->Eval(freq);
+      double phi = hp->GetBinContent(j+1) - hpr->GetBinContent(j+1);
+      value_re[j] = rho*cos(phi)/bins_per_frame;
+      value_im[j] = rho*sin(phi)/bins_per_frame;
+    }
+    ifft = TVirtualFFT::FFT(1,&n,"C2R M K");
+    ifft->SetPointsComplex(value_re,value_im);
+    ifft->Transform();
+    fb = TH1::TransformHisto(ifft,fb,"Re");
+    for (int j=0;j!=bins_per_frame;j++){
+      double content = fb->GetBinContent(j+1) /( 7.8*4096./2000.);
+      hw[i]->SetBinContent(j+1,content);
+    }
+  }
   // correct the baseline 
+  
+  
 
   // fill the frame data ... 
 
