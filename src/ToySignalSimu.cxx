@@ -113,8 +113,20 @@ int WireCell2dToy::ToySignalSimuFDS::jump(int frame_number){
     for (int j = 0; j!= nbins; j++){
       float charge = htemp->GetBinContent(tbin + 1 + j);
       charge += trace.charge.at(j);
-      htemp->SetBinContent(tbin+1+j,charge);
+      htemp->SetBinContent(tbin+1+j,charge);  
     }
+    
+    std::vector<double> vcharge;
+    for (int j=0;j!=htemp->GetNbinsX();j++){
+      vcharge.push_back(htemp->GetBinContent(j+1));
+    }
+    htemp->Reset();
+    for (int j=0;j!=htemp->GetNbinsX();j++){
+      int tt = j+1+3200;
+      if (tt <= bins_per_frame)
+	htemp->SetBinContent(tt,vcharge.at(j));
+    }
+
     //std::cout << chid << std::endl;
     // std::cout << nwire_u << " " << nwire_v << " " << nwire_w << std::endl;
   }
@@ -155,7 +167,7 @@ int WireCell2dToy::ToySignalSimuFDS::jump(int frame_number){
     ifft->Transform();
     fb = TH1::TransformHisto(ifft,fb,"Re");
     for (int j=0;j!=bins_per_frame;j++){
-      int content = fb->GetBinContent(j+1) * 7.8*4096./2000. + gRandom->Gaus(0,noise[1]);
+      int content = round(fb->GetBinContent(j+1) * 7.8*4096./2000. + gRandom->Gaus(0,noise[1]));
       hu[i]->SetBinContent(j+1,content);
     }
   }
@@ -176,7 +188,7 @@ int WireCell2dToy::ToySignalSimuFDS::jump(int frame_number){
     ifft->Transform();
     fb = TH1::TransformHisto(ifft,fb,"Re");
     for (int j=0;j!=bins_per_frame;j++){
-      int content = fb->GetBinContent(j+1)*7.8*4096./2000. + gRandom->Gaus(0,noise[1]);
+      int content = round(fb->GetBinContent(j+1)*7.8*4096./2000. + gRandom->Gaus(0,noise[1]));
       hv[i]->SetBinContent(j+1,content);
     }
   }
@@ -197,7 +209,7 @@ int WireCell2dToy::ToySignalSimuFDS::jump(int frame_number){
     ifft->Transform();
     fb = TH1::TransformHisto(ifft,fb,"Re");
     for (int j=0;j!=bins_per_frame;j++){
-      int content = fb->GetBinContent(j+1)*7.8*4096./2000. + gRandom->Gaus(0,noise[0]);
+      int content = round(fb->GetBinContent(j+1)*7.8*4096./2000. + gRandom->Gaus(0,noise[0]));
       hw[i]->SetBinContent(j+1,content);
     }
   }
@@ -226,9 +238,9 @@ int WireCell2dToy::ToySignalSimuFDS::jump(int frame_number){
     for (int j=0;j!=bins_per_frame;j++){
       double freq;
       if (j < bins_per_frame/2.){
-	freq = j/(1.*bins_per_frame)*2.;
+  	freq = j/(1.*bins_per_frame)*2.;
       }else{
-	freq = (bins_per_frame - j)/(1.*bins_per_frame)*2.;
+  	freq = (bins_per_frame - j)/(1.*bins_per_frame)*2.;
       }
 
       double rho = hm->GetBinContent(j+1)/hmr->GetBinContent(j+1)*filter_u->Eval(freq);
@@ -256,9 +268,9 @@ int WireCell2dToy::ToySignalSimuFDS::jump(int frame_number){
     for (int j=0;j!=bins_per_frame;j++){
       double freq;
       if (j < bins_per_frame/2.){
-	freq = j/(1.*bins_per_frame)*2.;
+  	freq = j/(1.*bins_per_frame)*2.;
       }else{
-	freq = (bins_per_frame - j)/(1.*bins_per_frame)*2.;
+  	freq = (bins_per_frame - j)/(1.*bins_per_frame)*2.;
       }
 
       double rho = hm->GetBinContent(j+1)/hmr->GetBinContent(j+1)*filter_v->Eval(freq);
@@ -284,9 +296,9 @@ int WireCell2dToy::ToySignalSimuFDS::jump(int frame_number){
     for (int j=0;j!=bins_per_frame;j++){
       double freq;
       if (j < bins_per_frame/2.){
-	freq = j/(1.*bins_per_frame)*2.;
+  	freq = j/(1.*bins_per_frame)*2.;
       }else{
-	freq = (bins_per_frame - j)/(1.*bins_per_frame)*2.;
+  	freq = (bins_per_frame - j)/(1.*bins_per_frame)*2.;
       }
 
       double rho = hm->GetBinContent(j+1)/hmr->GetBinContent(j+1)*filter_w->Eval(freq);
@@ -309,20 +321,23 @@ int WireCell2dToy::ToySignalSimuFDS::jump(int frame_number){
     double max = hu[i]->GetMaximum();
     double min = hu[i]->GetMinimum();
     int nbin = max - min;
+    if (nbin ==0) nbin = 1;
     TH1F *h1 = new TH1F("h1","h1",nbin,min,max);
     for (int j=0;j!=bins_per_frame;j++){
       h1->Fill(hu[i]->GetBinContent(j+1));
     }
-    float ped = h1->GetMaximum();
+    float ped = h1->GetMaximumBin()*(max-min)/(nbin*1.) + min;
     float ave=0,ncount = 0;
     for (int j=0;j!=bins_per_frame;j++){
-      if (fabs(hu[i]->GetBinContent(j+1)-ped)<5){
-	ave +=hu[i]->GetBinContent(j+1);
-	ncount ++;
+      if (fabs(hu[i]->GetBinContent(j+1)-ped)<400){
+  	ave +=hu[i]->GetBinContent(j+1);
+  	ncount ++;
       }
     }
     if (ncount==0) ncount=1;
     ave = ave/ncount;
+    //    if (i==492) std::cout << ave << " " << ncount << " "<< ped << std::endl;
+    
     for (int j=0;j!=bins_per_frame;j++){
       double content = hu[i]->GetBinContent(j+1);
       content -= ave;
@@ -335,17 +350,17 @@ int WireCell2dToy::ToySignalSimuFDS::jump(int frame_number){
     double max = hv[i]->GetMaximum();
     double min = hv[i]->GetMinimum();
     int nbin = max - min;
-    
+    if (nbin ==0) nbin = 1;
     TH1F *h1 = new TH1F("h1","h1",nbin,min,max);
     for (int j=0;j!=bins_per_frame;j++){
       h1->Fill(hv[i]->GetBinContent(j+1));
     }
-    float ped = h1->GetMaximum();
+    float ped = h1->GetMaximumBin()*(max-min)/(nbin*1.) + min;
     float ave=0,ncount = 0;
     for (int j=0;j!=bins_per_frame;j++){
-      if (fabs(hv[i]->GetBinContent(j+1)-ped)<5){
-	ave +=hv[i]->GetBinContent(j+1);
-	ncount ++;
+      if (fabs(hv[i]->GetBinContent(j+1)-ped)<400){
+  	ave +=hv[i]->GetBinContent(j+1);
+  	ncount ++;
       }
     }
     if (ncount==0) ncount=1;
@@ -362,17 +377,17 @@ int WireCell2dToy::ToySignalSimuFDS::jump(int frame_number){
     double max = hw[i]->GetMaximum();
     double min = hw[i]->GetMinimum();
     int nbin = max - min;
-    
+    if (nbin ==0) nbin = 1;
     TH1F *h1 = new TH1F("h1","h1",nbin,min,max);
     for (int j=0;j!=bins_per_frame;j++){
       h1->Fill(hw[i]->GetBinContent(j+1));
     }
-    float ped = h1->GetMaximum();
+    float ped = h1->GetMaximumBin()*(max-min)/(nbin*1.) + min;
     float ave=0,ncount = 0;
     for (int j=0;j!=bins_per_frame;j++){
-      if (fabs(hw[i]->GetBinContent(j+1)-ped)<5){
-	ave +=hw[i]->GetBinContent(j+1);
-	ncount ++;
+      if (fabs(hw[i]->GetBinContent(j+1)-ped)<400){
+  	ave +=hw[i]->GetBinContent(j+1);
+  	ncount ++;
       }
     }
     if (ncount==0) ncount=1;
@@ -384,6 +399,9 @@ int WireCell2dToy::ToySignalSimuFDS::jump(int frame_number){
     }
     delete h1;
   }
+
+  //consider pre-signal processing ... later  
+
 
   // fill the frame data ... 
   frame.clear();

@@ -41,7 +41,7 @@ int main(int argc, char* argv[])
   
   TFile tfile(root_file,"read");
   TTree* sst = dynamic_cast<TTree*>(tfile.Get(tpath));
-  WireCellSst::ToyuBooNEFrameDataSource fds(*sst);
+  WireCellSst::ToyuBooNEFrameDataSource fds(*sst,gds);
   std::cerr << "Got " << fds.size() 
 	    << " frames from " << tpath 
 	    << " in " << root_file << std::endl;

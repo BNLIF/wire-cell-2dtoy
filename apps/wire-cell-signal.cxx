@@ -1,4 +1,5 @@
 #include "WireCellSst/GeomDataSource.h"
+#include "WireCellSst/ToyuBooNEFrameDataSource.h"
 #include "WireCellSst/ToyuBooNESliceDataSource.h"
 #include "WireCell2dToy/ToyEventDisplay.h"
 #include "WireCell2dToy/ToyTiling.h"
@@ -75,8 +76,11 @@ int main(int argc, char* argv[])
   }
   
 
-  
- 
+  TFile tfile(root_file,"read");
+  TTree* sst = dynamic_cast<TTree*>(tfile.Get(tpath));
+  WireCellSst::ToyuBooNEFrameDataSource fds_data(*sst,gds);
+  fds_data.jump(1);
+  fds_data.Save();
 
  
 
@@ -85,7 +89,7 @@ int main(int argc, char* argv[])
   const PointValueVector pvv = toydep.depositions(1);
   
   
-  WireCell::GenerativeFDS gfds(toydep,gds,9600,5,1.6*units::millimeter);
+  WireCell::GenerativeFDS gfds(toydep,gds,9600,5,0.5*1.602*units::millimeter);
   WireCell2dToy::ToySignalSimuFDS simu_fds(gfds,gds,9600,5);
   
   simu_fds.jump(1);
