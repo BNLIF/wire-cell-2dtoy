@@ -27,6 +27,14 @@ namespace WireCell2dToy {
     TH1F **hu;
     TH1F **hv;
     TH1F **hw;
+
+    TH1F *hfilter_u;
+    TH1F *hfilter_v;
+    TH1F *hfilter_w;
+    
+    TH1F *hfilter_time_u;
+    TH1F *hfilter_time_v;
+    TH1F *hfilter_time_w;
   };
 
 }
