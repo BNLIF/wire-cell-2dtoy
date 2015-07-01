@@ -9,12 +9,13 @@
 using namespace WireCell;
 
 WireCell2dToy::ToySignalSimuFDS::ToySignalSimuFDS(WireCell::FrameDataSource& fds, const WireCell::GeomDataSource& gds,
-						  int bins_per_frame, int nframes_total)
+						  int bins_per_frame1, int nframes_total)
   : fds(fds)
   , gds(gds)
-  , bins_per_frame(bins_per_frame)
   , max_frames(nframes_total)
 {  
+  bins_per_frame = bins_per_frame1;
+
   GeomWireSelection wires_u = gds.wires_in_plane(WirePlaneType_t(0));
   GeomWireSelection wires_v = gds.wires_in_plane(WirePlaneType_t(1));
   GeomWireSelection wires_w = gds.wires_in_plane(WirePlaneType_t(2));

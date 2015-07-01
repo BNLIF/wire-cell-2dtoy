@@ -4,12 +4,13 @@
 #include "WireCellNav/FrameDataSource.h"
 #include "WireCellNav/GeomDataSource.h"
 #include "TH1F.h"
+#include "TGraph.h"
 
 namespace WireCell2dToy {
   class ToySignalPreFDS : public WireCell::FrameDataSource
   {
   public:
-    ToySignalPreFDS(WireCell::FrameDataSource& fds,  const WireCell::GeomDataSource& gds, int bins_per_frame = 9600, int nframes_total = -1);
+    ToySignalPreFDS(WireCell::FrameDataSource& fds,  const WireCell::GeomDataSource& gds, int bins_per_frame1 = 9600, int nframes_total = -1);
     ~ToySignalPreFDS();
 
     virtual int size() const;
@@ -20,7 +21,7 @@ namespace WireCell2dToy {
   private:
     WireCell::FrameDataSource& fds;
     const WireCell::GeomDataSource& gds;
-    int bins_per_frame, max_frames;
+    int max_frames;
     
     int nwire_u, nwire_v, nwire_w;
 
@@ -35,6 +36,10 @@ namespace WireCell2dToy {
     TH1F *hfilter_time_u;
     TH1F *hfilter_time_v;
     TH1F *hfilter_time_w;
+
+    TGraph *gu;
+    TGraph *gv;
+    TGraph *gw;
   };
 
 }
