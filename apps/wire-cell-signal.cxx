@@ -88,13 +88,13 @@ int main(int argc, char* argv[])
   
 
 
-  WireCell::ToyDepositor toydep(fds);
-  const PointValueVector pvv = toydep.depositions(1);
-  WireCell::GenerativeFDS gfds(toydep,gds,9600,5,0.5*1.605723*units::millimeter); // 87 K at 0.5 kV/cm
-  WireCell2dToy::ToySignalSimuFDS simu_fds(gfds,gds,9600,5);
+  // WireCell::ToyDepositor toydep(fds);
+  // const PointValueVector pvv = toydep.depositions(1);
+  // WireCell::GenerativeFDS gfds(toydep,gds,9600,5,0.5*1.605723*units::millimeter); // 87 K at 0.5 kV/cm
+  // WireCell2dToy::ToySignalSimuFDS simu_fds(gfds,gds,9600,5);
   
-  simu_fds.jump(1);
-  simu_fds.Save();
+  // simu_fds.jump(1);
+  // simu_fds.Save();
 
   
 

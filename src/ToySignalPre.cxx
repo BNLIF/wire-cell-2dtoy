@@ -4,6 +4,9 @@
 #include "TFile.h"
 #include "TVirtualFFT.h"
 #include "TF1.h"
+#include "TMatrixDSparse.h"
+#include "TMatrixD.h"
+#include "TVectorD.h"
 
 using namespace WireCell;
 
@@ -190,8 +193,156 @@ int WireCell2dToy::ToySignalPreFDS::jump(int frame_number){
   // fill the frame data ... 
   frame.clear();
 
-  // form matrix
-  // TMatrixDSparce A()
+  int n = bins_per_frame;
+  int m = fds.Get_Bins_Per_Frame();
+  int scale = m/n;
+
+  TMatrixDSparse A_u(m,n);
+  TMatrixDSparse AT_u(n,m);
+  TMatrixD MB_u(n,n);
+  TMatrixD FM_u(n,m);
+
+  double x[40],y[40];
+  //treat filter ... 
+  for (int i=0;i!=40;i++){
+    x[i] = (i-20+0.5)*0.5;
+    y[i] =  gu->Eval(x[i]+0.5/4.);
+    y[i] += gu->Eval(x[i]-0.5/4.);
+  }
+  // fill matrix
+  for (int i=0;i!=n;i++){
+    for (int j=0;j!=40;j++){
+      Int_t row = i;
+      Int_t column = scale*i-20+j+1;
+      if (column >=0 && column < m){
+	A_u(column,row) = y[j];
+      }
+    }
+  }
+  //operate matrix and 
+
+  //std::cout << " a" << std::endl;
+  AT_u.Transpose(A_u);
+  //std::cout << " b" << std::endl;
+  MB_u = (AT_u) * (A_u);
+  std::cout << " Start to Invert U Matrix" << std::endl;
+  MB_u.Invert();
+  std::cout << " Finish to Invert U Matrix" << std::endl;
+  FM_u = (MB_u) * (AT_u) ;
+  //std::cout << " e" << std::endl;
+  
+
+  //V-plane
+  TMatrixDSparse A_v(m,n);
+  TMatrixDSparse AT_v(n,m);
+  TMatrixD MB_v(n,n);
+  TMatrixD FM_v(n,m);
+  
+   //treat filter ... 
+  for (int i=0;i!=40;i++){
+    x[i] = (i-20+0.5)*0.5;
+    y[i] =  gv->Eval(x[i]+0.5/4.);
+    y[i] += gv->Eval(x[i]-0.5/4.);
+  }
+  // fill matrix
+  for (int i=0;i!=n;i++){
+    for (int j=0;j!=40;j++){
+      Int_t row = i;
+      Int_t column = scale*i-20+j+1;
+      if (column >=0 && column < m){
+	A_v(column,row) = y[j];
+      }
+    }
+  }
+  //operate matrix and 
+  AT_v.Transpose(A_v);
+  MB_v = (AT_v) * (A_v);
+  std::cout << " Start to Invert V Matrix" << std::endl;
+  MB_v.Invert();
+  std::cout << " Finish to Invert V Matrix" << std::endl;
+  FM_v = (MB_v) * (AT_v) ;
+
+  
+
+  TMatrixDSparse A_w(m,n);
+  TMatrixDSparse AT_w(n,m);
+  TMatrixD MB_w(n,n);
+  TMatrixD FM_w(n,m);
+
+   //treat filter ... 
+  for (int i=0;i!=40;i++){
+    x[i] = (i-20+0.5)*0.5;
+    y[i] =  gw->Eval(x[i]+0.5/4.);
+    y[i] += gw->Eval(x[i]-0.5/4.);
+  }
+  // fill matrix
+  for (int i=0;i!=n;i++){
+    for (int j=0;j!=40;j++){
+      Int_t row = i;
+      Int_t column = scale*i-20+j+1;
+      if (column >=0 && column < m){
+	A_w(column,row) = y[j];
+      }
+    }
+  }
+  //operate matrix and 
+  AT_w.Transpose(A_w);
+  MB_w = (AT_w) * (A_w);
+  std::cout << " Start to Invert W Matrix" << std::endl;
+  MB_w.Invert();
+  std::cout << " End to Invert W Matrix" << std::endl;
+  FM_w = (MB_w) * (AT_w) ;
+
+  
+
+  const Frame& frame1 = fds.get();
+  size_t ntraces = frame1.traces.size();
+
+
+  for (size_t ind=0; ind<ntraces; ++ind) {
+    const Trace& trace = frame1.traces[ind];
+    int tbin = trace.tbin;
+    int chid = trace.chid;
+    int nbins = trace.charge.size();
+
+    TVectorD rx(n);
+    TVectorD ry(m);
+    
+    // fill raw data ... 
+    for (int i=0;i!=m;i++){
+      ry[i] = trace.charge.at(i);
+    }
+
+    //if (chid ==447) ry.Print();
+
+    TH1F *htemp;
+    TGraph *gfilter;
+    if (chid < nwire_u){
+      htemp = hu[chid];
+      rx = FM_u * ry;
+    }else if (chid < nwire_u + nwire_v){
+      htemp = hv[chid - nwire_u];
+      rx = FM_v * ry;
+    }else{
+      htemp = hw[chid - nwire_u - nwire_v];
+      rx = FM_w * ry;
+    }
+    for (int i = 0;i!=n;i++){
+      htemp->SetBinContent(i+1,rx[i]);
+    }
+    
+    Trace t;
+    t.chid = chid;
+    t.tbin = tbin;
+    t.charge.resize(bins_per_frame, 0.0);
+    for (int j=0;j!=bins_per_frame;j++){
+      t.charge.at(j) = htemp->GetBinContent(j+1);
+    }
+    frame.traces.push_back(t);
+
+  }
+
+
   
   frame.index = frame_number;
   return frame.index;
