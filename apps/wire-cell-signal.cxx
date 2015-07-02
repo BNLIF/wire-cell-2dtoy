@@ -85,7 +85,7 @@ int main(int argc, char* argv[])
   WireCell2dToy::ToySignalPreFDS pre_fds(fds_data,gds,9600/4,5);
   pre_fds.jump(1);
   pre_fds.Save();
- 
+  
 
 
   WireCell::ToyDepositor toydep(fds);

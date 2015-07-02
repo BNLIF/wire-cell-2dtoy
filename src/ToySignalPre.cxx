@@ -187,12 +187,11 @@ void WireCell2dToy::ToySignalPreFDS::Save(){
 
 
 int WireCell2dToy::ToySignalPreFDS::jump(int frame_number){
-  // form matrix
-  // TMatrixDSparce A()
-
-  
   // fill the frame data ... 
   frame.clear();
+
+  // form matrix
+  // TMatrixDSparce A()
   
   frame.index = frame_number;
   return frame.index;
