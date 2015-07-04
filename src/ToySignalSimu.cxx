@@ -132,7 +132,9 @@ int WireCell2dToy::ToySignalSimuFDS::jump(int frame_number){
     // std::cout << nwire_u << " " << nwire_v << " " << nwire_w << std::endl;
   }
   
-  // do FFT to convolute with response function
+
+  
+  // start FFT to convolute with response function
   TVirtualFFT::SetTransform(0);
   TH1 *hm = 0;
   TH1 *hp = 0;
@@ -401,7 +403,7 @@ int WireCell2dToy::ToySignalSimuFDS::jump(int frame_number){
     delete h1;
   }
 
-  //consider pre-signal processing ... later  
+  // done with FFT
 
 
   // fill the frame data ... 

@@ -77,25 +77,27 @@ int main(int argc, char* argv[])
   }
   
 
-  TFile tfile(root_file,"read");
-  TTree* sst = dynamic_cast<TTree*>(tfile.Get(tpath));
-  WireCellSst::ToyuBooNEFrameDataSource fds_data(*sst,gds);
-  fds_data.jump(1);
-  fds_data.Save();
-  WireCell2dToy::ToySignalPreFDS pre_fds(fds_data,gds,9600/4,5);
+  // TFile tfile(root_file,"read");
+  // TTree* sst = dynamic_cast<TTree*>(tfile.Get(tpath));
+  // WireCellSst::ToyuBooNEFrameDataSource fds_data(*sst,gds);
+  // fds_data.jump(1);
+  // fds_data.Save();
+  // WireCell2dToy::ToySignalPreFDS pre_fds(fds_data,gds,9600/4,5);
+  // pre_fds.jump(1);
+  // pre_fds.Save();
+  
+
+
+  WireCell::ToyDepositor toydep(fds);
+  const PointValueVector pvv = toydep.depositions(1);
+  WireCell::GenerativeFDS gfds(toydep,gds,9600,5,0.5*1.605723*units::millimeter); // 87 K at 0.5 kV/cm
+  WireCell2dToy::ToySignalSimuFDS simu_fds(gfds,gds,9600,5);
+  
+  simu_fds.jump(1);
+  simu_fds.Save();
+  WireCell2dToy::ToySignalPreFDS pre_fds(simu_fds,gds,9600/4,5);
   pre_fds.jump(1);
   pre_fds.Save();
-  
-
-
-  // WireCell::ToyDepositor toydep(fds);
-  // const PointValueVector pvv = toydep.depositions(1);
-  // WireCell::GenerativeFDS gfds(toydep,gds,9600,5,0.5*1.605723*units::millimeter); // 87 K at 0.5 kV/cm
-  // WireCell2dToy::ToySignalSimuFDS simu_fds(gfds,gds,9600,5);
-  
-  // simu_fds.jump(1);
-  // simu_fds.Save();
-
   
 
   // WireCellSst::ToyuBooNESliceDataSource sds(gfds,1500); //set threshold at 2000 electrons
