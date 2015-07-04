@@ -30,6 +30,7 @@
 #include "WireCell2dToy/ToyDepositor.h"
 #include "WireCellNav/GenerativeFDS.h"
 #include "WireCell2dToy/ToySignalSimu.h"
+#include "WireCell2dToy/ToySignalSimuTrue.h"
 #include "WireCell2dToy/ToySignalGaus.h"
 #include "WireCell2dToy/ToySignalWien.h"
 
@@ -95,6 +96,10 @@ int main(int argc, char* argv[])
   WireCell2dToy::ToySignalSimuFDS simu_fds(gfds,gds,9600,5);
   simu_fds.jump(1);
   simu_fds.Save();
+
+  WireCell2dToy::ToySignalSimuTrueFDS st_fds(gfds,gds,9600,5);
+  st_fds.jump(1);
+  st_fds.Save();
   
   WireCell2dToy::ToySignalGausFDS gaus_fds(simu_fds,gds,9600/4,5);
   gaus_fds.jump(1);
