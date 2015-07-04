@@ -1,16 +1,15 @@
-#include "WireCell2dToy/ToySignalGaus.h"
-#include "WireCell2dToy/ToySignalSimu.h"
+#include "WireCell2dToy/ToySignalWien.h"
+
 #include "WireCellData/GeomWire.h"
 #include "TFile.h"
 #include "TVirtualFFT.h"
+#include "TRandom.h"
 #include "TF1.h"
-#include "TMatrixDSparse.h"
-#include "TMatrixD.h"
-#include "TVectorD.h"
 
 using namespace WireCell;
 
-WireCell2dToy::ToySignalGausFDS::ToySignalGausFDS(WireCell::FrameDataSource& fds, const WireCell::GeomDataSource& gds, int bins_per_frame1, int nframes_total)
+WireCell2dToy::ToySignalWienFDS::ToySignalWienFDS(WireCell::FrameDataSource& fds, const WireCell::GeomDataSource& gds,
+						  int bins_per_frame1, int nframes_total)
   : fds(fds)
   , gds(gds)
   , max_frames(nframes_total)
@@ -28,45 +27,28 @@ WireCell2dToy::ToySignalGausFDS::ToySignalGausFDS(WireCell::FrameDataSource& fds
   hu = new TH1F*[nwire_u];
   hv = new TH1F*[nwire_v];
   hw = new TH1F*[nwire_w];
-
+  
   nbin = fds.Get_Bins_Per_Frame();
   
   for (int i=0;i!=nwire_u;i++){
-    hu[i] = new TH1F(Form("U3_%d",i),Form("U3_%d",i),nbin,0,nbin);
+    hu[i] = new TH1F(Form("U4_%d",i),Form("U4_%d",i),nbin,0,nbin);
   }
   for (int i=0;i!=nwire_v;i++){
-    hv[i] = new TH1F(Form("V3_%d",i),Form("V3_%d",i),nbin,0,nbin);
+    hv[i] = new TH1F(Form("V4_%d",i),Form("V4_%d",i),nbin,0,nbin);
   }
   for (int i=0;i!=nwire_w;i++){
-    hw[i] = new TH1F(Form("W3_%d",i),Form("W3_%d",i),nbin,0,nbin);
+    hw[i] = new TH1F(Form("W4_%d",i),Form("W4_%d",i),nbin,0,nbin);
   }
   
-
-  //define filters
-  filter_g = new TF1("filger_g","1./sqrt(2.*3.1415926)/[0]*exp(-x*x/2./[0]/[0])");
-  double par3[1] = {2./1.7};
-  filter_g->SetParameters(par3);
-  
-  hfilter_time_gaus =new TH1F("hfilter_time_gaus","hfilter_time_gaus",nbin,0,nbin);
-  for (int i=0;i!=nbin;i++){
-    double xx = hfilter_time_gaus->GetBinCenter(i+1)/2.-nbin/4.;
-    hfilter_time_gaus->SetBinContent(i+1,filter_g->Eval(xx));
-  }
-  hfilter_time_gaus->Scale(1./hfilter_time_gaus->GetSum());
-  hfilter_gaus = 0;
-  hfilter_gaus = hfilter_time_gaus->FFT(hfilter_gaus,"MAG");
-  
-
-  //get in the response function ... 
   #include "data.txt"
 
   gu = new TGraph(5000,xu,yu);
   gv = new TGraph(5000,xv,yv);
   gw = new TGraph(5000,xw,yw);
 
-  hur = new TH1F("hur","hur",nbin,0,nbin); // half us tick
-  hvr = new TH1F("hvr","hvr",nbin,0,nbin); // half us tick
-  hwr = new TH1F("hwr","hwr",nbin,0,nbin); // half us tick
+  hur = new TH1F("hur1","hur1",nbin,0,nbin); // half us tick
+  hvr = new TH1F("hvr1","hvr1",nbin,0,nbin); // half us tick
+  hwr = new TH1F("hwr1","hwr1",nbin,0,nbin); // half us tick
   
   for (int i=0; i!=nbin; i++){  
     double time = hur->GetBinCenter(i+1)/2.-50;
@@ -81,15 +63,15 @@ WireCell2dToy::ToySignalGausFDS::ToySignalGausFDS(WireCell::FrameDataSource& fds
   hpr_u = 0;
   hpr_v = 0;
   hpr_w = 0;
+  
 }
 
-
-int WireCell2dToy::ToySignalGausFDS::size() const{
+int WireCell2dToy::ToySignalWienFDS::size() const{
   return max_frames;
 }
 
-void WireCell2dToy::ToySignalGausFDS::Save(){
-  TFile *file = new TFile("temp_gaus.root","RECREATE");
+void WireCell2dToy::ToySignalWienFDS::Save(){
+  TFile *file = new TFile("temp_wien.root","RECREATE");
   for (int i=0;i!=nwire_u;i++){
     TH1F *huu = (TH1F*)hu[i]->Clone(Form("U1_%d",i));
   }
@@ -99,18 +81,11 @@ void WireCell2dToy::ToySignalGausFDS::Save(){
   for (int i=0;i!=nwire_w;i++){
     TH1F *hww = (TH1F*)hw[i]->Clone(Form("W1_%d",i));
   }
-
-  // TH1F *hftg = (TH1F*)hfilter_time_gaus->Clone("hftg");
-  // TH1 *hfg = (TH1*)hfilter_gaus->Clone("hfg");
-  
- 
-  
   file->Write();
   file->Close();
 }
 
-
-int WireCell2dToy::ToySignalGausFDS::jump(int frame_number){
+int WireCell2dToy::ToySignalWienFDS::jump(int frame_number){
   // fill the frame data ... 
   frame.clear();
   int scale = nbin/bins_per_frame;
@@ -130,7 +105,7 @@ int WireCell2dToy::ToySignalGausFDS::jump(int frame_number){
   hpr_u = hur->FFT(hpr_u,"PH");
   hpr_v = hvr->FFT(hpr_v,"PH");
   hpr_w = hwr->FFT(hpr_w,"PH");
-  
+    
   TH1 *hm = 0;
   TH1 *hp = 0;
   double value_re[9600];
@@ -139,7 +114,29 @@ int WireCell2dToy::ToySignalGausFDS::jump(int frame_number){
   TH1 *fb = 0;
   int n = nbin;
   TH1 *hmr, *hpr;
+  
+  // do FFT again to remove response function and apply filter
 
+  TF1 *filter_u = new TF1("filter_u","(x>0.0)*gaus*exp(-0.5*pow(x/[3],[4]))");
+  double par[5]={1.73/0.959301, 1.69, 1.55, 0.19, 3.75};
+  filter_u->SetParameters(par);
+
+  TF1 *filter_v = new TF1("filter_v","(x>0.0)*gaus*exp(-0.5*pow(x/[3],[4]))");
+  double par1[5]={1.74/0.941034, 1.46, 1.33, 0.23, 4.89};
+  filter_v->SetParameters(par1);
+
+  TF1 *filter_w = new TF1("filter_y","(x>0.0)*[0]*exp(-0.5*(((x-[1])/[2])^2)^[3])");
+  double par2[4]={1.03/0.995635, 0.08, 0.15, 2.17};
+  filter_w->SetParameters(par2);
+
+
+  
+  
+ 
+      
+
+      // double rho = hm->GetBinContent(j+1)/hmr->GetBinContent(j+1)*filter_u->Eval(freq);
+      
   for (size_t ind=0; ind<ntraces; ++ind) {
     const Trace& trace = frame1.traces[ind];
     int tbin = trace.tbin;
@@ -155,14 +152,17 @@ int WireCell2dToy::ToySignalGausFDS::jump(int frame_number){
       htemp = hu[chid];
       hmr = hmr_u;
       hpr = hpr_u;
+      filter = filter_u;
     }else if (chid < nwire_u + nwire_v){
       htemp = hv[chid - nwire_u];
       hmr = hmr_v;
       hpr = hpr_v;
+      filter = filter_v;
     }else{
       htemp = hw[chid - nwire_u - nwire_v];
       hmr = hmr_w;
       hpr = hpr_w;
+      filter = filter_w;
     }
 
     for (int i = tbin;i!=tbin+nbins;i++){
@@ -173,7 +173,15 @@ int WireCell2dToy::ToySignalGausFDS::jump(int frame_number){
     hp = htemp->FFT(hp,"PH");
     
     for (int i=0;i!=nbin;i++){
-      double rho = hm->GetBinContent(i+1)/hmr->GetBinContent(i+1)*hfilter_gaus->GetBinContent(i+1);
+      
+      double freq;
+      if (i < nbin/2.){
+       	freq = i/(1.*nbin)*2.;
+      }else{
+       	freq = (nbin - i)/(1.*nbin)*2.;
+      }
+
+      double rho = hm->GetBinContent(i+1)/hmr->GetBinContent(i+1)*filter->Eval(freq);
       double phi = hp->GetBinContent(i+1) - hpr->GetBinContent(i+1);
 
       if (i==0) rho = 0;
@@ -234,15 +242,16 @@ int WireCell2dToy::ToySignalGausFDS::jump(int frame_number){
     frame.traces.push_back(t);
 
   }
-
-
+ 
+  delete filter_u;
+  delete filter_v;
+  delete filter_w;
   
   frame.index = frame_number;
   return frame.index;
 }
 
-
-WireCell2dToy::ToySignalGausFDS::~ToySignalGausFDS(){
+WireCell2dToy::ToySignalWienFDS::~ToySignalWienFDS(){
   for (int i=0;i!=nwire_u;i++){
     delete hu[i] ;
   }
@@ -255,17 +264,12 @@ WireCell2dToy::ToySignalGausFDS::~ToySignalGausFDS(){
     delete hw[i] ;
   }
   delete hw;
-  
-  delete filter_g;
-  delete hfilter_time_gaus;
-  delete hfilter_gaus;
-  
-  delete hur;
-  delete hvr;
-  delete hwr;
- 
+
   delete gu;
   delete gv;
   delete gw;
- 
+
+  delete hur;
+  delete hvr;
+  delete hwr;
 }

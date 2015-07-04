@@ -30,13 +30,13 @@ WireCell2dToy::ToySignalPreFDS::ToySignalPreFDS(WireCell::FrameDataSource& fds, 
   hw = new TH1F*[nwire_w];
   
   for (int i=0;i!=nwire_u;i++){
-    hu[i] = new TH1F(Form("U3_%d",i),Form("U3_%d",i),bins_per_frame,0,bins_per_frame);
+    hu[i] = new TH1F(Form("U2_%d",i),Form("U2_%d",i),bins_per_frame,0,bins_per_frame);
   }
   for (int i=0;i!=nwire_v;i++){
-    hv[i] = new TH1F(Form("V3_%d",i),Form("V3_%d",i),bins_per_frame,0,bins_per_frame);
+    hv[i] = new TH1F(Form("V2_%d",i),Form("V2_%d",i),bins_per_frame,0,bins_per_frame);
   }
   for (int i=0;i!=nwire_w;i++){
-    hw[i] = new TH1F(Form("W3_%d",i),Form("W3_%d",i),bins_per_frame,0,bins_per_frame);
+    hw[i] = new TH1F(Form("W2_%d",i),Form("W2_%d",i),bins_per_frame,0,bins_per_frame);
   }
   
 

@@ -30,7 +30,8 @@
 #include "WireCell2dToy/ToyDepositor.h"
 #include "WireCellNav/GenerativeFDS.h"
 #include "WireCell2dToy/ToySignalSimu.h"
-#include "WireCell2dToy/ToySignalPre.h"
+#include "WireCell2dToy/ToySignalGaus.h"
+#include "WireCell2dToy/ToySignalWien.h"
 
 #include "TApplication.h"
 #include "TCanvas.h"
@@ -92,12 +93,17 @@ int main(int argc, char* argv[])
   const PointValueVector pvv = toydep.depositions(1);
   WireCell::GenerativeFDS gfds(toydep,gds,9600,5,0.5*1.605723*units::millimeter); // 87 K at 0.5 kV/cm
   WireCell2dToy::ToySignalSimuFDS simu_fds(gfds,gds,9600,5);
-  
   simu_fds.jump(1);
   simu_fds.Save();
-  WireCell2dToy::ToySignalPreFDS pre_fds(simu_fds,gds,9600/4,5);
-  pre_fds.jump(1);
-  pre_fds.Save();
+  
+  WireCell2dToy::ToySignalGausFDS gaus_fds(simu_fds,gds,9600/4,5);
+  gaus_fds.jump(1);
+  gaus_fds.Save();
+  
+  WireCell2dToy::ToySignalWienFDS wien_fds(simu_fds,gds,9600/4,5);
+  wien_fds.jump(1);
+  wien_fds.Save();
+  
   
 
   // WireCellSst::ToyuBooNESliceDataSource sds(gfds,1500); //set threshold at 2000 electrons
