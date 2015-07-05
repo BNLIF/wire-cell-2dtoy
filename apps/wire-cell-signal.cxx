@@ -119,9 +119,13 @@ int main(int argc, char* argv[])
   int nwire_v = wires_v.size();
   int nwire_w = wires_w.size();
   
-  float threshold_u = 5.87819e+02 * 4;
-  float threshold_v = 8.36644e+02 * 4;
-  float threshold_w = 5.67974e+02 * 4;
+  float threshold_u = 5.87819e+02 * 3.0;
+  float threshold_v = 8.36644e+02 * 3.0;
+  float threshold_w = 5.67974e+02 * 3.0;
+
+  // float threshold_u = 1000;
+  // float threshold_v = 1000;
+  // float threshold_w = 1000;
   
 
   WireCellSst::ToyuBooNESliceDataSource sds(wien_fds,gaus_fds,threshold_u, 
@@ -146,6 +150,11 @@ int main(int argc, char* argv[])
     GeomWireSelection allmwire = mergetiling[i]->get_allwire();
     cout << i << " " << allmcell.size() << " " << allmwire.size() << endl;
     truthtiling[i] = new WireCell2dToy::TruthToyTiling(*toytiling[i],pvv,i,gds,800);
+    
+    // for (int j=0;j!=allmwire.size();j++){
+    //   cout << mergetiling[i]->cells(*allmwire.at(j)).size() << endl;
+    // }
+
     CellChargeMap ccmap = truthtiling[i]->ccmap();
     
     Double_t charge_min = 10000;
