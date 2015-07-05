@@ -12,7 +12,7 @@ namespace WireCell2dToy{
   public:
     TruthToyTiling(){};
     ~TruthToyTiling(){};
-    TruthToyTiling(WireCell2dToy::ToyTiling& tiling, const WireCell::PointValueVector &pvv, int tbin, const WireCell::GeomDataSource& gds);
+    TruthToyTiling(WireCell2dToy::ToyTiling& tiling, const WireCell::PointValueVector &pvv, int tbin, const WireCell::GeomDataSource& gds, int offset1 = 0);
     
     float charge(const WireCell::GeomCell& cell) const {return cellchargemap.find(&cell)->second;};
     
@@ -20,8 +20,9 @@ namespace WireCell2dToy{
 
   protected:
     WireCell::CellChargeMap cellchargemap;
-
-      ClassDef(TruthToyTiling,1);
+    int offset;
+    
+    ClassDef(TruthToyTiling,1);
   };
 }
 

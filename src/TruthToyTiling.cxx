@@ -2,11 +2,12 @@
 
 using namespace WireCell;
 
-WireCell2dToy::TruthToyTiling::TruthToyTiling(WireCell2dToy::ToyTiling& tiling, const WireCell::PointValueVector &pvv, int tbin, const GeomDataSource& gds){
-  
+WireCell2dToy::TruthToyTiling::TruthToyTiling(WireCell2dToy::ToyTiling& tiling, const WireCell::PointValueVector &pvv, int tbin, const GeomDataSource& gds, int offset1){
+  offset = offset1;
+
   float sum = 0;
   for (int itruth = 0; itruth < pvv.size(); ++itruth){
-    if (int(pvv[itruth].first.x/2.0/1.6/units::mm) == tbin){
+    if (int(pvv[itruth].first.x/2.0/1.6/units::mm + offset1) == tbin){
       const Point& p = pvv[itruth].first; // get the point
       float charge = pvv[itruth].second;
       

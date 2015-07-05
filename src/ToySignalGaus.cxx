@@ -64,9 +64,9 @@ WireCell2dToy::ToySignalGausFDS::ToySignalGausFDS(WireCell::FrameDataSource& fds
   gv = new TGraph(5000,xv,yv);
   gw = new TGraph(5000,xw,yw);
 
-  hur = new TH1F("hur","hur",nbin,0,nbin); // half us tick
-  hvr = new TH1F("hvr","hvr",nbin,0,nbin); // half us tick
-  hwr = new TH1F("hwr","hwr",nbin,0,nbin); // half us tick
+  hur = new TH1F("hur2","hur2",nbin,0,nbin); // half us tick
+  hvr = new TH1F("hvr2","hvr2",nbin,0,nbin); // half us tick
+  hwr = new TH1F("hwr2","hwr2",nbin,0,nbin); // half us tick
   
   for (int i=0; i!=nbin; i++){  
     double time = hur->GetBinCenter(i+1)/2.-50;
