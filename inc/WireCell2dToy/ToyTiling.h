@@ -17,7 +17,9 @@ namespace WireCell2dToy {
       ToyTiling();
 	// fixme: tiling should not know about slices data.
       
-      ToyTiling(const WireCell::Slice& slice, WireCell::GeomDataSource& gds);
+      // ToyTiling(const WireCell::Slice& slice, WireCell::GeomDataSource& gds);
+      ToyTiling(const WireCell::Slice& slice, WireCell::GeomDataSource& gds, float rel_u = 0.05, float rel_v=0.05, float rel_w=0.05, float noise_u=14000*0.05, float noise_v=14000*0.03, float noise_w=14000*0.02);
+
       virtual ~ToyTiling();
       
       WireCell::GeomWireSelection wires(const WireCell::GeomCell& cell) const;

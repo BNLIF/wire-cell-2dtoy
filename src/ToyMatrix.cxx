@@ -285,24 +285,27 @@ WireCell2dToy::ToyMatrix::ToyMatrix(WireCell2dToy::ToyTiling& toytiling, WireCel
     
     GeomWireSelection allwire = toytiling.get_allwire();
     WireChargeMap wcmap = toytiling.wcmap();
+    WireChargeMap wcemap = toytiling.wcemap();
     for (int j=0;j!=allwire.size();j++){
       if (swimap.find(allwire[j])!=swimap.end()){
 	int index = swimap[allwire[j]];
 	float charge = wcmap[allwire[j]];
+	float charge_err = wcemap[allwire[j]];
 	(*Wy)[index] =charge;
+	(*Vy)(index,index) = charge_err*charge_err/1e6;
 	// fill covariance matrix as well
 	// Vy ...
 	// need to differentiate which plane it is
-	WirePlaneType_t plane = allwire[j]->plane();
-	Double_t charge_noise;
-	if (plane == 0){
-	  charge_noise = 14000*0.05;
-	}else if (plane==1){
-	  charge_noise = 14000*0.03;
-	}else if (plane==2){
-	  charge_noise = 14000*0.02;
-	}
-	(*Vy)(index,index) = (charge_noise*charge_noise + 0.05*0.05 * charge*charge)/1e6;
+	// WirePlaneType_t plane = allwire[j]->plane();
+	// Double_t charge_noise;
+	// if (plane == 0){
+	//   charge_noise = 14000*0.05;
+	// }else if (plane==1){
+	//   charge_noise = 14000*0.03;
+	// }else if (plane==2){
+	//   charge_noise = 14000*0.02;
+	// }
+	// (*Vy)(index,index) = (charge_noise*charge_noise + 0.05*0.05 * charge*charge)/1e6;
       }
     }
     

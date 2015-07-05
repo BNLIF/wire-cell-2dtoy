@@ -10,7 +10,7 @@ WireCell2dToy::ToyTiling::ToyTiling()
 }
 
 
-WireCell2dToy::ToyTiling::ToyTiling(const WireCell::Slice& slice,WireCell::GeomDataSource& gds){
+WireCell2dToy::ToyTiling::ToyTiling(const WireCell::Slice& slice,WireCell::GeomDataSource& gds, float rel_u , float rel_v, float rel_w, float noise_u, float noise_v, float noise_w){
   WireCell::Channel::Group group = slice.group();
   //double sum = 0;
   for (int i=0;i!=group.size();i++){
@@ -29,14 +29,18 @@ WireCell2dToy::ToyTiling::ToyTiling(const WireCell::Slice& slice,WireCell::GeomD
     //fill in the error ...
     WirePlaneType_t plane = wire->plane();
     double charge_noise;
+    double rel_charge_err;
     if (plane ==0){
-      charge_noise = 14000*0.05;
+      charge_noise = noise_u;
+      rel_charge_err = rel_u;
     }else if (plane == 1){
-      charge_noise = 14000*0.03;
+      charge_noise = noise_v;
+      rel_charge_err = rel_v;
     }else if (plane == 2){
-      charge_noise = 14000*0.02;
+      charge_noise = noise_w;
+      rel_charge_err = rel_w;
     }
-    wirecharge_errmap[wire] = sqrt(charge_noise*charge_noise + 0.05*0.05 * charge*charge);
+    wirecharge_errmap[wire] = sqrt(charge_noise*charge_noise + pow(rel_charge_err,2) * charge*charge);
 
 
     wire_all.push_back(wire);
