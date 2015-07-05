@@ -94,7 +94,7 @@ int main(int argc, char* argv[])
   const PointValueVector pvv = toydep.depositions(1);
   //WireCell::GenerativeFDS gfds(toydep,gds,9600,5,0.5*1.605723*units::millimeter); // 87 K at 0.5 kV/cm
   WireCell::GenerativeFDS gfds(toydep,gds,9600,5,0.5*1.60*units::millimeter); // 87 K at 0.5 kV/cm
-  WireCell2dToy::ToySignalSimuFDS simu_fds(gfds,gds,9600,5,1.647,1.539+1.647);
+  WireCell2dToy::ToySignalSimuFDS simu_fds(gfds,gds,9600,5,1.647,1.539+1.647); // time offset among different planes for the time electrons travel among different planes
   simu_fds.jump(1);
   //simu_fds.Save();
 
@@ -119,9 +119,13 @@ int main(int argc, char* argv[])
   int nwire_v = wires_v.size();
   int nwire_w = wires_w.size();
   
-  float threshold_u = 5.87819e+02 * 3.0;
-  float threshold_v = 8.36644e+02 * 3.0;
-  float threshold_w = 5.67974e+02 * 3.0;
+  float threshold_u = 5.87819e+02 * 3.5;
+  float threshold_v = 8.36644e+02 * 3.5;
+  float threshold_w = 5.67974e+02 * 3.5;
+
+  float threshold_ug = 410.543*2.5;
+  float threshold_vg = 631.936*2.5;
+  float threshold_wg = 315.031*2.5;
 
   // float threshold_u = 1000;
   // float threshold_v = 1000;
@@ -129,7 +133,10 @@ int main(int argc, char* argv[])
   
 
   WireCellSst::ToyuBooNESliceDataSource sds(wien_fds,gaus_fds,threshold_u, 
-					    threshold_v, threshold_w, nwire_u, 
+					    threshold_v, threshold_w, 
+					    threshold_ug, 
+					    threshold_vg, threshold_wg, 
+					    nwire_u, 
 					    nwire_v, nwire_w); 
   
   WireCell2dToy::ToyTiling **toytiling = new WireCell2dToy::ToyTiling*[2400];

@@ -8,12 +8,13 @@
 
 using namespace WireCell;
 
-WireCell2dToy::ToySignalSimuFDS::ToySignalSimuFDS(WireCell::FrameDataSource& fds, const WireCell::GeomDataSource& gds,int bins_per_frame1, int nframes_total, float time_offset_uv, float time_offset_uw)
+WireCell2dToy::ToySignalSimuFDS::ToySignalSimuFDS(WireCell::FrameDataSource& fds, const WireCell::GeomDataSource& gds,int bins_per_frame1, int nframes_total, float time_offset_uv, float time_offset_uw, int flag_random)
   : fds(fds)
   , gds(gds)
   , max_frames(nframes_total)
   , time_offset_uv(time_offset_uv)
   , time_offset_uw(time_offset_uw)
+  , flag_random(flag_random)
 {  
   bins_per_frame = bins_per_frame1;
 
@@ -171,7 +172,12 @@ int WireCell2dToy::ToySignalSimuFDS::jump(int frame_number){
     ifft->Transform();
     fb = TH1::TransformHisto(ifft,fb,"Re");
     for (int j=0;j!=bins_per_frame;j++){
-      int content = round(fb->GetBinContent(j+1) * 7.8*4096./2000. + gRandom->Gaus(0,noise[1]));
+      int content;
+      if (flag_random ==1){
+	content = round(fb->GetBinContent(j+1) * 7.8*4096./2000. + gRandom->Gaus(0,noise[1]));
+      }else{
+	content = round(fb->GetBinContent(j+1) * 7.8*4096./2000.);
+      }
       hu[i]->SetBinContent(j+1,content);
     }
   }
@@ -192,7 +198,12 @@ int WireCell2dToy::ToySignalSimuFDS::jump(int frame_number){
     ifft->Transform();
     fb = TH1::TransformHisto(ifft,fb,"Re");
     for (int j=0;j!=bins_per_frame;j++){
-      int content = round(fb->GetBinContent(j+1)*7.8*4096./2000. + gRandom->Gaus(0,noise[1]));
+      int content;
+      if (flag_random == 1){
+	content = round(fb->GetBinContent(j+1)*7.8*4096./2000. + gRandom->Gaus(0,noise[1]));
+      }else{
+	content = round(fb->GetBinContent(j+1)*7.8*4096./2000.);
+      }
       hv[i]->SetBinContent(j+1,content);
     }
   }
@@ -213,7 +224,12 @@ int WireCell2dToy::ToySignalSimuFDS::jump(int frame_number){
     ifft->Transform();
     fb = TH1::TransformHisto(ifft,fb,"Re");
     for (int j=0;j!=bins_per_frame;j++){
-      int content = round(fb->GetBinContent(j+1)*7.8*4096./2000. + gRandom->Gaus(0,noise[0]));
+      int content;
+      if (flag_random ==1){
+	content = round(fb->GetBinContent(j+1)*7.8*4096./2000. + gRandom->Gaus(0,noise[0]));
+      }else{
+	content = round(fb->GetBinContent(j+1)*7.8*4096./2000. );
+      }
       hw[i]->SetBinContent(j+1,content);
     }
   }
