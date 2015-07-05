@@ -94,7 +94,7 @@ int main(int argc, char* argv[])
   const PointValueVector pvv = toydep.depositions(1);
   //WireCell::GenerativeFDS gfds(toydep,gds,9600,5,0.5*1.605723*units::millimeter); // 87 K at 0.5 kV/cm
   WireCell::GenerativeFDS gfds(toydep,gds,9600,5,0.5*1.60*units::millimeter); // 87 K at 0.5 kV/cm
-  WireCell2dToy::ToySignalSimuFDS simu_fds(gfds,gds,9600,5);
+  WireCell2dToy::ToySignalSimuFDS simu_fds(gfds,gds,9600,5,1.647,1.539+1.647);
   simu_fds.jump(1);
   //simu_fds.Save();
 
@@ -102,11 +102,11 @@ int main(int argc, char* argv[])
   // st_fds.jump(1);
   // st_fds.Save();
   
-  WireCell2dToy::ToySignalGausFDS gaus_fds(simu_fds,gds,9600/4,5); // gaussian smearing for charge estimation
+  WireCell2dToy::ToySignalGausFDS gaus_fds(simu_fds,gds,9600/4,5,1.647,1.539+1.647); // gaussian smearing for charge estimation
   gaus_fds.jump(1);
   gaus_fds.Save();
   
-  WireCell2dToy::ToySignalWienFDS wien_fds(simu_fds,gds,9600/4,5); // weiner smearing for hit identification
+  WireCell2dToy::ToySignalWienFDS wien_fds(simu_fds,gds,9600/4,5,1.647,1.539+1.647); // weiner smearing for hit identification
   wien_fds.jump(1);
   wien_fds.Save();
   

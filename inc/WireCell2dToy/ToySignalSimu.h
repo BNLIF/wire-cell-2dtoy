@@ -10,7 +10,7 @@ namespace WireCell2dToy {
   class ToySignalSimuFDS : public WireCell::FrameDataSource
   {
   public:
-    ToySignalSimuFDS(WireCell::FrameDataSource& fds, const WireCell::GeomDataSource& gds, int bins_per_frame1 = 9600, int nframes_total = -1);
+    ToySignalSimuFDS(WireCell::FrameDataSource& fds, const WireCell::GeomDataSource& gds, int bins_per_frame1 = 9600, int nframes_total = -1,float time_offset_uv = 0, float time_offset_uw = 0);
     ~ToySignalSimuFDS();
 
     virtual int size() const;
@@ -24,6 +24,8 @@ namespace WireCell2dToy {
     WireCell::FrameDataSource& fds;
     const WireCell::GeomDataSource& gds;
     int  max_frames;
+
+    float time_offset_uv, time_offset_uw;
 
     int nwire_u, nwire_v, nwire_w;
 
