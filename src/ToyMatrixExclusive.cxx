@@ -127,10 +127,14 @@ WireCell2dToy::ToyMatrixExclusive::ToyMatrixExclusive(WireCell2dToy::ToyMatrix &
 WireCell2dToy::ToyMatrixExclusive::~ToyMatrixExclusive(){
   delete Eigen;
   delete EigenValue;
-  delete MA, MAT;
-  delete MC, MC_inv;
-  delete Vx, Vx_inv;
-  delete Cxt, dCxt;
+  delete MA;
+  delete MAT;
+  delete MC;
+  delete MC_inv;
+  delete Vx;
+  delete Vx_inv;
+  delete Cxt;
+  delete dCxt;
   //delete Cx, dCx;
   delete trans;
   // delete transT;

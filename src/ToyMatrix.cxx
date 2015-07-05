@@ -371,11 +371,22 @@ double WireCell2dToy::ToyMatrix::Get_residual(const WireCell::GeomCell *cell){
 WireCell2dToy::ToyMatrix::~ToyMatrix(){
   
   
-  delete MA, MB, MAT, MBT;
-  delete Vy, VBy, Vx, VBy_inv, Vx_inv;
-  delete MC, MC_inv;
-  delete Wy, Cx, dCx;
-  delete MWy_pred, MWy;
+  delete MA;
+  delete MB;
+  delete MAT;
+  delete MBT;
+  delete Vy;
+  delete VBy;
+  delete Vx;
+  delete VBy_inv;
+  delete Vx_inv;
+  delete MC;
+  delete MC_inv;
+  delete Wy;
+  delete Cx;
+  delete dCx;
+  delete MWy_pred;
+  delete MWy;
 }
 
 int WireCell2dToy::ToyMatrix::Solve(){
