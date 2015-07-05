@@ -75,7 +75,7 @@ int main(int argc, char* argv[])
   }
   
 
-  
+  int recon_threshold = 2000;
  
 
  
@@ -363,7 +363,7 @@ int main(int argc, char* argv[])
      GeomCellSelection allmcell;
      for (int j=0;j!=pallmcell.size();j++){
        const GeomCell* mcell = pallmcell[j];
-       if (toymatrix[i]->Get_Cell_Charge(mcell)>2000){
+       if (toymatrix[i]->Get_Cell_Charge(mcell)> recon_threshold){
 	 allmcell.push_back(mcell);
        }
      }
@@ -508,7 +508,7 @@ int main(int argc, char* argv[])
     for (int j=0;j!=allmcell.size();j++){
       MergeGeomCell *mcell = (MergeGeomCell*)allmcell[j];
       double charge = toymatrix[i]->Get_Cell_Charge(mcell,1);
-      if (charge>2000){
+      if (charge> recon_threshold){
 	//truth
 	for (int k=0;k!=mcell->get_allcell().size();k++){
 	  Point p = mcell->get_allcell().at(k)->center();
@@ -532,7 +532,7 @@ int main(int argc, char* argv[])
     for (int j=0;j!=allmcell.size();j++){
       MergeGeomCell *mcell = (MergeGeomCell*)allmcell[j];
       double charge = toymatrix[i]->Get_Cell_Charge(mcell,1);
-      if (charge>2000 && !(mcell->IsSimpleBlob() && mcell->IsBlob())){
+      if (charge> recon_threshold && !(mcell->IsSimpleBlob() && mcell->IsBlob())){
 	for (int k=0;k!=mcell->get_allcell().size();k++){
 	  Point p = mcell->get_allcell().at(k)->center();
 	  x_save = i*0.32;

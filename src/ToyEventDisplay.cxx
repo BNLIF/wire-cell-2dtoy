@@ -14,6 +14,8 @@ ToyEventDisplay::ToyEventDisplay(TPad& pad, const WireCell::GeomDataSource& gds)
     , g1(0)
     , g2(0)
 {
+  recon_threshold = 1500;
+  truth_threshold = 2000;
 }
 
 ToyEventDisplay::~ToyEventDisplay()
@@ -168,7 +170,7 @@ int ToyEventDisplay::draw_truthcells(const WireCell::CellChargeMap& ccmap, TStri
   int i=0;
   for (auto it = ccmap.begin();it!=ccmap.end(); it++){
     WireCell::Point p = it->first->center();
-    if (it->second > 2000){
+    if (it->second > truth_threshold){
       g2->SetPoint(i,p.z/units::m,p.y/units::m);
       i++;
     }
@@ -299,7 +301,7 @@ int ToyEventDisplay::draw_reconcells(const WireCell::GeomCellSelection& cellall,
   int ncount = 0;
   for (int i=0;i!=cellall.size();i++){
     WireCell::MergeGeomCell *mcell = (WireCell::MergeGeomCell*)cellall[i];
-    if (toymatrix->Get_Cell_Charge(mcell)>1500){
+    if (toymatrix->Get_Cell_Charge(mcell)>recon_threshold){
       WireCell::GeomCellSelection acell = mcell->get_allcell();
       for (int j=0;j!=acell.size();j++){
 	g2->SetPoint(ncount,acell[j]->center().z/units::m,acell[j]->center().y/units::m);

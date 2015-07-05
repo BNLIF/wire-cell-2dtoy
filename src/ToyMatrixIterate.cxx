@@ -4,10 +4,11 @@ using namespace WireCell;
 
 #include "TMath.h"
 
-WireCell2dToy::ToyMatrixIterate::ToyMatrixIterate(WireCell2dToy::ToyMatrix &toymatrix, std::vector<int>& already_removed){
+WireCell2dToy::ToyMatrixIterate::ToyMatrixIterate(WireCell2dToy::ToyMatrix &toymatrix, std::vector<int>& already_removed, int recon_t){
   prev_ncount = -1;
   ncount = 0;
   nlevel = 0;
+  recon_threshold = recon_t;
   
   std::vector<int> no_need_remove;
 
@@ -23,10 +24,11 @@ WireCell2dToy::ToyMatrixIterate::ToyMatrixIterate(WireCell2dToy::ToyMatrix &toym
   }
 }
 
-WireCell2dToy::ToyMatrixIterate::ToyMatrixIterate(WireCell2dToy::ToyMatrix &toymatrix){
+WireCell2dToy::ToyMatrixIterate::ToyMatrixIterate(WireCell2dToy::ToyMatrix &toymatrix, int recon_t){
   prev_ncount = -1;
   ncount = 0;
   nlevel = 0;
+  recon_threshold = recon_t;
 
  
   toymatrixkalman = new WireCell2dToy::ToyMatrixKalman(toymatrix);  
@@ -60,7 +62,7 @@ void WireCell2dToy::ToyMatrixIterate::UseTime(WireCell2dToy::ToyMatrix &toybefor
 	MergeGeomCell *mcell_p = (MergeGeomCell*)allmcell_p[j];
 	int index_p = toybefore.Get_mcindex(mcell_p);
 	double charge = toybefore.Get_Cell_Charge(mcell_p,1);
-	if ( charge > 2000 && mcell_c->Overlap(*mcell_p)){
+	if ( charge > recon_threshold && mcell_c->Overlap(*mcell_p)){
 	  auto it = find(no_need_remove.begin(),no_need_remove.end(),index_c);
 	  if (it == no_need_remove.end()){
 	    no_need_remove.push_back(index_c);
@@ -73,7 +75,7 @@ void WireCell2dToy::ToyMatrixIterate::UseTime(WireCell2dToy::ToyMatrix &toybefor
 	MergeGeomCell *mcell_n = (MergeGeomCell*)allmcell_n[j];
 	int index_n = toyafter.Get_mcindex(mcell_n);
 	double charge = toyafter.Get_Cell_Charge(mcell_n,1);
-	if ( charge > 2000 && mcell_c->Overlap(*mcell_n)){
+	if ( charge > recon_threshold && mcell_c->Overlap(*mcell_n)){
 	  auto it = find(no_need_remove.begin(),no_need_remove.end(),index_c);
 	  if (it == no_need_remove.end()){
 	    no_need_remove.push_back(index_c);

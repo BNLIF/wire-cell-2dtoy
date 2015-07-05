@@ -52,12 +52,17 @@ namespace WireCell2dToy {
 
 	virtual int draw_reconcells(const WireCell::GeomCellSelection& cellall, WireCell2dToy::ToyMatrix *toymatrix ,TString option, int color = 4);
 
-	
+	void Set_ReconThreshold(int abc){recon_threshold = abc;};
+	void Set_TruthThreshold(int abc){truth_threshold = abc;};
 
 	/// Clear visual the event display data.
 	void clear();
 
 	Double_t charge_min, charge_max;
+
+    private:
+	int recon_threshold;
+	int truth_threshold;
     };
 
 }

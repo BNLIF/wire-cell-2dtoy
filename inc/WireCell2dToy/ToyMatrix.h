@@ -13,8 +13,8 @@ namespace WireCell2dToy{
   class ToyMatrix {
   public:
     ToyMatrix();
-    ToyMatrix(WireCell2dToy::ToyTiling& toytiling, WireCell2dToy::MergeToyTiling& mergetiling);
-    ToyMatrix(WireCell2dToy::ToyTiling& toytiling, WireCell2dToy::MergeToyTiling& mergetiling, int abc);
+    ToyMatrix(WireCell2dToy::ToyTiling& toytiling, WireCell2dToy::MergeToyTiling& mergetiling, int recon_t=2000);
+    ToyMatrix(WireCell2dToy::ToyTiling& toytiling, WireCell2dToy::MergeToyTiling& mergetiling, int abc, int recon_t = 2000);
    
     virtual ~ToyMatrix();
 
@@ -63,7 +63,7 @@ namespace WireCell2dToy{
     
 
   protected:
-
+    int recon_threshold;
     std::vector<int> svd_removed;
 
     int num_blob;

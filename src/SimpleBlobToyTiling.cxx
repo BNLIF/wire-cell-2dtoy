@@ -27,10 +27,11 @@ double WireCell2dToy::SimpleBlobToyTiling::Get_Cell_Charge( const WireCell::Geom
 
 WireCell2dToy::SimpleBlobToyTiling::SimpleBlobToyTiling(WireCell2dToy::ToyTiling& toytiling1, WireCell2dToy::MergeToyTiling& mergetiling1, WireCell2dToy::ToyMatrix& toymatrix1,
 							WireCell2dToy::MergeToyTiling& prev_mergetiling, WireCell2dToy::ToyMatrix& prev_toymatrix,
-							WireCell2dToy::MergeToyTiling& next_mergetiling, WireCell2dToy::ToyMatrix& next_toymatrix){
+							WireCell2dToy::MergeToyTiling& next_mergetiling, WireCell2dToy::ToyMatrix& next_toymatrix, int recon_t){
   toytiling = &toytiling1;
   mergetiling = &mergetiling1;
   toymatrix = &toymatrix1;
+  recon_threshold = recon_t;
   
 
   nsimple_blob = 0;
@@ -121,7 +122,7 @@ WireCell2dToy::SimpleBlobToyTiling::SimpleBlobToyTiling(WireCell2dToy::ToyTiling
 	  MergeGeomCell *mcell = (MergeGeomCell*) (*it);
 	  for (int j=0;j!=prev_mergetiling.get_allcell().size();j++){
 	    MergeGeomCell *prev_mcell = (MergeGeomCell*) prev_mergetiling.get_allcell().at(j);
-	    if (prev_toymatrix.Get_Cell_Charge(prev_mcell)>2000){
+	    if (prev_toymatrix.Get_Cell_Charge(prev_mcell)>recon_threshold){
 	      int temp_val = mcell->Overlap1(*prev_mcell);
 	      if (temp_val){
 		cell_rank[mcell] += temp_val;
@@ -132,7 +133,7 @@ WireCell2dToy::SimpleBlobToyTiling::SimpleBlobToyTiling(WireCell2dToy::ToyTiling
 	  //see next time slice
 	  for (int j=0;j!=next_mergetiling.get_allcell().size();j++){
 	    MergeGeomCell *next_mcell = (MergeGeomCell*) next_mergetiling.get_allcell().at(j);
-	    if (next_toymatrix.Get_Cell_Charge(next_mcell)>2000){
+	    if (next_toymatrix.Get_Cell_Charge(next_mcell)>recon_threshold){
 	      int temp_val = mcell->Overlap1(*next_mcell);
 	      if (temp_val){
 		cell_rank[mcell] += temp_val;
@@ -150,7 +151,7 @@ WireCell2dToy::SimpleBlobToyTiling::SimpleBlobToyTiling(WireCell2dToy::ToyTiling
 	  //see previous time slice
 	  for (int j=0;j!=prev_mergetiling.get_allcell().size();j++){
 	    MergeGeomCell *prev_mcell = (MergeGeomCell*) prev_mergetiling.get_allcell().at(j);
-	    if (prev_toymatrix.Get_Cell_Charge(prev_mcell)>2000){
+	    if (prev_toymatrix.Get_Cell_Charge(prev_mcell)>recon_threshold){
 	      int temp_val = mcell->Overlap1(*prev_mcell);
 	      if (temp_val){
 		cell_rank[mcell] += temp_val;
@@ -162,7 +163,7 @@ WireCell2dToy::SimpleBlobToyTiling::SimpleBlobToyTiling(WireCell2dToy::ToyTiling
 	  //see next time slice
 	  for (int j=0;j!=next_mergetiling.get_allcell().size();j++){
 	    MergeGeomCell *next_mcell = (MergeGeomCell*) next_mergetiling.get_allcell().at(j);
-	    if (next_toymatrix.Get_Cell_Charge(next_mcell)>2000){
+	    if (next_toymatrix.Get_Cell_Charge(next_mcell)>recon_threshold){
 	      int temp_val = mcell->Overlap1(*next_mcell);
 	      if (temp_val){
 		cell_rank[mcell] += temp_val;
@@ -469,7 +470,7 @@ void WireCell2dToy::SimpleBlobToyTiling::DoTiling(){
     MergeGeomWire* mwire = (MergeGeomWire*) mwires.at(i);
     GeomCellSelection cells = mergetiling->cells(*mwire);
     for (int j=0;j!=cells.size();j++){
-      if (toymatrix->Get_Cell_Charge(cells.at(j))>2000){
+      if (toymatrix->Get_Cell_Charge(cells.at(j))>recon_threshold){
 	auto it = find(sbcells.begin(),sbcells.end(),cells.at(j));
 	if (it==sbcells.end()){
 	  mcells.push_back(cells.at(j));

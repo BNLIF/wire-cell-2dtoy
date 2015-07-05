@@ -37,12 +37,15 @@ void WireCell2dToy::ToyMatrixMarkov::find_subset(WireCell2dToy::ToyMatrixKalman 
 
 
 
-WireCell2dToy::ToyMatrixMarkov::ToyMatrixMarkov(WireCell2dToy::ToyMatrix &toybefore, WireCell2dToy::ToyMatrix &toycur, WireCell2dToy::ToyMatrix &toyafter, WireCell2dToy::MergeToyTiling &mergebefore, WireCell2dToy::MergeToyTiling &mergecur, WireCell2dToy::MergeToyTiling &mergeafter, WireCell::GeomCellSelection *allmcell1){
+WireCell2dToy::ToyMatrixMarkov::ToyMatrixMarkov(WireCell2dToy::ToyMatrix &toybefore, WireCell2dToy::ToyMatrix &toycur, WireCell2dToy::ToyMatrix &toyafter, WireCell2dToy::MergeToyTiling &mergebefore, WireCell2dToy::MergeToyTiling &mergecur, WireCell2dToy::MergeToyTiling &mergeafter, WireCell::GeomCellSelection *allmcell1,int recon_t1, int recon_t2){
   ncount = 0;
   first_flag = 0;
   toymatrix = &toycur;
   allmcell = allmcell1;
   mcindex = toymatrix->Get_mcindex();
+  recon_threshold1 = recon_t1;
+  recon_threshold2 = recon_t2;
+  
   
    //find good cells with time information and then use them ... 
   
@@ -62,7 +65,7 @@ WireCell2dToy::ToyMatrixMarkov::ToyMatrixMarkov(WireCell2dToy::ToyMatrix &toybef
 	MergeGeomCell *mcell_p = (MergeGeomCell*)allmcell_p[j];
 	int index_p = toybefore.Get_mcindex(mcell_p);
 	double charge = toybefore.Get_Cell_Charge(mcell_p,1);
-	if ( charge > 2000 && mcell_c->Overlap(*mcell_p)){
+	if ( charge > recon_threshold2 && mcell_c->Overlap(*mcell_p)){
 	  auto it = find(use_time.begin(),use_time.end(),index_c);
 	  if (it == use_time.end()){
 	    use_time.push_back(index_c);
@@ -75,7 +78,7 @@ WireCell2dToy::ToyMatrixMarkov::ToyMatrixMarkov(WireCell2dToy::ToyMatrix &toybef
 	MergeGeomCell *mcell_n = (MergeGeomCell*)allmcell_n[j];
 	int index_n = toyafter.Get_mcindex(mcell_n);
 	double charge = toyafter.Get_Cell_Charge(mcell_n,1);
-	if ( charge > 2000 && mcell_c->Overlap(*mcell_n)){
+	if ( charge > recon_threshold2 && mcell_c->Overlap(*mcell_n)){
 	  auto it = find(use_time.begin(),use_time.end(),index_c);
 	  if (it == use_time.end()){
 	    use_time.push_back(index_c);
@@ -125,12 +128,14 @@ WireCell2dToy::ToyMatrixMarkov::ToyMatrixMarkov(WireCell2dToy::ToyMatrix &toybef
   }
 }
 
-WireCell2dToy::ToyMatrixMarkov::ToyMatrixMarkov(WireCell2dToy::ToyMatrix *toymatrix1,WireCell::GeomCellSelection *allmcell1){
+WireCell2dToy::ToyMatrixMarkov::ToyMatrixMarkov(WireCell2dToy::ToyMatrix *toymatrix1,WireCell::GeomCellSelection *allmcell1, int recon_t1, int recon_t2){
   ncount = 0;
   first_flag = 0;
   toymatrix = toymatrix1; //save the matrix in here
   allmcell = allmcell1;
   mcindex = toymatrix->Get_mcindex();
+  recon_threshold1 = recon_t1;
+  recon_threshold2 = recon_t2;
   
   toymatrixkalman = new WireCell2dToy::ToyMatrixKalman(*toymatrix);  // hold the current results 
   
@@ -191,7 +196,7 @@ void WireCell2dToy::ToyMatrixMarkov::make_guess(){
       cur_cell_status.push_back(1); // not removed
     }
     
-    if (charge > 1500){ // hard coded to be fixed later
+    if (charge > recon_threshold1){ // hard coded to be fixed later
       cur_cell_pol.push_back(1); // on
     }else{
       cur_cell_pol.push_back(0); //off

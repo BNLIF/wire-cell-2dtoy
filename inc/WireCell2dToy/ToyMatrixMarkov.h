@@ -20,9 +20,9 @@ typedef std::set<CellRankPair, CellRankCompare> CellRankSet;
 namespace WireCell2dToy{
   class ToyMatrixMarkov {
   public:
-    ToyMatrixMarkov(WireCell2dToy::ToyMatrix *toymatrix1,WireCell::GeomCellSelection *allmcell1);
+    ToyMatrixMarkov(WireCell2dToy::ToyMatrix *toymatrix1,WireCell::GeomCellSelection *allmcell1, int recon_t1=1500, int recon_t2=2000);
     
-    ToyMatrixMarkov(WireCell2dToy::ToyMatrix &toybefore, WireCell2dToy::ToyMatrix &toycur, WireCell2dToy::ToyMatrix &toyafter, WireCell2dToy::MergeToyTiling &mergebefore, WireCell2dToy::MergeToyTiling &mergecur, WireCell2dToy::MergeToyTiling &mergeafter, WireCell::GeomCellSelection *allmcell1);
+    ToyMatrixMarkov(WireCell2dToy::ToyMatrix &toybefore, WireCell2dToy::ToyMatrix &toycur, WireCell2dToy::ToyMatrix &toyafter, WireCell2dToy::MergeToyTiling &mergebefore, WireCell2dToy::MergeToyTiling &mergecur, WireCell2dToy::MergeToyTiling &mergeafter, WireCell::GeomCellSelection *allmcell1, int recon_t1=1500, int recon_t2=2000);
 
     virtual ~ToyMatrixMarkov();
 
@@ -67,6 +67,9 @@ namespace WireCell2dToy{
     
     double next_chi2; // chi2 for the next cell
     double next_dof;
+
+    int recon_threshold1;
+    int recon_threshold2;
   };
 }
 

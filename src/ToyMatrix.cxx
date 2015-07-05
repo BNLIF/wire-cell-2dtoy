@@ -11,7 +11,7 @@ void WireCell2dToy::ToyMatrix::JudgeSimpleBlob(WireCell2dToy::ToyTiling& toytili
      MergeGeomCell *mcell =(MergeGeomCell*)allmcell.at(j);
      
      double charge =Get_Cell_Charge(mcell);
-     if (charge>2000){
+     if (charge>recon_threshold){
        mcell->FindEdges();
        // std::cout << mcell->get_allcell().size() << " " << mcell->get_edgecells().size() << std::endl;
        int nwire = 0, max_wire = 0;
@@ -23,7 +23,7 @@ void WireCell2dToy::ToyMatrix::JudgeSimpleBlob(WireCell2dToy::ToyTiling& toytili
 	 // for (int k=0;k!=n_mwires.size();k++){
 	 //   int ncells = 0;
 	 //   for (int kk= 0; kk!=mergetiling[i]->cells(*n_mwires.at(k)).size();kk++){
-	 //     if (toymatrix[i]->Get_Cell_Charge(mergetiling[i]->cells(*n_mwires.at(k)).at(kk))>2000){
+	 //     if (toymatrix[i]->Get_Cell_Charge(mergetiling[i]->cells(*n_mwires.at(k)).at(kk))>recon_threshold){
 	 // 	ncells ++;
 	 //     }
 	 //   }
@@ -41,7 +41,7 @@ void WireCell2dToy::ToyMatrix::JudgeSimpleBlob(WireCell2dToy::ToyTiling& toytili
 	     max_wire = mwire->get_allwire().size();
 	   GeomCellSelection cells = mergetiling.cells(*mwire);
 	   for (int kk=0; kk!= cells.size(); kk++){
-	     if (cells.at(kk) != mcell && Get_Cell_Charge(cells.at(kk))>2000){
+	     if (cells.at(kk) != mcell && Get_Cell_Charge(cells.at(kk))>recon_threshold){
 	       ncell += ((MergeGeomCell*)cells.at(kk))->get_allcell().size();
 	     }
 	   }
@@ -93,7 +93,8 @@ WireCell2dToy::ToyMatrix::ToyMatrix(){
   svd_flag = 0;
   num_blob = 0;
   simple_blob_reduction = false;
-
+  recon_threshold = 2000;
+  
   mwindex = 1;
   mcindex = 1;
 
@@ -123,12 +124,13 @@ WireCell2dToy::ToyMatrix::ToyMatrix(){
 }
 
 
-WireCell2dToy::ToyMatrix::ToyMatrix(WireCell2dToy::ToyTiling& toytiling, WireCell2dToy::MergeToyTiling& mergetiling, int svd_flag1){
+WireCell2dToy::ToyMatrix::ToyMatrix(WireCell2dToy::ToyTiling& toytiling, WireCell2dToy::MergeToyTiling& mergetiling, int svd_flag1, int recon_t){
   solve_flag = -1;
   chi2 = -1;
   svd_flag = svd_flag1;
   num_blob = 0;
   simple_blob_reduction = false;
+  recon_threshold = recon_t;
   
   // build up index
   Buildup_index(mergetiling);
@@ -241,7 +243,7 @@ WireCell2dToy::ToyMatrix::ToyMatrix(WireCell2dToy::ToyTiling& toytiling, WireCel
 
 
 
-WireCell2dToy::ToyMatrix::ToyMatrix(WireCell2dToy::ToyTiling& toytiling, WireCell2dToy::MergeToyTiling& mergetiling){
+WireCell2dToy::ToyMatrix::ToyMatrix(WireCell2dToy::ToyTiling& toytiling, WireCell2dToy::MergeToyTiling& mergetiling, int recon_t){
   solve_flag = -1;
   chi2 = -1;
   svd_flag = 0;
@@ -249,6 +251,7 @@ WireCell2dToy::ToyMatrix::ToyMatrix(WireCell2dToy::ToyTiling& toytiling, WireCel
   simple_blob_reduction = false;
   // build up index
   Buildup_index(mergetiling);
+  recon_threshold = recon_t;
   
   //std::cout << mcindex << " " << mwindex << " " << swindex << std::endl;
   if (mcindex >0){

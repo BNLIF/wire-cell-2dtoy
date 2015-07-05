@@ -137,7 +137,7 @@ int main(int argc, char* argv[])
       cout << i << " " << allmcell.size() << " " << allmwire.size() << endl;
 
       truthtiling[i] = new WireCell2dToy::TruthToyTiling(*toytiling[i],pvv,i,gds);
-      toymatrix[i] = new WireCell2dToy::ToyMatrix(*toytiling[i],*mergetiling[i],1);
+      toymatrix[i] = new WireCell2dToy::ToyMatrix(*toytiling[i],*mergetiling[i],1,2000);
       if (toymatrix[i]->Get_Solve_Flag()==0)
 	toymatrix_it[i] = new WireCell2dToy::ToyMatrixIterate(*toymatrix[i],toymatrix[i]->Get_svd_removed());
       

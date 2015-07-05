@@ -17,7 +17,7 @@ namespace WireCell2dToy{
     SimpleBlobToyTiling(WireCell2dToy::ToyTiling& toytiling1, WireCell2dToy::MergeToyTiling& mergetiling1, WireCell2dToy::ToyMatrix& toymatrix1, 
 			WireCell2dToy::MergeToyTiling& prev_mergetiling, WireCell2dToy::ToyMatrix& prev_toymatrix,
 			 WireCell2dToy::MergeToyTiling& next_mergetiling, WireCell2dToy::ToyMatrix& next_toymatrix
-			);
+			, int recon_t = 2000);
     ~SimpleBlobToyTiling();
     
     
@@ -33,6 +33,7 @@ namespace WireCell2dToy{
     double CalChi2();
     void SaveResult();
     void Buildup_index();
+    int recon_threshold;
     
 
     WireCell2dToy::ToyTiling *toytiling;
