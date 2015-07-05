@@ -264,20 +264,23 @@ double WireCell2dToy::SimpleBlobToyTiling::CalChi2(){
   
   // fill wire charge
   WireChargeMap wcmap = toytiling->wcmap();
+  WireChargeMap wcemap = toytiling->wcemap();
   for (int i=0; i!=wire_all.size();i++){
     int index = swimap[wire_all.at(i)];
     float charge = wcmap[wire_all.at(i)];
+    float charge_err = wcemap[wire_all.at(i)];
     Wy[index] =charge;
-    WirePlaneType_t plane = wire_all.at(i)->plane();
-    Double_t charge_noise;
-    if (plane == 0){
-      charge_noise = 14000*0.05;
-    }else if (plane==1){
-      charge_noise = 14000*0.03;
-    }else if (plane==2){
-      charge_noise = 14000*0.02;
-    }
-    Vy(index,index) = (charge_noise*charge_noise + 0.05*0.05 * charge*charge)/1e6;
+    Vy(index,index) = charge_err*charge_err/1e6;
+    //WirePlaneType_t plane = wire_all.at(i)->plane();
+    //double charge_noise;
+    // if (plane == 0){
+    //   charge_noise = 14000*0.05;
+    // }else if (plane==1){
+    //   charge_noise = 14000*0.03;
+    // }else if (plane==2){
+    //   charge_noise = 14000*0.02;
+    // }
+    // Vy(index,index) = (charge_noise*charge_noise + 0.05*0.05 * charge*charge)/1e6;
   }
   
   //fill MA

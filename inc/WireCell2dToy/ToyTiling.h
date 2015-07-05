@@ -34,6 +34,7 @@ namespace WireCell2dToy {
       WireCell::GeomWireSelection get_wire_all(){ return wire_all;}
 
       WireCell::WireChargeMap& wcmap(){return wirechargemap;};
+      WireCell::WireChargeMap& wcemap(){return wirecharge_errmap;};
       WireCell::GeomCellMap& cmap(){return cellmap;};
       WireCell::GeomWireMap& wmap(){return wiremap;};
 
@@ -50,6 +51,7 @@ namespace WireCell2dToy {
       WireCell::GeomWireMap wiremap;
       
       WireCell::WireChargeMap wirechargemap;
+      WireCell::WireChargeMap wirecharge_errmap;
 
       //
 
