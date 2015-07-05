@@ -118,9 +118,9 @@ int main(int argc, char* argv[])
   int nwire_v = wires_v.size();
   int nwire_w = wires_w.size();
   
-  float threshold_u = 5.87819e+02 * 3.5;
-  float threshold_v = 8.36644e+02 * 3.5;
-  float threshold_w = 5.67974e+02 * 3.5;
+  float threshold_u = 5.87819e+02 * 3.75;
+  float threshold_v = 8.36644e+02 * 3.75;
+  float threshold_w = 5.67974e+02 * 3.75;
 
   float threshold_ug = 410.543*2.5;
   float threshold_vg = 631.936*2.5;
