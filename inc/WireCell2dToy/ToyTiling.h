@@ -3,7 +3,6 @@
 
 #include "WireCellData/GeomWireCellMap.h"
 #include "WireCellNav/SliceDataSource.h"
-#include "WireCellSst/GeomDataSource.h"
 
 #include "WireCellIface/ICellTiling.h"
 
@@ -16,7 +15,7 @@ namespace WireCell2dToy {
       ToyTiling();
 	// fixme: tiling should not know about slices data.
       
-      ToyTiling(const WireCell::Slice& slice, WireCell::GeomDataSource& gds);
+      ToyTiling(const WireCell::Slice& slice, WireCell::IWireDatabase& gds);
       virtual ~ToyTiling();
       
       WireCell::GeomWireSelection wires(const WireCell::GeomCell& cell) const;
