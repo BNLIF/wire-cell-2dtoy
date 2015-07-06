@@ -8,11 +8,10 @@
 typedef std::pair<int, double> CellRankPair;
 struct CellRankCompare {
   bool operator() (const CellRankPair& a, const CellRankPair& b) const {
-    if (a.second < b.second) {
-      return false;
-    }else{
-      return true;
+    if (a.second == b.second){
+      return a.first < b.first;
     }
+    return a.second > b.second;
   }
 };
 typedef std::set<CellRankPair, CellRankCompare> CellRankSet;

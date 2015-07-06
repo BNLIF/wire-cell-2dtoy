@@ -25,8 +25,11 @@ WireCell2dToy::MergeToyTiling::MergeToyTiling(WireCell2dToy::ToyTiling& tiling, 
   // cellmap
   // wiremap
 
+  
+
   // //start with wire_u
   for (int i =0;i!=wire_u.size();i++){
+    //ntemp += tiling.cells(*tiling.get_wire_u()[i]).size();
     for (int j=0;j!=tiling.cells(*tiling.get_wire_u()[i]).size();j++){
       const GeomCell *cell = tiling.cells(*wire_u[i])[j];
       int flag=0;
@@ -47,12 +50,27 @@ WireCell2dToy::MergeToyTiling::MergeToyTiling(WireCell2dToy::ToyTiling& tiling, 
     }
   }
   
+  int ntemp = 0;
+  // for (int i=0;i!=cell_all.size();i++){
+  //   MergeGeomCell *mcell = (MergeGeomCell*)cell_all.at(i);
+  //   ntemp += mcell->get_allcell().size();
+  // }
+  // std::cout << ntemp << " " << cell_all.size() << std::endl;
+  
   while(further_merge(cell_all,tiling.get_ncell(),time_slice));
     
+  ntemp = 0;
+  for (int i=0;i!=cell_all.size();i++){
+    MergeGeomCell *mcell = (MergeGeomCell*)cell_all.at(i);
+    ntemp += mcell->get_allcell().size();
+  }
+  std::cout << ntemp << " " << cell_all.size()<< std::endl;
+
   MergeGeomCellSet mset;
   // rank the merged cell ... 
   for (int i=0;i!=cell_all.size();i++){
     MergeGeomCell *mcell = (MergeGeomCell*)cell_all[i];
+    std::cout << mcell << " " << mcell->cross_section() << std::endl;
     mset.insert(mcell);
   }
   
@@ -62,7 +80,12 @@ WireCell2dToy::MergeToyTiling::MergeToyTiling(WireCell2dToy::ToyTiling& tiling, 
     //std::cout << (*it)->cross_section() << std::endl;
   }
 
-
+  ntemp = 0;
+  for (int i=0;i!=cell_all.size();i++){
+    MergeGeomCell *mcell = (MergeGeomCell*)cell_all.at(i);
+    ntemp += mcell->get_allcell().size();
+  }
+  std::cout << ntemp << " " << cell_all.size()<< std::endl;
 
   // Now merge all the wires   wire_all
   int ident_wire = 50000;

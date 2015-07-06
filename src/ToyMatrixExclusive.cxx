@@ -6,11 +6,10 @@ using namespace WireCell;
 typedef std::pair<int, double> EigenPair;
 struct EigenCompare {
   bool operator() (const EigenPair& a, const EigenPair& b) const {
-    if (a.second < b.second) {
-      return false;
-    }else{
-      return true;
+    if (a.second == b.second){
+      return a.first < b.first;
     }
+    return a.second > b.second;
   }
 };
 typedef std::set<EigenPair, EigenCompare> EigenSet;

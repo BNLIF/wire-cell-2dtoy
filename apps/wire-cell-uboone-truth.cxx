@@ -103,6 +103,12 @@ int main(int argc, char* argv[])
       truthtiling[i] = new WireCell2dToy::TruthToyTiling(*toytiling[i],pvv,i,gds);
       
       GeomCellSelection allcell = toytiling[i]->get_allcell();
+
+      // for (int j=0;j!=allcell.size();j++){
+      // 	std::cout << toytiling[i]->wires(*allcell.at(j)).size() << std::endl;
+      // }
+      
+
       GeomCellSelection allmcell = mergetiling[i]->get_allcell();
       GeomWireSelection allmwire = mergetiling[i]->get_allwire();
       
@@ -180,7 +186,15 @@ int main(int argc, char* argv[])
   	ncount_mcell_cluster += (*it)->get_allcell().size();
       }
       ncount_mcell += allmcell.size();
-      cout << i << " " << allmcell.size() << " " << allmwire.size() << " " << cluster_set.size()  << endl;
+      
+      
+      int ncells_qx = 0;
+      for (int j=0;j!=allmcell.size();j++){
+	MergeGeomCell* mcell = (MergeGeomCell*)allmcell.at(j);
+	ncells_qx += mcell->get_allcell().size();
+      }
+
+      cout << i << " " << allcell.size() << " " << ncells_qx << " " << allmcell.size() << " " << allmwire.size() << " " << cluster_set.size()  << endl;
       
 
       // for (int j=0;j!=allmwire.size();j++){
@@ -288,7 +302,7 @@ int main(int argc, char* argv[])
 
     display.draw_slice(slice,"");
     display.draw_cells(toytiling[i]->get_allcell(),"*same");
-    display.draw_mergecells(mergetiling[i]->get_allcell(),"*same",1); //0 is normal, 1 is only draw the ones containt the truth cell
+    display.draw_mergecells(mergetiling[i]->get_allcell(),"*same",0); //0 is normal, 1 is only draw the ones containt the truth cell
     display.draw_truthcells(ccmap,"*same");
     
     // display.draw_wires_charge(wcmap,"Fsame",FI);
