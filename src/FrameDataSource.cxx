@@ -36,7 +36,8 @@ int WireCell2dToy::FrameDataSource::jump(int frame_number)
     traces[i].charge.push_back(0);
   }
   // start the simulation of random some points and put in charge
-  int npoint = gRandom->Uniform(5,20);
+  //int npoint = gRandom->Uniform(5,20);
+  int npoint = 1;
   float charge;
 
   // fixme: use the gds?
@@ -51,6 +52,9 @@ int WireCell2dToy::FrameDataSource::jump(int frame_number)
   for (int i=0;i!=npoint;i++){
     WireCell::Point p;
     p.x = -1;
+    // p.y = -0.672 * units::m;//gRandom->Uniform(y_low, y_high);
+    // p.z = 5.718 * units::m;//gRandom->Uniform(z_low, z_high);
+
     p.y = gRandom->Uniform(y_low, y_high);
     p.z = gRandom->Uniform(z_low, z_high);
     

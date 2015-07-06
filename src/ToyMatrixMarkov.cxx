@@ -114,9 +114,9 @@ WireCell2dToy::ToyMatrixMarkov::ToyMatrixMarkov(WireCell2dToy::ToyMatrix &toybef
 
   
   while (ncount < 1e4 
-	 && (cur_chi2 > 8*(cur_dof+0.1) || ncount < 6000) 
-	 && (cur_chi2 > 6*(cur_dof+0.1) || ncount < 3000) 
-	 && (cur_chi2 > 4*(cur_dof+0.1) || ncount < 1500) 
+	 && (cur_chi2 > 5*(cur_dof+0.1) || ncount < 6000) 
+	 && (cur_chi2 > 4*(cur_dof+0.1) || ncount < 3000) 
+	 && (cur_chi2 > 3*(cur_dof+0.1) || ncount < 1500) 
 	 && (cur_chi2 > 2*(cur_dof+0.1) || ncount < 800) 
 	 ){
     if (ncount == 1 || (ncount % 1000 ==0&&ncount >0) )
@@ -140,9 +140,9 @@ WireCell2dToy::ToyMatrixMarkov::ToyMatrixMarkov(WireCell2dToy::ToyMatrix *toymat
   toymatrixkalman = new WireCell2dToy::ToyMatrixKalman(*toymatrix);  // hold the current results 
   
   while (ncount < 1e4 
-	 && (cur_chi2 > 8*(cur_dof+0.1) || ncount < 6000) 
-	 && (cur_chi2 > 6*(cur_dof+0.1) || ncount < 3000) 
-	 && (cur_chi2 > 4*(cur_dof+0.1) || ncount < 1500) 
+	 && (cur_chi2 > 5*(cur_dof+0.1) || ncount < 6000) 
+	 && (cur_chi2 > 4*(cur_dof+0.1) || ncount < 3000) 
+	 && (cur_chi2 > 3*(cur_dof+0.1) || ncount < 1500) 
 	 && (cur_chi2 > 2*(cur_dof+0.1) || ncount < 800) 
 	 ){
     if (ncount == 1 || (ncount % 1000 ==0&&ncount >0) )
