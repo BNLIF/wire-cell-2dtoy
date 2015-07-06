@@ -90,7 +90,7 @@ int main(int argc, char* argv[])
   
 
   //int i=178;{
-  int i=180;{
+  int i=1262-800;{
   //int i=441;{
     // for (int i=0;i!=sds.size();i++){
     //for (int i=365;i!=378;i++){

@@ -207,12 +207,12 @@ WireCell2dToy::SimpleBlobToyTiling::SimpleBlobToyTiling(WireCell2dToy::ToyTiling
     cur_chi2 = CalChi2();
     //std::cout << "xin1" << std::endl;
     SaveResult();
-    // std::cout << "xin1" << std::endl;
+    //std::cout << "xin1" << std::endl;
     while(cur_chi2 > 5 && ncount < 100){
       //std::cout << cur_chi2 << std::endl;
       
       FormHypo();
-      // std::cout << "xin1" << std::endl;
+      //std::cout << "xin1" << std::endl;
       DoTiling();
       //std::cout << "xin1" << std::endl;
       cur_chi2 = CalChi2();
@@ -687,16 +687,22 @@ void WireCell2dToy::SimpleBlobToyTiling::FormHypo(){
 	MergeGeomCell *mcell1 = (MergeGeomCell*) first_cell.at(i).at(n);
 	n = gRandom->Uniform(0,second_cell.at(i).size());
 	MergeGeomCell *mcell2 = (MergeGeomCell*) second_cell.at(i).at(n);
-	n = gRandom->Uniform(0,other_cell.at(i).size());
-	MergeGeomCell *mcell3 = (MergeGeomCell*) other_cell.at(i).at(n);
-	WireCell2dToy::ToyHypothesis *hypo = new WireCell2dToy::ToyHypothesis(*mcell1,*mcell2);
-	hypos.push_back(hypo);
-	n = gRandom->Uniform(0.1,1.9);
-	if (n==0){
-	  hypo = new WireCell2dToy::ToyHypothesis(*mcell1,*mcell3);
+
+	if (other_cell.at(i).size()!=0){
+	  n = gRandom->Uniform(0,other_cell.at(i).size());
+	  MergeGeomCell *mcell3 = (MergeGeomCell*) other_cell.at(i).at(n);	
+	  WireCell2dToy::ToyHypothesis *hypo = new WireCell2dToy::ToyHypothesis(*mcell1,*mcell2);
 	  hypos.push_back(hypo);
+	  n = gRandom->Uniform(0.1,1.9);
+	  if (n==0){
+	    hypo = new WireCell2dToy::ToyHypothesis(*mcell1,*mcell3);
+	    hypos.push_back(hypo);
+	  }else{
+	    hypo = new WireCell2dToy::ToyHypothesis(*mcell2,*mcell3);
+	    hypos.push_back(hypo);
+	  }
 	}else{
-	  hypo = new WireCell2dToy::ToyHypothesis(*mcell2,*mcell3);
+	  WireCell2dToy::ToyHypothesis *hypo = new WireCell2dToy::ToyHypothesis(*mcell1,*mcell2);
 	  hypos.push_back(hypo);
 	}
       }else if (flag_cell.at(i) == 2){
@@ -705,25 +711,31 @@ void WireCell2dToy::SimpleBlobToyTiling::FormHypo(){
 	MergeGeomCell *mcell1 = (MergeGeomCell*) first_cell.at(i).at(n);
 	n = gRandom->Uniform(0,second_cell.at(i).size());
 	MergeGeomCell *mcell2 = (MergeGeomCell*) second_cell.at(i).at(n);
-	n = gRandom->Uniform(0,other_cell.at(i).size());
-	MergeGeomCell *mcell3 = (MergeGeomCell*) other_cell.at(i).at(n);
-	int nnn = 0;
-	while(mcell3 == mcell2 && nnn<20){
-	  n = gRandom->Uniform(0,second_cell.at(i).size());
-	  MergeGeomCell *mcell2 = (MergeGeomCell*) second_cell.at(i).at(n);
+	
+	if (other_cell.at(i).size()!=0){
 	  n = gRandom->Uniform(0,other_cell.at(i).size());
 	  MergeGeomCell *mcell3 = (MergeGeomCell*) other_cell.at(i).at(n);
-	  nnn ++;
-	}
-
-	WireCell2dToy::ToyHypothesis *hypo = new WireCell2dToy::ToyHypothesis(*mcell1,*mcell2);
-	hypos.push_back(hypo);
-	n = gRandom->Uniform(0.1,1.9);
-	if (n==0){
-	  hypo = new WireCell2dToy::ToyHypothesis(*mcell1,*mcell3);
+	  int nnn = 0;
+	  while(mcell3 == mcell2 && nnn<20){
+	    n = gRandom->Uniform(0,second_cell.at(i).size());
+	    MergeGeomCell *mcell2 = (MergeGeomCell*) second_cell.at(i).at(n);
+	    n = gRandom->Uniform(0,other_cell.at(i).size());
+	    MergeGeomCell *mcell3 = (MergeGeomCell*) other_cell.at(i).at(n);
+	    nnn ++;
+	  }
+	  
+	  WireCell2dToy::ToyHypothesis *hypo = new WireCell2dToy::ToyHypothesis(*mcell1,*mcell2);
 	  hypos.push_back(hypo);
+	  n = gRandom->Uniform(0.1,1.9);
+	  if (n==0){
+	    hypo = new WireCell2dToy::ToyHypothesis(*mcell1,*mcell3);
+	    hypos.push_back(hypo);
+	  }else{
+	    hypo = new WireCell2dToy::ToyHypothesis(*mcell2,*mcell3);
+	    hypos.push_back(hypo);
+	  }
 	}else{
-	  hypo = new WireCell2dToy::ToyHypothesis(*mcell2,*mcell3);
+	  WireCell2dToy::ToyHypothesis *hypo = new WireCell2dToy::ToyHypothesis(*mcell1,*mcell2);
 	  hypos.push_back(hypo);
 	}
       }else if (flag_cell.at(i) == 3){
@@ -732,73 +744,73 @@ void WireCell2dToy::SimpleBlobToyTiling::FormHypo(){
 	MergeGeomCell *mcell1 = (MergeGeomCell*) first_cell.at(i).at(n);
 	n = gRandom->Uniform(0,second_cell.at(i).size());
 	MergeGeomCell *mcell2 = (MergeGeomCell*) second_cell.at(i).at(n);
-	n = gRandom->Uniform(0,other_cell.at(i).size());
-	MergeGeomCell *mcell3 = (MergeGeomCell*) other_cell.at(i).at(n);
 
-	int nnn = 0;
-	while(mcell3 == mcell2 && nnn<20){
-	  n = gRandom->Uniform(0,second_cell.at(i).size());
-	  MergeGeomCell *mcell2 = (MergeGeomCell*) second_cell.at(i).at(n);
+	if (other_cell.at(i).size()!=0){
 	  n = gRandom->Uniform(0,other_cell.at(i).size());
 	  MergeGeomCell *mcell3 = (MergeGeomCell*) other_cell.at(i).at(n);
-	  nnn ++;
-	}
-	
-
-	MergeGeomCell *mcell4;
-	std::set<int> edge_wires;
-      	for (auto it = mcell1->ewires.begin(); it!=mcell1->ewires.end(); it++){
-	  edge_wires.insert(*it);
-	}
-	for (auto it = mcell2->ewires.begin(); it!=mcell2->ewires.end(); it++){
-	  edge_wires.insert(*it);
-	}
-	for (auto it = mcell3->ewires.begin(); it!=mcell3->ewires.end(); it++){
-	  edge_wires.insert(*it);
-	}
-	std::vector<int> not_found;
-	for (int j=0;j!=6;j++){
-	  if (edge_wires.find(j)==edge_wires.end()){
-	    not_found.push_back(j);
+	  
+	  int nnn = 0;
+	  while(mcell3 == mcell2 && nnn<20){
+	    n = gRandom->Uniform(0,second_cell.at(i).size());
+	    MergeGeomCell *mcell2 = (MergeGeomCell*) second_cell.at(i).at(n);
+	    n = gRandom->Uniform(0,other_cell.at(i).size());
+	    MergeGeomCell *mcell3 = (MergeGeomCell*) other_cell.at(i).at(n);
+	    nnn ++;
 	  }
-	}
 	
-	//need to improve later .. no random here
-	for (int j=1;j<other_cell.at(i).size();j++){
-	  mcell4 = (MergeGeomCell*) other_cell.at(i).at(j);
-	  int flag = 1;
-	  for (int k=0;k!=not_found.size();k++){
-	    auto it = mcell4->ewires.find(not_found.at(k));
-	    if (it == mcell4->ewires.end()){
-	      flag = 0;
-	      break;
+	  MergeGeomCell *mcell4;
+	  std::set<int> edge_wires;
+	  for (auto it = mcell1->ewires.begin(); it!=mcell1->ewires.end(); it++){
+	    edge_wires.insert(*it);
+	  }
+	  for (auto it = mcell2->ewires.begin(); it!=mcell2->ewires.end(); it++){
+	    edge_wires.insert(*it);
+	  }
+	  for (auto it = mcell3->ewires.begin(); it!=mcell3->ewires.end(); it++){
+	    edge_wires.insert(*it);
+	  }
+	  std::vector<int> not_found;
+	  for (int j=0;j!=6;j++){
+	    if (edge_wires.find(j)==edge_wires.end()){
+	      not_found.push_back(j);
 	    }
 	  }
-	  if (flag==1) break;
-	}
-	
-
-
-
-
-	n = gRandom->Uniform(0.1,2.9);
-	if (n==0){
+	  
+	  //need to improve later .. no random here
+	  for (int j=1;j<other_cell.at(i).size();j++){
+	    mcell4 = (MergeGeomCell*) other_cell.at(i).at(j);
+	    int flag = 1;
+	    for (int k=0;k!=not_found.size();k++){
+	      auto it = mcell4->ewires.find(not_found.at(k));
+	      if (it == mcell4->ewires.end()){
+		flag = 0;
+		break;
+	      }
+	    }
+	    if (flag==1) break;
+	  }
+	  
+	  n = gRandom->Uniform(0.1,2.9);
+	  if (n==0){
+	    WireCell2dToy::ToyHypothesis *hypo = new WireCell2dToy::ToyHypothesis(*mcell1,*mcell2);
+	    hypos.push_back(hypo);
+	    hypo = new WireCell2dToy::ToyHypothesis(*mcell3,*mcell4);
+	    hypos.push_back(hypo);
+	  }else if (n==1){
+	    WireCell2dToy::ToyHypothesis *hypo = new WireCell2dToy::ToyHypothesis(*mcell1,*mcell3);
+	    hypos.push_back(hypo);
+	    hypo = new WireCell2dToy::ToyHypothesis(*mcell2,*mcell4);
+	    hypos.push_back(hypo);
+	  }else if (n==2){
+	    WireCell2dToy::ToyHypothesis *hypo = new WireCell2dToy::ToyHypothesis(*mcell1,*mcell4);
+	    hypos.push_back(hypo);
+	    hypo = new WireCell2dToy::ToyHypothesis(*mcell2,*mcell3);
+	    hypos.push_back(hypo);
+	  }
+	}else{
 	  WireCell2dToy::ToyHypothesis *hypo = new WireCell2dToy::ToyHypothesis(*mcell1,*mcell2);
 	  hypos.push_back(hypo);
-	  hypo = new WireCell2dToy::ToyHypothesis(*mcell3,*mcell4);
-	  hypos.push_back(hypo);
-	}else if (n==1){
-	  WireCell2dToy::ToyHypothesis *hypo = new WireCell2dToy::ToyHypothesis(*mcell1,*mcell3);
-	  hypos.push_back(hypo);
-	  hypo = new WireCell2dToy::ToyHypothesis(*mcell2,*mcell4);
-	  hypos.push_back(hypo);
-	}else if (n==2){
-	  WireCell2dToy::ToyHypothesis *hypo = new WireCell2dToy::ToyHypothesis(*mcell1,*mcell4);
-	  hypos.push_back(hypo);
-	  hypo = new WireCell2dToy::ToyHypothesis(*mcell2,*mcell3);
-	  hypos.push_back(hypo);
 	}
-	
 	
       }
       cur_hypo.push_back(hypos);
