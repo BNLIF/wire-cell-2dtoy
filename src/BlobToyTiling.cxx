@@ -11,28 +11,28 @@ WireCell2dToy::BlobToyTiling::BlobToyTiling(WireCell2dToy::ToyTiling& toytiling,
   //all the single wires
   wirechargemap = mergetiling.wcmap();
 
-  GeomWireSet1 tmp_set;
+  GeomWireSet tmp_set;
   for (int i=0;i!= mergetiling.get_wire_u().size();i++){
-    tmp_set.insert(mergetiling.get_wire_u().at(i));
+    tmp_set.insert(*mergetiling.get_wire_u().at(i));
   }
   for (auto it = tmp_set.begin();it!=tmp_set.end();it++){
-    wire_u.push_back(*it) ;
+    wire_u.push_back(&*it) ;
   }
   tmp_set.clear();
   
   for (int i=0;i!= mergetiling.get_wire_v().size();i++){
-    tmp_set.insert(mergetiling.get_wire_v().at(i));
+    tmp_set.insert(*mergetiling.get_wire_v().at(i));
   }
   for (auto it = tmp_set.begin();it!=tmp_set.end();it++){
-    wire_v.push_back(*it) ;
+    wire_v.push_back(&*it) ;
   }
   tmp_set.clear();
   
   for (int i=0;i!= mergetiling.get_wire_w().size();i++){
-    tmp_set.insert(mergetiling.get_wire_w().at(i));
+    tmp_set.insert(*mergetiling.get_wire_w().at(i));
   }
   for (auto it = tmp_set.begin();it!=tmp_set.end();it++){
-    wire_w.push_back(*it) ;
+    wire_w.push_back(&*it) ;
   }
   tmp_set.clear();
   
@@ -256,4 +256,3 @@ WireCell2dToy::BlobToyTiling::~BlobToyTiling(){
 
 }
 
-ClassImp(WireCell2dToy::BlobToyTiling);

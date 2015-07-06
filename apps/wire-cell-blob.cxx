@@ -1,4 +1,6 @@
-#include "WireCellSst/GeomDataSource.h"
+#include "WireCellNav/GeomDataSource.h"
+#include "WireCellSst/GeomWireReader.h"
+
 //#include "WireCellSst/ToyuBooNEFrameDataSource.h"
 #include "WireCellSst/ToyuBooNESliceDataSource.h"
 #include "WireCell2dToy/ToyEventDisplay.h"
@@ -67,7 +69,10 @@ int main(int argc, char* argv[])
   }
   
   
-  WireCellSst::GeomDataSource gds(argv[1]);
+  WireCellSst::GeomWireReader reader(argv[1]);
+  WireCell::GeomDataSource gds;
+  gds.use_wires(reader);
+
   std::vector<double> ex = gds.extent();
   cerr << "Extent: "
        << " x:" << ex[0]/units::mm << " mm"

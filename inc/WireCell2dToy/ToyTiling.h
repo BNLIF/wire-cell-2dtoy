@@ -1,18 +1,17 @@
 #ifndef WIRECELL_TOYTILING_H
 #define WIRECELL_TOYTILING_H
 
-#include "WireCellTiling/TilingBase.h"
 #include "WireCellData/GeomWireCellMap.h"
 #include "WireCellNav/SliceDataSource.h"
 #include "WireCellSst/GeomDataSource.h"
 
-#include "Rtypes.h"
+#include "WireCellIface/ICellTiling.h"
 
 namespace WireCell2dToy {
     /**
      *  A bogus tiling class that doesn't do anything.
      */
-    class ToyTiling : public WireCell::TilingBase { 
+    class ToyTiling : public WireCell::ICellTiling { 
     public:
       ToyTiling();
 	// fixme: tiling should not know about slices data.
@@ -50,12 +49,6 @@ namespace WireCell2dToy {
       WireCell::GeomWireMap wiremap;
       
       WireCell::WireChargeMap wirechargemap;
-
-      //
-
-      
-      
-	ClassDef(ToyTiling,1);
 
     };
 

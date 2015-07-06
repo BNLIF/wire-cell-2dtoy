@@ -5,8 +5,6 @@
 #include "WireCell2dToy/ToyDepositor.h"
 #include "WireCellNav/GeomDataSource.h"
 
-#include "Rtypes.h"
-
 namespace WireCell2dToy{
   class TruthToyTiling : public WireCell2dToy::ToyTiling {
   public:
@@ -18,7 +16,6 @@ namespace WireCell2dToy{
   protected:
     WireCell::CellChargeMap cellchargemap;
 
-      ClassDef(TruthToyTiling,1);
   };
 }
 

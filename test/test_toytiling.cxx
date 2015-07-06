@@ -1,4 +1,5 @@
-#include "WireCellNav/ExampleGDS.h"
+#include "WireCellNav/ExampleWires.h"
+#include "WireCellNav/GeomDataSource.h"
 #include "WireCellNav/GenerativeFDS.h"
 #include "WireCellNav/PepperDepositor.h"
 #include "WireCellNav/SliceDataSource.h"
@@ -7,6 +8,8 @@
 
 #include "WireCellData/Units.h"
 #include "WireCellData/Slice.h"
+
+#include "WireCellIface/IWireGeometry.h"
 
 #include <iostream>
 #include <string>
@@ -31,9 +34,11 @@ int main () {
     const PepperDepositor::MinMax charge(1,100);
     PepperDepositor dep(drift_dim, trans_dim, trans_dim, charge, 5);
     
-    GeomDataSource* gds = make_example_gds(10*units::mm);
+    IWireGeometry* wires = make_example_wires(10*units::mm);
+    GeomDataSource gds;
+    gds.use_wires(*wires);
 
-    GenerativeFDS fds(dep, *gds);
+    GenerativeFDS fds(dep, gds);
 
     fds.jump(0);    
     SliceDataSource sds(fds);
@@ -42,7 +47,7 @@ int main () {
 
     const Slice& slice = sds.get();
     
-    WireCell2dToy::ToyTiling *toytiling = new WireCell2dToy::ToyTiling(slice,*gds);
+    WireCell2dToy::ToyTiling *toytiling = new WireCell2dToy::ToyTiling(slice,gds);
     
     GeomCellSelection allcell = toytiling->get_allcell();
     

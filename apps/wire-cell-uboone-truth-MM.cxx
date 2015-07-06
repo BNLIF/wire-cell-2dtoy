@@ -1,4 +1,5 @@
-#include "WireCellSst/GeomDataSource.h"
+#include "WireCellNav/GeomDataSource.h"
+#include "WireCellSst/GeomWireReader.h"
 #include "WireCellSst/ToyuBooNESliceDataSource.h"
 #include "WireCell2dToy/ToyEventDisplay.h"
 #include "WireCell2dToy/ToyTiling.h"
@@ -87,7 +88,9 @@ int main(int argc, char* argv[])
   gStyle->SetPalette(NCont,MyPalette);
   
   // Get GDS from geometry text file
-  WireCellSst::GeomDataSource gds(argv[1]);
+  WireCellSst::GeomWireReader reader(argv[1]);
+  WireCell::GeomDataSource gds;
+  gds.use_wires(reader);
   
   // Get FDS from ROOT file (Chao's data format for now)
   const char* root_file = argv[2];

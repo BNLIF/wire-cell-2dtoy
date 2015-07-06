@@ -26,8 +26,6 @@ namespace WireCell2dToy{
     WireCell::GeomWireWireMap wwmap; // wire to merged wire
     WireCell::GeomWireWiresMap wwsmap; // merged wire to wires
     
-
-   ClassDef(MergeToyTiling,1);
   };
 }
 #endif

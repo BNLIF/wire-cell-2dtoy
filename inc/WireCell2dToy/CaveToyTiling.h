@@ -39,13 +39,6 @@ namespace WireCell2dToy{
     WireCell::GeomCellSelection cell_to_remove;
     WireCell::GeomCellSelection cell_not_to_remove;
 
-
-    
-   
-
-   ClassDef(CaveToyTiling,1);
-   
-    
   };
 }
 #endif
