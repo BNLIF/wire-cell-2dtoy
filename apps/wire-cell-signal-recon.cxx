@@ -103,11 +103,11 @@ int main(int argc, char* argv[])
   
   WireCell2dToy::ToySignalGausFDS gaus_fds(simu_fds,gds,9600/4,5,1.647,1.539+1.647); // gaussian smearing for charge estimation
   gaus_fds.jump(1);
-  gaus_fds.Save();
+  //gaus_fds.Save();
 
    WireCell2dToy::ToySignalWienFDS wien_fds(simu_fds,gds,9600/4,5,1.647,1.539+1.647); // weiner smearing for hit identification
   wien_fds.jump(1);
-  wien_fds.Save();
+  //wien_fds.Save();
   
   
   GeomWireSelection wires_u = gds.wires_in_plane(WirePlaneType_t(0));
@@ -118,13 +118,13 @@ int main(int argc, char* argv[])
   int nwire_v = wires_v.size();
   int nwire_w = wires_w.size();
   
-  float threshold_u = 5.87819e+02 * 3.75;
-  float threshold_v = 8.36644e+02 * 3.75;
-  float threshold_w = 5.67974e+02 * 3.75;
+  float threshold_u = 5.87819e+02 * 4.0;
+  float threshold_v = 8.36644e+02 * 4.0;
+  float threshold_w = 5.67974e+02 * 4.0;
 
-  float threshold_ug = 410.543*2.5;
-  float threshold_vg = 631.936*2.5;
-  float threshold_wg = 315.031*2.5;
+  float threshold_ug = 755.96;
+  float threshold_vg = 822.81;
+  float threshold_wg = 510.84;
   
   // float threshold_u = 1000;
   // float threshold_v = 1000;
@@ -186,7 +186,7 @@ int main(int argc, char* argv[])
     WireCell::Slice slice = sds.get();
     //if ( slice.group().size() >0){
       
-      toytiling[i] = new WireCell2dToy::ToyTiling(slice,gds);
+    toytiling[i] = new WireCell2dToy::ToyTiling(slice,gds,0,0,0,threshold_ug,threshold_vg, threshold_wg);
       mergetiling[i] = new WireCell2dToy::MergeToyTiling(*toytiling[i],i);
 
       GeomCellSelection allcell = toytiling[i]->get_allcell();

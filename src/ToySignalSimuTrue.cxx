@@ -40,7 +40,7 @@ WireCell2dToy::ToySignalSimuTrueFDS::ToySignalSimuTrueFDS(WireCell::FrameDataSou
   
   //define filters
   filter_g = new TF1("filger_g","1./sqrt(2.*3.1415926)/[0]*exp(-x*x/2./[0]/[0])");
-  double par3[1] = {2./1.7};
+  double par3[1] = {2./2.2};
   filter_g->SetParameters(par3);
   
   hfilter_time_gaus =new TH1F("hfilter_time_gaus1","hfilter_time_gaus1",bins_per_frame,0,bins_per_frame);

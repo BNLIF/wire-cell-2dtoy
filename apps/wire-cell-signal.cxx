@@ -94,17 +94,17 @@ int main(int argc, char* argv[])
   const PointValueVector pvv = toydep.depositions(1);
   //WireCell::GenerativeFDS gfds(toydep,gds,9600,5,0.5*1.605723*units::millimeter); // 87 K at 0.5 kV/cm
   WireCell::GenerativeFDS gfds(toydep,gds,9600,5,0.5*1.60*units::millimeter); // 87 K at 0.5 kV/cm
-  WireCell2dToy::ToySignalSimuFDS simu_fds(gfds,gds,9600,5,1.647,1.539+1.647); // time offset among different planes for the time electrons travel among different planes
+  WireCell2dToy::ToySignalSimuFDS simu_fds(gfds,gds,9600,5,1.647,1.539+1.647,1); // time offset among different planes for the time electrons travel among different planes
   simu_fds.jump(1);
   //simu_fds.Save();
 
-  // WireCell2dToy::ToySignalSimuTrueFDS st_fds(gfds,gds,9600,5); //truth
-  // st_fds.jump(1);
-  // st_fds.Save();
+  WireCell2dToy::ToySignalSimuTrueFDS st_fds(gfds,gds,9600,5); //truth
+  st_fds.jump(1);
+  //st_fds.Save();
   
   WireCell2dToy::ToySignalGausFDS gaus_fds(simu_fds,gds,9600/4,5,1.647,1.539+1.647); // gaussian smearing for charge estimation
   gaus_fds.jump(1);
-  //gaus_fds.Save();
+  // gaus_fds.Save();
   
   WireCell2dToy::ToySignalWienFDS wien_fds(simu_fds,gds,9600/4,5,1.647,1.539+1.647); // weiner smearing for hit identification
   wien_fds.jump(1);
@@ -119,13 +119,13 @@ int main(int argc, char* argv[])
   int nwire_v = wires_v.size();
   int nwire_w = wires_w.size();
   
-  float threshold_u = 5.87819e+02 * 3.75;
-  float threshold_v = 8.36644e+02 * 3.75;
-  float threshold_w = 5.67974e+02 * 3.75;
+  float threshold_u = 5.87819e+02 * 4.0;
+  float threshold_v = 8.36644e+02 * 4.0;
+  float threshold_w = 5.67974e+02 * 4.0;
 
-  float threshold_ug = 410.543*2.5;
-  float threshold_vg = 631.936*2.5;
-  float threshold_wg = 315.031*2.5;
+  float threshold_ug = 755.96;
+  float threshold_vg = 822.81;
+  float threshold_wg = 510.84;
 
   // float threshold_u = 1000;
   // float threshold_v = 1000;
@@ -143,12 +143,12 @@ int main(int argc, char* argv[])
   WireCell2dToy::MergeToyTiling **mergetiling = new WireCell2dToy::MergeToyTiling*[2400];
   WireCell2dToy::TruthToyTiling **truthtiling = new WireCell2dToy::TruthToyTiling*[2400];
    
-  int start_num =459 + 800;
-  int end_num = 459 + 800;
+  int start_num =180 + 800;
+  int end_num = 180 + 800;
   for (int i=start_num;i!=end_num+1;i++){
     sds.jump(i);
     WireCell::Slice slice = sds.get();
-    toytiling[i] = new WireCell2dToy::ToyTiling(slice,gds);
+    toytiling[i] = new WireCell2dToy::ToyTiling(slice,gds,0,0,0,threshold_ug,threshold_vg, threshold_wg);
     mergetiling[i] = new WireCell2dToy::MergeToyTiling(*toytiling[i],i);
     
     GeomCellSelection allcell = toytiling[i]->get_allcell();
