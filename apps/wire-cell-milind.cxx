@@ -92,14 +92,15 @@ int main(int argc, char* argv[])
   // WireCellSst::ToyuBooNESliceDataSource sds(gfds,1500); //set threshold at 2000 electrons
 
   WireCell::ToyDepositor toydep(fds);
-  const PointValueVector pvv = toydep.depositions(1);
+  const PointValueVector pvv = toydep.depositions(eve_num);
   //WireCell::GenerativeFDS gfds(toydep,gds,9600,5,0.5*1.605723*units::millimeter); // 87 K at 0.5 kV/cm
   WireCell::GenerativeFDS gfds(toydep,gds,9600,100,0.5*1.60*units::millimeter); // 87 K at 0.5 kV/cm
   WireCell2dToy::ToySignalSimuFDS simu_fds(gfds,gds,9600,100,1.647,1.539+1.647,1); // time offset among different planes for the time electrons travel among different planes
   simu_fds.jump(eve_num);
   //simu_fds.Save();
 
-  WireCell2dToy::ToySignalSimuTrueFDS st_fds(gfds,gds,9600/4,100); //truth
+  //WireCell2dToy::ToySignalSimuTrueFDS st_fds(gfds,gds,9600/4,100); //truth
+  WireCell::GenerativeFDS st_fds(toydep,gds,9600/4,5,0.5*1.60*units::millimeter); // 87 K at 0.5 kV/cm
   st_fds.jump(eve_num);
   // st_fds.Save();
   

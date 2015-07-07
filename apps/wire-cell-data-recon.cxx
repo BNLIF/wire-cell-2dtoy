@@ -107,9 +107,10 @@ int main(int argc, char* argv[])
  
 
 
-  WireCell2dToy::ToySignalSimuTrueFDS st_fds(gfds,gds,9600/4,5); //truth
+  //WireCell2dToy::ToySignalSimuTrueFDS st_fds(gfds,gds,9600/4,5); //truth
+  WireCell::GenerativeFDS st_fds(toydep,gds,9600/4,5,0.5*1.60*units::millimeter); // 87 K at 0.5 kV/cm
   st_fds.jump(1);
-  st_fds.Save();
+  //st_fds.Save();
   
   
 
