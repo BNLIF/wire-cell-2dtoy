@@ -27,15 +27,17 @@ WireCell2dToy::ToySignalSimuTrueFDS::ToySignalSimuTrueFDS(WireCell::FrameDataSou
   hu = new TH1F*[nwire_u];
   hv = new TH1F*[nwire_v];
   hw = new TH1F*[nwire_w];
+
+  nbin = fds.Get_Bins_Per_Frame();
   
   for (int i=0;i!=nwire_u;i++){
-    hu[i] = new TH1F(Form("U5_%d",i),Form("U5_%d",i),bins_per_frame,0,bins_per_frame);
+    hu[i] = new TH1F(Form("U5_%d",i),Form("U5_%d",i),nbin,0,nbin);
   }
   for (int i=0;i!=nwire_v;i++){
-    hv[i] = new TH1F(Form("V5_%d",i),Form("V5_%d",i),bins_per_frame,0,bins_per_frame);
+    hv[i] = new TH1F(Form("V5_%d",i),Form("V5_%d",i),nbin,0,nbin);
   }
   for (int i=0;i!=nwire_w;i++){
-    hw[i] = new TH1F(Form("W5_%d",i),Form("W5_%d",i),bins_per_frame,0,bins_per_frame);
+    hw[i] = new TH1F(Form("W5_%d",i),Form("W5_%d",i),nbin,0,nbin);
   }
   
   //define filters
@@ -43,9 +45,9 @@ WireCell2dToy::ToySignalSimuTrueFDS::ToySignalSimuTrueFDS(WireCell::FrameDataSou
   double par3[1] = {2./2.2};
   filter_g->SetParameters(par3);
   
-  hfilter_time_gaus =new TH1F("hfilter_time_gaus1","hfilter_time_gaus1",bins_per_frame,0,bins_per_frame);
-  for (int i=0;i!=bins_per_frame;i++){
-    double xx = hfilter_time_gaus->GetBinCenter(i+1)/2.-bins_per_frame/4.;
+  hfilter_time_gaus =new TH1F("hfilter_time_gaus1","hfilter_time_gaus1",nbin,0,nbin);
+  for (int i=0;i!=nbin;i++){
+    double xx = hfilter_time_gaus->GetBinCenter(i+1)/2.-nbin/4.;
     hfilter_time_gaus->SetBinContent(i+1,filter_g->Eval(xx));
   }
   hfilter_time_gaus->Scale(1./hfilter_time_gaus->GetSum());
@@ -119,7 +121,7 @@ int WireCell2dToy::ToySignalSimuTrueFDS::jump(int frame_number){
     htemp->Reset();
     for (int j=0;j!=htemp->GetNbinsX();j++){
       int tt = j+1+3200;
-      if (tt <= bins_per_frame)
+      if (tt <= nbin)
 	htemp->SetBinContent(tt,vcharge.at(j));
     }
     
@@ -138,7 +140,7 @@ int WireCell2dToy::ToySignalSimuTrueFDS::jump(int frame_number){
   
   double value_re[9600]; // hack for now
   double value_im[9600];
-  int  n  = bins_per_frame;
+  int  n  = nbin;
   TVirtualFFT *ifft;
   TH1 *fb = 0;
   
@@ -147,17 +149,17 @@ int WireCell2dToy::ToySignalSimuTrueFDS::jump(int frame_number){
   for (int i=0;i!=nwire_v;i++){
     hm = hv[i]->FFT(hm,"MAG");
     hp = hv[i]->FFT(hp,"PH");
-    for (int j=0;j!=bins_per_frame;j++){
+    for (int j=0;j!=nbin;j++){
       double rho = hm->GetBinContent(j+1)*hfilter_gaus->GetBinContent(j+1);
       double phi = hp->GetBinContent(j+1);
-      value_re[j] = rho*cos(phi)/bins_per_frame;
-      value_im[j] = rho*sin(phi)/bins_per_frame;
+      value_re[j] = rho*cos(phi)/nbin;
+      value_im[j] = rho*sin(phi)/nbin;
     }
     ifft = TVirtualFFT::FFT(1,&n,"C2R M K");
     ifft->SetPointsComplex(value_re,value_im);
     ifft->Transform();
     fb = TH1::TransformHisto(ifft,fb,"Re");
-    for (int j=0;j!=bins_per_frame;j++){
+    for (int j=0;j!=nbin;j++){
       int content = fb->GetBinContent(j+1) ;
       hv[i]->SetBinContent(j+1,content);
     }
@@ -166,17 +168,17 @@ int WireCell2dToy::ToySignalSimuTrueFDS::jump(int frame_number){
   for (int i=0;i!=nwire_w;i++){
     hm = hw[i]->FFT(hm,"MAG");
     hp = hw[i]->FFT(hp,"PH");
-    for (int j=0;j!=bins_per_frame;j++){
+    for (int j=0;j!=nbin;j++){
       double rho = hm->GetBinContent(j+1)*hfilter_gaus->GetBinContent(j+1);
       double phi = hp->GetBinContent(j+1);
-      value_re[j] = rho*cos(phi)/bins_per_frame;
-      value_im[j] = rho*sin(phi)/bins_per_frame;
+      value_re[j] = rho*cos(phi)/nbin;
+      value_im[j] = rho*sin(phi)/nbin;
     }
     ifft = TVirtualFFT::FFT(1,&n,"C2R M K");
     ifft->SetPointsComplex(value_re,value_im);
     ifft->Transform();
     fb = TH1::TransformHisto(ifft,fb,"Re");
-    for (int j=0;j!=bins_per_frame;j++){
+    for (int j=0;j!=nbin;j++){
       int content = fb->GetBinContent(j+1) ;
       hw[i]->SetBinContent(j+1,content);
     }
@@ -186,17 +188,17 @@ int WireCell2dToy::ToySignalSimuTrueFDS::jump(int frame_number){
   for (int i=0;i!=nwire_u;i++){
     hm = hu[i]->FFT(hm,"MAG");
     hp = hu[i]->FFT(hp,"PH");
-    for (int j=0;j!=bins_per_frame;j++){
+    for (int j=0;j!=nbin;j++){
       double rho = hm->GetBinContent(j+1)*hfilter_gaus->GetBinContent(j+1);
       double phi = hp->GetBinContent(j+1);
-      value_re[j] = rho*cos(phi)/bins_per_frame;
-      value_im[j] = rho*sin(phi)/bins_per_frame;
+      value_re[j] = rho*cos(phi)/nbin;
+      value_im[j] = rho*sin(phi)/nbin;
     }
     ifft = TVirtualFFT::FFT(1,&n,"C2R M K");
     ifft->SetPointsComplex(value_re,value_im);
     ifft->Transform();
     fb = TH1::TransformHisto(ifft,fb,"Re");
-    for (int j=0;j!=bins_per_frame;j++){
+    for (int j=0;j!=nbin;j++){
       int content = fb->GetBinContent(j+1) ;
       hu[i]->SetBinContent(j+1,content);
     }
@@ -209,7 +211,7 @@ int WireCell2dToy::ToySignalSimuTrueFDS::jump(int frame_number){
 
   // fill the frame data ... 
   frame.clear();
-  
+  int scale = nbin/bins_per_frame;
   //U-plane
   for (int i=0;i!=nwire_u;i++){
     Trace t;
@@ -217,7 +219,10 @@ int WireCell2dToy::ToySignalSimuTrueFDS::jump(int frame_number){
     t.tbin = 0;
     t.charge.resize(bins_per_frame, 0.0);
     for (int j=0;j!=bins_per_frame;j++){
-      t.charge.at(j) = hu[i]->GetBinContent(j+1);
+      t.charge.at(j) = 0;
+      for (int k=0;k!=scale;k++){
+	t.charge.at(j) += hu[i]->GetBinContent(scale*j+k+1);
+      }
     }
     frame.traces.push_back(t);
   }
@@ -228,7 +233,10 @@ int WireCell2dToy::ToySignalSimuTrueFDS::jump(int frame_number){
     t.tbin = 0;
     t.charge.resize(bins_per_frame, 0.0);
     for (int j=0;j!=bins_per_frame;j++){
-      t.charge.at(j) = hv[i]->GetBinContent(j+1);
+      t.charge.at(j)=0;
+      for (int k=0;k!=scale;k++){
+	t.charge.at(j) += hv[i]->GetBinContent(scale*j+k+1);
+      }
     }
     frame.traces.push_back(t);
   }
@@ -239,7 +247,10 @@ int WireCell2dToy::ToySignalSimuTrueFDS::jump(int frame_number){
     t.tbin = 0;
     t.charge.resize(bins_per_frame, 0.0);
     for (int j=0;j!=bins_per_frame;j++){
-      t.charge.at(j) = hw[i]->GetBinContent(j+1);
+      t.charge.at(j) = 0;
+      for (int k=0;k!=scale;k++){
+	t.charge.at(j) += hw[i]->GetBinContent(scale*j+k+1);
+      }
     }
     frame.traces.push_back(t);
   }

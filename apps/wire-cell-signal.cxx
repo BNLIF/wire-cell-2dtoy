@@ -104,11 +104,11 @@ int main(int argc, char* argv[])
   
   WireCell2dToy::ToySignalGausFDS gaus_fds(simu_fds,gds,9600/4,5,1.647,1.539+1.647); // gaussian smearing for charge estimation
   gaus_fds.jump(1);
-  // gaus_fds.Save();
+  gaus_fds.Save();
   
   WireCell2dToy::ToySignalWienFDS wien_fds(simu_fds,gds,9600/4,5,1.647,1.539+1.647); // weiner smearing for hit identification
   wien_fds.jump(1);
-  //wien_fds.Save();
+  wien_fds.Save();
   
   
   GeomWireSelection wires_u = gds.wires_in_plane(WirePlaneType_t(0));
@@ -143,8 +143,8 @@ int main(int argc, char* argv[])
   WireCell2dToy::MergeToyTiling **mergetiling = new WireCell2dToy::MergeToyTiling*[2400];
   WireCell2dToy::TruthToyTiling **truthtiling = new WireCell2dToy::TruthToyTiling*[2400];
    
-  int start_num =758 + 800;
-  int end_num = 758 + 800;
+  int start_num =184 + 800;
+  int end_num = 184 + 800;
   for (int i=start_num;i!=end_num+1;i++){
     sds.jump(i);
     WireCell::Slice slice = sds.get();

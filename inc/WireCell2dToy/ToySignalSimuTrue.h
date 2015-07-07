@@ -27,6 +27,8 @@ namespace WireCell2dToy {
 
     int nwire_u, nwire_v, nwire_w;
 
+    int nbin;
+    
     TH1F **hu;
     TH1F **hv;
     TH1F **hw;
