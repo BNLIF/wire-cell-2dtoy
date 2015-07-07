@@ -82,7 +82,7 @@ int main(int argc, char* argv[])
   TTree* sst = dynamic_cast<TTree*>(tfile.Get(tpath));
   WireCellSst::ToyuBooNEFrameDataSource data_fds(*sst,gds);
   data_fds.jump(1);
-  data_fds.Save();
+  //data_fds.Save();
 
   int recon_threshold = 2000;
  
@@ -104,17 +104,17 @@ int main(int argc, char* argv[])
 
   WireCell2dToy::ToySignalSimuTrueFDS st_fds(gfds,gds,9600,1); //truth
   st_fds.jump(1);
-  st_fds.Save();
+  //st_fds.Save();
   
   
 
   WireCell2dToy::ToySignalGausFDS gaus_fds(data_fds,gds,9600/4,1,1.647,1.539+1.647); // gaussian smearing for charge estimation
   gaus_fds.jump(1);
-  gaus_fds.Save();
+  //gaus_fds.Save();
 
    WireCell2dToy::ToySignalWienFDS wien_fds(data_fds,gds,9600/4,1,1.647,1.539+1.647); // weiner smearing for hit identification
   wien_fds.jump(1);
-  wien_fds.Save();
+  //wien_fds.Save();
   
   
   GeomWireSelection wires_u = gds.wires_in_plane(WirePlaneType_t(0));
