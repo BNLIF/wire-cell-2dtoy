@@ -191,6 +191,10 @@ void WireCell2dToy::ToySignalPreFDS::Save(){
 
 int WireCell2dToy::ToySignalPreFDS::jump(int frame_number){
   // fill the frame data ... 
+  if (frame.index == frame_number) {
+    return frame_number;
+  }
+
   frame.clear();
 
   int n = bins_per_frame;

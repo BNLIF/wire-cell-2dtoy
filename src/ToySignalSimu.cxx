@@ -98,6 +98,10 @@ int WireCell2dToy::ToySignalSimuFDS::jump(int frame_number){
   //   hw[i]->Reset();
   // }
   
+  if (frame.index == frame_number) {
+    return frame_number;
+  }
+  
   fds.jump(frame_number);
   
    // start FFT to convolute with response function

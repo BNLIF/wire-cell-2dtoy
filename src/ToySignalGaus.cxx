@@ -118,6 +118,9 @@ void WireCell2dToy::ToySignalGausFDS::Save(){
 
 int WireCell2dToy::ToySignalGausFDS::jump(int frame_number){
   // fill the frame data ... 
+  if (frame.index == frame_number) {
+    return frame_number;
+  }
   frame.clear();
   int scale = nbin/bins_per_frame;
 
