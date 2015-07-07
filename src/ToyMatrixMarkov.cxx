@@ -162,6 +162,7 @@ WireCell2dToy::ToyMatrixMarkov::ToyMatrixMarkov(WireCell2dToy::ToyMatrix *toymat
 }
 
 WireCell2dToy::ToyMatrixMarkov::~ToyMatrixMarkov(){
+  delete toymatrixkalman;
 }
 
 void WireCell2dToy::ToyMatrixMarkov::make_guess(){
