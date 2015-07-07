@@ -25,22 +25,26 @@ WireCell2dToy::ToySignalWienFDS::ToySignalWienFDS(WireCell::FrameDataSource& fds
   nwire_v = wires_v.size();
   nwire_w = wires_w.size();
 
-  hu = new TH1F*[nwire_u];
-  hv = new TH1F*[nwire_v];
-  hw = new TH1F*[nwire_w];
-  
   nbin = fds.Get_Bins_Per_Frame();
+
+  // hu = new TH1F*[nwire_u];
+  // hv = new TH1F*[nwire_v];
+  // hw = new TH1F*[nwire_w];
   
-  for (int i=0;i!=nwire_u;i++){
-    hu[i] = new TH1F(Form("U4_%d",i),Form("U4_%d",i),nbin,0,nbin);
-  }
-  for (int i=0;i!=nwire_v;i++){
-    hv[i] = new TH1F(Form("V4_%d",i),Form("V4_%d",i),nbin,0,nbin);
-  }
-  for (int i=0;i!=nwire_w;i++){
-    hw[i] = new TH1F(Form("W4_%d",i),Form("W4_%d",i),nbin,0,nbin);
-  }
-  
+  // for (int i=0;i!=nwire_u;i++){
+  //   hu[i] = new TH1F(Form("U4_%d",i),Form("U4_%d",i),nbin,0,nbin);
+  // }
+  // for (int i=0;i!=nwire_v;i++){
+  //   hv[i] = new TH1F(Form("V4_%d",i),Form("V4_%d",i),nbin,0,nbin);
+  // }
+  // for (int i=0;i!=nwire_w;i++){
+  //   hw[i] = new TH1F(Form("W4_%d",i),Form("W4_%d",i),nbin,0,nbin);
+  // }
+
+  hu = new TH1F("U4","U4",nbin,0,nbin);
+  hv = new TH1F("V4","V4",nbin,0,nbin);
+  hw = new TH1F("V4","V4",nbin,0,nbin);
+
   #include "data.txt"
 
   gu = new TGraph(5000,xu,yu);
@@ -73,15 +77,15 @@ int WireCell2dToy::ToySignalWienFDS::size() const{
 
 void WireCell2dToy::ToySignalWienFDS::Save(){
   TFile *file = new TFile("temp_wien.root","RECREATE");
-  for (int i=0;i!=nwire_u;i++){
-    TH1F *huu = (TH1F*)hu[i]->Clone(Form("U1_%d",i));
-  }
-  for (int i=0;i!=nwire_v;i++){
-    TH1F *hvv = (TH1F*)hv[i]->Clone(Form("V1_%d",i));
-  }
-  for (int i=0;i!=nwire_w;i++){
-    TH1F *hww = (TH1F*)hw[i]->Clone(Form("W1_%d",i));
-  }
+  // for (int i=0;i!=nwire_u;i++){
+  //   TH1F *huu = (TH1F*)hu[i]->Clone(Form("U1_%d",i));
+  // }
+  // for (int i=0;i!=nwire_v;i++){
+  //   TH1F *hvv = (TH1F*)hv[i]->Clone(Form("V1_%d",i));
+  // }
+  // for (int i=0;i!=nwire_w;i++){
+  //   TH1F *hww = (TH1F*)hw[i]->Clone(Form("W1_%d",i));
+  // }
   file->Write();
   file->Close();
 }
@@ -150,22 +154,22 @@ int WireCell2dToy::ToySignalWienFDS::jump(int frame_number){
     TF1 *filter;
     
     if (chid < nwire_u){
-      htemp = hu[chid];
+      htemp = hu;
       hmr = hmr_u;
       hpr = hpr_u;
       filter = filter_u;
     }else if (chid < nwire_u + nwire_v){
-      htemp = hv[chid - nwire_u];
+      htemp = hv;
       hmr = hmr_v;
       hpr = hpr_v;
       filter = filter_v;
     }else{
-      htemp = hw[chid - nwire_u - nwire_v];
+      htemp = hw;
       hmr = hmr_w;
       hpr = hpr_w;
       filter = filter_w;
     }
-
+    htemp->Reset();
     for (int i = tbin;i!=tbin+nbins;i++){
       htemp->SetBinContent(i+1,trace.charge.at(i));
     }
@@ -253,17 +257,17 @@ int WireCell2dToy::ToySignalWienFDS::jump(int frame_number){
 }
 
 WireCell2dToy::ToySignalWienFDS::~ToySignalWienFDS(){
-  for (int i=0;i!=nwire_u;i++){
-    delete hu[i] ;
-  }
+  // for (int i=0;i!=nwire_u;i++){
+  //   delete hu[i] ;
+  // }
   delete hu;
-  for (int i=0;i!=nwire_v;i++){
-    delete hv[i] ;
-  }
+  // for (int i=0;i!=nwire_v;i++){
+  //   delete hv[i] ;
+  // }
   delete hv;
-  for (int i=0;i!=nwire_w;i++){
-    delete hw[i] ;
-  }
+  // for (int i=0;i!=nwire_w;i++){
+  //   delete hw[i] ;
+  // }
   delete hw;
 
   delete gu;

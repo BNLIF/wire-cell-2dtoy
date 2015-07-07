@@ -34,6 +34,12 @@ namespace WireCell2dToy {
     TH1F **hv;
     TH1F **hw;
 
+    /* TH1F *hu;  */
+    /* TH1F *hv;  */
+    /* TH1F *hw;   */
+    
+
+
     TGraph *gu, *gv, *gw;
 
     TH1F *hur, *hvr, *hwr;

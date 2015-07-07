@@ -96,14 +96,43 @@ int main(int argc, char* argv[])
   const PointValueVector pvv = toydep.depositions(eve_num);
   //WireCell::GenerativeFDS gfds(toydep,gds,9600,5,0.5*1.605723*units::millimeter); // 87 K at 0.5 kV/cm
   WireCell::GenerativeFDS gfds(toydep,gds,9600,max_events,0.5*1.60*units::millimeter); // 87 K at 0.5 kV/cm
+  
+  WireCell2dToy::ToySignalSimuTrueFDS st_fds(gfds,gds,9600/4,max_events,0); //truth
+  st_fds.jump(eve_num);
+  // st_fds.Save();
+  
+  GeomWireSelection wires_u = gds.wires_in_plane(WirePlaneType_t(0));
+  GeomWireSelection wires_v = gds.wires_in_plane(WirePlaneType_t(1));
+  GeomWireSelection wires_w = gds.wires_in_plane(WirePlaneType_t(2));
+
+  int nwire_u = wires_u.size();
+  int nwire_v = wires_v.size();
+  int nwire_w = wires_w.size();
+
+  float threshold_u = 5.87819e+02 * 4.0;
+  float threshold_v = 8.36644e+02 * 4.0;
+  float threshold_w = 5.67974e+02 * 4.0;
+
+  float threshold_ug = 755.96;
+  float threshold_vg = 822.81;
+  float threshold_wg = 510.84;
+
+  WireCellSst::ToyuBooNESliceDataSource sds_th(st_fds,st_fds,1, 
+					    1, 1, 
+					    threshold_ug, 
+					    threshold_vg, threshold_wg, 
+					    nwire_u, 
+					    nwire_v, nwire_w); 
+  // sds_th.jump(1207);
+  // WireCell::Slice slice_th = sds_th.get();
+  // cout << st_fds.size() << " " << slice_th.group().size() << endl;
+
+
+
+
   WireCell2dToy::ToySignalSimuFDS simu_fds(gfds,gds,9600,max_events,1.647,1.539+1.647,1); // time offset among different planes for the time electrons travel among different planes
   simu_fds.jump(eve_num);
   //simu_fds.Save();
-
-  //WireCell2dToy::ToySignalSimuTrueFDS st_fds(gfds,gds,9600/4,max_events); //truth
-  WireCell::GenerativeFDS st_fds(toydep,gds,9600/4,max_events,0.5*1.60*units::millimeter); // 87 K at 0.5 kV/cm
-  st_fds.jump(eve_num);
-  // st_fds.Save();
   
   WireCell2dToy::ToySignalGausFDS gaus_fds(simu_fds,gds,9600/4,max_events,1.647,1.539+1.647); // gaussian smearing for charge estimation
   gaus_fds.jump(eve_num);
@@ -114,21 +143,9 @@ int main(int argc, char* argv[])
   //wien_fds.Save();
   
   
-  GeomWireSelection wires_u = gds.wires_in_plane(WirePlaneType_t(0));
-  GeomWireSelection wires_v = gds.wires_in_plane(WirePlaneType_t(1));
-  GeomWireSelection wires_w = gds.wires_in_plane(WirePlaneType_t(2));
-
-  int nwire_u = wires_u.size();
-  int nwire_v = wires_v.size();
-  int nwire_w = wires_w.size();
   
-  float threshold_u = 5.87819e+02 * 4.0;
-  float threshold_v = 8.36644e+02 * 4.0;
-  float threshold_w = 5.67974e+02 * 4.0;
-
-  float threshold_ug = 755.96;
-  float threshold_vg = 822.81;
-  float threshold_wg = 510.84;
+  
+ 
   
   // float threshold_u = 1000;
   // float threshold_v = 1000;
@@ -142,12 +159,7 @@ int main(int argc, char* argv[])
 					    nwire_u, 
 					    nwire_v, nwire_w); 
 
-  WireCellSst::ToyuBooNESliceDataSource sds_th(st_fds,st_fds,1, 
-					    1, 1, 
-					    threshold_ug, 
-					    threshold_vg, threshold_wg, 
-					    nwire_u, 
-					    nwire_v, nwire_w); 
+  
 
   // const int N = 100000;
   // Double_t x[N],y[N],z[N];

@@ -9,10 +9,11 @@
 using namespace WireCell;
 
 WireCell2dToy::ToySignalSimuTrueFDS::ToySignalSimuTrueFDS(WireCell::FrameDataSource& fds, const WireCell::GeomDataSource& gds,
-						  int bins_per_frame1, int nframes_total)
+							  int bins_per_frame1, int nframes_total, int flag_smear)
   : fds(fds)
   , gds(gds)
   , max_frames(nframes_total)
+  , flag_smear(flag_smear)
 {  
   bins_per_frame = bins_per_frame1;
 
@@ -23,22 +24,26 @@ WireCell2dToy::ToySignalSimuTrueFDS::ToySignalSimuTrueFDS(WireCell::FrameDataSou
   nwire_u = wires_u.size();
   nwire_v = wires_v.size();
   nwire_w = wires_w.size();
-
-  hu = new TH1F*[nwire_u];
-  hv = new TH1F*[nwire_v];
-  hw = new TH1F*[nwire_w];
-
-  nbin = fds.Get_Bins_Per_Frame();
   
-  for (int i=0;i!=nwire_u;i++){
-    hu[i] = new TH1F(Form("U5_%d",i),Form("U5_%d",i),nbin,0,nbin);
-  }
-  for (int i=0;i!=nwire_v;i++){
-    hv[i] = new TH1F(Form("V5_%d",i),Form("V5_%d",i),nbin,0,nbin);
-  }
-  for (int i=0;i!=nwire_w;i++){
-    hw[i] = new TH1F(Form("W5_%d",i),Form("W5_%d",i),nbin,0,nbin);
-  }
+  nbin = fds.Get_Bins_Per_Frame();
+
+  // hu = new TH1F*[nwire_u];
+  // hv = new TH1F*[nwire_v];
+  // hw = new TH1F*[nwire_w];
+  
+  // for (int i=0;i!=nwire_u;i++){
+  //   hu[i] = new TH1F(Form("U5_%d",i),Form("U5_%d",i),nbin,0,nbin);
+  // }
+  // for (int i=0;i!=nwire_v;i++){
+  //   hv[i] = new TH1F(Form("V5_%d",i),Form("V5_%d",i),nbin,0,nbin);
+  // }
+  // for (int i=0;i!=nwire_w;i++){
+  //   hw[i] = new TH1F(Form("W5_%d",i),Form("W5_%d",i),nbin,0,nbin);
+  // }
+
+  hu = new TH1F("U5","U5",nbin,0,nbin);
+  hv = new TH1F("V5","V5",nbin,0,nbin);
+  hw = new TH1F("W5","W5",nbin,0,nbin);
   
   //define filters
   filter_g = new TF1("filger_g","1./sqrt(2.*3.1415926)/[0]*exp(-x*x/2./[0]/[0])");
@@ -62,30 +67,48 @@ int WireCell2dToy::ToySignalSimuTrueFDS::size() const{
 
 void WireCell2dToy::ToySignalSimuTrueFDS::Save(){
   TFile *file = new TFile("temp_true.root","RECREATE");
-  for (int i=0;i!=nwire_u;i++){
-    TH1F *huu = (TH1F*)hu[i]->Clone(Form("U1_%d",i));
-  }
-  for (int i=0;i!=nwire_v;i++){
-    TH1F *hvv = (TH1F*)hv[i]->Clone(Form("V1_%d",i));
-  }
-  for (int i=0;i!=nwire_w;i++){
-    TH1F *hww = (TH1F*)hw[i]->Clone(Form("W1_%d",i));
-  }
+  // for (int i=0;i!=nwire_u;i++){
+  //   TH1F *huu = (TH1F*)hu[i]->Clone(Form("U1_%d",i));
+  // }
+  // for (int i=0;i!=nwire_v;i++){
+  //   TH1F *hvv = (TH1F*)hv[i]->Clone(Form("V1_%d",i));
+  // }
+  // for (int i=0;i!=nwire_w;i++){
+  //   TH1F *hww = (TH1F*)hw[i]->Clone(Form("W1_%d",i));
+  // }
+
+    
   file->Write();
   file->Close();
 }
 
 int WireCell2dToy::ToySignalSimuTrueFDS::jump(int frame_number){
   // do simulation
-  for (int i=0;i!=nwire_u;i++){
-    hu[i]->Reset();
-  }
-  for (int i=0;i!=nwire_v;i++){
-    hv[i]->Reset();
-  }
-  for (int i=0;i!=nwire_w;i++){
-    hw[i]->Reset();
-  }
+  // for (int i=0;i!=nwire_u;i++){
+  //   hu[i]->Reset();
+  // }
+  // for (int i=0;i!=nwire_v;i++){
+  //   hv[i]->Reset();
+  // }
+  // for (int i=0;i!=nwire_w;i++){
+  //   hw[i]->Reset();
+  // }
+  
+  // start FFT to convolute with response function
+  TVirtualFFT::SetTransform(0);
+  TH1 *hm = 0;
+  TH1 *hp = 0;
+  TH1 *hmr = 0;
+  TH1 *hpr = 0;
+  
+  double value_re[9600]; // hack for now
+  double value_im[9600];
+  int  n  = nbin;
+  TVirtualFFT *ifft;
+  TH1 *fb = 0;
+
+  frame.clear();
+  int scale = nbin/bins_per_frame;
   
   fds.jump(frame_number);
   
@@ -101,12 +124,16 @@ int WireCell2dToy::ToySignalSimuTrueFDS::jump(int frame_number){
     
     TH1F *htemp;
     if (chid < nwire_u){
-      htemp = hu[chid];
+      //htemp = hu[chid];
+      htemp = hu;
     }else if (chid < nwire_u + nwire_v){
-      htemp = hv[chid - nwire_u];
+      //htemp = hv[chid - nwire_u];
+      htemp = hv;
     }else{
-      htemp = hw[chid - nwire_u - nwire_v];
+      //htemp = hw[chid - nwire_u - nwire_v];
+      htemp = hw;
     }
+    htemp->Reset();
     
     for (int j = 0; j!= nbins; j++){
       float charge = htemp->GetBinContent(tbin + 1 + j);
@@ -125,84 +152,89 @@ int WireCell2dToy::ToySignalSimuTrueFDS::jump(int frame_number){
 	htemp->SetBinContent(tt,vcharge.at(j));
     }
     
+    if (flag_smear == 1){
+      hm = htemp->FFT(hm,"MAG");
+      hp = htemp->FFT(hp,"PH");
+      for (int j=0;j!=nbin;j++){
+	double rho = hm->GetBinContent(j+1)*hfilter_gaus->GetBinContent(j+1);
+	double phi = hp->GetBinContent(j+1);
+	value_re[j] = rho*cos(phi)/nbin;
+	value_im[j] = rho*sin(phi)/nbin;
+      }
+      ifft = TVirtualFFT::FFT(1,&n,"C2R M K");
+      ifft->SetPointsComplex(value_re,value_im);
+      ifft->Transform();
+      fb = TH1::TransformHisto(ifft,fb,"Re");
+      for (int j=0;j!=nbin;j++){
+	int content = fb->GetBinContent(j+1) ;
+	htemp->SetBinContent(j+1,content);
+      }
+    }
+
+    Trace t;
+    t.chid = chid;
+    t.tbin = 0;
+    t.charge.resize(bins_per_frame, 0.0);
+    for (int j=0;j!=bins_per_frame;j++){
+      t.charge.at(j) = 0;
+      for (int k=0;k!=scale;k++){
+	t.charge.at(j) += htemp->GetBinContent(scale*j+k+1);
+      }
+    }
+    frame.traces.push_back(t);
+    
     //std::cout << chid << std::endl;
     // std::cout << nwire_u << " " << nwire_v << " " << nwire_w << std::endl;
   }
   
   
   
-  // start FFT to convolute with response function
-  TVirtualFFT::SetTransform(0);
-  TH1 *hm = 0;
-  TH1 *hp = 0;
-  TH1 *hmr = 0;
-  TH1 *hpr = 0;
-  
-  double value_re[9600]; // hack for now
-  double value_im[9600];
-  int  n  = nbin;
-  TVirtualFFT *ifft;
-  TH1 *fb = 0;
+ 
   
   
-  //U-plane first
-  for (int i=0;i!=nwire_v;i++){
-    hm = hv[i]->FFT(hm,"MAG");
-    hp = hv[i]->FFT(hp,"PH");
-    for (int j=0;j!=nbin;j++){
-      double rho = hm->GetBinContent(j+1)*hfilter_gaus->GetBinContent(j+1);
-      double phi = hp->GetBinContent(j+1);
-      value_re[j] = rho*cos(phi)/nbin;
-      value_im[j] = rho*sin(phi)/nbin;
-    }
-    ifft = TVirtualFFT::FFT(1,&n,"C2R M K");
-    ifft->SetPointsComplex(value_re,value_im);
-    ifft->Transform();
-    fb = TH1::TransformHisto(ifft,fb,"Re");
-    for (int j=0;j!=nbin;j++){
-      int content = fb->GetBinContent(j+1) ;
-      hv[i]->SetBinContent(j+1,content);
-    }
-  }
-  //V-plane
-  for (int i=0;i!=nwire_w;i++){
-    hm = hw[i]->FFT(hm,"MAG");
-    hp = hw[i]->FFT(hp,"PH");
-    for (int j=0;j!=nbin;j++){
-      double rho = hm->GetBinContent(j+1)*hfilter_gaus->GetBinContent(j+1);
-      double phi = hp->GetBinContent(j+1);
-      value_re[j] = rho*cos(phi)/nbin;
-      value_im[j] = rho*sin(phi)/nbin;
-    }
-    ifft = TVirtualFFT::FFT(1,&n,"C2R M K");
-    ifft->SetPointsComplex(value_re,value_im);
-    ifft->Transform();
-    fb = TH1::TransformHisto(ifft,fb,"Re");
-    for (int j=0;j!=nbin;j++){
-      int content = fb->GetBinContent(j+1) ;
-      hw[i]->SetBinContent(j+1,content);
-    }
-  }
+  // //U-plane first
+  // for (int i=0;i!=nwire_v;i++){
+    
+  // }
+  // //V-plane
+  // for (int i=0;i!=nwire_w;i++){
+  //   hm = hw[i]->FFT(hm,"MAG");
+  //   hp = hw[i]->FFT(hp,"PH");
+  //   for (int j=0;j!=nbin;j++){
+  //     double rho = hm->GetBinContent(j+1)*hfilter_gaus->GetBinContent(j+1);
+  //     double phi = hp->GetBinContent(j+1);
+  //     value_re[j] = rho*cos(phi)/nbin;
+  //     value_im[j] = rho*sin(phi)/nbin;
+  //   }
+  //   ifft = TVirtualFFT::FFT(1,&n,"C2R M K");
+  //   ifft->SetPointsComplex(value_re,value_im);
+  //   ifft->Transform();
+  //   fb = TH1::TransformHisto(ifft,fb,"Re");
+  //   for (int j=0;j!=nbin;j++){
+  //     int content = fb->GetBinContent(j+1) ;
+  //     hw[i]->SetBinContent(j+1,content);
+  //   }
+  // }
 
-  //W-plane
-  for (int i=0;i!=nwire_u;i++){
-    hm = hu[i]->FFT(hm,"MAG");
-    hp = hu[i]->FFT(hp,"PH");
-    for (int j=0;j!=nbin;j++){
-      double rho = hm->GetBinContent(j+1)*hfilter_gaus->GetBinContent(j+1);
-      double phi = hp->GetBinContent(j+1);
-      value_re[j] = rho*cos(phi)/nbin;
-      value_im[j] = rho*sin(phi)/nbin;
-    }
-    ifft = TVirtualFFT::FFT(1,&n,"C2R M K");
-    ifft->SetPointsComplex(value_re,value_im);
-    ifft->Transform();
-    fb = TH1::TransformHisto(ifft,fb,"Re");
-    for (int j=0;j!=nbin;j++){
-      int content = fb->GetBinContent(j+1) ;
-      hu[i]->SetBinContent(j+1,content);
-    }
-  }
+  // //W-plane
+  // for (int i=0;i!=nwire_u;i++){
+  //   hm = hu[i]->FFT(hm,"MAG");
+  //   hp = hu[i]->FFT(hp,"PH");
+  //   for (int j=0;j!=nbin;j++){
+  //     double rho = hm->GetBinContent(j+1)*hfilter_gaus->GetBinContent(j+1);
+  //     double phi = hp->GetBinContent(j+1);
+  //     value_re[j] = rho*cos(phi)/nbin;
+  //     value_im[j] = rho*sin(phi)/nbin;
+  //   }
+  //   ifft = TVirtualFFT::FFT(1,&n,"C2R M K");
+  //   ifft->SetPointsComplex(value_re,value_im);
+  //   ifft->Transform();
+  //   fb = TH1::TransformHisto(ifft,fb,"Re");
+  //   for (int j=0;j!=nbin;j++){
+  //     int content = fb->GetBinContent(j+1) ;
+  //     hu[i]->SetBinContent(j+1,content);
+  //   }
+  // }
 
 
 
@@ -210,50 +242,39 @@ int WireCell2dToy::ToySignalSimuTrueFDS::jump(int frame_number){
 
 
   // fill the frame data ... 
-  frame.clear();
-  int scale = nbin/bins_per_frame;
-  //U-plane
-  for (int i=0;i!=nwire_u;i++){
-    Trace t;
-    t.chid = i;
-    t.tbin = 0;
-    t.charge.resize(bins_per_frame, 0.0);
-    for (int j=0;j!=bins_per_frame;j++){
-      t.charge.at(j) = 0;
-      for (int k=0;k!=scale;k++){
-	t.charge.at(j) += hu[i]->GetBinContent(scale*j+k+1);
-      }
-    }
-    frame.traces.push_back(t);
-  }
-  //V-plane
-  for (int i=0;i!=nwire_v;i++){
-    Trace t;
-    t.chid = i+nwire_u;
-    t.tbin = 0;
-    t.charge.resize(bins_per_frame, 0.0);
-    for (int j=0;j!=bins_per_frame;j++){
-      t.charge.at(j)=0;
-      for (int k=0;k!=scale;k++){
-	t.charge.at(j) += hv[i]->GetBinContent(scale*j+k+1);
-      }
-    }
-    frame.traces.push_back(t);
-  }
-  //W-plane
-  for (int i=0;i!=nwire_w;i++){
-    Trace t;
-    t.chid = i + nwire_u + nwire_v;
-    t.tbin = 0;
-    t.charge.resize(bins_per_frame, 0.0);
-    for (int j=0;j!=bins_per_frame;j++){
-      t.charge.at(j) = 0;
-      for (int k=0;k!=scale;k++){
-	t.charge.at(j) += hw[i]->GetBinContent(scale*j+k+1);
-      }
-    }
-    frame.traces.push_back(t);
-  }
+  
+  // //U-plane
+  // for (int i=0;i!=nwire_u;i++){
+    
+  // }
+  // //V-plane
+  // for (int i=0;i!=nwire_v;i++){
+  //   Trace t;
+  //   t.chid = i+nwire_u;
+  //   t.tbin = 0;
+  //   t.charge.resize(bins_per_frame, 0.0);
+  //   for (int j=0;j!=bins_per_frame;j++){
+  //     t.charge.at(j)=0;
+  //     for (int k=0;k!=scale;k++){
+  // 	t.charge.at(j) += hv[i]->GetBinContent(scale*j+k+1);
+  //     }
+  //   }
+  //   frame.traces.push_back(t);
+  // }
+  // //W-plane
+  // for (int i=0;i!=nwire_w;i++){
+  //   Trace t;
+  //   t.chid = i + nwire_u + nwire_v;
+  //   t.tbin = 0;
+  //   t.charge.resize(bins_per_frame, 0.0);
+  //   for (int j=0;j!=bins_per_frame;j++){
+  //     t.charge.at(j) = 0;
+  //     for (int k=0;k!=scale;k++){
+  // 	t.charge.at(j) += hw[i]->GetBinContent(scale*j+k+1);
+  //     }
+  //   }
+  //   frame.traces.push_back(t);
+  // }
   
   
   frame.index = frame_number;
@@ -261,17 +282,17 @@ int WireCell2dToy::ToySignalSimuTrueFDS::jump(int frame_number){
 }
 
 WireCell2dToy::ToySignalSimuTrueFDS::~ToySignalSimuTrueFDS(){
-  for (int i=0;i!=nwire_u;i++){
-    delete hu[i] ;
-  }
+  // for (int i=0;i!=nwire_u;i++){
+  //   delete hu[i] ;
+  // }
   delete hu;
-  for (int i=0;i!=nwire_v;i++){
-    delete hv[i] ;
-  }
+  // for (int i=0;i!=nwire_v;i++){
+  //   delete hv[i] ;
+  // }
   delete hv;
-  for (int i=0;i!=nwire_w;i++){
-    delete hw[i] ;
-  }
+  // for (int i=0;i!=nwire_w;i++){
+  //   delete hw[i] ;
+  // }
   delete hw;
 
   delete filter_g;
