@@ -88,6 +88,8 @@ int main(int argc, char* argv[])
  
   WireCell::ToyDepositor toydep(fds);
   const PointValueVector pvv = toydep.depositions(1);
+
+  // 
   
   //  WireCell::GenerativeFDS gfds(toydep,gds,2400,5,2.0*1.6*units::millimeter);
   // gfds.jump(1);
@@ -97,22 +99,25 @@ int main(int argc, char* argv[])
   // WireCell::ToyDepositor toydep(fds);
   // const PointValueVector pvv = toydep.depositions(1);
   //WireCell::GenerativeFDS gfds(toydep,gds,9600,1,0.5*1.605723*units::millimeter); // 87 K at 0.5 kV/cm
-  WireCell::GenerativeFDS gfds(toydep,gds,9600,1,0.5*1.60*units::millimeter); // 87 K at 0.5 kV/cm
-  WireCell2dToy::ToySignalSimuFDS simu_fds(gfds,gds,9600,5,1.647,1.539+1.647,1); // time offset among different planes for the time electrons travel among different planes
-  simu_fds.jump(1);
-  // simu_fds.Save();
+  WireCell::GenerativeFDS gfds(toydep,gds,9600,5,0.5*1.60*units::millimeter); // 87 K at 0.5 kV/cm
+  //WireCell2dToy::ToySignalSimuFDS simu_fds(gfds,gds,9600,1,1.647,1.539+1.647,1); // time offset among different planes for the time electrons travel among different planes
+  //simu_fds.jump(1);
+  //simu_fds.Save();
 
-  WireCell2dToy::ToySignalSimuTrueFDS st_fds(gfds,gds,9600/4,1); //truth
+ 
+
+
+  WireCell2dToy::ToySignalSimuTrueFDS st_fds(gfds,gds,9600/4,5); //truth
   st_fds.jump(1);
-  //st_fds.Save();
+  st_fds.Save();
   
   
 
-  WireCell2dToy::ToySignalGausFDS gaus_fds(data_fds,gds,9600/4,1,1.647,1.539+1.647); // gaussian smearing for charge estimation
+  WireCell2dToy::ToySignalGausFDS gaus_fds(data_fds,gds,9600/4,5,1.647,1.539+1.647); // gaussian smearing for charge estimation
   gaus_fds.jump(1);
   //gaus_fds.Save();
 
-   WireCell2dToy::ToySignalWienFDS wien_fds(data_fds,gds,9600/4,1,1.647,1.539+1.647); // weiner smearing for hit identification
+   WireCell2dToy::ToySignalWienFDS wien_fds(data_fds,gds,9600/4,5,1.647,1.539+1.647); // weiner smearing for hit identification
   wien_fds.jump(1);
   //wien_fds.Save();
   
@@ -190,6 +195,9 @@ int main(int argc, char* argv[])
   int start_num = 0 ;
   int end_num = sds.size()-1;
 
+  // int start_num = 1170 ;
+  // int end_num = 1170 ;
+
   // int start_num =1117;
   // int end_num = 1119;
   // int end_num = sds.size()-1;
@@ -232,6 +240,9 @@ int main(int argc, char* argv[])
 
     toytiling_th[i] = new WireCell2dToy::ToyTiling(slice_th,gds,0,0,0,threshold_ug,threshold_vg, threshold_wg);
     truthtiling_th[i] = new WireCell2dToy::TruthToyTiling(*toytiling_th[i],pvv,i,gds,800);
+
+    // cout << slice_th.group().size() << " " << toytiling_th[i] ->get_allcell().size() << " " 
+    // 	 << toytiling_th[i] ->get_allwire().size() << " " << truthtiling_th[i]->ccmap().size() << endl;
 
       // GeomCellSelection calmcell;
       // for (int j=0;j!=allmcell.size();j++){

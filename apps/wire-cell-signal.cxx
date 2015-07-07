@@ -98,17 +98,17 @@ int main(int argc, char* argv[])
   simu_fds.jump(1);
   //simu_fds.Save();
 
-  WireCell2dToy::ToySignalSimuTrueFDS st_fds(gfds,gds,9600,5); //truth
+  WireCell2dToy::ToySignalSimuTrueFDS st_fds(gfds,gds,9600/4,5); //truth
   st_fds.jump(1);
   //st_fds.Save();
   
   WireCell2dToy::ToySignalGausFDS gaus_fds(simu_fds,gds,9600/4,5,1.647,1.539+1.647); // gaussian smearing for charge estimation
   gaus_fds.jump(1);
-  gaus_fds.Save();
+  //gaus_fds.Save();
   
   WireCell2dToy::ToySignalWienFDS wien_fds(simu_fds,gds,9600/4,5,1.647,1.539+1.647); // weiner smearing for hit identification
   wien_fds.jump(1);
-  wien_fds.Save();
+  //wien_fds.Save();
   
   
   GeomWireSelection wires_u = gds.wires_in_plane(WirePlaneType_t(0));
@@ -139,6 +139,14 @@ int main(int argc, char* argv[])
 					    nwire_u, 
 					    nwire_v, nwire_w); 
   
+  WireCellSst::ToyuBooNESliceDataSource sds_th(st_fds,st_fds,1, 
+					    1, 1, 
+					    threshold_ug, 
+					    threshold_vg, threshold_wg, 
+					    nwire_u, 
+					    nwire_v, nwire_w); 
+
+
   WireCell2dToy::ToyTiling **toytiling = new WireCell2dToy::ToyTiling*[2400];
   WireCell2dToy::MergeToyTiling **mergetiling = new WireCell2dToy::MergeToyTiling*[2400];
   WireCell2dToy::TruthToyTiling **truthtiling = new WireCell2dToy::TruthToyTiling*[2400];
@@ -147,7 +155,10 @@ int main(int argc, char* argv[])
   int end_num = 184 + 800;
   for (int i=start_num;i!=end_num+1;i++){
     sds.jump(i);
+    sds_th.jump(i);
     WireCell::Slice slice = sds.get();
+    WireCell::Slice slice_th = sds_th.get();
+    
     toytiling[i] = new WireCell2dToy::ToyTiling(slice,gds,0,0,0,threshold_ug,threshold_vg, threshold_wg);
     mergetiling[i] = new WireCell2dToy::MergeToyTiling(*toytiling[i],i);
     
@@ -155,7 +166,7 @@ int main(int argc, char* argv[])
     GeomWireSelection allwire = toytiling[i]->get_allwire();
     GeomCellSelection allmcell = mergetiling[i]->get_allcell();
     GeomWireSelection allmwire = mergetiling[i]->get_allwire();
-    cout << i << " " << allmcell.size() << " " << allmwire.size() << endl;
+    cout << i << " " << allmcell.size() << " " << allmwire.size() << " " << slice_th.group().size() << endl;
     truthtiling[i] = new WireCell2dToy::TruthToyTiling(*toytiling[i],pvv,i,gds,800);
     
     // for (int j=0;j!=allmwire.size();j++){
