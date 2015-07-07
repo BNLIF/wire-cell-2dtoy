@@ -94,8 +94,7 @@ int main(int argc, char* argv[])
 
   WireCell::ToyDepositor toydep(fds);
   const PointValueVector pvv = toydep.depositions(eve_num);
-  delete fds;
-  tfile->Close();
+  
 
 
   //WireCell::GenerativeFDS gfds(toydep,gds,9600,max_events,0.5*1.605723*units::millimeter); // 87 K at 0.5 kV/cm
@@ -174,8 +173,8 @@ int main(int argc, char* argv[])
   WireCell2dToy::SimpleBlobToyTiling **blobtiling = new WireCell2dToy::SimpleBlobToyTiling*[2400];
 
   WireCell2dToy::ToyMatrix **toymatrix = new WireCell2dToy::ToyMatrix*[2400];
-  WireCell2dToy::ToyMatrixIterate **toymatrix_it = new WireCell2dToy::ToyMatrixIterate*[2400];
-  WireCell2dToy::ToyMatrixMarkov **toymatrix_markov = new WireCell2dToy::ToyMatrixMarkov*[2400];
+  // WireCell2dToy::ToyMatrixIterate **toymatrix_it = new WireCell2dToy::ToyMatrixIterate*[2400];
+  // WireCell2dToy::ToyMatrixMarkov **toymatrix_markov = new WireCell2dToy::ToyMatrixMarkov*[2400];
   
   //save truth ...
   WireCell2dToy::ToyTiling **toytiling_th = new WireCell2dToy::ToyTiling*[2400];
@@ -188,6 +187,10 @@ int main(int argc, char* argv[])
   GeomClusterSet cluster_set, cluster_delset;
   
   int ncount_mcell = 0;
+
+  delete fds;
+  tfile->Close();
+
 
   int start_num = 0 ;
   int end_num = sds.size()-1;
@@ -228,7 +231,7 @@ int main(int argc, char* argv[])
       truthtiling[i] = new WireCell2dToy::TruthToyTiling(*toytiling[i],pvv,i,gds,800);
       toymatrix[i] = new WireCell2dToy::ToyMatrix(*toytiling[i],*mergetiling[i]);
       if (toymatrix[i]->Get_Solve_Flag()==0)
-      	toymatrix_it[i] = new WireCell2dToy::ToyMatrixIterate(*toymatrix[i]);
+      WireCell2dToy::ToyMatrixIterate toymatrix_it(*toymatrix[i]);
       
       cout << "chi2: " << toymatrix[i]->Get_Chi2() << endl;
       cout << "NDF: " << toymatrix[i]->Get_ndf() << endl;
@@ -360,7 +363,7 @@ int main(int argc, char* argv[])
     for (int i=first_solve+1;i<=end_num-1;i++){
       if (toymatrix[i]->Get_Solve_Flag()==0){
   	GeomCellSelection allmcell = mergetiling[i]->get_allcell();
-  	toymatrix_markov[i] = new WireCell2dToy::ToyMatrixMarkov(*toymatrix[i-1],*toymatrix[i],*toymatrix[i+1],*mergetiling[i-1],*mergetiling[i],*mergetiling[i+1],&allmcell);
+  	WireCell2dToy::ToyMatrixMarkov toymatrix_markov(*toymatrix[i-1],*toymatrix[i],*toymatrix[i+1],*mergetiling[i-1],*mergetiling[i],*mergetiling[i+1],&allmcell);
   	CellChargeMap ccmap = truthtiling[i]->ccmap();
   	if (toymatrix[i]->Get_Solve_Flag()!=0)
   	  toymetric.Add(allmcell,*toymatrix[i],ccmap);
@@ -375,7 +378,7 @@ int main(int argc, char* argv[])
      
     if (toymatrix[end_num]->Get_Solve_Flag()==0){
       GeomCellSelection allmcell = mergetiling[end_num]->get_allcell();
-      toymatrix_markov[end_num] = new WireCell2dToy::ToyMatrixMarkov(*toymatrix[end_num-1],*toymatrix[end_num],*toymatrix[end_num-1],*mergetiling[end_num-1],*mergetiling[end_num],*mergetiling[end_num-1],&allmcell);
+      WireCell2dToy::ToyMatrixMarkov toymatrix_markov(*toymatrix[end_num-1],*toymatrix[end_num],*toymatrix[end_num-1],*mergetiling[end_num-1],*mergetiling[end_num],*mergetiling[end_num-1],&allmcell);
 
       
       CellChargeMap ccmap = truthtiling[end_num]->ccmap();
@@ -391,7 +394,7 @@ int main(int argc, char* argv[])
      for (int i=first_solve-1;i>=start_num+1;i--){
       if (toymatrix[i]->Get_Solve_Flag()==0){
   	GeomCellSelection allmcell = mergetiling[i]->get_allcell();
-  	toymatrix_markov[i] = new WireCell2dToy::ToyMatrixMarkov(*toymatrix[i-1],*toymatrix[i],*toymatrix[i+1],*mergetiling[i-1],*mergetiling[i],*mergetiling[i+1],&allmcell);
+  	WireCell2dToy::ToyMatrixMarkov toymatrix_markov(*toymatrix[i-1],*toymatrix[i],*toymatrix[i+1],*mergetiling[i-1],*mergetiling[i],*mergetiling[i+1],&allmcell);
   	
   	CellChargeMap ccmap = truthtiling[i]->ccmap();
   	if (toymatrix[i]->Get_Solve_Flag()!=0)
@@ -405,7 +408,7 @@ int main(int argc, char* argv[])
      
     if (toymatrix[start_num]->Get_Solve_Flag()==0){
       GeomCellSelection allmcell = mergetiling[start_num]->get_allcell();
-      toymatrix_markov[start_num] = new WireCell2dToy::ToyMatrixMarkov(*toymatrix[start_num+1],*toymatrix[start_num],*toymatrix[start_num+1],*mergetiling[start_num+1],*mergetiling[start_num],*mergetiling[start_num+1],&allmcell);
+      WireCell2dToy::ToyMatrixMarkov toymatrix_markov(*toymatrix[start_num+1],*toymatrix[start_num],*toymatrix[start_num+1],*mergetiling[start_num+1],*mergetiling[start_num],*mergetiling[start_num+1],&allmcell);
 
       
       CellChargeMap ccmap = truthtiling[start_num]->ccmap();

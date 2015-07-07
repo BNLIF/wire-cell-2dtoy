@@ -16,21 +16,21 @@ const PointValueVector& ToyDepositor::depositions(int frame_number) const{
     }
   }
 
-  // WireCell::SimDataSource* sim = dynamic_cast<WireCell::SimDataSource*>(fds);
-  // WireCell::SimTruthSelection sts = sim->truth();
+  WireCell::SimDataSource* sim = dynamic_cast<WireCell::SimDataSource*>(fds);
+  WireCell::SimTruthSelection sts = sim->truth();
   
 
   mchits.clear();
 
-  // for (size_t itruth = 0; itruth < sts.size(); ++itruth) {
-  //    const WireCell::SimTruth* st = sts[itruth];
-  //    PointValue p;
-  //    p.first.x = st->x() * units::cm;
-  //    p.first.y = st->y() * units::cm;
-  //    p.first.z = st->z() * units::cm;
-  //    p.second = st->charge()/3.;
-  //    mchits.push_back(p);
-  // }
+  for (size_t itruth = 0; itruth < sts.size(); ++itruth) {
+     const WireCell::SimTruth* st = sts[itruth];
+     PointValue p;
+     p.first.x = st->x() * units::cm;
+     p.first.y = st->y() * units::cm;
+     p.first.z = st->z() * units::cm;
+     p.second = st->charge()/3.;
+     mchits.push_back(p);
+  }
 
   return mchits;
 }
