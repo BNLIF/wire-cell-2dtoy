@@ -43,7 +43,7 @@ WireCell2dToy::ToySignalWienFDS::ToySignalWienFDS(WireCell::FrameDataSource& fds
 
   hu = new TH1F("U4","U4",nbin,0,nbin);
   hv = new TH1F("V4","V4",nbin,0,nbin);
-  hw = new TH1F("V4","V4",nbin,0,nbin);
+  hw = new TH1F("W4","W4",nbin,0,nbin);
 
   #include "data.txt"
 
@@ -103,13 +103,13 @@ int WireCell2dToy::ToySignalWienFDS::jump(int frame_number){
   TVirtualFFT::SetTransform(0);
   
   
-  hmr_u = hur->FFT(hmr_u,"MAG");
-  hmr_v = hvr->FFT(hmr_v,"MAG");
-  hmr_w = hwr->FFT(hmr_w,"MAG");
+  hmr_u = hur->FFT(0,"MAG");
+  hmr_v = hvr->FFT(0,"MAG");
+  hmr_w = hwr->FFT(0,"MAG");
 
-  hpr_u = hur->FFT(hpr_u,"PH");
-  hpr_v = hvr->FFT(hpr_v,"PH");
-  hpr_w = hwr->FFT(hpr_w,"PH");
+  hpr_u = hur->FFT(0,"PH");
+  hpr_v = hvr->FFT(0,"PH");
+  hpr_w = hwr->FFT(0,"PH");
     
   TH1 *hm = 0;
   TH1 *hp = 0;
@@ -174,8 +174,8 @@ int WireCell2dToy::ToySignalWienFDS::jump(int frame_number){
       htemp->SetBinContent(i+1,trace.charge.at(i));
     }
         
-    hm = htemp->FFT(hm,"MAG");
-    hp = htemp->FFT(hp,"PH");
+    hm = htemp->FFT(0,"MAG");
+    hp = htemp->FFT(0,"PH");
     
     for (int i=0;i!=nbin;i++){
       
@@ -197,13 +197,17 @@ int WireCell2dToy::ToySignalWienFDS::jump(int frame_number){
     ifft = TVirtualFFT::FFT(1,&n,"C2R M K");
     ifft->SetPointsComplex(value_re,value_im);
     ifft->Transform();
-    fb = TH1::TransformHisto(ifft,fb,"Re");
+    fb = TH1::TransformHisto(ifft,0,"Re");
 
     for (int i=0;i!=nbin;i++){
       htemp->SetBinContent(i+1,fb->GetBinContent(i+1)/( 7.8*4096./2000.));
     }
 
-    
+    delete hm;
+    delete hp;
+    delete ifft;
+    delete fb;
+   
 
     //correct baseline 
     double max = htemp->GetMaximum();
@@ -246,11 +250,19 @@ int WireCell2dToy::ToySignalWienFDS::jump(int frame_number){
     }
     frame.traces.push_back(t);
 
+    
   }
  
   delete filter_u;
   delete filter_v;
   delete filter_w;
+
+  delete hmr_u;
+  delete hmr_v;
+  delete hmr_w;
+  delete hpr_u;
+  delete hpr_v;
+  delete hpr_w;
   
   frame.index = frame_number;
   return frame.index;

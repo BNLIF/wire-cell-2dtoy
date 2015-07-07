@@ -57,7 +57,7 @@ WireCell2dToy::ToySignalSimuTrueFDS::ToySignalSimuTrueFDS(WireCell::FrameDataSou
   }
   hfilter_time_gaus->Scale(1./hfilter_time_gaus->GetSum());
   hfilter_gaus = 0;
-  hfilter_gaus = hfilter_time_gaus->FFT(hfilter_gaus,"MAG");
+  hfilter_gaus = hfilter_time_gaus->FFT(0,"MAG");
   
 }
 
@@ -98,8 +98,8 @@ int WireCell2dToy::ToySignalSimuTrueFDS::jump(int frame_number){
   TVirtualFFT::SetTransform(0);
   TH1 *hm = 0;
   TH1 *hp = 0;
-  TH1 *hmr = 0;
-  TH1 *hpr = 0;
+  //  TH1 *hmr = 0;
+  //TH1 *hpr = 0;
   
   double value_re[9600]; // hack for now
   double value_im[9600];
@@ -153,8 +153,8 @@ int WireCell2dToy::ToySignalSimuTrueFDS::jump(int frame_number){
     }
     
     if (flag_smear == 1){
-      hm = htemp->FFT(hm,"MAG");
-      hp = htemp->FFT(hp,"PH");
+      hm = htemp->FFT(0,"MAG");
+      hp = htemp->FFT(0,"PH");
       for (int j=0;j!=nbin;j++){
 	double rho = hm->GetBinContent(j+1)*hfilter_gaus->GetBinContent(j+1);
 	double phi = hp->GetBinContent(j+1);
@@ -164,11 +164,16 @@ int WireCell2dToy::ToySignalSimuTrueFDS::jump(int frame_number){
       ifft = TVirtualFFT::FFT(1,&n,"C2R M K");
       ifft->SetPointsComplex(value_re,value_im);
       ifft->Transform();
-      fb = TH1::TransformHisto(ifft,fb,"Re");
+      fb = TH1::TransformHisto(ifft,0,"Re");
       for (int j=0;j!=nbin;j++){
 	int content = fb->GetBinContent(j+1) ;
 	htemp->SetBinContent(j+1,content);
       }
+      
+      delete hm;
+      delete hp;
+      delete ifft;
+      delete fb;
     }
 
     Trace t;
