@@ -85,41 +85,43 @@ int main(int argc, char* argv[])
   //data_fds.Save();
 
   int recon_threshold = 2000;
- 
+  int max_events = 5;
+  int eve_num  = 1;
   WireCell::ToyDepositor toydep(fds);
-  const PointValueVector pvv = toydep.depositions(1);
+  const PointValueVector pvv = toydep.depositions(eve_num);
+  
 
   // 
   
-  //  WireCell::GenerativeFDS gfds(toydep,gds,2400,5,2.0*1.6*units::millimeter);
-  // gfds.jump(1);
+  //  WireCell::GenerativeFDS gfds(toydep,gds,2400,max_events,2.0*1.6*units::millimeter);
+  // gfds.jump(eve_num);
 
   // WireCellSst::ToyuBooNESliceDataSource sds(gfds,1500); //set threshold at 2000 electrons
 
   // WireCell::ToyDepositor toydep(fds);
-  // const PointValueVector pvv = toydep.depositions(1);
+  // const PointValueVector pvv = toydep.depositions(eve_num);
   //WireCell::GenerativeFDS gfds(toydep,gds,9600,1,0.5*1.605723*units::millimeter); // 87 K at 0.5 kV/cm
-  WireCell::GenerativeFDS gfds(toydep,gds,9600,5,0.5*1.60*units::millimeter); // 87 K at 0.5 kV/cm
+  WireCell::GenerativeFDS gfds(toydep,gds,9600,max_events,0.5*1.60*units::millimeter); // 87 K at 0.5 kV/cm
   //WireCell2dToy::ToySignalSimuFDS simu_fds(gfds,gds,9600,1,1.647,1.539+1.647,1); // time offset among different planes for the time electrons travel among different planes
-  //simu_fds.jump(1);
+  //simu_fds.jump(eve_num);
   //simu_fds.Save();
 
  
 
 
-  //WireCell2dToy::ToySignalSimuTrueFDS st_fds(gfds,gds,9600/4,5); //truth
-  WireCell::GenerativeFDS st_fds(toydep,gds,9600/4,5,0.5*1.60*units::millimeter); // 87 K at 0.5 kV/cm
-  st_fds.jump(1);
+  //WireCell2dToy::ToySignalSimuTrueFDS st_fds(gfds,gds,9600/4,max_events); //truth
+  WireCell::GenerativeFDS st_fds(toydep,gds,9600/4,max_events,0.5*1.60*units::millimeter); // 87 K at 0.5 kV/cm
+  st_fds.jump(eve_num);
   //st_fds.Save();
   
   
 
-  WireCell2dToy::ToySignalGausFDS gaus_fds(data_fds,gds,9600/4,5,1.647,1.539+1.647); // gaussian smearing for charge estimation
-  gaus_fds.jump(1);
+  WireCell2dToy::ToySignalGausFDS gaus_fds(data_fds,gds,9600/4,max_events,1.647,1.539+1.647); // gaussian smearing for charge estimation
+  gaus_fds.jump(eve_num);
   //gaus_fds.Save();
 
-   WireCell2dToy::ToySignalWienFDS wien_fds(data_fds,gds,9600/4,5,1.647,1.539+1.647); // weiner smearing for hit identification
-  wien_fds.jump(1);
+   WireCell2dToy::ToySignalWienFDS wien_fds(data_fds,gds,9600/4,max_events,1.647,1.539+1.647); // weiner smearing for hit identification
+  wien_fds.jump(eve_num);
   //wien_fds.Save();
   
   

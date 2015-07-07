@@ -82,6 +82,7 @@ int main(int argc, char* argv[])
   
 
   int recon_threshold = 2000;
+  int max_events = 100;
  
   // WireCell::ToyDepositor toydep(fds);
   // const PointValueVector pvv = toydep.depositions(1);
@@ -94,21 +95,21 @@ int main(int argc, char* argv[])
   WireCell::ToyDepositor toydep(fds);
   const PointValueVector pvv = toydep.depositions(eve_num);
   //WireCell::GenerativeFDS gfds(toydep,gds,9600,5,0.5*1.605723*units::millimeter); // 87 K at 0.5 kV/cm
-  WireCell::GenerativeFDS gfds(toydep,gds,9600,100,0.5*1.60*units::millimeter); // 87 K at 0.5 kV/cm
-  WireCell2dToy::ToySignalSimuFDS simu_fds(gfds,gds,9600,100,1.647,1.539+1.647,1); // time offset among different planes for the time electrons travel among different planes
+  WireCell::GenerativeFDS gfds(toydep,gds,9600,max_events,0.5*1.60*units::millimeter); // 87 K at 0.5 kV/cm
+  WireCell2dToy::ToySignalSimuFDS simu_fds(gfds,gds,9600,max_events,1.647,1.539+1.647,1); // time offset among different planes for the time electrons travel among different planes
   simu_fds.jump(eve_num);
   //simu_fds.Save();
 
-  //WireCell2dToy::ToySignalSimuTrueFDS st_fds(gfds,gds,9600/4,100); //truth
-  WireCell::GenerativeFDS st_fds(toydep,gds,9600/4,5,0.5*1.60*units::millimeter); // 87 K at 0.5 kV/cm
+  //WireCell2dToy::ToySignalSimuTrueFDS st_fds(gfds,gds,9600/4,max_events); //truth
+  WireCell::GenerativeFDS st_fds(toydep,gds,9600/4,max_events,0.5*1.60*units::millimeter); // 87 K at 0.5 kV/cm
   st_fds.jump(eve_num);
   // st_fds.Save();
   
-  WireCell2dToy::ToySignalGausFDS gaus_fds(simu_fds,gds,9600/4,100,1.647,1.539+1.647); // gaussian smearing for charge estimation
+  WireCell2dToy::ToySignalGausFDS gaus_fds(simu_fds,gds,9600/4,max_events,1.647,1.539+1.647); // gaussian smearing for charge estimation
   gaus_fds.jump(eve_num);
   //gaus_fds.Save();
 
-   WireCell2dToy::ToySignalWienFDS wien_fds(simu_fds,gds,9600/4,100,1.647,1.539+1.647); // weiner smearing for hit identification
+   WireCell2dToy::ToySignalWienFDS wien_fds(simu_fds,gds,9600/4,max_events,1.647,1.539+1.647); // weiner smearing for hit identification
   wien_fds.jump(eve_num);
   //wien_fds.Save();
   
