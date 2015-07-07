@@ -245,7 +245,7 @@ double WireCell2dToy::SimpleBlobToyTiling::CalChi2(){
   double chi2=1e9;
   Buildup_index();
 
-  if (swindex==wire_all.size()){
+  if (swindex==wire_all.size() || ncount==1){
   TMatrixD MA(swindex,scindex);
   TMatrixD MAT(scindex,swindex);
  

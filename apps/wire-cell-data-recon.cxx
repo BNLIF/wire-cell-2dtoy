@@ -78,36 +78,43 @@ int main(int argc, char* argv[])
     return 1;
   }
   
+  TFile tfile(root_file,"read");
+  TTree* sst = dynamic_cast<TTree*>(tfile.Get(tpath));
+  WireCellSst::ToyuBooNEFrameDataSource data_fds(*sst,gds);
+  data_fds.jump(1);
+  data_fds.Save();
 
   int recon_threshold = 2000;
  
-  // WireCell::ToyDepositor toydep(fds);
-  // const PointValueVector pvv = toydep.depositions(1);
+  WireCell::ToyDepositor toydep(fds);
+  const PointValueVector pvv = toydep.depositions(1);
   
-  // WireCell::GenerativeFDS gfds(toydep,gds,2400,5,2.0*1.6*units::millimeter);
+  //  WireCell::GenerativeFDS gfds(toydep,gds,2400,5,2.0*1.6*units::millimeter);
   // gfds.jump(1);
 
   // WireCellSst::ToyuBooNESliceDataSource sds(gfds,1500); //set threshold at 2000 electrons
 
-  WireCell::ToyDepositor toydep(fds);
-  const PointValueVector pvv = toydep.depositions(1);
-  //WireCell::GenerativeFDS gfds(toydep,gds,9600,5,0.5*1.605723*units::millimeter); // 87 K at 0.5 kV/cm
-  WireCell::GenerativeFDS gfds(toydep,gds,9600,5,0.5*1.60*units::millimeter); // 87 K at 0.5 kV/cm
-  WireCell2dToy::ToySignalSimuFDS simu_fds(gfds,gds,9600,5,1.647,1.539+1.647,1); // time offset among different planes for the time electrons travel among different planes
-  simu_fds.jump(1);
-  //simu_fds.Save();
+  // WireCell::ToyDepositor toydep(fds);
+  // const PointValueVector pvv = toydep.depositions(1);
+  //WireCell::GenerativeFDS gfds(toydep,gds,9600,1,0.5*1.605723*units::millimeter); // 87 K at 0.5 kV/cm
+  WireCell::GenerativeFDS gfds(toydep,gds,9600,1,0.5*1.60*units::millimeter); // 87 K at 0.5 kV/cm
+  // WireCell2dToy::ToySignalSimuFDS simu_fds(gfds,gds,9600,5,1.647,1.539+1.647,1); // time offset among different planes for the time electrons travel among different planes
+  // simu_fds.jump(1);
+  // simu_fds.Save();
 
-  // WireCell2dToy::ToySignalSimuTrueFDS st_fds(gfds,gds,9600,5); //truth
-  // st_fds.jump(1);
-  // st_fds.Save();
+  WireCell2dToy::ToySignalSimuTrueFDS st_fds(gfds,gds,9600,1); //truth
+  st_fds.jump(1);
+  st_fds.Save();
   
-  WireCell2dToy::ToySignalGausFDS gaus_fds(simu_fds,gds,9600/4,5,1.647,1.539+1.647); // gaussian smearing for charge estimation
-  gaus_fds.jump(1);
-  //gaus_fds.Save();
+  
 
-   WireCell2dToy::ToySignalWienFDS wien_fds(simu_fds,gds,9600/4,5,1.647,1.539+1.647); // weiner smearing for hit identification
+  WireCell2dToy::ToySignalGausFDS gaus_fds(data_fds,gds,9600/4,1,1.647,1.539+1.647); // gaussian smearing for charge estimation
+  gaus_fds.jump(1);
+  gaus_fds.Save();
+
+   WireCell2dToy::ToySignalWienFDS wien_fds(data_fds,gds,9600/4,1,1.647,1.539+1.647); // weiner smearing for hit identification
   wien_fds.jump(1);
-  //wien_fds.Save();
+  wien_fds.Save();
   
   
   GeomWireSelection wires_u = gds.wires_in_plane(WirePlaneType_t(0));
@@ -167,8 +174,8 @@ int main(int argc, char* argv[])
   int start_num = 0 ;
   int end_num = sds.size()-1;
 
-  // int start_num =1241;
-  // int end_num = 1243;
+  // int start_num =1117;
+  // int end_num = 1119;
   // int end_num = sds.size()-1;
 
   // int start_num = 400;
@@ -490,7 +497,7 @@ int main(int argc, char* argv[])
    cout << "Summary: " << ncount << " " << ncount_mcell << " " << ncount_mcell_cluster << endl;
 
 
-  TFile *file = new TFile("shower3D_signal.root","RECREATE");
+  TFile *file = new TFile("shower3D_data.root","RECREATE");
   TTree *t_true = new TTree("T_true","T_true");
   TTree *t_rec = new TTree("T_rec","T_rec");
   TTree *t_rec_charge = new TTree("T_rec_charge","T_rec_charge");
@@ -556,7 +563,7 @@ int main(int argc, char* argv[])
     GeomCellSelection allcell = toytiling[i]->get_allcell();
     for (int j=0;j!=allcell.size();j++){
       Point p = allcell[j]->center();
-      x_save = i*0.32- 256;
+      x_save = i*0.32- 256 + 50*0.16;
       y_save = p.y/units::cm;
       z_save = p.z/units::cm;
       
@@ -576,7 +583,7 @@ int main(int argc, char* argv[])
 	//truth
 	for (int k=0;k!=mcell->get_allcell().size();k++){
 	  Point p = mcell->get_allcell().at(k)->center();
-	  x_save = i*0.32- 256;
+	  x_save = i*0.32- 256+50*0.16;
 	  y_save = p.y/units::cm;
 	  z_save = p.z/units::cm;
 	  charge_save = charge/mcell->get_allcell().size();
@@ -599,7 +606,7 @@ int main(int argc, char* argv[])
       if (charge> recon_threshold && !(mcell->IsSimpleBlob() && mcell->IsBlob())){
   	for (int k=0;k!=mcell->get_allcell().size();k++){
   	  Point p = mcell->get_allcell().at(k)->center();
-  	  x_save = i*0.32-256;
+  	  x_save = i*0.32-256+50*0.16;
   	  y_save = p.y/units::cm;
   	  z_save = p.z/units::cm;
   	  charge_save = charge/mcell->get_allcell().size();
@@ -616,7 +623,7 @@ int main(int argc, char* argv[])
        for (int j=0;j!=blobtiling[i]->Get_Cells().size();j++){
   	 const GeomCell *cell = blobtiling[i]->Get_Cells().at(j);
   	 Point p = cell->center();
-  	 x_save = i*0.32-256;
+  	 x_save = i*0.32-256+50*0.16;
   	 y_save = p.y/units::cm;
   	 z_save = p.z/units::cm;
   	 charge_save = blobtiling[i]->Get_Cell_Charge(cell,1);
