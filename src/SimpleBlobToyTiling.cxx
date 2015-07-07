@@ -219,10 +219,10 @@ WireCell2dToy::SimpleBlobToyTiling::SimpleBlobToyTiling(WireCell2dToy::ToyTiling
       //std::cout << "xin2" << std::endl;
       //std::cout << cur_chi2 << std::endl;
       if (cur_chi2 < chi2_save)
-    	SaveResult();
+	SaveResult();
     }
 
-    std::cout << "DeBlob Chi2: " << cur_chi2 << " " << cell_all.size() << std::endl;
+    std::cout << "DeBlob Chi2: " << chi2_save << " " << cell_all.size() << std::endl;
     
     
     
@@ -242,8 +242,10 @@ WireCell2dToy::SimpleBlobToyTiling::SimpleBlobToyTiling(WireCell2dToy::ToyTiling
 double WireCell2dToy::SimpleBlobToyTiling::CalChi2(){
   //using namespace boost::numeric::ublas;
 
-  double chi2;
+  double chi2=1e9;
   Buildup_index();
+
+  if (swindex==wire_all.size()){
   TMatrixD MA(swindex,scindex);
   TMatrixD MAT(scindex,swindex);
  
@@ -262,6 +264,8 @@ double WireCell2dToy::SimpleBlobToyTiling::CalChi2(){
 
   TVectorD VCx(scindex);
   
+  //std::cout << ncount << " " << swindex << " " << scindex << " " << cell_all.size() << " " << wire_all.size() << std::endl;
+
   // fill wire charge
   WireChargeMap wcmap = toytiling->wcmap();
   WireChargeMap wcemap = toytiling->wcemap();
@@ -357,6 +361,8 @@ double WireCell2dToy::SimpleBlobToyTiling::CalChi2(){
   TVectorD r2 = Wy - Wy_pred;
   chi2 = r1 * r2 / 1e6;
 
+  //std::cout << chi2 << std::endl;
+  }
 
   return chi2;
 }
@@ -388,6 +394,15 @@ void WireCell2dToy::SimpleBlobToyTiling::Buildup_index(){
       }
     }
   }
+
+  // for (int j=0;j!=wire_all.size();j++){
+  //   const GeomWire *wire = wire_all.at(j);
+  //   if (swimap.find(wire) == swimap.end()){
+  //     swimap[wire] = swindex;
+  //     swindex ++;
+  //   }
+  // }
+  
   
 }
 
