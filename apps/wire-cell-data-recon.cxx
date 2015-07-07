@@ -89,7 +89,7 @@ int main(int argc, char* argv[])
   int eve_num  = 1;
   WireCell::ToyDepositor toydep(fds);
   const PointValueVector pvv = toydep.depositions(eve_num);
-  
+  delete fds;
 
   // 
   

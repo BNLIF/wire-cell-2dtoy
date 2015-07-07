@@ -71,8 +71,10 @@ int main(int argc, char* argv[])
   const char* root_file = argv[2];
   const char* tpath = "/Event/Sim";
   
+  TFile *tfile = TFile::Open(root_file);
+
   WireCell::FrameDataSource* fds = 0;
-  fds = WireCellSst::make_fds(root_file);
+  fds = WireCellSst::make_fds(*tfile);
   if (!fds) {
     cerr << "ERROR: failed to get FDS from " << root_file << endl;
     return 1;
@@ -92,6 +94,10 @@ int main(int argc, char* argv[])
 
   WireCell::ToyDepositor toydep(fds);
   const PointValueVector pvv = toydep.depositions(eve_num);
+  delete fds;
+  tfile->Close();
+
+
   //WireCell::GenerativeFDS gfds(toydep,gds,9600,max_events,0.5*1.605723*units::millimeter); // 87 K at 0.5 kV/cm
   WireCell::GenerativeFDS gfds(toydep,gds,9600,max_events,0.5*1.60*units::millimeter); // 87 K at 0.5 kV/cm
   
