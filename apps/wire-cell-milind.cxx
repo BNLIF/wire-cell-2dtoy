@@ -99,7 +99,7 @@ int main(int argc, char* argv[])
   simu_fds.jump(eve_num);
   //simu_fds.Save();
 
-  WireCell2dToy::ToySignalSimuTrueFDS st_fds(gfds,gds,9600,100); //truth
+  WireCell2dToy::ToySignalSimuTrueFDS st_fds(gfds,gds,9600/4,100); //truth
   st_fds.jump(eve_num);
   // st_fds.Save();
   
