@@ -189,7 +189,7 @@ int main(int argc, char* argv[])
   int ncount_mcell = 0;
 
   delete fds;
-  tfile->Close();
+  //tfile->Close();
 
 
   int start_num = 0 ;
