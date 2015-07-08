@@ -208,7 +208,7 @@ WireCell2dToy::SimpleBlobToyTiling::SimpleBlobToyTiling(WireCell2dToy::ToyTiling
     //std::cout << "xin1" << std::endl;
     SaveResult();
     //std::cout << "xin1" << std::endl;
-    while(cur_chi2 > 5 && ncount < 100){
+    while(cur_chi2 > 5 && ncount < 10){
       //std::cout << cur_chi2 << std::endl;
       
       FormHypo();
@@ -244,126 +244,141 @@ double WireCell2dToy::SimpleBlobToyTiling::CalChi2(){
 
   double chi2=1e9;
   Buildup_index();
-
-  if (swindex==wire_all.size() || ncount==1){
-  TMatrixD MA(swindex,scindex);
-  TMatrixD MAT(scindex,swindex);
- 
-  TMatrixD Vy(swindex,swindex);
-  TMatrixD Vy_inv(swindex,swindex);
- 
-  TVectorD Wy(swindex);
-  TVectorD Wy_pred(swindex);
   
-  TMatrixD MC(scindex,scindex);
-  TMatrixD MC_inv(scindex,scindex);
+  if (ncount == 1)
+    std::cout << "Dimensions: " << swindex << " " << " " << scindex << wire_all.size() << std::endl;
 
-  TMatrixD Vx(scindex,scindex);
-  TMatrixD Vx_inv(scindex,scindex);
-
-
-  TVectorD VCx(scindex);
-  
-  //std::cout << ncount << " " << swindex << " " << scindex << " " << cell_all.size() << " " << wire_all.size() << std::endl;
-
-  // fill wire charge
-  WireChargeMap wcmap = toytiling->wcmap();
-  WireChargeMap wcemap = toytiling->wcemap();
-  for (int i=0; i!=wire_all.size();i++){
-    int index = swimap[wire_all.at(i)];
-    float charge = wcmap[wire_all.at(i)];
-    float charge_err = wcemap[wire_all.at(i)];
-    Wy[index] =charge;
-    Vy(index,index) = charge_err*charge_err/1e6;
-    //WirePlaneType_t plane = wire_all.at(i)->plane();
-    //double charge_noise;
-    // if (plane == 0){
-    //   charge_noise = 14000*0.05;
-    // }else if (plane==1){
-    //   charge_noise = 14000*0.03;
-    // }else if (plane==2){
-    //   charge_noise = 14000*0.02;
-    // }
-    // Vy(index,index) = (charge_noise*charge_noise + 0.05*0.05 * charge*charge)/1e6;
-  }
-  
-  //fill MA
-  for (int i=0;i!=wire_all.size();i++){
-    int index = swimap[wire_all.at(i)];
-    for (int j=0;j!=wiremap[wire_all.at(i)].size();j++){
-      int index1 = scimap[wiremap[wire_all.at(i)].at(j)];
-      MA(index,index1) = 1;
-    }
-  }
-  
-  MAT.Transpose(MA);
-  Vy_inv = Vy;
-  Vy_inv.Invert();
-
-  MC = MAT * Vy_inv * MA;
-
-
-  // //Now try NNLS  need to improve
-  // int m = scindex, n = swindex;
-
-  // std::cout << m << " " << n << std::endl;
-
-  // matrix < double > NNLS_A(n,m);
-  // vector < double > NNLS_b(n);
+  if (swindex==wire_all.size()&&scindex < 500 || ncount==1){
+    TMatrixD MA(swindex,scindex);
+    TMatrixD MAT(scindex,swindex);
     
-  // //fill value ...
-  // for (int i = 0;i!=n;i++){
-  //   NNLS_b(i) = Wy[i];
-  //   //std::cout << i << " " << Wy[i] << std::endl;
-  //   for (int j=0;j!=m;j++){
-  //     NNLS_A(i,j) = MA(i,j);
-  //     //std::cout << i << " " << j << " " << MA(i,j) << std::endl;
-  //   }
-  // }
-
-  // lsp::nnls< matrix< double >, vector< double >  > nnls( NNLS_A, NNLS_b );
-  // vector< double > NNLS_x(m);
-  // matrix< double > NNLS_cov(m,m);
-  // nnls.solve( NNLS_x , NNLS_cov );
-  
-  // // save results and calculate chi2 
-  // for (int i=0;i!=scindex;i++){
-  //   (*Cx)[i] = NNLS_x(i);
-  //   (*dCx)[i] = sqrt(NNLS_cov(i,i));
-  // }
-
-
-  //SVD solution
-  TDecompSVD svd(MC);
-  MC_inv = svd.Invert();
-  
-  VCx = MC_inv * MAT * Vy_inv * Wy;
-  Vx_inv = MAT * Vy_inv * MA;
-  TDecompSVD svd1(Vx_inv);
-  Vx = svd1.Invert();
-
-  Cx.clear();
-  dCx.clear();
-  for (int i = 0; i!=scindex; i++){
-    if (Vx(i,i)>=0){
-      dCx.push_back(sqrt( Vx(i,i)) * 1000.);
-    }else{
-      dCx.push_back(0);
+    TMatrixD Vy(swindex,swindex);
+    TMatrixD Vy_inv(swindex,swindex);
+    
+    TVectorD Wy(swindex);
+    TVectorD Wy_pred(swindex);
+    
+    TMatrixD MC(scindex,scindex);
+    TMatrixD MC_inv(scindex,scindex);
+    
+    TMatrixD Vx(scindex,scindex);
+    TMatrixD Vx_inv(scindex,scindex);
+    
+    
+    TVectorD VCx(scindex);
+    
+    //std::cout << ncount << " " << swindex << " " << scindex << " " << cell_all.size() << " " << wire_all.size() << std::endl;
+    
+    // fill wire charge
+    WireChargeMap wcmap = toytiling->wcmap();
+    WireChargeMap wcemap = toytiling->wcemap();
+    for (int i=0; i!=wire_all.size();i++){
+      int index = swimap[wire_all.at(i)];
+      float charge = wcmap[wire_all.at(i)];
+      float charge_err = wcemap[wire_all.at(i)];
+      Wy[index] =charge;
+      Vy(index,index) = charge_err*charge_err/1e6;
+      //WirePlaneType_t plane = wire_all.at(i)->plane();
+      //double charge_noise;
+      // if (plane == 0){
+      //   charge_noise = 14000*0.05;
+      // }else if (plane==1){
+      //   charge_noise = 14000*0.03;
+      // }else if (plane==2){
+      //   charge_noise = 14000*0.02;
+      // }
+      // Vy(index,index) = (charge_noise*charge_noise + 0.05*0.05 * charge*charge)/1e6;
     }
-    Cx.push_back(VCx[i]);
-    //std::cout << i << " " << (*Cx)[i] << " " << (*dCx)[i] << std::endl;
+    
+    std::cout << "finish fill in charge" << std::endl;
+
+    //fill MA
+    for (int i=0;i!=wire_all.size();i++){
+      int index = swimap[wire_all.at(i)];
+      for (int j=0;j!=wiremap[wire_all.at(i)].size();j++){
+	int index1 = scimap[wiremap[wire_all.at(i)].at(j)];
+	MA(index,index1) = 1;
+      }
+    }
+    
+    std::cout << "finish fill in MA" << std::endl;
+
+    MAT.Transpose(MA);
+    Vy_inv = Vy;
+    Vy_inv.Invert();
+    
+    MC = MAT * Vy_inv * MA;
+    
+    std::cout << "finish Invert Vy_inv" << std::endl;
+    
+    // //Now try NNLS  need to improve
+    // int m = scindex, n = swindex;
+    
+    // std::cout << m << " " << n << std::endl;
+    
+    // matrix < double > NNLS_A(n,m);
+    // vector < double > NNLS_b(n);
+    
+    // //fill value ...
+    // for (int i = 0;i!=n;i++){
+    //   NNLS_b(i) = Wy[i];
+    //   //std::cout << i << " " << Wy[i] << std::endl;
+    //   for (int j=0;j!=m;j++){
+    //     NNLS_A(i,j) = MA(i,j);
+    //     //std::cout << i << " " << j << " " << MA(i,j) << std::endl;
+    //   }
+    // }
+    
+    // lsp::nnls< matrix< double >, vector< double >  > nnls( NNLS_A, NNLS_b );
+    // vector< double > NNLS_x(m);
+    // matrix< double > NNLS_cov(m,m);
+    // nnls.solve( NNLS_x , NNLS_cov );
+    
+    // // save results and calculate chi2 
+    // for (int i=0;i!=scindex;i++){
+    //   (*Cx)[i] = NNLS_x(i);
+    //   (*dCx)[i] = sqrt(NNLS_cov(i,i));
+    // }
+    
+    // MC.Print();
+    
+    //SVD solution
+    TDecompSVD svd(MC);
+    MC_inv = svd.Invert();
+    
+    std::cout << "Finish Invert MC" << std::endl;
+
+    VCx = MC_inv * MAT * Vy_inv * Wy;
+    Vx_inv = MAT * Vy_inv * MA;
+    TDecompSVD svd1(Vx_inv);
+    Vx = svd1.Invert();
+    
+    std::cout << "Finish Invert Vx " << std::endl; 
+
+    Cx.clear();
+    dCx.clear();
+    for (int i = 0; i!=scindex; i++){
+      if (Vx(i,i)>=0){
+	dCx.push_back(sqrt( Vx(i,i)) * 1000.);
+      }else{
+	dCx.push_back(0);
+      }
+      Cx.push_back(VCx[i]);
+      //std::cout << i << " " << (*Cx)[i] << " " << (*dCx)[i] << std::endl;
+    }
+    //  std::cout << std::endl;
+    
+    
+    Wy_pred = MA * VCx;
+    TVectorD r1 = Vy_inv * (Wy - Wy_pred);
+    TVectorD r2 = Wy - Wy_pred;
+    chi2 = r1 * r2 / 1e6;
+
+    std::cout << "Calculate Chi2 " << std::endl;
+    
+    //std::cout << chi2 << std::endl;
   }
-  //  std::cout << std::endl;
-
-
-  Wy_pred = MA * VCx;
-  TVectorD r1 = Vy_inv * (Wy - Wy_pred);
-  TVectorD r2 = Wy - Wy_pred;
-  chi2 = r1 * r2 / 1e6;
-
-  //std::cout << chi2 << std::endl;
-  }
-
+  
   return chi2;
 }
 

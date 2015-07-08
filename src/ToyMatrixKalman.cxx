@@ -62,17 +62,17 @@ void WireCell2dToy::ToyMatrixKalman::init(WireCell2dToy::ToyMatrix& toymatrix){
 
   //std::cout << " Xin " << already_removed.size() << " " << no_need_remove.size() << std::endl;
 
-    TMatrixD MA(mwindex,mcindex-n_removed);
-    TMatrixD MAT(mcindex-n_removed,mwindex);
-
-    TMatrixD MC(mcindex-n_removed,mcindex-n_removed);
-    TMatrixD MC_inv(mcindex-n_removed,mcindex-n_removed);
-
-   
-
-    const TMatrixD *MA_big = toymatrix.Get_MA();
-    const TMatrixD *VBy_inv = toymatrix.Get_VBy_inv();
-
+  TMatrixD MA(mwindex,mcindex-n_removed);
+  TMatrixD MAT(mcindex-n_removed,mwindex);
+  
+  TMatrixD MC(mcindex-n_removed,mcindex-n_removed);
+  TMatrixD MC_inv(mcindex-n_removed,mcindex-n_removed);
+  
+  
+  
+  const TMatrixD *MA_big = toymatrix.Get_MA();
+  const TMatrixD *VBy_inv = toymatrix.Get_VBy_inv();
+  
   int index2 = 0;
   for (int i=0;i!=mcindex;i++){
     auto it1 = find(already_removed.begin(),already_removed.end(),i);

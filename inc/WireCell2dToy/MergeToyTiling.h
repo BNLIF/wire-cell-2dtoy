@@ -7,7 +7,7 @@ namespace WireCell2dToy{
   class MergeToyTiling : public WireCell2dToy::ToyTiling {
   public:
     MergeToyTiling(){};
-    MergeToyTiling(WireCell2dToy::ToyTiling& tiling, int time_slice=-1);
+    MergeToyTiling(WireCell2dToy::ToyTiling& tiling, int time_slice=-1, int merge_strategy = 1);
     ~MergeToyTiling();
 
     const WireCell::GeomCell* cell(const WireCell::GeomWireSelection& wires)const ;

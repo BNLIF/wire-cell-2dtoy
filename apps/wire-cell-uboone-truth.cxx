@@ -59,14 +59,16 @@ int main(int argc, char* argv[])
     return 1;
   }
   
+  int max_events = 100;
+  int eve_num = 18;
 
   
   WireCell::ToyDepositor toydep(fds);
-  const PointValueVector pvv = toydep.depositions(1);
+  const PointValueVector pvv = toydep.depositions(eve_num);
   
 
-  WireCell::GenerativeFDS gfds(toydep,gds,2400,5,2.0*1.6*units::millimeter);
-  gfds.jump(1);
+  WireCell::GenerativeFDS gfds(toydep,gds,2400,max_events,2.0*1.6*units::millimeter);
+  gfds.jump(eve_num);
 
   WireCellSst::ToyuBooNESliceDataSource sds(gfds,1500); //set threshold at 2000 electrons
 
@@ -90,19 +92,25 @@ int main(int argc, char* argv[])
   
 
   //int i=178;{
-  int i=187;{
-  //int i=441;{
+  int i=1172-800;{
+    //int i=441;{
     // for (int i=0;i!=sds.size();i++){
     //for (int i=365;i!=378;i++){
  
     sds.jump(i);
     WireCell::Slice slice = sds.get();
     if ( slice.group().size() >0){
+      cout << i << " " << slice.group().size() << endl;
+
       toytiling[i] = new WireCell2dToy::ToyTiling(slice,gds);
+      GeomCellSelection allcell = toytiling[i]->get_allcell();
+
+      cout << allcell.size() << endl;
+      
       mergetiling[i] = new WireCell2dToy::MergeToyTiling(*toytiling[i],i);
       truthtiling[i] = new WireCell2dToy::TruthToyTiling(*toytiling[i],pvv,i,gds);
       
-      GeomCellSelection allcell = toytiling[i]->get_allcell();
+      
 
       // for (int j=0;j!=allcell.size();j++){
       // 	std::cout << toytiling[i]->wires(*allcell.at(j)).size() << std::endl;
@@ -112,6 +120,7 @@ int main(int argc, char* argv[])
       GeomCellSelection allmcell = mergetiling[i]->get_allcell();
       GeomWireSelection allmwire = mergetiling[i]->get_allwire();
       
+      cout << allmcell.size() << endl;
      
       if (cluster_set.empty()){
   	// if cluster is empty, just insert all the mcell, each as a cluster

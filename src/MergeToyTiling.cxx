@@ -11,7 +11,7 @@ using namespace WireCell;
 
 
 
-WireCell2dToy::MergeToyTiling::MergeToyTiling(WireCell2dToy::ToyTiling& tiling, int time_slice){
+WireCell2dToy::MergeToyTiling::MergeToyTiling(WireCell2dToy::ToyTiling& tiling, int time_slice, int merge_strategy){
   
 
   ncell = tiling.get_ncell();
@@ -25,40 +25,44 @@ WireCell2dToy::MergeToyTiling::MergeToyTiling(WireCell2dToy::ToyTiling& tiling, 
   // cellmap
   // wiremap
 
-  
-
-  // //start with wire_u
-  for (int i =0;i!=wire_u.size();i++){
-    //ntemp += tiling.cells(*tiling.get_wire_u()[i]).size();
-    for (int j=0;j!=tiling.cells(*tiling.get_wire_u()[i]).size();j++){
-      const GeomCell *cell = tiling.cells(*wire_u[i])[j];
-      int flag=0;
-      
-      for (int k=0;k!=cell_all.size();k++){
-      	if (((MergeGeomCell*)cell_all[k])->AddCell(*cell)){
-      	  flag = 1;
-      	  break;
-      	}
-      }
-      
-      if(flag==0){
-	MergeGeomCell *mcell = new MergeGeomCell(ncell,*cell);
-      	mcell->SetTimeSlice(time_slice);
-	ncell++;
-	cell_all.push_back(mcell);
+  if (merge_strategy == 1){
+    
+    // //start with wire_u
+    for (int i =0;i!=wire_u.size();i++){
+      //ntemp += tiling.cells(*tiling.get_wire_u()[i]).size();
+      for (int j=0;j!=tiling.cells(*tiling.get_wire_u()[i]).size();j++){
+	const GeomCell *cell = tiling.cells(*wire_u[i])[j];
+	int flag=0;
+	
+	for (int k=0;k!=cell_all.size();k++){
+	  if (((MergeGeomCell*)cell_all[k])->AddCell(*cell)){
+	    flag = 1;
+	    break;
+	  }
+	}
+	
+	if(flag==0){
+	  MergeGeomCell *mcell = new MergeGeomCell(ncell,*cell);
+	  mcell->SetTimeSlice(time_slice);
+	  ncell++;
+	  cell_all.push_back(mcell);
+	}
       }
     }
-  }
-  
-  //int ntemp = 0;
-  // for (int i=0;i!=cell_all.size();i++){
-  //   MergeGeomCell *mcell = (MergeGeomCell*)cell_all.at(i);
-  //   ntemp += mcell->get_allcell().size();
-  // }
-  // std::cout << ntemp << " " << cell_all.size() << std::endl;
-  
-  while(further_merge(cell_all,tiling.get_ncell(),time_slice));
     
+    //int ntemp = 0;
+    // for (int i=0;i!=cell_all.size();i++){
+    //   MergeGeomCell *mcell = (MergeGeomCell*)cell_all.at(i);
+    //   ntemp += mcell->get_allcell().size();
+    // }
+    // std::cout << ntemp << " " << cell_all.size() << std::endl;
+    
+    while(further_merge(cell_all,tiling.get_ncell(),time_slice));
+    
+  }else if (merge_strategy == 2){
+    //try Brett's new merge strategy ... 
+    
+  }
   // ntemp = 0;
   // for (int i=0;i!=cell_all.size();i++){
   //   MergeGeomCell *mcell = (MergeGeomCell*)cell_all.at(i);
