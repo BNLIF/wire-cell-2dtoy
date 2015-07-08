@@ -92,6 +92,14 @@ int main(int argc, char* argv[])
 
   WireCell::ToyDepositor toydep(fds);
   const PointValueVector pvv = toydep.depositions(1);
+
+  // float sum_charge = 0;
+  // for (int i=0;i!=pvv.size();i++){
+  //   sum_charge += pvv.at(i).second;
+  // }
+  // cout << sum_charge << endl;
+
+
   //WireCell::GenerativeFDS gfds(toydep,gds,9600,5,0.5*1.605723*units::millimeter); // 87 K at 0.5 kV/cm
   WireCell::GenerativeFDS gfds(toydep,gds,9600,5,0.5*1.60*units::millimeter); // 87 K at 0.5 kV/cm
   WireCell2dToy::ToySignalSimuFDS simu_fds(gfds,gds,9600,5,1.647,1.539+1.647,1); // time offset among different planes for the time electrons travel among different planes
@@ -150,9 +158,17 @@ int main(int argc, char* argv[])
   WireCell2dToy::ToyTiling **toytiling = new WireCell2dToy::ToyTiling*[2400];
   WireCell2dToy::MergeToyTiling **mergetiling = new WireCell2dToy::MergeToyTiling*[2400];
   WireCell2dToy::TruthToyTiling **truthtiling = new WireCell2dToy::TruthToyTiling*[2400];
+
+  GeomCellSelection total_cells;
+  GeomCellSelection total_recon_cells;
+  GeomCellSelection total_corner_cells;
+  GeomCellSelection total_blob_cells;
+  CellChargeMap total_ccmap;
+
+
    
   int start_num =184 + 800;
-  int end_num = 184 + 800;
+  int end_num = 186 + 800;
   for (int i=start_num;i!=end_num+1;i++){
     sds.jump(i);
     sds_th.jump(i);
@@ -173,57 +189,63 @@ int main(int argc, char* argv[])
     //   cout << mergetiling[i]->cells(*allmwire.at(j)).size() << endl;
     // }
 
+        
+    for (int j=0;j!=allcell.size();j++){
+      total_cells.push_back(allcell.at(j));
+    }
     CellChargeMap ccmap = truthtiling[i]->ccmap();
-    
-    Double_t charge_min = 10000;
-    Double_t charge_max = 0;
-
-    TApplication theApp("theApp",&argc,argv);
-    theApp.SetReturnFromRun(true);
-    
-    TCanvas c1("ToyMC","ToyMC",800,600);
-    c1.Draw();
-    
-    WireCell2dToy::ToyEventDisplay display(c1, gds);
-    display.charge_min = charge_min;
-    display.charge_max = charge_max;
-
-
-    gStyle->SetOptStat(0);
-    
-    const Int_t NRGBs = 5;
-    const Int_t NCont = 255;
-    Int_t MyPalette[NCont];
-    Double_t stops[NRGBs] = {0.0, 0.34, 0.61, 0.84, 1.0};
-    Double_t red[NRGBs] = {0.0, 0.0, 0.87 ,1.0, 0.51};
-    Double_t green[NRGBs] = {0.0, 0.81, 1.0, 0.2 ,0.0};
-    Double_t blue[NRGBs] = {0.51, 1.0, 0.12, 0.0, 0.0};
-    Int_t FI = TColor::CreateGradientColorTable(NRGBs, stops, red, green, blue, NCont);
-    gStyle->SetNumberContours(NCont);
-    for (int kk=0;kk!=NCont;kk++) MyPalette[kk] = FI+kk;
-    gStyle->SetPalette(NCont,MyPalette);
-
-    
-
-    display.init(0,10.3698,-2.33/2.,2.33/2.);
-    //display.init(1.1,1.8,0.7,1.0);
-    display.draw_mc(1,WireCell::PointValueVector(),"colz");
-    
-    
-
-    display.draw_slice(slice,""); // draw wire 
-    display.draw_cells(toytiling[i]->get_allcell(),"*same");
-    display.draw_mergecells(mergetiling[i]->get_allcell(),"*same",0); //0 is normal, 1 is only draw the ones containt the truth cell
-    //display.draw_mergecells(calmcell,"*same",0); //0 is normal, 1 is only draw the ones containt the truth cell
-    display.draw_truthcells(ccmap,"*same");
-    
-    // display.draw_wires_charge(wcmap,"Fsame",FI);
-    // display.draw_cells_charge(toytiling.get_allcell(),"Fsame");
-    // display.draw_truthcells_charge(ccmap,"lFsame",FI);
-    
-    
-    theApp.Run();
+    total_ccmap.insert(ccmap.begin(),ccmap.end());
   }
+
+  Double_t charge_min = 10000;
+  Double_t charge_max = 0;
+  
+  TApplication theApp("theApp",&argc,argv);
+  theApp.SetReturnFromRun(true);
+  
+  TCanvas c1("ToyMC","ToyMC",800,600);
+  c1.Draw();
+  
+  WireCell2dToy::ToyEventDisplay display(c1, gds);
+  display.charge_min = charge_min;
+  display.charge_max = charge_max;
+  
+  
+  gStyle->SetOptStat(0);
+  
+  const Int_t NRGBs = 5;
+  const Int_t NCont = 255;
+  Int_t MyPalette[NCont];
+  Double_t stops[NRGBs] = {0.0, 0.34, 0.61, 0.84, 1.0};
+  Double_t red[NRGBs] = {0.0, 0.0, 0.87 ,1.0, 0.51};
+  Double_t green[NRGBs] = {0.0, 0.81, 1.0, 0.2 ,0.0};
+  Double_t blue[NRGBs] = {0.51, 1.0, 0.12, 0.0, 0.0};
+  Int_t FI = TColor::CreateGradientColorTable(NRGBs, stops, red, green, blue, NCont);
+  gStyle->SetNumberContours(NCont);
+  for (int kk=0;kk!=NCont;kk++) MyPalette[kk] = FI+kk;
+  gStyle->SetPalette(NCont,MyPalette);
+  
+  
+  
+  display.init(0,10.3698,-2.33/2.,2.33/2.);
+  //display.init(1.1,1.8,0.7,1.0);
+  display.draw_mc(1,WireCell::PointValueVector(),"colz");
+  
+  
+  
+  // display.draw_slice(slice,""); // draw wire 
+  display.draw_cells(total_cells,"*same");
+  //display.draw_mergecells(,"*same",0); //0 is normal, 1 is only draw the ones containt the truth cell
+  //display.draw_mergecells(calmcell,"*same",0); //0 is normal, 1 is only draw the ones containt the truth cell
+  display.draw_truthcells(total_ccmap,"*same");
+  
+  // display.draw_wires_charge(wcmap,"Fsame",FI);
+  // display.draw_cells_charge(toytiling.get_allcell(),"Fsame");
+  // display.draw_truthcells_charge(ccmap,"lFsame",FI);
+  
+  
+  theApp.Run();
+
 
  
   return 0;
