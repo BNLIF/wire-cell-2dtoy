@@ -10,7 +10,7 @@ ToyDepositor::ToyDepositor(WireCell::FrameDataSource* fds1)
 
 
 const PointValueVector& ToyDepositor::depositions(int frame_number) const{
-  if (frame_number >0 && frame_number < fds->size()){
+  if (frame_number >=0 && frame_number < fds->size()){
     if (fds->jump(frame_number) < 0) {
       std::cerr << "Failed to go to frame " << frame_number << std::endl;
     }
