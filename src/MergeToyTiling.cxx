@@ -64,19 +64,20 @@ WireCell2dToy::MergeToyTiling::MergeToyTiling(WireCell2dToy::ToyTiling& tiling, 
   }else if (merge_strategy == 2){
     //try Brett's new merge strategy ... 
     //put cells into a list
-    std::cout << "Copy " << std::endl; 
-    GeomCellList cell_list;
-    // creat a list
-    for (int i = 0; i!= tiling.get_allcell().size();i++){
-      cell_list.push_back(tiling.get_allcell().at(i));
-    }
+    //std::cout << "Copy " << std::endl; 
+    GeomCellSelection cells = tiling.get_allcell();
+    GeomCellList cell_list(cells.begin(),cells.end());
+    // // creat a list
+    // for (int i = 0; i!= tiling.get_allcell().size();i++){
+    //   cell_list.push_back(tiling.get_allcell().at(i));
+    // }
     
     while(cell_list.size()!=0){
       std::cout << "Big: " << cell_list.size() << " " << cell_all.size() << std::endl;
       // construct a new merged cell from the first element of the cell
       const GeomCell *first_cell = *(cell_list.begin());
       MergeGeomCell *mcell = new MergeGeomCell(ncell,*first_cell);
-      cell_list.remove(first_cell);
+      cell_list.erase(cell_list.begin());
       ncell++;
       cell_all.push_back(mcell);
 
@@ -84,40 +85,61 @@ WireCell2dToy::MergeToyTiling::MergeToyTiling(WireCell2dToy::ToyTiling& tiling, 
       // and add them to this merge cell
       // need to keep a lits to save the ones that are successful
       GeomCellList suceed_list;
+
+      // auto it =cell_list.begin();
+      // while(it!=cell_list.end()){
+      // 	for (auto it1 = it;it1!=cell_list.end();it1++){
+      // 	  const GeomCell *current_cell = *it1;
+      // 	  if (mcell->Connected(*first_cell,*current_cell)){
+      // 	    mcell->AddNewCell(*current_cell);
+      // 	    suceed_list.push_back(current_cell);
+      // 	    //cell_list.erase(it);
+      // 	    it = it1;
+      // 	    break;
+      // 	  }
+      // 	}
+      // 	it = cell_list.erase(it);
+      // }
+            
       for (auto it = cell_list.begin();it!=cell_list.end();it++){
 	const GeomCell *current_cell = *it;
 	if (mcell->Connected(*first_cell,*current_cell)){
 	  mcell->AddNewCell(*current_cell);
 	  suceed_list.push_back(current_cell);
+	  it = cell_list.erase(it);
 	}
       }
-      //remove the succeed ones from the original list
-      for (auto it = suceed_list.begin(); it!=suceed_list.end(); it++){
-	const GeomCell *current_cell = *it;
-	cell_list.remove(current_cell);
-      }
+
+
+      // //remove the succeed ones from the original list
+      // for (auto it = suceed_list.begin(); it!=suceed_list.end(); it++){
+      //  	const GeomCell *current_cell = *it;
+      //  	cell_list.remove(current_cell);
+      // }
       
       // Now, need to go through the existing
       while(suceed_list.size()!=0){
 	
 	const GeomCell *current_cell = *(suceed_list.begin()); // get first element
-	suceed_list.remove(current_cell);
-	GeomCellList temp_list;
+	suceed_list.erase(suceed_list.begin());
+	//	GeomCellList temp_list;
 	
 	for (auto it = cell_list.begin();it!=cell_list.end();it++){
 	  const GeomCell *current_cell1 = *it;
 	  if (mcell->Connected(*current_cell,*current_cell1)){
 	    mcell->AddNewCell(*current_cell1);
-	    temp_list.push_back(current_cell1);
+	    // temp_list.push_back(current_cell1);
+	    suceed_list.push_back(current_cell1);
+	    it = cell_list.erase(it);
 	  }
 	}
 	//std::cout << "Small " << suceed_list.size() << " " << temp_list.size() << std::endl;
 	//remove the succeed ones from the original list and add them into the suceed_list
-	for (auto it = temp_list.begin(); it!=temp_list.end(); it++){
-	  const GeomCell *current_cell1 = *it;
-	  cell_list.remove(current_cell1);
-	  suceed_list.push_back(current_cell1);
-	}
+	// for (auto it = temp_list.begin(); it!=temp_list.end(); it++){
+	//   const GeomCell *current_cell1 = *it;
+	//    cell_list.remove(current_cell1);
+	  
+	// }
       }
     }
   }
