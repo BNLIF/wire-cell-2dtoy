@@ -197,8 +197,8 @@ int main(int argc, char* argv[])
 
   cout << "Start the Reconstruction " << endl; 
 
-  int start_num =1228;
-  int end_num = 1230;
+  int start_num =1171;
+  int end_num = 1172;
   // int end_num = sds.size()-1;
 
   // int start_num = 400;
@@ -211,11 +211,12 @@ int main(int argc, char* argv[])
   //int i = 351;{
   //for (int i=0;i!=sds.size();i++){
   for (int i=start_num;i!=end_num+1;i++){
- 
+    
     sds.jump(i);
     sds_th.jump(i);
     WireCell::Slice slice = sds.get();
     WireCell::Slice slice_th = sds_th.get();
+    cout << i << " " << slice.group().size() << " " << slice_th.group().size() << endl;
     //if ( slice.group().size() >0){
       
     toytiling[i] = new WireCell2dToy::ToyTiling(slice,gds,0,0,0,threshold_ug,threshold_vg, threshold_wg);
@@ -224,7 +225,7 @@ int main(int argc, char* argv[])
     cout << "Single Cell: " << i << " "  << allcell.size() << " " << allwire.size() << endl;
     
 
-    mergetiling[i] = new WireCell2dToy::MergeToyTiling(*toytiling[i],i);
+    mergetiling[i] = new WireCell2dToy::MergeToyTiling(*toytiling[i],i,3);
     
     
     GeomCellSelection allmcell = mergetiling[i]->get_allcell();
