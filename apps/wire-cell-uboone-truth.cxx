@@ -92,7 +92,7 @@ int main(int argc, char* argv[])
   
 
   //int i=178;{
-  int i=1173-800;{
+  int i=1172-800;{
     //int i=441;{
     // for (int i=0;i!=sds.size();i++){
     //for (int i=365;i!=378;i++){
@@ -107,7 +107,7 @@ int main(int argc, char* argv[])
 
       cout << allcell.size() << endl;
       
-      mergetiling[i] = new WireCell2dToy::MergeToyTiling(*toytiling[i],i,2);
+      mergetiling[i] = new WireCell2dToy::MergeToyTiling(*toytiling[i],i,3);
       truthtiling[i] = new WireCell2dToy::TruthToyTiling(*toytiling[i],pvv,i,gds);
       
       
@@ -330,34 +330,34 @@ int main(int argc, char* argv[])
 
 
   cout << "Summary: " << ncount << " " << ncount_mcell << " " << ncount_mcell_cluster << endl;
-  TGraph2D *g = new TGraph2D(ncount,x,y,z);
-  TGraph2D *gt = new TGraph2D(ncount_t,xt,yt,zt);
-  TFile *file = new TFile("shower3D.root","RECREATE");
-  g->Write("shower3D");
-  gt->Write("shower3D_truth");
+  // TGraph2D *g = new TGraph2D(ncount,x,y,z);
+  // TGraph2D *gt = new TGraph2D(ncount_t,xt,yt,zt);
+  // TFile *file = new TFile("shower3D.root","RECREATE");
+  // g->Write("shower3D");
+  // gt->Write("shower3D_truth");
 
-  //save cluster
-  int ncluster = 0;
-  for (auto it = cluster_set.begin();it!=cluster_set.end();it++){
-    ncount = 0;
-    for (int i=0; i!=(*it)->get_allcell().size();i++){
-      const MergeGeomCell *mcell = (const MergeGeomCell*)((*it)->get_allcell().at(i));
-      for (int j=0; j!=mcell->get_allcell().size();j++){
-  	Point p = mcell->get_allcell().at(j)->center();
-  	x[ncount] = mcell->GetTimeSlice()*0.32;
-  	y[ncount] = p.y/units::cm;
-  	z[ncount] = p.z/units::cm;
-  	ncount ++;
-      }
-    }
-    // cout << ncount << endl;
-    TGraph2D *g1 = new TGraph2D(ncount,x,y,z);
-    g1->Write(Form("cluster_%d",ncluster));
-    ncluster ++;
-  }
+  // //save cluster
+  // int ncluster = 0;
+  // for (auto it = cluster_set.begin();it!=cluster_set.end();it++){
+  //   ncount = 0;
+  //   for (int i=0; i!=(*it)->get_allcell().size();i++){
+  //     const MergeGeomCell *mcell = (const MergeGeomCell*)((*it)->get_allcell().at(i));
+  //     for (int j=0; j!=mcell->get_allcell().size();j++){
+  // 	Point p = mcell->get_allcell().at(j)->center();
+  // 	x[ncount] = mcell->GetTimeSlice()*0.32;
+  // 	y[ncount] = p.y/units::cm;
+  // 	z[ncount] = p.z/units::cm;
+  // 	ncount ++;
+  //     }
+  //   }
+  //   // cout << ncount << endl;
+  //   TGraph2D *g1 = new TGraph2D(ncount,x,y,z);
+  //   g1->Write(Form("cluster_%d",ncluster));
+  //   ncluster ++;
+  // }
 
-  file->Write();
-  file->Close();
+  // file->Write();
+  // file->Close();
 
   return 0;
   
