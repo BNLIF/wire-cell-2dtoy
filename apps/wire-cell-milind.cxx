@@ -66,6 +66,14 @@ int main(int argc, char* argv[])
        << " y:" << ex[1]/units::m << " m"
        << " z:" << ex[2]/units::m << " m"
        << endl;
+  cout << "Pitch: " << gds.pitch(WirePlaneType_t(0)) 
+       << " " << gds.pitch(WirePlaneType_t(1)) 
+       << " " << gds.pitch(WirePlaneType_t(2))
+       << endl;
+  cout << "Angle: " << gds.angle(WirePlaneType_t(0)) 
+       << " " << gds.angle(WirePlaneType_t(1)) 
+       << " " << gds.angle(WirePlaneType_t(2))
+       << endl;
   
   
   const char* root_file = argv[2];
@@ -192,13 +200,13 @@ int main(int argc, char* argv[])
   //tfile->Close();
 
 
-  int start_num = 0 ;
-  int end_num = sds.size()-1;
+  // int start_num = 0 ;
+  // int end_num = sds.size()-1;
 
   cout << "Start the Reconstruction " << endl; 
 
-  // int start_num =1276;
-  // int end_num = 1278;
+  int start_num =1327;
+  int end_num = 1327+1;
   // int start_num =1193;
   // int end_num = 1200;
   // int end_num = sds.size()-1;
@@ -343,94 +351,107 @@ int main(int argc, char* argv[])
   toymetric.Print();
   std::cout << "Starting MCMC" << std::endl;
 
-  //without  time information
-  for (int i=start_num;i!=end_num+1;i++){
-    if (toymatrix[i]->Get_Solve_Flag()==0){
-      GeomCellSelection allmcell = mergetiling[i]->get_allcell();
-      WireCell2dToy::ToyMatrixMarkov toymatrix_markov(toymatrix[i],&allmcell);
-      CellChargeMap ccmap = truthtiling[i]->ccmap();
-      if (toymatrix[i]->Get_Solve_Flag()!=0)
-  	toymetric.Add(allmcell,*toymatrix[i],ccmap);
-      toymetric.AddSolve(toymatrix[i]->Get_Solve_Flag());
-      cout << "chi2: " << i << " " << toymatrix[i]->Get_Chi2() << endl;
-      cout << "NDF: " << toymatrix[i]->Get_ndf() << endl;
-    }
-  }
+  // //without  time information
+  // for (int i=start_num;i!=end_num+1;i++){
+  //   if (toymatrix[i]->Get_Solve_Flag()==0){
+  //     GeomCellSelection allmcell = mergetiling[i]->get_allcell();
+  //     WireCell2dToy::ToyMatrixMarkov toymatrix_markov(toymatrix[i],&allmcell);
+  //     CellChargeMap ccmap = truthtiling[i]->ccmap();
+  //     if (toymatrix[i]->Get_Solve_Flag()!=0)
+  // 	toymetric.Add(allmcell,*toymatrix[i],ccmap);
+  //     toymetric.AddSolve(toymatrix[i]->Get_Solve_Flag());
+  //     cout << "chi2: " << i << " " << toymatrix[i]->Get_Chi2() << endl;
+  //     cout << "NDF: " << toymatrix[i]->Get_ndf() << endl;
+  //   }
+  // }
     
 
 
 
-  // //with time information
-  // if (start_num != end_num){
-  //   int first_solve;
-  //   for (int i=start_num; i!=end_num+1;i++){
-  //     if (toymatrix[i]->Get_Solve_Flag()!=0){
-  // 	first_solve = i;
-  // 	break;
-  //     }
-  //   }
-  
-
-  //   for (int i=first_solve+1;i<=end_num-1;i++){
-  //     if (toymatrix[i]->Get_Solve_Flag()==0){
-  // 	GeomCellSelection allmcell = mergetiling[i]->get_allcell();
-  // 	WireCell2dToy::ToyMatrixMarkov toymatrix_markov(*toymatrix[i-1],*toymatrix[i],*toymatrix[i+1],*mergetiling[i-1],*mergetiling[i],*mergetiling[i+1],&allmcell);
-  // 	CellChargeMap ccmap = truthtiling[i]->ccmap();
-  // 	if (toymatrix[i]->Get_Solve_Flag()!=0)
-  // 	  toymetric.Add(allmcell,*toymatrix[i],ccmap);
-  // 	toymetric.AddSolve(toymatrix[i]->Get_Solve_Flag());
-
-  // 	cout << "chi2: " << i << " " << toymatrix[i]->Get_Chi2() << endl;
-  // 	cout << "NDF: " << toymatrix[i]->Get_ndf() << endl;
-
-  // 	//toymetric.Print();
-  //     }
-  //   }
-     
-  //   if (toymatrix[end_num]->Get_Solve_Flag()==0){
-  //     GeomCellSelection allmcell = mergetiling[end_num]->get_allcell();
-  //     WireCell2dToy::ToyMatrixMarkov toymatrix_markov(*toymatrix[end_num-1],*toymatrix[end_num],*toymatrix[end_num-1],*mergetiling[end_num-1],*mergetiling[end_num],*mergetiling[end_num-1],&allmcell);
-
+  //with time information
+  if (start_num != end_num){
+    int first_solve=-1;
+    for (int i=start_num; i!=end_num+1;i++){
+      if (toymatrix[i]->Get_Solve_Flag()!=0){
+  	first_solve = i;
+  	break;
+      }
+    }
+    if (first_solve <0){
+      for (int i=start_num;i!=end_num+1;i++){
+	if (toymatrix[i]->Get_Solve_Flag()==0){
+	  GeomCellSelection allmcell = mergetiling[i]->get_allcell();
+	  WireCell2dToy::ToyMatrixMarkov toymatrix_markov(toymatrix[i],&allmcell);
+	  CellChargeMap ccmap = truthtiling[i]->ccmap();
+	  if (toymatrix[i]->Get_Solve_Flag()!=0)
+	    toymetric.Add(allmcell,*toymatrix[i],ccmap);
+	  toymetric.AddSolve(toymatrix[i]->Get_Solve_Flag());
+	  cout << "chi2: " << i << " " << toymatrix[i]->Get_Chi2() << endl;
+	  cout << "NDF: " << toymatrix[i]->Get_ndf() << endl;
+	}
+      }
+    }else{
+      for (int i=first_solve+1;i<=end_num-1;i++){
+	if (toymatrix[i]->Get_Solve_Flag()==0){
+	  GeomCellSelection allmcell = mergetiling[i]->get_allcell();
+	  WireCell2dToy::ToyMatrixMarkov toymatrix_markov(*toymatrix[i-1],*toymatrix[i],*toymatrix[i+1],*mergetiling[i-1],*mergetiling[i],*mergetiling[i+1],&allmcell);
+	  CellChargeMap ccmap = truthtiling[i]->ccmap();
+	  if (toymatrix[i]->Get_Solve_Flag()!=0)
+	    toymetric.Add(allmcell,*toymatrix[i],ccmap);
+	  toymetric.AddSolve(toymatrix[i]->Get_Solve_Flag());
+	  
+	  cout << "chi2: " << i << " " << toymatrix[i]->Get_Chi2() << endl;
+	  cout << "NDF: " << toymatrix[i]->Get_ndf() << endl;
+	  
+	  //toymetric.Print();
+	}
+      }
       
-  //     CellChargeMap ccmap = truthtiling[end_num]->ccmap();
-  //     if (toymatrix[end_num]->Get_Solve_Flag()!=0)
-  // 	toymetric.Add(allmcell,*toymatrix[end_num],ccmap);
-  //     toymetric.AddSolve(toymatrix[end_num]->Get_Solve_Flag());
-
-  //     cout << "chi2: " << end_num << " " << toymatrix[end_num]->Get_Chi2() << endl;
-  //     cout << "NDF: " << toymatrix[end_num]->Get_ndf() << endl;
-  //   }
-      
-  //   // go to early ones 
-  //    for (int i=first_solve-1;i>=start_num+1;i--){
-  //     if (toymatrix[i]->Get_Solve_Flag()==0){
-  // 	GeomCellSelection allmcell = mergetiling[i]->get_allcell();
-  // 	WireCell2dToy::ToyMatrixMarkov toymatrix_markov(*toymatrix[i-1],*toymatrix[i],*toymatrix[i+1],*mergetiling[i-1],*mergetiling[i],*mergetiling[i+1],&allmcell);
-  	
-  // 	CellChargeMap ccmap = truthtiling[i]->ccmap();
-  // 	if (toymatrix[i]->Get_Solve_Flag()!=0)
-  // 	  toymetric.Add(allmcell,*toymatrix[i],ccmap);
-  // 	toymetric.AddSolve(toymatrix[i]->Get_Solve_Flag());
+      if (toymatrix[end_num]->Get_Solve_Flag()==0){
+	GeomCellSelection allmcell = mergetiling[end_num]->get_allcell();
+	WireCell2dToy::ToyMatrixMarkov toymatrix_markov(*toymatrix[end_num-1],*toymatrix[end_num],*toymatrix[end_num-1],*mergetiling[end_num-1],*mergetiling[end_num],*mergetiling[end_num-1],&allmcell);
 	
-  // 	cout << "chi2: " << i << " " << toymatrix[i]->Get_Chi2() << endl;
-  // 	cout << "NDF: " << toymatrix[i]->Get_ndf() << endl;
-  //     }
-  //   }
-     
-  //   if (toymatrix[start_num]->Get_Solve_Flag()==0){
-  //     GeomCellSelection allmcell = mergetiling[start_num]->get_allcell();
-  //     WireCell2dToy::ToyMatrixMarkov toymatrix_markov(*toymatrix[start_num+1],*toymatrix[start_num],*toymatrix[start_num+1],*mergetiling[start_num+1],*mergetiling[start_num],*mergetiling[start_num+1],&allmcell);
-
+	
+	CellChargeMap ccmap = truthtiling[end_num]->ccmap();
+	if (toymatrix[end_num]->Get_Solve_Flag()!=0)
+	  toymetric.Add(allmcell,*toymatrix[end_num],ccmap);
+	toymetric.AddSolve(toymatrix[end_num]->Get_Solve_Flag());
+	
+	cout << "chi2: " << end_num << " " << toymatrix[end_num]->Get_Chi2() << endl;
+	cout << "NDF: " << toymatrix[end_num]->Get_ndf() << endl;
+      }
       
-  //     CellChargeMap ccmap = truthtiling[start_num]->ccmap();
-  //     if (toymatrix[start_num]->Get_Solve_Flag()!=0)
-  // 	toymetric.Add(allmcell,*toymatrix[start_num],ccmap);
-  //     toymetric.AddSolve(toymatrix[start_num]->Get_Solve_Flag());
-
-  //     cout << "chi2: " << start_num << " " << toymatrix[start_num]->Get_Chi2() << endl;
-  //     cout << "NDF: " << toymatrix[start_num]->Get_ndf() << endl;
-  //   }
-  // }
+      // go to early ones 
+      for (int i=first_solve-1;i>=start_num+1;i--){
+	if (toymatrix[i]->Get_Solve_Flag()==0){
+	  GeomCellSelection allmcell = mergetiling[i]->get_allcell();
+	  WireCell2dToy::ToyMatrixMarkov toymatrix_markov(*toymatrix[i-1],*toymatrix[i],*toymatrix[i+1],*mergetiling[i-1],*mergetiling[i],*mergetiling[i+1],&allmcell);
+	  
+	  CellChargeMap ccmap = truthtiling[i]->ccmap();
+	  if (toymatrix[i]->Get_Solve_Flag()!=0)
+	    toymetric.Add(allmcell,*toymatrix[i],ccmap);
+	  toymetric.AddSolve(toymatrix[i]->Get_Solve_Flag());
+	  
+	  cout << "chi2: " << i << " " << toymatrix[i]->Get_Chi2() << endl;
+	  cout << "NDF: " << toymatrix[i]->Get_ndf() << endl;
+	}
+      }
+      
+      if (toymatrix[start_num]->Get_Solve_Flag()==0){
+	GeomCellSelection allmcell = mergetiling[start_num]->get_allcell();
+	WireCell2dToy::ToyMatrixMarkov toymatrix_markov(*toymatrix[start_num+1],*toymatrix[start_num],*toymatrix[start_num+1],*mergetiling[start_num+1],*mergetiling[start_num],*mergetiling[start_num+1],&allmcell);
+	
+	
+	CellChargeMap ccmap = truthtiling[start_num]->ccmap();
+	if (toymatrix[start_num]->Get_Solve_Flag()!=0)
+	  toymetric.Add(allmcell,*toymatrix[start_num],ccmap);
+	toymetric.AddSolve(toymatrix[start_num]->Get_Solve_Flag());
+	
+	cout << "chi2: " << start_num << " " << toymatrix[start_num]->Get_Chi2() << endl;
+	cout << "NDF: " << toymatrix[start_num]->Get_ndf() << endl;
+      }
+    }
+  }
 
 
   
