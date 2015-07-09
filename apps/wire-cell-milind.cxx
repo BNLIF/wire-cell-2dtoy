@@ -205,8 +205,8 @@ int main(int argc, char* argv[])
 
   cout << "Start the Reconstruction " << endl; 
 
-  int start_num =1157;
-  int end_num = 1158;
+  int start_num =1164;
+  int end_num = 1175;
   // int start_num =1193;
   // int end_num = 1200;
   // int end_num = sds.size()-1;
@@ -235,7 +235,7 @@ int main(int argc, char* argv[])
     cout << "Single Cell: " << i << " "  << allcell.size() << " " << allwire.size() << endl;
     
 
-    mergetiling[i] = new WireCell2dToy::MergeToyTiling(*toytiling[i],i,3);
+    mergetiling[i] = new WireCell2dToy::MergeToyTiling(*toytiling[i],i,3,1);
     
     
     GeomCellSelection allmcell = mergetiling[i]->get_allcell();
@@ -463,8 +463,10 @@ int main(int argc, char* argv[])
   for (int i=start_num;i!=end_num+1;i++){
     std::cout << "Check Blob " << i << std::endl;
     //std::cout << toymatrix[i]->GetSimpleBlobReduction() << std::endl;
-    toymatrix[i]->JudgeSimpleBlob(*toytiling[i],*mergetiling[i]);
-    
+    if (!mergetiling[i]->GetRemerged()){
+      toymatrix[i]->JudgeSimpleBlob(*toytiling[i],*mergetiling[i]);
+    }
+
     //std::cout << toymatrix[i]->GetSimpleBlobReduction() << std::endl;
     if (toymatrix[i]->GetSimpleBlobReduction()){
       if (i==start_num){

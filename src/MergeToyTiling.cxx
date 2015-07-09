@@ -311,7 +311,7 @@ WireCell2dToy::MergeToyTiling::MergeToyTiling(WireCell2dToy::ToyTiling& tiling, 
   if (flag_remerge == 1){
     double dis = 3*units::mm;
 
-    while (cell_all.size() > 2 * wire_all.size() || cell_all.size() - wire_all.size() > 50){
+    while (cell_all.size() > 2 * wire_all.size() && cell_all.size() - wire_all.size() > 50){
       dis += 3*units::mm;
       //std::cout << " Start to remerge blob " << cell_all.size() << " " << wire_all.size() << std::endl; 
       IsRemerged = true;
