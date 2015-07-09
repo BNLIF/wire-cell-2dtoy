@@ -214,6 +214,8 @@ WireCell2dToy::ToyMatrix::ToyMatrix(WireCell2dToy::ToyTiling& toytiling, WireCel
     
     *VBy = (*MB) * (*Vy) * (*MBT);
     
+    
+    
     *VBy_inv = *VBy;
     //    if (fabs(VBy->Determinant())<0.01) {
     // std::cout << "Problem " << VBy->Determinant() << std::endl;
@@ -221,8 +223,13 @@ WireCell2dToy::ToyMatrix::ToyMatrix(WireCell2dToy::ToyTiling& toytiling, WireCel
     VBy_inv->Invert();
     
     *MC = (*MAT) * (*VBy_inv) * (*MA);
-    double det = MC->Determinant();
-    
+    //double det = MC->Determinant();
+    double det;
+    if (mcindex <= mwindex){
+      det = MC->Determinant();
+    }else{
+      det = 0;
+    }
     solve_flag = 0;
     if (svd_flag==0){
       if (det > 1e-5)
@@ -335,15 +342,26 @@ WireCell2dToy::ToyMatrix::ToyMatrix(WireCell2dToy::ToyTiling& toytiling, WireCel
     
     *VBy = (*MB) * (*Vy) * (*MBT);
     
+    //    std::cout << "fill in the data" << std::endl;
+
     *VBy_inv = *VBy;
     //    if (fabs(VBy->Determinant())<0.01) {
     // std::cout << "Problem " << VBy->Determinant() << std::endl;
     //}
     VBy_inv->Invert();
     
+    //std::cout << "invert the matrix " << std::endl; 
+
+    
     *MC = (*MAT) * (*VBy_inv) * (*MA);
     solve_flag = 0;
-    double det = MC->Determinant();
+    
+    double det;
+    if (mcindex <= mwindex){
+      det = MC->Determinant();
+    }else{
+      det = 0;
+    }
     if (det > 1e-5){
       Solve();
     }

@@ -235,7 +235,9 @@ int main(int argc, char* argv[])
     
     
     truthtiling[i] = new WireCell2dToy::TruthToyTiling(*toytiling[i],pvv,i,gds,800);
+    //cout << "finish truth tiling " << endl; 
     toymatrix[i] = new WireCell2dToy::ToyMatrix(*toytiling[i],*mergetiling[i]);
+    // cout << "start the iterate " << endl; 
     if (toymatrix[i]->Get_Solve_Flag()==0)
       WireCell2dToy::ToyMatrixIterate toymatrix_it(*toymatrix[i]);
     

@@ -102,6 +102,8 @@ void WireCell2dToy::ToyMatrixKalman::init(WireCell2dToy::ToyMatrix& toymatrix){
 
   if (numz!=0){
     for (int i=0;i!=mcindex;i++){ //loop all possibility
+      //std::cout << i << " " << mcindex << std::endl;
+
       auto it1 = find(already_removed.begin(),already_removed.end(),i);
       auto it2 = find(no_need_remove.begin(),no_need_remove.end(),i);
       if (it1==already_removed.end() && it2 == no_need_remove.end()){ // not in removed
@@ -111,6 +113,8 @@ void WireCell2dToy::ToyMatrixKalman::init(WireCell2dToy::ToyMatrix& toymatrix){
 	
     	int index1 = 0;
     	for (int k=0;k!=mcindex;k++){
+	  
+
     	  auto it1 = find(already_removed.begin(),already_removed.end(),k);
     	  if (it1==already_removed.end() && k!=i ){
     	    for (int j=0;j!=mwindex;j++){
@@ -134,42 +138,42 @@ void WireCell2dToy::ToyMatrixKalman::init(WireCell2dToy::ToyMatrix& toymatrix){
     	}
 	
     	if (numz == numz1) {
-	  
-	  if (check_flag!=0){
-	  //   TMatrixD MA2(mwindex,no_need_remove.size()+1);
-	  //   TMatrixD MA2T(no_need_remove.size()+1,mwindex);
-	  //   TMatrixD MC2(no_need_remove.size()+1,no_need_remove.size()+1);
+	  no_need_remove.push_back(i);
+	  // if (check_flag!=0){
+	  // //   TMatrixD MA2(mwindex,no_need_remove.size()+1);
+	  // //   TMatrixD MA2T(no_need_remove.size()+1,mwindex);
+	  // //   TMatrixD MC2(no_need_remove.size()+1,no_need_remove.size()+1);
 	    
-	  //   int index2 = 0;
-	  //   for (int k=0;k!=mcindex;k++){ //loop all possibility
-	  //     auto it3 = find(no_need_remove.begin(),no_need_remove.end(),k);
-	  //     if (it3 != no_need_remove.end() || k==i){ // not in removed
-	  //   	for (int j=0;j!=mwindex;j++){
-	  //   	  MA2(j,index2) = (*MA_big)(j,k);
-	  //   	}
-	  //   	index2 ++;
-	  //     }
-	  //   }
+	  // //   int index2 = 0;
+	  // //   for (int k=0;k!=mcindex;k++){ //loop all possibility
+	  // //     auto it3 = find(no_need_remove.begin(),no_need_remove.end(),k);
+	  // //     if (it3 != no_need_remove.end() || k==i){ // not in removed
+	  // //   	for (int j=0;j!=mwindex;j++){
+	  // //   	  MA2(j,index2) = (*MA_big)(j,k);
+	  // //   	}
+	  // //   	index2 ++;
+	  // //     }
+	  // //   }
 	    
-	  //   MA2T.Transpose(MA2);
-	  //   MC2 = (MA2T) * (*VBy_inv) * (MA2);
-	  //   TMatrixDEigen Eigen2(MC2);
-	  //   TVectorD EigenValue2(Eigen2.GetEigenValuesRe());
+	  // //   MA2T.Transpose(MA2);
+	  // //   MC2 = (MA2T) * (*VBy_inv) * (MA2);
+	  // //   TMatrixDEigen Eigen2(MC2);
+	  // //   TVectorD EigenValue2(Eigen2.GetEigenValuesRe());
 	    
-	  //   int numz2 = 0;
-	  //   for (int k=0;k!=no_need_remove.size()+1;k++){
-	  //     if (fabs(EigenValue2[k])<1e-5){
-	  //   	numz2 ++;
-	  //     }
-	  //   }
-	  //   if (numz2==0){
-	    no_need_remove.push_back(i);
-	    // }else{
-	    // //   //std::cout << numz2 << std::endl;
-	    // }
-	  }else{
-	    no_need_remove.push_back(i);
-	  }
+	  // //   int numz2 = 0;
+	  // //   for (int k=0;k!=no_need_remove.size()+1;k++){
+	  // //     if (fabs(EigenValue2[k])<1e-5){
+	  // //   	numz2 ++;
+	  // //     }
+	  // //   }
+	  // //   if (numz2==0){
+	    
+	  //   // }else{
+	  //   // //   //std::cout << numz2 << std::endl;
+	  //   // }
+	  // }else{
+	  //   no_need_remove.push_back(i);
+	  // }
 	}
       }
     }

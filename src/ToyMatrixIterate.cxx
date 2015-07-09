@@ -31,14 +31,16 @@ WireCell2dToy::ToyMatrixIterate::ToyMatrixIterate(WireCell2dToy::ToyMatrix &toym
   recon_threshold = recon_t;
 
  
-  toymatrixkalman = new WireCell2dToy::ToyMatrixKalman(toymatrix);  
+  
   //std::cout << "Number of zeros: " << toymatrixkalman->Get_numz() << std::endl;
+  int numz = toymatrix.Get_mcindex() - toymatrix.Get_mwindex();
 
-  estimated_loop = TMath::Factorial(toymatrix.Get_mcindex())/TMath::Factorial(toymatrix.Get_mcindex()-toymatrixkalman->Get_numz())/TMath::Factorial(toymatrixkalman->Get_numz())/25.;
+  estimated_loop = TMath::Factorial(toymatrix.Get_mcindex())/TMath::Factorial(toymatrix.Get_mcindex()-numz)/TMath::Factorial(numz)/25.;
   std::cout << estimated_loop << std::endl;
 
   if (estimated_loop < 1e6){
     time_flag = 0;
+    toymatrixkalman = new WireCell2dToy::ToyMatrixKalman(toymatrix);  
     Iterate(*toymatrixkalman,toymatrix);
   }
   //if not use time information ... 
