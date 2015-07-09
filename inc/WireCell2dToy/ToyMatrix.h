@@ -53,6 +53,7 @@ namespace WireCell2dToy{
     //void Set_blob(int num1){num_blob = num1;};
     int Get_blob(){return num_blob;};
     bool GetSimpleBlobReduction(){return simple_blob_reduction;};
+    void SetSimpleBlobReduction(bool val){simple_blob_reduction = val;};
     void JudgeSimpleBlob(WireCell2dToy::ToyTiling& toytiling, WireCell2dToy::MergeToyTiling& mergetiling);
     
 

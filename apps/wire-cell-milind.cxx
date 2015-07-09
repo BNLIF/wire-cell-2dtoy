@@ -205,8 +205,8 @@ int main(int argc, char* argv[])
 
   cout << "Start the Reconstruction " << endl; 
 
-  int start_num =1327;
-  int end_num = 1327+1;
+  int start_num =1157;
+  int end_num = 1158;
   // int start_num =1193;
   // int end_num = 1200;
   // int end_num = sds.size()-1;
@@ -473,7 +473,8 @@ int main(int argc, char* argv[])
       }else{
   	blobtiling[i] = new WireCell2dToy::SimpleBlobToyTiling(*toytiling[i],*mergetiling[i],*toymatrix[i],*mergetiling[i-1],*toymatrix[i-1],*mergetiling[i+1],*toymatrix[i+1]);
       }
-      
+    }
+    if (toymatrix[i]->GetSimpleBlobReduction()){
       //save stuff
       CellChargeMap ccmap = truthtiling[i]->ccmap();
       blobmetric.Add(*blobtiling[i],ccmap);
@@ -657,41 +658,43 @@ int main(int argc, char* argv[])
     }
 
     //recon 3 with charge and deblob
-    for (int j=0;j!=allmcell.size();j++){
-      MergeGeomCell *mcell = (MergeGeomCell*)allmcell[j];
-      double charge = toymatrix[i]->Get_Cell_Charge(mcell,1);
-      if (charge> recon_threshold && !(mcell->IsSimpleBlob() && mcell->IsBlob())){
-  	for (int k=0;k!=mcell->get_allcell().size();k++){
-  	  Point p = mcell->get_allcell().at(k)->center();
-  	  x_save = i*0.32-256;
-  	  y_save = p.y/units::cm;
-  	  z_save = p.z/units::cm;
-  	  charge_save = charge/mcell->get_allcell().size();
-  	  ncharge_save = mcell->get_allcell().size();
-	  
-  	  g_rec_blob->SetPoint(ncount2,x_save,y_save,z_save);
-  	  t_rec_charge_blob->Fill();
-	  
-  	  ncount2 ++;
-  	}
+    if (toymatrix[i]->GetSimpleBlobReduction()){
+      for (int j=0;j!=blobtiling[i]->Get_Cells().size();j++){
+	const GeomCell *cell = blobtiling[i]->Get_Cells().at(j);
+	Point p = cell->center();
+	x_save = i*0.32-256;
+	y_save = p.y/units::cm;
+	z_save = p.z/units::cm;
+	charge_save = blobtiling[i]->Get_Cell_Charge(cell,1);
+	ncharge_save = 1;
+	
+	g_rec_blob->SetPoint(ncount2,x_save,y_save,z_save);
+	t_rec_charge_blob->Fill();
+	
+	ncount2 ++;
+      }
+    }else{
+      for (int j=0;j!=allmcell.size();j++){
+	MergeGeomCell *mcell = (MergeGeomCell*)allmcell[j];
+	double charge = toymatrix[i]->Get_Cell_Charge(mcell,1);
+	if (charge> recon_threshold ){
+	  for (int k=0;k!=mcell->get_allcell().size();k++){
+	    Point p = mcell->get_allcell().at(k)->center();
+	    x_save = i*0.32-256;
+	    y_save = p.y/units::cm;
+	    z_save = p.z/units::cm;
+	    charge_save = charge/mcell->get_allcell().size();
+	    ncharge_save = mcell->get_allcell().size();
+	    
+	    g_rec_blob->SetPoint(ncount2,x_save,y_save,z_save);
+	    t_rec_charge_blob->Fill();
+	    
+	    ncount2 ++;
+	  }
+	}
       }
     }
-     if (toymatrix[i]->GetSimpleBlobReduction()){
-       for (int j=0;j!=blobtiling[i]->Get_Cells().size();j++){
-  	 const GeomCell *cell = blobtiling[i]->Get_Cells().at(j);
-  	 Point p = cell->center();
-  	 x_save = i*0.32-256;
-  	 y_save = p.y/units::cm;
-  	 z_save = p.z/units::cm;
-  	 charge_save = blobtiling[i]->Get_Cell_Charge(cell,1);
-  	 ncharge_save = 1;
-	 
-  	 g_rec_blob->SetPoint(ncount2,x_save,y_save,z_save);
-  	 t_rec_charge_blob->Fill();
-	  
-  	 ncount2 ++;
-       }
-     }
+    
     
     //save all results
     // file->Write(Form("toytiling_%d",i),toytiling[i]);
