@@ -78,6 +78,7 @@ WireCell2dToy::MergeToyTiling::MergeToyTiling(WireCell2dToy::ToyTiling& tiling, 
       auto it_abc = cell_list.begin();
       const GeomCell *first_cell = *it_abc;
       MergeGeomCell *mcell = new MergeGeomCell(ncell,*first_cell);
+      mcell->SetTimeSlice(time_slice);
       //std::cout << "Big: " << cell_list.size() << " " << cell_all.size() << first_cell->center().y << " " <<first_cell->center().z << std::endl;
       it_abc = cell_list.erase(it_abc);
       ncell++;
@@ -180,6 +181,7 @@ WireCell2dToy::MergeToyTiling::MergeToyTiling(WireCell2dToy::ToyTiling& tiling, 
       if (it!=abc.end()){
 	const GeomCell *cell = *it;
 	MergeGeomCell *mcell = new MergeGeomCell(ncell,*cell);
+	mcell->SetTimeSlice(time_slice);
 	//std::cout << "Big: " << i << " " << cell_all.size() << " " << abc.size()  << std::endl;
 	ncell++;
 	cell_all.push_back(mcell);

@@ -246,7 +246,7 @@ double WireCell2dToy::SimpleBlobToyTiling::CalChi2(){
   Buildup_index();
   
   if (ncount == 1)
-    std::cout << "Dimensions: " << swindex << " " << " " << scindex << wire_all.size() << std::endl;
+    std::cout << "Dimensions: " << swindex << " " << " " << scindex << " " << wire_all.size() << std::endl;
 
   if (swindex==wire_all.size()&&scindex < 500 || ncount==1){
     TMatrixD MA(swindex,scindex);
