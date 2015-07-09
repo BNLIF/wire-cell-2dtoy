@@ -200,13 +200,13 @@ int main(int argc, char* argv[])
   //tfile->Close();
 
 
-  // int start_num = 0 ;
-  // int end_num = sds.size()-1;
+  int start_num = 0 ;
+  int end_num = sds.size()-1;
 
   cout << "Start the Reconstruction " << endl; 
 
-  int start_num =1164;
-  int end_num = 1175;
+  // int start_num =1164;
+  // int end_num = 1175;
   // int start_num =1193;
   // int end_num = 1200;
   // int end_num = sds.size()-1;
