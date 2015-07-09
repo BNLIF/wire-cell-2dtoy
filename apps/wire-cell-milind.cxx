@@ -464,6 +464,7 @@ int main(int argc, char* argv[])
     std::cout << "Check Blob " << i << std::endl;
     //std::cout << toymatrix[i]->GetSimpleBlobReduction() << std::endl;
     toymatrix[i]->JudgeSimpleBlob(*toytiling[i],*mergetiling[i]);
+    
     //std::cout << toymatrix[i]->GetSimpleBlobReduction() << std::endl;
     if (toymatrix[i]->GetSimpleBlobReduction()){
       if (i==start_num){

@@ -11,8 +11,8 @@ using namespace WireCell;
 
 
 
-WireCell2dToy::MergeToyTiling::MergeToyTiling(WireCell2dToy::ToyTiling& tiling, int time_slice, int merge_strategy){
-  
+WireCell2dToy::MergeToyTiling::MergeToyTiling(WireCell2dToy::ToyTiling& tiling, int time_slice, int merge_strategy, int flag_remerge){
+  IsRemerged = false;
 
   ncell = tiling.get_ncell();
   wire_u = tiling.get_wire_u();
@@ -305,6 +305,44 @@ WireCell2dToy::MergeToyTiling::MergeToyTiling(WireCell2dToy::ToyTiling& tiling, 
   // std::cout << ntemp << " " << cell_all.size()<< std::endl;
 
   // Now merge all the wires   wire_all
+  
+  form_wiremap(tiling, time_slice);
+  
+  if (flag_remerge == 1){
+    double dis = 3*units::mm;
+
+    while (cell_all.size() > 2 * wire_all.size() || cell_all.size() - wire_all.size() > 50){
+      dis += 3*units::mm;
+      //std::cout << " Start to remerge blob " << cell_all.size() << " " << wire_all.size() << std::endl; 
+      IsRemerged = true;
+      //clear all wire and all maps
+      for (int i=0;i!=wire_all.size();i++){
+	delete wire_all[i];
+      }
+      wire_u.clear();
+      wire_v.clear();
+      wire_w.clear();
+      wire_all.clear();
+      cellmap.clear();
+      wiremap.clear();
+      cellmap1.clear();
+      wiremap1.clear();
+      wwmap.clear();
+      wwsmap.clear();
+      
+      while(further_merge(cell_all,tiling.get_ncell(),time_slice,dis));
+
+      form_wiremap(tiling, time_slice);
+
+    }
+  }
+
+
+  
+
+}
+
+void WireCell2dToy::MergeToyTiling::form_wiremap(WireCell2dToy::ToyTiling& tiling, int time_slice){
   int ident_wire = 50000;
   
 
@@ -438,9 +476,8 @@ WireCell2dToy::MergeToyTiling::MergeToyTiling(WireCell2dToy::ToyTiling& tiling, 
 
     }
   }
-  
-
 }
+
 
 
 WireCell2dToy::MergeToyTiling::~MergeToyTiling(){
@@ -516,7 +553,7 @@ int WireCell2dToy::MergeToyTiling::further_mergewire(WireCell::GeomWireSelection
 
 
 
-int WireCell2dToy::MergeToyTiling::further_merge(WireCell::GeomCellSelection &allcell, int ncell,int time_slice){
+int WireCell2dToy::MergeToyTiling::further_merge(WireCell::GeomCellSelection &allcell, int ncell,int time_slice, double dis){
   WireCell::GeomCellSelection tempcell = allcell;
   allcell.clear();
   
@@ -524,7 +561,7 @@ int WireCell2dToy::MergeToyTiling::further_merge(WireCell::GeomCellSelection &al
     MergeGeomCell *cell = (MergeGeomCell*)tempcell[i];
       int flag=0;
       for (int k=0;k!=allcell.size();k++){
-	if (((MergeGeomCell*)allcell[k])->AddCell(*cell)){
+	if (((MergeGeomCell*)allcell[k])->AddCell(*cell,dis)){
 	  flag = 1;
 	  break;
 	}
