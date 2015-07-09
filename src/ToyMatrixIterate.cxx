@@ -14,16 +14,18 @@ WireCell2dToy::ToyMatrixIterate::ToyMatrixIterate(WireCell2dToy::ToyMatrix &toym
 
   
   //std::cout << "Number of zeros: " << toymatrixkalman->Get_numz() << std::endl;
-  int numz = toymatrix.Get_mcindex() - toymatrix.Get_mwindex();
-
-  estimated_loop = TMath::Factorial(toymatrix.Get_mcindex())/TMath::Factorial(toymatrix.Get_mcindex()-numz)/TMath::Factorial(numz)/25.;
-  std::cout << estimated_loop << std::endl;
-  //  estimated_loop = TMath::Factorial(toymatrix.Get_mcindex())/TMath::Factorial(toymatrix.Get_mcindex()-toymatrixkalman->Get_numz())/TMath::Factorial(toymatrixkalman->Get_numz())/25.;
+  //int numz = toymatrix.Get_mcindex() - toymatrix.Get_mwindex();
+  toymatrixkalman = new WireCell2dToy::ToyMatrixKalman(already_removed, no_need_remove, toymatrix, 0,0);  
+  
+  //estimated_loop = TMath::Factorial(toymatrix.Get_mcindex())/TMath::Factorial(toymatrix.Get_mcindex()-numz)/TMath::Factorial(numz)/25.;
   //std::cout << estimated_loop << std::endl;
+  estimated_loop = TMath::Factorial(toymatrix.Get_mcindex())/TMath::Factorial(toymatrix.Get_mcindex()-toymatrixkalman->Get_numz())/TMath::Factorial(toymatrixkalman->Get_numz())/25.;
+  std::cout << estimated_loop << std::endl;
 
   if (estimated_loop < 1e6){
     time_flag = 0;
-    toymatrixkalman = new WireCell2dToy::ToyMatrixKalman(already_removed, no_need_remove, toymatrix, 0);  
+    delete toymatrixkalman;
+    toymatrixkalman = new WireCell2dToy::ToyMatrixKalman(already_removed, no_need_remove, toymatrix, 0,1); 
     Iterate(*toymatrixkalman,toymatrix);
   }
 }
@@ -37,14 +39,17 @@ WireCell2dToy::ToyMatrixIterate::ToyMatrixIterate(WireCell2dToy::ToyMatrix &toym
  
   
   //std::cout << "Number of zeros: " << toymatrixkalman->Get_numz() << std::endl;
-  int numz = toymatrix.Get_mcindex() - toymatrix.Get_mwindex();
-
-  estimated_loop = TMath::Factorial(toymatrix.Get_mcindex())/TMath::Factorial(toymatrix.Get_mcindex()-numz)/TMath::Factorial(numz)/25.;
+  //int numz = toymatrix.Get_mcindex() - toymatrix.Get_mwindex();
+  toymatrixkalman = new WireCell2dToy::ToyMatrixKalman(toymatrix,0);  
+  // estimated_loop = TMath::Factorial(toymatrix.Get_mcindex())/TMath::Factorial(toymatrix.Get_mcindex()-numz)/TMath::Factorial(numz)/25.;
+  // std::cout << estimated_loop << std::endl;
+  estimated_loop = TMath::Factorial(toymatrix.Get_mcindex())/TMath::Factorial(toymatrix.Get_mcindex()-toymatrixkalman->Get_numz())/TMath::Factorial(toymatrixkalman->Get_numz())/25.;
   std::cout << estimated_loop << std::endl;
-
+  
   if (estimated_loop < 1e6){
     time_flag = 0;
-    toymatrixkalman = new WireCell2dToy::ToyMatrixKalman(toymatrix);  
+    delete toymatrixkalman;
+    toymatrixkalman = new WireCell2dToy::ToyMatrixKalman(toymatrix,1);  
     Iterate(*toymatrixkalman,toymatrix);
   }
   //if not use time information ... 

@@ -14,7 +14,7 @@ void WireCell2dToy::ToyMatrixMarkov::find_subset(WireCell2dToy::ToyMatrixKalman 
       if (it1 == toymatrix.Get_already_removed().end() && it2 == toymatrix.Get_no_need_remove().end()){
 	std::vector<int> already_removed = toymatrix.Get_already_removed();
 	already_removed.push_back(i);
-	WireCell2dToy::ToyMatrixKalman kalman(already_removed,toymatrix.Get_no_need_remove(),toymatrix1,0);
+	WireCell2dToy::ToyMatrixKalman kalman(already_removed,toymatrix.Get_no_need_remove(),toymatrix1,0,0);
 	
 	if (kalman.Get_numz()==toymatrix.Get_numz()){
 	}else{
@@ -98,7 +98,7 @@ WireCell2dToy::ToyMatrixMarkov::ToyMatrixMarkov(WireCell2dToy::ToyMatrix &toybef
   //initialize
   //toymatrixkalman = new WireCell2dToy::ToyMatrixKalman(*toymatrix);  // hold the current results 
 
-  toymatrixkalman = new WireCell2dToy::ToyMatrixKalman(already_removed, use_time, *toymatrix,1);
+  toymatrixkalman = new WireCell2dToy::ToyMatrixKalman(already_removed, use_time, *toymatrix,1,0);
   std::cout << "With Time: " << toymatrixkalman->Get_numz() << " " << allmcell_c.size() << " " <<  already_removed.size() << std::endl;
   // Find a sub-set that is not degenerated
   // put things into use_time
@@ -107,7 +107,7 @@ WireCell2dToy::ToyMatrixMarkov::ToyMatrixMarkov(WireCell2dToy::ToyMatrix &toybef
   
   // recalculate
   delete toymatrixkalman;
-  toymatrixkalman = new WireCell2dToy::ToyMatrixKalman(already_removed, use_time, toycur,1);
+  toymatrixkalman = new WireCell2dToy::ToyMatrixKalman(already_removed, use_time, toycur,1,0);
   toymatrix->Set_Solve_Flag(0);
   toymatrix->Set_chi2(-1);
 
@@ -137,7 +137,7 @@ WireCell2dToy::ToyMatrixMarkov::ToyMatrixMarkov(WireCell2dToy::ToyMatrix *toymat
   recon_threshold1 = recon_t1;
   recon_threshold2 = recon_t2;
   
-  toymatrixkalman = new WireCell2dToy::ToyMatrixKalman(*toymatrix);  // hold the current results 
+  toymatrixkalman = new WireCell2dToy::ToyMatrixKalman(*toymatrix,0);  // hold the current results 
   
   while (ncount < 1e4 
 	 && (cur_chi2 > 5*(cur_dof+0.1) || ncount < 6000) 
@@ -334,6 +334,8 @@ void WireCell2dToy::ToyMatrixMarkov::make_guess(){
   }
   toymatrixkalman->Get_no_need_remove().clear();
   
+
+  //why initiate again???  //calculate chi2 ... 
   toymatrixkalman->init(*toymatrix);
   //std::cout << toymatrixkalman->Get_already_removed().size() << std::endl;
 }
@@ -347,7 +349,9 @@ void WireCell2dToy::ToyMatrixMarkov::Iterate(WireCell2dToy::ToyMatrixKalman &toy
 	std::vector<int> already_removed = toykalman.Get_already_removed();
 	already_removed.push_back(i);
 	WireCell2dToy::ToyMatrixKalman kalman(already_removed,toykalman.Get_no_need_remove(),*toymatrix,0);
+	
 	Iterate(kalman);
+	
 	toykalman.Get_no_need_remove().push_back(i);
 	if (toymatrix->Get_Chi2()>0) break;
       }
