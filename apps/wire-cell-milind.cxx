@@ -238,9 +238,10 @@ int main(int argc, char* argv[])
     //cout << "finish truth tiling " << endl; 
     toymatrix[i] = new WireCell2dToy::ToyMatrix(*toytiling[i],*mergetiling[i]);
     // cout << "start the iterate " << endl; 
-    if (toymatrix[i]->Get_Solve_Flag()==0)
+    if (toymatrix[i]->Get_Solve_Flag()==0){
       WireCell2dToy::ToyMatrixIterate toymatrix_it(*toymatrix[i]);
-    
+    }
+
     cout << "chi2: " << toymatrix[i]->Get_Chi2() << endl;
     cout << "NDF: " << toymatrix[i]->Get_ndf() << endl;
     
