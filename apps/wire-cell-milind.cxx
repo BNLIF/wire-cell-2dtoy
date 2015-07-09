@@ -714,24 +714,26 @@ int main(int argc, char* argv[])
   g_rec->Write("shower3D_charge");
   g_rec_blob->Write("shower3D_charge_blob");
   
-  const int N = 100000;
-  Double_t x[N],y[N],z[N];
+  // const int N = 100000;
+  // Double_t x[N],y[N],z[N];
+  Double_t x,y,z;
   //save cluster
   int ncluster = 0;
   for (auto it = cluster_set.begin();it!=cluster_set.end();it++){
     ncount = 0;
+    TGraph2D *g1 = new TGraph2D();
     for (int i=0; i!=(*it)->get_allcell().size();i++){
       const MergeGeomCell *mcell = (const MergeGeomCell*)((*it)->get_allcell().at(i));
       for (int j=0; j!=mcell->get_allcell().size();j++){
   	Point p = mcell->get_allcell().at(j)->center();
-  	x[ncount] = mcell->GetTimeSlice()*0.32- 256;
-  	y[ncount] = p.y/units::cm;
-  	z[ncount] = p.z/units::cm;
+  	x = mcell->GetTimeSlice()*0.32- 256;
+  	y = p.y/units::cm;
+  	z = p.z/units::cm;
+	g1->SetPoint(ncount,x,y,z);
   	ncount ++;
       }
     }
     // cout << ncount << endl;
-    TGraph2D *g1 = new TGraph2D(ncount,x,y,z);
     g1->Write(Form("cluster_%d",ncluster));
     ncluster ++;
   }
