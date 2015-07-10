@@ -311,54 +311,81 @@ WireCell2dToy::MergeToyTiling::MergeToyTiling(WireCell2dToy::ToyTiling& tiling, 
   if (flag_remerge == 1){
     double dis = 3*units::mm;
 
-    while (cell_all.size() > 2 * wire_all.size() && cell_all.size() - wire_all.size() > 50){
-      dis += 3*units::mm;
-      //std::cout << " Start to remerge blob " << cell_all.size() << " " << wire_all.size() << std::endl; 
-      IsRemerged = true;
-      //clear all wire and all maps
-      for (int i=0;i!=wire_all.size();i++){
-    	delete wire_all[i];
-      }
-      wire_u.clear();
-      wire_v.clear();
-      wire_w.clear();
-      wire_all.clear();
-      cellmap.clear();
-      wiremap.clear();
-      cellmap1.clear();
-      wiremap1.clear();
-      wwmap.clear();
-      wwsmap.clear();
-      
-      while(further_merge(cell_all,tiling.get_ncell(),time_slice,dis));
-
-      form_wiremap(tiling, time_slice);
-
+    for (int i=0;i!=cell_all.size();i++){
+      MergeGeomCell* mcell = (MergeGeomCell*)cell_all.at(i);
+      //std::cout << "Before: " << mcell->boundary().size() << " " ; 
+      mcell->Organize_edge_boundary();
+      //std::cout << mcell->boundary().size() << std::endl;
     }
 
-    while (tiling.get_allcell().size()>10000 && cell_all.size() >0.45 * wire_all.size()){
-      dis += 3*units::cm;
+    int current_ncell = cell_all.size();
+    int prev_ncell = -1;
+    
+
+    while (cell_all.size() > 2 * wire_all.size() && cell_all.size() - wire_all.size() > 50){
+      dis += 6*units::mm;
+
+
       //std::cout << " Start to remerge blob " << cell_all.size() << " " << wire_all.size() << std::endl; 
       IsRemerged = true;
-      //clear all wire and all maps
-      for (int i=0;i!=wire_all.size();i++){
-    	delete wire_all[i];
-      }
-      wire_u.clear();
-      wire_v.clear();
-      wire_w.clear();
-      wire_all.clear();
-      cellmap.clear();
-      wiremap.clear();
-      cellmap1.clear();
-      wiremap1.clear();
-      wwmap.clear();
-      wwsmap.clear();
+      
       
       while(further_merge(cell_all,tiling.get_ncell(),time_slice,dis));
+      
+      current_ncell = cell_all.size();
+      if (current_ncell != prev_ncell){
+	//clear all wire and all maps
+	for (int i=0;i!=wire_all.size();i++){
+	  delete wire_all[i];
+	}
+	wire_u.clear();
+	wire_v.clear();
+	wire_w.clear();
+	wire_all.clear();
+	cellmap.clear();
+	wiremap.clear();
+	cellmap1.clear();
+	wiremap1.clear();
+	wwmap.clear();
+	wwsmap.clear();
+	form_wiremap(tiling, time_slice);
+      }
+      prev_ncell = current_ncell;
+    }
 
-      form_wiremap(tiling, time_slice);
+   
+    current_ncell = cell_all.size();
+    prev_ncell = -1;
 
+    
+
+    while (tiling.get_allcell().size()>10000 && cell_all.size() >0.45 * wire_all.size()){
+      dis += sqrt(0.3*0.3/2.*tiling.get_allcell().size())/6.*units::cm;
+
+      
+      IsRemerged = true;
+      while(further_merge(cell_all,tiling.get_ncell(),time_slice,dis));
+      current_ncell = cell_all.size();
+      
+      if (current_ncell != prev_ncell){
+	//clear all wire and all maps
+	for (int i=0;i!=wire_all.size();i++){
+	  delete wire_all[i];
+	}
+	wire_u.clear();
+	wire_v.clear();
+	wire_w.clear();
+	wire_all.clear();
+	cellmap.clear();
+	wiremap.clear();
+	cellmap1.clear();
+	wiremap1.clear();
+	wwmap.clear();
+	wwsmap.clear();
+	form_wiremap(tiling, time_slice);
+      }
+      
+      prev_ncell = current_ncell;
     }
 
   }
@@ -586,11 +613,16 @@ int WireCell2dToy::MergeToyTiling::further_mergewire(WireCell::GeomWireSelection
 int WireCell2dToy::MergeToyTiling::further_merge(WireCell::GeomCellSelection &allcell, int ncell,int time_slice, double dis){
   WireCell::GeomCellSelection tempcell = allcell;
   allcell.clear();
+
   
+
   for (int i=0;i!=tempcell.size();i++){
     MergeGeomCell *cell = (MergeGeomCell*)tempcell[i];
       int flag=0;
       for (int k=0;k!=allcell.size();k++){
+	
+
+
 	if (((MergeGeomCell*)allcell[k])->AddCell(*cell,dis)){
 	  flag = 1;
 	  break;
@@ -612,6 +644,8 @@ int WireCell2dToy::MergeToyTiling::further_merge(WireCell::GeomCellSelection &al
     delete tempcell[i];
   }
   tempcell.clear();
+
+ 
   
   return diff;
 }

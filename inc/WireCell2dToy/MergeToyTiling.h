@@ -19,6 +19,7 @@ namespace WireCell2dToy{
 
   protected:
     bool IsRemerged;
+    
 
     void form_wiremap(WireCell2dToy::ToyTiling& tiling, int time_slice);
 
