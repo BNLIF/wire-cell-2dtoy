@@ -309,7 +309,7 @@ WireCell2dToy::MergeToyTiling::MergeToyTiling(WireCell2dToy::ToyTiling& tiling, 
   form_wiremap(tiling, time_slice);
   
   if (flag_remerge == 1){
-    double dis = 3*units::mm;
+    double dis = 0*units::mm;
 
     for (int i=0;i!=cell_all.size();i++){
       MergeGeomCell* mcell = (MergeGeomCell*)cell_all.at(i);
@@ -321,11 +321,42 @@ WireCell2dToy::MergeToyTiling::MergeToyTiling(WireCell2dToy::ToyTiling& tiling, 
     int current_ncell = cell_all.size();
     int prev_ncell = -1;
     
-
+    while (tiling.get_allcell().size()>10000 && cell_all.size() >0.45 * wire_all.size()){
+      dis += sqrt(0.3*0.3/2.*tiling.get_allcell().size())/3.*units::cm;
+      
+      
+      IsRemerged = true;
+      while(further_merge(cell_all,tiling.get_ncell(),time_slice,dis));
+      current_ncell = cell_all.size();
+      
+      if (current_ncell != prev_ncell){
+	//clear all wire and all maps
+	for (int i=0;i!=wire_all.size();i++){
+	  delete wire_all[i];
+	}
+	wire_u.clear();
+	wire_v.clear();
+	wire_w.clear();
+	wire_all.clear();
+	cellmap.clear();
+	wiremap.clear();
+	cellmap1.clear();
+	wiremap1.clear();
+	wwmap.clear();
+	wwsmap.clear();
+	form_wiremap(tiling, time_slice);
+      }
+      
+      prev_ncell = current_ncell;
+    }
+    
+    current_ncell = cell_all.size();
+    prev_ncell = -1;
+    
     while (cell_all.size() > 2 * wire_all.size() && cell_all.size() - wire_all.size() > 50){
       dis += 6*units::mm;
-
-
+      
+      
       //std::cout << " Start to remerge blob " << cell_all.size() << " " << wire_all.size() << std::endl; 
       IsRemerged = true;
       
@@ -353,45 +384,7 @@ WireCell2dToy::MergeToyTiling::MergeToyTiling(WireCell2dToy::ToyTiling& tiling, 
       prev_ncell = current_ncell;
     }
 
-   
-    current_ncell = cell_all.size();
-    prev_ncell = -1;
-
-    
-
-    while (tiling.get_allcell().size()>10000 && cell_all.size() >0.45 * wire_all.size()){
-      dis += sqrt(0.3*0.3/2.*tiling.get_allcell().size())/6.*units::cm;
-
-      
-      IsRemerged = true;
-      while(further_merge(cell_all,tiling.get_ncell(),time_slice,dis));
-      current_ncell = cell_all.size();
-      
-      if (current_ncell != prev_ncell){
-	//clear all wire and all maps
-	for (int i=0;i!=wire_all.size();i++){
-	  delete wire_all[i];
-	}
-	wire_u.clear();
-	wire_v.clear();
-	wire_w.clear();
-	wire_all.clear();
-	cellmap.clear();
-	wiremap.clear();
-	cellmap1.clear();
-	wiremap1.clear();
-	wwmap.clear();
-	wwsmap.clear();
-	form_wiremap(tiling, time_slice);
-      }
-      
-      prev_ncell = current_ncell;
-    }
-
   }
-
-
-  
 
 }
 
