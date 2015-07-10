@@ -336,8 +336,8 @@ WireCell2dToy::MergeToyTiling::MergeToyTiling(WireCell2dToy::ToyTiling& tiling, 
 
     }
 
-    while (tiling.get_allcell().size()>10000 && cell_all.size() - wire_all.size() >0){
-      dis += 1*units::cm;
+    while (tiling.get_allcell().size()>10000 && cell_all.size() >0.45 * wire_all.size()){
+      dis += 3*units::cm;
       //std::cout << " Start to remerge blob " << cell_all.size() << " " << wire_all.size() << std::endl; 
       IsRemerged = true;
       //clear all wire and all maps
