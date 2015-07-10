@@ -317,7 +317,7 @@ WireCell2dToy::MergeToyTiling::MergeToyTiling(WireCell2dToy::ToyTiling& tiling, 
       IsRemerged = true;
       //clear all wire and all maps
       for (int i=0;i!=wire_all.size();i++){
-	delete wire_all[i];
+    	delete wire_all[i];
       }
       wire_u.clear();
       wire_v.clear();
@@ -336,30 +336,30 @@ WireCell2dToy::MergeToyTiling::MergeToyTiling(WireCell2dToy::ToyTiling& tiling, 
 
     }
 
-    while (tiling.get_allcell().size()>10000 && cell_all.size() - wire_all.size() >0){
-      dis += 1*units::cm;
-      //std::cout << " Start to remerge blob " << cell_all.size() << " " << wire_all.size() << std::endl; 
-      IsRemerged = true;
-      //clear all wire and all maps
-      for (int i=0;i!=wire_all.size();i++){
-	delete wire_all[i];
-      }
-      wire_u.clear();
-      wire_v.clear();
-      wire_w.clear();
-      wire_all.clear();
-      cellmap.clear();
-      wiremap.clear();
-      cellmap1.clear();
-      wiremap1.clear();
-      wwmap.clear();
-      wwsmap.clear();
+    // while (tiling.get_allcell().size()>10000 && cell_all.size() - wire_all.size() >0){
+    //   dis += 1*units::cm;
+    //   //std::cout << " Start to remerge blob " << cell_all.size() << " " << wire_all.size() << std::endl; 
+    //   IsRemerged = true;
+    //   //clear all wire and all maps
+    //   for (int i=0;i!=wire_all.size();i++){
+    // 	delete wire_all[i];
+    //   }
+    //   wire_u.clear();
+    //   wire_v.clear();
+    //   wire_w.clear();
+    //   wire_all.clear();
+    //   cellmap.clear();
+    //   wiremap.clear();
+    //   cellmap1.clear();
+    //   wiremap1.clear();
+    //   wwmap.clear();
+    //   wwsmap.clear();
       
-      while(further_merge(cell_all,tiling.get_ncell(),time_slice,dis));
+    //   while(further_merge(cell_all,tiling.get_ncell(),time_slice,dis));
 
-      form_wiremap(tiling, time_slice);
+    //   form_wiremap(tiling, time_slice);
 
-    }
+    // }
 
   }
 
@@ -378,6 +378,7 @@ void WireCell2dToy::MergeToyTiling::form_wiremap(WireCell2dToy::ToyTiling& tilin
       WirePlaneType_t plane = (WirePlaneType_t)k;
       MergeGeomWire *mwire = 0;
       int flag = 0;
+
       for (int j=0;j!=call.size();j++){
    	GeomWireSelection wires = tiling.wires(*call[j]);
   	for (int nwire = 0; nwire!=wires.size();nwire++){
@@ -388,6 +389,7 @@ void WireCell2dToy::MergeToyTiling::form_wiremap(WireCell2dToy::ToyTiling& tilin
 	    if (flag==0){
 	      mwire = new MergeGeomWire(ident_wire,*wires[nwire]);
 	      mwire->SetTimeSlice(time_slice);
+	      
 	      ident_wire++;
 	      flag = 1;
 	    }else {
@@ -397,9 +399,9 @@ void WireCell2dToy::MergeToyTiling::form_wiremap(WireCell2dToy::ToyTiling& tilin
   	}
       }
       
-     
+     wire_all.push_back(mwire);
       
-      wire_all.push_back(mwire);
+     
     }
   }
 
@@ -559,8 +561,10 @@ int WireCell2dToy::MergeToyTiling::further_mergewire(WireCell::GeomWireSelection
   int diff = tempwire.size() - allwire.size();
   
   for (int i=0;i!=tempwire.size();i++){
-    tempwire[i] = 0;
+    delete tempwire[i];
   }
+  tempwire.clear();
+  
   
   return diff;
 
@@ -604,8 +608,10 @@ int WireCell2dToy::MergeToyTiling::further_merge(WireCell::GeomCellSelection &al
   int diff = tempcell.size() - allcell.size();
   
   for (int i=0;i!=tempcell.size();i++){
-    tempcell[i] = 0;
+    //tempcell[i] = 0;
+    delete tempcell[i];
   }
+  tempcell.clear();
   
   return diff;
 }
