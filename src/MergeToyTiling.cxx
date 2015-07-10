@@ -336,30 +336,30 @@ WireCell2dToy::MergeToyTiling::MergeToyTiling(WireCell2dToy::ToyTiling& tiling, 
 
     }
 
-    // while (tiling.get_allcell().size()>10000 && cell_all.size() - wire_all.size() >0){
-    //   dis += 1*units::cm;
-    //   //std::cout << " Start to remerge blob " << cell_all.size() << " " << wire_all.size() << std::endl; 
-    //   IsRemerged = true;
-    //   //clear all wire and all maps
-    //   for (int i=0;i!=wire_all.size();i++){
-    // 	delete wire_all[i];
-    //   }
-    //   wire_u.clear();
-    //   wire_v.clear();
-    //   wire_w.clear();
-    //   wire_all.clear();
-    //   cellmap.clear();
-    //   wiremap.clear();
-    //   cellmap1.clear();
-    //   wiremap1.clear();
-    //   wwmap.clear();
-    //   wwsmap.clear();
+    while (tiling.get_allcell().size()>10000 && cell_all.size() - wire_all.size() >0){
+      dis += 1*units::cm;
+      //std::cout << " Start to remerge blob " << cell_all.size() << " " << wire_all.size() << std::endl; 
+      IsRemerged = true;
+      //clear all wire and all maps
+      for (int i=0;i!=wire_all.size();i++){
+    	delete wire_all[i];
+      }
+      wire_u.clear();
+      wire_v.clear();
+      wire_w.clear();
+      wire_all.clear();
+      cellmap.clear();
+      wiremap.clear();
+      cellmap1.clear();
+      wiremap1.clear();
+      wwmap.clear();
+      wwsmap.clear();
       
-    //   while(further_merge(cell_all,tiling.get_ncell(),time_slice,dis));
+      while(further_merge(cell_all,tiling.get_ncell(),time_slice,dis));
 
-    //   form_wiremap(tiling, time_slice);
+      form_wiremap(tiling, time_slice);
 
-    // }
+    }
 
   }
 
