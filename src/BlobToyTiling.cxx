@@ -11,7 +11,7 @@ WireCell2dToy::BlobToyTiling::BlobToyTiling(WireCell2dToy::ToyTiling& toytiling,
   //all the single wires
   wirechargemap = mergetiling.wcmap();
 
-  GeomWireSet1 tmp_set;
+  GeomWirePtrSet tmp_set;
   for (int i=0;i!= mergetiling.get_wire_u().size();i++){
     tmp_set.insert(mergetiling.get_wire_u().at(i));
   }
