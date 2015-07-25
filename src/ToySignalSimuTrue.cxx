@@ -174,12 +174,14 @@ int WireCell2dToy::ToySignalSimuTrueFDS::jump(int frame_number){
 	htemp->SetBinContent(j+1,content);
       }
       
-      delete hm;
-      delete hp;
-      delete ifft;
-      delete fb;
+      
     }
 
+    delete hm;
+    delete hp;
+    delete ifft;
+    delete fb;
+    
     Trace t;
     t.chid = chid;
     t.tbin = 0;
