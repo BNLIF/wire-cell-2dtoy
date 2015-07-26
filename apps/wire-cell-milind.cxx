@@ -640,54 +640,62 @@ int main(int argc, char* argv[])
     ncluster ++;
   }
 
-  // WireCell2dToy::ToyTiling* tt1;
-  // WireCell2dToy::MergeToyTiling* tt2;
-  // WireCell2dToy::TruthToyTiling* tt3;
 
-  // WireCell2dToy::ToyMatrix* tt4;
-  // WireCell2dToy::ToyMatrixIterate* tt5;
-  // WireCell2dToy::ToyMatrixMarkov* tt6;
-  // WireCell2dToy::SimpleBlobToyTiling *tt7;
-  // int time_slice;
+  // save all the toy tiling stuff
+  WireCell2dToy::ToyTiling* tt1 = 0;
+  int time_slice;
   
-  // TTree* ttree = new TTree("T","T");
-  // ttree->Branch("time_slice",&time_slice,"time_slice/I");
-  // ttree->Branch("toytiling",&tt1);
-  // //ttree->Branch("truthtiling",&tt3);
-  // //ttree->Branch("mergetiling",&tt2);
+  TTree* ttree = new TTree("T","T");
+  ttree->Branch("time_slice",&time_slice,"time_slice/I");
+  ttree->Branch("toytiling",&tt1);
+  ttree->SetDirectory(file);
+  for (int i=start_num;i!=end_num+1;i++){
+    tt1 = toytiling[i];
+    time_slice = i;
+    ttree->Fill();
+  }
+  ttree->Write();
 
+  TTree *ttree1 = new TTree("TC","TC");
+  // To save cluster, we need to save
+  // 1. time slice
+  // 2. single cell
+  // 3. charge
+  // 4. cluster number
+  const GeomCell* cell_save = 0;
+  int cluster_num = 0;
   
-  // //ttree->Branch("toymatrix",&tt4);
-  // // ttree->Branch("toymatrix_ite",&tt5);
-  // // ttree->Branch("toymatrix_markov",&tt6);
-  // //ttree->Branch("blobtiling",&tt7);
+  ttree1->Branch("time_slice",&time_slice,"time_slice/I"); // done
+  ttree1->Branch("cell",&cell_save);
+  ttree1->Branch("ncluster",&cluster_num,"cluster_num/I"); //done
+
+  ttree1->Branch("charge",&charge_save,"charge/D"); 
+  ttree1->Branch("x",&x,"x/D");    //done
+  ttree1->Branch("y",&y,"y/D");
+  ttree1->Branch("z",&z,"z/D");
   
-
-  // ttree->SetDirectory(file);
-  // for (int i=start_num;i!=end_num+1;i++){
-  //   tt1 = toytiling[i];
-  //   //tt3 = truthtiling[i];
-
-  //   //tt2 = mergetiling[i];
+  ttree1->SetDirectory(file);
   
-
-  //   //tt4 = toymatrix[i];
-  //   // tt5 = toymatrix_it[i];
-  //   // tt6 = toymatrix_markov[i];
-  //   //tt7 = blobtiling[i];
-    
-  //   time_slice = i;
-  //   ttree->Fill();
-  // }
-
-  // // TTree *ttree1 = new TTree("TC","TC");
-  // // GeomCluster *cluster;
-  // // ttree1->Branch("cluster",&cluster);
-  // // ttree1->SetDirectory(file);
-  // // for (auto it = cluster_set.begin();it!=cluster_set.end();it++){
-  // //   cluster = *it;
-  // //   ttree1->Fill();
-  // // }
+  for (auto it = cluster_set.begin();it!=cluster_set.end();it++){
+    cluster_num ++;
+    //loop merged cell
+    for (int i=0; i!=(*it)->get_allcell().size();i++){
+      const MergeGeomCell *mcell = (const MergeGeomCell*)((*it)->get_allcell().at(i));
+      time_slice = mcell->GetTimeSlice();
+      x = time_slice *0.32- 256;
+      //loop single cell
+      for (int j=0; j!=mcell->get_allcell().size();j++){
+	cell_save = mcell->get_allcell().at(j);
+	Point p = mcell->get_allcell().at(j)->center();
+	charge_save = toymatrix[time_slice]->Get_Cell_Charge(mcell,1)/mcell->cross_section() * cell_save->cross_section();
+	y = p.y/units::cm;
+  	z = p.z/units::cm;
+	ttree1->Fill();
+	
+      }
+    }
+  }
+  ttree1->Write();
   
  
 
