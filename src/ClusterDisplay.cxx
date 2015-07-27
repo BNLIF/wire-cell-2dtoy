@@ -36,22 +36,22 @@ void WireCell2dToy::ClusterDisplay::DrawHough(SpaceCellSelection& cells, Point& 
 }
 					     
 
-void WireCell2dToy::ClusterDisplay::DrawCluster(SpaceCellSelection& cells){
+void WireCell2dToy::ClusterDisplay::DrawCluster(SpaceCellSelection& mcells){
   Double_t x, y, z;
   TGraph2D *g1 = new TGraph2D();
   
-  for (int i=0;i!=cells.size();i++){
+  for (int i=0;i!=mcells.size();i++){
     
-    SpaceCell *cell = cells.at(i);
-    x = cell->x()/units::cm;
-    y = cell->y()/units::cm;
-    z = cell->z()/units::cm;
-    g1->SetPoint(i,x,y,z);
+    SpaceCell *cell = mcells.at(i);
+      x = cell->x()/units::cm;
+      y = cell->y()/units::cm;
+      z = cell->z()/units::cm;
+      g1->SetPoint(i,x,y,z);
 
     // if (i==0) 
-    //   std::cout << x << " " << y << " " << z << std::endl;
-    
+      //std::cout << x << " " << y << " " << z << std::endl;
+   
   }
-  g1->Draw("p");
+  g1->Draw("p0");
   
 }

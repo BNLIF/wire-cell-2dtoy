@@ -663,12 +663,13 @@ int main(int argc, char* argv[])
   // 3. charge
   // 4. cluster number
   const GeomCell* cell_save = 0;
-  int cluster_num = 0;
+  int cluster_num = -1;
+  int mcell_id = -1;
   
   ttree1->Branch("time_slice",&time_slice,"time_slice/I"); // done
   ttree1->Branch("cell",&cell_save);
   ttree1->Branch("ncluster",&cluster_num,"cluster_num/I"); //done
-
+  ttree1->Branch("mcell_id",&mcell_id,"mcell_id/I");
   ttree1->Branch("charge",&charge_save,"charge/D"); 
   ttree1->Branch("x",&x,"x/D");    //done
   ttree1->Branch("y",&y,"y/D");
@@ -681,6 +682,7 @@ int main(int argc, char* argv[])
     //loop merged cell
     for (int i=0; i!=(*it)->get_allcell().size();i++){
       const MergeGeomCell *mcell = (const MergeGeomCell*)((*it)->get_allcell().at(i));
+      mcell_id ++;
       time_slice = mcell->GetTimeSlice();
       x = time_slice *0.32- 256;
       //loop single cell
