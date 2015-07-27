@@ -88,8 +88,8 @@ int main(int argc, char* argv[])
     }
   }
 
-  std::cout << cells.size() << std::endl;
-	 
+  
+  //std::cout << cells.size() << std::endl;
   //successfully read the TC tree 
   // TC->GetEntry(0);
   //cout << x << " " << y << " " << z << " " << charge << " " << time_slice << " " << cluster_num << " " << cell->cross_section() << " " << cell->center().y << endl;
