@@ -52,7 +52,7 @@ void WireCell2dToy::ClusterDisplay::DrawCluster(SpaceCellSelection& mcells){
       //std::cout << x << " " << y << " " << z << std::endl;
    
   }
-  std::cout << mcells.size() << std::endl;
+  // std::cout << mcells.size() << std::endl;
   g1->Draw("p0");
  
 }
@@ -80,7 +80,20 @@ void WireCell2dToy::ClusterDisplay::DrawCluster(MergeSpaceCellSelection& mcells)
     //std::cout << x << " " << y << " " << z << std::endl;
     
   }
-  std::cout << n << std::endl;
+  // std::cout << n << std::endl;
   g1->Draw("p0");
+
+  TGraph2D *g2 = new TGraph2D();
+  for (int i=0;i!=mcells.size();i++){
+    MergeSpaceCell *mcell = mcells.at(i);
+    Point center = mcell->Get_Center();
+    x = center.x/units::cm;
+    y = center.y/units::cm;
+    z = center.z/units::cm;
+    g2->SetPoint(i,x,y,z);
+  }
+  g2->Draw("Psame");
+  g2->SetMarkerStyle(22);
+  g2->SetMarkerColor(2);
   
 }

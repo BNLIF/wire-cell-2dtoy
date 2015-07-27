@@ -106,15 +106,10 @@ int main(int argc, char* argv[])
     }
 
   }
-  
-  
   mcells.push_back(mcell);
   
   
-  // for (int i=0;i!=mcells.size();i++){
-  //   cout << mcells.at(i).size() << endl;
-  // }
-
+ 
   TApplication theApp("theApp",&argc,argv);
   theApp.SetReturnFromRun(true);
   
