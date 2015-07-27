@@ -52,6 +52,35 @@ void WireCell2dToy::ClusterDisplay::DrawCluster(SpaceCellSelection& mcells){
       //std::cout << x << " " << y << " " << z << std::endl;
    
   }
+  std::cout << mcells.size() << std::endl;
+  g1->Draw("p0");
+ 
+}
+
+
+void WireCell2dToy::ClusterDisplay::DrawCluster(MergeSpaceCellSelection& mcells){
+  Double_t x, y, z;
+  TGraph2D *g1 = new TGraph2D();
+  
+  int n=0;
+  for (int i=0;i!=mcells.size();i++){
+    
+    MergeSpaceCell *mcell = mcells.at(i);
+    
+    for (int j=0;j!=mcell->Get_all_spacecell().size();j++){
+      SpaceCell *cell = mcell->Get_all_spacecell().at(j);
+    
+      x = cell->x()/units::cm;
+      y = cell->y()/units::cm;
+      z = cell->z()/units::cm;
+      g1->SetPoint(n,x,y,z);
+      n++;
+    }
+    // if (i==0) 
+    //std::cout << x << " " << y << " " << z << std::endl;
+    
+  }
+  std::cout << n << std::endl;
   g1->Draw("p0");
   
 }

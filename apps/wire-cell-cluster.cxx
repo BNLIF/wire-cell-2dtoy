@@ -80,28 +80,36 @@ int main(int argc, char* argv[])
   int flag = 0;
   SpaceCellSelection cells;
 
+
+  MergeSpaceCell *mcell;
+  
   for (int i=0;i!=TC->GetEntries();i++){
     TC->GetEntry(i);
    
     //cluster starting at 0
     if (cluster_num == ncluster){
-      // if (flag!=0 && mcell_id != prev_mcell_id){
-      // 	mcells.push_back(cells);
-      // 	cells.clear();
-      // }
-
+      
+      if (flag == 0){
+	mcell = new MergeSpaceCell();
+	flag = 1;
+      }else if (flag==1 && mcell_id!=prev_mcell_id){
+	mcells.push_back(mcell);
+	mcell = new MergeSpaceCell();
+      }
+      
       SpaceCell *space_cell = new SpaceCell(cluster_num,*cell,x*units::cm,charge,0.32*units::cm);
+      mcell->AddSpaceCell(space_cell);
       cells.push_back(space_cell);
       
 
-      // prev_mcell_id = mcell_id;
+      prev_mcell_id = mcell_id;
     }
 
   }
   
-  // if (cells.size()>0){
-  //   mcells.push_back(cells);
-  // }
+  
+  mcells.push_back(mcell);
+  
   
   // for (int i=0;i!=mcells.size();i++){
   //   cout << mcells.at(i).size() << endl;
@@ -114,7 +122,8 @@ int main(int argc, char* argv[])
   c1.Draw();
   
   WireCell2dToy::ClusterDisplay display(c1);
-  display.DrawCluster(cells);
+  // display.DrawCluster(cells);
+  display.DrawCluster(mcells);
 
   // Point p;
   // p.x = cells.at(0)->x();

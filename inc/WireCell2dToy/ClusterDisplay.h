@@ -2,6 +2,7 @@
 #define WIRECELL2DTOY_CLUSTERDISPLAY_H
 #include "WireCellData/Point.h"
 #include "WireCellData/SpaceCell.h"
+#include "WireCellData/MergeSpaceCell.h"
 
 #include "TPad.h"
 #include "TH2F.h"
@@ -23,6 +24,7 @@ namespace WireCell2dToy {
 	virtual ~ClusterDisplay();
     
 	void DrawCluster(WireCell::SpaceCellSelection& cells);
+	void DrawCluster(WireCell::MergeSpaceCellSelection& mcells);
 	void DrawHough(WireCell::SpaceCellSelection& cells, WireCell::Point& p, double dis_near, double dis_far);
 
     };
