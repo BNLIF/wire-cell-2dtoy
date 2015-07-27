@@ -14,6 +14,11 @@ namespace WireCell2dToy{
     
   protected:
     WireCell::ClusterTrackSelection all_clustertrack;
+
+    WireCell::MergeSpaceCellSelection used_mcells; // save used mergespacecell
+    WireCell::MergeSpaceCellSelection end_mcells; // save all the merge spacecell at the beginning/end of a clustertrack
+
+    WireCell::MergeSpaceCellMap mcells_map;
     
   };
   
