@@ -20,6 +20,7 @@ namespace WireCell2dToy{
 
     WireCell::MergeSpaceCellMap mcells_map;
     
+    WireCell::MergeSpaceCellCounter mcells_counter;
   };
   
 }
