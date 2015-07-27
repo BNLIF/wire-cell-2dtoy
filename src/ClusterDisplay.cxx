@@ -1,5 +1,6 @@
 #include "WireCell2dToy/ClusterDisplay.h"
 #include "TGraph2D.h"
+#include "TVector3.h"
 
 using namespace WireCell;
 
@@ -11,16 +12,44 @@ WireCell2dToy::ClusterDisplay::ClusterDisplay(TPad& pad)
 WireCell2dToy::ClusterDisplay::~ClusterDisplay(){
 }
 
+void WireCell2dToy::ClusterDisplay::DrawHough(SpaceCellSelection& cells, Point& p, double dis_near, double dis_far){
+  TH2F *h1 = new TH2F("h1","h1",180,0,3.1415926,360,-3.1415926,3.1415926);
+  Double_t x,y,z;
+  Double_t x0 = p.x;
+  Double_t y0 = p.y;
+  Double_t z0 = p.z;
+
+  for (int i=0;i!=cells.size();i++){
+    SpaceCell *cell = cells.at(i);
+    x = cell->x();
+    y = cell->y();
+    z = cell->z();
+    
+    TVector3 vec(x-x0,y-y0,z-z0);
+    if (vec.Mag() < dis_far && vec.Mag() >= dis_near){
+      h1->Fill(vec.Theta(),vec.Phi());
+    }
+    
+  }
+  
+  h1->Draw("COLZ");
+}
+					     
+
 void WireCell2dToy::ClusterDisplay::DrawCluster(SpaceCellSelection& cells){
   Double_t x, y, z;
   TGraph2D *g1 = new TGraph2D();
   
   for (int i=0;i!=cells.size();i++){
+    
     SpaceCell *cell = cells.at(i);
     x = cell->x()/units::cm;
     y = cell->y()/units::cm;
     z = cell->z()/units::cm;
     g1->SetPoint(i,x,y,z);
+
+    // if (i==0) 
+    //   std::cout << x << " " << y << " " << z << std::endl;
     
   }
   g1->Draw("p");

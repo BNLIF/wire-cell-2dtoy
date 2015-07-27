@@ -99,6 +99,13 @@ int main(int argc, char* argv[])
   WireCell2dToy::ClusterDisplay display(c1);
   display.DrawCluster(cells);
 
+  Point p;
+  p.x = cells.at(0)->x();
+  p.y = cells.at(0)->y();
+  p.z = cells.at(0)->z();
+  display.DrawHough(cells,p,-1,10*units::m);
+  
+
   theApp.Run();
   //std::cout << cells.size() << std::endl;
   //successfully read the TC tree 

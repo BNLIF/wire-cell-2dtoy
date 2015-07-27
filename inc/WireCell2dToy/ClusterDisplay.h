@@ -23,7 +23,7 @@ namespace WireCell2dToy {
 	virtual ~ClusterDisplay();
     
 	void DrawCluster(WireCell::SpaceCellSelection& cells);
-	
+	void DrawHough(WireCell::SpaceCellSelection& cells, WireCell::Point& p, double dis_near, double dis_far);
 
     };
 
