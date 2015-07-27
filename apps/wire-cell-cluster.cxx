@@ -47,11 +47,11 @@ int main(int argc, char* argv[])
   T->SetBranchAddress("time_slice",&time_slice);
   T->SetBranchAddress("toytiling",&tt);
 
-  T->GetEntry(855);
+  //T->GetEntry(855);
   // cout << tt->get_allwire().size() << " " << tt->get_allcell().size() << endl;
 
-  const GeomCell *cell = tt->get_allcell().at(5);
-  const GeomWire *wire = tt->get_allwire().at(3);
+  const GeomCell *cell = 0;//tt->get_allcell().at(5);
+  const GeomWire *wire = 0;//tt->get_allwire().at(3);
   //cout << cell->cross_section() << " " << cell->center().y << endl;
 
   // GeomCellMap cellmap = tt->cmap();

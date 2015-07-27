@@ -81,7 +81,7 @@ void WireCell2dToy::ClusterDisplay::DrawCluster(MergeSpaceCellSelection& mcells)
     
   }
   // std::cout << n << std::endl;
-  g1->Draw("p0");
+  g1->Draw("p");
 
   TGraph2D *g2 = new TGraph2D();
   for (int i=0;i!=mcells.size();i++){
