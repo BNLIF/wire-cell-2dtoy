@@ -1,7 +1,9 @@
 #include "WireCell2dToy/ToyTiling.h"
+#include "WireCell2dToy/ClusterDisplay.h"
 #include "WireCellData/MergeGeomCell.h"
 #include "WireCellData/MergeGeomWire.h"
 #include "WireCellData/SpaceCell.h"
+
 
 #include "TApplication.h"
 #include "TString.h"
@@ -70,7 +72,7 @@ int main(int argc, char* argv[])
   
   SpaceCellSelection cells;
 
-  int flag = 0;
+  //int flag = 0;
 
   for (int i=0;i!=TC->GetEntries();i++){
     TC->GetEntry(i);
@@ -88,7 +90,16 @@ int main(int argc, char* argv[])
     }
   }
 
+  TApplication theApp("theApp",&argc,argv);
+  theApp.SetReturnFromRun(true);
   
+  TCanvas c1("ToyMC","ToyMC",800,600);
+  c1.Draw();
+  
+  WireCell2dToy::ClusterDisplay display(c1);
+  display.DrawCluster(cells);
+
+  theApp.Run();
   //std::cout << cells.size() << std::endl;
   //successfully read the TC tree 
   // TC->GetEntry(0);
