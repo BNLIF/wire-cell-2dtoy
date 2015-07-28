@@ -1,6 +1,7 @@
 #include "WireCell2dToy/ClusterDisplay.h"
 #include "TGraph2D.h"
 #include "TVector3.h"
+#include "TRandom.h"
 
 using namespace WireCell;
 
@@ -52,16 +53,17 @@ void WireCell2dToy::ClusterDisplay::DrawCrawler(WireCell2dToy::ToyCrawler& toycr
     for (int j=0;j!=clustertrack->Get_allmcells().size();j++){
       MergeSpaceCell* mcell = clustertrack->Get_allmcells().at(j);
       Point center = mcell->Get_Center();
-      x = center.x/units::cm ;
-      y = center.y/units::cm ;
-      z = center.z/units::cm ;
+      x = center.x/units::cm;// + gRandom->Uniform(-0.15,0.15);
+      y = center.y/units::cm;// + gRandom->Uniform(-0.15,0.15);
+      z = center.z/units::cm;// + gRandom->Uniform(-0.15,0.15);
       
       g1->SetPoint(n,x,y,z);
       n++;
     }
-    //std::cout << i << " " << n << std::endl;
+    std::cout << i << " " << n << std::endl;
 
     //std::cout << i << " " << n << " " << x << " " << y << " " << z << std::endl;
+    
     
     g1->Draw(option);
     if (num == 7 ) num = 0;

@@ -19,7 +19,8 @@ namespace WireCell2dToy{
     WireCell::MergeSpaceCellSelection end_mcells; // save all the merge spacecell at the beginning/end of a clustertrack
 
     WireCell::MergeSpaceCellMap mcells_map;
-    
+    WireCell::MergeSpaceCellMap mcells_save;
+
     WireCell::MergeSpaceCellCounter mcells_counter;
   };
   

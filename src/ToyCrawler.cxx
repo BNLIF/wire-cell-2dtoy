@@ -21,16 +21,19 @@ WireCell2dToy::ToyCrawler::ToyCrawler(MergeSpaceCellSelection& mcells){
       
       
     }
+    MergeSpaceCellSelection mcell2_sel;
+    mcells_save[mcell1] = mcell2_sel;
     mcells_map[mcell1] = mcell1_sel; // form structure 
-    mcells_counter[mcell1] = 0;  // initiliaization
+    //    mcells_counter[mcell1] = 0;  // initiliaization
   }
 
   //std::cout << mcells_map.size() << " " << mcells_counter.size() << std::endl;
 
-  // for (int qx = 0; qx!=100;qx++){
-  //std::cout << "Xin: " << qx << " " << used_mcells.size() << " " << mcells_map.size() << std::endl;
-  while(used_mcells.size()!=mcells_map.size()){
-  //start to construct ClusterTrack ... first one 
+  //for (int qx = 0; qx!=10;qx++){
+  //
+    while(used_mcells.size()!=mcells_map.size()){
+    // std::cout << "Xin: " << qx << " " << used_mcells.size() << " " << mcells_map.size() << std::endl;
+    //start to construct ClusterTrack ... first one 
   ClusterTrack *ctrack;
   // find the start point
   int flag1 = 0;
@@ -41,14 +44,14 @@ WireCell2dToy::ToyCrawler::ToyCrawler(MergeSpaceCellSelection& mcells){
     
     if (it1 == used_mcells.end()  // not insided the used ones
 	|| (it2 != end_mcells.end()// inside the end ones
-	    && mcells_map[mcell].size()> mcells_counter[mcell] //not used all    
+	    && mcells_map[mcell].size()> mcells_save[mcell].size() //not used all    
 	    )) {
       ctrack = new ClusterTrack(mcell);
       if (it2==end_mcells.end())
 	end_mcells.push_back(mcell);
       if (it1 == used_mcells.end())
 	used_mcells.push_back(mcell);
-      mcells_counter[mcell] ++;
+      //mcells_counter[mcell] ++;
       flag1 = 1;
       break;
     }
@@ -61,7 +64,7 @@ WireCell2dToy::ToyCrawler::ToyCrawler(MergeSpaceCellSelection& mcells){
       MergeSpaceCell *cur_cell = ctrack->Get_LastMSCell();
       int num_daughter = mcells_map[cur_cell].size();
       
-      //   std::cout << "nd: " << num_daughter << std::endl;
+      //      std::cout << "nd: " << num_daughter << std::endl;
       
       if (num_daughter == 0 ){ // no daugher, end
 	flag = 1;
@@ -82,11 +85,8 @@ WireCell2dToy::ToyCrawler::ToyCrawler(MergeSpaceCellSelection& mcells){
 	    flag = 1;
 	    if (it3 != end_mcells.end()){
 	      // already used, add it, and end it
-	      if (mcells_counter[dcell]+1 < mcells_map[dcell].size()){
-		ctrack->AddMSCell(dcell);
-	      }
+	      ctrack->AddMSCell(dcell);
 	    }
-	    
 	  }
 	}
       } // # of daughter  == 1
@@ -96,6 +96,9 @@ WireCell2dToy::ToyCrawler::ToyCrawler(MergeSpaceCellSelection& mcells){
 	  for (int i=0; i!=num_daughter;i++){
 	    MergeSpaceCell *dcell = mcells_map[cur_cell].at(i);
 	    auto it1 = find(ctrack->Get_allmcells().begin(),ctrack->Get_allmcells().end(),dcell);
+	    
+	    std::cout << it1 - ctrack->Get_allmcells().end() << std::endl;
+
 	    if (it1 == ctrack->Get_allmcells().end()){
 	      // not used yet
 	      auto it2 = find(used_mcells.begin(),used_mcells.end(),dcell);
@@ -110,7 +113,8 @@ WireCell2dToy::ToyCrawler::ToyCrawler(MergeSpaceCellSelection& mcells){
 		flag = 1;
 		if (it3 != end_mcells.end()){
 		  // already used, add it, and end it
-		  if (mcells_counter[dcell]+1 < mcells_map[dcell].size()){
+		  auto it4 = find(mcells_save[cur_cell].begin(),mcells_save[cur_cell].end(),dcell);
+		  if (it4 == mcells_save[cur_cell].end()){
 		    ctrack->AddMSCell(dcell);
 		    break;
 		  }
@@ -143,9 +147,9 @@ WireCell2dToy::ToyCrawler::ToyCrawler(MergeSpaceCellSelection& mcells){
 	      flag = 1;
 	      if (it4 != end_mcells.end()){
 		// already used, add it, and end it
-		if (mcells_counter[dcell1]+1 < mcells_map[dcell1].size()){
+		//if (mcells_counter[dcell1]+1 < mcells_map[dcell1].size()){
 		  ctrack->AddMSCell(dcell1);
-		}
+		  //}
 	      }
 	    }
 	    
@@ -163,9 +167,9 @@ WireCell2dToy::ToyCrawler::ToyCrawler(MergeSpaceCellSelection& mcells){
 	      flag = 1;
 	      if (it4 != end_mcells.end()){
 		// already used, add it, and end it
-		if (mcells_counter[dcell2]+1 < mcells_map[dcell2].size()){
+		//if (mcells_counter[dcell2]+1 < mcells_map[dcell2].size()){
 		  ctrack->AddMSCell(dcell2);
-		}
+		  //}
 	      }
 	    }
 	    
@@ -204,7 +208,9 @@ WireCell2dToy::ToyCrawler::ToyCrawler(MergeSpaceCellSelection& mcells){
 		  // already used, add it, and end it
 
 		  //		  std::cout << mcells_counter[dcell] << " " << mcells_map[dcell].size() << std::endl;
-		  if (mcells_counter[dcell]+1 < mcells_map[dcell].size()){
+		  auto it4 = find(mcells_save[cur_cell].begin(),mcells_save[cur_cell].end(),dcell);
+		  if (it4 == mcells_save[cur_cell].end()){
+		  //if (mcells_counter[dcell]+1 < mcells_map[dcell].size()){
 		    ctrack->AddMSCell(dcell);
 		    break;
 		  }
@@ -227,8 +233,20 @@ WireCell2dToy::ToyCrawler::ToyCrawler(MergeSpaceCellSelection& mcells){
       auto it = find(end_mcells.begin(),end_mcells.end(),ctrack->Get_LastMSCell());
       if (it == end_mcells.end())
 	end_mcells.push_back(ctrack->Get_LastMSCell());
-      mcells_counter[ctrack->Get_LastMSCell()] ++;
     }
+    
+    if (ctrack->Get_allmcells().size()!=1){
+      MergeSpaceCell *fcell = ctrack->Get_FirstMSCell();
+      MergeSpaceCell *fcell_next = ctrack->Get_allmcells().at(1);
+
+      MergeSpaceCell *lcell = ctrack->Get_LastMSCell();
+      MergeSpaceCell *lcell_next = ctrack->Get_allmcells().at(ctrack->Get_allmcells().size()-2);
+
+      mcells_save[fcell].push_back(fcell_next);
+      mcells_save[lcell].push_back(lcell_next);
+    }
+    
+
     all_clustertrack.push_back(ctrack);
   }
 
