@@ -60,7 +60,7 @@ void WireCell2dToy::ClusterDisplay::DrawCrawler(WireCell2dToy::ToyCrawler& toycr
       g1->SetPoint(n,x,y,z);
       n++;
     }
-    std::cout << i << " " << n << std::endl;
+    //std::cout << i << " " << n << std::endl;
 
     //std::cout << i << " " << n << " " << x << " " << y << " " << z << std::endl;
     
@@ -127,7 +127,7 @@ void WireCell2dToy::ClusterDisplay::DrawCluster(MergeSpaceCellSelection& mcells,
   // g1->GetYaxis()->SetRangeUser(195,210);
   // g1->GetZaxis()->SetRangeUser(335,345);
 
-  std::cout << mcells.size() << std::endl;
+  //  std::cout << mcells.size() << std::endl;
 
   TGraph2D *g2 = new TGraph2D();
   for (int i=0;i!=mcells.size();i++){

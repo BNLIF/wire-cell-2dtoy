@@ -105,7 +105,7 @@ WireCell2dToy::ToyCrawler::ToyCrawler(MergeSpaceCellSelection& mcells){
 	    MergeSpaceCell *dcell = mcells_map[cur_cell].at(i);
 	    auto it1 = find(ctrack->Get_allmcells().begin(),ctrack->Get_allmcells().end(),dcell);
 	    
-	    std::cout << it1 - ctrack->Get_allmcells().end() << std::endl;
+	    //std::cout << it1 - ctrack->Get_allmcells().end() << std::endl;
 
 	    if (it1 == ctrack->Get_allmcells().end()){
 	      // not used yet
