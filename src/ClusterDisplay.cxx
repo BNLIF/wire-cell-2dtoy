@@ -34,9 +34,45 @@ void WireCell2dToy::ClusterDisplay::DrawHough(SpaceCellSelection& cells, Point& 
   
   h1->Draw("COLZ");
 }
+
+void WireCell2dToy::ClusterDisplay::DrawCrawler(WireCell2dToy::ToyCrawler& toycrawler, TString option){
+  
+  std::cout << "Draw Crawler " << " " << toycrawler.Get_allCT().size() << std::endl;
+
+  int color[7]={3,4,5,6,7,8,9};
+  int style[7]={21,22,23,24,25,26,27};
+  int num = 0;
+  
+  for (int i=0;i!=toycrawler.Get_allCT().size();i++){
+    ClusterTrack* clustertrack = toycrawler.Get_allCT().at(i);
+    Double_t x, y, z;
+    TGraph2D *g1 = new TGraph2D();
+    int n= 0;
+    for (int j=0;j!=clustertrack->Get_allmcells().size();j++){
+      MergeSpaceCell* mcell = clustertrack->Get_allmcells().at(j);
+      Point center = mcell->Get_Center();
+      x = center.x/units::cm ;
+      y = center.y/units::cm ;
+      z = center.z/units::cm ;
+      
+      g1->SetPoint(n,x,y,z);
+      n++;
+    }
+    //std::cout << i << " " << n << std::endl;
+
+    std::cout << i << " " << n << " " << x << " " << y << " " << z << std::endl;
+    
+    g1->Draw(option);
+    if (num == 7 ) num = 0;
+    g1->SetMarkerColor(color[num]);
+    g1->SetMarkerStyle(style[num]);
+    num++;
+  }
+
+}
 					     
 
-void WireCell2dToy::ClusterDisplay::DrawCluster(SpaceCellSelection& mcells){
+void WireCell2dToy::ClusterDisplay::DrawCluster(SpaceCellSelection& mcells, TString option){
   Double_t x, y, z;
   TGraph2D *g1 = new TGraph2D();
   
@@ -53,12 +89,12 @@ void WireCell2dToy::ClusterDisplay::DrawCluster(SpaceCellSelection& mcells){
    
   }
   // std::cout << mcells.size() << std::endl;
-  g1->Draw("p0");
+  g1->Draw(option);
  
 }
 
 
-void WireCell2dToy::ClusterDisplay::DrawCluster(MergeSpaceCellSelection& mcells){
+void WireCell2dToy::ClusterDisplay::DrawCluster(MergeSpaceCellSelection& mcells,TString option){
   Double_t x, y, z;
   TGraph2D *g1 = new TGraph2D();
   
@@ -81,7 +117,12 @@ void WireCell2dToy::ClusterDisplay::DrawCluster(MergeSpaceCellSelection& mcells)
     
   }
   // std::cout << n << std::endl;
-  g1->Draw("p");
+  g1->Draw(option);
+
+  //test 
+  // g1->GetXaxis()->SetRangeUser(0,30);
+  // g1->GetYaxis()->SetRangeUser(80,100);
+  // g1->GetZaxis()->SetRangeUser(250,260);
 
   TGraph2D *g2 = new TGraph2D();
   for (int i=0;i!=mcells.size();i++){

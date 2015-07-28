@@ -4,11 +4,14 @@
 #include "WireCellData/SpaceCell.h"
 #include "WireCellData/MergeSpaceCell.h"
 
+#include "WireCell2dToy/ToyCrawler.h"
+
 #include "TPad.h"
 #include "TH2F.h"
 #include "TString.h"
 #include "TGraph.h"
 #include "TPolyLine.h"
+#include "TString.h"
 
 namespace WireCell2dToy {
 
@@ -23,8 +26,9 @@ namespace WireCell2dToy {
 	ClusterDisplay(TPad& pad);
 	virtual ~ClusterDisplay();
     
-	void DrawCluster(WireCell::SpaceCellSelection& cells);
-	void DrawCluster(WireCell::MergeSpaceCellSelection& mcells);
+	void DrawCluster(WireCell::SpaceCellSelection& cells, TString option = "p0");
+	void DrawCluster(WireCell::MergeSpaceCellSelection& mcells, TString option = "p");
+	void DrawCrawler(ToyCrawler& toycrawler, TString option = "p");
 	void DrawHough(WireCell::SpaceCellSelection& cells, WireCell::Point& p, double dis_near, double dis_far);
 
     };

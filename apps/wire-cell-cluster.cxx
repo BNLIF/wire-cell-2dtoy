@@ -1,5 +1,7 @@
 #include "WireCell2dToy/ToyTiling.h"
 #include "WireCell2dToy/ClusterDisplay.h"
+#include "WireCell2dToy/ToyCrawler.h"
+
 #include "WireCellData/MergeGeomCell.h"
 #include "WireCellData/MergeGeomWire.h"
 #include "WireCellData/SpaceCell.h"
@@ -108,7 +110,9 @@ int main(int argc, char* argv[])
   }
   mcells.push_back(mcell);
   
-  
+
+  // do the Toy Crawler
+  WireCell2dToy::ToyCrawler toycrawler(mcells);
  
   TApplication theApp("theApp",&argc,argv);
   theApp.SetReturnFromRun(true);
@@ -119,6 +123,7 @@ int main(int argc, char* argv[])
   WireCell2dToy::ClusterDisplay display(c1);
   // display.DrawCluster(cells);
   display.DrawCluster(mcells);
+  display.DrawCrawler(toycrawler,"psame");
 
   // Point p;
   // p.x = cells.at(0)->x();
