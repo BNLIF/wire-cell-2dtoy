@@ -40,7 +40,7 @@ void WireCell2dToy::ClusterDisplay::DrawCrawler(WireCell2dToy::ToyCrawler& toycr
   std::cout << "Draw Crawler " << " " << toycrawler.Get_allCT().size() << std::endl;
 
   int color[7]={3,4,5,6,7,8,9};
-  int style[7]={21,22,23,24,25,26,27};
+  int style[7]={20,21,23,29,33,34,31};
   int num = 0;
   
   for (int i=0;i!=toycrawler.Get_allCT().size();i++){
@@ -55,12 +55,12 @@ void WireCell2dToy::ClusterDisplay::DrawCrawler(WireCell2dToy::ToyCrawler& toycr
       y = center.y/units::cm ;
       z = center.z/units::cm ;
       
-      g1->SetPoint(n,x,y,z);
+      g1->SetPoint(n+1,x,y,z);
       n++;
     }
     //std::cout << i << " " << n << std::endl;
 
-    std::cout << i << " " << n << " " << x << " " << y << " " << z << std::endl;
+    //std::cout << i << " " << n << " " << x << " " << y << " " << z << std::endl;
     
     g1->Draw(option);
     if (num == 7 ) num = 0;
@@ -120,9 +120,11 @@ void WireCell2dToy::ClusterDisplay::DrawCluster(MergeSpaceCellSelection& mcells,
   g1->Draw(option);
 
   //test 
-  // g1->GetXaxis()->SetRangeUser(0,30);
-  // g1->GetYaxis()->SetRangeUser(80,100);
-  // g1->GetZaxis()->SetRangeUser(250,260);
+  g1->GetXaxis()->SetRangeUser(95,105);
+  g1->GetYaxis()->SetRangeUser(195,210);
+  g1->GetZaxis()->SetRangeUser(335,345);
+
+  std::cout << mcells.size() << std::endl;
 
   TGraph2D *g2 = new TGraph2D();
   for (int i=0;i!=mcells.size();i++){
@@ -131,7 +133,7 @@ void WireCell2dToy::ClusterDisplay::DrawCluster(MergeSpaceCellSelection& mcells,
     x = center.x/units::cm;
     y = center.y/units::cm;
     z = center.z/units::cm;
-    g2->SetPoint(i,x,y,z);
+    g2->SetPoint(i+1,x,y,z);
   }
   g2->Draw("Psame");
   g2->SetMarkerStyle(22);

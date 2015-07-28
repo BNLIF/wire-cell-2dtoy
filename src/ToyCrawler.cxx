@@ -61,7 +61,7 @@ WireCell2dToy::ToyCrawler::ToyCrawler(MergeSpaceCellSelection& mcells){
       MergeSpaceCell *cur_cell = ctrack->Get_LastMSCell();
       int num_daughter = mcells_map[cur_cell].size();
       
-      std::cout << "nd: " << num_daughter << std::endl;
+      //   std::cout << "nd: " << num_daughter << std::endl;
       
       if (num_daughter == 0 ){ // no daugher, end
 	flag = 1;
