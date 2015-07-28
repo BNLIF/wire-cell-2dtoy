@@ -29,10 +29,10 @@ WireCell2dToy::ToyCrawler::ToyCrawler(MergeSpaceCellSelection& mcells){
 
   //std::cout << mcells_map.size() << " " << mcells_counter.size() << std::endl;
 
-  //for (int qx = 0; qx!=10;qx++){
+  //for (int qx = 0; qx!=14;qx++){
   //
-    while(used_mcells.size()!=mcells_map.size()){
-    // std::cout << "Xin: " << qx << " " << used_mcells.size() << " " << mcells_map.size() << std::endl;
+  while(used_mcells.size()!=mcells_map.size()){
+    //  std::cout << "Xin: " << qx << " " << used_mcells.size() << " " << mcells_map.size() << std::endl;
     //start to construct ClusterTrack ... first one 
   ClusterTrack *ctrack;
   // find the start point
@@ -42,10 +42,18 @@ WireCell2dToy::ToyCrawler::ToyCrawler(MergeSpaceCellSelection& mcells){
     auto it1 = find(used_mcells.begin(),used_mcells.end(),mcell);
     auto it2 = find(end_mcells.begin(),end_mcells.end(),mcell);
     
+    
+
     if (it1 == used_mcells.end()  // not insided the used ones
 	|| (it2 != end_mcells.end()// inside the end ones
 	    && mcells_map[mcell].size()> mcells_save[mcell].size() //not used all    
 	    )) {
+
+      // std::cout << it1 - used_mcells.end() << " " << 
+      // it2 - end_mcells.end() << " " << 
+      // mcells_map[mcell].size() << " " << mcells_save[mcell].size()
+      // 	      <<std::endl;
+
       ctrack = new ClusterTrack(mcell);
       if (it2==end_mcells.end())
 	end_mcells.push_back(mcell);
@@ -187,13 +195,13 @@ WireCell2dToy::ToyCrawler::ToyCrawler(MergeSpaceCellSelection& mcells){
 	    MergeSpaceCell *dcell = mcells_map[cur_cell].at(i);
 	    auto it1 = find(ctrack->Get_allmcells().begin(),ctrack->Get_allmcells().end(),dcell);
 	    
-	    //std::cout << it1 - ctrack->Get_allmcells().end() << std::endl;
+	    //std::cout << "Xin2: " <<it1 - ctrack->Get_allmcells().end() << std::endl;
 	    
 	    if (it1 == ctrack->Get_allmcells().end()){
 	      // not used yet
 	      auto it2 = find(used_mcells.begin(),used_mcells.end(),dcell);
 
-	      //std::cout << it2 - used_mcells.end() << std::endl;
+	      //std::cout << "Xin3: " << it2 - used_mcells.end() << std::endl;
 	      
 	      if (it2 == used_mcells.end()){
 		//not used yet? add it
@@ -244,6 +252,11 @@ WireCell2dToy::ToyCrawler::ToyCrawler(MergeSpaceCellSelection& mcells){
 
       mcells_save[fcell].push_back(fcell_next);
       mcells_save[lcell].push_back(lcell_next);
+    }else{
+      MergeSpaceCell *fcell = ctrack->Get_FirstMSCell();
+      for (int qq = 0;qq!=mcells_map[fcell].size();qq++){
+	mcells_save[fcell].push_back(mcells_map[fcell].at(qq));
+      }
     }
     
 
