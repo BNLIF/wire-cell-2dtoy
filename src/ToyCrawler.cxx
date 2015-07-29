@@ -7,40 +7,14 @@ WireCell2dToy::ToyCrawler::ToyCrawler(MergeSpaceCellSelection& mcells){
   CreateClusterTrack(mcells);
   FormGraph(); 
 
-  // if # of daughters is only 1
-  // if already taken, end
-  // if not taken, keep adding
+  MergeClusterTrack();
+   
+}
 
-  
-  // if # of daughters is just two
-  // if this is start, just pick one
-  // if this is not start, end
-
-  // if # of daughters is more than two 
-
-  
-
-  // while(mcells_counter[ctrack->Get_LastMSCell()]+1 != mcells_map[ctrack->Get_LastMSCell()].size()){
-  //   // start to look at the next ones
-  //   for (int i=0;i!=mcells_map[ctrack->Get_LastMSCell()].size();i++){
-  //     MergeSpaceCell *mcell = mcells_map[ctrack->Get_LastMSCell()].at(i);
-  //     auto it1 = find(used_mcells.begin(),used_mcells.end(),mcell);
-  //     if (it1 == used_mcells.end()){
-  // 	ctrack->AddMSCell(mcell);
-  // 	used_mcells.push_back(mcell);
-  // 	break;
-  //     }
-  //   }
-  // }
-  
-  // //add the last element
-  // auto it = find(end_mcells.begin(),end_mcells.end(),ctrack->Get_LastMSCell());
-  // if (it == end_mcells.end())
-  //   end_mcells.push_back(ctrack->Get_LastMSCell());
-  // mcells_counter[ctrack->Get_LastMSCell()] ++;
-
+void WireCell2dToy::ToyCrawler::MergeClusterTrack(){
   
 }
+
 
 void WireCell2dToy::ToyCrawler::CreateClusterTrack(MergeSpaceCellSelection& mcells){
   // form associations ...
