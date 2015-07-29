@@ -36,9 +36,9 @@ void WireCell2dToy::ToyCrawler::MergeCTrack(){
 
 	// find the track inside MergeClusterTrack which contain this vertex
 	ClusterTrack* old_cct = mct->GetClusterTrack(vertex);
-	old_cct->SC_Hough(vertex->Get_Center());
-	float theta1 = old_cct->Get_Theta();
-	float phi1 = old_cct->Get_Phi();
+	mct->SC_Hough(vertex->Get_Center());
+	float theta1 = mct->Get_Theta();
+	float phi1 = mct->Get_Phi();
 
 	//
 	
@@ -61,27 +61,67 @@ void WireCell2dToy::ToyCrawler::MergeCTrack(){
 	    float cut_angle = 15;
 	    float cut_angle1 = 5;
 
+	    float shift_angle = 100;
 
 	    if ((fabs(theta1+theta2-3.1415926)<cut_angle/180.*3.1415926 // 5 degrees
 		 && fabs(fabs(phi1-phi2)-3.1415926)<cut_angle/180.*3.1415926)
-		||(fabs(theta1-theta2-100)<cut_angle1/180.*3.1415926 // 5 degrees
+		||(fabs(theta1-theta2-shift_angle)<cut_angle1/180.*3.1415926 // 5 degrees
 		 && fabs(phi1-phi2)<cut_angle1/180.*3.1415926)
 		){
 	      flag = 1;
 	    }
 
-	    if (flag == 0 ){
+	    // if (flag == 0 ){
+	    //   mct->SC_Hough(vertex->Get_Center(), 3 * units::cm);
+	    //   cct->SC_Hough(vertex->Get_Center(), 3 * units::cm);
 	      
-	    }
+	    //   theta1 = mct->Get_Theta();
+	    //   phi1 = mct->Get_Phi();
 
-	    if (flag == 0 ){
+	    //   theta2 = cct->Get_Theta();
+	    //   phi2 = cct->Get_Phi();
+
+	    //   if ((fabs(theta1+theta2-3.1415926)<cut_angle/180.*3.1415926 // 5 degrees
+	    // 	   && fabs(fabs(phi1-phi2)-3.1415926)<cut_angle/180.*3.1415926)
+	    // 	  ||(fabs(theta1-theta2-shift_angle)<cut_angle1/180.*3.1415926 // 5 degrees
+	    // 	     && fabs(phi1-phi2)<cut_angle1/180.*3.1415926)
+	    // 	  ){
+	    // 	flag = 1;
+	    //   }
+	    // }
+
+	     if (flag == 0 ){
+	    //   Point pp = mct->SC_IterativeHough(vertex->Get_Center(), 3 * units::cm);
+	    //   // std::cout << vertex->Get_Center().x/units::cm << " "  
+	    //   // 		<< vertex->Get_Center().y/units::cm << " " 
+	    //   // 		<< vertex->Get_Center().z/units::cm << std::endl;
+	    //   // std::cout << pp.x/units::cm << " " << pp.y/units::cm
+	    //   //  		<< " " << pp.z/units::cm << std::endl;
+	      
+	    //   cct->SC_Hough(pp);
+	    //   theta2 = cct->Get_Theta();
+	    //   phi2 = cct->Get_Phi();
+
+	       int cross_num = cct->CrossNum(vertex->Get_Center(), theta1,phi1);
+	       //std::cout << cross_num << " " << cct->Get_allmcells().size() << std::endl;
+	       if ( cross_num == cct->Get_allmcells().size()){
+	       	 flag = 1;
+	       }
+	     }
 	    
-	    }
 
-	    std::cout <<  i << " " << find(all_clustertrack.begin(),all_clustertrack.end(),old_cct)-all_clustertrack.begin()
-		      << " " << find(all_clustertrack.begin(),all_clustertrack.end(),cct)-all_clustertrack.begin() << " "
-		      << cts.size() << " " 
-		      << flag << " " << (theta1 + theta2-3.1415926)/3.1415926*180. << " " << (fabs(phi1- phi2)-3.1415926)/3.1415926*180. << std::endl;
+	    // std::cout <<  i << " " << find(all_clustertrack.begin(),all_clustertrack.end(),old_cct)-all_clustertrack.begin()
+	    // 	      << " " << find(all_clustertrack.begin(),all_clustertrack.end(),cct)-all_clustertrack.begin() << " "
+	    // 	      << cts.size() << " " 
+	    // 	      << flag << " " << theta1/3.1415926*180. << " " << phi1/3.1415926*180. << " "
+	    // 	      << theta2/3.1415926*180. << " " 
+	    // 	      <<  phi2/3.1415926*180. << " "
+	    // 	      << cct->Get_CTheta(vertex->Get_Center())/3.1415926*180. << " " 
+	    // 	      << cct->Get_CPhi(vertex->Get_Center())/3.1415926*180. << " " 
+	    // 	      << vertex->Get_Center().x/units::cm << " " 
+	    // 	      << vertex->Get_Center().y/units::cm << " " 
+	    // 	      << vertex->Get_Center().z/units::cm << " " 
+	    // 	      << std::endl;
 
 
 	    // if good, save it
@@ -393,9 +433,11 @@ void WireCell2dToy::ToyCrawler::FormGraph(){
     }else{
       ms_ct_map[LMSCell].push_back(ctrack);
     }
-    
-    
+        
   }
+
+  // need to expand the distance cut a little bit ... 
+
 }
 
 

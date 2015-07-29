@@ -16,6 +16,7 @@ namespace WireCell2dToy{
     void MergeCTrack();
 
     WireCell::ClusterTrackSelection& Get_allCT(){return all_clustertrack;};
+    WireCell::MergeClusterTrackSelection& Get_allMCT(){return all_mergeclustertrack;};
     
   protected:
     WireCell::ClusterTrackSelection all_clustertrack;

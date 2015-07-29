@@ -36,47 +36,77 @@ void WireCell2dToy::ClusterDisplay::DrawHough(SpaceCellSelection& cells, Point& 
   h1->Draw("COLZ");
 }
 
-void WireCell2dToy::ClusterDisplay::DrawCrawler(WireCell2dToy::ToyCrawler& toycrawler, TString option){
+void WireCell2dToy::ClusterDisplay::DrawCrawler(WireCell2dToy::ToyCrawler& toycrawler, TString option, int flag){
   
   std::cout << "Draw Crawler " << " " << toycrawler.Get_allCT().size() << std::endl;
 
-  int color[7]={3,4,5,6,7,8,9};
+  int color[9]={3,4,5,6,7,8,9,1,2};
   //int style[7]={24,25,32,30,27,28,31};
   int style[7]={20,21,23,29,33,34,22};
   int num = 0;
   
-  for (int i=0;i!=toycrawler.Get_allCT().size();i++){
-    ClusterTrack* clustertrack = toycrawler.Get_allCT().at(i);
-    Double_t x, y, z;
-    TGraph2D *g1 = new TGraph2D();
-    int n= 0;
 
-
-    for (int j=0;j!=clustertrack->Get_allmcells().size();j++){
-      MergeSpaceCell* mcell = clustertrack->Get_allmcells().at(j);
-      Point center = mcell->Get_Center();
-      x = center.x/units::cm;// + gRandom->Uniform(-0.15,0.15);
-      y = center.y/units::cm;// + gRandom->Uniform(-0.15,0.15);
-      z = center.z/units::cm;// + gRandom->Uniform(-0.15,0.15);
+  if (flag == 0 ){
+    for (int i=0;i!=toycrawler.Get_allCT().size();i++){
+      ClusterTrack* clustertrack = toycrawler.Get_allCT().at(i);
       
-      g1->SetPoint(n,x,y,z);
-      n++;
+      Double_t x, y, z;
+      TGraph2D *g1 = new TGraph2D();
+      int n= 0;
+      
+      for (int j=0;j!=clustertrack->Get_allmcells().size();j++){
+	MergeSpaceCell* mcell = clustertrack->Get_allmcells().at(j);
+	Point center = mcell->Get_Center();
+	x = center.x/units::cm;// + gRandom->Uniform(-0.15,0.15);
+	y = center.y/units::cm;// + gRandom->Uniform(-0.15,0.15);
+	z = center.z/units::cm;// + gRandom->Uniform(-0.15,0.15);
+	
+	g1->SetPoint(n,x,y,z);
+	n++;
+      }
+      //std::cout << i << " " << n << std::endl;
+      // Point center = clustertrack->Get_FirstMSCell()->Get_Center();
+      // clustertrack->SC_Hough(center);
+      // std::cout << i << " " << clustertrack->Get_Theta() << " " << clustertrack->Get_Phi() << " " << center.x/units::cm << " " << center.y/units::cm << " " << center.z/units::cm << std::endl;
+      //std::cout << i << " " << n << " " << x << " " << y << " " << z << std::endl;
+      
+      //   if (i<24)
+	g1->Draw(option);
+      if (num == 7 ) num = 0;
+      g1->SetMarkerColor(color[num]);
+      g1->SetMarkerStyle(style[num]);
+      num++;
     }
-    //std::cout << i << " " << n << std::endl;
-    // Point center = clustertrack->Get_FirstMSCell()->Get_Center();
-    // clustertrack->SC_Hough(center);
-    // std::cout << i << " " << clustertrack->Get_Theta() << " " << clustertrack->Get_Phi() << " " << center.x/units::cm << " " << center.y/units::cm << " " << center.z/units::cm << std::endl;
-    
+  }else if (flag == 1){
+    for (int i=0;i!=toycrawler.Get_allMCT().size();i++){
+      MergeClusterTrack* clustertrack = toycrawler.Get_allMCT().at(i);
+      
+      Double_t x, y, z;
+      TGraph2D *g1 = new TGraph2D();
+      int n= 0;
+      
+      for (int j=0;j!=clustertrack->Get_allmcells().size();j++){
+	MergeSpaceCell* mcell = clustertrack->Get_allmcells().at(j);
+	Point center = mcell->Get_Center();
+	x = center.x/units::cm;// + gRandom->Uniform(-0.15,0.15);
+	y = center.y/units::cm;// + gRandom->Uniform(-0.15,0.15);
+	z = center.z/units::cm;// + gRandom->Uniform(-0.15,0.15);
+	
+	g1->SetPoint(n,x,y,z);
+	n++;
+      }
+           
+      //if (i<9)
+	g1->Draw(option);
+      if (num == 7 ) num = 0;
+      
+      int num1 = gRandom->Uniform(0,8.9);
+      int num2 = gRandom->Uniform(0,6.9);
 
-
-    //std::cout << i << " " << n << " " << x << " " << y << " " << z << std::endl;
-    
-    if (i<13)
-      g1->Draw(option);
-    if (num == 7 ) num = 0;
-    g1->SetMarkerColor(color[num]);
-    g1->SetMarkerStyle(style[num]);
-    num++;
+      g1->SetMarkerColor(color[num1]);
+      g1->SetMarkerStyle(style[num2]);
+      num++;
+    }
   }
 
 }
@@ -130,9 +160,9 @@ void WireCell2dToy::ClusterDisplay::DrawCluster(MergeSpaceCellSelection& mcells,
   g1->Draw(option);
 
   //test 
-  // g1->GetXaxis()->SetRangeUser(0,5);
+  //g1->GetXaxis()->SetRangeUser(20,25);
   // g1->GetYaxis()->SetRangeUser(30,5);
-  // g1->GetZaxis()->SetRangeUser(828,833);
+  //g1->GetZaxis()->SetRangeUser(836,845);
 
   //  std::cout << mcells.size() << std::endl;
 
@@ -145,7 +175,7 @@ void WireCell2dToy::ClusterDisplay::DrawCluster(MergeSpaceCellSelection& mcells,
     z = center.z/units::cm;
     g2->SetPoint(i,x,y,z);
   }
-  g2->Draw("Psame");
+  //g2->Draw("Psame");
   g2->SetMarkerStyle(22);
   g2->SetMarkerColor(2);
   
