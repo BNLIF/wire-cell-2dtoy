@@ -3,6 +3,46 @@
 using namespace WireCell;
 
 WireCell2dToy::ToyCrawler::ToyCrawler(MergeSpaceCellSelection& mcells){
+
+  CreateClusterTrack(mcells);
+  FormGraph(); 
+
+  // if # of daughters is only 1
+  // if already taken, end
+  // if not taken, keep adding
+
+  
+  // if # of daughters is just two
+  // if this is start, just pick one
+  // if this is not start, end
+
+  // if # of daughters is more than two 
+
+  
+
+  // while(mcells_counter[ctrack->Get_LastMSCell()]+1 != mcells_map[ctrack->Get_LastMSCell()].size()){
+  //   // start to look at the next ones
+  //   for (int i=0;i!=mcells_map[ctrack->Get_LastMSCell()].size();i++){
+  //     MergeSpaceCell *mcell = mcells_map[ctrack->Get_LastMSCell()].at(i);
+  //     auto it1 = find(used_mcells.begin(),used_mcells.end(),mcell);
+  //     if (it1 == used_mcells.end()){
+  // 	ctrack->AddMSCell(mcell);
+  // 	used_mcells.push_back(mcell);
+  // 	break;
+  //     }
+  //   }
+  // }
+  
+  // //add the last element
+  // auto it = find(end_mcells.begin(),end_mcells.end(),ctrack->Get_LastMSCell());
+  // if (it == end_mcells.end())
+  //   end_mcells.push_back(ctrack->Get_LastMSCell());
+  // mcells_counter[ctrack->Get_LastMSCell()] ++;
+
+  
+}
+
+void WireCell2dToy::ToyCrawler::CreateClusterTrack(MergeSpaceCellSelection& mcells){
   // form associations ...
   for (int i = 0; i!=mcells.size();i++){
     MergeSpaceCell *mcell1 = mcells.at(i);
@@ -265,43 +305,42 @@ WireCell2dToy::ToyCrawler::ToyCrawler(MergeSpaceCellSelection& mcells){
 
 
   }
-
-  // if # of daughters is only 1
-  // if already taken, end
-  // if not taken, keep adding
-
-  
-  // if # of daughters is just two
-  // if this is start, just pick one
-  // if this is not start, end
-
-  // if # of daughters is more than two 
-
-  
-
-  // while(mcells_counter[ctrack->Get_LastMSCell()]+1 != mcells_map[ctrack->Get_LastMSCell()].size()){
-  //   // start to look at the next ones
-  //   for (int i=0;i!=mcells_map[ctrack->Get_LastMSCell()].size();i++){
-  //     MergeSpaceCell *mcell = mcells_map[ctrack->Get_LastMSCell()].at(i);
-  //     auto it1 = find(used_mcells.begin(),used_mcells.end(),mcell);
-  //     if (it1 == used_mcells.end()){
-  // 	ctrack->AddMSCell(mcell);
-  // 	used_mcells.push_back(mcell);
-  // 	break;
-  //     }
-  //   }
-  // }
-  
-  // //add the last element
-  // auto it = find(end_mcells.begin(),end_mcells.end(),ctrack->Get_LastMSCell());
-  // if (it == end_mcells.end())
-  //   end_mcells.push_back(ctrack->Get_LastMSCell());
-  // mcells_counter[ctrack->Get_LastMSCell()] ++;
-
-  
-  
-
 }
+
+void WireCell2dToy::ToyCrawler::FormGraph(){
+  ct_ms_map.clear();
+  ms_ct_map.clear();
+
+  for (int i=0;i!=all_clustertrack.size();i++){
+    ClusterTrack *ctrack = all_clustertrack.at(i);
+    MergeSpaceCell *FMSCell = ctrack->Get_FirstMSCell();
+    MergeSpaceCell *LMSCell = ctrack->Get_LastMSCell();
+    
+    MergeSpaceCellSelection temp;
+    temp.push_back(FMSCell);
+    temp.push_back(LMSCell);
+    ct_ms_map[ctrack] = temp;
+    
+    if (ms_ct_map.find(FMSCell) == ms_ct_map.end()){
+      ClusterTrackSelection temp1;
+      temp1.push_back(ctrack);
+      ms_ct_map[FMSCell] = temp1;
+    }else{
+      ms_ct_map[FMSCell].push_back(ctrack);
+    }
+    
+    if (ms_ct_map.find(LMSCell) == ms_ct_map.end()){
+      ClusterTrackSelection temp1;
+      temp1.push_back(ctrack);
+      ms_ct_map[LMSCell] = temp1;
+    }else{
+      ms_ct_map[LMSCell].push_back(ctrack);
+    }
+    
+    
+  }
+}
+
 
 WireCell2dToy::ToyCrawler::~ToyCrawler(){
   for (int i=0;i!=all_clustertrack.size();i++){

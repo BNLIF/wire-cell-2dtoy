@@ -10,6 +10,9 @@ namespace WireCell2dToy{
     ToyCrawler(WireCell::MergeSpaceCellSelection& mcells);
     ~ToyCrawler();
 
+    void CreateClusterTrack(WireCell::MergeSpaceCellSelection& mcells);
+    void FormGraph();
+
     WireCell::ClusterTrackSelection& Get_allCT(){return all_clustertrack;};
     
   protected:
@@ -22,6 +25,11 @@ namespace WireCell2dToy{
     WireCell::MergeSpaceCellMap mcells_save;
 
     WireCell::MergeSpaceCellCounter mcells_counter;
+
+
+    WireCell::ClusterMSpaceCellMap ct_ms_map;
+    WireCell::MSpaceCellClusterMap ms_ct_map;
+
   };
   
 }
