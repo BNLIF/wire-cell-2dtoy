@@ -71,7 +71,7 @@ void WireCell2dToy::ClusterDisplay::DrawCrawler(WireCell2dToy::ToyCrawler& toycr
 
     //std::cout << i << " " << n << " " << x << " " << y << " " << z << std::endl;
     
-    //if (i<22)
+    if (i<13)
       g1->Draw(option);
     if (num == 7 ) num = 0;
     g1->SetMarkerColor(color[num]);

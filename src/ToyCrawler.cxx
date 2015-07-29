@@ -6,24 +6,96 @@ WireCell2dToy::ToyCrawler::ToyCrawler(MergeSpaceCellSelection& mcells){
 
   CreateClusterTrack(mcells);
   FormGraph(); 
-
+  //std::cout << "Merge Clusters " << std::endl; 
   MergeCTrack();
    
 }
 
 void WireCell2dToy::ToyCrawler::MergeCTrack(){
 
+  
+
   for (int i = 0;i!=all_clustertrack.size();i++){
     auto it = find(used_clustertrack.begin(),used_clustertrack.end(),all_clustertrack.at(i));
+    
+    
+
     if (it == used_clustertrack.end()){
       MergeClusterTrack *mct = new MergeClusterTrack(all_clustertrack.at(i));
-      MergeSpaceCellSelection vertices;
+      
+      MergeSpaceCellSelection vertices; // save existing vertices
       all_mergeclustertrack.push_back(mct);
+      used_clustertrack.push_back(all_clustertrack.at(i));
+      vertices.push_back(all_clustertrack.at(i)->Get_FirstMSCell());
+      vertices.push_back(all_clustertrack.at(i)->Get_LastMSCell());
 
       // start to add stuff ... 
+      while (vertices.size()!=0){
+	MergeSpaceCell *vertex = vertices.back();
+	vertices.pop_back();
+
+	// find the track inside MergeClusterTrack which contain this vertex
+	ClusterTrack* old_cct = mct->GetClusterTrack(vertex);
+	old_cct->SC_Hough(vertex->Get_Center());
+	float theta1 = old_cct->Get_Theta();
+	float phi1 = old_cct->Get_Phi();
+
+	//
+	
+
+	ClusterTrackSelection cts = ms_ct_map[vertex];
+
+	//std::cout << theta1 << " " << phi1 << " " << cts.size() << std::endl;
+
+	for (int j=0;j!=cts.size();j++){
+	  ClusterTrack *cct = cts.at(j);
+	  auto it1 = find(used_clustertrack.begin(),used_clustertrack.end(), cct);
+	  if (it1==used_clustertrack.end()){
+	    //Judge angle matching ... 
+	    int flag = 0;
+	    // write the main alg. ...
+	    cct->SC_Hough(vertex->Get_Center());
+	    float theta2 = cct->Get_Theta();
+	    float phi2 = cct->Get_Phi();
+	    
+	    float cut_angle = 15;
+	    float cut_angle1 = 5;
+
+
+	    if ((fabs(theta1+theta2-3.1415926)<cut_angle/180.*3.1415926 // 5 degrees
+		 && fabs(fabs(phi1-phi2)-3.1415926)<cut_angle/180.*3.1415926)
+		||(fabs(theta1-theta2-100)<cut_angle1/180.*3.1415926 // 5 degrees
+		 && fabs(phi1-phi2)<cut_angle1/180.*3.1415926)
+		){
+	      flag = 1;
+	    }
+
+	    if (flag == 0 ){
+	      
+	    }
+
+	    if (flag == 0 ){
+	    
+	    }
+
+	    std::cout <<  i << " " << find(all_clustertrack.begin(),all_clustertrack.end(),old_cct)-all_clustertrack.begin()
+		      << " " << find(all_clustertrack.begin(),all_clustertrack.end(),cct)-all_clustertrack.begin() << " "
+		      << cts.size() << " " 
+		      << flag << " " << (theta1 + theta2-3.1415926)/3.1415926*180. << " " << (fabs(phi1- phi2)-3.1415926)/3.1415926*180. << std::endl;
+
+
+	    // if good, save it
+	    if (flag==1){
+	      mct->Add(cct,vertex);
+	      used_clustertrack.push_back(cct);
+	      if (cct->Get_FirstMSCell()!=vertex) vertices.push_back(cct->Get_FirstMSCell());
+	      if (cct->Get_LastMSCell()!=vertex) vertices.push_back(cct->Get_LastMSCell());
+	    }
+	  }
+	}
+      }
     }
   }
-
 }
 
 
