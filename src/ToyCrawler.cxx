@@ -7,12 +7,23 @@ WireCell2dToy::ToyCrawler::ToyCrawler(MergeSpaceCellSelection& mcells){
   CreateClusterTrack(mcells);
   FormGraph(); 
 
-  MergeClusterTrack();
+  MergeCTrack();
    
 }
 
-void WireCell2dToy::ToyCrawler::MergeClusterTrack(){
-  
+void WireCell2dToy::ToyCrawler::MergeCTrack(){
+
+  for (int i = 0;i!=all_clustertrack.size();i++){
+    auto it = find(used_clustertrack.begin(),used_clustertrack.end(),all_clustertrack.at(i));
+    if (it == used_clustertrack.end()){
+      MergeClusterTrack *mct = new MergeClusterTrack(all_clustertrack.at(i));
+      MergeSpaceCellSelection vertices;
+      all_mergeclustertrack.push_back(mct);
+
+      // start to add stuff ... 
+    }
+  }
+
 }
 
 

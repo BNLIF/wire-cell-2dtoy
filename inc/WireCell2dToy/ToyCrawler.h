@@ -2,6 +2,7 @@
 #define WIRECELL_TOYCRAWLER_H
 
 #include "WireCellData/ClusterTrack.h"
+#include "WireCellData/MergeClusterTrack.h"
 
 namespace WireCell2dToy{
   
@@ -12,13 +13,16 @@ namespace WireCell2dToy{
 
     void CreateClusterTrack(WireCell::MergeSpaceCellSelection& mcells);
     void FormGraph();
-    void MergeClusterTrack();
+    void MergeCTrack();
 
     WireCell::ClusterTrackSelection& Get_allCT(){return all_clustertrack;};
     
   protected:
     WireCell::ClusterTrackSelection all_clustertrack;
 
+    WireCell::ClusterTrackSelection used_clustertrack; // hold the used tracks
+
+    WireCell::MergeClusterTrackSelection all_mergeclustertrack;
     
 
 
