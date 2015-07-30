@@ -38,7 +38,7 @@ void WireCell2dToy::ClusterDisplay::DrawHough(SpaceCellSelection& cells, Point& 
 
 void WireCell2dToy::ClusterDisplay::DrawCrawler(WireCell2dToy::ToyCrawler& toycrawler, TString option, int flag){
   
-  std::cout << "Draw Crawler " << " " << toycrawler.Get_allCT().size() << std::endl;
+  std::cout << "Draw Crawler " << " " << toycrawler.Get_allCT().size() << " " << toycrawler.Get_allMCT().size()<< std::endl;
 
   int color[9]={3,4,5,6,7,8,9,1,2};
   //int style[7]={24,25,32,30,27,28,31};

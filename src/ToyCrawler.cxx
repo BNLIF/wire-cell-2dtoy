@@ -92,9 +92,12 @@ void WireCell2dToy::ToyCrawler::FurtherMergeCTrack(){
 		  
 		  if ((fabs(theta1+theta-3.1415926)<cut_angle/180.*3.1415926 // 5 degrees
 		       && fabs(fabs(phi1-phi)-3.1415926)<cut_angle/180.*3.1415926)
-		      ||(fabs(theta1-theta)<cut_angle/180.*3.1415926
-			 && fabs(phi1-phi)<cut_angle/180.*3.1415926)
+		      // ||(fabs(theta1-theta)<cut_angle/180.*3.1415926
+		      // 	 && fabs(phi1-phi)<cut_angle/180.*3.1415926)
 		      ){
+		    
+		    // std::cout << theta << " " << theta1 << " " << phi << " " << phi1 << std::endl;
+
 		    //add this Merged Track
 		    mct->Add(MCTS.at(k),mcell,-1);
 		    temp1.push_back(MCTS.at(k));
@@ -175,9 +178,11 @@ void WireCell2dToy::ToyCrawler::FurtherMergeCTrack(){
 		  float phi1 = MCTS.at(k)->Get_Phi();
 		  if ((fabs(theta1+theta-3.1415926)<cut_angle/180.*3.1415926 // 5 degrees
 		       && fabs(fabs(phi1-phi)-3.1415926)<cut_angle/180.*3.1415926)
-		      ||(fabs(theta1-theta)<cut_angle/180.*3.1415926
-			 && fabs(phi1-phi)<cut_angle/180.*3.1415926)
+		      // ||(fabs(theta1-theta)<cut_angle/180.*3.1415926
+		      // 	 && fabs(phi1-phi)<cut_angle/180.*3.1415926)
 		      ){
+
+		    //std::cout << theta << " " << theta1 << " " << phi << " " << phi1 << std::endl;
 		    //add this Merged Track
 		    mct->Add(MCTS.at(k),mcell,1);
 		    temp1.push_back(MCTS.at(k));
