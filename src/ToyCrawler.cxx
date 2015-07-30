@@ -6,10 +6,19 @@ WireCell2dToy::ToyCrawler::ToyCrawler(MergeSpaceCellSelection& mcells){
 
   CreateClusterTrack(mcells);
   FormGraph(); 
+
   //std::cout << "Merge Clusters " << std::endl; 
+  
   MergeCTrack();
-   
+  
+  FurtherMergeCTrack();
+ 
 }
+
+void WireCell2dToy::ToyCrawler::FurtherMergeCTrack(){
+  
+}
+
 
 void WireCell2dToy::ToyCrawler::MergeCTrack(){
 
@@ -65,11 +74,28 @@ void WireCell2dToy::ToyCrawler::MergeCTrack(){
 
 	    if ((fabs(theta1+theta2-3.1415926)<cut_angle/180.*3.1415926 // 5 degrees
 		 && fabs(fabs(phi1-phi2)-3.1415926)<cut_angle/180.*3.1415926)
-		||(fabs(theta1-theta2-shift_angle)<cut_angle1/180.*3.1415926 // 5 degrees
-		 && fabs(phi1-phi2)<cut_angle1/180.*3.1415926)
 		){
 	      flag = 1;
 	    }
+
+	    if (flag == 0 ){
+	      int cross_num = cct->CrossNum(vertex->Get_Center(), theta1,phi1);
+	      if ( cross_num == cct->Get_allmcells().size()){
+		flag = 1;
+	      }
+	    }
+	    
+	    // if (flag==0){
+	    //   theta2 = cct->Get_CTheta(vertex->Get_Center());
+	    //   phi2 = cct->Get_CPhi(vertex->Get_Center());
+	    //   if ((fabs(theta1+theta2-3.1415926)<cut_angle/180.*3.1415926 // 5 degrees
+	    // 	   && fabs(fabs(phi1-phi2)-3.1415926)<cut_angle/180.*3.1415926)
+	    // 	  ||(fabs(theta1-theta2-shift_angle)<cut_angle1/180.*3.1415926 // 5 degrees
+	    // 	     && fabs(phi1-phi2)<cut_angle1/180.*3.1415926)
+	    // 	  ){
+	    // 	flag = 1;
+	    //   }
+	    // }
 
 	    // if (flag == 0 ){
 	    //   mct->SC_Hough(vertex->Get_Center(), 3 * units::cm);
@@ -90,24 +116,7 @@ void WireCell2dToy::ToyCrawler::MergeCTrack(){
 	    //   }
 	    // }
 
-	     if (flag == 0 ){
-	    //   Point pp = mct->SC_IterativeHough(vertex->Get_Center(), 3 * units::cm);
-	    //   // std::cout << vertex->Get_Center().x/units::cm << " "  
-	    //   // 		<< vertex->Get_Center().y/units::cm << " " 
-	    //   // 		<< vertex->Get_Center().z/units::cm << std::endl;
-	    //   // std::cout << pp.x/units::cm << " " << pp.y/units::cm
-	    //   //  		<< " " << pp.z/units::cm << std::endl;
-	      
-	    //   cct->SC_Hough(pp);
-	    //   theta2 = cct->Get_Theta();
-	    //   phi2 = cct->Get_Phi();
-
-	       int cross_num = cct->CrossNum(vertex->Get_Center(), theta1,phi1);
-	       //std::cout << cross_num << " " << cct->Get_allmcells().size() << std::endl;
-	       if ( cross_num == cct->Get_allmcells().size()){
-	       	 flag = 1;
-	       }
-	     }
+	    
 	    
 
 	    // std::cout <<  i << " " << find(all_clustertrack.begin(),all_clustertrack.end(),old_cct)-all_clustertrack.begin()
@@ -118,6 +127,8 @@ void WireCell2dToy::ToyCrawler::MergeCTrack(){
 	    // 	      <<  phi2/3.1415926*180. << " "
 	    // 	      << cct->Get_CTheta(vertex->Get_Center())/3.1415926*180. << " " 
 	    // 	      << cct->Get_CPhi(vertex->Get_Center())/3.1415926*180. << " " 
+	    // 	      << old_cct->Get_CTheta(vertex->Get_Center())/3.1415926*180. << " " 
+	    // 	      << old_cct->Get_CPhi(vertex->Get_Center())/3.1415926*180. << " " 
 	    // 	      << vertex->Get_Center().x/units::cm << " " 
 	    // 	      << vertex->Get_Center().y/units::cm << " " 
 	    // 	      << vertex->Get_Center().z/units::cm << " " 
@@ -136,10 +147,30 @@ void WireCell2dToy::ToyCrawler::MergeCTrack(){
       }
     }
   }
+
+  //Form map ...
+
+  for (int i=0;i!=all_mergeclustertrack.size();i++){
+    MergeClusterTrack *mct = all_mergeclustertrack.at(i);
+    for (int j=0; j!=mct->Get_allmcells().size() ;j++){
+      MergeSpaceCell *mcell = mct->Get_allmcells().at(j);
+      
+      if (mcells_mct_map.find(mcell) == mcells_mct_map.end()){
+	MergeClusterTrackSelection temp1;
+	temp1.push_back(mct);
+	mcells_mct_map[mcell] = temp1;
+      }else{
+	mcells_mct_map[mcell].push_back(mct);
+      }
+
+    }
+  }
+
 }
 
 
 void WireCell2dToy::ToyCrawler::CreateClusterTrack(MergeSpaceCellSelection& mcells){
+
   // form associations ...
   for (int i = 0; i!=mcells.size();i++){
     MergeSpaceCell *mcell1 = mcells.at(i);
@@ -147,6 +178,7 @@ void WireCell2dToy::ToyCrawler::CreateClusterTrack(MergeSpaceCellSelection& mcel
     double thickness = mcell1->thickness();
     
     MergeSpaceCellSelection mcell1_sel;
+
     for (int j=0;j!=mcells.size();j++){
       MergeSpaceCell *mcell2 = mcells.at(j);
       Point m2center = mcell2->Get_Center();
@@ -160,9 +192,12 @@ void WireCell2dToy::ToyCrawler::CreateClusterTrack(MergeSpaceCellSelection& mcel
     }
     MergeSpaceCellSelection mcell2_sel;
     mcells_save[mcell1] = mcell2_sel;
-    mcells_map[mcell1] = mcell1_sel; // form structure 
+    mcells_map[mcell1] = mcell1_sel; // form structure   adjacent ones ...
     //    mcells_counter[mcell1] = 0;  // initiliaization
   }
+
+
+
 
   //std::cout << mcells_map.size() << " " << mcells_counter.size() << std::endl;
 

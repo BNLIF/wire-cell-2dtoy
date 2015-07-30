@@ -15,6 +15,8 @@ namespace WireCell2dToy{
     void FormGraph();
     void MergeCTrack();
 
+    void FurtherMergeCTrack();
+
     WireCell::ClusterTrackSelection& Get_allCT(){return all_clustertrack;};
     WireCell::MergeClusterTrackSelection& Get_allMCT(){return all_mergeclustertrack;};
     
@@ -24,7 +26,10 @@ namespace WireCell2dToy{
     WireCell::ClusterTrackSelection used_clustertrack; // hold the used tracks
 
     WireCell::MergeClusterTrackSelection all_mergeclustertrack;
+
+    WireCell::MSC_MCT_Map  mcells_mct_map;
     
+
 
 
     WireCell::MergeSpaceCellSelection used_mcells; // save used mergespacecell
@@ -33,6 +38,7 @@ namespace WireCell2dToy{
     WireCell::MergeSpaceCellMap mcells_map;
     WireCell::MergeSpaceCellMap mcells_save;
 
+    
     WireCell::MergeSpaceCellCounter mcells_counter;
 
 
