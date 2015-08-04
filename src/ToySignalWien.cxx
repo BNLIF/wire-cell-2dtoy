@@ -133,7 +133,7 @@ int WireCell2dToy::ToySignalWienFDS::jump(int frame_number){
   double par1[5]={1.74/0.941034, 1.46, 1.33, 0.23, 4.89};
   filter_v->SetParameters(par1);
 
-  TF1 *filter_w = new TF1("filter_y","(x>0.0)*[0]*exp(-0.5*(((x-[1])/[2])^2)^[3])");
+  TF1 *filter_w = new TF1("filter_y","(x>0.0)*[0]*exp(-0.5*pow(pow((x-[1])/[2],2),[3]))");
   double par2[4]={1.03/0.995635, 0.08, 0.15, 2.17};
   filter_w->SetParameters(par2);
 
