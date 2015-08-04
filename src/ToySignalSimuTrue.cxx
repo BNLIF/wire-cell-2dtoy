@@ -108,7 +108,7 @@ int WireCell2dToy::ToySignalSimuTrueFDS::jump(int frame_number){
   double value_re[9600]; // hack for now
   double value_im[9600];
   int  n  = nbin;
-  TVirtualFFT *ifft;
+  TVirtualFFT *ifft=0;
   TH1 *fb = 0;
 
   frame.clear();
@@ -116,6 +116,8 @@ int WireCell2dToy::ToySignalSimuTrueFDS::jump(int frame_number){
   
   fds.jump(frame_number);
   
+  //std::cout << "Xin1 " << std::endl; 
+
   //fill in the data ... 
   const Frame& frame1 = fds.get();
   size_t ntraces = frame1.traces.size();
@@ -177,9 +179,13 @@ int WireCell2dToy::ToySignalSimuTrueFDS::jump(int frame_number){
       
     }
 
+
+    //std::cout << "Xin2 " << std::endl; 
+
     delete hm;
     delete hp;
-    delete ifft;
+    if (ifft!=0)
+      delete ifft;
     delete fb;
     
     Trace t;
@@ -194,6 +200,8 @@ int WireCell2dToy::ToySignalSimuTrueFDS::jump(int frame_number){
     }
     frame.traces.push_back(t);
     
+    //std::cout << "Xin3 " << std::endl; 
+
     //std::cout << chid << std::endl;
     // std::cout << nwire_u << " " << nwire_v << " " << nwire_w << std::endl;
   }
