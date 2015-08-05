@@ -102,7 +102,8 @@ int main(int argc, char* argv[])
 
   WireCell::ToyDepositor toydep(fds,1);
   const PointValueVector& pvv = toydep.depositions(eve_num);
-  
+  const std::vector<int>& timeoffset = toydep.timeoffset();
+
   //cout << pvv.size() << endl;
 
   //WireCell::GenerativeFDS gfds(toydep,gds,9600,max_events,0.5*1.605723*units::millimeter); // 87 K at 0.5 kV/cm
@@ -224,7 +225,7 @@ int main(int argc, char* argv[])
     cout <<"Blob: " << i << " " << allmcell.size() << " " << allmwire.size() << endl;
     
     
-    truthtiling[i] = new WireCell2dToy::TruthToyTiling(*toytiling[i],pvv,i,gds,800);
+    truthtiling[i] = new WireCell2dToy::TruthToyTiling(*toytiling[i],pvv,timeoffset,i,gds);
     //cout << "finish truth tiling " << endl; 
     toymatrix[i] = new WireCell2dToy::ToyMatrix(*toytiling[i],*mergetiling[i]);
     // cout << "start the iterate " << endl; 
@@ -236,7 +237,7 @@ int main(int argc, char* argv[])
     cout << "NDF: " << toymatrix[i]->Get_ndf() << endl;
     
     toytiling_th[i] = new WireCell2dToy::ToyTiling(slice_th,gds,0,0,0,threshold_ug,threshold_vg, threshold_wg);
-    truthtiling_th[i] = new WireCell2dToy::TruthToyTiling(*toytiling_th[i],pvv,i,gds,800);
+    truthtiling_th[i] = new WireCell2dToy::TruthToyTiling(*toytiling_th[i],pvv,timeoffset,i,gds);
     
     
     CellChargeMap ccmap = truthtiling[i]->ccmap();
