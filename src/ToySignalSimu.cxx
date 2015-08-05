@@ -176,7 +176,7 @@ int WireCell2dToy::ToySignalSimuFDS::jump(int frame_number){
     }
     htemp->Reset();
     for (int j=0;j!=htemp->GetNbinsX();j++){
-      int tt = j+1+3200;
+      int tt = j+1;//+3200;
       if (tt <= bins_per_frame)
 	htemp->SetBinContent(tt,vcharge.at(j));
     }

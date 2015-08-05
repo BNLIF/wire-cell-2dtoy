@@ -21,7 +21,7 @@ const PointValueVector& ToyDepositor::depositions(int frame_number) const{
   
 
   mchits.clear();
-
+  time_offset.clear();
   for (size_t itruth = 0; itruth < sts.size(); ++itruth) {
      const WireCell::SimTruth* st = sts[itruth];
      PointValue p;
@@ -30,7 +30,10 @@ const PointValueVector& ToyDepositor::depositions(int frame_number) const{
      p.first.z = st->z() * units::cm;
      p.second = st->charge()/3.;
      mchits.push_back(p);
+     time_offset.push_back(3200);
   }
 
   return mchits;
 }
+
+

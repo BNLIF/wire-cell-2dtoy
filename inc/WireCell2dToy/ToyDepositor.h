@@ -10,10 +10,12 @@ namespace WireCell {
   public:
     ToyDepositor(WireCell::FrameDataSource* fds);
     virtual const PointValueVector& depositions(int frame_number) const;
+    virtual std::vector<int>& timeoffset() const{return time_offset;};
 
   private:
     WireCell::FrameDataSource* fds;
     mutable PointValueVector mchits;
+    mutable std::vector<int> time_offset;
   };
 }
 
