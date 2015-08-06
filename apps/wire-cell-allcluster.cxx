@@ -132,9 +132,7 @@ int main(int argc, char* argv[])
   }
   
   std::cout << "Check: " << crawlers.size() << " " << TC->GetEntries() << " " << sum << std::endl;
-  int abc;
-  cin >> abc;
- 
+  
     
     
 }
