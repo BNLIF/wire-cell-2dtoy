@@ -153,7 +153,7 @@ void WireCell2dToy::ClusterDisplay::DrawCluster(MergeSpaceCellSelection& mcells,
       n++;
     }
     // if (i==0) 
-    //std::cout << x << " " << y << " " << z << std::endl;
+    //std::cout << "Xin1: " << x << " " << y << " " << z << std::endl;
     
   }
   // std::cout << n << std::endl;
@@ -174,6 +174,8 @@ void WireCell2dToy::ClusterDisplay::DrawCluster(MergeSpaceCellSelection& mcells,
     y = center.y/units::cm;
     z = center.z/units::cm;
     g2->SetPoint(i,x,y,z);
+    //std::cout << "Xin2: " << x << " " << y << " " << z << std::endl;
+    
   }
   //g2->Draw("Psame");
   g2->SetMarkerStyle(22);
