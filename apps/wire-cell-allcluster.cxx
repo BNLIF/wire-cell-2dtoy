@@ -89,27 +89,35 @@ int main(int argc, char* argv[])
   for (int i=0;i!=TC->GetEntries();i++){
     TC->GetEntry(i);
 
-    // //cluster starting at 0
-    // if (cluster_num == ncluster){
-    //   if (flag == 0){
-    // 	mcell = new MergeSpaceCell();
-    // 	flag = 1;
-    //   }else if (flag==1 && mcell_id!=prev_mcell_id){
-    // 	mcells.push_back(mcell);
-    // 	mcell = new MergeSpaceCell();
-    //   }
-      
-    //   SpaceCell *space_cell = new SpaceCell(cluster_num,*cell,x*units::cm,charge,0.32*units::cm);
-    //   mcell->AddSpaceCell(space_cell);
-      
-    //   prev_mcell_id = mcell_id;
-    // }
+    if (cluster_num != prev_cluster_num){
+      if (prev_cluster_num!=-1){
+	WireCell2dToy::ToyCrawler* toycrawler = new WireCell2dToy::ToyCrawler(mcells);
+	toycrawler->FormGraph();
+	crawlers.push_back(toycrawler);
+	mcells.clear();
+	flag = 0;
+      }
 
+      if (flag == 0){
+	mcell = new MergeSpaceCell();
+	flag = 1;
+      }else if (flag==1 && mcell_id!=prev_mcell_id){
+	mcells.push_back(mcell);
+     	mcell = new MergeSpaceCell();
+      }
+      SpaceCell *space_cell = new SpaceCell(cluster_num,*cell,x*units::cm,charge,0.32*units::cm);
+      mcell->AddSpaceCell(space_cell);
+
+    }
+
+    prev_cluster_num = cluster_num;
+    prev_mcell_id = mcell_id;
+   
   }
+  
   // mcells.push_back(mcell);  
   // // do the Toy Crawler
-  // WireCell2dToy::ToyCrawler toycrawler(mcells);
-  // toycrawler.FormGraph();
+  // 
  
 
  
