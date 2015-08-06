@@ -218,13 +218,8 @@ void WireCell2dToy::ToyCrawler::FurtherMergeCTrack(){
 
 void WireCell2dToy::ToyCrawler::MergeCTrack(){
 
-  
-
   for (int i = 0;i!=all_clustertrack.size();i++){
     auto it = find(used_clustertrack.begin(),used_clustertrack.end(),all_clustertrack.at(i));
-    
-    
-
     if (it == used_clustertrack.end()){
       MergeClusterTrack *mct = new MergeClusterTrack(all_clustertrack.at(i));
       
@@ -245,9 +240,7 @@ void WireCell2dToy::ToyCrawler::MergeCTrack(){
 	float theta1 = mct->Get_Theta();
 	float phi1 = mct->Get_Phi();
 
-	//
 	
-
 	ClusterTrackSelection cts = ms_ct_map[vertex];
 
 	//std::cout << theta1 << " " << phi1 << " " << cts.size() << std::endl;
@@ -352,11 +345,11 @@ void WireCell2dToy::ToyCrawler::MergeCTrack(){
       MergeSpaceCell *mcell = mct->Get_allmcells().at(j);
       
       if (mcells_mct_map.find(mcell) == mcells_mct_map.end()){
-	MergeClusterTrackSelection temp1;
-	temp1.push_back(mct);
-	mcells_mct_map[mcell] = temp1;
+  	MergeClusterTrackSelection temp1;
+  	temp1.push_back(mct);
+  	mcells_mct_map[mcell] = temp1;
       }else{
-	mcells_mct_map[mcell].push_back(mct);
+  	mcells_mct_map[mcell].push_back(mct);
       }
 
     }

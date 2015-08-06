@@ -182,9 +182,7 @@ int main(int argc, char* argv[])
   WireCell2dToy::ToyMetric toymetric;
   WireCell2dToy::BlobMetric blobmetric;
 
-  //add in cluster
-  GeomClusterSet cluster_set, cluster_delset;
-  int ncount_mcell = 0;
+
 
   
   int start_num = 0 ;
@@ -230,7 +228,12 @@ int main(int argc, char* argv[])
   delete fds;
 
 
+  
+
+  //add in cluster
   std::cout << "Start Clustering " << std::endl;
+  GeomClusterSet cluster_set, cluster_delset;
+  int ncount_mcell = 0;
   //Now do cluster
   for (int i=start_num;i!=end_num+1;i++){
     GeomCellSelection pallmcell = mergetiling[i]->get_allcell();
@@ -238,8 +241,8 @@ int main(int argc, char* argv[])
     for (int j=0;j!=pallmcell.size();j++){
       const GeomCell* mcell = pallmcell[j];
       //     if (toymatrix[i]->Get_Cell_Charge(mcell)> recon_threshold){
-	allmcell.push_back(mcell);
-	//}
+      allmcell.push_back(mcell);
+      //}
     }
     
     
@@ -298,15 +301,14 @@ int main(int argc, char* argv[])
     ncount_mcell_cluster += (*it)->get_allcell().size();
   }
   cout << "Summary: " << ncount << " " << ncount_mcell << " " << ncount_mcell_cluster << endl;
+  
 
-
-
+   
 
   // start crawler
   cout << "Start Crawling " << endl;
   std::vector<WireCell2dToy::ToyCrawler*> crawlers;
   
-
   int ncluster = 0;
   for (auto it = cluster_set.begin();it!=cluster_set.end();it++){
     
@@ -315,14 +317,13 @@ int main(int argc, char* argv[])
       const MergeGeomCell *mcell = (const MergeGeomCell*)((*it)->get_allcell().at(i));
       MergeSpaceCell *mscell = new MergeSpaceCell();
       for (int j=0;j!=mcell->get_allcell().size();j++){
-	const GeomCell *cell = mcell->get_allcell().at(j);
-	SpaceCell *space_cell = new SpaceCell(ncluster,*cell,mcell->GetTimeSlice()*0.32-256,0,0.32*units::cm);
-	mscell->AddSpaceCell(space_cell);
+  	const GeomCell *cell = mcell->get_allcell().at(j);
+  	SpaceCell *space_cell = new SpaceCell(ncluster,*cell,mcell->GetTimeSlice()*0.32-256,0,0.32*units::cm);
+  	mscell->AddSpaceCell(space_cell);
       }
       mscells.push_back(mscell);
     }
     WireCell2dToy::ToyCrawler* toycrawler = new WireCell2dToy::ToyCrawler(mscells);
-    toycrawler->FormGraph();
     crawlers.push_back(toycrawler);
 
     ncluster ++;
@@ -344,7 +345,7 @@ int main(int argc, char* argv[])
 
 
 
-  //  cin >> abc;
+  cin >> abc;
   
   return 0;
   
