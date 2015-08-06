@@ -11,7 +11,7 @@ WireCell2dToy::ToyCrawler::ToyCrawler(MergeSpaceCellSelection& mcells){
   
   MergeCTrack();
   
-  //FurtherMergeCTrack();
+  FurtherMergeCTrack();
  
 }
 
@@ -79,31 +79,44 @@ void WireCell2dToy::ToyCrawler::FurtherMergeCTrack(){
 	      MergeSpaceCell *mcell = temp.at(j);
 	      auto it = find(mct->Get_allmcells().begin(),mct->Get_allmcells().end(),mcell);
 	      if (it == mct->Get_allmcells().end()){
-		// insert it in
-		mct->Add(mcell,-1);
-		// Now find the associated clusterTrack
 		MergeClusterTrackSelection MCTS = mcells_mct_map[mcell];
-		
-		// judge whether to put in temp1 to be deleted
+		// insert it in
+		int insert_flag = 0;
 		for (int k=0;k!=MCTS.size();k++){
-		  MCTS.at(k)->SC_Hough(mcell->Get_Center());
-		  float theta1 = MCTS.at(k)->Get_Theta();
-		  float phi1 = MCTS.at(k)->Get_Phi();
-		  
-		  if ((fabs(theta1+theta-3.1415926)<cut_angle/180.*3.1415926 // 5 degrees
-		       && fabs(fabs(phi1-phi)-3.1415926)<cut_angle/180.*3.1415926)
-		      // ||(fabs(theta1-theta)<cut_angle/180.*3.1415926
-		      // 	 && fabs(phi1-phi)<cut_angle/180.*3.1415926)
-		      ){
-		    
-		    // std::cout << theta << " " << theta1 << " " << phi << " " << phi1 << std::endl;
-
-		    //add this Merged Track
-		    mct->Add(MCTS.at(k),mcell,-1);
-		    temp1.push_back(MCTS.at(k));
-		    flag2 = 1;
+		  if ( MCTS.at(k)->CheckCell(mcell)){
+		    insert_flag = 1;
+		    break;
 		  }
 		}
+		
+
+		if (insert_flag ==1){
+		  mct->Add(mcell,-1);
+		  // Now find the associated clusterTrack
+		  // judge whether to put in temp1 to be deleted
+		  for (int k=0;k!=MCTS.size();k++){
+		    MCTS.at(k)->SC_Hough(mcell->Get_Center());
+		    float theta1 = MCTS.at(k)->Get_Theta();
+		    float phi1 = MCTS.at(k)->Get_Phi();
+		    if (MCTS.at(k)->CheckCell(mcell) ){
+		      if ((fabs(theta1+theta-3.1415926)<cut_angle/180.*3.1415926 // 5 degrees
+			   && fabs(fabs(phi1-phi)-3.1415926)<cut_angle/180.*3.1415926)
+			  // ||(fabs(theta1-theta)<cut_angle/180.*3.1415926
+			  // 	 && fabs(phi1-phi)<cut_angle/180.*3.1415926)
+			  ){
+			
+			// std::cout << theta << " " << theta1 << " " << phi << " " << phi1 << std::endl;
+			
+			//add this Merged Track
+			mct->Add(MCTS.at(k),mcell,-1);
+			temp1.push_back(MCTS.at(k));
+			flag2 = 1;
+		      }
+		    }
+		  }
+		}
+
+		
 	      }
 	    }
 	  } //while(flag2)
@@ -166,29 +179,42 @@ void WireCell2dToy::ToyCrawler::FurtherMergeCTrack(){
 	      MergeSpaceCell *mcell = temp.at(j);
 	      auto it = find(mct->Get_allmcells().begin(),mct->Get_allmcells().end(),mcell);
 	      if (it == mct->Get_allmcells().end()){
-		// insert it in
-		mct->Add(mcell,1);
-		// Now find the associated clusterTrack
 		MergeClusterTrackSelection MCTS = mcells_mct_map[mcell];
-		
-		// judge whether to put in temp1 to be deleted
-		for (int k=0;k!=MCTS.size();k++){
-		  MCTS.at(k)->SC_Hough(mcell->Get_Center());
-		  float theta1 = MCTS.at(k)->Get_Theta();
-		  float phi1 = MCTS.at(k)->Get_Phi();
-		  if ((fabs(theta1+theta-3.1415926)<cut_angle/180.*3.1415926 // 5 degrees
-		       && fabs(fabs(phi1-phi)-3.1415926)<cut_angle/180.*3.1415926)
-		      // ||(fabs(theta1-theta)<cut_angle/180.*3.1415926
-		      // 	 && fabs(phi1-phi)<cut_angle/180.*3.1415926)
-		      ){
+		int insert_flag = 0;
 
-		    //std::cout << theta << " " << theta1 << " " << phi << " " << phi1 << std::endl;
-		    //add this Merged Track
-		    mct->Add(MCTS.at(k),mcell,1);
-		    temp1.push_back(MCTS.at(k));
-		    flag2 = 1;
+		for (int k=0;k!=MCTS.size();k++){
+		  if ( MCTS.at(k)->CheckCell(mcell) ){
+		    insert_flag = 1;
+		    break;
 		  }
 		}
+
+		if (insert_flag == 1){
+		  // insert it in
+		  mct->Add(mcell,1);
+		  // Now find the associated clusterTrack
+		  // judge whether to put in temp1 to be deleted
+		  for (int k=0;k!=MCTS.size();k++){
+		    MCTS.at(k)->SC_Hough(mcell->Get_Center());
+		    float theta1 = MCTS.at(k)->Get_Theta();
+		    float phi1 = MCTS.at(k)->Get_Phi();
+		     if (MCTS.at(k)->CheckCell(mcell) ){
+		       if ((fabs(theta1+theta-3.1415926)<cut_angle/180.*3.1415926 // 5 degrees
+			    && fabs(fabs(phi1-phi)-3.1415926)<cut_angle/180.*3.1415926)
+			   // ||(fabs(theta1-theta)<cut_angle/180.*3.1415926
+			   // 	 && fabs(phi1-phi)<cut_angle/180.*3.1415926)
+			   ){
+			 
+			 //std::cout << theta << " " << theta1 << " " << phi << " " << phi1 << std::endl;
+			 //add this Merged Track
+			 mct->Add(MCTS.at(k),mcell,1);
+			 temp1.push_back(MCTS.at(k));
+			 flag2 = 1;
+		       }
+		     }
+		  }
+		}
+		  
 	      }
 	    }
 	  } //while(flag2)
