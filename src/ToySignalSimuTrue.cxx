@@ -8,9 +8,9 @@
 
 using namespace WireCell;
 
-WireCell2dToy::ToySignalSimuTrueFDS::ToySignalSimuTrueFDS(WireCell::FrameDataSource& fds, const WireCell::GeomDataSource& gds,
+WireCell2dToy::ToySignalSimuTrueFDS::ToySignalSimuTrueFDS(WireCell::FrameDataSource& fds1, const WireCell::GeomDataSource& gds,
 							  int bins_per_frame1, int nframes_total, int flag_smear)
-  : fds(fds)
+  : fds(&fds1)
   , gds(gds)
   , max_frames(nframes_total)
   , flag_smear(flag_smear)
@@ -25,7 +25,9 @@ WireCell2dToy::ToySignalSimuTrueFDS::ToySignalSimuTrueFDS(WireCell::FrameDataSou
   nwire_v = wires_v.size();
   nwire_w = wires_w.size();
   
-  nbin = fds.Get_Bins_Per_Frame();
+  nbin = fds1.Get_Bins_Per_Frame();
+  
+ 
 
   // hu = new TH1F*[nwire_u];
   // hv = new TH1F*[nwire_v];
@@ -102,9 +104,7 @@ int WireCell2dToy::ToySignalSimuTrueFDS::jump(int frame_number){
   TVirtualFFT::SetTransform(0);
   TH1 *hm = 0;
   TH1 *hp = 0;
-  //  TH1 *hmr = 0;
-  //TH1 *hpr = 0;
-  
+    
   double value_re[9600]; // hack for now
   double value_im[9600];
   int  n  = nbin;
@@ -114,12 +114,12 @@ int WireCell2dToy::ToySignalSimuTrueFDS::jump(int frame_number){
   frame.clear();
   int scale = nbin/bins_per_frame;
   
-  fds.jump(frame_number);
+  fds->jump(frame_number);
   
   //std::cout << "Xin1 " << std::endl; 
 
   //fill in the data ... 
-  const Frame& frame1 = fds.get();
+  const Frame& frame1 = fds->get();
   size_t ntraces = frame1.traces.size();
   for (size_t ind=0; ind<ntraces; ++ind) {
     const Trace& trace = frame1.traces[ind];
@@ -301,6 +301,10 @@ int WireCell2dToy::ToySignalSimuTrueFDS::jump(int frame_number){
 }
 
 WireCell2dToy::ToySignalSimuTrueFDS::~ToySignalSimuTrueFDS(){
+  
+  fds = 0;
+  
+
   // for (int i=0;i!=nwire_u;i++){
   //   delete hu[i] ;
   // }
@@ -313,6 +317,8 @@ WireCell2dToy::ToySignalSimuTrueFDS::~ToySignalSimuTrueFDS(){
   //   delete hw[i] ;
   // }
   delete hw;
+
+  //frame.clear();
 
   delete filter_g;
   delete hfilter_time_gaus;

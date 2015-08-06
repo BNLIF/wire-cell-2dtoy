@@ -86,6 +86,8 @@ int main(int argc, char* argv[])
     return 1;
   }
   
+  TH1::AddDirectory(kFALSE);
+  
 
   int recon_threshold = 2000;
   int max_events = 100;
@@ -93,8 +95,16 @@ int main(int argc, char* argv[])
   
   WireCell::ToyDepositor *toydep = new WireCell::ToyDepositor(fds);
   const PointValueVector& pvv = toydep->depositions(eve_num);
-    
+  
   WireCell::GenerativeFDS *gfds = new WireCell::GenerativeFDS(*toydep,gds,9600,max_events,0.5*1.60*units::millimeter); // 87 K at 0.5 kV/cm
+  gfds->jump(eve_num);
+
+  
+  int abc;
+  
+  tfile->Close("R");
+  delete tfile;
+
   
   cout << "Put in Truth " << endl; 
   WireCell2dToy::ToySignalSimuTrueFDS *st_fds = new WireCell2dToy::ToySignalSimuTrueFDS(*gfds,gds,9600/4,max_events,0); //truth
@@ -129,6 +139,8 @@ int main(int argc, char* argv[])
   float threshold_vg = 822.81;
   float threshold_wg = 510.84;
   
+  // cin >> abc;
+
   WireCellSst::ToyuBooNESliceDataSource *sds = new WireCellSst::ToyuBooNESliceDataSource(*wien_fds,*gaus_fds,threshold_u, 
   					    threshold_v, threshold_w, 
   					    threshold_ug, 
@@ -150,10 +162,8 @@ int main(int argc, char* argv[])
 
   int ncount_t = 0;
   
-  int abc;
-  cin >> abc;
-  delete fds;
-  cin >> abc;
+  
+  
 
   WireCell2dToy::ToyTiling **toytiling = new WireCell2dToy::ToyTiling*[2400];
   WireCell2dToy::MergeToyTiling **mergetiling = new WireCell2dToy::MergeToyTiling*[2400];
@@ -202,17 +212,21 @@ int main(int argc, char* argv[])
   }
 
   
-
+  delete sds;
+  delete sds_th;
   
-  delete toydep;
-  delete gfds;
-  delete st_fds;
   delete simu_fds;
   delete gaus_fds;
   delete wien_fds;
-  delete sds;
-  delete sds_th;
-  tfile->Close();
+
+  delete st_fds;
+  delete gfds;
+  delete toydep;
+  delete fds;
+  
+  
+  
+
   cin >> abc;
   
   return 0;

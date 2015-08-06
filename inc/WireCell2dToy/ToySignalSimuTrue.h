@@ -21,7 +21,7 @@ namespace WireCell2dToy {
     void Save();
     
   private:
-    WireCell::FrameDataSource& fds;
+    WireCell::FrameDataSource* fds;
     const WireCell::GeomDataSource& gds;
     int  max_frames;
 

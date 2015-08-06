@@ -11,6 +11,7 @@ namespace WireCell {
     ToyDepositor(WireCell::FrameDataSource* fds, int flag = 0);
     virtual const PointValueVector& depositions(int frame_number) const;
     virtual std::vector<int>& timeoffset() const{return time_offset;};
+    void clear(){mchits.clear();time_offset.clear();};
 
   private:
     WireCell::FrameDataSource* fds;
