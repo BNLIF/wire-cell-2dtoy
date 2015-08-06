@@ -19,7 +19,11 @@ namespace WireCell2dToy{
 
     WireCell::ClusterTrackSelection& Get_allCT(){return all_clustertrack;};
     WireCell::MergeClusterTrackSelection& Get_allMCT(){return all_mergeclustertrack;};
-    
+
+    WireCell::MSpaceCellClusterMap& Get_ms_ct_map(){return ms_ct_map;};
+    WireCell::MergeSpaceCellCounter& Get_mcells_counter(){return mcells_counter;};
+    WireCell::MergeSpaceCellMap& Get_mcells_map(){return mcells_map;};
+
   protected:
     WireCell::ClusterTrackSelection all_clustertrack;
 
@@ -28,8 +32,6 @@ namespace WireCell2dToy{
     WireCell::MergeClusterTrackSelection all_mergeclustertrack;
 
     WireCell::MSC_MCT_Map  mcells_mct_map;
-    
-
 
 
     WireCell::MergeSpaceCellSelection used_mcells; // save used mergespacecell
