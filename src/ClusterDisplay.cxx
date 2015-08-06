@@ -125,7 +125,7 @@ void WireCell2dToy::ClusterDisplay::DrawCluster(SpaceCellSelection& mcells, TStr
       g1->SetPoint(i,x,y,z);
 
     // if (i==0) 
-      //std::cout << x << " " << y << " " << z << std::endl;
+      // std::cout << x << " " << y << " " << z << std::endl;
    
   }
   // std::cout << mcells.size() << std::endl;

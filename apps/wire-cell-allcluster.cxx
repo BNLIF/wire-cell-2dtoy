@@ -85,6 +85,7 @@ int main(int argc, char* argv[])
   MergeSpaceCellSelection mcells; // save all the cells
   int flag = 0;
   MergeSpaceCell *mcell;
+  SpaceCellSelection cells;
   
   for (int i=0;i!=TC->GetEntries();i++){
     TC->GetEntry(i);
@@ -94,8 +95,29 @@ int main(int argc, char* argv[])
 	mcells.push_back(mcell);  
 	WireCell2dToy::ToyCrawler* toycrawler = new WireCell2dToy::ToyCrawler(mcells);
 	toycrawler->FormGraph();
+
+	if (cluster_num==3){
+	  TApplication theApp("theApp",&argc,argv);
+	  theApp.SetReturnFromRun(true);
+	  
+	  TCanvas c1("ToyMC","ToyMC",800,600);
+	  c1.Draw();
+	  
+	  WireCell2dToy::ClusterDisplay display(c1);
+	  display.DrawCluster(cells);
+	  display.DrawCluster(mcells);
+	  
+	
+	  display.DrawCrawler(*toycrawler,"psame",1);
+	  
+	  theApp.Run();
+	}
+	
+
+
 	crawlers.push_back(toycrawler);
 	mcells.clear();
+	cells.clear();
 	flag = 0;
       }
     }
@@ -108,8 +130,10 @@ int main(int argc, char* argv[])
       mcells.push_back(mcell);
       mcell = new MergeSpaceCell();
     }
-    SpaceCell *space_cell = new SpaceCell(cluster_num,*cell,x*units::cm,charge,0.32*units::cm);
+    GeomCell *cell1 = new GeomCell(cell);
+    SpaceCell *space_cell = new SpaceCell(cluster_num,*cell1,x*units::cm,charge,0.32*units::cm);
     mcell->AddSpaceCell(space_cell);
+    cells.push_back(space_cell);
     
     prev_cluster_num = cluster_num;
     prev_mcell_id = mcell_id;
@@ -133,8 +157,8 @@ int main(int argc, char* argv[])
   
   std::cout << "Check: " << crawlers.size() << " " << TC->GetEntries() << " " << sum << std::endl;
   
-  int abc;
-  cin >> abc;
+  // int abc;
+  // cin >> abc;
     
     
 }

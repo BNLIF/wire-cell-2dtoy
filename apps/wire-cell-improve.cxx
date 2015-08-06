@@ -2,6 +2,7 @@
 #include "WireCellSst/ToyuBooNEFrameDataSource.h"
 #include "WireCellSst/ToyuBooNESliceDataSource.h"
 #include "WireCell2dToy/ToyEventDisplay.h"
+#include "WireCell2dToy/ClusterDisplay.h"
 #include "WireCell2dToy/ToyTiling.h"
 #include "WireCell2dToy/MergeToyTiling.h"
 #include "WireCell2dToy/TruthToyTiling.h"
@@ -313,6 +314,7 @@ int main(int argc, char* argv[])
   for (auto it = cluster_set.begin();it!=cluster_set.end();it++){
     
     MergeSpaceCellSelection mscells;
+    SpaceCellSelection cells;
     for (int i=0; i!=(*it)->get_allcell().size();i++){
       const MergeGeomCell *mcell = (const MergeGeomCell*)((*it)->get_allcell().at(i));
       MergeSpaceCell *mscell = new MergeSpaceCell();
@@ -321,11 +323,32 @@ int main(int argc, char* argv[])
   	const GeomCell *cell = mcell->get_allcell().at(j);
   	SpaceCell *space_cell = new SpaceCell(ncluster,*cell,mcell->GetTimeSlice()*0.32-256,0,0.32*units::cm);
   	mscell->AddSpaceCell(space_cell);
+	cells.push_back(space_cell);
       }
       mscells.push_back(mscell);
     }
     WireCell2dToy::ToyCrawler* toycrawler = new WireCell2dToy::ToyCrawler(mscells);
     crawlers.push_back(toycrawler);
+    
+    std::cout << ncluster << " " << toycrawler->Get_mcells_map().size() << std::endl;
+
+    if (ncluster==100){
+      TApplication theApp("theApp",&argc,argv);
+      theApp.SetReturnFromRun(true);
+      
+      TCanvas c1("ToyMC","ToyMC",800,600);
+      c1.Draw();
+      
+      WireCell2dToy::ClusterDisplay display(c1);
+      display.DrawCluster(cells);
+      display.DrawCluster(mscells);
+      
+      
+      display.DrawCrawler(*toycrawler,"psame",1);
+      
+      theApp.Run();
+    }
+
 
     ncluster ++;
   }
