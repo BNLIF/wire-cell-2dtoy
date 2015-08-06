@@ -320,7 +320,7 @@ int main(int argc, char* argv[])
       mscell->set_mcell(mcell);
       for (int j=0;j!=mcell->get_allcell().size();j++){
   	const GeomCell *cell = mcell->get_allcell().at(j);
-  	SpaceCell *space_cell = new SpaceCell(ncluster,*cell,(mcell->GetTimeSlice()*0.32-256)*units::cm,0,0.32*units::cm);
+  	SpaceCell *space_cell = new SpaceCell(ncluster,*cell,(mcell->GetTimeSlice()*0.32-256)*units::cm,1,0.32*units::cm);
   	mscell->AddSpaceCell(space_cell);
       }
       mscells.push_back(mscell);
@@ -328,24 +328,24 @@ int main(int argc, char* argv[])
     WireCell2dToy::ToyCrawler* toycrawler = new WireCell2dToy::ToyCrawler(mscells);
     crawlers.push_back(toycrawler);
     
-    std::cout << ncluster << " " << toycrawler->Get_mcells_map().size() << " " << toycrawler->Get_allCT().size() << " " << toycrawler->Get_allMCT().size()  << std::endl;
+    // std::cout << ncluster << " " << toycrawler->Get_mcells_map().size() << " " << toycrawler->Get_allCT().size() << " " << toycrawler->Get_allMCT().size()  << std::endl;
 
-    if (toycrawler->Get_mcells_map().size()>200){
-      TApplication theApp("theApp",&argc,argv);
-      theApp.SetReturnFromRun(true);
+    // if (toycrawler->Get_mcells_map().size()>200){
+    //   TApplication theApp("theApp",&argc,argv);
+    //   theApp.SetReturnFromRun(true);
       
-      TCanvas c1("ToyMC","ToyMC",800,600);
-      c1.Draw();
+    //   TCanvas c1("ToyMC","ToyMC",800,600);
+    //   c1.Draw();
       
-      WireCell2dToy::ClusterDisplay display(c1);
-      //display.DrawCluster(cells);
-      display.DrawCluster(mscells);
+    //   WireCell2dToy::ClusterDisplay display(c1);
+    //   //display.DrawCluster(cells);
+    //   display.DrawCluster(mscells);
       
       
-      display.DrawCrawler(*toycrawler,"psame",1);
+    //   display.DrawCrawler(*toycrawler,"psame",1);
       
-      theApp.Run();
-    }
+    //   theApp.Run();
+    // }
 
 
     ncluster ++;
@@ -366,8 +366,153 @@ int main(int argc, char* argv[])
   
 
 
+  //save files
+  TFile *file = new TFile(Form("shower3D_cluster_%d.root",eve_num),"RECREATE");
+  
+  Double_t x_save, y_save, z_save;
+  Double_t charge_save;
+  Double_t ncharge_save;
+  Double_t chi2_save;
+  Double_t ndf_save;
 
-  cin >> abc;
+
+  
+  TGraph2D *g = new TGraph2D();
+  TGraph2D *gt = new TGraph2D();
+  TGraph2D *g_rec = new TGraph2D();
+  TGraph2D *g_rec_blob = new TGraph2D();
+
+  //save results 
+  for (int i=start_num;i!=end_num+1;i++){
+    //truth
+    CellChargeMap ccmap = truthtiling_th[i]->ccmap();
+    for (auto it = ccmap.begin();it!=ccmap.end(); it++){
+      Point p = it->first->center();
+      x_save = i*0.32 - 256;
+      y_save = p.y/units::cm;
+      z_save = p.z/units::cm;
+      charge_save = it->second;
+      
+      gt->SetPoint(ncount_t,x_save,y_save,z_save);
+      
+      
+      ncount_t ++;
+    }
+    
+    //recon 1
+    GeomCellSelection allcell = toytiling[i]->get_allcell();
+    for (int j=0;j!=allcell.size();j++){
+      Point p = allcell[j]->center();
+      x_save = i*0.32- 256;
+      y_save = p.y/units::cm;
+      z_save = p.z/units::cm;
+      
+
+      g->SetPoint(ncount,x_save,y_save,z_save);
+      
+
+      ncount ++;
+    }
+    
+  }
+ 
+  
+
+  g->Write("shower3D");
+  gt->Write("shower3D_truth");
+  g_rec->Write("shower3D_charge");
+  g_rec_blob->Write("shower3D_charge_blob");
+  
+  // const int N = 100000;
+  // Double_t x[N],y[N],z[N];
+  Double_t x,y,z;
+  //save cluster
+  ncluster = 0;
+  for (auto it = cluster_set.begin();it!=cluster_set.end();it++){
+    ncount = 0;
+    TGraph2D *g1 = new TGraph2D();
+    for (int i=0; i!=(*it)->get_allcell().size();i++){
+      const MergeGeomCell *mcell = (const MergeGeomCell*)((*it)->get_allcell().at(i));
+      for (int j=0; j!=mcell->get_allcell().size();j++){
+  	Point p = mcell->get_allcell().at(j)->center();
+  	x = mcell->GetTimeSlice()*0.32- 256;
+  	y = p.y/units::cm;
+  	z = p.z/units::cm;
+  	g1->SetPoint(ncount,x,y,z);
+  	ncount ++;
+      }
+    }
+    // cout << ncount << endl;
+    g1->Write(Form("cluster_%d",ncluster));
+    ncluster ++;
+  }
+
+
+  // save all the toy tiling stuff
+  WireCell2dToy::ToyTiling* tt1 = 0;
+  int time_slice;
+  
+  TTree* ttree = new TTree("T","T");
+  ttree->Branch("time_slice",&time_slice,"time_slice/I");
+  ttree->Branch("toytiling",&tt1);
+  ttree->SetDirectory(file);
+  for (int i=start_num;i!=end_num+1;i++){
+    tt1 = toytiling[i];
+    time_slice = i;
+    ttree->Fill();
+  }
+  ttree->Write();
+
+  TTree *ttree1 = new TTree("TC","TC");
+  // To save cluster, we need to save
+  // 1. time slice
+  // 2. single cell
+  // 3. charge
+  // 4. cluster number
+  const GeomCell* cell_save = 0;
+  int cluster_num = -1;
+  int mcell_id = -1;
+  
+  ttree1->Branch("time_slice",&time_slice,"time_slice/I"); // done
+  ttree1->Branch("cell",&cell_save);
+  ttree1->Branch("ncluster",&cluster_num,"cluster_num/I"); //done
+  ttree1->Branch("mcell_id",&mcell_id,"mcell_id/I");
+  ttree1->Branch("charge",&charge_save,"charge/D"); 
+  ttree1->Branch("x",&x,"x/D");    //done
+  ttree1->Branch("y",&y,"y/D");
+  ttree1->Branch("z",&z,"z/D");
+  
+  ttree1->SetDirectory(file);
+  
+  for (auto it = cluster_set.begin();it!=cluster_set.end();it++){
+    cluster_num ++;
+    //loop merged cell
+    for (int i=0; i!=(*it)->get_allcell().size();i++){
+      const MergeGeomCell *mcell = (const MergeGeomCell*)((*it)->get_allcell().at(i));
+      mcell_id ++;
+      time_slice = mcell->GetTimeSlice();
+      x = time_slice *0.32- 256;
+      //loop single cell
+      for (int j=0; j!=mcell->get_allcell().size();j++){
+	cell_save = mcell->get_allcell().at(j);
+	Point p = mcell->get_allcell().at(j)->center();
+	charge_save = 1;
+	y = p.y/units::cm;
+  	z = p.z/units::cm;
+	ttree1->Fill();
+	
+      }
+    }
+  }
+  ttree1->Write();
+  
+ 
+
+
+  file->Write();
+  file->Close();
+
+  // cin >> abc;
   
   return 0;
   
