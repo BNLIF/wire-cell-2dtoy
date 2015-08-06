@@ -11,7 +11,7 @@ WireCell2dToy::ToyCrawler::ToyCrawler(MergeSpaceCellSelection& mcells){
   
   MergeCTrack();
   
-  FurtherMergeCTrack();
+  //FurtherMergeCTrack();
  
 }
 

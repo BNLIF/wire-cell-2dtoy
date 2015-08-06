@@ -98,8 +98,12 @@ int main(int argc, char* argv[])
 	mcells.push_back(mcell);
 	mcell = new MergeSpaceCell();
       }
+
+      // cout << x << " " << y << " " << z << endl;
       
-      SpaceCell *space_cell = new SpaceCell(cluster_num,*cell,x*units::cm,charge,0.32*units::cm);
+      GeomCell *cell1 = new GeomCell(cell);
+
+      SpaceCell *space_cell = new SpaceCell(cluster_num,*cell1,x*units::cm,charge,0.32*units::cm);
       mcell->AddSpaceCell(space_cell);
       cells.push_back(space_cell);
       
@@ -110,6 +114,8 @@ int main(int argc, char* argv[])
   }
   mcells.push_back(mcell);
   
+
+  // cout << mcells.size() << endl;
 
   // do the Toy Crawler
   WireCell2dToy::ToyCrawler toycrawler(mcells);
@@ -122,7 +128,7 @@ int main(int argc, char* argv[])
   c1.Draw();
   
   WireCell2dToy::ClusterDisplay display(c1);
-  // display.DrawCluster(cells);
+  display.DrawCluster(cells);
   display.DrawCluster(mcells);
 
 

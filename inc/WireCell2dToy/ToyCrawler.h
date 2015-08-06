@@ -25,6 +25,7 @@ namespace WireCell2dToy{
   protected:
     WireCell::ClusterTrackSelection all_clustertrack;
     WireCell::ClusterTrackSelection used_clustertrack; // hold the used tracks
+
     WireCell::MergeClusterTrackSelection all_mergeclustertrack;
     WireCell::MSC_MCT_Map  mcells_mct_map;
 
