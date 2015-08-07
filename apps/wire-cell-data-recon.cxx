@@ -643,7 +643,7 @@ int main(int argc, char* argv[])
     GeomCellSelection allcell = toytiling[i]->get_allcell();
     for (int j=0;j!=allcell.size();j++){
       Point p = allcell[j]->center();
-      x_save = i*unit_dis/10.*2- 256 +50*unit_dis/10.;
+      x_save = i*unit_dis/10.*2- 256 -time_shift*unit_dis/10.;
       y_save = p.y/units::cm;
       z_save = p.z/units::cm;
       
@@ -663,7 +663,7 @@ int main(int argc, char* argv[])
 	//truth
 	for (int k=0;k!=mcell->get_allcell().size();k++){
 	  Point p = mcell->get_allcell().at(k)->center();
-	  x_save = i*unit_dis/10.*2- 256 +50*unit_dis/10.;
+	  x_save = i*unit_dis/10.*2- 256 -time_shift*unit_dis/10.;
 	  y_save = p.y/units::cm;
 	  z_save = p.z/units::cm;
 	  charge_save = charge/mcell->get_allcell().size();
@@ -688,7 +688,7 @@ int main(int argc, char* argv[])
       if (charge> recon_threshold ){
   	for (int k=0;k!=mcell->get_allcell().size();k++){
   	  Point p = mcell->get_allcell().at(k)->center();
-  	  x_save = i*unit_dis/10.*2-256 +50*unit_dis/10.;
+  	  x_save = i*unit_dis/10.*2-256 -time_shift*unit_dis/10.;
   	  y_save = p.y/units::cm;
   	  z_save = p.z/units::cm;
   	  charge_save = charge/mcell->get_allcell().size();
@@ -705,7 +705,7 @@ int main(int argc, char* argv[])
      //   for (int j=0;j!=blobtiling[i]->Get_Cells().size();j++){
      // 	 const GeomCell *cell = blobtiling[i]->Get_Cells().at(j);
      // 	 Point p = cell->center();
-     // 	 x_save = i*0.32-256+50*0.16;
+     // 	 x_save = i*0.32-256-time_shift*0.16;
      // 	 y_save = p.y/units::cm;
      // 	 z_save = p.z/units::cm;
      // 	 charge_save = blobtiling[i]->Get_Cell_Charge(cell,1);
