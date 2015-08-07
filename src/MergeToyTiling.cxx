@@ -386,6 +386,11 @@ WireCell2dToy::MergeToyTiling::MergeToyTiling(WireCell2dToy::ToyTiling& tiling, 
 
   }
 
+  for (int i=0;i!=cell_all.size();i++){
+    MergeGeomCell *mcell = (MergeGeomCell*)cell_all.at(i);
+    mcell->FindEdges();
+  }
+
 }
 
 void WireCell2dToy::MergeToyTiling::form_wiremap(WireCell2dToy::ToyTiling& tiling, int time_slice){
