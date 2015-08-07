@@ -105,6 +105,10 @@ void WireCell2dToy::ToyCrawler::FurtherExtendCTrack(){
 	double theta = mct->Get_Theta();
 	double phi = mct->Get_Phi();
 	
+	mct->SC_Hough(fvertex->Get_Center(),-1,2);
+	double theta_m = mct->Get_Theta();
+	double phi_m = mct->Get_Phi();
+	
 	//save the one that satisfy the requirement
 	MergeSpaceCellSelection temp;
 	MergeSpaceCell *cur_msc = fvertex;
@@ -159,20 +163,24 @@ void WireCell2dToy::ToyCrawler::FurtherExtendCTrack(){
 		  MCTS.at(k)->SC_Hough(mcell->Get_Center());
 		  float theta1 = MCTS.at(k)->Get_Theta();
 		  float phi1 = MCTS.at(k)->Get_Phi();
+
+		  MCTS.at(k)->SC_Hough(mcell->Get_Center(),-1,2);
+		  float theta1_m = MCTS.at(k)->Get_Theta();
+		  float phi1_m = MCTS.at(k)->Get_Phi();
+
 		  if (MCTS.at(k)->CheckCell(mcell) ){
 		    if ((fabs(theta1+theta-3.1415926)<cut_angle/180.*3.1415926 // 5 degrees
-			 && fabs(fabs(phi1-phi)-3.1415926)<cut_angle/180.*3.1415926)
-			// ||(fabs(theta1-theta)<cut_angle/180.*3.1415926
-			// 	 && fabs(phi1-phi)<cut_angle/180.*3.1415926)
-			){
-		      
-		      //std::cout << theta << " " << theta1 << " " << phi << " " << phi1 << std::endl;
-		      
+			 && fabs(fabs(phi1-phi)-3.1415926)<cut_angle/180.*3.1415926) ||
+			(fabs(theta1_m+theta_m-3.1415926)<cut_angle/180.*3.1415926 // 5 degrees
+			 && fabs(fabs(phi1_m-phi_m)-3.1415926)<cut_angle/180.*3.1415926)){
 		      //add this Merged Track
 		      mct->Add(MCTS.at(k),mcell,-1);
 		      temp1.push_back(MCTS.at(k));
 		      flag2 = 1;
 		    }
+
+
+
 		  }
 		}
 	      }
@@ -205,6 +213,9 @@ void WireCell2dToy::ToyCrawler::FurtherExtendCTrack(){
 	mct->SC_Hough(bvertex->Get_Center());
 	double theta = mct->Get_Theta();
 	double phi = mct->Get_Phi();
+	mct->SC_Hough(bvertex->Get_Center(),-1,2);
+	double theta_m = mct->Get_Theta();
+	double phi_m = mct->Get_Phi();
 	
 	//save the one that satisfy the requirement
 	MergeSpaceCellSelection temp;
@@ -260,11 +271,15 @@ void WireCell2dToy::ToyCrawler::FurtherExtendCTrack(){
 		  MCTS.at(k)->SC_Hough(mcell->Get_Center());
 		  float theta1 = MCTS.at(k)->Get_Theta();
 		  float phi1 = MCTS.at(k)->Get_Phi();
+		  MCTS.at(k)->SC_Hough(mcell->Get_Center(),-1,2);
+		  float theta1_m = MCTS.at(k)->Get_Theta();
+		  float phi1_m = MCTS.at(k)->Get_Phi();
+
 		  if (MCTS.at(k)->CheckCell(mcell) ){
 		    if ((fabs(theta1+theta-3.1415926)<cut_angle/180.*3.1415926 // 5 degrees
 			 && fabs(fabs(phi1-phi)-3.1415926)<cut_angle/180.*3.1415926)
-			// ||(fabs(theta1-theta)<cut_angle/180.*3.1415926
-			// 	 && fabs(phi1-phi)<cut_angle/180.*3.1415926)
+			||(fabs(theta1_m+theta_m-3.1415926)<cut_angle/180.*3.1415926 // 5 degrees
+			 && fabs(fabs(phi1_m-phi_m)-3.1415926)<cut_angle/180.*3.1415926)
 			){
 		      
 		      //std::cout << theta << " " << theta1 << " " << phi << " " << phi1 << std::endl;
@@ -349,6 +364,11 @@ void WireCell2dToy::ToyCrawler::MergeCTrack(){
 	float theta1 = mct->Get_Theta();
 	float phi1 = mct->Get_Phi();
 
+	mct->SC_Hough(vertex->Get_Center(),-1,2);
+	float theta1_m = mct->Get_Theta();
+	float phi1_m = mct->Get_Phi();
+
+
 	
 	ClusterTrackSelection cts = ms_ct_map[vertex];
 
@@ -371,6 +391,10 @@ void WireCell2dToy::ToyCrawler::MergeCTrack(){
 	    cct->SC_Hough(vertex->Get_Center());
 	    float theta2 = cct->Get_Theta();
 	    float phi2 = cct->Get_Phi();
+
+	    cct->SC_Hough(vertex->Get_Center(),-1,2);
+	    float theta2_m = cct->Get_Theta();
+	    float phi2_m = cct->Get_Phi();
 	    
 	    float cut_angle;
 	    if (flag_special > 2){
@@ -378,7 +402,7 @@ void WireCell2dToy::ToyCrawler::MergeCTrack(){
 	    }else{
 	      cut_angle = 25;
 	    }
-	    float cut_angle1 = 5;
+	    float cut_angle1 = 25;
 
 	    float shift_angle = 100;
 
@@ -387,6 +411,17 @@ void WireCell2dToy::ToyCrawler::MergeCTrack(){
 		){
 	      flag = 1;
 	    }
+
+	    if ((fabs(theta1_m+theta2_m-3.1415926)<cut_angle1/180.*3.1415926 // 5 degrees
+	    	 && fabs(fabs(phi1_m-phi2_m)-3.1415926)<cut_angle1/180.*3.1415926)
+	    	){
+	      flag = 1;
+	    }
+	    // std::cout << theta1_m/3.1415926*180. << " " << theta2_m/3.1415926*180.
+	    // 	      << " " << phi1_m/3.1415926*180. << " " << phi2_m/3.1415926*180. 
+	    // 	      << std::endl;
+
+	    
 
 	    if (flag == 0 ){
 	      int cross_num = cct->CrossNum(vertex->Get_Center(), theta1,phi1);
