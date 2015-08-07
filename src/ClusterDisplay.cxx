@@ -98,7 +98,7 @@ void WireCell2dToy::ClusterDisplay::DrawCrawler(WireCell2dToy::ToyCrawler& toycr
            
       //if (i<9)
 	g1->Draw(option);
-      if (num == 7 ) num = 0;
+      if (num ==7 ) num = 0;
       
       int num1 = gRandom->Uniform(0,8.9);
       int num2 = gRandom->Uniform(0,6.9);
@@ -160,9 +160,9 @@ void WireCell2dToy::ClusterDisplay::DrawCluster(MergeSpaceCellSelection& mcells,
   g1->Draw(option);
 
   //test 
-   g1->GetXaxis()->SetRangeUser(120,145);
-   g1->GetYaxis()->SetRangeUser(-120,-80);
-   g1->GetZaxis()->SetRangeUser(135,145);
+   // g1->GetXaxis()->SetRangeUser(120,145);
+   // g1->GetYaxis()->SetRangeUser(-120,-80);
+   // g1->GetZaxis()->SetRangeUser(135,145);
 
   //  std::cout << mcells.size() << std::endl;
 

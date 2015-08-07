@@ -13,7 +13,7 @@ WireCell2dToy::ToyCrawler::ToyCrawler(MergeSpaceCellSelection& mcells){
   MergeCTrack();
   
   // Further merge trying to extend into other tracks ... 
-  FurtherMergeCTrack();
+  FurtherExtendCTrack();
   
   PurgeMergeCTrack();
 
@@ -73,7 +73,7 @@ void WireCell2dToy::ToyCrawler::PurgeMergeCTrack(){
 
 
 
-void WireCell2dToy::ToyCrawler::FurtherMergeCTrack(){
+void WireCell2dToy::ToyCrawler::FurtherExtendCTrack(){
   
   
   MergeClusterTrackSelection temp1;
@@ -82,6 +82,8 @@ void WireCell2dToy::ToyCrawler::FurtherMergeCTrack(){
   //while(flag3){
   flag3 = 0;
   float cut_angle = 15;
+  
+ 
   
   for (int i=0;i!=all_mergeclustertrack.size();i++){
     MergeClusterTrack *mct = all_mergeclustertrack.at(i);
@@ -150,6 +152,7 @@ void WireCell2dToy::ToyCrawler::FurtherMergeCTrack(){
 	      
 	      if (insert_flag ==1){
 		mct->Add(mcell,-1);
+		
 		// Now find the associated clusterTrack
 		// judge whether to put in temp1 to be deleted
 		for (int k=0;k!=MCTS.size();k++){
@@ -163,7 +166,7 @@ void WireCell2dToy::ToyCrawler::FurtherMergeCTrack(){
 			// 	 && fabs(phi1-phi)<cut_angle/180.*3.1415926)
 			){
 		      
-		      std::cout << theta << " " << theta1 << " " << phi << " " << phi1 << std::endl;
+		      //std::cout << theta << " " << theta1 << " " << phi << " " << phi1 << std::endl;
 		      
 		      //add this Merged Track
 		      mct->Add(MCTS.at(k),mcell,-1);
@@ -250,6 +253,7 @@ void WireCell2dToy::ToyCrawler::FurtherMergeCTrack(){
 	      if (insert_flag == 1){
 		// insert it in
 		mct->Add(mcell,1);
+		
 		// Now find the associated clusterTrack
 		// judge whether to put in temp1 to be deleted
 		for (int k=0;k!=MCTS.size();k++){
@@ -263,7 +267,7 @@ void WireCell2dToy::ToyCrawler::FurtherMergeCTrack(){
 			// 	 && fabs(phi1-phi)<cut_angle/180.*3.1415926)
 			){
 		      
-		      std::cout << theta << " " << theta1 << " " << phi << " " << phi1 << std::endl;
+		      //std::cout << theta << " " << theta1 << " " << phi << " " << phi1 << std::endl;
 		      //add this Merged Track
 		      mct->Add(MCTS.at(k),mcell,1);
 		      temp1.push_back(MCTS.at(k));
@@ -350,6 +354,13 @@ void WireCell2dToy::ToyCrawler::MergeCTrack(){
 
 	//std::cout << theta1 << " " << phi1 << " " << cts.size() << std::endl;
 
+	int flag_special = 0;
+	for (int j=0;j!=cts.size();j++){
+	  if (cts.at(j)->Get_allmcells().size()>3)
+	    flag_special ++;
+	}
+
+
 	for (int j=0;j!=cts.size();j++){
 	  ClusterTrack *cct = cts.at(j);
 	  auto it1 = find(used_clustertrack.begin(),used_clustertrack.end(), cct);
@@ -361,7 +372,12 @@ void WireCell2dToy::ToyCrawler::MergeCTrack(){
 	    float theta2 = cct->Get_Theta();
 	    float phi2 = cct->Get_Phi();
 	    
-	    float cut_angle = 15;
+	    float cut_angle;
+	    if (flag_special > 2){
+	      cut_angle = 10;
+	    }else{
+	      cut_angle = 25;
+	    }
 	    float cut_angle1 = 5;
 
 	    float shift_angle = 100;
