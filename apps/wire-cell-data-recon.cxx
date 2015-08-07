@@ -94,7 +94,7 @@ int main(int argc, char* argv[])
   TTree* sst = dynamic_cast<TTree*>(tfile.Get(tpath));
   WireCellSst::ToyuBooNEFrameDataSource data_fds(*sst,gds);
   data_fds.jump(eve_num);
-  data_fds.Save();
+  //data_fds.Save();
 
   int recon_threshold = 2000;
   
@@ -102,7 +102,7 @@ int main(int argc, char* argv[])
   const PointValueVector pvv = toydep.depositions(eve_num);
   
 
-  double unit_dis = 1.605723;
+  float unit_dis = 1.60;
   // 
   
   //  WireCell::GenerativeFDS gfds(toydep,gds,2400,max_events,2.0*1.6*units::millimeter);
@@ -127,24 +127,28 @@ int main(int argc, char* argv[])
   //st_fds.Save();
   
   
-  //test
-  cout << "Simulate Raw WaveForm " << endl; 
-  //WireCell2dToy::ToySignalSimuFDS simu_fds(gfds,gds,9600,max_events,1.647,1.539+1.647,1,-55); // time offset among different planes for the time electrons travel among different planes
-  WireCell2dToy::ToySignalSimuFDS simu_fds(gfds,gds,9600,max_events,0,0,1,-0.5,-46); // time offset among different planes for the time electrons travel among different planes
-  simu_fds.jump(eve_num);
-  simu_fds.Save();
+  int time_offset = -46;
+  // //test
+  // cout << "Simulate Raw WaveForm " << endl; 
+  // //WireCell2dToy::ToySignalSimuFDS simu_fds(gfds,gds,9600,max_events,1.647,1.539+1.647,1,-55); // time offset among different planes for the time electrons travel among different planes
+  // //WireCell2dToy::ToySignalSimuFDS simu_fds(gfds,gds,9600,max_events,0,0,1,-0.5,time_offset); // time offset among different planes for the time electrons travel among different planes
+  // WireCell2dToy::ToySignalSimuFDS simu_fds(gfds,gds,9600,max_events,0,0,1,0,0); // time offset among different planes for the time electrons travel among different planes
+  // simu_fds.jump(eve_num);
+  // //simu_fds.Save();
   
   
+ 
+
   cout << "Deconvolution with Gaussian filter" << endl;
-  //WireCell2dToy::ToySignalGausFDS gaus_fds(data_fds,gds,9600/4,max_events,1.647,1.539+1.647,-55); // gaussian smearing for charge estimation
-  WireCell2dToy::ToySignalGausFDS gaus_fds(data_fds,gds,9600/4,max_events,0,0,-0.5,-46); // gaussian smearing for charge estimation
+  //WireCell2dToy::ToySignalGausFDS gaus_fds(data_fds,gds,9600/4,max_events,1.647,1.539+1.647); // gaussian smearing for charge estimation
+  WireCell2dToy::ToySignalGausFDS gaus_fds(data_fds,gds,9600/4,max_events,0,0,-0.5); // gaussian smearing for charge estimation
   gaus_fds.jump(eve_num);
   //gaus_fds.Save();
 
-   cout << "Deconvolution with Wiener filter" << endl;
-   //WireCell2dToy::ToySignalWienFDS wien_fds(data_fds,gds,9600/4,max_events,1.647,1.539+1.647,-55); // weiner smearing for hit identification
-   WireCell2dToy::ToySignalWienFDS wien_fds(data_fds,gds,9600/4,max_events,0,0,-0.5,-46); // weiner smearing for hit identification
-  wien_fds.jump(eve_num);
+   cout << "Deconvolution with Wiener filter" << endl; 
+   //WireCell2dToy::ToySignalWienFDS wien_fds(data_fds,gds,9600/4,max_events,1.647,1.539+1.647); // weiner smearing for hit identification
+   WireCell2dToy::ToySignalWienFDS wien_fds(data_fds,gds,9600/4,max_events,0,0,-0.5); // weiner smearing for hit identification
+   wien_fds.jump(eve_num);
   //wien_fds.Save();
   
   
@@ -624,7 +628,7 @@ int main(int argc, char* argv[])
     CellChargeMap ccmap = truthtiling_th[i]->ccmap();
     for (auto it = ccmap.begin();it!=ccmap.end(); it++){
       Point p = it->first->center();
-      x_save = i*0.32 - 256;
+      x_save = i*unit_dis/10.*2. - 256;
       y_save = p.y/units::cm;
       z_save = p.z/units::cm;
       charge_save = it->second;
@@ -639,7 +643,7 @@ int main(int argc, char* argv[])
     GeomCellSelection allcell = toytiling[i]->get_allcell();
     for (int j=0;j!=allcell.size();j++){
       Point p = allcell[j]->center();
-      x_save = i*unit_dis/10.*2- 256+ 50*unit_dis/10.;
+      x_save = i*unit_dis/10.*2- 256 +50*unit_dis/10.;
       y_save = p.y/units::cm;
       z_save = p.z/units::cm;
       
@@ -659,7 +663,7 @@ int main(int argc, char* argv[])
 	//truth
 	for (int k=0;k!=mcell->get_allcell().size();k++){
 	  Point p = mcell->get_allcell().at(k)->center();
-	  x_save = i*unit_dis/10.*2- 256+50*unit_dis/10.;
+	  x_save = i*unit_dis/10.*2- 256 +50*unit_dis/10.;
 	  y_save = p.y/units::cm;
 	  z_save = p.z/units::cm;
 	  charge_save = charge/mcell->get_allcell().size();
@@ -684,7 +688,7 @@ int main(int argc, char* argv[])
       if (charge> recon_threshold ){
   	for (int k=0;k!=mcell->get_allcell().size();k++){
   	  Point p = mcell->get_allcell().at(k)->center();
-  	  x_save = i*unit_dis/10.*2-256+50*unit_dis/10.;
+  	  x_save = i*unit_dis/10.*2-256 +50*unit_dis/10.;
   	  y_save = p.y/units::cm;
   	  z_save = p.z/units::cm;
   	  charge_save = charge/mcell->get_allcell().size();
