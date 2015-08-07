@@ -16,6 +16,9 @@ WireCell2dToy::ToyCrawler::ToyCrawler(MergeSpaceCellSelection& mcells){
   FurtherExtendCTrack();
   
   PurgeMergeCTrack();
+  
+  
+
 
   // for (int i=0;i!=all_mergeclustertrack.size();i++){
   //   MergeClusterTrack *mct = all_mergeclustertrack.at(i);

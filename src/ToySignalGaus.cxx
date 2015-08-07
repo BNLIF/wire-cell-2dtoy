@@ -10,7 +10,7 @@
 
 using namespace WireCell;
 
-WireCell2dToy::ToySignalGausFDS::ToySignalGausFDS(WireCell::FrameDataSource& fds, const WireCell::GeomDataSource& gds, int bins_per_frame1, int nframes_total, float time_offset_uv, float time_offset_uw)
+WireCell2dToy::ToySignalGausFDS::ToySignalGausFDS(WireCell::FrameDataSource& fds, const WireCell::GeomDataSource& gds, int bins_per_frame1, int nframes_total, float time_offset_uv, float time_offset_uw, float overall_time_offset, int overall_time_shift)
   : fds(fds)
   , gds(gds)
   , max_frames(nframes_total)
@@ -75,10 +75,10 @@ WireCell2dToy::ToySignalGausFDS::ToySignalGausFDS(WireCell::FrameDataSource& fds
   hwr = new TH1F("hwr2","hwr2",nbin,0,nbin); // half us tick
   
   for (int i=0; i!=nbin; i++){  
-    double time = hur->GetBinCenter(i+1)/2.-50;
-    hur->SetBinContent(i+1,gu->Eval(time));
-    hvr->SetBinContent(i+1,gv->Eval(time-time_offset_uv));
-    hwr->SetBinContent(i+1,gw->Eval(time-time_offset_uw));
+    double time = hur->GetBinCenter(i+1)/2.-50 ;
+    hur->SetBinContent(i+1,gu->Eval(time-overall_time_offset));
+    hvr->SetBinContent(i+1,gv->Eval(time-time_offset_uv-overall_time_offset));
+    hwr->SetBinContent(i+1,gw->Eval(time-time_offset_uw-overall_time_offset));
   } 
   
   hmr_u = 0;

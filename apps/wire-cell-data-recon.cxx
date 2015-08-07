@@ -53,8 +53,8 @@ using namespace std;
 
 int main(int argc, char* argv[])
 {
-  if (argc < 3) {
-    cerr << "usage: wire-cell-uboone /path/to/ChannelWireGeometry.txt /path/to/celltree.root" << endl;
+  if (argc < 4) {
+    cerr << "usage: wire-cell-uboone /path/to/ChannelWireGeometry.txt /path/to/celltree.root eve_num" << endl;
     return 1;
   }
   
@@ -65,6 +65,15 @@ int main(int argc, char* argv[])
        << " x:" << ex[0]/units::mm << " mm"
        << " y:" << ex[1]/units::m << " m"
        << " z:" << ex[2]/units::m << " m"
+       << endl;
+
+  cout << "Pitch: " << gds.pitch(WirePlaneType_t(0)) 
+       << " " << gds.pitch(WirePlaneType_t(1)) 
+       << " " << gds.pitch(WirePlaneType_t(2))
+       << endl;
+  cout << "Angle: " << gds.angle(WirePlaneType_t(0)) 
+       << " " << gds.angle(WirePlaneType_t(1)) 
+       << " " << gds.angle(WirePlaneType_t(2))
        << endl;
   
   
@@ -78,14 +87,14 @@ int main(int argc, char* argv[])
     return 1;
   }
   
-  int max_events = 5;
-  int eve_num  = 1;
+  int max_events = 100;
+  int eve_num  = atoi(argv[3]);
 
   TFile tfile(root_file,"read");
   TTree* sst = dynamic_cast<TTree*>(tfile.Get(tpath));
   WireCellSst::ToyuBooNEFrameDataSource data_fds(*sst,gds);
   data_fds.jump(eve_num);
-  //data_fds.Save();
+  data_fds.Save();
 
   int recon_threshold = 2000;
   
@@ -93,6 +102,7 @@ int main(int argc, char* argv[])
   const PointValueVector pvv = toydep.depositions(eve_num);
   
 
+  double unit_dis = 1.605723;
   // 
   
   //  WireCell::GenerativeFDS gfds(toydep,gds,2400,max_events,2.0*1.6*units::millimeter);
@@ -103,26 +113,37 @@ int main(int argc, char* argv[])
   // WireCell::ToyDepositor toydep(fds);
   // const PointValueVector pvv = toydep.depositions(eve_num);
   //WireCell::GenerativeFDS gfds(toydep,gds,9600,1,0.5*1.605723*units::millimeter); // 87 K at 0.5 kV/cm
-  WireCell::GenerativeFDS gfds(toydep,gds,9600,max_events,0.5*1.60*units::millimeter); // 87 K at 0.5 kV/cm
+  WireCell::GenerativeFDS gfds(toydep,gds,9600,max_events,0.5*unit_dis*units::millimeter); // 87 K at 0.5 kV/cm
   //WireCell2dToy::ToySignalSimuFDS simu_fds(gfds,gds,9600,1,1.647,1.539+1.647,1); // time offset among different planes for the time electrons travel among different planes
   //simu_fds.jump(eve_num);
   //simu_fds.Save();
 
  
 
-
+  cout << "Put in Truth " << endl; 
   WireCell2dToy::ToySignalSimuTrueFDS st_fds(gfds,gds,9600/4,max_events,0); //truth
   //WireCell::GenerativeFDS st_fds(toydep,gds,9600/4,max_events,2.0*1.60*units::millimeter); // 87 K at 0.5 kV/cm
   st_fds.jump(eve_num);
   //st_fds.Save();
   
   
-
-  WireCell2dToy::ToySignalGausFDS gaus_fds(data_fds,gds,9600/4,max_events,1.647,1.539+1.647); // gaussian smearing for charge estimation
+  //test
+  cout << "Simulate Raw WaveForm " << endl; 
+  //WireCell2dToy::ToySignalSimuFDS simu_fds(gfds,gds,9600,max_events,1.647,1.539+1.647,1,-55); // time offset among different planes for the time electrons travel among different planes
+  WireCell2dToy::ToySignalSimuFDS simu_fds(gfds,gds,9600,max_events,0,0,1,-46); // time offset among different planes for the time electrons travel among different planes
+  simu_fds.jump(eve_num);
+  simu_fds.Save();
+  
+  
+  cout << "Deconvolution with Gaussian filter" << endl;
+  //WireCell2dToy::ToySignalGausFDS gaus_fds(data_fds,gds,9600/4,max_events,1.647,1.539+1.647,-55); // gaussian smearing for charge estimation
+  WireCell2dToy::ToySignalGausFDS gaus_fds(data_fds,gds,9600/4,max_events,0,0,-46); // gaussian smearing for charge estimation
   gaus_fds.jump(eve_num);
   //gaus_fds.Save();
 
-   WireCell2dToy::ToySignalWienFDS wien_fds(data_fds,gds,9600/4,max_events,1.647,1.539+1.647); // weiner smearing for hit identification
+   cout << "Deconvolution with Wiener filter" << endl;
+   //WireCell2dToy::ToySignalWienFDS wien_fds(data_fds,gds,9600/4,max_events,1.647,1.539+1.647,-55); // weiner smearing for hit identification
+   WireCell2dToy::ToySignalWienFDS wien_fds(data_fds,gds,9600/4,max_events,0,0,-46); // weiner smearing for hit identification
   wien_fds.jump(eve_num);
   //wien_fds.Save();
   
@@ -452,36 +473,36 @@ int main(int argc, char* argv[])
   
 
 
-  //do blob thing ... 
-  //use time information
-  std::cout << "Reduce Blob" << std::endl; 
-  for (int i=start_num;i!=end_num+1;i++){
-    std::cout << "Check Blob " << i << std::endl;
-    //std::cout << toymatrix[i]->GetSimpleBlobReduction() << std::endl;
-    if (!mergetiling[i]->GetRemerged()){
-      toymatrix[i]->JudgeSimpleBlob(*toytiling[i],*mergetiling[i]);
-    }
-    //std::cout << toymatrix[i]->GetSimpleBlobReduction() << std::endl;
-    if (toymatrix[i]->GetSimpleBlobReduction()){
-      if (i==start_num){
-  	blobtiling[i] = new WireCell2dToy::SimpleBlobToyTiling(*toytiling[i],*mergetiling[i],*toymatrix[i],*mergetiling[i+1],*toymatrix[i+1],*mergetiling[i+1],*toymatrix[i+1]);
-      }else if (i==end_num){
-  	blobtiling[i] = new WireCell2dToy::SimpleBlobToyTiling(*toytiling[i],*mergetiling[i],*toymatrix[i],*mergetiling[i-1],*toymatrix[i-1],*mergetiling[i-1],*toymatrix[i-1]);
-      }else{
-  	blobtiling[i] = new WireCell2dToy::SimpleBlobToyTiling(*toytiling[i],*mergetiling[i],*toymatrix[i],*mergetiling[i-1],*toymatrix[i-1],*mergetiling[i+1],*toymatrix[i+1]);
-      }
-    }
-    if (toymatrix[i]->GetSimpleBlobReduction()){
-      //save stuff
-      CellChargeMap ccmap = truthtiling[i]->ccmap();
-      blobmetric.Add(*blobtiling[i],ccmap);
+  // //do blob thing ... 
+  // //use time information
+  // std::cout << "Reduce Blob" << std::endl; 
+  // for (int i=start_num;i!=end_num+1;i++){
+  //   std::cout << "Check Blob " << i << std::endl;
+  //   //std::cout << toymatrix[i]->GetSimpleBlobReduction() << std::endl;
+  //   if (!mergetiling[i]->GetRemerged()){
+  //     toymatrix[i]->JudgeSimpleBlob(*toytiling[i],*mergetiling[i]);
+  //   }
+  //   //std::cout << toymatrix[i]->GetSimpleBlobReduction() << std::endl;
+  //   if (toymatrix[i]->GetSimpleBlobReduction()){
+  //     if (i==start_num){
+  // 	blobtiling[i] = new WireCell2dToy::SimpleBlobToyTiling(*toytiling[i],*mergetiling[i],*toymatrix[i],*mergetiling[i+1],*toymatrix[i+1],*mergetiling[i+1],*toymatrix[i+1]);
+  //     }else if (i==end_num){
+  // 	blobtiling[i] = new WireCell2dToy::SimpleBlobToyTiling(*toytiling[i],*mergetiling[i],*toymatrix[i],*mergetiling[i-1],*toymatrix[i-1],*mergetiling[i-1],*toymatrix[i-1]);
+  //     }else{
+  // 	blobtiling[i] = new WireCell2dToy::SimpleBlobToyTiling(*toytiling[i],*mergetiling[i],*toymatrix[i],*mergetiling[i-1],*toymatrix[i-1],*mergetiling[i+1],*toymatrix[i+1]);
+  //     }
+  //   }
+  //   if (toymatrix[i]->GetSimpleBlobReduction()){
+  //     //save stuff
+  //     CellChargeMap ccmap = truthtiling[i]->ccmap();
+  //     blobmetric.Add(*blobtiling[i],ccmap);
       
-      std::cout << "Check Blob " << i << std::endl;
-      WireCell2dToy::BlobMetric tempblob;
-      tempblob.Add(*blobtiling[i],ccmap);
-      tempblob.Print();
-    }
-  }
+  //     std::cout << "Check Blob " << i << std::endl;
+  //     WireCell2dToy::BlobMetric tempblob;
+  //     tempblob.Add(*blobtiling[i],ccmap);
+  //     tempblob.Print();
+  //   }
+  // }
   
   //do clustering ... 
    for (int i=start_num;i!=end_num+1;i++){
@@ -552,7 +573,7 @@ int main(int argc, char* argv[])
    cout << "Summary: " << ncount << " " << ncount_mcell << " " << ncount_mcell_cluster << endl;
 
 
-  TFile *file = new TFile("shower3D_data.root","RECREATE");
+   TFile *file = new TFile(Form("shower3D_data_%d.root",eve_num),"RECREATE");
   TTree *t_true = new TTree("T_true","T_true");
   TTree *t_rec = new TTree("T_rec","T_rec");
   TTree *t_rec_charge = new TTree("T_rec_charge","T_rec_charge");
@@ -618,7 +639,7 @@ int main(int argc, char* argv[])
     GeomCellSelection allcell = toytiling[i]->get_allcell();
     for (int j=0;j!=allcell.size();j++){
       Point p = allcell[j]->center();
-      x_save = i*0.32- 256 + 50*0.16;
+      x_save = i*unit_dis/10.*2- 256+ 50*unit_dis/10.;
       y_save = p.y/units::cm;
       z_save = p.z/units::cm;
       
@@ -638,7 +659,7 @@ int main(int argc, char* argv[])
 	//truth
 	for (int k=0;k!=mcell->get_allcell().size();k++){
 	  Point p = mcell->get_allcell().at(k)->center();
-	  x_save = i*0.32- 256+50*0.16;
+	  x_save = i*unit_dis/10.*2- 256+50*unit_dis/10.;
 	  y_save = p.y/units::cm;
 	  z_save = p.z/units::cm;
 	  charge_save = charge/mcell->get_allcell().size();
@@ -659,10 +680,11 @@ int main(int argc, char* argv[])
     for (int j=0;j!=allmcell.size();j++){
       MergeGeomCell *mcell = (MergeGeomCell*)allmcell[j];
       double charge = toymatrix[i]->Get_Cell_Charge(mcell,1);
-      if (charge> recon_threshold && !(mcell->IsSimpleBlob() && mcell->IsBlob())){
+      //if (charge> recon_threshold && !(mcell->IsSimpleBlob() && mcell->IsBlob())){
+      if (charge> recon_threshold ){
   	for (int k=0;k!=mcell->get_allcell().size();k++){
   	  Point p = mcell->get_allcell().at(k)->center();
-  	  x_save = i*0.32-256+50*0.16;
+  	  x_save = i*unit_dis/10.*2-256+50*unit_dis/10.;
   	  y_save = p.y/units::cm;
   	  z_save = p.z/units::cm;
   	  charge_save = charge/mcell->get_allcell().size();
@@ -675,22 +697,22 @@ int main(int argc, char* argv[])
   	}
       }
     }
-     if (toymatrix[i]->GetSimpleBlobReduction()){
-       for (int j=0;j!=blobtiling[i]->Get_Cells().size();j++){
-  	 const GeomCell *cell = blobtiling[i]->Get_Cells().at(j);
-  	 Point p = cell->center();
-  	 x_save = i*0.32-256+50*0.16;
-  	 y_save = p.y/units::cm;
-  	 z_save = p.z/units::cm;
-  	 charge_save = blobtiling[i]->Get_Cell_Charge(cell,1);
-  	 ncharge_save = 1;
+     // if (toymatrix[i]->GetSimpleBlobReduction()){
+     //   for (int j=0;j!=blobtiling[i]->Get_Cells().size();j++){
+     // 	 const GeomCell *cell = blobtiling[i]->Get_Cells().at(j);
+     // 	 Point p = cell->center();
+     // 	 x_save = i*0.32-256+50*0.16;
+     // 	 y_save = p.y/units::cm;
+     // 	 z_save = p.z/units::cm;
+     // 	 charge_save = blobtiling[i]->Get_Cell_Charge(cell,1);
+     // 	 ncharge_save = 1;
 	 
-  	 g_rec_blob->SetPoint(ncount2,x_save,y_save,z_save);
-  	 t_rec_charge_blob->Fill();
+     // 	 g_rec_blob->SetPoint(ncount2,x_save,y_save,z_save);
+     // 	 t_rec_charge_blob->Fill();
 	  
-  	 ncount2 ++;
-       }
-     }
+     // 	 ncount2 ++;
+     //   }
+     // }
     
     //save all results
     // file->Write(Form("toytiling_%d",i),toytiling[i]);
@@ -707,24 +729,26 @@ int main(int argc, char* argv[])
   g_rec->Write("shower3D_charge");
   g_rec_blob->Write("shower3D_charge_blob");
   
-  const int N = 100000;
-  Double_t x[N],y[N],z[N];
+  // const int N = 100000;
+  // Double_t x[N],y[N],z[N];
+  Double_t x,y,z;
   //save cluster
   int ncluster = 0;
   for (auto it = cluster_set.begin();it!=cluster_set.end();it++){
     ncount = 0;
+    TGraph2D *g1 = new TGraph2D();
     for (int i=0; i!=(*it)->get_allcell().size();i++){
       const MergeGeomCell *mcell = (const MergeGeomCell*)((*it)->get_allcell().at(i));
       for (int j=0; j!=mcell->get_allcell().size();j++){
   	Point p = mcell->get_allcell().at(j)->center();
-  	x[ncount] = mcell->GetTimeSlice()*0.32- 256;
-  	y[ncount] = p.y/units::cm;
-  	z[ncount] = p.z/units::cm;
+  	x = mcell->GetTimeSlice()*0.32- 256;
+  	y = p.y/units::cm;
+  	z = p.z/units::cm;
+  	g1->SetPoint(ncount,x,y,z);
   	ncount ++;
       }
     }
     // cout << ncount << endl;
-    TGraph2D *g1 = new TGraph2D(ncount,x,y,z);
     g1->Write(Form("cluster_%d",ncluster));
     ncluster ++;
   }

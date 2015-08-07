@@ -15,9 +15,6 @@ namespace WireCell2dToy{
     void FormGraph();
     void MergeCTrack();
     void FurtherExtendCTrack();
-    
-
-
     void PurgeMergeCTrack();
 
     WireCell::ClusterTrackSelection& Get_allCT(){return all_clustertrack;};

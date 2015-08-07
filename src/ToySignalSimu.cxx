@@ -8,7 +8,7 @@
 
 using namespace WireCell;
 
-WireCell2dToy::ToySignalSimuFDS::ToySignalSimuFDS(WireCell::FrameDataSource& fds, const WireCell::GeomDataSource& gds,int bins_per_frame1, int nframes_total, float time_offset_uv, float time_offset_uw, int flag_random)
+WireCell2dToy::ToySignalSimuFDS::ToySignalSimuFDS(WireCell::FrameDataSource& fds, const WireCell::GeomDataSource& gds,int bins_per_frame1, int nframes_total, float time_offset_uv, float time_offset_uw, int flag_random, float overall_time_offset, int overall_time_shift)
   : fds(fds)
   , gds(gds)
   , max_frames(nframes_total)
@@ -26,19 +26,21 @@ WireCell2dToy::ToySignalSimuFDS::ToySignalSimuFDS(WireCell::FrameDataSource& fds
   nwire_v = wires_v.size();
   nwire_w = wires_w.size();
 
-  // hu = new TH1F*[nwire_u];
-  // hv = new TH1F*[nwire_v];
-  // hw = new TH1F*[nwire_w];
+  //test save
+  hu1 = new TH1F*[nwire_u];
+  hv1 = new TH1F*[nwire_v];
+  hw1 = new TH1F*[nwire_w];
   
-  // for (int i=0;i!=nwire_u;i++){
-  //   hu[i] = new TH1F(Form("U_%d",i),Form("U_%d",i),bins_per_frame,0,bins_per_frame);
-  // }
-  // for (int i=0;i!=nwire_v;i++){
-  //   hv[i] = new TH1F(Form("V_%d",i),Form("V_%d",i),bins_per_frame,0,bins_per_frame);
-  // }
-  // for (int i=0;i!=nwire_w;i++){
-  //   hw[i] = new TH1F(Form("W_%d",i),Form("W_%d",i),bins_per_frame,0,bins_per_frame);
-  // }
+  for (int i=0;i!=nwire_u;i++){
+    hu1[i] = new TH1F(Form("U_%d",i),Form("U_%d",i),bins_per_frame,0,bins_per_frame);
+  }
+  for (int i=0;i!=nwire_v;i++){
+    hv1[i] = new TH1F(Form("V_%d",i),Form("V_%d",i),bins_per_frame,0,bins_per_frame);
+  }
+  for (int i=0;i!=nwire_w;i++){
+    hw1[i] = new TH1F(Form("W_%d",i),Form("W_%d",i),bins_per_frame,0,bins_per_frame);
+  }
+  //test save
   
   hu = new TH1F("U","U",bins_per_frame,0,bins_per_frame);
   hv = new TH1F("V","V",bins_per_frame,0,bins_per_frame);
@@ -55,10 +57,10 @@ WireCell2dToy::ToySignalSimuFDS::ToySignalSimuFDS(WireCell::FrameDataSource& fds
   hwr = new TH1F("hwr","hwr",bins_per_frame,0,bins_per_frame); // half us tick
   
   for (int i=0; i!=bins_per_frame; i++){  
-    double time = hur->GetBinCenter(i+1)/2.-50;
-    hur->SetBinContent(i+1,gu->Eval(time));
-    hvr->SetBinContent(i+1,gv->Eval(time-time_offset_uv));
-    hwr->SetBinContent(i+1,gw->Eval(time-time_offset_uw));
+    double time = hur->GetBinCenter(i+1)/2.-50 ;
+    hur->SetBinContent(i+1,gu->Eval(time-overall_time_offset));
+    hvr->SetBinContent(i+1,gv->Eval(time-time_offset_uv-overall_time_offset));
+    hwr->SetBinContent(i+1,gw->Eval(time-time_offset_uw-overall_time_offset));
   } 
   
   delete gu;
@@ -73,30 +75,35 @@ int WireCell2dToy::ToySignalSimuFDS::size() const{
 
 void WireCell2dToy::ToySignalSimuFDS::Save(){
   TFile *file = new TFile("temp_simu.root","RECREATE");
-  // for (int i=0;i!=nwire_u;i++){
-  //   TH1F *huu = (TH1F*)hu[i]->Clone(Form("U1_%d",i));
-  // }
-  // for (int i=0;i!=nwire_v;i++){
-  //   TH1F *hvv = (TH1F*)hv[i]->Clone(Form("V1_%d",i));
-  // }
-  // for (int i=0;i!=nwire_w;i++){
-  //   TH1F *hww = (TH1F*)hw[i]->Clone(Form("W1_%d",i));
-  // }
+  //test save
+  for (int i=0;i!=nwire_u;i++){
+    TH1F *huu = (TH1F*)hu1[i]->Clone(Form("U1_%d",i));
+  }
+  for (int i=0;i!=nwire_v;i++){
+    TH1F *hvv = (TH1F*)hv1[i]->Clone(Form("V1_%d",i));
+  }
+  for (int i=0;i!=nwire_w;i++){
+    TH1F *hww = (TH1F*)hw1[i]->Clone(Form("W1_%d",i));
+  }
+  //test save
   file->Write();
   file->Close();
 }
 
 int WireCell2dToy::ToySignalSimuFDS::jump(int frame_number){
   // do simulation
-  // for (int i=0;i!=nwire_u;i++){
-  //   hu[i]->Reset();
-  // }
-  // for (int i=0;i!=nwire_v;i++){
-  //   hv[i]->Reset();
-  // }
-  // for (int i=0;i!=nwire_w;i++){
-  //   hw[i]->Reset();
-  // }
+  
+  //test save
+  for (int i=0;i!=nwire_u;i++){
+    hu1[i]->Reset();
+  }
+  for (int i=0;i!=nwire_v;i++){
+    hv1[i]->Reset();
+  }
+  for (int i=0;i!=nwire_w;i++){
+    hw1[i]->Reset();
+  }
+  //test save
   
   if (frame.index == frame_number) {
     return frame_number;
@@ -151,15 +158,18 @@ int WireCell2dToy::ToySignalSimuFDS::jump(int frame_number){
     
     TH1F *htemp;
     if (chid < nwire_u){
-      htemp = hu;
+      //      htemp = hu;
+      htemp = hu1[chid];
       hmr = hmr_u;
       hpr = hpr_u;
     }else if (chid < nwire_u + nwire_v){
-      htemp = hv;
+      //htemp = hv;
+      htemp = hv1[chid - nwire_u];
       hmr = hmr_v;
       hpr = hpr_v;
     }else{
-      htemp = hw;
+      //htemp = hw;
+      htemp = hw1[chid - nwire_u-nwire_v];
       hmr = hmr_w;
       hpr = hpr_w;
     }
@@ -318,17 +328,20 @@ int WireCell2dToy::ToySignalSimuFDS::jump(int frame_number){
 }
 
 WireCell2dToy::ToySignalSimuFDS::~ToySignalSimuFDS(){
-  // for (int i=0;i!=nwire_u;i++){
-  //   delete hu[i] ;
-  // }
+  //test save
+  for (int i=0;i!=nwire_u;i++){
+    delete hu1[i] ;
+  }
+   for (int i=0;i!=nwire_w;i++){
+    delete hw1[i] ;
+  }
+   for (int i=0;i!=nwire_v;i++){
+    delete hv1[i] ;
+  }
+  //test save
+
   delete hu;
-  // for (int i=0;i!=nwire_v;i++){
-  //   delete hv[i] ;
-  // }
   delete hv;
-  // for (int i=0;i!=nwire_w;i++){
-  //   delete hw[i] ;
-  // }
   delete hw;
 
   // delete gu;
