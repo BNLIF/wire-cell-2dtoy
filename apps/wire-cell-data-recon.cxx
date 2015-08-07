@@ -87,6 +87,8 @@ int main(int argc, char* argv[])
     return 1;
   }
   
+  float unit_dis = 1.605723;
+
   int max_events = 100;
   int eve_num  = atoi(argv[3]);
 
@@ -98,11 +100,11 @@ int main(int argc, char* argv[])
 
   int recon_threshold = 2000;
   
-  WireCell::ToyDepositor toydep(fds);
+  WireCell::ToyDepositor toydep(fds,0,unit_dis);
   const PointValueVector pvv = toydep.depositions(eve_num);
   
 
-  float unit_dis = 1.60;
+  
   // 
   
   //  WireCell::GenerativeFDS gfds(toydep,gds,2400,max_events,2.0*1.6*units::millimeter);
@@ -113,7 +115,7 @@ int main(int argc, char* argv[])
   // WireCell::ToyDepositor toydep(fds);
   // const PointValueVector pvv = toydep.depositions(eve_num);
   //WireCell::GenerativeFDS gfds(toydep,gds,9600,1,0.5*1.605723*units::millimeter); // 87 K at 0.5 kV/cm
-  WireCell::GenerativeFDS gfds(toydep,gds,9600,max_events,0.5*unit_dis*units::millimeter); // 87 K at 0.5 kV/cm
+  WireCell::GenerativeFDS gfds(toydep,gds,9600,max_events,0.5*unit_dis*units::millimeter,unit_dis); // 87 K at 0.5 kV/cm
   //WireCell2dToy::ToySignalSimuFDS simu_fds(gfds,gds,9600,1,1.647,1.539+1.647,1); // time offset among different planes for the time electrons travel among different planes
   //simu_fds.jump(eve_num);
   //simu_fds.Save();
@@ -261,7 +263,7 @@ int main(int argc, char* argv[])
     
     cout << i << " " << allmcell.size() << " " << allmwire.size() << endl;
     
-    truthtiling[i] = new WireCell2dToy::TruthToyTiling(*toytiling[i],pvv,i,gds,800);
+    truthtiling[i] = new WireCell2dToy::TruthToyTiling(*toytiling[i],pvv,i,gds,800,unit_dis);
     toymatrix[i] = new WireCell2dToy::ToyMatrix(*toytiling[i],*mergetiling[i]);
     if (toymatrix[i]->Get_Solve_Flag()==0){
       WireCell2dToy::ToyMatrixIterate toymatrix_it(*toymatrix[i]);
@@ -272,7 +274,7 @@ int main(int argc, char* argv[])
     
 
     toytiling_th[i] = new WireCell2dToy::ToyTiling(slice_th,gds,0,0,0,threshold_ug,threshold_vg, threshold_wg);
-    truthtiling_th[i] = new WireCell2dToy::TruthToyTiling(*toytiling_th[i],pvv,i,gds,800);
+    truthtiling_th[i] = new WireCell2dToy::TruthToyTiling(*toytiling_th[i],pvv,i,gds,800,unit_dis);
 
     // cout << slice_th.group().size() << " " << toytiling_th[i] ->get_allcell().size() << " " 
     // 	 << toytiling_th[i] ->get_allwire().size() << " " << truthtiling_th[i]->ccmap().size() << endl;
@@ -643,7 +645,7 @@ int main(int argc, char* argv[])
     GeomCellSelection allcell = toytiling[i]->get_allcell();
     for (int j=0;j!=allcell.size();j++){
       Point p = allcell[j]->center();
-      x_save = i*unit_dis/10.*2- 256 -time_shift*unit_dis/10.;
+      x_save = i*unit_dis/10.*2- 256 -time_offset*unit_dis/10.;
       y_save = p.y/units::cm;
       z_save = p.z/units::cm;
       
@@ -663,7 +665,7 @@ int main(int argc, char* argv[])
 	//truth
 	for (int k=0;k!=mcell->get_allcell().size();k++){
 	  Point p = mcell->get_allcell().at(k)->center();
-	  x_save = i*unit_dis/10.*2- 256 -time_shift*unit_dis/10.;
+	  x_save = i*unit_dis/10.*2- 256 -time_offset*unit_dis/10.;
 	  y_save = p.y/units::cm;
 	  z_save = p.z/units::cm;
 	  charge_save = charge/mcell->get_allcell().size();
@@ -688,7 +690,7 @@ int main(int argc, char* argv[])
       if (charge> recon_threshold ){
   	for (int k=0;k!=mcell->get_allcell().size();k++){
   	  Point p = mcell->get_allcell().at(k)->center();
-  	  x_save = i*unit_dis/10.*2-256 -time_shift*unit_dis/10.;
+  	  x_save = i*unit_dis/10.*2-256 -time_offset*unit_dis/10.;
   	  y_save = p.y/units::cm;
   	  z_save = p.z/units::cm;
   	  charge_save = charge/mcell->get_allcell().size();

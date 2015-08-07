@@ -2,12 +2,13 @@
 
 using namespace WireCell;
 
-WireCell2dToy::TruthToyTiling::TruthToyTiling(WireCell2dToy::ToyTiling& tiling, const WireCell::PointValueVector &pvv, int tbin, const GeomDataSource& gds, int offset1){
+WireCell2dToy::TruthToyTiling::TruthToyTiling(WireCell2dToy::ToyTiling& tiling, const WireCell::PointValueVector &pvv, int tbin, const GeomDataSource& gds, int offset1, float unit_dis){
   offset = offset1;
 
+  
   float sum = 0;
   for (int itruth = 0; itruth < pvv.size(); ++itruth){
-    if (int(pvv[itruth].first.x/2.0/1.6/units::mm + offset1) == tbin){
+    if (int(pvv[itruth].first.x/2.0/unit_dis/units::mm + offset1) == tbin){
       const Point& p = pvv[itruth].first; // get the point
       float charge = pvv[itruth].second;
       
@@ -61,10 +62,10 @@ WireCell2dToy::TruthToyTiling::TruthToyTiling(WireCell2dToy::ToyTiling& tiling, 
 }
 
 
-WireCell2dToy::TruthToyTiling::TruthToyTiling(WireCell2dToy::ToyTiling& tiling, const WireCell::PointValueVector &pvv, const std::vector<int> &time_offset, int tbin, const GeomDataSource& gds){
+WireCell2dToy::TruthToyTiling::TruthToyTiling(WireCell2dToy::ToyTiling& tiling, const WireCell::PointValueVector &pvv, const std::vector<int> &time_offset, int tbin, const GeomDataSource& gds, float unit_dis){
   float sum = 0;
   for (int itruth = 0; itruth < pvv.size(); ++itruth){
-    if (int(pvv[itruth].first.x/2.0/1.6/units::mm + time_offset[itruth]/4. ) == tbin){
+    if (int(pvv[itruth].first.x/2.0/unit_dis/units::mm + time_offset[itruth]/4. ) == tbin){
       const Point& p = pvv[itruth].first; // get the point
       float charge = pvv[itruth].second;
       
