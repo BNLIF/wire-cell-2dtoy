@@ -30,14 +30,21 @@ const PointValueVector& ToyDepositor::depositions(int frame_number) const{
      p.first.y = st->y() * units::cm;
      p.first.z = st->z() * units::cm;
      p.second = st->charge()/3.;
-     mchits.push_back(p);
-
-     int offset = st->tdc() - 3200 - (st->x() * units::cm)/(0.5*1.605723*units::millimeter);
-     if (flag==0)
-       offset = 3200;
-     //std::cout << offset << std::endl;
-
-     time_offset.push_back(offset);
+     
+     //hack for test, to be removed
+     //if (p.first.x > 0*units::cm && p.first.x < 5.*units::cm ) {
+	 // && p.first.y > -200 * units::cm && p.first.y < 0 *units::cm &&
+	 // p.first.z > 920 * units::cm && p.first.z < 1000*units::cm ){
+     
+       mchits.push_back(p);
+       
+       int offset = st->tdc() - 3200 - (st->x() * units::cm)/(0.5*1.605723*units::millimeter);
+       if (flag==0)
+	 offset = 3200;
+       //std::cout << offset << std::endl;
+       
+       time_offset.push_back(offset);
+       // }
   }
 
   return mchits;

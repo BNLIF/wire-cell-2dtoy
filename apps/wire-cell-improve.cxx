@@ -233,10 +233,11 @@ int main(int argc, char* argv[])
 
   //add in cluster
   std::cout << "Start Clustering " << std::endl;
-  GeomClusterSet cluster_set, cluster_delset;
+  GeomClusterList cluster_list, cluster_dellist;
   int ncount_mcell = 0;
   //Now do cluster
   for (int i=start_num;i!=end_num+1;i++){
+    //for (int i=800;i!=810;i++){
     GeomCellSelection pallmcell = mergetiling[i]->get_allcell();
     GeomCellSelection allmcell;
     for (int j=0;j!=pallmcell.size();j++){
@@ -247,58 +248,68 @@ int main(int argc, char* argv[])
     }
     
     
-    if (cluster_set.empty()){
+    if (cluster_list.empty()){
       // if cluster is empty, just insert all the mcell, each as a cluster
       for (int j=0;j!=allmcell.size();j++){
-	GeomCluster *cluster = new GeomCluster(*((MergeGeomCell*)allmcell[j]));
-	cluster_set.insert(cluster);
+	MergeGeomCell *mcell = (MergeGeomCell*)allmcell[j];
+	if (mcell->get_allcell().size()>0){
+	  GeomCluster *cluster = new GeomCluster(*mcell);
+	  cluster_list.push_back(cluster);
+	}
       }
     }else{
       for (int j=0;j!=allmcell.size();j++){
-	int flag = 0;
-	int flag_save = 0;
-	GeomCluster *cluster_save = 0;
-	
-	cluster_delset.clear();
-	
-	// loop through merged cell
-	for (auto it = cluster_set.begin();it!=cluster_set.end();it++){
-	  //loop through clusters
+	MergeGeomCell *mcell = (MergeGeomCell*)allmcell[j];
+	if (mcell->get_allcell().size()>0){
+	  int flag = 0;
+	  int flag_save = 0;
+	  GeomCluster *cluster_save = 0;
+	  cluster_dellist.clear();
 	  
-	  flag += (*it)->AddCell(*((MergeGeomCell*)allmcell[j]));
-	  if (flag==1 && flag != flag_save){
-	    cluster_save = *it;
-	  }else if (flag>1 && flag != flag_save){
-	    cluster_save->MergeCluster(*(*it));
-	    cluster_delset.insert(*it);
+	  // loop through merged cell
+	  int tmp_num = 0;
+	  for (auto it = cluster_list.begin();it!=cluster_list.end();it++){
+	    //loop through clusters
+	    
+	    flag += (*it)->AddCell(*mcell);
+	    // std::cout << i << " " << j << " " << tmp_num << " " << flag << std::endl;
+	    tmp_num ++;
+	    
+	    if (flag==1 && flag != flag_save){
+	      cluster_save = *it;
+	    }else if (flag>1 && flag != flag_save){
+	      cluster_save->MergeCluster(*(*it));
+	      cluster_dellist.push_back(*it);
+	    }
+	    flag_save = flag;
+	    
 	  }
-	  flag_save = flag;
-  	  
-	}
-	
-	for (auto it = cluster_delset.begin();it!=cluster_delset.end();it++){
-	  cluster_set.erase(*it);
-	  delete (*it);
-	}
-	
-	if (flag==0){
-	  GeomCluster *cluster = new GeomCluster(*((MergeGeomCell*)allmcell[j]));
-	  cluster_set.insert(cluster);
+	  
+	  for (auto it = cluster_dellist.begin();it!=cluster_dellist.end();it++){
+	    auto it1 = find(cluster_list.begin(),cluster_list.end(),*it);
+	    cluster_list.erase(it1);
+	    delete (*it);
+	  }
+	  
+	  if (flag==0){
+	    GeomCluster *cluster = new GeomCluster(*mcell);
+	    cluster_list.push_back(cluster);
+	  }
 	}
 	
       }
     }
     
-    int ncount_mcell_cluster = 0;
-    for (auto it = cluster_set.begin();it!=cluster_set.end();it++){
-      ncount_mcell_cluster += (*it)->get_allcell().size();
-    }
+    // int ncount_mcell_cluster = 0;
+    // for (auto it = cluster_list.begin();it!=cluster_list.end();it++){
+    //   ncount_mcell_cluster += (*it)->get_allcell().size();
+    // }
     ncount_mcell += allmcell.size();
     //cout << i << " " << allmcell.size()  << " " << cluster_set.size()  << endl;
   }
   
   int ncount_mcell_cluster = 0;
-  for (auto it = cluster_set.begin();it!=cluster_set.end();it++){
+  for (auto it = cluster_list.begin();it!=cluster_list.end();it++){
     ncount_mcell_cluster += (*it)->get_allcell().size();
   }
   cout << "Summary: " << ncount << " " << ncount_mcell << " " << ncount_mcell_cluster << endl;
@@ -311,7 +322,7 @@ int main(int argc, char* argv[])
   std::vector<WireCell2dToy::ToyCrawler*> crawlers;
   
   int ncluster = 0;
-  for (auto it = cluster_set.begin();it!=cluster_set.end();it++){
+  for (auto it = cluster_list.begin();it!=cluster_list.end();it++){
     
     MergeSpaceCellSelection mscells;
     for (int i=0; i!=(*it)->get_allcell().size();i++){
@@ -428,7 +439,7 @@ int main(int argc, char* argv[])
   Double_t x,y,z;
   //save cluster
   ncluster = 0;
-  for (auto it = cluster_set.begin();it!=cluster_set.end();it++){
+  for (auto it = cluster_list.begin();it!=cluster_list.end();it++){
     ncount = 0;
     TGraph2D *g1 = new TGraph2D();
     for (int i=0; i!=(*it)->get_allcell().size();i++){
@@ -484,7 +495,7 @@ int main(int argc, char* argv[])
   
   ttree1->SetDirectory(file);
   
-  for (auto it = cluster_set.begin();it!=cluster_set.end();it++){
+  for (auto it = cluster_list.begin();it!=cluster_list.end();it++){
     cluster_num ++;
     //loop merged cell
     for (int i=0; i!=(*it)->get_allcell().size();i++){
