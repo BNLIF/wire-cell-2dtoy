@@ -188,23 +188,29 @@ int main(int argc, char* argv[])
   
   int start_num = 0 ;
   int end_num = sds->size()-1;
+  // int start_num = 800 ;
+  // int end_num = 810;
+  // GeomCellSelection total_cells;
+  // GeomCellSelection total_edge_cells;
 
   cout << "Start the Tiling " << endl; 
-
+  WireCell::Slice slice;
   for (int i=start_num;i!=end_num+1;i++){
     
     sds->jump(i);
     sds_th->jump(i);
-    WireCell::Slice slice = sds->get();
+    slice = sds->get();
     WireCell::Slice slice_th = sds_th->get();
     cout << i << " " << slice.group().size() << " " << slice_th.group().size() << endl;
     
     toytiling[i] = new WireCell2dToy::ToyTiling(slice,gds,0,0,0,threshold_ug,threshold_vg, threshold_wg);
     GeomCellSelection allcell = toytiling[i]->get_allcell();
+    
     GeomWireSelection allwire = toytiling[i]->get_allwire();
     cout << "Single Cell: " << i << " "  << allcell.size() << " " << allwire.size() << endl;
     mergetiling[i] = new WireCell2dToy::MergeToyTiling(*toytiling[i],i,3,1);
     GeomCellSelection allmcell = mergetiling[i]->get_allcell();
+    
     GeomWireSelection allmwire = mergetiling[i]->get_allwire();
     cout <<"Blob: " << i << " " << allmcell.size() << " " << allmwire.size() << endl;
     truthtiling[i] = new WireCell2dToy::TruthToyTiling(*toytiling[i],pvv,i,gds,800);
@@ -214,6 +220,17 @@ int main(int argc, char* argv[])
     truthtiling_th[i] = new WireCell2dToy::TruthToyTiling(*toytiling_th[i],pvv,i,gds,800);
     CellChargeMap ccmap = truthtiling[i]->ccmap();
         
+    // for (int j=0;j!=allcell.size();j++){
+    //   total_cells.push_back(allcell.at(j));
+    // }
+    // for (int j=0;j!=allmcell.size();j++){
+    //   const MergeGeomCell *mcell = (const MergeGeomCell*)allmcell.at(j);
+    //   GeomCellSelection edgecells = mcell->get_edgecells();
+    //   for (int k=0;k!=edgecells.size();k++){
+    // 	total_edge_cells.push_back(edgecells.at(k));
+    //   }
+    // }
+
   }
 
   delete sds;
@@ -230,6 +247,47 @@ int main(int argc, char* argv[])
 
 
   
+    //do display
+  
+  // TApplication theApp("theApp",&argc,argv);
+  // theApp.SetReturnFromRun(true);
+  
+  // TCanvas c1("ToyMC","ToyMC",800,600);
+  // WireCell2dToy::ToyEventDisplay display(c1, gds);
+  
+  // display.charge_min = 0.;
+  // display.charge_max = 1.;
+  
+  
+  
+  // gStyle->SetOptStat(0);
+  
+  // const Int_t NRGBs = 5;
+  // const Int_t NCont = 255;
+  // Int_t MyPalette[NCont];
+  // Double_t stops[NRGBs] = {0.0, 0.34, 0.61, 0.84, 1.0};
+  // Double_t red[NRGBs] = {0.0, 0.0, 0.87 ,1.0, 0.51};
+  // Double_t green[NRGBs] = {0.0, 0.81, 1.0, 0.2 ,0.0};
+  // Double_t blue[NRGBs] = {0.51, 1.0, 0.12, 0.0, 0.0};
+  // Int_t FI = TColor::CreateGradientColorTable(NRGBs, stops, red, green, blue, NCont);
+  // gStyle->SetNumberContours(NCont);
+  // for (int kk=0;kk!=NCont;kk++) MyPalette[kk] = FI+kk;
+  // gStyle->SetPalette(NCont,MyPalette);
+  
+  // display.init(0,10.3698,-2.33/2.,2.33/2.);
+    
+  // display.draw_mc(1,WireCell::PointValueVector(),"colz");
+  // display.draw_slice(slice,"");
+  // display.draw_cells(total_cells,"*same");
+  // display.draw_cells(total_edge_cells,"*same",2);
+  // theApp.Run();
+
+
+
+
+
+
+
 
   //add in cluster
   std::cout << "Start Clustering " << std::endl;
