@@ -23,6 +23,8 @@ namespace WireCell2dToy {
     const WireCell::GeomDataSource& gds;
     int max_frames;
     int nbin;
+
+    int overall_time_shift;
     
     float time_offset_uv;
     float time_offset_uw;

@@ -24,6 +24,7 @@ namespace WireCell2dToy {
     WireCell::FrameDataSource& fds;
     const WireCell::GeomDataSource& gds;
     int  max_frames;
+    int overall_time_shift;
 
     float time_offset_uv, time_offset_uw;
     int flag_random;

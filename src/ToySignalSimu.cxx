@@ -15,6 +15,7 @@ WireCell2dToy::ToySignalSimuFDS::ToySignalSimuFDS(WireCell::FrameDataSource& fds
   , time_offset_uv(time_offset_uv)
   , time_offset_uw(time_offset_uw)
   , flag_random(flag_random)
+  , overall_time_shift(overall_time_shift)
 {  
   bins_per_frame = bins_per_frame1;
 
@@ -186,7 +187,11 @@ int WireCell2dToy::ToySignalSimuFDS::jump(int frame_number){
     }
     htemp->Reset();
     for (int j=0;j!=htemp->GetNbinsX();j++){
-      int tt = j+1;//+3200;
+      int tt = j+1 + overall_time_shift * 2;
+      
+      if (tt > bins_per_frame) tt -= bins_per_frame;
+      if (tt < 1 ) tt += bins_per_frame;
+
       if (tt <= bins_per_frame)
 	htemp->SetBinContent(tt,vcharge.at(j));
     }

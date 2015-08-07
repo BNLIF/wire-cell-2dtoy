@@ -130,20 +130,20 @@ int main(int argc, char* argv[])
   //test
   cout << "Simulate Raw WaveForm " << endl; 
   //WireCell2dToy::ToySignalSimuFDS simu_fds(gfds,gds,9600,max_events,1.647,1.539+1.647,1,-55); // time offset among different planes for the time electrons travel among different planes
-  WireCell2dToy::ToySignalSimuFDS simu_fds(gfds,gds,9600,max_events,0,0,1,-46); // time offset among different planes for the time electrons travel among different planes
+  WireCell2dToy::ToySignalSimuFDS simu_fds(gfds,gds,9600,max_events,0,0,1,-0.5,-46); // time offset among different planes for the time electrons travel among different planes
   simu_fds.jump(eve_num);
   simu_fds.Save();
   
   
   cout << "Deconvolution with Gaussian filter" << endl;
   //WireCell2dToy::ToySignalGausFDS gaus_fds(data_fds,gds,9600/4,max_events,1.647,1.539+1.647,-55); // gaussian smearing for charge estimation
-  WireCell2dToy::ToySignalGausFDS gaus_fds(data_fds,gds,9600/4,max_events,0,0,-46); // gaussian smearing for charge estimation
+  WireCell2dToy::ToySignalGausFDS gaus_fds(data_fds,gds,9600/4,max_events,0,0,-0.5,-46); // gaussian smearing for charge estimation
   gaus_fds.jump(eve_num);
   //gaus_fds.Save();
 
    cout << "Deconvolution with Wiener filter" << endl;
    //WireCell2dToy::ToySignalWienFDS wien_fds(data_fds,gds,9600/4,max_events,1.647,1.539+1.647,-55); // weiner smearing for hit identification
-   WireCell2dToy::ToySignalWienFDS wien_fds(data_fds,gds,9600/4,max_events,0,0,-46); // weiner smearing for hit identification
+   WireCell2dToy::ToySignalWienFDS wien_fds(data_fds,gds,9600/4,max_events,0,0,-0.5,-46); // weiner smearing for hit identification
   wien_fds.jump(eve_num);
   //wien_fds.Save();
   

@@ -14,6 +14,7 @@ WireCell2dToy::ToySignalWienFDS::ToySignalWienFDS(WireCell::FrameDataSource& fds
   , max_frames(nframes_total)
   , time_offset_uv(time_offset_uv)
   , time_offset_uw(time_offset_uw)
+  , overall_time_shift(overall_time_shift)
 {  
   bins_per_frame = bins_per_frame1;
 
@@ -174,7 +175,10 @@ int WireCell2dToy::ToySignalWienFDS::jump(int frame_number){
     }
     htemp->Reset();
     for (int i = tbin;i!=tbin+nbins;i++){
-      htemp->SetBinContent(i+1,trace.charge.at(i));
+      int tt = i+1 - overall_time_shift * 2;
+      if (tt > bins_per_frame) tt -= bins_per_frame;
+      if (tt < 1 ) tt += bins_per_frame;
+      htemp->SetBinContent(tt,trace.charge.at(i));
     }
         
     hm = htemp->FFT(0,"MAG");
