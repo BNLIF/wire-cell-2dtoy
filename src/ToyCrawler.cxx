@@ -917,9 +917,9 @@ void WireCell2dToy::ToyCrawler::FormGraph(){
 
 
 WireCell2dToy::ToyCrawler::~ToyCrawler(){
-  for (int i=0;i!=all_clustertrack.size();i++){
-    delete all_clustertrack.at(i);
-  }
+  // for (int i=0;i!=all_clustertrack.size();i++){
+  //   delete all_clustertrack.at(i);
+  // }
   for (int i=0;i!=all_mergeclustertrack.size();i++){
     delete all_mergeclustertrack.at(i);
   }
