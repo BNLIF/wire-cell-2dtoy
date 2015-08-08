@@ -201,7 +201,7 @@ int main(int argc, char* argv[])
     sds_th->jump(i);
     slice = sds->get();
     WireCell::Slice slice_th = sds_th->get();
-    cout << i << " " << slice.group().size() << " " << slice_th.group().size() << endl;
+    // cout << i << " " << slice.group().size() << " " << slice_th.group().size() << endl;
     
     toytiling[i] = new WireCell2dToy::ToyTiling(slice,gds,0,0,0,threshold_ug,threshold_vg, threshold_wg);
     GeomCellSelection allcell = toytiling[i]->get_allcell();
@@ -469,20 +469,80 @@ int main(int argc, char* argv[])
   }
   
 
+  //start to solve matrix ...
+   for (int i=start_num;i!=end_num+1;i++){
+     toymatrix[i] = new WireCell2dToy::ToyMatrix(*toytiling[i],*mergetiling[i]);
+    // cout << "start the iterate " << endl; 
+    if (toymatrix[i]->Get_Solve_Flag()==0){
+      WireCell2dToy::ToyMatrixIterate toymatrix_it(*toymatrix[i]);
+    }
 
+    cout << i << " chi2: " << toymatrix[i]->Get_Chi2() <<
+      " NDF: " << toymatrix[i]->Get_ndf() << endl;
+    GeomCellSelection allmcell = mergetiling[i]->get_allcell();
+    CellChargeMap ccmap = truthtiling[i]->ccmap();
+    if (toymatrix[i]->Get_Solve_Flag()!=0)
+      toymetric.Add(allmcell,*toymatrix[i],ccmap);
+    
+    toymetric.AddSolve(toymatrix[i]->Get_Solve_Flag());
+   }
+   toymetric.Print();
+   std::cout << "Starting MCMC" << std::endl;
+    //without  time information
+  for (int i=start_num;i!=end_num+1;i++){
+    if (toymatrix[i]->Get_Solve_Flag()==0){
+      GeomCellSelection allmcell = mergetiling[i]->get_allcell();
+      WireCell2dToy::ToyMatrixMarkov toymatrix_markov(toymatrix[i],&allmcell);
+      CellChargeMap ccmap = truthtiling[i]->ccmap();
+      if (toymatrix[i]->Get_Solve_Flag()!=0)
+  	toymetric.Add(allmcell,*toymatrix[i],ccmap);
+      toymetric.AddSolve(toymatrix[i]->Get_Solve_Flag());
+      cout << " chi2: " << i << " " << toymatrix[i]->Get_Chi2() 
+	   << " NDF: " << toymatrix[i]->Get_ndf() << endl;
+    }
+  }
 
-
-
-
+  
   //save files
   TFile *file = new TFile(Form("shower3D_cluster_%d.root",eve_num),"RECREATE");
-  
+  TTree *t_true = new TTree("T_true","T_true");
+  TTree *t_rec = new TTree("T_rec","T_rec");
+  TTree *t_rec_charge = new TTree("T_rec_charge","T_rec_charge");
+  TTree *t_rec_charge_blob = new TTree("T_rec_charge_blob","T_rec_charge_blob");
+
   Double_t x_save, y_save, z_save;
   Double_t charge_save;
   Double_t ncharge_save;
   Double_t chi2_save;
   Double_t ndf_save;
+  
+  t_true->SetDirectory(file);
+  t_true->Branch("x",&x_save,"x/D");
+  t_true->Branch("y",&y_save,"y/D");
+  t_true->Branch("z",&z_save,"z/D");
+  t_true->Branch("q",&charge_save,"q/D");
+  
+  t_rec->SetDirectory(file);
+  t_rec->Branch("x",&x_save,"x/D");
+  t_rec->Branch("y",&y_save,"y/D");
+  t_rec->Branch("z",&z_save,"z/D");
+  
+  t_rec_charge->SetDirectory(file);
+  t_rec_charge->Branch("x",&x_save,"x/D");
+  t_rec_charge->Branch("y",&y_save,"y/D");
+  t_rec_charge->Branch("z",&z_save,"z/D");
+  t_rec_charge->Branch("q",&charge_save,"q/D");
+  t_rec_charge->Branch("nq",&ncharge_save,"nq/D");
+  t_rec_charge->Branch("chi2",&chi2_save,"chi2/D");
+  t_rec_charge->Branch("ndf",&ndf_save,"ndf/D");
 
+  //blob stuff
+  t_rec_charge_blob->SetDirectory(file);
+  t_rec_charge_blob->Branch("x",&x_save,"x/D");
+  t_rec_charge_blob->Branch("y",&y_save,"y/D");
+  t_rec_charge_blob->Branch("z",&z_save,"z/D");
+  t_rec_charge_blob->Branch("q",&charge_save,"q/D");
+  t_rec_charge_blob->Branch("nq",&ncharge_save,"nq/D");
 
   
   TGraph2D *g = new TGraph2D();
@@ -502,7 +562,7 @@ int main(int argc, char* argv[])
       charge_save = it->second;
       
       gt->SetPoint(ncount_t,x_save,y_save,z_save);
-      
+      t_true->Fill();
       
       ncount_t ++;
     }
@@ -517,11 +577,57 @@ int main(int argc, char* argv[])
       
 
       g->SetPoint(ncount,x_save,y_save,z_save);
-      
+      t_rec->Fill();
 
       ncount ++;
     }
     
+    //recon 2 with charge
+    GeomCellSelection allmcell = mergetiling[i]->get_allcell();
+    for (int j=0;j!=allmcell.size();j++){
+      MergeGeomCell *mcell = (MergeGeomCell*)allmcell[j];
+      double charge = toymatrix[i]->Get_Cell_Charge(mcell,1);
+      if (charge> recon_threshold){
+  	//truth
+  	for (int k=0;k!=mcell->get_allcell().size();k++){
+  	  Point p = mcell->get_allcell().at(k)->center();
+  	  x_save = i*0.32- 256;
+  	  y_save = p.y/units::cm;
+  	  z_save = p.z/units::cm;
+  	  charge_save = charge/mcell->get_allcell().size();
+  	  ncharge_save = mcell->get_allcell().size();
+  	  chi2_save = toymatrix[i]->Get_Chi2();
+  	  ndf_save = toymatrix[i]->Get_ndf();
+
+  	  g_rec->SetPoint(ncount1,x_save,y_save,z_save);
+  	  t_rec_charge->Fill();
+	  
+  	  ncount1 ++;
+  	}
+      }
+    }
+    
+    for (int j=0;j!=allmcell.size();j++){
+      MergeGeomCell *mcell = (MergeGeomCell*)allmcell[j];
+      double charge = toymatrix[i]->Get_Cell_Charge(mcell,1);
+      if (charge> recon_threshold ){
+	for (int k=0;k!=mcell->get_allcell().size();k++){
+	  Point p = mcell->get_allcell().at(k)->center();
+	  x_save = i*0.32-256;
+	  y_save = p.y/units::cm;
+	  z_save = p.z/units::cm;
+	  charge_save = charge/mcell->get_allcell().size();
+	  ncharge_save = mcell->get_allcell().size();
+	  
+	  g_rec_blob->SetPoint(ncount2,x_save,y_save,z_save);
+	  t_rec_charge_blob->Fill();
+	  
+	  ncount2 ++;
+	}
+      }
+    }
+
+
   }
  
   
@@ -619,6 +725,9 @@ int main(int argc, char* argv[])
 
   file->Write();
   file->Close();
+
+  toymetric.Print();
+  blobmetric.Print();
 
   // cin >> abc;
   
