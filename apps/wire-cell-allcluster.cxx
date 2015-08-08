@@ -96,22 +96,20 @@ int main(int argc, char* argv[])
 	WireCell2dToy::ToyCrawler* toycrawler = new WireCell2dToy::ToyCrawler(mcells);
 	toycrawler->FormGraph();
 
-	if (cluster_num==3){
-	  TApplication theApp("theApp",&argc,argv);
-	  theApp.SetReturnFromRun(true);
-	  
-	  TCanvas c1("ToyMC","ToyMC",800,600);
-	  c1.Draw();
-	  
-	  WireCell2dToy::ClusterDisplay display(c1);
-	  display.DrawCluster(cells);
-	  display.DrawCluster(mcells);
+	// if (cluster_num==3){
+	//   TApplication theApp("theApp",&argc,argv);
+	//   theApp.SetReturnFromRun(true);	  
+	//   TCanvas c1("ToyMC","ToyMC",800,600);
+	//   c1.Draw();
+	//   WireCell2dToy::ClusterDisplay display(c1);
+	//   display.DrawCluster(cells);
+	//   display.DrawCluster(mcells);
 	  
 	
-	  display.DrawCrawler(*toycrawler,"psame",1);
+	//   display.DrawCrawler(*toycrawler,"psame",1);
 	  
-	  theApp.Run();
-	}
+	//   theApp.Run();
+	// }
 	
 
 
@@ -156,9 +154,59 @@ int main(int argc, char* argv[])
   }
   
   std::cout << "Check: " << crawlers.size() << " " << TC->GetEntries() << " " << sum << std::endl;
+
+
+  //start the prepare the important merge cell vectors
+  // int start_num = 0 ;
+  // int end_num = 2399;
+  // std::vector<GeomCellSelection> Good_MCells;
   
-  // int abc;
-  // cin >> abc;
-    
-    
+  // for (int i=start_num;i!=end_num+1;i++){
+  // GeomCellSelection cells;
+  //Good_MCells.push_back(cells);
+  // }
+
+  MergeSpaceCellSelection ms_cells;
+  
+  
+  for (int i=0;i!=crawlers.size();i++){
+    WireCell2dToy::ToyCrawler *toycrawler = crawlers.at(i);
+    for (int j=0;j!=toycrawler->Get_allMCT().size();j++){
+      MergeClusterTrack *mct = toycrawler->Get_allMCT().at(j);
+      int ntime = mct->Get_TimeLength();
+      if (ntime >=5){
+	// do something
+	
+	for (int k=0;k!=ntime;k++){
+	  MergeSpaceCellSelection cells = mct->Get_MSCS(k);
+	  if (cells.size()==1){
+	    ms_cells.push_back(cells.at(0));
+	  }else if (cells.size()>1){
+	    MergeSpaceCell *cell = cells.at(0);
+	    for (int i1 = 1; i1!=cells.size();i1++){
+	      if (cell->Get_all_spacecell().size() < cells.at(i1)->Get_all_spacecell().size()){
+		cell = cells.at(i1);
+	      }
+	    }
+	    ms_cells.push_back(cell);
+	  }
+	}
+	
+
+      }
+    }
+  }
+  
+  // plot it
+  
+  TApplication theApp("theApp",&argc,argv);
+  theApp.SetReturnFromRun(true);
+  
+  TCanvas c1("ToyMC","ToyMC",800,600);
+  c1.Draw();
+  
+  WireCell2dToy::ClusterDisplay display(c1);
+  display.DrawCluster(ms_cells);
+
+  theApp.Run();
 }

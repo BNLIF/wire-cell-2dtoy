@@ -434,6 +434,45 @@ int main(int argc, char* argv[])
 
   
 
+  //start to prepare the important merge cell vectors
+  std::vector<GeomCellSelection> Good_MCells;
+  for (int i=start_num;i!=end_num+1;i++){
+    GeomCellSelection cells;
+    Good_MCells.push_back(cells);
+  }
+ 
+  for (int i=0;i!=crawlers.size();i++){
+    WireCell2dToy::ToyCrawler *toycrawler = crawlers.at(i);
+    for (int j=0;j!=toycrawler->Get_allMCT().size();j++){
+      MergeClusterTrack *mct = toycrawler->Get_allMCT().at(j);
+      int ntime = mct->Get_TimeLength();
+      if (ntime >=5){
+	// do something
+	
+	for (int k=0;k!=ntime;k++){
+	  MergeSpaceCellSelection cells = mct->Get_MSCS(k);
+	  int time = mct->Get_Time(k);
+	  if (cells.size()==1){
+	    Good_MCells.at(time).push_back(cells.at(0)->get_mcell());  
+	  }else if (cells.size()>1){
+	    MergeSpaceCell *cell = cells.at(0);
+	    for (int i1 = 1; i1!=cells.size();i1++){
+	      if (cell->Get_all_spacecell().size() < cells.at(i1)->Get_all_spacecell().size()){
+	   	cell = cells.at(i1);
+	      }
+	    }
+	    Good_MCells.at(time).push_back(cell->get_mcell());
+	  }
+	}
+      }
+    }
+  }
+  
+
+
+
+
+
 
   //save files
   TFile *file = new TFile(Form("shower3D_cluster_%d.root",eve_num),"RECREATE");
