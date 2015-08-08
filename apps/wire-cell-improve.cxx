@@ -378,6 +378,8 @@ int main(int argc, char* argv[])
   // start crawler
   cout << "Start Crawling " << endl;
   std::vector<WireCell2dToy::ToyCrawler*> crawlers;
+  MergeSpaceCellSelection all_msc_cells;
+  SpaceCellSelection all_sc_cells;
   
   int ncluster = 0;
   for (auto it = cluster_list.begin();it!=cluster_list.end();it++){
@@ -386,11 +388,13 @@ int main(int argc, char* argv[])
     for (int i=0; i!=(*it)->get_allcell().size();i++){
       const MergeGeomCell *mcell = (const MergeGeomCell*)((*it)->get_allcell().at(i));
       MergeSpaceCell *mscell = new MergeSpaceCell();
+      all_msc_cells.push_back(mscell);
       mscell->set_mcell(mcell);
       for (int j=0;j!=mcell->get_allcell().size();j++){
   	const GeomCell *cell = mcell->get_allcell().at(j);
   	SpaceCell *space_cell = new SpaceCell(ncluster,*cell,(mcell->GetTimeSlice()*0.32-256)*units::cm,1,0.32*units::cm);
-  	mscell->AddSpaceCell(space_cell);
+  	all_sc_cells.push_back(space_cell);
+	mscell->AddSpaceCell(space_cell);
       }
       mscells.push_back(mscell);
     }
@@ -614,7 +618,14 @@ int main(int argc, char* argv[])
     delete crawlers.at(i);
   }
   crawlers.clear();
-  
+  for (int i=0;i!=all_msc_cells.size();i++){
+    delete all_msc_cells.at(i);
+  }
+  all_msc_cells.clear();
+  for (int i=0;i!=all_sc_cells.size();i++){
+    delete all_sc_cells.at(i);
+  }
+  all_sc_cells.clear();
 
   // start crawler ... 
 
@@ -629,10 +640,12 @@ int main(int argc, char* argv[])
     for (int i=0; i!=(*it)->get_allcell().size();i++){
       const MergeGeomCell *mcell = (const MergeGeomCell*)((*it)->get_allcell().at(i));
       MergeSpaceCell *mscell = new MergeSpaceCell();
+      all_msc_cells.push_back(mscell);
       mscell->set_mcell(mcell);
       for (int j=0;j!=mcell->get_allcell().size();j++){
   	const GeomCell *cell = mcell->get_allcell().at(j);
   	SpaceCell *space_cell = new SpaceCell(ncluster,*cell,(mcell->GetTimeSlice()*0.32-256)*units::cm,1,0.32*units::cm);
+	all_sc_cells.push_back(space_cell);
   	mscell->AddSpaceCell(space_cell);
       }
       mscells.push_back(mscell);

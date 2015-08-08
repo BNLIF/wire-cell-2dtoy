@@ -124,12 +124,23 @@ WireCell2dToy::ToyMatrixIterate::ToyMatrixIterate(WireCell2dToy::ToyMatrix &toyc
   std::cout << "With Cluster: " << estimated_loop << " " << toycur.Get_mcindex() << " " << no_need_remove.size() << " " << toymatrixkalman->Get_numz() <<std::endl;
 
   if (estimated_loop < 2e5 && toymatrixkalman->Get_numz()!=toycur.Get_mcindex()){
-    time_flag = 0;
+    time_flag = 1;
     delete toymatrixkalman;
     toymatrixkalman = new WireCell2dToy::ToyMatrixKalman(already_removed, no_need_remove, toycur, 0,1); 
     
     Iterate(*toymatrixkalman,toycur);
   }
+
+  
+  // // if no good, release ... 
+  // if (toycur.Get_Chi2() > 5*(toycur.Get_ndf()+0.1)){
+  //   no_need_remove.clear();
+  //   already_removed.clear();
+  //   delete toymatrixkalman;
+  //   toymatrixkalman = new WireCell2dToy::ToyMatrixKalman(already_removed, no_need_remove, toycur,0);
+  //   Iterate_simple1(*toymatrixkalman,toycur);
+  // }
+
 
 }
 
