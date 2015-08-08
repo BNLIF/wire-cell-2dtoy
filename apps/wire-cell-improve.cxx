@@ -499,6 +499,7 @@ int main(int argc, char* argv[])
     if (toymatrix[i]->Get_Solve_Flag()==0){
       WireCell2dToy::ToyMatrixIterate toymatrix_it(*toymatrix[i], *mergetiling[i], Good_MCells.at(i-start_num));
     }
+    
 
     cout << i << " chi2: " << toymatrix[i]->Get_Chi2() <<
       " NDF: " << toymatrix[i]->Get_ndf() << endl;
