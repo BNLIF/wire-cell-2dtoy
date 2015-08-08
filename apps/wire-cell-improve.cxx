@@ -446,9 +446,28 @@ int main(int argc, char* argv[])
     for (int j=0;j!=toycrawler->Get_allMCT().size();j++){
       MergeClusterTrack *mct = toycrawler->Get_allMCT().at(j);
       int ntime = mct->Get_TimeLength();
-      if (ntime >=5){
-	// do something
-	
+      int ntime_flag = 0;
+
+      if (ntime < 5 && ntime >= 2){
+	ntime_flag = 1;
+	for (int k=0;k!=ntime;k++){
+	  MergeSpaceCellSelection cells = mct->Get_MSCS(k);
+	  ntime_flag = 0;
+	  for (int i1 = 0; i1!=cells.size(); i1++){
+	    if (cells.at(i1)->Get_all_spacecell().size() > 200){
+	      ntime_flag = 1;
+	      break;
+	    }
+	  }
+	  if (ntime_flag == 0)
+	    break;
+	}
+      }else{
+	ntime_flag = 1;
+      }
+
+      if (ntime_flag){
+	// do something	
 	for (int k=0;k!=ntime;k++){
 	  MergeSpaceCellSelection cells = mct->Get_MSCS(k);
 	  int time = mct->Get_Time(k);
@@ -502,7 +521,161 @@ int main(int argc, char* argv[])
     }
   }
 
+  // reset existing cluster and redo it ...
+  std::cout << "Start Clustering after solving equations " << std::endl;
+  cluster_dellist.clear();
+  for (auto it = cluster_list.begin();it!=cluster_list.end();it++){
+    delete (*it);
+  }
+  cluster_list.clear();
   
+  ncount_mcell = 0;
+
+  //Now do cluster
+  for (int i=start_num;i!=end_num+1;i++){
+    GeomCellSelection pallmcell = mergetiling[i]->get_allcell();
+    GeomCellSelection allmcell;
+    for (int j=0;j!=pallmcell.size();j++){
+      const GeomCell* mcell = pallmcell[j];
+      if (toymatrix[i]->Get_Cell_Charge(mcell)> recon_threshold){
+	allmcell.push_back(mcell);
+      }
+    }
+    
+    
+    if (cluster_list.empty()){
+      // if cluster is empty, just insert all the mcell, each as a cluster
+      for (int j=0;j!=allmcell.size();j++){
+	MergeGeomCell *mcell = (MergeGeomCell*)allmcell[j];
+	if (mcell->get_allcell().size()>0){
+	  GeomCluster *cluster = new GeomCluster(*mcell);
+	  cluster_list.push_back(cluster);
+	}
+      }
+    }else{
+      for (int j=0;j!=allmcell.size();j++){
+	MergeGeomCell *mcell = (MergeGeomCell*)allmcell[j];
+	if (mcell->get_allcell().size()>0){
+	  int flag = 0;
+	  int flag_save = 0;
+	  GeomCluster *cluster_save = 0;
+	  cluster_dellist.clear();
+	  
+	  // loop through merged cell
+	  int tmp_num = 0;
+	  for (auto it = cluster_list.begin();it!=cluster_list.end();it++){
+	    //loop through clusters
+	    
+	    flag += (*it)->AddCell(*mcell);
+	    // std::cout << i << " " << j << " " << tmp_num << " " << flag << std::endl;
+	    tmp_num ++;
+	    
+	    if (flag==1 && flag != flag_save){
+	      cluster_save = *it;
+	    }else if (flag>1 && flag != flag_save){
+	      cluster_save->MergeCluster(*(*it));
+	      cluster_dellist.push_back(*it);
+	    }
+	    flag_save = flag;
+	    
+	  }
+	  
+	  for (auto it = cluster_dellist.begin();it!=cluster_dellist.end();it++){
+	    auto it1 = find(cluster_list.begin(),cluster_list.end(),*it);
+	    cluster_list.erase(it1);
+	    delete (*it);
+	  }
+	  
+	  if (flag==0){
+	    GeomCluster *cluster = new GeomCluster(*mcell);
+	    cluster_list.push_back(cluster);
+	  }
+	}
+	
+      }
+    }
+    
+    // int ncount_mcell_cluster = 0;
+    // for (auto it = cluster_list.begin();it!=cluster_list.end();it++){
+    //   ncount_mcell_cluster += (*it)->get_allcell().size();
+    // }
+    ncount_mcell += allmcell.size();
+    //cout << i << " " << allmcell.size()  << " " << cluster_set.size()  << endl;
+  }
+  
+  ncount_mcell_cluster = 0;
+  for (auto it = cluster_list.begin();it!=cluster_list.end();it++){
+    ncount_mcell_cluster += (*it)->get_allcell().size();
+  }
+  cout << "Summary: " << ncount << " " << ncount_mcell << " " << ncount_mcell_cluster << endl;
+  
+  // reset crawler ... 
+  for (int i =0; i!=crawlers.size();i++){
+    delete crawlers.at(i);
+  }
+  crawlers.clear();
+  
+
+  // start crawler ... 
+
+  
+  // start crawler
+  cout << "Start Crawling after solving equations " << endl;
+  
+  ncluster = 0;
+  for (auto it = cluster_list.begin();it!=cluster_list.end();it++){
+    
+    MergeSpaceCellSelection mscells;
+    for (int i=0; i!=(*it)->get_allcell().size();i++){
+      const MergeGeomCell *mcell = (const MergeGeomCell*)((*it)->get_allcell().at(i));
+      MergeSpaceCell *mscell = new MergeSpaceCell();
+      mscell->set_mcell(mcell);
+      for (int j=0;j!=mcell->get_allcell().size();j++){
+  	const GeomCell *cell = mcell->get_allcell().at(j);
+  	SpaceCell *space_cell = new SpaceCell(ncluster,*cell,(mcell->GetTimeSlice()*0.32-256)*units::cm,1,0.32*units::cm);
+  	mscell->AddSpaceCell(space_cell);
+      }
+      mscells.push_back(mscell);
+    }
+    WireCell2dToy::ToyCrawler* toycrawler = new WireCell2dToy::ToyCrawler(mscells);
+    crawlers.push_back(toycrawler);
+    
+    // std::cout << ncluster << " " << toycrawler->Get_mcells_map().size() << " " << toycrawler->Get_allCT().size() << " " << toycrawler->Get_allMCT().size()  << std::endl;
+
+    // if (toycrawler->Get_mcells_map().size()>200){
+    //   TApplication theApp("theApp",&argc,argv);
+    //   theApp.SetReturnFromRun(true);
+      
+    //   TCanvas c1("ToyMC","ToyMC",800,600);
+    //   c1.Draw();
+      
+    //   WireCell2dToy::ClusterDisplay display(c1);
+    //   //display.DrawCluster(cells);
+    //   display.DrawCluster(mscells);
+      
+      
+    //   display.DrawCrawler(*toycrawler,"psame",1);
+      
+    //   theApp.Run();
+    // }
+
+
+    ncluster ++;
+  }
+  
+  
+  //check # of clusters 
+  sum = 0 ;
+  for (int i=0;i!=crawlers.size();i++){
+    for (auto it = crawlers.at(i)->Get_mcells_map().begin(); it!= crawlers.at(i)->Get_mcells_map().end();it++){
+      MergeSpaceCell *mcell1 = it->first;
+      sum += mcell1->Get_all_spacecell().size();
+    }
+  }
+  
+  std::cout << "Check: " << crawlers.size() << " "  << sum << std::endl;
+
+
   //save files
   TFile *file = new TFile(Form("shower3D_cluster_%d.root",eve_num),"RECREATE");
   TTree *t_true = new TTree("T_true","T_true");
