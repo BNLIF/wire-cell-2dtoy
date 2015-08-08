@@ -17,15 +17,107 @@ WireCell2dToy::ToyCrawler::ToyCrawler(MergeSpaceCellSelection& mcells){
   
   PurgeMergeCTrack();
   
+  CleanUpCTTrack();
   
-
-
   // for (int i=0;i!=all_mergeclustertrack.size();i++){
   //   MergeClusterTrack *mct = all_mergeclustertrack.at(i);
   //   std::cout << i << " " << mct->Get_allmcells().size() << std::endl;
   // }
-  
 }
+
+void WireCell2dToy::ToyCrawler::CleanUpCTTrack(){
+  //Sort the track first
+  MergeClusterTrackSet MCT_set;
+  for (int i =0;i!=all_mergeclustertrack.size();i++){
+    MergeClusterTrack *mct = all_mergeclustertrack.at(i);
+    MCT_set.insert(mct);
+  }
+  all_mergeclustertrack.clear();
+  for (auto it = MCT_set.begin();it!=MCT_set.end();it++){
+    MergeClusterTrack *mct = *it;
+    all_mergeclustertrack.push_back(mct);
+    //std::cout << mct->Get_allmcells().size() << std::endl;
+  }
+
+  MergeClusterTrackSelection to_be_removed;
+  MergeClusterTrackSelection examined;
+  
+  for (int i=0;i!=all_mergeclustertrack.size();i++){
+    MergeClusterTrack *mct = all_mergeclustertrack.at(i);
+    examined.push_back(mct);
+    
+    for (int j = 0;j!=mct->Get_allmcells().size();j++){
+      MergeSpaceCell *mcell = mct->Get_allmcells().at(j);
+      for (int k=0; k!= mcells_mct_map[mcell].size();k++){
+	MergeClusterTrack *mct1 =  mcells_mct_map[mcell].at(k);
+	auto it1 = find(to_be_removed.begin(),to_be_removed.end(),mct1);
+	auto it2 = find(examined.begin(),examined.end(),mct1);
+	if (it1==to_be_removed.end() && it2 == examined.end()){
+	  
+	  int n_common = 0;
+	  int n_diff = 0;
+	  int ncells_common = 0;
+	  int ncells_diff = 0;
+ 
+	  for (int i1 = 0; i1!=mct1->Get_allmcells().size();i1++){
+	    MergeSpaceCell *mcell1 = mct1->Get_allmcells().at(i1);
+	    auto it3 = find(mct->Get_allmcells().begin(),mct->Get_allmcells().end(),mcell1);
+	    if (it3 == mct->Get_allmcells().end()){
+	      n_diff ++;
+	      ncells_diff += mcell1->Get_all_spacecell().size();
+	    }else{
+	      n_common ++;
+	      ncells_common += mcell1->Get_all_spacecell().size();
+	    }
+	  }
+
+	  if (n_common >= n_diff && n_diff < 3 && ncells_common >= 20*ncells_diff){
+	    //merge
+	    to_be_removed.push_back(mct1);
+	    mct->AddTrack(mct1);
+	  }else{
+	    //not merge
+	    examined.push_back(mct1);
+	  }
+	}
+      }
+    }
+  }
+
+  
+  for (int i=0;i!=to_be_removed.size();i++){
+    auto it = find(all_mergeclustertrack.begin(),all_mergeclustertrack.end(),to_be_removed.at(i));
+    all_mergeclustertrack.erase(it);
+  }
+
+  for (int i=0;i!=all_mergeclustertrack.size();i++){
+    MergeClusterTrack *mct = all_mergeclustertrack.at(i);
+    mct->Organize();
+  }
+  
+  
+
+  // Update map again ... 
+  mcells_mct_map.clear();
+  for (int i=0;i!=all_mergeclustertrack.size();i++){
+    MergeClusterTrack *mct = all_mergeclustertrack.at(i);
+    for (int j=0; j!=mct->Get_allmcells().size() ;j++){
+      MergeSpaceCell *mcell = mct->Get_allmcells().at(j);
+      
+      if (mcells_mct_map.find(mcell) == mcells_mct_map.end()){
+	MergeClusterTrackSelection temp1;
+	temp1.push_back(mct);
+	mcells_mct_map[mcell] = temp1;
+      }else{
+	mcells_mct_map[mcell].push_back(mct);
+      }
+    }
+  }
+
+
+
+}
+
 
 void WireCell2dToy::ToyCrawler::PurgeMergeCTrack(){
   //remove merged cluster in which all the merge space cell are accounted for ... 
