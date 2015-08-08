@@ -478,13 +478,17 @@ int main(int argc, char* argv[])
 	  if (cells.size()==1){
 	    Good_MCells.at(time).push_back(cells.at(0)->get_mcell());  
 	  }else if (cells.size()>1){
+	    
 	    MergeSpaceCell *cell = cells.at(0);
+	    MergeSpaceCell *next_cell = cells.at(1);
 	    for (int i1 = 1; i1!=cells.size();i1++){
 	      if (cell->Get_all_spacecell().size() < cells.at(i1)->Get_all_spacecell().size()){
 	   	cell = cells.at(i1);
+		next_cell = cell;
 	      }
 	    }
-	    Good_MCells.at(time).push_back(cell->get_mcell());
+	    if (cell->Get_all_spacecell().size() > 3* next_cell->Get_all_spacecell().size())
+	      Good_MCells.at(time).push_back(cell->get_mcell());
 	  }
 	}
       }
