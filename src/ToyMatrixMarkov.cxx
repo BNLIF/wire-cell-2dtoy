@@ -35,6 +35,73 @@ void WireCell2dToy::ToyMatrixMarkov::find_subset(WireCell2dToy::ToyMatrixKalman 
   }
 }
 
+WireCell2dToy::ToyMatrixMarkov::ToyMatrixMarkov(WireCell2dToy::ToyMatrix &toycur,WireCell2dToy::MergeToyTiling &mergecur, WireCell::GeomCellSelection *allmcell1, WireCell::GeomCellSelection &cells, int recon_t1, int recon_t2){
+  ncount = 0;
+  first_flag = 0;
+  toymatrix = &toycur;
+  allmcell = allmcell1;
+  mcindex = toymatrix->Get_mcindex();
+  recon_threshold1 = recon_t1;
+  recon_threshold2 = recon_t2;
+  use_time_threshold = 1.0;
+
+  GeomCellSelection allmcell_c = mergecur.get_allcell();
+
+  //form two vectors 
+  std::vector<int> already_removed; //dummy
+  
+  for (int i=0;i!=allmcell_c.size();i++){
+    MergeGeomCell *mcell_c = (MergeGeomCell*)allmcell_c[i];
+    int index_c = toycur.Get_mcindex(mcell_c);
+    
+    auto it = find(cells.begin(),cells.end(),mcell_c);
+    if (it !=cells.end()){
+      use_time.push_back(index_c);
+    }
+    
+  }
+
+  for (int i=0;i!=allmcell_c.size();i++){
+    auto it = find(use_time.begin(),use_time.end(),i);
+    if (it==use_time.end())
+      already_removed.push_back(i);
+  }
+  use_time.clear();
+  
+  //initialize
+  //toymatrixkalman = new WireCell2dToy::ToyMatrixKalman(*toymatrix);  // hold the current results 
+
+  toymatrixkalman = new WireCell2dToy::ToyMatrixKalman(already_removed, use_time, *toymatrix,1,0);
+  std::cout << "With Time: " << toymatrixkalman->Get_numz() << " " << allmcell_c.size() << " " <<  already_removed.size() << std::endl;
+  // Find a sub-set that is not degenerated
+  // put things into use_time
+  find_subset(*toymatrixkalman,toycur,use_time);
+  already_removed.clear();
+  
+  // recalculate
+  delete toymatrixkalman;
+  toymatrixkalman = new WireCell2dToy::ToyMatrixKalman(already_removed, use_time, toycur,1,0);
+  toymatrix->Set_Solve_Flag(0);
+  toymatrix->Set_chi2(-1);
+
+
+  
+  while (ncount < 1e4 
+	 && (cur_chi2 > 5*(cur_dof+0.1) || ncount < 6000) 
+	 && (cur_chi2 > 4*(cur_dof+0.1) || ncount < 3000) 
+	 && (cur_chi2 > 3*(cur_dof+0.1) || ncount < 1500) 
+	 && (cur_chi2 > 2*(cur_dof+0.1) || ncount < 800) 
+	 ){
+    if (ncount == 1 || (ncount % 1000 ==0&&ncount >0) )
+      std::cout << "MCMC: " << ncount << " " << cur_chi2 << " " << cur_dof << std::endl;
+    
+    make_guess();
+    next_chi2 = toymatrix->Get_Chi2();
+    next_dof = toymatrix->Get_ndf();
+  }
+
+
+}
 
 
 WireCell2dToy::ToyMatrixMarkov::ToyMatrixMarkov(WireCell2dToy::ToyMatrix &toybefore, WireCell2dToy::ToyMatrix &toycur, WireCell2dToy::ToyMatrix &toyafter, WireCell2dToy::MergeToyTiling &mergebefore, WireCell2dToy::MergeToyTiling &mergecur, WireCell2dToy::MergeToyTiling &mergeafter, WireCell::GeomCellSelection *allmcell1,int recon_t1, int recon_t2){
@@ -45,7 +112,7 @@ WireCell2dToy::ToyMatrixMarkov::ToyMatrixMarkov(WireCell2dToy::ToyMatrix &toybef
   mcindex = toymatrix->Get_mcindex();
   recon_threshold1 = recon_t1;
   recon_threshold2 = recon_t2;
-  
+  use_time_threshold = 0.75;
   
    //find good cells with time information and then use them ... 
   
@@ -128,6 +195,10 @@ WireCell2dToy::ToyMatrixMarkov::ToyMatrixMarkov(WireCell2dToy::ToyMatrix &toybef
   }
 }
 
+
+
+
+
 WireCell2dToy::ToyMatrixMarkov::ToyMatrixMarkov(WireCell2dToy::ToyMatrix *toymatrix1,WireCell::GeomCellSelection *allmcell1, int recon_t1, int recon_t2){
   ncount = 0;
   first_flag = 0;
@@ -136,7 +207,8 @@ WireCell2dToy::ToyMatrixMarkov::ToyMatrixMarkov(WireCell2dToy::ToyMatrix *toymat
   mcindex = toymatrix->Get_mcindex();
   recon_threshold1 = recon_t1;
   recon_threshold2 = recon_t2;
-  
+  use_time_threshold = 0.75;
+
   toymatrixkalman = new WireCell2dToy::ToyMatrixKalman(*toymatrix,0);  // hold the current results 
   
   while (ncount < 1e4 
@@ -238,8 +310,10 @@ void WireCell2dToy::ToyMatrixMarkov::make_guess(){
 
     auto it = find(use_time.begin(),use_time.end(),toymatrix->Get_mcindex(mcell));
     if (it != use_time.end()){
-      if (cell_prob.at(i) < 0.75)
-	cell_prob.at(i) = 0.75;
+
+      if (cell_prob.at(i) < use_time_threshold)
+	cell_prob.at(i) = use_time_threshold;
+      
     }
 
     //   std::cout << cur_cell_status.at(i) << " " << cur_cell_pol.at(i) <<

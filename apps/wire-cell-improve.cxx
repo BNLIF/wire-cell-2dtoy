@@ -474,7 +474,7 @@ int main(int argc, char* argv[])
      toymatrix[i] = new WireCell2dToy::ToyMatrix(*toytiling[i],*mergetiling[i]);
     // cout << "start the iterate " << endl; 
     if (toymatrix[i]->Get_Solve_Flag()==0){
-      WireCell2dToy::ToyMatrixIterate toymatrix_it(*toymatrix[i]);
+      WireCell2dToy::ToyMatrixIterate toymatrix_it(*toymatrix[i], *mergetiling[i], Good_MCells.at(i-start_num));
     }
 
     cout << i << " chi2: " << toymatrix[i]->Get_Chi2() <<
@@ -492,7 +492,7 @@ int main(int argc, char* argv[])
   for (int i=start_num;i!=end_num+1;i++){
     if (toymatrix[i]->Get_Solve_Flag()==0){
       GeomCellSelection allmcell = mergetiling[i]->get_allcell();
-      WireCell2dToy::ToyMatrixMarkov toymatrix_markov(toymatrix[i],&allmcell);
+      WireCell2dToy::ToyMatrixMarkov toymatrix_markov(*toymatrix[i],*mergetiling[i],&allmcell,Good_MCells.at(i-start_num));
       CellChargeMap ccmap = truthtiling[i]->ccmap();
       if (toymatrix[i]->Get_Solve_Flag()!=0)
   	toymetric.Add(allmcell,*toymatrix[i],ccmap);
