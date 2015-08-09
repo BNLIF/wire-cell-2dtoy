@@ -40,7 +40,7 @@ WireCell2dToy::ToyMatrixIterate::ToyMatrixIterate(WireCell2dToy::ToyMatrix &toym
 
 }
 
-WireCell2dToy::ToyMatrixIterate::ToyMatrixIterate(WireCell2dToy::ToyMatrix &toymatrix, int recon_t){
+WireCell2dToy::ToyMatrixIterate::ToyMatrixIterate(WireCell2dToy::ToyMatrix &toymatrix, int recon_t, float limit){
   prev_ncount = -1;
   ncount = 0;
   nlevel = 0;
@@ -63,7 +63,7 @@ WireCell2dToy::ToyMatrixIterate::ToyMatrixIterate(WireCell2dToy::ToyMatrix &toym
   //   toymatrixkalman = new WireCell2dToy::ToyMatrixKalman(toymatrix,1); 
   // }
   
-  if (estimated_loop < 1e6 && toymatrixkalman->Get_numz()!=toymatrix.Get_mcindex()){
+  if (estimated_loop < limit && toymatrixkalman->Get_numz()!=toymatrix.Get_mcindex()){
     time_flag = 0;
     delete toymatrixkalman;
     toymatrixkalman = new WireCell2dToy::ToyMatrixKalman(toymatrix,1);  
