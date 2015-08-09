@@ -43,7 +43,7 @@ WireCell2dToy::ToyMatrixMarkov::ToyMatrixMarkov(WireCell2dToy::ToyMatrix &toycur
   mcindex = toymatrix->Get_mcindex();
   recon_threshold1 = recon_t1;
   recon_threshold2 = recon_t2;
-  use_time_threshold = 0.72;
+  use_time_threshold = 0.75;
 
   GeomCellSelection allmcell_c = mergecur.get_allcell();
 
