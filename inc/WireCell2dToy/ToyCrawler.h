@@ -8,7 +8,7 @@ namespace WireCell2dToy{
   
   class ToyCrawler {
   public:
-    ToyCrawler(WireCell::MergeSpaceCellSelection& mcells);
+    ToyCrawler(WireCell::MergeSpaceCellSelection& mcells, int flag = 1);
     ~ToyCrawler();
 
     void CreateClusterTrack(WireCell::MergeSpaceCellSelection& mcells);
@@ -17,7 +17,7 @@ namespace WireCell2dToy{
     void FurtherExtendCTrack();
     void PurgeMergeCTrack();
 
-    void CleanUpCTTrack();
+    void CleanUpCTTrack(int flag=1);
 
     WireCell::ClusterTrackSelection& Get_allCT(){return all_clustertrack;};
     WireCell::MergeClusterTrackSelection& Get_allMCT(){return all_mergeclustertrack;};

@@ -2,22 +2,21 @@
 
 using namespace WireCell;
 
-WireCell2dToy::ToyCrawler::ToyCrawler(MergeSpaceCellSelection& mcells){
+WireCell2dToy::ToyCrawler::ToyCrawler(MergeSpaceCellSelection& mcells, int flag){
 
   CreateClusterTrack(mcells);
   FormGraph(); 
 
   //std::cout << "Merge Clusters " << std::endl; 
-  
   // Merge Cluster ...
-  MergeCTrack();
-  
+  MergeCTrack();  
   // Further merge trying to extend into other tracks ... 
   FurtherExtendCTrack();
   
   PurgeMergeCTrack();
   
-  CleanUpCTTrack();
+  CleanUpCTTrack(flag);
+  
   
   // for (int i=0;i!=all_mergeclustertrack.size();i++){
   //   MergeClusterTrack *mct = all_mergeclustertrack.at(i);
@@ -25,7 +24,7 @@ WireCell2dToy::ToyCrawler::ToyCrawler(MergeSpaceCellSelection& mcells){
   // }
 }
 
-void WireCell2dToy::ToyCrawler::CleanUpCTTrack(){
+void WireCell2dToy::ToyCrawler::CleanUpCTTrack(int flag){
   //Sort the track first
   MergeClusterTrackSet MCT_set;
   for (int i =0;i!=all_mergeclustertrack.size();i++){
@@ -56,22 +55,36 @@ void WireCell2dToy::ToyCrawler::CleanUpCTTrack(){
 	  
 	  int n_common = 0;
 	  int n_diff = 0;
-	  int ncells_common = 0;
-	  int ncells_diff = 0;
+	  float ncells_common = 0;
+	  float ncells_diff = 0;
  
 	  for (int i1 = 0; i1!=mct1->Get_allmcells().size();i1++){
 	    MergeSpaceCell *mcell1 = mct1->Get_allmcells().at(i1);
 	    auto it3 = find(mct->Get_allmcells().begin(),mct->Get_allmcells().end(),mcell1);
 	    if (it3 == mct->Get_allmcells().end()){
 	      n_diff ++;
-	      ncells_diff += mcell1->Get_all_spacecell().size();
+	      if (flag == 1){
+		ncells_diff += mcell1->Get_all_spacecell().size();
+	      }else{
+		ncells_diff += mcell1->Get_Charge();
+	      }
 	    }else{
 	      n_common ++;
-	      ncells_common += mcell1->Get_all_spacecell().size();
+	      if (flag == 1){
+		ncells_common += mcell1->Get_all_spacecell().size();
+	      }else{
+		ncells_common += mcell1->Get_Charge();
+	      }
 	    }
 	  }
 
-	  if (n_common >= n_diff && n_diff < 3 && ncells_common >= 20*ncells_diff){
+	  if ((flag==1)&&(
+			  (n_common > n_diff && n_diff < 3 && ncells_common >= 20*ncells_diff) )){
+	    //merge
+	    to_be_removed.push_back(mct1);
+	    mct->AddTrack(mct1);
+	  }else if ((flag==2)&&
+		    (n_common >= n_diff && n_diff < 3 && ncells_common >= 20*ncells_diff) ){
 	    //merge
 	    to_be_removed.push_back(mct1);
 	    mct->AddTrack(mct1);
@@ -217,7 +230,7 @@ void WireCell2dToy::ToyCrawler::FurtherExtendCTrack(){
 	    MergeSpaceCell *next_msc = cur_cells.at(j);
 	    if ((next_msc->Get_Center().x-cur_msc->Get_Center().x)*flag1>0){
 	      //judge overlap?
-	      if (next_msc->CrossCell(fvertex->Get_Center(),theta,phi)){
+	      if (next_msc->CrossCell(fvertex->Get_Center(),theta_m,phi_m)){
 		temp.push_back(next_msc);
 		cur_msc = next_msc;
 		cur_cells = mcells_map[cur_msc];
@@ -502,8 +515,8 @@ void WireCell2dToy::ToyCrawler::MergeCTrack(){
 	    float shift_angle = 100;
 
 	    if ((fabs(theta1+theta2-3.1415926)<cut_angle/180.*3.1415926 // 5 degrees
-		 && fabs(fabs(phi1-phi2)-3.1415926)<cut_angle/180.*3.1415926)
-		){
+	    	 && fabs(fabs(phi1-phi2)-3.1415926)<cut_angle/180.*3.1415926)
+	    	){
 	      flag = 1;
 	    }
 
@@ -512,6 +525,8 @@ void WireCell2dToy::ToyCrawler::MergeCTrack(){
 	    	){
 	      flag = 1;
 	    }
+
+	    
 	    // std::cout << theta1_m/3.1415926*180. << " " << theta2_m/3.1415926*180.
 	    // 	      << " " << phi1_m/3.1415926*180. << " " << phi2_m/3.1415926*180. 
 	    // 	      << std::endl;
@@ -519,9 +534,9 @@ void WireCell2dToy::ToyCrawler::MergeCTrack(){
 	    
 
 	    if (flag == 0 ){
-	      int cross_num = cct->CrossNum(vertex->Get_Center(), theta1,phi1);
+	      int cross_num = cct->CrossNum(vertex->Get_Center(), theta1_m,phi1_m);
 	      if ( cross_num == cct->Get_allmcells().size()){
-		flag = 1;
+	      	flag = 1;
 	      }
 	    }
 	    
@@ -555,9 +570,6 @@ void WireCell2dToy::ToyCrawler::MergeCTrack(){
 	    // 	flag = 1;
 	    //   }
 	    // }
-
-	    
-	    
 
 	    // std::cout <<  i << " " << find(all_clustertrack.begin(),all_clustertrack.end(),old_cct)-all_clustertrack.begin()
 	    // 	      << " " << find(all_clustertrack.begin(),all_clustertrack.end(),cct)-all_clustertrack.begin() << " "

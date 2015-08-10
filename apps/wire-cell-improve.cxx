@@ -772,7 +772,7 @@ int main(int argc, char* argv[])
       }
       mscells.push_back(mscell);
     }
-    WireCell2dToy::ToyCrawler* toycrawler = new WireCell2dToy::ToyCrawler(mscells);
+    WireCell2dToy::ToyCrawler* toycrawler = new WireCell2dToy::ToyCrawler(mscells,2);
     crawlers.push_back(toycrawler);
     
     // std::cout << ncluster << " " << toycrawler->Get_mcells_map().size() << " " << toycrawler->Get_allCT().size() << " " << toycrawler->Get_allMCT().size()  << std::endl;
