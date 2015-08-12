@@ -22,7 +22,7 @@ namespace WireCell2dToy{
     WireCell::WCTrackSelection tracks;
     WireCell::WCVertexSelection vertices;
     
-    WireCell::MSC_WCV_Map wsc_mcv_map;
+    WireCell::MSC_WCV_Map msc_wcv_map;
     WireCell::MCT_WCT_Map mct_wct_map;
 
     WCT_WCV_Map wct_wcv_map;
