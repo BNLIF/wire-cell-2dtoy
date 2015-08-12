@@ -99,9 +99,9 @@ void WireCell2dToy::ClusterDisplay::DrawCrawler(WireCell2dToy::ToyCrawler& toycr
       for (int j=0;j!=clustertrack->Get_allmcells().size();j++){
 	MergeSpaceCell* mcell = clustertrack->Get_allmcells().at(j);
 	Point center = mcell->Get_Center();
-	x = center.x/units::cm;//+ gRandom->Uniform(-0.1,0.1);
-	y = center.y/units::cm;//+ gRandom->Uniform(-0.1,0.1);
-	z = center.z/units::cm;//+ gRandom->Uniform(-0.1,0.1);
+	x = center.x/units::cm+ gRandom->Uniform(-0.1,0.1);
+	y = center.y/units::cm+ gRandom->Uniform(-0.1,0.1);
+	z = center.z/units::cm+ gRandom->Uniform(-0.1,0.1);
 	
 	g1->SetPoint(n,x,y,z);
 	n++;
