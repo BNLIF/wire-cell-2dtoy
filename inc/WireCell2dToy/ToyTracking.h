@@ -13,6 +13,11 @@ namespace WireCell2dToy{
   public:
     ToyTracking(ToyCrawler& toycrawler);
     ~ToyTracking();
+    
+    WireCell::WCTrackSelection& get_tracks(){return tracks;};
+    WireCell::WCVertexSelection& get_vertices(){return vertices;};
+    
+
   protected: 
     WireCell::WCTrackSelection tracks;
     WireCell::WCVertexSelection vertices;
