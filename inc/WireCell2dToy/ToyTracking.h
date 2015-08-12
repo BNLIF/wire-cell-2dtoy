@@ -14,8 +14,15 @@ namespace WireCell2dToy{
     ToyTracking(ToyCrawler& toycrawler);
     ~ToyTracking();
   protected: 
+    WireCell::WCTrackSelection tracks;
+    WireCell::WCVertexSelection vertices;
+    
+    WireCell::MSC_WCV_Map wsc_mcv_map;
+    WireCell::MCT_WCT_Map mct_wct_map;
+
     WCT_WCV_Map wct_wcv_map;
     WCV_WCT_Map wcv_wct_map;
+    
   };
 }
 
