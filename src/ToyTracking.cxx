@@ -4,6 +4,8 @@ using namespace WireCell;
 WireCell2dToy::ToyTracking::ToyTracking(WireCell2dToy::ToyCrawler& toycrawler){
   std::map<MergeSpaceCell*,WCTrackSelection> msc_wct_map;
 
+
+  // fill in tracks ... 
   for (int i=0;i!=toycrawler.Get_allMCT().size();i++){
     WCTrack *track = new WCTrack(*toycrawler.Get_allMCT().at(i));
     tracks.push_back(track);
@@ -21,7 +23,15 @@ WireCell2dToy::ToyTracking::ToyTracking(WireCell2dToy::ToyCrawler& toycrawler){
     // std::cout << "Xin " << track->get_end_scells().size()<<std::endl;
   }
 
-  
+  //start to judge vertex ... 
+  for (auto it = msc_wct_map.begin();it!=msc_wct_map.end();it++){
+    MergeSpaceCell *cell = it->first;
+    WCTrackSelection temp_tracks = it->second;
+    for (int i=0;i!=temp_tracks.size();i++){
+      WCTrack *temp_track = temp_tracks.at(i);
+      temp_track->
+    }
+  }
 
 
 }
