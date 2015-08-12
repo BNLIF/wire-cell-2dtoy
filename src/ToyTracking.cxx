@@ -5,6 +5,7 @@ WireCell2dToy::ToyTracking::ToyTracking(WireCell2dToy::ToyCrawler& toycrawler){
   for (int i=0;i!=toycrawler.Get_allMCT().size();i++){
     WCTrack *track = new WCTrack(*toycrawler.Get_allMCT().at(i));
     tracks.push_back(track);
+    // std::cout << "Xin " << track->get_end_scells().size()<<std::endl;
   }
 
   
