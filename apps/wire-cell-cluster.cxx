@@ -1,6 +1,7 @@
 #include "WireCell2dToy/ToyTiling.h"
 #include "WireCell2dToy/ClusterDisplay.h"
 #include "WireCell2dToy/ToyCrawler.h"
+#include "WireCell2dToy/ToyTracking.h"
 
 #include "WireCellData/MergeGeomCell.h"
 #include "WireCellData/MergeGeomWire.h"
@@ -119,7 +120,7 @@ int main(int argc, char* argv[])
 
   // do the Toy Crawler
   WireCell2dToy::ToyCrawler toycrawler(mcells);
-  
+  WireCell2dToy::ToyTracking toytracking(toycrawler);
 
 
 
