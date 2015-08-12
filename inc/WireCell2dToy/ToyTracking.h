@@ -8,7 +8,10 @@
 namespace WireCell2dToy{
   class ToyTracking{
   public:
+    ToyTracking(ToyCrawler& toycrawler);
+    ~ToyTracking();
   protected: 
+    
   };
 }
 

@@ -119,7 +119,10 @@ int main(int argc, char* argv[])
 
   // do the Toy Crawler
   WireCell2dToy::ToyCrawler toycrawler(mcells);
-  toycrawler.FormGraph();
+  
+
+
+
  
   TApplication theApp("theApp",&argc,argv);
   theApp.SetReturnFromRun(true);
