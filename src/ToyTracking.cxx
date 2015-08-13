@@ -112,16 +112,21 @@ WireCell2dToy::ToyTracking::ToyTracking(WireCell2dToy::ToyCrawler& toycrawler){
   for (int i=0;i!=vertices.size();i++){
     WCVertex *vertex1 = vertices.at(i);
     if (vertex1->get_ntracks()==1) continue;
-    
-    for (int j=0;j!=vertices.size();j++){
-      WCVertex * vertex2 = vertices.at(j);
-      if (vertex2->get_ntracks()==1 || vertex2 == vertex1) continue;
-      
-      // if (vertex1->Add(vertex2)){
-      // 	to_be_removed.push_back(vertex2);
-      // }
-
-     }
+    auto it1 = find(to_be_removed.begin(),to_be_removed.end(),vertex1);
+    if (it1 == to_be_removed.end()){
+      // std::cout << i << " " << vertex1->get_ntracks() << std::endl;
+      for (int j=0;j!=vertices.size();j++){
+	WCVertex *vertex2 = vertices.at(j);
+	if (vertex2->get_ntracks()==1 || vertex2 == vertex1) continue;
+	auto it2 = find(to_be_removed.begin(),to_be_removed.end(),vertex2);
+	if (it2 == to_be_removed.end()){
+	  //std::cout << i << " " << j << " " << vertex2->get_ntracks() << std::endl;
+	  if (vertex1->AddVertex(vertex2)){
+	    to_be_removed.push_back(vertex2);
+	  }
+	}
+      }
+    }
   }
   
   
@@ -132,10 +137,10 @@ WireCell2dToy::ToyTracking::ToyTracking(WireCell2dToy::ToyCrawler& toycrawler){
   }
 
 
-  for (int i=0;i!=vertices.size();i++){
-    WCVertex *vertex = vertices.at(i);
-    std::cout << vertex->get_ntracks() << std::endl;
-  }
+  // for (int i=0;i!=vertices.size();i++){
+  //   WCVertex *vertex = vertices.at(i);
+  //   std::cout << vertex->get_ntracks() << std::endl;
+  // }
 
 
 }
