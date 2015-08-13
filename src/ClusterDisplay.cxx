@@ -121,9 +121,9 @@ void WireCell2dToy::ClusterDisplay::DrawCrawler(WireCell2dToy::ToyCrawler& toycr
       for (int j=0;j!=clustertrack->Get_allmcells().size();j++){
 	MergeSpaceCell* mcell = clustertrack->Get_allmcells().at(j);
 	Point center = mcell->Get_Center();
-	x = center.x/units::cm + gRandom->Uniform(-0.1,0.1);
-	y = center.y/units::cm + gRandom->Uniform(-0.1,0.1);
-	z = center.z/units::cm + gRandom->Uniform(-0.1,0.1);
+	x = center.x/units::cm;// + gRandom->Uniform(-0.15,0.15);
+	y = center.y/units::cm;// + gRandom->Uniform(-0.15,0.15);
+	z = center.z/units::cm;// + gRandom->Uniform(-0.15,0.15);
 	
 	g1->SetPoint(n,x,y,z);
 	n++;
@@ -196,9 +196,9 @@ void WireCell2dToy::ClusterDisplay::DrawCluster(MergeSpaceCellSelection& mcells,
   g1->Draw(option);
 
   //test 
-  //  g1->GetXaxis()->SetRangeUser(60.,65);
-  // g1->GetYaxis()->SetRangeUser(20,62.);
-  // g1->GetZaxis()->SetRangeUser(635,660);
+  // g1->GetXaxis()->SetRangeUser(118.,203);
+  // g1->GetYaxis()->SetRangeUser(95,105.);
+  // g1->GetZaxis()->SetRangeUser(335,345);
 
   //  std::cout << mcells.size() << std::endl;
 

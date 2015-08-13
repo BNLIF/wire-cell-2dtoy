@@ -187,11 +187,8 @@ void WireCell2dToy::ToyCrawler::FurtherExtendCTrack(){
   MergeClusterTrackSelection temp1;
   
   int flag3 = 1;
-  //while(flag3){
   flag3 = 0;
   float cut_angle = 15;
-  
- 
   
   for (int i=0;i!=all_mergeclustertrack.size();i++){
     MergeClusterTrack *mct = all_mergeclustertrack.at(i);
@@ -253,14 +250,14 @@ void WireCell2dToy::ToyCrawler::FurtherExtendCTrack(){
 	    if (it == mct->Get_allmcells().end()){
 	      MergeClusterTrackSelection MCTS = mcells_mct_map[mcell];
 	      // insert it in
-	      int insert_flag = 0;
-	      for (int k=0;k!=MCTS.size();k++){
-		if ( MCTS.at(k)->CheckCell(mcell)){
-		  insert_flag = 1;
-		  break;
-		}
-	      }
-	      
+	      int insert_flag = 1;
+	      // for (int k=0;k!=MCTS.size();k++){
+	      // 	if ( MCTS.at(k)->CheckCell(mcell)){
+	      // 	  insert_flag = 1;
+	      // 	  break;
+	      // 	}
+	      // }
+	      // std::cout << "abc: " << insert_flag << std::endl;
 	      
 	      if (insert_flag ==1){
 		mct->Add(mcell,-1);
@@ -286,11 +283,9 @@ void WireCell2dToy::ToyCrawler::FurtherExtendCTrack(){
 		      temp1.push_back(MCTS.at(k));
 		      flag2 = 1;
 		    }
-
-
-
 		  }
 		}
+	      
 	      }
 	      
 	      
@@ -312,103 +307,106 @@ void WireCell2dToy::ToyCrawler::FurtherExtendCTrack(){
       
       flag1 = 0;
       if (bvertex->Get_Center().x - bvertex_next->Get_Center().x>0){
-	flag1 = 1;
+      	flag1 = 1;
       }else if (bvertex->Get_Center().x - bvertex_next->Get_Center().x<0){
-	flag1 = -1;
+      	flag1 = -1;
       }
       
       if (flag1!=0){
-	mct->SC_Hough(bvertex->Get_Center());
-	double theta = mct->Get_Theta();
-	double phi = mct->Get_Phi();
-	mct->SC_Hough(bvertex->Get_Center(),-1,2);
-	double theta_m = mct->Get_Theta();
-	double phi_m = mct->Get_Phi();
+      	mct->SC_Hough(bvertex->Get_Center());
+      	double theta = mct->Get_Theta();
+      	double phi = mct->Get_Phi();
+      	mct->SC_Hough(bvertex->Get_Center(),-1,2);
+      	double theta_m = mct->Get_Theta();
+      	double phi_m = mct->Get_Phi();
 	
-	//save the one that satisfy the requirement
-	MergeSpaceCellSelection temp;
-	MergeSpaceCell *cur_msc = bvertex;
-	MergeSpaceCellSelection cur_cells = mcells_map[cur_msc];
+      	//save the one that satisfy the requirement
+      	MergeSpaceCellSelection temp;
+      	MergeSpaceCell *cur_msc = bvertex;
+      	MergeSpaceCellSelection cur_cells = mcells_map[cur_msc];
 	
-	int flag2 = 1;
-	while(flag2 == 1){
-	  //insert temp
-	  flag2 = 0;
-	  for (int j=0;j!=cur_cells.size();j++){
-	    MergeSpaceCell *next_msc = cur_cells.at(j);
-	    if ((next_msc->Get_Center().x-cur_msc->Get_Center().x)*flag1>0){
-	      //judge overlap?
-	      if (next_msc->CrossCell(bvertex->Get_Center(),theta,phi)){
-		temp.push_back(next_msc);
-		cur_msc = next_msc;
-		cur_cells = mcells_map[cur_msc];
-		flag2 = 1;
-		break;
-	      }
-	    }
-	  }
-	}
+      	int flag2 = 1;
+      	while(flag2 == 1){
+      	  //insert temp
+      	  flag2 = 0;
+      	  for (int j=0;j!=cur_cells.size();j++){
+      	    MergeSpaceCell *next_msc = cur_cells.at(j);
+      	    if ((next_msc->Get_Center().x-cur_msc->Get_Center().x)*flag1>0){
+      	      //judge overlap?
+      	      if (next_msc->CrossCell(bvertex->Get_Center(),theta,phi)){
+      		temp.push_back(next_msc);
+      		cur_msc = next_msc;
+      		cur_cells = mcells_map[cur_msc];
+      		flag2 = 1;
+      		break;
+      	      }
+      	    }
+      	  }
+      	}
 	
-	//Now temp contains all the cells to be merged
+      	//Now temp contains all the cells to be merged
 	
-	// add one cell in, and then figure out whether to add its track
-	flag2 = 1;
-	while(flag2){
-	  flag2 = 0;
-	  for (int j = 0;j!=temp.size();j++){
-	    MergeSpaceCell *mcell = temp.at(j);
-	    auto it = find(mct->Get_allmcells().begin(),mct->Get_allmcells().end(),mcell);
-	    if (it == mct->Get_allmcells().end()){
-	      MergeClusterTrackSelection MCTS = mcells_mct_map[mcell];
-	      int insert_flag = 0;
+      	// add one cell in, and then figure out whether to add its track
+      	flag2 = 1;
+      	while(flag2){
+      	  flag2 = 0;
+      	  for (int j = 0;j!=temp.size();j++){
+      	    MergeSpaceCell *mcell = temp.at(j);
+      	    auto it = find(mct->Get_allmcells().begin(),mct->Get_allmcells().end(),mcell);
+      	    if (it == mct->Get_allmcells().end()){
+      	      MergeClusterTrackSelection MCTS = mcells_mct_map[mcell];
+      	      int insert_flag = 1;
 	      
-	      for (int k=0;k!=MCTS.size();k++){
-		if ( MCTS.at(k)->CheckCell(mcell) ){
-		  insert_flag = 1;
-		  break;
-		}
-	      }
+      	      // for (int k=0;k!=MCTS.size();k++){
+      	      // 	if ( MCTS.at(k)->CheckCell(mcell) ){
+      	      // 	  insert_flag = 1;
+      	      // 	  break;
+      	      // 	}
+      	      // }
 	      
-	      if (insert_flag == 1){
-		// insert it in
-		mct->Add(mcell,1);
+      	      if (insert_flag == 1){
+      		// insert it in
+      		mct->Add(mcell,1);
 		
-		// Now find the associated clusterTrack
-		// judge whether to put in temp1 to be deleted
-		for (int k=0;k!=MCTS.size();k++){
-		  MCTS.at(k)->SC_Hough(mcell->Get_Center());
-		  float theta1 = MCTS.at(k)->Get_Theta();
-		  float phi1 = MCTS.at(k)->Get_Phi();
-		  MCTS.at(k)->SC_Hough(mcell->Get_Center(),-1,2);
-		  float theta1_m = MCTS.at(k)->Get_Theta();
-		  float phi1_m = MCTS.at(k)->Get_Phi();
+      		// Now find the associated clusterTrack
+      		// judge whether to put in temp1 to be deleted
+      		for (int k=0;k!=MCTS.size();k++){
+      		  MCTS.at(k)->SC_Hough(mcell->Get_Center());
+      		  float theta1 = MCTS.at(k)->Get_Theta();
+      		  float phi1 = MCTS.at(k)->Get_Phi();
+      		  MCTS.at(k)->SC_Hough(mcell->Get_Center(),-1,2);
+      		  float theta1_m = MCTS.at(k)->Get_Theta();
+      		  float phi1_m = MCTS.at(k)->Get_Phi();
 
-		  if (MCTS.at(k)->CheckCell(mcell) ){
-		    if ((fabs(theta1+theta-3.1415926)<cut_angle/180.*3.1415926 // 5 degrees
-			 && fabs(fabs(phi1-phi)-3.1415926)<cut_angle/180.*3.1415926)
-			||(fabs(theta1_m+theta_m-3.1415926)<cut_angle/180.*3.1415926 // 5 degrees
-			 && fabs(fabs(phi1_m-phi_m)-3.1415926)<cut_angle/180.*3.1415926)
-			){
+      		  if (MCTS.at(k)->CheckCell(mcell) ){
+      		    if ((fabs(theta1+theta-3.1415926)<cut_angle/180.*3.1415926 // 5 degrees
+      			 && fabs(fabs(phi1-phi)-3.1415926)<cut_angle/180.*3.1415926)
+      			||(fabs(theta1_m+theta_m-3.1415926)<cut_angle/180.*3.1415926 // 5 degrees
+      			 && fabs(fabs(phi1_m-phi_m)-3.1415926)<cut_angle/180.*3.1415926)
+      			){
 		      
-		      //std::cout << theta << " " << theta1 << " " << phi << " " << phi1 << std::endl;
-		      //add this Merged Track
-		      mct->Add(MCTS.at(k),mcell,1);
-		      temp1.push_back(MCTS.at(k));
-		      flag2 = 1;
-		    }
-		  }
-		}
-	      }
+      		      //std::cout << theta << " " << theta1 << " " << phi << " " << phi1 << std::endl;
+      		      //add this Merged Track
+      		      mct->Add(MCTS.at(k),mcell,1);
+      		      temp1.push_back(MCTS.at(k));
+      		      flag2 = 1;
+      		    }
+      		  }
+      		}
+      	      }
 	      
-	    }
-	  }
-	} //while(flag2)
-	  // std::cout << i << " " << temp.size() << " " << temp1.size() << std::endl;
-	if (temp1.size()>0) {
-	  flag3 = 1;
-	  goto abc;
-	}
+      	    }
+      	  }
+      	} //while(flag2)
+      	  // std::cout << i << " " << temp.size() << " " << temp1.size() << std::endl;
+	
+      	if (temp1.size()>0) {
+      	  flag3 = 1;
+      	  goto abc;
+      	}
       }
+
+
       
       
     }

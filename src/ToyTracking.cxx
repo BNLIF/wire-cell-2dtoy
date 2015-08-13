@@ -137,10 +137,12 @@ WireCell2dToy::ToyTracking::ToyTracking(WireCell2dToy::ToyCrawler& toycrawler){
   }
 
 
-  // for (int i=0;i!=vertices.size();i++){
-  //   WCVertex *vertex = vertices.at(i);
-  //   std::cout << vertex->get_ntracks() << std::endl;
-  // }
+  
+
+  for (int i=0;i!=vertices.size();i++){
+    WCVertex *vertex = vertices.at(i);
+    std::cout << vertex->get_ntracks() << std::endl;
+  }
 
 
 }
