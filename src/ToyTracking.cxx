@@ -77,8 +77,64 @@ WireCell2dToy::ToyTracking::ToyTracking(WireCell2dToy::ToyCrawler& toycrawler){
 	continue;
       }
     }
+  }
+
+  // remove the contained one ... 
+  WCVertexSelection to_be_removed;
+  for (int i=0;i!=vertices.size();i++){
+    WCVertex *vertex1 = vertices.at(i);
+    if (vertex1->get_ntracks()==1) continue;
     
-    // std::cout << vertex->get_ntracks() << std::endl;
+    for (int j=0;j!=vertices.size();j++){
+      WCVertex * vertex2 = vertices.at(j);
+      if (vertex2->get_ntracks()==1 || vertex2 == vertex1) continue;
+      auto it1 = find(to_be_removed.begin(),to_be_removed.end(),vertex2);
+      if (it1 == to_be_removed.end()){
+	if (vertex1->IsInside(vertex2) >=0){
+	  auto it = find(to_be_removed.begin(),to_be_removed.end(),vertex1);   
+	  if (it == to_be_removed.end()){
+	    to_be_removed.push_back(vertex1);
+	  }
+	}
+      }
+    }
+  }
+  
+  
+  for (int i=0;i!=to_be_removed.size();i++){
+    WCVertex *vertex = to_be_removed.at(i);
+    auto it = find(vertices.begin(),vertices.end(),vertex);
+    vertices.erase(it);
+  }
+  
+  //prepare to merge vertices 
+  to_be_removed.clear();
+  for (int i=0;i!=vertices.size();i++){
+    WCVertex *vertex1 = vertices.at(i);
+    if (vertex1->get_ntracks()==1) continue;
+    
+    for (int j=0;j!=vertices.size();j++){
+      WCVertex * vertex2 = vertices.at(j);
+      if (vertex2->get_ntracks()==1 || vertex2 == vertex1) continue;
+      
+      // if (vertex1->Add(vertex2)){
+      // 	to_be_removed.push_back(vertex2);
+      // }
+
+     }
+  }
+  
+  
+  for (int i=0;i!=to_be_removed.size();i++){
+    WCVertex *vertex = to_be_removed.at(i);
+    auto it = find(vertices.begin(),vertices.end(),vertex);
+    vertices.erase(it);
+  }
+
+
+  for (int i=0;i!=vertices.size();i++){
+    WCVertex *vertex = vertices.at(i);
+    std::cout << vertex->get_ntracks() << std::endl;
   }
 
 

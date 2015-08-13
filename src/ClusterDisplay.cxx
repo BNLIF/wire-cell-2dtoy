@@ -31,7 +31,7 @@ void WireCell2dToy::ClusterDisplay::DrawVertex(WCVertexSelection& vertices, TStr
   g1->SetMarkerColor(2);
   g1->SetMarkerStyle(20);
   g1->SetMarkerSize(2.0);
-  //g1->Draw(option);
+  g1->Draw(option);
   
 }
 
@@ -196,7 +196,7 @@ void WireCell2dToy::ClusterDisplay::DrawCluster(MergeSpaceCellSelection& mcells,
   g1->Draw(option);
 
   //test 
-  g1->GetXaxis()->SetRangeUser(60.,65);
+  //  g1->GetXaxis()->SetRangeUser(60.,65);
   // g1->GetYaxis()->SetRangeUser(20,62.);
   // g1->GetZaxis()->SetRangeUser(635,660);
 
