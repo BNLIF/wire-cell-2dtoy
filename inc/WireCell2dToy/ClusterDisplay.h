@@ -5,6 +5,7 @@
 #include "WireCellData/MergeSpaceCell.h"
 
 #include "WireCell2dToy/ToyCrawler.h"
+#include "WireCell2dToy/ToyTracking.h"
 
 #include "TPad.h"
 #include "TH2F.h"
@@ -31,6 +32,9 @@ namespace WireCell2dToy {
 
 	void DrawCrawler(ToyCrawler& toycrawler, TString option = "p", int flag = 0);
 	void DrawHough(WireCell::SpaceCellSelection& cells, WireCell::Point& p, double dis_near, double dis_far);
+
+
+	void DrawVertex(WireCell::WCVertexSelection& vertices, TString option = "p");
 
     };
 

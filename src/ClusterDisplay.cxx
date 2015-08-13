@@ -13,6 +13,27 @@ WireCell2dToy::ClusterDisplay::ClusterDisplay(TPad& pad)
 WireCell2dToy::ClusterDisplay::~ClusterDisplay(){
 }
 
+
+void WireCell2dToy::ClusterDisplay::DrawVertex(WCVertexSelection& vertices, TString option){
+  TGraph2D *g1 = new TGraph2D();
+  int n = 0;
+  double x,y,z;
+  for (int i=0;i!=vertices.size();i++){
+    Point center = vertices.at(i)->Center();
+    x = center.x/units::cm;// + gRandom->Uniform(-0.15,0.15);
+    y = center.y/units::cm;// + gRandom->Uniform(-0.15,0.15);
+    z = center.z/units::cm;// + gRandom->Uniform(-0.15,0.15);
+    
+    g1->SetPoint(n,x,y,z);
+    n++;
+  }
+  
+  g1->SetMarkerColor(2);
+  g1->SetMarkerStyle(22);
+  g1->Draw(option);
+  
+}
+
 void WireCell2dToy::ClusterDisplay::DrawHough(SpaceCellSelection& cells, Point& p, double dis_near, double dis_far){
   TH2F *h1 = new TH2F("h1","h1",180,0,3.1415926,360,-3.1415926,3.1415926);
   Double_t x,y,z;

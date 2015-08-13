@@ -29,9 +29,13 @@ WireCell2dToy::ToyTracking::ToyTracking(WireCell2dToy::ToyCrawler& toycrawler){
     WCTrackSelection temp_tracks = it->second;
     for (int i=0;i!=temp_tracks.size();i++){
       WCTrack *temp_track = temp_tracks.at(i);
-      
       int type = temp_track->TrackType(*cell);
       
+      if (type==2){
+	WCVertex *vertex = new WCVertex(*cell);
+	vertices.push_back(vertex);
+	break;
+      }
       //std::cout << "Xin " << type << std::endl;
     }
   }

@@ -132,11 +132,13 @@ int main(int argc, char* argv[])
   c1.Draw();
   
   WireCell2dToy::ClusterDisplay display(c1);
-  display.DrawCluster(cells);
+  // display.DrawCluster(cells);
   display.DrawCluster(mcells);
-
-
   display.DrawCrawler(toycrawler,"psame",1);
+
+  
+  WCVertexSelection& vertices = toytracking.get_vertices();
+  display.DrawVertex(vertices,"psame");
 
   // Point p;
   // p.x = cells.at(0)->x();
