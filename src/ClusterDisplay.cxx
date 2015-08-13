@@ -30,19 +30,21 @@ void WireCell2dToy::ClusterDisplay::DrawVertex(WCVertexSelection& vertices, TStr
 
     double x1[2],y1[2],z1[2];
     WCTrackSelection& tracks = vertices.at(i)->get_tracks();
-    for (int j=0;j!=tracks.size();j++){
-      WCTrack *track = tracks.at(j);
-      Point p1 = track->get_end_scells().at(0)->Get_Center();
-      Point p2 = track->get_end_scells().at(1)->Get_Center();
-      x1[0] = p1.x/units::cm;
-      y1[0] = p1.y/units::cm;
-      z1[0] = p1.z/units::cm;
-
-      x1[1] = p2.x/units::cm;
-      y1[1] = p2.y/units::cm;
-      z1[1] = p2.z/units::cm;
-      TPolyLine3D *l1 = new TPolyLine3D(2,x1,y1,z1);
-      l1->Draw("same");
+    if (tracks.size()>1){
+      for (int j=0;j!=tracks.size();j++){
+	WCTrack *track = tracks.at(j);
+	Point p1 = track->get_end_scells().at(0)->Get_Center();
+	Point p2 = track->get_end_scells().at(1)->Get_Center();
+	x1[0] = p1.x/units::cm;
+	y1[0] = p1.y/units::cm;
+	z1[0] = p1.z/units::cm;
+	
+	x1[1] = p2.x/units::cm;
+	y1[1] = p2.y/units::cm;
+	z1[1] = p2.z/units::cm;
+	TPolyLine3D *l1 = new TPolyLine3D(2,x1,y1,z1);
+	l1->Draw("same");
+      }
     }
 
   }
