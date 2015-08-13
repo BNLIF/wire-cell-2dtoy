@@ -23,6 +23,8 @@ WireCell2dToy::ToyTracking::ToyTracking(WireCell2dToy::ToyCrawler& toycrawler){
     // std::cout << "Xin " << track->get_end_scells().size()<<std::endl;
   }
 
+  MergeSpaceCellSelection vertex_candidate;
+  
   //start to judge vertex ... 
   for (auto it = msc_wct_map.begin();it!=msc_wct_map.end();it++){
     MergeSpaceCell *cell = it->first;
@@ -30,15 +32,15 @@ WireCell2dToy::ToyTracking::ToyTracking(WireCell2dToy::ToyCrawler& toycrawler){
     for (int i=0;i!=temp_tracks.size();i++){
       WCTrack *temp_track = temp_tracks.at(i);
       int type = temp_track->TrackType(*cell);
-      
+      // std::cout << "Xin " << type << std::endl;
       if (type==2){
-	WCVertex *vertex = new WCVertex(*cell);
+      	WCVertex *vertex = new WCVertex(*cell);
 	vertices.push_back(vertex);
-	break;
+      	break;
       }
-      //std::cout << "Xin " << type << std::endl;
     }
   }
+
 
 
 }

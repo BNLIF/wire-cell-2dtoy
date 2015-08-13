@@ -29,7 +29,8 @@ void WireCell2dToy::ClusterDisplay::DrawVertex(WCVertexSelection& vertices, TStr
   }
   
   g1->SetMarkerColor(2);
-  g1->SetMarkerStyle(22);
+  g1->SetMarkerStyle(20);
+  g1->SetMarkerSize(1.0);
   g1->Draw(option);
   
 }
