@@ -44,6 +44,7 @@ void WireCell2dToy::ClusterDisplay::DrawVertex(WCVertexSelection& vertices, TStr
 	z1[1] = p2.z/units::cm;
 	TPolyLine3D *l1 = new TPolyLine3D(2,x1,y1,z1);
 	l1->Draw("same");
+	l1->SetLineColor(6);
       }
     }
 
@@ -51,7 +52,7 @@ void WireCell2dToy::ClusterDisplay::DrawVertex(WCVertexSelection& vertices, TStr
   
   g1->SetMarkerColor(2);
   g1->SetMarkerStyle(20);
-  g1->SetMarkerSize(2.0);
+  g1->SetMarkerSize(1.0);
   g1->Draw(option);
   
   // Draw tracks associated with it

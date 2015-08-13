@@ -145,13 +145,34 @@ WireCell2dToy::ToyTracking::ToyTracking(WireCell2dToy::ToyCrawler& toycrawler){
     vertex->OrganizeTracks();
   }
   
-  
+  WCTrackSelection break_tracks;
+  int flag = 1;
+  while(flag){
+    flag = 0;
+    for(int i=0;i!=vertices.size();i++){
+      WCVertex *vertex1 = vertices.at(i);
+      break_tracks = vertex1->BreakTracks();
+      if (break_tracks.size()==2){
+	flag = 1;
+	tracks.push_back(break_tracks.at(1));
+	for (int j=0;j!=vertices.size();j++){
+	  WCVertex *vertex2 = vertices.at(j);
+	  if (vertex2 != vertex1){
+	    vertex2->ProcessTracks(break_tracks);
+	  }
+	}
+
+	break;
+      }
+    }
+  }
   
   
 
 
   for (int i=0;i!=vertices.size();i++){
     WCVertex *vertex = vertices.at(i);
+    //vertex->OrganizeEnds();
     std::cout << vertex->get_ntracks() << " " << vertex->Center().x/units::cm << " " << vertex->Center().y/units::cm << " " << vertex->Center().z/units::cm << " " << std::endl;
   }
 
