@@ -23,24 +23,63 @@ WireCell2dToy::ToyTracking::ToyTracking(WireCell2dToy::ToyCrawler& toycrawler){
     // std::cout << "Xin " << track->get_end_scells().size()<<std::endl;
   }
 
-  MergeSpaceCellSelection vertex_candidate;
-  
+
+  // MergeSpaceCellSelection vertex_candidate;
+  WCTrackSelection saved_tracks;
+
   //start to judge vertex ... 
   for (auto it = msc_wct_map.begin();it!=msc_wct_map.end();it++){
     MergeSpaceCell *cell = it->first;
     WCTrackSelection temp_tracks = it->second;
+
+    WCVertex *vertex = new WCVertex(*cell);
+
     for (int i=0;i!=temp_tracks.size();i++){
       WCTrack *temp_track = temp_tracks.at(i);
       int type = temp_track->TrackType(*cell);
       //std::cout << "Xin " << type << " " << cell->Get_Center().x/units::cm << " " << cell->Get_Center().y/units::cm << " " << cell->Get_Center().z/units::cm << std::endl;
       if (type==2){
-      	WCVertex *vertex = new WCVertex(*cell);
-      	vertices.push_back(vertex);
-      	break;
+      	vertex->Add(temp_track);
+	
+	auto it = find(saved_tracks.begin(),saved_tracks.end(),temp_track);
+	if (it == saved_tracks.end()){
+	  saved_tracks.push_back(temp_track);
+	}
+
       }
     }
+    if (vertex->get_ntracks() > 0){
+      vertices.push_back(vertex);
+      //     std::cout << vertex->get_ntracks() << std::endl;
+    }else{
+      delete vertex;
+    }
+    //  	break;
   }
 
+  // Now need to clean up vertices ... 
+  for (int i= 0;i!=vertices.size();i++){
+    WCVertex *vertex = vertices.at(i);
+    MergeSpaceCell *cell = vertex->get_msc();
+    WCTrackSelection& tracks = vertex->get_tracks();
+
+    for (int j=0;j!=saved_tracks.size();j++){
+      WCTrack *temp_track = saved_tracks.at(j);
+      auto it = find(tracks.begin(),tracks.end(),temp_track);
+      if (it == tracks.end()){
+	MergeClusterTrack& mct = temp_track->get_mct();
+	MergeSpaceCellSelection& cells = mct.Get_allmcells();
+	auto it1 = find(cells.begin(),cells.end(),cell);
+	if (it1 != cells.end()){
+	  vertex->Add(temp_track);
+	}
+      }else{
+	continue;
+      }
+    }
+    
+    // std::cout << vertex->get_ntracks() << std::endl;
+  }
 
 
 }
