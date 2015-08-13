@@ -138,18 +138,22 @@ WireCell2dToy::ToyTracking::ToyTracking(WireCell2dToy::ToyCrawler& toycrawler){
 
   
   // Now need to break the track?
+
+  //first shif the vertex locations
   for (int i=0;i!=vertices.size();i++){
     WCVertex *vertex = vertices.at(i);
-    vertex->OrganizeTracks(tracks);
+    vertex->OrganizeTracks();
   }
   
   
+  
+  
 
 
-  // for (int i=0;i!=vertices.size();i++){
-  //   WCVertex *vertex = vertices.at(i);
-  //   std::cout << vertex->get_ntracks() << std::endl;
-  // }
+  for (int i=0;i!=vertices.size();i++){
+    WCVertex *vertex = vertices.at(i);
+    std::cout << vertex->get_ntracks() << " " << vertex->Center().x/units::cm << " " << vertex->Center().y/units::cm << " " << vertex->Center().z/units::cm << " " << std::endl;
+  }
 
 
 }
