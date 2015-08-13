@@ -32,10 +32,10 @@ WireCell2dToy::ToyTracking::ToyTracking(WireCell2dToy::ToyCrawler& toycrawler){
     for (int i=0;i!=temp_tracks.size();i++){
       WCTrack *temp_track = temp_tracks.at(i);
       int type = temp_track->TrackType(*cell);
-      // std::cout << "Xin " << type << std::endl;
+      //std::cout << "Xin " << type << " " << cell->Get_Center().x/units::cm << " " << cell->Get_Center().y/units::cm << " " << cell->Get_Center().z/units::cm << std::endl;
       if (type==2){
       	WCVertex *vertex = new WCVertex(*cell);
-	vertices.push_back(vertex);
+      	vertices.push_back(vertex);
       	break;
       }
     }
