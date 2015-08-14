@@ -9,14 +9,33 @@ WireCell2dToy::ToyTracking::ToyTracking(WireCell2dToy::ToyCrawler& toycrawler){
   BreakTracks();
   OrganizeTracks();
   
+  // for (int i=0;i!=vertices.size();i++){
+  //   WCVertex *vertex = vertices.at(i);
+  //   std::cout << i << " " << vertex->get_ntracks() << " " << vertex->Center().x/units::cm << " " << vertex->Center().y/units::cm << " " << vertex->Center().z/units::cm << " " << std::endl;
+  // }
+  //Associate();
+
+  MergeVertices(0);
+  BreakTracks();
+  OrganizeTracks();
+
+  for (int i=0;i!=vertices.size();i++){
+    WCVertex *vertex = vertices.at(i);
+    std::cout << i << " " << vertex->get_ntracks() << " " << vertex->Center().x/units::cm << " " << vertex->Center().y/units::cm << " " << vertex->Center().z/units::cm << " " << std::endl;
+  }
   
 
 }
 
 void WireCell2dToy::ToyTracking::OrganizeTracks(){
-   for (int i=0;i!=vertices.size();i++){
+  MergeSpaceCellSelection saved_cells;
+  for (int i=0;i!=vertices.size();i++){
+    saved_cells.push_back(vertices.at(i)->get_msc());
+  } 
+
+  for (int i=0;i!=vertices.size();i++){
     WCVertex *vertex = vertices.at(i);
-    vertex->OrganizeEnds();
+    vertex->OrganizeEnds(saved_cells);
     //std::cout << vertex->get_ntracks() << " " << vertex->Center().x/units::cm << " " << vertex->Center().y/units::cm << " " << vertex->Center().z/units::cm << " " << std::endl;
   }
 }
@@ -53,7 +72,7 @@ void WireCell2dToy::ToyTracking::BreakTracks(){
 }
 
 
-void WireCell2dToy::ToyTracking::MergeVertices(){
+void WireCell2dToy::ToyTracking::MergeVertices(int flag){
    WCVertexSelection to_be_removed;
   //prepare to merge vertices 
   for (int i=0;i!=vertices.size();i++){
@@ -68,7 +87,7 @@ void WireCell2dToy::ToyTracking::MergeVertices(){
   	auto it2 = find(to_be_removed.begin(),to_be_removed.end(),vertex2);
   	if (it2 == to_be_removed.end()){
   	  //std::cout << i << " " << j << " " << vertex2->get_ntracks() << std::endl;
-  	  if (vertex1->AddVertex(vertex2)){
+  	  if (vertex1->AddVertex(vertex2, flag)){
   	    //  std::cout << "remove2 " << vertex1->Center().x/units::cm << " " <<
   	    // vertex1->Center().y/units::cm << " " << vertex1->Center().z/units::cm << " " <<
   	    // vertex2->Center().x/units::cm << " " <<
@@ -201,8 +220,40 @@ void WireCell2dToy::ToyTracking::CreateVertices(ToyCrawler& toycrawler){
       WCTrack *temp_track = saved_tracks.at(j);
       auto it = find(tracks.begin(),tracks.end(),temp_track);
       if (it == tracks.end()){
-	MergeClusterTrack& mct = temp_track->get_mct();
-	MergeSpaceCellSelection& cells = mct.Get_allmcells();
+	//	MergeClusterTrack& mct = temp_track->get_mct();
+	MergeSpaceCellSelection& cells = temp_track->get_all_cells();
+	auto it1 = find(cells.begin(),cells.end(),cell);
+	if (it1 != cells.end()){
+	  vertex->Add(temp_track);
+	}
+      }else{
+	continue;
+      }
+    }
+  }
+
+}
+
+void WireCell2dToy::ToyTracking::Associate(){
+  WCTrackSelection saved_tracks;
+  for (int i=0;i!=vertices.size();i++){
+    for (int j=0;j!=vertices.at(i)->get_tracks().size();j++){
+      saved_tracks.push_back(vertices.at(i)->get_tracks().at(j));
+    }
+  }
+
+
+  // Now need to match tracks with vertices ... 
+  for (int i= 0;i!=vertices.size();i++){
+    WCVertex *vertex = vertices.at(i);
+    MergeSpaceCell *cell = vertex->get_msc();
+    WCTrackSelection& tracks = vertex->get_tracks();
+    for (int j=0;j!=saved_tracks.size();j++){
+      WCTrack *temp_track = saved_tracks.at(j);
+      auto it = find(tracks.begin(),tracks.end(),temp_track);
+      if (it == tracks.end()){
+	//	MergeClusterTrack& mct = temp_track->get_mct();
+	MergeSpaceCellSelection& cells = temp_track->get_all_cells();
 	auto it1 = find(cells.begin(),cells.end(),cell);
 	if (it1 != cells.end()){
 	  vertex->Add(temp_track);
@@ -213,8 +264,6 @@ void WireCell2dToy::ToyTracking::CreateVertices(ToyCrawler& toycrawler){
     }
   }
 }
-
-
 
 
 WireCell2dToy::ToyTracking::~ToyTracking(){

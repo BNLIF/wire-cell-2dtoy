@@ -19,9 +19,10 @@ namespace WireCell2dToy{
     
     void CreateVertices(ToyCrawler& toycrawler);
     void RemoveSame();
-    void MergeVertices();
+    void MergeVertices(int flag  = 1);
     void BreakTracks();
     void OrganizeTracks();
+    void Associate();
 
 
   protected: 
