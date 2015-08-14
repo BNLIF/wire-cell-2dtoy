@@ -21,8 +21,11 @@ namespace WireCell2dToy{
     void RemoveSame();
     void MergeVertices(int flag  = 1);
     void BreakTracks();
-    void OrganizeTracks();
+    void OrganizeTracks(int flag = 1);
     void Associate();
+    void CleanUpVertex();
+    void Crawl();
+    
 
 
   protected: 
