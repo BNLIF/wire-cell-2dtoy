@@ -30,7 +30,7 @@ void WireCell2dToy::ClusterDisplay::DrawVertex(WCVertexSelection& vertices, TStr
 
     double x1[2],y1[2],z1[2];
     WCTrackSelection& tracks = vertices.at(i)->get_tracks();
-    if (tracks.size()>1){
+    if (tracks.size()>=1){
       for (int j=0;j!=tracks.size();j++){
 	WCTrack *track = tracks.at(j);
 	Point p1 = track->get_end_scells().at(0)->Get_Center();

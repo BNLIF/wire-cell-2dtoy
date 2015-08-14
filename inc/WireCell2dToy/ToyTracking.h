@@ -17,6 +17,12 @@ namespace WireCell2dToy{
     WireCell::WCTrackSelection& get_tracks(){return tracks;};
     WireCell::WCVertexSelection& get_vertices(){return vertices;};
     
+    void CreateVertices(ToyCrawler& toycrawler);
+    void RemoveSame();
+    void MergeVertices();
+    void BreakTracks();
+    void OrganizeTracks();
+
 
   protected: 
     WireCell::WCTrackSelection tracks;
