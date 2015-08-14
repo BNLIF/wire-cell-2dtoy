@@ -45,6 +45,8 @@ void WireCell2dToy::ClusterDisplay::DrawVertex(WCVertexSelection& vertices, TStr
 	TPolyLine3D *l1 = new TPolyLine3D(2,x1,y1,z1);
 	l1->Draw("same");
 	l1->SetLineColor(6);
+	// std::cout << x1[0] << " " << y1[0] << " " << z1[0] << " " 
+	// 	  << x1[1] << " " << y1[1] << " " << z1[1] << std::endl;
       }
     }
 

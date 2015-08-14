@@ -23,7 +23,6 @@ WireCell2dToy::ToyTracking::ToyTracking(WireCell2dToy::ToyCrawler& toycrawler){
     // std::cout << "Xin " << track->get_end_scells().size()<<std::endl;
   }
 
-
   // MergeSpaceCellSelection vertex_candidate;
   WCTrackSelection saved_tracks;
 
@@ -31,21 +30,17 @@ WireCell2dToy::ToyTracking::ToyTracking(WireCell2dToy::ToyCrawler& toycrawler){
   for (auto it = msc_wct_map.begin();it!=msc_wct_map.end();it++){
     MergeSpaceCell *cell = it->first;
     WCTrackSelection temp_tracks = it->second;
-
     WCVertex *vertex = new WCVertex(*cell);
-
     for (int i=0;i!=temp_tracks.size();i++){
       WCTrack *temp_track = temp_tracks.at(i);
       int type = temp_track->TrackType(*cell);
       //std::cout << "Xin " << type << " " << cell->Get_Center().x/units::cm << " " << cell->Get_Center().y/units::cm << " " << cell->Get_Center().z/units::cm << std::endl;
       if (type==2){
       	vertex->Add(temp_track);
-	
 	auto it = find(saved_tracks.begin(),saved_tracks.end(),temp_track);
 	if (it == saved_tracks.end()){
 	  saved_tracks.push_back(temp_track);
 	}
-
       }
     }
     if (vertex->get_ntracks() > 0){
@@ -57,12 +52,31 @@ WireCell2dToy::ToyTracking::ToyTracking(WireCell2dToy::ToyCrawler& toycrawler){
     //  	break;
   }
 
-  // Now need to clean up vertices ... 
+  //complete the other side of the track? ... 
+  MergeSpaceCellSelection existing_cells;
+  for (int i = 0;i!=vertices.size();i++){
+    existing_cells.push_back(vertices.at(i)->get_msc());
+  }
+  for (int i=0;i!=saved_tracks.size();i++){
+     WCTrack *temp_track = saved_tracks.at(i);
+     for (int j=0;j!=temp_track->get_end_scells().size();j++){
+       MergeSpaceCell *cell = temp_track->get_end_scells().at(j);
+       auto it = find(existing_cells.begin(),existing_cells.end(),cell);
+       if (it == existing_cells.end()){
+	 WCVertex *vertex = new WCVertex(*cell);
+	 vertex->Add(temp_track);
+	 vertices.push_back(vertex);
+       }
+     }
+  }
+
+
+
+  // Now need to match tracks with vertices ... 
   for (int i= 0;i!=vertices.size();i++){
     WCVertex *vertex = vertices.at(i);
     MergeSpaceCell *cell = vertex->get_msc();
     WCTrackSelection& tracks = vertex->get_tracks();
-
     for (int j=0;j!=saved_tracks.size();j++){
       WCTrack *temp_track = saved_tracks.at(j);
       auto it = find(tracks.begin(),tracks.end(),temp_track);
@@ -84,28 +98,30 @@ WireCell2dToy::ToyTracking::ToyTracking(WireCell2dToy::ToyCrawler& toycrawler){
   for (int i=0;i!=vertices.size();i++){
     WCVertex *vertex1 = vertices.at(i);
     if (vertex1->get_ntracks()==1) continue;
-    
     for (int j=0;j!=vertices.size();j++){
       WCVertex * vertex2 = vertices.at(j);
       if (vertex2->get_ntracks()==1 || vertex2 == vertex1) continue;
       auto it1 = find(to_be_removed.begin(),to_be_removed.end(),vertex2);
       if (it1 == to_be_removed.end()){
-	if (vertex1->IsInside(vertex2) >=0){
-	  auto it = find(to_be_removed.begin(),to_be_removed.end(),vertex1);   
-	  if (it == to_be_removed.end()){
-	    to_be_removed.push_back(vertex1);
-	  }
-	}
+  	if (vertex1->IsInside(vertex2) >=0){
+  	  std::cout << "remove " << vertex1->Center().x/units::cm << " " <<
+  	    vertex1->Center().y/units::cm << " " << vertex1->Center().z/units::cm << " " <<
+  	    vertex2->Center().x/units::cm << " " <<
+  	    vertex2->Center().y/units::cm << " " << vertex2->Center().z/units::cm << " " <<std::endl;
+  	  auto it = find(to_be_removed.begin(),to_be_removed.end(),vertex1);   
+  	  if (it == to_be_removed.end()){
+  	    to_be_removed.push_back(vertex1);
+  	  }
+  	}
       }
     }
   }
-  
-  
   for (int i=0;i!=to_be_removed.size();i++){
     WCVertex *vertex = to_be_removed.at(i);
     auto it = find(vertices.begin(),vertices.end(),vertex);
     vertices.erase(it);
   }
+  
   
   //prepare to merge vertices 
   to_be_removed.clear();
@@ -116,15 +132,19 @@ WireCell2dToy::ToyTracking::ToyTracking(WireCell2dToy::ToyCrawler& toycrawler){
     if (it1 == to_be_removed.end()){
       // std::cout << i << " " << vertex1->get_ntracks() << std::endl;
       for (int j=0;j!=vertices.size();j++){
-	WCVertex *vertex2 = vertices.at(j);
-	if (vertex2->get_ntracks()==1 || vertex2 == vertex1) continue;
-	auto it2 = find(to_be_removed.begin(),to_be_removed.end(),vertex2);
-	if (it2 == to_be_removed.end()){
-	  //std::cout << i << " " << j << " " << vertex2->get_ntracks() << std::endl;
-	  if (vertex1->AddVertex(vertex2)){
-	    to_be_removed.push_back(vertex2);
-	  }
-	}
+  	WCVertex *vertex2 = vertices.at(j);
+  	if (vertex2->get_ntracks()==1 || vertex2 == vertex1) continue;
+  	auto it2 = find(to_be_removed.begin(),to_be_removed.end(),vertex2);
+  	if (it2 == to_be_removed.end()){
+  	  //std::cout << i << " " << j << " " << vertex2->get_ntracks() << std::endl;
+  	  if (vertex1->AddVertex(vertex2)){
+	     std::cout << "remove2 " << vertex1->Center().x/units::cm << " " <<
+  	    vertex1->Center().y/units::cm << " " << vertex1->Center().z/units::cm << " " <<
+  	    vertex2->Center().x/units::cm << " " <<
+  	    vertex2->Center().y/units::cm << " " << vertex2->Center().z/units::cm << " " <<std::endl;
+  	    to_be_removed.push_back(vertex2);
+  	  }
+  	}
       }
     }
   }
@@ -137,42 +157,40 @@ WireCell2dToy::ToyTracking::ToyTracking(WireCell2dToy::ToyCrawler& toycrawler){
   }
 
   
-  // Now need to break the track?
-
-  //first shif the vertex locations
-  for (int i=0;i!=vertices.size();i++){
-    WCVertex *vertex = vertices.at(i);
-    vertex->OrganizeTracks();
-  }
+  // // Now need to break the track?
+  // // first shif the vertex locations
+  // for (int i=0;i!=vertices.size();i++){
+  //   WCVertex *vertex = vertices.at(i);
+  //   vertex->OrganizeTracks();
+  // }
   
-  WCTrackSelection break_tracks;
-  int flag = 1;
-  while(flag){
-    flag = 0;
-    for(int i=0;i!=vertices.size();i++){
-      WCVertex *vertex1 = vertices.at(i);
-      break_tracks = vertex1->BreakTracks();
-      if (break_tracks.size()==2){
-	flag = 1;
-	tracks.push_back(break_tracks.at(1));
-	for (int j=0;j!=vertices.size();j++){
-	  WCVertex *vertex2 = vertices.at(j);
-	  if (vertex2 != vertex1){
-	    vertex2->ProcessTracks(break_tracks);
-	  }
-	}
-
-	break;
-      }
-    }
-  }
+  // WCTrackSelection break_tracks;
+  // int flag = 1;
+  // while(flag){
+  //   flag = 0;
+  //   for(int i=0;i!=vertices.size();i++){
+  //     WCVertex *vertex1 = vertices.at(i);
+  //     break_tracks = vertex1->BreakTracks();
+  //     if (break_tracks.size()==2){
+  // 	flag = 1;
+  // 	tracks.push_back(break_tracks.at(1));
+  // 	for (int j=0;j!=vertices.size();j++){
+  // 	  WCVertex *vertex2 = vertices.at(j);
+  // 	  if (vertex2 != vertex1){
+  // 	    vertex2->ProcessTracks(break_tracks);
+  // 	  }
+  // 	}
+  // 	break;
+  //     }
+  //   }
+  // }
   
   
 
 
   for (int i=0;i!=vertices.size();i++){
     WCVertex *vertex = vertices.at(i);
-    //vertex->OrganizeEnds();
+    // vertex->OrganizeEnds();
     std::cout << vertex->get_ntracks() << " " << vertex->Center().x/units::cm << " " << vertex->Center().y/units::cm << " " << vertex->Center().z/units::cm << " " << std::endl;
   }
 
