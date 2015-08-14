@@ -6,7 +6,6 @@ WireCell2dToy::ToyTracking::ToyTracking(WireCell2dToy::ToyCrawler& toycrawler){
   CreateVertices(toycrawler);
   RemoveSame();
   MergeVertices();
-  
   BreakTracks();
   OrganizeTracks();
   
