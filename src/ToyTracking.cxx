@@ -7,28 +7,28 @@ WireCell2dToy::ToyTracking::ToyTracking(WireCell2dToy::ToyCrawler& toycrawler){
   RemoveSame(); // get rid of duplicated ones
   
 
-  // MergeVertices();   // merge things that are common ...
-  // OrganizeTracks();  // improve the end points nearby and break things
-  // Associate();    //associate the rest
+  MergeVertices();   // merge things that are common ...
+  OrganizeTracks();  // improve the end points nearby and break things
+  Associate();    //associate the rest
    
-  // MergeVertices(0); //merge things, but require the center must be at the end of common track
-  // OrganizeTracks(); //improve the end points nearby and break things
-  // Associate(); //associate the rest
+  MergeVertices(0); //merge things, but require the center must be at the end of common track
+  OrganizeTracks(); //improve the end points nearby and break things
+  Associate(); //associate the rest
   
 
-  // MergeVertices(2);  // merge some vertices with distance cut only 
-  // Crawl();
-  // OrganizeTracks(); //associate the rest
-  // Associate(); //associate the rest
+  MergeVertices(2);  // merge some vertices with distance cut only 
+  Crawl();
+  OrganizeTracks(); //associate the rest
+  Associate(); //associate the rest
   
   
-  // MergeVertices(2);  // merge some vertices together, allow single track
-  // BreakTracks();    //improve the end points and break things
-  // OrganizeTracks(); //associate the rest
+  MergeVertices(2);  // merge some vertices together, allow single track
+  BreakTracks();    //improve the end points and break things
+  OrganizeTracks(); //associate the rest
 
 
-  // Associate();  //associate the rest .. 
-  // CleanUpVertex(); //do some final clean up ... 
+  Associate();  //associate the rest .. 
+  CleanUpVertex(); //do some final clean up ... 
   
 
   for (int i=0;i!=vertices.size();i++){
