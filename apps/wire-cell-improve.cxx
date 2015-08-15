@@ -1018,7 +1018,7 @@ int main(int argc, char* argv[])
       for (int j=0; j!=mcell->get_allcell().size();j++){
 	cell_save = mcell->get_allcell().at(j);
 	Point p = mcell->get_allcell().at(j)->center();
-	charge_save = 1;
+	charge_save = toymatrix[time_slice]->Get_Cell_Charge(mcell,1)/mcell->cross_section() * cell_save->cross_section();
 	y = p.y/units::cm;
   	z = p.z/units::cm;
 	ttree1->Fill();

@@ -100,7 +100,7 @@ int main(int argc, char* argv[])
 	mcell = new MergeSpaceCell();
       }
 
-      // cout << x << " " << y << " " << z << endl;
+      //cout << x << " " << y << " " << z << " " << charge << endl;
       
       GeomCell *cell1 = new GeomCell(cell);
 

@@ -32,26 +32,47 @@ void WireCell2dToy::ClusterDisplay::DrawVertex(WCVertexSelection& vertices, TStr
     WCTrackSelection& tracks = vertices.at(i)->get_tracks();
     if (tracks.size()>=1){
       for (int j=0;j!=tracks.size();j++){
-	WCTrack *track = tracks.at(j);
-	Point p1 = track->get_end_scells().at(0)->Get_Center();
-	Point p2 = track->get_end_scells().at(1)->Get_Center();
-	x1[0] = p1.x/units::cm;
-	y1[0] = p1.y/units::cm;
-	z1[0] = p1.z/units::cm;
+    	WCTrack *track = tracks.at(j);
+    	Point p1 = track->get_end_scells().at(0)->Get_Center();
+    	Point p2 = track->get_end_scells().at(1)->Get_Center();
+    	x1[0] = p1.x/units::cm;
+    	y1[0] = p1.y/units::cm;
+    	z1[0] = p1.z/units::cm;
 	
-	x1[1] = p2.x/units::cm;
-	y1[1] = p2.y/units::cm;
-	z1[1] = p2.z/units::cm;
-	TPolyLine3D *l1 = new TPolyLine3D(2,x1,y1,z1);
-	l1->Draw("same");
-	l1->SetLineColor(6);
-	// std::cout << x1[0] << " " << y1[0] << " " << z1[0] << " " 
-	// 	  << x1[1] << " " << y1[1] << " " << z1[1] << std::endl;
+    	x1[1] = p2.x/units::cm;
+    	y1[1] = p2.y/units::cm;
+    	z1[1] = p2.z/units::cm;
+    	TPolyLine3D *l1 = new TPolyLine3D(2,x1,y1,z1);
+    	l1->Draw("same");
+    	l1->SetLineColor(6);
+    	// std::cout << x1[0] << " " << y1[0] << " " << z1[0] << " " 
+    	// 	  << x1[1] << " " << y1[1] << " " << z1[1] << std::endl;
       }
     }
 
+    // if (tracks.size()>1){
+    //   for (int j=0;j!=tracks.size();j++){
+    // 	double ky = vertices.at(i)->get_ky(j);
+    // 	double kz = vertices.at(i)->get_kz(j);
+	
+    // 	x1[0] = x-2.5;
+    // 	y1[0] = ky * (x1[0]-x) + y;
+    // 	z1[0] = kz * (x1[0]-x) + z;
+	
+    // 	x1[1] = x+2.5;
+    // 	y1[1] = ky * (x1[1]-x) + y;
+    // 	z1[1] = kz * (x1[1]-x) + z;
+    // 	TPolyLine3D *l1 = new TPolyLine3D(2,x1,y1,z1);
+    // 	l1->Draw("same");
+    // 	l1->SetLineColor(6);
+    //   }
+    // }
+    
+
   }
   
+  std::cout <<"abc " << n << " " <<std::endl;
+
   g1->SetMarkerColor(2);
   g1->SetMarkerStyle(20);
   g1->SetMarkerSize(1.0);
