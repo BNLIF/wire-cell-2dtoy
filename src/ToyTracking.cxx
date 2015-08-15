@@ -198,8 +198,17 @@ void WireCell2dToy::ToyTracking::CreateVertices(ToyCrawler& toycrawler){
   for (int i=0;i!=toycrawler.Get_allMCT().size();i++){
     WCTrack *track = new WCTrack(*toycrawler.Get_allMCT().at(i));
     tracks.push_back(track);
+    for (int j=0;j!=track->get_all_cells().size();j++){
+      MergeSpaceCell *cell = track->get_all_cells().at(j);
+      cell->CalMinMax();
+      //std::cout << cell->get_dy() << " " <<cell->get_dz() << std::endl;
+    }
+
+
     for (int j=0;j!=track->get_end_scells().size();j++){
       MergeSpaceCell *cell = track->get_end_scells().at(j);
+      
+
       auto it = msc_wct_map.find(cell);
       if (it == msc_wct_map.end()){
        	WCTrackSelection temp_tracks;

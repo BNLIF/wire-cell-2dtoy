@@ -50,7 +50,7 @@ void WireCell2dToy::ClusterDisplay::DrawVertex(WCVertexSelection& vertices, TStr
       }
     }
 
-    if (tracks.size()>1){
+    if (tracks.size()>=1){
       for (int j=0;j!=tracks.size();j++){
     	double ky = vertices.at(i)->get_ky(j);
     	double kz = vertices.at(i)->get_kz(j);
