@@ -11,34 +11,37 @@ WireCell2dToy::ToyTracking::ToyTracking(WireCell2dToy::ToyCrawler& toycrawler){
   Associate();    //associate the rest
    
   MergeVertices(0); //merge things, but require the center must be at the end of common track
+  //CheckVertices(toycrawler);
   OrganizeTracks(); //improve the end points nearby and break things
   Associate(); //associate the rest
   
   MergeVertices(2);  // merge some vertices with distance cut only 
+  //CheckVertices(toycrawler);
   Crawl();
   OrganizeTracks(); //associate the rest
   Associate(); //associate the rest
     
   MergeVertices(2);  // merge some vertices together, allow single track
+  CheckVertices(toycrawler);
   BreakTracks();    //improve the end points and break things
   OrganizeTracks(); //associate the rest
 
   
-
-
   Associate();  //associate the rest .. 
   CleanUpVertex(); //do some final clean up ... 
   
 
   for (int i=0;i!=vertices.size();i++){
     WCVertex *vertex = vertices.at(i);
-    //if (i==2)
-    vertex->FindVertex();
+    //if (i==7)
+    double chi2 = vertex->FindVertex();
     
-    std::cout << i << " " << vertex->get_ntracks() << " " << vertex->Center().x/units::cm << " " << vertex->Center().y/units::cm << " " << vertex->Center().z/units::cm << " " << std::endl;
+    std::cout << i << " " << vertex->get_ntracks() << " " << chi2 << " " << vertex->Center().x/units::cm << " " << vertex->Center().y/units::cm << " " << vertex->Center().z/units::cm << " " << std::endl;
     // for (int j=0;j!=vertex->get_ntracks();j++){
     //   std::cout << vertex->get_tracks().at(j)->get_end_scells().at(0)->Get_Center().x/units::cm << " " 
     // 		<< vertex->get_tracks().at(j)->get_end_scells().at(1)->Get_Center().x/units::cm << " " 
+    // 		<< vertex->get_tracks().at(j)->get_all_cells().front()->Get_Center().x/units::cm << " " 
+    // 		<< vertex->get_tracks().at(j)->get_all_cells().back()->Get_Center().x/units::cm << " " 
     // 		<< std::endl;
     // }
 
@@ -46,6 +49,113 @@ WireCell2dToy::ToyTracking::ToyTracking(WireCell2dToy::ToyCrawler& toycrawler){
   
 
 }
+
+
+void WireCell2dToy::ToyTracking::CheckVertices(WireCell2dToy::ToyCrawler& toycrawler){
+  
+  MergeSpaceCellMap& mcells_map = toycrawler.Get_mcells_map();
+  
+  for (int i=0;i!=vertices.size();i++){
+    WCVertex *vertex = vertices.at(i);
+    MergeSpaceCell *center = vertex->get_msc();
+    Point pcenter = vertex->Center();
+    WCTrackSelection tracks = vertex->get_tracks();
+
+    //deal the case where center is vertex ...
+    if (center->Get_Center().x == pcenter.x &&
+	center->Get_Center().y == pcenter.y &&
+	center->Get_Center().z == pcenter.z){
+      for (int j=0;j!=tracks.size();j++){
+	WCTrack *track = tracks.at(j);
+	MergeSpaceCellSelection& cells = track->get_all_cells();
+	auto it = find(cells.begin(),cells.end(),center);
+	if (it == cells.end()){
+	  // need to fill in ... 
+	  float dis1 = fabs(center->Get_Center().x - cells.front()->Get_Center().x);
+	  float dis2 = fabs(center->Get_Center().x - cells.back()->Get_Center().x);
+	  MergeSpaceCell *cell1; // the one ... 
+	  if (dis1 < dis2){
+	    cell1 = cells.front();
+	  }else{
+	    cell1 = cells.back();
+	  }
+	  
+	  double x1 = cell1->Get_Center().x;
+	  double y1 = cell1->Get_Center().y;
+	  double z1 = cell1->Get_Center().z;
+	  
+	  double ky = (center->Get_Center().y - y1)/(center->Get_Center().x - x1);
+	  double kz = (center->Get_Center().z - z1)/(center->Get_Center().x - x1);
+	  
+	  double dis = center->Get_Center().x - x1;
+
+	  MergeSpaceCell *cell2 = cell1;
+
+
+	  while( (cell2->Get_Center().x - cell1->Get_Center().x) * (cell2->Get_Center().x - center->Get_Center().x) < 0 || cell2 == cell1){
+	    // start to do the surgery ... 
+	    MergeSpaceCellSelection cells2 = mcells_map[cell2];
+	    MergeSpaceCell *min_cell3;
+	    
+	    double min = 1e9;
+	    
+	    for (int k=0;k!=cells2.size();k++){
+	      MergeSpaceCell *cell3 = cells2.at(k);
+	      if (dis * (cell3->Get_Center().x - cell2->Get_Center().x) < 0)
+		continue;
+	      
+	      double dy = cell3->get_dy();
+	      double dz = cell3->get_dz();
+	      
+	      if (dy == 0) dy = 0.3/2 * units::cm;
+	      if (dz == 0) dz = 0.3/2 * units::cm;
+	      
+	      double yp = y1 + ky * (cell3->Get_Center().x-x1);
+	      double zp = z1 + kz * (cell3->Get_Center().x-x1);
+	      double dis_sigma = pow(cell3->Get_Center().y - yp,2)/pow(dy,2)
+		+ pow(cell3->Get_Center().z - zp,2)/pow(dz,2);
+	      
+	      if (dis_sigma < min){
+		min = dis_sigma;
+		min_cell3 = cell3;
+	      }
+	      
+	    }
+	    cell2 = min_cell3;
+
+	    // put it in  ...
+	    if ((cell2->Get_Center().x - cell1->Get_Center().x) * (cell2->Get_Center().x - center->Get_Center().x) < 0){
+	      if (dis1 < dis2){
+		cells.insert(cells.begin(),cell2);
+	      }else{
+		cells.push_back(cell2);
+	      }
+	    }
+	    
+	  }
+	  // put the final center in ...
+	  if (dis1 < dis2){
+	    cells.insert(cells.begin(),center);
+	    track->get_end_scells().clear();
+	    track->get_end_scells().push_back(center);
+	    track->get_end_scells().push_back(cells.back());
+	  }else{
+	    cells.push_back(center);
+	    track->get_end_scells().clear();
+	    track->get_end_scells().push_back(cells.front());
+	    track->get_end_scells().push_back(center);
+	  }
+
+	}
+      }
+    }else{
+      //after fit .... 
+    }
+    
+
+  }
+}
+
 
 void WireCell2dToy::ToyTracking::CleanUpVertex(){
   WCVertexSelection temp;
@@ -87,7 +197,7 @@ void WireCell2dToy::ToyTracking::OrganizeTracks(int flag){
 
 
 void WireCell2dToy::ToyTracking::Crawl(){
-  // first shif the vertex locations
+  // first shift the vertex locations
   for (int i=0;i!=vertices.size();i++){
     WCVertex *vertex = vertices.at(i);
     vertex->OrganizeTracks();

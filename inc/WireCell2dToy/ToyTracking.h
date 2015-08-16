@@ -26,6 +26,8 @@ namespace WireCell2dToy{
     void CleanUpVertex();
     void Crawl();
 
+    void CheckVertices(WireCell2dToy::ToyCrawler& toycrawler);
+
 
     
 
@@ -34,11 +36,11 @@ namespace WireCell2dToy{
     WireCell::WCTrackSelection tracks;
     WireCell::WCVertexSelection vertices;
     
-    WireCell::MSC_WCV_Map msc_wcv_map;
-    WireCell::MCT_WCT_Map mct_wct_map;
+    /* WireCell::MSC_WCV_Map msc_wcv_map; */
+    /* WireCell::MCT_WCT_Map mct_wct_map; */
 
-    WCT_WCV_Map wct_wcv_map;
-    WCV_WCT_Map wcv_wct_map;
+    /* WCT_WCV_Map wct_wcv_map; */
+    /* WCV_WCT_Map wcv_wct_map; */
     
   };
 }
