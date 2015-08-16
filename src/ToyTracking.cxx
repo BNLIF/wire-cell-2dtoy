@@ -6,7 +6,6 @@ WireCell2dToy::ToyTracking::ToyTracking(WireCell2dToy::ToyCrawler& toycrawler){
   CreateVertices(toycrawler);
   RemoveSame(); // get rid of duplicated ones
   
-
   MergeVertices();   // merge things that are common ...
   OrganizeTracks();  // improve the end points nearby and break things
   Associate();    //associate the rest
@@ -15,16 +14,16 @@ WireCell2dToy::ToyTracking::ToyTracking(WireCell2dToy::ToyCrawler& toycrawler){
   OrganizeTracks(); //improve the end points nearby and break things
   Associate(); //associate the rest
   
-
   MergeVertices(2);  // merge some vertices with distance cut only 
   Crawl();
   OrganizeTracks(); //associate the rest
   Associate(); //associate the rest
-  
-  
+    
   MergeVertices(2);  // merge some vertices together, allow single track
   BreakTracks();    //improve the end points and break things
   OrganizeTracks(); //associate the rest
+
+  
 
 
   Associate();  //associate the rest .. 
@@ -33,6 +32,7 @@ WireCell2dToy::ToyTracking::ToyTracking(WireCell2dToy::ToyCrawler& toycrawler){
 
   for (int i=0;i!=vertices.size();i++){
     WCVertex *vertex = vertices.at(i);
+    //if (i==8)
     vertex->FindVertex();
     std::cout << i << " " << vertex->get_ntracks() << " " << vertex->Center().x/units::cm << " " << vertex->Center().y/units::cm << " " << vertex->Center().z/units::cm << " " << std::endl;
   }
@@ -89,8 +89,9 @@ void WireCell2dToy::ToyTracking::Crawl(){
 
 void WireCell2dToy::ToyTracking::BreakTracks(){
   // Now need to break the track?
-  
-  
+   
+
+  // first break the track if a vertice is in the middle
   WCTrackSelection break_tracks;
   int flag = 1;
   while(flag){
@@ -111,6 +112,50 @@ void WireCell2dToy::ToyTracking::BreakTracks(){
       }
     }
   }
+
+
+  // second break the track if there is a direction change ... 
+  break_tracks.clear();
+  WCTrackSelection finished_tracks;
+  WCVertexSelection NewVertices;
+  
+  for (int i=0;i!=vertices.size();i++){
+    WCVertex *vertex = vertices.at(i);
+    break_tracks = vertex->BreakTracksAngle(finished_tracks);
+    if (break_tracks.size()>0){
+
+      for (int j=1;j!=break_tracks.size();j++){
+	tracks.push_back(break_tracks.at(j));
+      }
+      // Form new vertices
+      for (int j=0;j!=break_tracks.size()-1;j++){
+	//WCVertex *vertex2 = FormNewVertex(break_tracks.at(j),break_tracks.at(j+1));
+	WCVertex *vertex2 = new WCVertex(*(break_tracks.at(j)->get_all_cells().back()));
+	vertex2->get_tracks().push_back(break_tracks.at(j));
+	vertex2->get_tracks().push_back(break_tracks.at(j+1));
+	NewVertices.push_back(vertex2);
+      }
+
+
+      // need to deal with other vertices ...
+      WCTrackSelection break_tracks1;
+      break_tracks1.push_back(break_tracks.at(0));
+      break_tracks1.push_back(break_tracks.at(break_tracks.size()-1));
+      for (int j=0;j!=vertices.size();j++){
+	WCVertex *vertex2 = vertices.at(j);
+	if (vertex2 != vertex){
+	  vertex2->ProcessTracks(break_tracks1);
+	}
+      }
+    }
+  }
+
+
+  for (int i=0;i!=NewVertices.size();i++){
+    vertices.push_back(NewVertices.at(i));
+  }
+
+
 }
 
 
