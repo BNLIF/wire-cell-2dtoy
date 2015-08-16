@@ -34,7 +34,14 @@ WireCell2dToy::ToyTracking::ToyTracking(WireCell2dToy::ToyCrawler& toycrawler){
     WCVertex *vertex = vertices.at(i);
     // if (i==12)
     vertex->FindVertex();
+    
     std::cout << i << " " << vertex->get_ntracks() << " " << vertex->Center().x/units::cm << " " << vertex->Center().y/units::cm << " " << vertex->Center().z/units::cm << " " << std::endl;
+    // for (int j=0;j!=vertex->get_ntracks();j++){
+    //   std::cout << vertex->get_tracks().at(j)->get_end_scells().at(0)->Get_Center().x/units::cm << " " 
+    // 		<< vertex->get_tracks().at(j)->get_end_scells().at(1)->Get_Center().x/units::cm << " " 
+    // 		<< std::endl;
+    // }
+
   }
   
 
@@ -356,7 +363,6 @@ void WireCell2dToy::ToyTracking::Associate(){
       WCTrack *temp_track = saved_tracks.at(j);
       auto it = find(tracks.begin(),tracks.end(),temp_track);
       if (it == tracks.end()){
-	//	MergeClusterTrack& mct = temp_track->get_mct();
 	MergeSpaceCellSelection& cells = temp_track->get_all_cells();
 	auto it1 = find(cells.begin(),cells.end(),cell);
 	if (it1 != cells.end()){
