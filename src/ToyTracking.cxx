@@ -32,7 +32,7 @@ WireCell2dToy::ToyTracking::ToyTracking(WireCell2dToy::ToyCrawler& toycrawler){
 
   for (int i=0;i!=vertices.size();i++){
     WCVertex *vertex = vertices.at(i);
-    // if (i==12)
+    //if (i==2)
     vertex->FindVertex();
     
     std::cout << i << " " << vertex->get_ntracks() << " " << vertex->Center().x/units::cm << " " << vertex->Center().y/units::cm << " " << vertex->Center().z/units::cm << " " << std::endl;
@@ -132,15 +132,15 @@ void WireCell2dToy::ToyTracking::BreakTracks(){
     if (break_tracks.size()>0){
 
       for (int j=1;j!=break_tracks.size();j++){
-	tracks.push_back(break_tracks.at(j));
+      	tracks.push_back(break_tracks.at(j));
       }
       // Form new vertices
       for (int j=0;j!=break_tracks.size()-1;j++){
-	//WCVertex *vertex2 = FormNewVertex(break_tracks.at(j),break_tracks.at(j+1));
-	WCVertex *vertex2 = new WCVertex(*(break_tracks.at(j)->get_all_cells().back()));
-	vertex2->get_tracks().push_back(break_tracks.at(j));
-	vertex2->get_tracks().push_back(break_tracks.at(j+1));
-	NewVertices.push_back(vertex2);
+      	//WCVertex *vertex2 = FormNewVertex(break_tracks.at(j),break_tracks.at(j+1));
+      	WCVertex *vertex2 = new WCVertex(*(break_tracks.at(j)->get_all_cells().back()));
+      	vertex2->get_tracks().push_back(break_tracks.at(j));
+      	vertex2->get_tracks().push_back(break_tracks.at(j+1));
+      	NewVertices.push_back(vertex2);
       }
 
 
@@ -149,12 +149,12 @@ void WireCell2dToy::ToyTracking::BreakTracks(){
       break_tracks1.push_back(break_tracks.at(0));
       break_tracks1.push_back(break_tracks.at(break_tracks.size()-1));
       for (int j=0;j!=vertices.size();j++){
-	WCVertex *vertex2 = vertices.at(j);
-	if (vertex2 != vertex){
-	  vertex2->ProcessTracks(break_tracks1);
-	}
+      	WCVertex *vertex2 = vertices.at(j);
+      	if (vertex2 != vertex){
+      	  vertex2->ProcessTracks(break_tracks1);
+      	}
       }
-    }
+      }
   }
 
 

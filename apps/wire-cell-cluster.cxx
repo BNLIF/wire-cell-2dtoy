@@ -116,15 +116,17 @@ int main(int argc, char* argv[])
   mcells.push_back(mcell);
   
 
-  // cout << mcells.size() << endl;
+  //cout << mcells.size() << endl;
 
   // do the Toy Crawler
+  std::cout << "Crawling " << std::endl;
   WireCell2dToy::ToyCrawler toycrawler(mcells);
+  std::cout << "Tracking " << std::endl;
   WireCell2dToy::ToyTracking toytracking(toycrawler);
 
 
 
- 
+  std::cout << "Drawing " << std::endl; 
   TApplication theApp("theApp",&argc,argv);
   theApp.SetReturnFromRun(true);
   

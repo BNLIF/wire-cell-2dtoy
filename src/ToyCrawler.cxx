@@ -10,12 +10,14 @@ WireCell2dToy::ToyCrawler::ToyCrawler(MergeSpaceCellSelection& mcells, int flag)
   //std::cout << "Merge Clusters " << std::endl; 
   // Merge Cluster ...
   MergeCTrack();  
-  // Further merge trying to extend into other tracks ... 
+  // // Further merge trying to extend into other tracks ... 
   FurtherExtendCTrack();
   
   PurgeMergeCTrack();
   
-  CleanUpCTTrack(flag);
+
+  //this is not a good assumption
+  //CleanUpCTTrack(flag);
   
   
   // for (int i=0;i!=all_mergeclustertrack.size();i++){
