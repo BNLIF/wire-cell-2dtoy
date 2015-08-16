@@ -32,7 +32,7 @@ WireCell2dToy::ToyTracking::ToyTracking(WireCell2dToy::ToyCrawler& toycrawler){
 
   for (int i=0;i!=vertices.size();i++){
     WCVertex *vertex = vertices.at(i);
-    //if (i==8)
+    // if (i==12)
     vertex->FindVertex();
     std::cout << i << " " << vertex->get_ntracks() << " " << vertex->Center().x/units::cm << " " << vertex->Center().y/units::cm << " " << vertex->Center().z/units::cm << " " << std::endl;
   }
