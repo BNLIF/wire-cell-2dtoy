@@ -26,7 +26,10 @@ WireCell2dToy::ToyTracking::ToyTracking(WireCell2dToy::ToyCrawler& toycrawler){
   BreakTracks();    //improve the end points and break things
   OrganizeTracks(); //associate the rest
 
-  
+  // MergeVertices(2);  // merge some vertices together, allow single track
+  // CheckVertices(toycrawler);
+  // OrganizeTracks(); //associate the rest
+
   Associate();  //associate the rest .. 
   CleanUpVertex(); //do some final clean up ... 
   
