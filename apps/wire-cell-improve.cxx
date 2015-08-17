@@ -284,11 +284,7 @@ int main(int argc, char* argv[])
 
 
 
-  // for (int i=start_num;i!=end_num+1;i++){
-  //    toymatrix[i] = new WireCell2dToy::ToyMatrix(*toytiling[i],*mergetiling[i]);
-  //    cout << i << " chi2: " << toymatrix[i]->Get_Chi2() <<
-  //      " NDF: " << toymatrix[i]->Get_ndf() << endl;
-  // }
+  
 
 
    for (int i=start_num;i!=end_num+1;i++){
@@ -324,13 +320,17 @@ int main(int argc, char* argv[])
     GeomCellSelection allmcell;
     for (int j=0;j!=pallmcell.size();j++){
       const GeomCell* mcell = pallmcell[j];
+      
+      //hack for now
       if (toymatrix[i]->Get_Solve_Flag()!=0){
-	if (toymatrix[i]->Get_Cell_Charge(mcell)> recon_threshold){
-	  allmcell.push_back(mcell);
-	}
+      	if (toymatrix[i]->Get_Cell_Charge(mcell)> recon_threshold){
+      	  allmcell.push_back(mcell);
+      	}
       }else{
-	allmcell.push_back(mcell);
+      	allmcell.push_back(mcell);
       }
+      
+      //allmcell.push_back(mcell);
     }
     
     
@@ -400,6 +400,7 @@ int main(int argc, char* argv[])
   }
   cout << "Summary: " << ncount << " " << ncount_mcell << " " << ncount_mcell_cluster << endl;
   
+  int ncluster;
 
    
 
@@ -409,7 +410,7 @@ int main(int argc, char* argv[])
   MergeSpaceCellSelection all_msc_cells;
   SpaceCellSelection all_sc_cells;
   
-  int ncluster = 0;
+  ncluster = 0;
   for (auto it = cluster_list.begin();it!=cluster_list.end();it++){
     
     MergeSpaceCellSelection mscells;
@@ -896,22 +897,22 @@ int main(int argc, char* argv[])
       MergeGeomCell *mcell = (MergeGeomCell*)allmcell[j];
       double charge = toymatrix[i]->Get_Cell_Charge(mcell,1);
       if (charge> recon_threshold){
-  	//truth
-  	for (int k=0;k!=mcell->get_allcell().size();k++){
-  	  Point p = mcell->get_allcell().at(k)->center();
-  	  x_save = i*0.32- 256;
-  	  y_save = p.y/units::cm;
-  	  z_save = p.z/units::cm;
-  	  charge_save = charge/mcell->get_allcell().size();
-  	  ncharge_save = mcell->get_allcell().size();
-  	  chi2_save = toymatrix[i]->Get_Chi2();
-  	  ndf_save = toymatrix[i]->Get_ndf();
+    	//truth
+    	for (int k=0;k!=mcell->get_allcell().size();k++){
+    	  Point p = mcell->get_allcell().at(k)->center();
+    	  x_save = i*0.32- 256;
+    	  y_save = p.y/units::cm;
+    	  z_save = p.z/units::cm;
+    	  charge_save = charge/mcell->get_allcell().size();
+    	  ncharge_save = mcell->get_allcell().size();
+    	  chi2_save = toymatrix[i]->Get_Chi2();
+    	  ndf_save = toymatrix[i]->Get_ndf();
 
-  	  g_rec->SetPoint(ncount1,x_save,y_save,z_save);
-  	  t_rec_charge->Fill();
+    	  g_rec->SetPoint(ncount1,x_save,y_save,z_save);
+    	  t_rec_charge->Fill();
 	  
-  	  ncount1 ++;
-  	}
+    	  ncount1 ++;
+    	}
       }
     }
     
@@ -919,19 +920,19 @@ int main(int argc, char* argv[])
       MergeGeomCell *mcell = (MergeGeomCell*)allmcell[j];
       double charge = toymatrix[i]->Get_Cell_Charge(mcell,1);
       if (charge> recon_threshold ){
-	for (int k=0;k!=mcell->get_allcell().size();k++){
-	  Point p = mcell->get_allcell().at(k)->center();
-	  x_save = i*0.32-256;
-	  y_save = p.y/units::cm;
-	  z_save = p.z/units::cm;
-	  charge_save = charge/mcell->get_allcell().size();
-	  ncharge_save = mcell->get_allcell().size();
+    	for (int k=0;k!=mcell->get_allcell().size();k++){
+    	  Point p = mcell->get_allcell().at(k)->center();
+    	  x_save = i*0.32-256;
+    	  y_save = p.y/units::cm;
+    	  z_save = p.z/units::cm;
+    	  charge_save = charge/mcell->get_allcell().size();
+    	  ncharge_save = mcell->get_allcell().size();
 	  
-	  g_rec_blob->SetPoint(ncount2,x_save,y_save,z_save);
-	  t_rec_charge_blob->Fill();
+    	  g_rec_blob->SetPoint(ncount2,x_save,y_save,z_save);
+    	  t_rec_charge_blob->Fill();
 	  
-	  ncount2 ++;
-	}
+    	  ncount2 ++;
+    	}
       }
     }
 
@@ -1000,9 +1001,9 @@ int main(int argc, char* argv[])
   ttree1->Branch("ncluster",&cluster_num,"cluster_num/I"); //done
   ttree1->Branch("mcell_id",&mcell_id,"mcell_id/I");
   ttree1->Branch("charge",&charge_save,"charge/D"); 
-  ttree1->Branch("x",&x,"x/D");    //done
-  ttree1->Branch("y",&y,"y/D");
-  ttree1->Branch("z",&z,"z/D");
+  ttree1->Branch("x",&x_save,"x/D");    //done
+  ttree1->Branch("y",&y_save,"y/D");
+  ttree1->Branch("z",&z_save,"z/D");
   
   ttree1->SetDirectory(file);
   
@@ -1013,14 +1014,18 @@ int main(int argc, char* argv[])
       const MergeGeomCell *mcell = (const MergeGeomCell*)((*it)->get_allcell().at(i));
       mcell_id ++;
       time_slice = mcell->GetTimeSlice();
-      x = time_slice *0.32- 256;
+      x_save = time_slice * 0.32 - 256.;
       //loop single cell
       for (int j=0; j!=mcell->get_allcell().size();j++){
 	cell_save = mcell->get_allcell().at(j);
 	Point p = mcell->get_allcell().at(j)->center();
+	//hack for now
 	charge_save = toymatrix[time_slice]->Get_Cell_Charge(mcell,1)/mcell->cross_section() * cell_save->cross_section();
-	y = p.y/units::cm;
-  	z = p.z/units::cm;
+	//charge_save = 1;
+	
+	//std::cout << time_slice << " " << x_save << std::endl;
+	y_save = p.y/units::cm;
+  	z_save = p.z/units::cm;
 	ttree1->Fill();
 	
       }
