@@ -33,10 +33,10 @@ WireCell2dToy::ToyTracking::ToyTracking(WireCell2dToy::ToyCrawler& toycrawler){
 
   for (int i=0;i!=vertices.size();i++){
     WCVertex *vertex = vertices.at(i);
-    //if (i==7)
-    double chi2 = vertex->FindVertex();
+    //if (i==20)
+    bool success = vertex->FindVertex();
     
-    std::cout << i << " " << vertex->get_ntracks() << " " << chi2 << " " << vertex->Center().x/units::cm << " " << vertex->Center().y/units::cm << " " << vertex->Center().z/units::cm << " " << std::endl;
+    std::cout << i << " " << vertex->get_ntracks() << " " << success << " " << vertex->Center().x/units::cm << " " << vertex->Center().y/units::cm << " " << vertex->Center().z/units::cm << " " << std::endl;
     // for (int j=0;j!=vertex->get_ntracks();j++){
     //   std::cout << vertex->get_tracks().at(j)->get_end_scells().at(0)->Get_Center().x/units::cm << " " 
     // 		<< vertex->get_tracks().at(j)->get_end_scells().at(1)->Get_Center().x/units::cm << " " 
@@ -200,7 +200,11 @@ void WireCell2dToy::ToyTracking::Crawl(){
   // first shift the vertex locations
   for (int i=0;i!=vertices.size();i++){
     WCVertex *vertex = vertices.at(i);
+
+    //if (i==1){
     vertex->OrganizeTracks();
+      //std::cout << vertex->get_ntracks() << " " << vertex->Center().x/units::cm << " " << vertex->Center().y/units::cm << " " << vertex->Center().z/units::cm << std::endl;
+      // }
   }
 }
 

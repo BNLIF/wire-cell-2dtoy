@@ -50,23 +50,23 @@ void WireCell2dToy::ClusterDisplay::DrawVertex(WCVertexSelection& vertices, TStr
       }
     }
 
-    if (tracks.size()>=1 ){
-      for (int j=0;j!=tracks.size();j++){
-    	double ky = vertices.at(i)->get_ky(j);
-    	double kz = vertices.at(i)->get_kz(j);
+    // if (tracks.size()>1 ){
+    //   for (int j=0;j!=tracks.size();j++){
+    // 	double ky = vertices.at(i)->get_ky(j);
+    // 	double kz = vertices.at(i)->get_kz(j);
 	
-    	x1[0] = x-2.5;
-    	y1[0] = ky * (x1[0]-x) + y;
-    	z1[0] = kz * (x1[0]-x) + z;
+    // 	x1[0] = x-2.5;
+    // 	y1[0] = ky * (x1[0]-x) + y;
+    // 	z1[0] = kz * (x1[0]-x) + z;
 	
-    	x1[1] = x+2.5;
-    	y1[1] = ky * (x1[1]-x) + y;
-    	z1[1] = kz * (x1[1]-x) + z;
-    	TPolyLine3D *l1 = new TPolyLine3D(2,x1,y1,z1);
-    	l1->Draw("same");
-    	l1->SetLineColor(4);
-      }
-    }
+    // 	x1[1] = x+2.5;
+    // 	y1[1] = ky * (x1[1]-x) + y;
+    // 	z1[1] = kz * (x1[1]-x) + z;
+    // 	TPolyLine3D *l1 = new TPolyLine3D(2,x1,y1,z1);
+    // 	l1->Draw("same");
+    // 	l1->SetLineColor(4);
+    //   }
+    // }
     
 
   }
@@ -246,9 +246,9 @@ void WireCell2dToy::ClusterDisplay::DrawCluster(MergeSpaceCellSelection& mcells,
   //g1->Draw("p0");
 
   //test 
-  // g1->GetXaxis()->SetRangeUser(60,65);
-  // g1->GetYaxis()->SetRangeUser(-70,-50);
-  // g1->GetZaxis()->SetRangeUser(285,295);
+  // g1->GetXaxis()->SetRangeUser(50,70);
+  // g1->GetYaxis()->SetRangeUser(-70,-30);
+  // g1->GetZaxis()->SetRangeUser(280,294);
 
   //  std::cout << mcells.size() << std::endl;
 
