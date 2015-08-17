@@ -10,14 +10,14 @@ WireCell2dToy::ToyCrawler::ToyCrawler(MergeSpaceCellSelection& mcells, int flag)
   //std::cout << "Merge Clusters " << std::endl; 
   // Merge Cluster ...
   MergeCTrack();  
-  // // Further merge trying to extend into other tracks ... 
+  // Further merge trying to extend into other tracks ... 
   FurtherExtendCTrack();
   
   PurgeMergeCTrack();
   
 
   //this is not a good assumption
-  //CleanUpCTTrack(flag);
+  CleanUpCTTrack(flag);
   
   
   // for (int i=0;i!=all_mergeclustertrack.size();i++){
@@ -81,12 +81,12 @@ void WireCell2dToy::ToyCrawler::CleanUpCTTrack(int flag){
 	  }
 
 	  if ((flag==1)&&(
-			  (n_common > n_diff && n_diff < 3 && ncells_common >= 20*ncells_diff) )){
+			  (n_common > n_diff && n_diff < 2 && ncells_common >= 20*ncells_diff) )){
 	    //merge
 	    to_be_removed.push_back(mct1);
 	    mct->AddTrack(mct1);
 	  }else if ((flag==2)&&
-		    (n_common >= n_diff && n_diff < 3 && ncells_common >= 20*ncells_diff) ){
+		    (n_common >= n_diff && n_diff < 2 && ncells_common >= 20*ncells_diff) ){
 	    //merge
 	    to_be_removed.push_back(mct1);
 	    mct->AddTrack(mct1);
@@ -510,7 +510,7 @@ void WireCell2dToy::ToyCrawler::MergeCTrack(){
 	    }else{
 	      cut_angle = 25;
 	    }
-	    float cut_angle1 = 25;
+	    float cut_angle1 = 15;
 
 	    float shift_angle = 100;
 
@@ -586,6 +586,7 @@ void WireCell2dToy::ToyCrawler::MergeCTrack(){
 	    // 	      << vertex->Get_Center().z/units::cm << " " 
 	    // 	      << std::endl;
 
+	    //flag = 0;
 
 	    // if good, save it
 	    if (flag==1){

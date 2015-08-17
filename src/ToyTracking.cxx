@@ -358,6 +358,8 @@ void WireCell2dToy::ToyTracking::CreateVertices(ToyCrawler& toycrawler){
 
    // fill in tracks ... 
   for (int i=0;i!=toycrawler.Get_allMCT().size();i++){
+    toycrawler.Get_allMCT().at(i)->Organize();
+
     WCTrack *track = new WCTrack(*toycrawler.Get_allMCT().at(i));
     tracks.push_back(track);
     for (int j=0;j!=track->get_all_cells().size();j++){
