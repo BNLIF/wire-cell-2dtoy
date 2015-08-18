@@ -3,6 +3,7 @@
 
 #include "WireCellData/ClusterTrack.h"
 #include "WireCellData/MergeClusterTrack.h"
+#include "WireCell2dToy/MergeToyTiling.h"
 
 namespace WireCell2dToy{
   
@@ -25,7 +26,7 @@ namespace WireCell2dToy{
     WireCell::MergeSpaceCellCounter& Get_mcells_counter(){return mcells_counter;};
     WireCell::MergeSpaceCellMap& Get_mcells_map(){return mcells_map;};
 
-    WireCell::MergeSpaceCell* GetClosestMSC(WireCell::Point p);
+    WireCell::MergeSpaceCell* GetClosestMSC(WireCell::Point p, WireCell::MergeSpaceCellSelection& cells);
 
   protected:
     WireCell::ClusterTrackSelection all_clustertrack;

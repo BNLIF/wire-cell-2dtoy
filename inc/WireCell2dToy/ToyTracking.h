@@ -29,7 +29,7 @@ namespace WireCell2dToy{
 
     void CheckVertices(WireCell2dToy::ToyCrawler& toycrawler);
 
-    void ExamineVertex(WireCell::WCVertex* vertex, WireCell2dToy::ToyCrawler& toycrawler);
+    bool ExamineVertex(WireCell::WCVertex* vertex, WireCell2dToy::ToyCrawler& toycrawler);
 
     
 

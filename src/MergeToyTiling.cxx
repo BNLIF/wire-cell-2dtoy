@@ -8,10 +8,12 @@
 
 using namespace WireCell;
 
+double WireCell2dToy::MergeToyTiling::time_convert = 0.32;
+double WireCell2dToy::MergeToyTiling::dis_offset = -256;
 
 
-
-WireCell2dToy::MergeToyTiling::MergeToyTiling(WireCell2dToy::ToyTiling& tiling, int time_slice, int merge_strategy, int flag_remerge){
+WireCell2dToy::MergeToyTiling::MergeToyTiling(WireCell2dToy::ToyTiling& tiling, int time_slice, int merge_strategy, int flag_remerge)
+{
   IsRemerged = false;
 
   ncell = tiling.get_ncell();

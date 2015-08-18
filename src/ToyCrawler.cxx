@@ -26,10 +26,37 @@ WireCell2dToy::ToyCrawler::ToyCrawler(MergeSpaceCellSelection& mcells, int flag)
   // }
 }
 
-MergeSpaceCell* WireCell2dToy::ToyCrawler::GetClosestMSC(Point p){
-  
+MergeSpaceCell* WireCell2dToy::ToyCrawler::GetClosestMSC(Point p, WireCell::MergeSpaceCellSelection& cells2){
+  // loop all mergeclustertrack
+  // find the right time slice and search for mergespace cell (or the closest)
+  int time = WireCell2dToy::MergeToyTiling::Dis2Time(p.x);
+  // std::cout << p.x/units::cm << " " << time << std::endl;
+  MergeSpaceCell *cell = 0;
 
-  return 0;
+  double min_dis = 1e9;
+
+  for (int i=0;i!=all_mergeclustertrack.size();i++){
+    MergeClusterTrack *mct = all_mergeclustertrack.at(i);
+    int ntime = mct->Get_TimeLength();
+    for (int j=0;j!=ntime;j++){
+      if (mct->Get_Time(j)==time){
+	// examine all the merge cells
+	MergeSpaceCellSelection& cells1 = mct->Get_MSCS(j);
+	for(int k=0;k!=cells1.size();k++){
+	  auto it = find(cells2.begin(),cells2.end(),cells1.at(k));
+	  if (it != cells2.end()){
+	    double dis = cells1.at(k)->ClosestDis(p) ;
+	    if (dis < min_dis){
+	      cell = cells1.at(k);
+	      min_dis = dis;
+	    }
+	  }
+	}
+      }
+    }
+  }
+  
+  return cell;
 }
 
 

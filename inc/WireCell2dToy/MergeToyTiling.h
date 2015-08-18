@@ -16,10 +16,16 @@ namespace WireCell2dToy{
     int further_mergewire(WireCell::GeomWireSelection &allwire, int nwire, int time_slice);
     bool GetRemerged(){return IsRemerged;};
     
+    static double Time2Dis(int time){return time*time_convert + dis_offset;};
+    static int Dis2Time(double dis){ return round((dis/units::cm-dis_offset)/time_convert);}; //in cm
+
 
   protected:
     bool IsRemerged;
     
+    static double time_convert;
+    static double dis_offset;
+
 
     void form_wiremap(WireCell2dToy::ToyTiling& tiling, int time_slice);
 
