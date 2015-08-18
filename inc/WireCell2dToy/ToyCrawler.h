@@ -25,6 +25,8 @@ namespace WireCell2dToy{
     WireCell::MergeSpaceCellCounter& Get_mcells_counter(){return mcells_counter;};
     WireCell::MergeSpaceCellMap& Get_mcells_map(){return mcells_map;};
 
+    WireCell::MergeSpaceCell* GetClosestMSC(WireCell::Point p);
+
   protected:
     WireCell::ClusterTrackSelection all_clustertrack;
     WireCell::ClusterTrackSelection used_clustertrack; // hold the used tracks

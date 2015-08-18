@@ -60,7 +60,8 @@ WireCell2dToy::ToyTracking::ToyTracking(WireCell2dToy::ToyCrawler& toycrawler){
 
 
 void WireCell2dToy::ToyTracking::ExamineVertex(WCVertex* vertex, WireCell2dToy::ToyCrawler& toycrawler){
-  
+  Point vertex_location = vertex->Center();
+  MergeSpaceCell *vertex_cell = toycrawler.GetClosestMSC(vertex_location);
 }
 
 

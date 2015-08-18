@@ -26,6 +26,13 @@ WireCell2dToy::ToyCrawler::ToyCrawler(MergeSpaceCellSelection& mcells, int flag)
   // }
 }
 
+MergeSpaceCell* WireCell2dToy::ToyCrawler::GetClosestMSC(Point p){
+  
+
+  return 0;
+}
+
+
 void WireCell2dToy::ToyCrawler::CleanUpCTTrack(int flag){
   //Sort the track first
   MergeClusterTrackSet MCT_set;
