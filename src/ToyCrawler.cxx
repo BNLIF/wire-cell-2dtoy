@@ -55,7 +55,23 @@ MergeSpaceCell* WireCell2dToy::ToyCrawler::GetClosestMSC(Point p, WireCell::Merg
       }
     }
   }
-  
+
+  if (cell==0){
+    for (int i=0;i!=all_mergeclustertrack.size();i++){
+      MergeClusterTrack *mct = all_mergeclustertrack.at(i);
+      MergeSpaceCellSelection cells1 = mct->Get_allmcells();
+      for (int j=0;j!=cells1.size();j++){
+	
+	double dis = cells1.at(j)->ClosestDis(p);
+	if (dis < min_dis){
+	  cell = cells1.at(j);
+	  min_dis = dis;
+	}
+      }
+    }
+  }
+
+
   return cell;
 }
 

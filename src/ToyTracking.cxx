@@ -60,6 +60,9 @@ WireCell2dToy::ToyTracking::ToyTracking(WireCell2dToy::ToyCrawler& toycrawler){
   }
   CheckVertices(toycrawler);
   OrganizeTracks(); 
+
+  
+
 }
 
 
@@ -76,6 +79,10 @@ bool WireCell2dToy::ToyTracking::ExamineVertex(WCVertex* vertex, WireCell2dToy::
   }
   
   MergeSpaceCell *vertex_cell = toycrawler.GetClosestMSC(vertex_location,cells1);
+  
+  // std::cout << vertex_cell << " " << cells1.size() << std::endl;
+
+  //if (vertex_cell!=0)
   vertex->set_msc(vertex_cell);
   
   // Now need to examine the vertex ... 
