@@ -39,6 +39,10 @@ WireCell2dToy::ToyTracking::ToyTracking(WireCell2dToy::ToyCrawler& toycrawler){
     //if (i==20)
     bool success = vertex->FindVertex();
 
+    if (success){
+      ExamineVertex(vertex,toycrawler);
+    }
+
     std::cout << i << " Vertex " << vertex->get_ntracks() << " " << success << " " << vertex->Center().x/units::cm << " " << vertex->Center().y/units::cm << " " << vertex->Center().z/units::cm << " " << std::endl;
     // for (int j=0;j!=vertex->get_ntracks();j++){
     //   std::cout << vertex->get_tracks().at(j)->get_end_scells().at(0)->Get_Center().x/units::cm << " " 
@@ -52,6 +56,13 @@ WireCell2dToy::ToyTracking::ToyTracking(WireCell2dToy::ToyCrawler& toycrawler){
   
 
 }
+
+
+
+void WireCell2dToy::ToyTracking::ExamineVertex(WCVertex* vertex, WireCell2dToy::ToyCrawler& toycrawler){
+  
+}
+
 
 
 void WireCell2dToy::ToyTracking::CheckVertices(WireCell2dToy::ToyCrawler& toycrawler){

@@ -1001,6 +1001,9 @@ int main(int argc, char* argv[])
   ttree1->Branch("ncluster",&cluster_num,"cluster_num/I"); //done
   ttree1->Branch("mcell_id",&mcell_id,"mcell_id/I");
   ttree1->Branch("charge",&charge_save,"charge/D"); 
+  double xx;
+  ttree1->Branch("xx",&xx,"xx/D");    //don
+
   ttree1->Branch("x",&x_save,"x/D");    //done
   ttree1->Branch("y",&y_save,"y/D");
   ttree1->Branch("z",&z_save,"z/D");
@@ -1015,6 +1018,7 @@ int main(int argc, char* argv[])
       mcell_id ++;
       time_slice = mcell->GetTimeSlice();
       x_save = time_slice * 0.32 - 256.;
+      xx = time_slice * 0.32 - 256.;
       //loop single cell
       for (int j=0; j!=mcell->get_allcell().size();j++){
 	cell_save = mcell->get_allcell().at(j);

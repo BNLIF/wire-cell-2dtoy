@@ -25,9 +25,11 @@ namespace WireCell2dToy{
     void Associate();
     void CleanUpVertex();
     void Crawl();
+   
 
     void CheckVertices(WireCell2dToy::ToyCrawler& toycrawler);
 
+    void ExamineVertex(WireCell::WCVertex* vertex, WireCell2dToy::ToyCrawler& toycrawler);
 
     
 
