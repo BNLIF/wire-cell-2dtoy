@@ -31,8 +31,8 @@
 #include "WireCellNav/GenerativeFDS.h"
 #include "WireCell2dToy/ToySignalSimu.h"
 #include "WireCell2dToy/ToySignalSimuTrue.h"
-#include "WireCell2dToy/ToySignalGaus.h"
-#include "WireCell2dToy/ToySignalWien.h"
+#include "WireCell2dToy/DataSignalGaus.h"
+#include "WireCell2dToy/DataSignalWien.h"
 
 #include "TApplication.h"
 #include "TCanvas.h"
@@ -87,7 +87,7 @@ int main(int argc, char* argv[])
     return 1;
   }
   
-  float unit_dis = 1.605723;
+  float unit_dis = 1.01483;  // 58KV @ 226.5 V/cm
 
   int max_events = 100;
   int eve_num  = atoi(argv[3]);
@@ -95,245 +95,105 @@ int main(int argc, char* argv[])
   
   TFile tfile(root_file,"read");
   TTree* sst = dynamic_cast<TTree*>(tfile.Get(tpath));
-  WireCellSst::DatauBooNEFrameDataSource data_fds(*sst,gds,9594);
+  WireCellSst::DatauBooNEFrameDataSource data_fds(*sst,gds,9592);
   data_fds.jump(eve_num);
-  data_fds.Save();
+  //data_fds.Save();
 
+  
   
 
   int recon_threshold = 2000;
   
 
   cout << "Deconvolution with Gaussian filter" << endl;
-  // //WireCell2dToy::ToySignalGausFDS gaus_fds(data_fds,gds,9600/4,max_events,1.647,1.539+1.647); // gaussian smearing for charge estimation
-  WireCell2dToy::ToySignalGausFDS gaus_fds(data_fds,gds,9600/4,max_events,0,0,-0.5); // gaussian smearing for charge estimation
+  WireCell2dToy::DataSignalGausFDS gaus_fds(data_fds,gds,9592/4,max_events,1.834,1.555+1.834,-0.5); // gaussian smearing for charge estimation
   gaus_fds.jump(eve_num);
   // //gaus_fds.Save();
 
-  //  cout << "Deconvolution with Wiener filter" << endl; 
-  //  //WireCell2dToy::ToySignalWienFDS wien_fds(data_fds,gds,9600/4,max_events,1.647,1.539+1.647); // weiner smearing for hit identification
-  WireCell2dToy::ToySignalWienFDS wien_fds(data_fds,gds,9600/4,max_events,0,0,-0.5); // weiner smearing for hit identification
+  cout << "Deconvolution with Wiener filter" << endl; 
+  WireCell2dToy::DataSignalWienFDS wien_fds(data_fds,gds,9592/4,max_events,1.834,1.555+1.834,-0.5); // weiner smearing for hit identification
   wien_fds.jump(eve_num);
-  // //wien_fds.Save();
+  //wien_fds.Save();
   
   
-  // GeomWireSelection wires_u = gds.wires_in_plane(WirePlaneType_t(0));
-  // GeomWireSelection wires_v = gds.wires_in_plane(WirePlaneType_t(1));
-  // GeomWireSelection wires_w = gds.wires_in_plane(WirePlaneType_t(2));
+  GeomWireSelection wires_u = gds.wires_in_plane(WirePlaneType_t(0));
+  GeomWireSelection wires_v = gds.wires_in_plane(WirePlaneType_t(1));
+  GeomWireSelection wires_w = gds.wires_in_plane(WirePlaneType_t(2));
 
-  // int nwire_u = wires_u.size();
-  // int nwire_v = wires_v.size();
-  // int nwire_w = wires_w.size();
+  int nwire_u = wires_u.size();
+  int nwire_v = wires_v.size();
+  int nwire_w = wires_w.size();
   
-  // float threshold_u = 5.87819e+02 * 4.0;
-  // float threshold_v = 8.36644e+02 * 4.0;
-  // float threshold_w = 5.67974e+02 * 4.0;
+  float threshold_u = 5.87819e+02 * 4.0;
+  float threshold_v = 8.36644e+02 * 4.0;
+  float threshold_w = 5.67974e+02 * 4.0;
 
-  // float threshold_ug = 755.96;
-  // float threshold_vg = 822.81;
-  // float threshold_wg = 510.84;
+  float threshold_ug = 755.96;
+  float threshold_vg = 822.81;
+  float threshold_wg = 510.84;
   
-  // // float threshold_u = 1000;
-  // // float threshold_v = 1000;
-  // // float threshold_w = 1000;
-  
-
-  // WireCellSst::ToyuBooNESliceDataSource sds(wien_fds,gaus_fds,threshold_u, 
-  // 					    threshold_v, threshold_w, 
-  // 					    threshold_ug, 
-  // 					    threshold_vg, threshold_wg, 
-  // 					    nwire_u, 
-  // 					    nwire_v, nwire_w); 
-  
-  //  WireCellSst::ToyuBooNESliceDataSource sds_th(st_fds,st_fds,1, 
-  // 					    1, 1, 
-  // 					    threshold_ug, 
-  // 					    threshold_vg, threshold_wg, 
-  // 					    nwire_u, 
-  // 					    nwire_v, nwire_w); 
-  // // const int N = 100000;
-  // // Double_t x[N],y[N],z[N];
-  // // Double_t x1[N],y1[N],z1[N], charge_r1[N];
-  // // Double_t xt[N],yt[N],zt[N], charge_t[N];
-  // int ncount = 0;
-  // int ncount1 = 0;
-  // int ncount2 = 0;
-
-  // int ncount_t = 0;
-  
-
-  // WireCell2dToy::ToyTiling **toytiling = new WireCell2dToy::ToyTiling*[2400];
-  
-  // WireCell2dToy::MergeToyTiling **mergetiling = new WireCell2dToy::MergeToyTiling*[2400];
-  // WireCell2dToy::TruthToyTiling **truthtiling = new WireCell2dToy::TruthToyTiling*[2400];
-  
-  // WireCell2dToy::SimpleBlobToyTiling **blobtiling = new WireCell2dToy::SimpleBlobToyTiling*[2400];
-
-  // WireCell2dToy::ToyMatrix **toymatrix = new WireCell2dToy::ToyMatrix*[2400];
-  // // WireCell2dToy::ToyMatrixIterate **toymatrix_it = new WireCell2dToy::ToyMatrixIterate*[2400];
-  // //WireCell2dToy::ToyMatrixMarkov **toymatrix_markov = new WireCell2dToy::ToyMatrixMarkov*[2400];
-  
-
-  // //save truth ...
-  // WireCell2dToy::ToyTiling **toytiling_th = new WireCell2dToy::ToyTiling*[2400];
-  // WireCell2dToy::TruthToyTiling **truthtiling_th = new WireCell2dToy::TruthToyTiling*[2400];
-
-  
-  // WireCell2dToy::ToyMetric toymetric;
-  // WireCell2dToy::BlobMetric blobmetric;
-
-  // //add in cluster
-  // GeomClusterSet cluster_set, cluster_delset;
-  
-  // int ncount_mcell = 0;
-
-  // delete fds;
-
-  // int start_num = 0 ;
-  // int end_num = sds.size()-1;
-
-  // // int start_num = 1170 ;
-  // // int end_num = 1170 ;
-
-  // // int start_num =1117;
-  // // int end_num = 1119;
-  // // int end_num = sds.size()-1;
-
-  // // int start_num = 400;
-  // // int end_num = 462;
-
-  // //  int i=454;{ // 46, 26
-  // // int i=329;{  // 18, 6,
-  // // int i=344;{ // 29 14
-  // //int i=459;{ // 23, 8,   5e5 
-  // //int i = 351;{
-  // //for (int i=0;i!=sds.size();i++){
-  // for (int i=start_num;i!=end_num+1;i++){
  
-  //   sds.jump(i);
-  //   sds_th.jump(i);
-  //   WireCell::Slice slice = sds.get();
-  //   WireCell::Slice slice_th = sds_th.get();
-  //   //if ( slice.group().size() >0){
-      
-  //   toytiling[i] = new WireCell2dToy::ToyTiling(slice,gds,0,0,0,threshold_ug,threshold_vg, threshold_wg);
-  //   mergetiling[i] = new WireCell2dToy::MergeToyTiling(*toytiling[i],i,3,1);
+  
+
+  WireCellSst::ToyuBooNESliceDataSource sds(wien_fds,gaus_fds,threshold_u, 
+  					    threshold_v, threshold_w, 
+  					    threshold_ug, 
+  					    threshold_vg, threshold_wg, 
+  					    nwire_u, 
+  					    nwire_v, nwire_w); 
+  
+  
+  int ncount = 0;
+  int ncount1 = 0;
+  int ncount2 = 0;
+
+  int ncount_t = 0;
+  
+
+  WireCell2dToy::ToyTiling **toytiling = new WireCell2dToy::ToyTiling*[2400];
+  WireCell2dToy::MergeToyTiling **mergetiling = new WireCell2dToy::MergeToyTiling*[2400];
+  WireCell2dToy::ToyMatrix **toymatrix = new WireCell2dToy::ToyMatrix*[2400];
     
-  //   GeomCellSelection allcell = toytiling[i]->get_allcell();
-  //   GeomWireSelection allwire = toytiling[i]->get_allwire();
-  //   GeomCellSelection allmcell = mergetiling[i]->get_allcell();
-  //   GeomWireSelection allmwire = mergetiling[i]->get_allwire();
+  //add in cluster
+  GeomClusterSet cluster_set, cluster_delset;
+  
+  int ncount_mcell = 0;
+
+  delete fds;
+
+  int start_num = 0 ;
+  int end_num = sds.size()-1;
+
+
+  for (int i=start_num;i!=end_num+1;i++){
+ 
+    sds.jump(i);
+    WireCell::Slice slice = sds.get();
+        
+    toytiling[i] = new WireCell2dToy::ToyTiling(slice,gds,0,0,0,threshold_ug,threshold_vg, threshold_wg);
+    mergetiling[i] = new WireCell2dToy::MergeToyTiling(*toytiling[i],i,3,1);
     
-  //   cout << i << " " << allmcell.size() << " " << allmwire.size() << endl;
+    GeomCellSelection allcell = toytiling[i]->get_allcell();
+    GeomWireSelection allwire = toytiling[i]->get_allwire();
+    GeomCellSelection allmcell = mergetiling[i]->get_allcell();
+    GeomWireSelection allmwire = mergetiling[i]->get_allwire();
     
-  //   truthtiling[i] = new WireCell2dToy::TruthToyTiling(*toytiling[i],pvv,i,gds,800,unit_dis);
-  //   toymatrix[i] = new WireCell2dToy::ToyMatrix(*toytiling[i],*mergetiling[i]);
-  //   if (toymatrix[i]->Get_Solve_Flag()==0){
-  //     WireCell2dToy::ToyMatrixIterate toymatrix_it(*toymatrix[i]);
-  //   }
-    
-  //   cout << "chi2: " << toymatrix[i]->Get_Chi2() << endl;
-  //   cout << "NDF: " << toymatrix[i]->Get_ndf() << endl;
-    
-
-  //   toytiling_th[i] = new WireCell2dToy::ToyTiling(slice_th,gds,0,0,0,threshold_ug,threshold_vg, threshold_wg);
-  //   truthtiling_th[i] = new WireCell2dToy::TruthToyTiling(*toytiling_th[i],pvv,i,gds,800,unit_dis);
-
-  //   // cout << slice_th.group().size() << " " << toytiling_th[i] ->get_allcell().size() << " " 
-  //   // 	 << toytiling_th[i] ->get_allwire().size() << " " << truthtiling_th[i]->ccmap().size() << endl;
-
-  //     // GeomCellSelection calmcell;
-  //     // for (int j=0;j!=allmcell.size();j++){
-  //     // 	MergeGeomCell *mcell = (MergeGeomCell*)allmcell[j];
-  //     // 	double charge = toymatrix[i]->Get_Cell_Charge(mcell,1);
-  //     // 	double charge_err = toymatrix[i]->Get_Cell_Charge(mcell,2);
-	
-  //     // 	//	cout << "Recon: " << j << " " << charge << " " << charge_err << endl;
-
-  //     // 	if (charge > 2000) calmcell.push_back(mcell);
-  //     // }
-      
-  //     //
-
-
-
-  //     CellChargeMap ccmap = truthtiling[i]->ccmap();
-  //     if (toymatrix[i]->Get_Solve_Flag()!=0)
-  // 	toymetric.Add(allmcell,*toymatrix[i],ccmap);
-
-  //     toymetric.AddSolve(toymatrix[i]->Get_Solve_Flag());
-
-  //     Double_t charge_min = 10000;
-  //     Double_t charge_max = 0;
-
-     
-      
-      
-  //     // //loop through merged cell and compare with truth cells
-  //     // for (int j=0;j!=allmcell.size();j++){
-  //     // 	MergeGeomCell *mcell = (MergeGeomCell*)allmcell[j];
-  //     // 	if (mcell->CheckContainTruthCell(ccmap)) 
-  //     // 	  cout << "True: " << toymatrix[i]->Get_mcindex(mcell) << " " << mcell->GetTruthCharge()<< endl;
-  //     // 	//cout << mergetiling.wires(*allmcell[j]).size() << endl;
-  //     // }
-      
-  //     // WireChargeMap wcmap = toytiling[i]->wcmap();
-
-
-
-
-      
-  //   // TApplication theApp("theApp",&argc,argv);
-  //   // theApp.SetReturnFromRun(true);
-    
-  //   // TCanvas c1("ToyMC","ToyMC",800,600);
-  //   // c1.Draw();
-    
-  //   // WireCell2dToy::ToyEventDisplay display(c1, gds);
-  //   // display.charge_min = charge_min;
-  //   // display.charge_max = charge_max;
-
-
-  //   // gStyle->SetOptStat(0);
-    
-  //   // const Int_t NRGBs = 5;
-  //   // const Int_t NCont = 255;
-  //   // Int_t MyPalette[NCont];
-  //   // Double_t stops[NRGBs] = {0.0, 0.34, 0.61, 0.84, 1.0};
-  //   // Double_t red[NRGBs] = {0.0, 0.0, 0.87 ,1.0, 0.51};
-  //   // Double_t green[NRGBs] = {0.0, 0.81, 1.0, 0.2 ,0.0};
-  //   // Double_t blue[NRGBs] = {0.51, 1.0, 0.12, 0.0, 0.0};
-  //   // Int_t FI = TColor::CreateGradientColorTable(NRGBs, stops, red, green, blue, NCont);
-  //   // gStyle->SetNumberContours(NCont);
-  //   // for (int kk=0;kk!=NCont;kk++) MyPalette[kk] = FI+kk;
-  //   // gStyle->SetPalette(NCont,MyPalette);
-
+    cout << i << " " << allmcell.size() << " " << allmwire.size() << endl;
     
 
-  //   // display.init(0,10.3698,-2.33/2.,2.33/2.);
-  //   // //display.init(1.1,1.8,0.7,1.0);
+    toymatrix[i] = new WireCell2dToy::ToyMatrix(*toytiling[i],*mergetiling[i]);
+    if (toymatrix[i]->Get_Solve_Flag()==0){
+      WireCell2dToy::ToyMatrixIterate toymatrix_it(*toymatrix[i]);
+    }
     
-  //   // display.draw_mc(1,WireCell::PointValueVector(),"colz");
-    
+    cout << "chi2: " << toymatrix[i]->Get_Chi2() << endl;
+    cout << "NDF: " << toymatrix[i]->Get_ndf() << endl;
     
 
-  //   // // display.draw_slice(slice,""); // draw wire 
-  //   // display.draw_cells(toytiling[i]->get_allcell(),"*same");
-  //   // //display.draw_mergecells(mergetiling[i]->get_allcell(),"*same",1); //0 is normal, 1 is only draw the ones containt the truth cell
-  //   // display.draw_mergecells(calmcell,"*same",0); //0 is normal, 1 is only draw the ones containt the truth cell
-  //   // display.draw_truthcells(ccmap,"*same");
-    
-  //   // // display.draw_wires_charge(wcmap,"Fsame",FI);
-  //   // // display.draw_cells_charge(toytiling.get_allcell(),"Fsame");
-  //   // // display.draw_truthcells_charge(ccmap,"lFsame",FI);
-    
-    
-  //   // theApp.Run();
-  //     // }
-  // }
+  }
+  
 
-  // toymetric.Print();
-  // std::cout << "Starting MCMC" << std::endl;
+  std::cout << "Starting MCMC" << std::endl;
 
   // // //without  time information
   // // for (int i=start_num;i!=end_num+1;i++){
