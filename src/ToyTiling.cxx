@@ -112,22 +112,31 @@ WireCell2dToy::ToyTiling::ToyTiling(const WireCell::Slice& slice,WireCell::GeomD
     dis_u[0] = udis.at(0) - gds.pitch(kUwire)/2.;
     dis_u[1] = dis_u[0] + gds.pitch(kUwire);
     dis_u[2] = udis.at(0);
-    
+
     dis_v[0] = vdis.at(0) - gds.pitch(kVwire)/2.;
     dis_v[1] = dis_v[0] + gds.pitch(kVwire);
     dis_v[2] = vdis.at(0);
 
-    dis_w[0] = wdis.at(0) - w_pitch/2.;
-    dis_w[1] = dis_w[0] + w_pitch;
-    dis_w[2] = wdis.at(0);
-    
-
-  
     gds.crossing_point(dis_u[0],dis_v[0],kUwire,kVwire, puv_save[0]);
     gds.crossing_point(dis_u[0],dis_v[1],kUwire,kVwire, puv_save[1]);
     gds.crossing_point(dis_u[1],dis_v[1],kUwire,kVwire, puv_save[2]);
     gds.crossing_point(dis_u[1],dis_v[0],kUwire,kVwire, puv_save[3]);
     gds.crossing_point(dis_u[2],dis_v[2],kUwire,kVwire, puv_save[4]);
+
+    for (int k=0;k!=5;k++){
+      dis_puv_save[k] = gds.wire_dist(puv_save[k],kYwire);
+    }
+    
+  }
+
+  if (wire_u.size()>=1&&wire_w.size()>=1){
+    dis_u[0] = udis.at(0) - gds.pitch(kUwire)/2.;
+    dis_u[1] = dis_u[0] + gds.pitch(kUwire);
+    dis_u[2] = udis.at(0);
+
+    dis_w[0] = wdis.at(0) - w_pitch/2.;
+    dis_w[1] = dis_w[0] + w_pitch;
+    dis_w[2] = wdis.at(0);
 
     gds.crossing_point(dis_u[0],dis_w[0],kUwire,kYwire, puw_save[0]);
     gds.crossing_point(dis_u[0],dis_w[1],kUwire,kYwire, puw_save[1]);
@@ -135,6 +144,22 @@ WireCell2dToy::ToyTiling::ToyTiling(const WireCell::Slice& slice,WireCell::GeomD
     gds.crossing_point(dis_u[1],dis_w[0],kUwire,kYwire, puw_save[3]);
     gds.crossing_point(dis_u[2],dis_w[2],kUwire,kYwire, puw_save[4]);
 
+    for (int k=0;k!=5;k++){
+      dis_puw_save[k] = gds.wire_dist(puw_save[k],kVwire);
+    }
+
+  }
+
+  if (wire_v.size()>=1&&wire_w.size()>=1){
+
+    dis_w[0] = wdis.at(0) - w_pitch/2.;
+    dis_w[1] = dis_w[0] + w_pitch;
+    dis_w[2] = wdis.at(0);
+
+    dis_v[0] = vdis.at(0) - gds.pitch(kVwire)/2.;
+    dis_v[1] = dis_v[0] + gds.pitch(kVwire);
+    dis_v[2] = vdis.at(0);
+    
     gds.crossing_point(dis_v[0],dis_w[0],kVwire,kYwire, pwv_save[0]);
     gds.crossing_point(dis_v[0],dis_w[1],kVwire,kYwire, pwv_save[1]);
     gds.crossing_point(dis_v[1],dis_w[1],kVwire,kYwire, pwv_save[2]);
@@ -142,8 +167,6 @@ WireCell2dToy::ToyTiling::ToyTiling(const WireCell::Slice& slice,WireCell::GeomD
     gds.crossing_point(dis_v[2],dis_w[2],kVwire,kYwire, pwv_save[4]);
     
     for (int k=0;k!=5;k++){
-      dis_puv_save[k] = gds.wire_dist(puv_save[k],kYwire);
-      dis_puw_save[k] = gds.wire_dist(puw_save[k],kVwire);
       dis_pwv_save[k] = gds.wire_dist(pwv_save[k],kUwire);
     }
   }
