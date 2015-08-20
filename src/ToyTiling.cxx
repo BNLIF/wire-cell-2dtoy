@@ -45,6 +45,11 @@ WireCell2dToy::ToyTiling::ToyTiling(const WireCell::Slice& slice,WireCell::GeomD
     }
     wirecharge_errmap[wire] = sqrt(charge_noise*charge_noise + pow(rel_charge_err,2) * charge*charge);
 
+    // hack for now
+    if (charge == 0){
+      wirecharge_errmap[wire] = 1e6;
+    }
+    // hack for data
 
     wire_all.push_back(wire);
     if (wire->plane() == kUwire){
