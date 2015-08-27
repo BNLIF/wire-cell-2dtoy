@@ -142,12 +142,7 @@ int main(int argc, char* argv[])
  
   
 
-  // WireCellSst::ToyuBooNESliceDataSource sds(wien_fds,gaus_fds,threshold_u, 
-  // 					    threshold_v, threshold_w, 
-  // 					    threshold_ug, 
-  // 					    threshold_vg, threshold_wg, 
-  // 					    nwire_u, 
-  // 					    nwire_v, nwire_w, &uplane_map, &vplane_map, &wplane_map); 
+ 
 
   WireCellSst::ToyuBooNESliceDataSource sds(wien_fds,gaus_fds,threshold_u, 
   					    threshold_v, threshold_w, 

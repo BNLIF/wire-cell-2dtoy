@@ -50,12 +50,12 @@ WireCell2dToy::ToyTiling::ToyTiling(const WireCell::Slice& slice,WireCell::GeomD
     }
     wirecharge_errmap[wire] = sqrt(charge_noise*charge_noise + pow(rel_charge_err,2) * charge*charge);
 
-    // hack for now
-    if (charge < 100){
-      //std::cout << "Bad Channel, Fill in a large error " << std::endl;
-      wirecharge_errmap[wire] = 1e4;
-    }
-    // hack for data
+    // // hack for now
+    // if (charge < 100){
+    //   //std::cout << "Bad Channel, Fill in a large error " << std::endl;
+    //   wirecharge_errmap[wire] = 1e4;
+    // }
+    // // hack for data
 
     
     wire_all.push_back(wire);
@@ -182,7 +182,7 @@ WireCell2dToy::ToyTiling::ToyTiling(const WireCell::Slice& slice,WireCell::GeomD
     dis_u[2] = udis.at(i);
 
     for (int j=0;j!=wire_v.size();j++){
-      if (wirechargemap[wire_u[i]] <100 && wirechargemap[wire_v[j]] <100 ) continue;
+      //  if (wirechargemap[wire_u[i]] <100 && wirechargemap[wire_v[j]] <100 ) continue;
       dis_v[0] = vdis.at(j) - v_pitch/2.;
       dis_v[1] = dis_v[0] + v_pitch;
       dis_v[2] = vdis.at(j);
@@ -223,8 +223,8 @@ WireCell2dToy::ToyTiling::ToyTiling(const WireCell::Slice& slice,WireCell::GeomD
        
       for (int k=0;k!=wire_w.size();k++){
 	
-	if (wirechargemap[wire_u[i]] <100 && wirechargemap[wire_w[k]] <100 ) continue;
-	if (wirechargemap[wire_w[k]] <100 && wirechargemap[wire_v[j]] <100 ) continue;
+	// if (wirechargemap[wire_u[i]] <100 && wirechargemap[wire_w[k]] <100 ) continue;
+	// if (wirechargemap[wire_w[k]] <100 && wirechargemap[wire_v[j]] <100 ) continue;
 	//counter2++;
 
 	int flag = 0;
