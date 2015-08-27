@@ -99,11 +99,11 @@ int main(int argc, char* argv[])
   data_fds.jump(eve_num);
   //data_fds.Save();
 
-  WireMap& uplane_map = data_fds.get_u_map();
-  WireMap& vplane_map = data_fds.get_v_map();
-  WireMap& wplane_map = data_fds.get_w_map();
+  // WireMap& uplane_map = data_fds.get_u_map();
+  // WireMap& vplane_map = data_fds.get_v_map();
+  // WireMap& wplane_map = data_fds.get_w_map();
 
-  std::cout << uplane_map.size() << " " << vplane_map.size() << " " << wplane_map.size() << std::endl;
+  // std::cout << uplane_map.size() << " " << vplane_map.size() << " " << wplane_map.size() << std::endl;
   
 
   int recon_threshold = 2000;
@@ -118,7 +118,21 @@ int main(int argc, char* argv[])
   WireCell2dToy::DataSignalWienFDS wien_fds(data_fds,gds,9592/4,max_events,1.834,1.555+1.834,-0.5); // weiner smearing for hit identification
   wien_fds.jump(eve_num);
   //wien_fds.Save();
+
+  std::vector<float>& uplane_rms = wien_fds.get_uplane_rms();
+  std::vector<float>& vplane_rms = wien_fds.get_vplane_rms();
+  std::vector<float>& wplane_rms = wien_fds.get_wplane_rms();
+
   
+  // for (int i=0;i!=uplane_rms.size();i++){
+  //   cout << "U " << i << " " << uplane_rms.at(i) << endl;
+  // }
+  // for (int i=0;i!=vplane_rms.size();i++){
+  //   cout << "V " << i << " " << vplane_rms.at(i) << endl;
+  // }
+  // for (int i=0;i!=wplane_rms.size();i++){
+  //   cout << "W " << i << " " << wplane_rms.at(i) << endl;
+  // }
   
   GeomWireSelection wires_u = gds.wires_in_plane(WirePlaneType_t(0));
   GeomWireSelection wires_v = gds.wires_in_plane(WirePlaneType_t(1));
@@ -128,9 +142,9 @@ int main(int argc, char* argv[])
   int nwire_v = wires_v.size();
   int nwire_w = wires_w.size();
   
-  float threshold_u = 5.87819e+02 * 5.0;
-  float threshold_v = 8.36644e+02 * 5.0;
-  float threshold_w = 5.67974e+02 * 5.0;
+  float threshold_u = 5.87819e+02 * 4.0;
+  float threshold_v = 8.36644e+02 * 4.0;
+  float threshold_w = 5.67974e+02 * 4.0;
 
 
 
@@ -144,12 +158,21 @@ int main(int argc, char* argv[])
 
  
 
+  // WireCellSst::ToyuBooNESliceDataSource sds(wien_fds,gaus_fds,threshold_u, 
+  // 					    threshold_v, threshold_w, 
+  // 					    threshold_ug, 
+  // 					    threshold_vg, threshold_wg, 
+  // 					    nwire_u, 
+  // 					    nwire_v, nwire_w); 
+
   WireCellSst::ToyuBooNESliceDataSource sds(wien_fds,gaus_fds,threshold_u, 
   					    threshold_v, threshold_w, 
   					    threshold_ug, 
   					    threshold_vg, threshold_wg, 
   					    nwire_u, 
-  					    nwire_v, nwire_w); 
+  					    nwire_v, nwire_w,
+					    &uplane_rms, &vplane_rms, &wplane_rms); 
+    
   
   
   int ncount = 0;

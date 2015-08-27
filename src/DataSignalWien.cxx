@@ -28,6 +28,10 @@ WireCell2dToy::DataSignalWienFDS::DataSignalWienFDS(WireCell::FrameDataSource& f
 
   nbin = fds.Get_Bins_Per_Frame();
 
+  uplane_rms.resize(nwire_u,0);
+  vplane_rms.resize(nwire_v,0);
+  wplane_rms.resize(nwire_w,0);
+
   // hu = new TH1F*[nwire_u];
   // hv = new TH1F*[nwire_v];
   // hw = new TH1F*[nwire_w];
@@ -280,7 +284,32 @@ int WireCell2dToy::DataSignalWienFDS::jump(int frame_number){
     }
     frame.traces.push_back(t);
 
-    
+     //calculate rms, this is to be used for threshold purpose
+    float rms = 0, rms1 = 0,rms2 = 0;
+    for (int i=0;i!=htemp->GetNbinsX();i++){
+      rms += pow(htemp->GetBinContent(i+1),2);
+    }
+    rms = sqrt(rms/htemp->GetNbinsX());
+
+    for (int i=0;i!=htemp->GetNbinsX();i++){
+      if (fabs(htemp->GetBinContent(i+1)) < 6 * rms){
+    	rms1 += pow(htemp->GetBinContent(i+1),2);
+    	rms2 ++;
+      }
+    }
+    if (rms2!=0){
+      rms1 = sqrt(rms1/rms2);
+    }else{
+      rms1 = 0;   
+    }
+
+    if (chid < nwire_u){
+      uplane_rms[chid] = rms1;
+    }else if (chid < nwire_u + nwire_v){
+      vplane_rms[chid - nwire_u] = rms1;
+    }else{
+      wplane_rms[chid - nwire_u - nwire_v] = rms1;
+    }
   }
  
   delete filter_u;

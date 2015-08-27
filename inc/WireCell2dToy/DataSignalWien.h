@@ -16,7 +16,9 @@ namespace WireCell2dToy {
     virtual int size() const;
     virtual int jump(int frame_number);
     //fixed it ...
-    
+    std::vector <float>& get_uplane_rms(){return uplane_rms;};
+    std::vector <float>& get_vplane_rms(){return vplane_rms;};
+    std::vector <float>& get_wplane_rms(){return wplane_rms;};
 
     void Save();
     
@@ -48,6 +50,10 @@ namespace WireCell2dToy {
     TH1 *hmr_v, *hpr_v;
     TH1 *hmr_w, *hpr_w;
     
+    std::vector<float> uplane_rms;
+    std::vector<float> vplane_rms;
+    std::vector<float> wplane_rms;
+
   };
 }
 
