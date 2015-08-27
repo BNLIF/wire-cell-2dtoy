@@ -304,11 +304,11 @@ int WireCell2dToy::DataSignalWienFDS::jump(int frame_number){
     }
 
     if (chid < nwire_u){
-      uplane_rms[chid] = rms1;
+      uplane_rms[chid] = rms1*scale;
     }else if (chid < nwire_u + nwire_v){
-      vplane_rms[chid - nwire_u] = rms1;
+      vplane_rms[chid - nwire_u] = rms1*scale;
     }else{
-      wplane_rms[chid - nwire_u - nwire_v] = rms1;
+      wplane_rms[chid - nwire_u - nwire_v] = rms1*scale;
     }
   }
  

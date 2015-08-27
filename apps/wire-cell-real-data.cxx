@@ -171,7 +171,7 @@ int main(int argc, char* argv[])
   					    threshold_vg, threshold_wg, 
   					    nwire_u, 
   					    nwire_v, nwire_w,
-					    &uplane_rms, &vplane_rms, &wplane_rms); 
+  					    &uplane_rms, &vplane_rms, &wplane_rms); 
     
   
   
