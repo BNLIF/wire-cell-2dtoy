@@ -90,7 +90,8 @@ WireCell2dToy::ToyMatrixMarkov::ToyMatrixMarkov(WireCell2dToy::ToyMatrix &toycur
 	 && (cur_chi2 > 5*(cur_dof+0.1) || ncount < 6000) 
 	 && (cur_chi2 > 4*(cur_dof+0.1) || ncount < 3000) 
 	 && (cur_chi2 > 3*(cur_dof+0.1) || ncount < 1500) 
-	 && (cur_chi2 > 2*(cur_dof+0.1) || ncount < 800) 
+	 && (cur_chi2 > 2*(cur_dof+0.1) || ncount < 800)
+	 && (cur_chi2 > 1*(cur_dof+0.1) || ncount < 10)
 	 ){
     if (ncount == 1 || (ncount % 1000 ==0&&ncount >0) )
       std::cout << "MCMC: " << ncount << " " << cur_chi2 << " " << cur_dof << std::endl;
@@ -185,6 +186,7 @@ WireCell2dToy::ToyMatrixMarkov::ToyMatrixMarkov(WireCell2dToy::ToyMatrix &toybef
 	 && (cur_chi2 > 4*(cur_dof+0.1) || ncount < 3000) 
 	 && (cur_chi2 > 3*(cur_dof+0.1) || ncount < 1500) 
 	 && (cur_chi2 > 2*(cur_dof+0.1) || ncount < 800) 
+	 && (cur_chi2 > 1*(cur_dof+0.1) || ncount < 10) 
 	 ){
     if (ncount == 1 || (ncount % 1000 ==0&&ncount >0) )
       std::cout << "MCMC: " << ncount << " " << cur_chi2 << " " << cur_dof << std::endl;
@@ -216,6 +218,7 @@ WireCell2dToy::ToyMatrixMarkov::ToyMatrixMarkov(WireCell2dToy::ToyMatrix *toymat
 	 && (cur_chi2 > 4*(cur_dof+0.1) || ncount < 3000) 
 	 && (cur_chi2 > 3*(cur_dof+0.1) || ncount < 1500) 
 	 && (cur_chi2 > 2*(cur_dof+0.1) || ncount < 800) 
+	 && (cur_chi2 > (cur_dof+0.1) || ncount < 10) 
 	 ){
     if (ncount == 1 || (ncount % 1000 ==0&&ncount >0) )
       std::cout << "MCMC: " << ncount << " " << cur_chi2 << " " << cur_dof << std::endl;

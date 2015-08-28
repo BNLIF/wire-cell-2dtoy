@@ -19,7 +19,7 @@ WireCell2dToy::ToyMatrixIterate::ToyMatrixIterate(WireCell2dToy::ToyMatrix &toym
   
   //estimated_loop = TMath::Factorial(toymatrix.Get_mcindex())/TMath::Factorial(toymatrix.Get_mcindex()-numz)/TMath::Factorial(numz)/25.;
   //std::cout << estimated_loop << std::endl;
-  estimated_loop = TMath::Factorial(toymatrix.Get_mcindex())/TMath::Factorial(toymatrix.Get_mcindex()-toymatrixkalman->Get_numz())/TMath::Factorial(toymatrixkalman->Get_numz())/25.;
+  estimated_loop = TMath::Binomial(toymatrix.Get_mcindex(),toymatrixkalman->Get_numz())/25.;//TMath::Factorial(toymatrix.Get_mcindex())/TMath::Factorial(toymatrix.Get_mcindex()-toymatrixkalman->Get_numz())/TMath::Factorial(toymatrixkalman->Get_numz())/25.;
   
   // if(toymatrixkalman->Get_numz()==toymatrix.Get_mcindex()){
   //   delete toymatrixkalman;
@@ -53,7 +53,7 @@ WireCell2dToy::ToyMatrixIterate::ToyMatrixIterate(WireCell2dToy::ToyMatrix &toym
   toymatrixkalman = new WireCell2dToy::ToyMatrixKalman(toymatrix,0);  
   // estimated_loop = TMath::Factorial(toymatrix.Get_mcindex())/TMath::Factorial(toymatrix.Get_mcindex()-numz)/TMath::Factorial(numz)/25.;
   // std::cout << estimated_loop << std::endl;
-  estimated_loop = TMath::Factorial(toymatrix.Get_mcindex())/TMath::Factorial(toymatrix.Get_mcindex()-toymatrixkalman->Get_numz())/TMath::Factorial(toymatrixkalman->Get_numz())/25.;
+  estimated_loop = TMath::Binomial(toymatrix.Get_mcindex(),toymatrixkalman->Get_numz())/25.;//TMath::Factorial(toymatrix.Get_mcindex())/TMath::Factorial(toymatrix.Get_mcindex()-toymatrixkalman->Get_numz())/TMath::Factorial(toymatrixkalman->Get_numz())/25.;
     
 
   std::cout << estimated_loop << " " << toymatrix.Get_mcindex() << " " << toymatrixkalman->Get_numz() << std::endl;
@@ -120,7 +120,7 @@ WireCell2dToy::ToyMatrixIterate::ToyMatrixIterate(WireCell2dToy::ToyMatrix &toyc
   //std::cout << "With Time: " << toymatrixkalman->Get_numz() << std::endl;
   
   
-  estimated_loop = TMath::Factorial(toycur.Get_mcindex()-no_need_remove.size())/TMath::Factorial(toycur.Get_mcindex()-no_need_remove.size()-toymatrixkalman->Get_numz())/TMath::Factorial(toymatrixkalman->Get_numz())/5;
+  estimated_loop = TMath::Binomial(toycur.Get_mcindex()-no_need_remove.size(),toymatrixkalman->Get_numz())/5.;//TMath::Factorial(toycur.Get_mcindex()-no_need_remove.size())/TMath::Factorial(toycur.Get_mcindex()-no_need_remove.size()-toymatrixkalman->Get_numz())/TMath::Factorial(toymatrixkalman->Get_numz())/5;
   std::cout << "With Cluster: " << estimated_loop << " " << toycur.Get_mcindex() << " " << no_need_remove.size() << " " << toymatrixkalman->Get_numz() <<std::endl;
 
   if (estimated_loop < 2e5 && toymatrixkalman->Get_numz()!=toycur.Get_mcindex()){
@@ -139,7 +139,7 @@ WireCell2dToy::ToyMatrixIterate::ToyMatrixIterate(WireCell2dToy::ToyMatrix &toyc
     
     
     toymatrixkalman = new WireCell2dToy::ToyMatrixKalman(already_removed, no_need_remove, toycur, 0,0);  
-    estimated_loop = TMath::Factorial(toycur.Get_mcindex())/TMath::Factorial(toycur.Get_mcindex()-toymatrixkalman->Get_numz())/TMath::Factorial(toymatrixkalman->Get_numz())/25.;
+    estimated_loop = TMath::Binomial(toycur.Get_mcindex(),toymatrixkalman->Get_numz())/25.;//TMath::Factorial(toycur.Get_mcindex())/TMath::Factorial(toycur.Get_mcindex()-toymatrixkalman->Get_numz())/TMath::Factorial(toymatrixkalman->Get_numz())/25.;
     std::cout << "Try again: " << estimated_loop << " " << toycur.Get_mcindex() << " " << toymatrixkalman->Get_numz() << std::endl;
     
     if (estimated_loop < 5e5 && toymatrixkalman->Get_numz()!=toycur.Get_mcindex()){
@@ -229,7 +229,7 @@ void WireCell2dToy::ToyMatrixIterate::UseTime(WireCell2dToy::ToyMatrix &toybefor
   //std::cout << "With Time: " << toymatrixkalman->Get_numz() << std::endl;
   
   
-  estimated_loop = TMath::Factorial(toycur.Get_mcindex()-no_need_remove.size())/TMath::Factorial(toycur.Get_mcindex()-no_need_remove.size()-toymatrixkalman->Get_numz())/TMath::Factorial(toymatrixkalman->Get_numz())/5;
+  estimated_loop = TMath::Binomial(toycur.Get_mcindex()-no_need_remove.size(),toymatrixkalman->Get_numz())/5.;//TMath::Factorial(toycur.Get_mcindex()-no_need_remove.size())/TMath::Factorial(toycur.Get_mcindex()-no_need_remove.size()-toymatrixkalman->Get_numz())/TMath::Factorial(toymatrixkalman->Get_numz())/5;
   std::cout << "With Time: " << estimated_loop << " " << toycur.Get_mcindex() << " " << no_need_remove.size() << " " << toymatrixkalman->Get_numz() <<std::endl;
   
   
