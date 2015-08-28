@@ -54,10 +54,23 @@ using namespace std;
 int main(int argc, char* argv[])
 {
   if (argc < 4) {
-    cerr << "usage: wire-cell-uboone /path/to/ChannelWireGeometry.txt /path/to/celltree.root eve_num" << endl;
+    cerr << "usage: wire-cell-uboone /path/to/ChannelWireGeometry.txt /path/to/celltree.root eve_num -t[0,1]" << endl;
     return 1;
   }
+
+  int two_plane = 0;
+
+  for(Int_t i = 1; i != argc; i++){
+     switch(argv[i][1]){
+     case 't':
+       two_plane = atoi(&argv[i][2]); 
+       break;
+     }
+  }
   
+  if (two_plane)
+    cout << "Enable Two Plane Reconstruction " << endl; 
+
   
   WireCellSst::GeomDataSource gds(argv[1]);
   std::vector<double> ex = gds.extent();
@@ -95,6 +108,16 @@ int main(int argc, char* argv[])
   
   TFile tfile(root_file,"read");
   TTree* sst = dynamic_cast<TTree*>(tfile.Get(tpath));
+
+  int run_no, subrun_no, event_no;
+  sst->SetBranchAddress("eventNo",&event_no);
+  sst->SetBranchAddress("runNo",&run_no);
+  sst->SetBranchAddress("subRunNo",&subrun_no);
+  sst->GetEntry(eve_num);
+
+  cout << run_no << " " << subrun_no << " " << eve_num << endl;
+
+
   WireCellSst::DatauBooNEFrameDataSource data_fds(*sst,gds,9592);
   data_fds.jump(eve_num);
   //data_fds.Save();
@@ -220,7 +243,8 @@ int main(int argc, char* argv[])
 
     
     toytiling[i] = new WireCell2dToy::ToyTiling(slice,gds,0.1,0.1,0.1,threshold_ug,threshold_vg, threshold_wg);
-    toytiling[i]->twoplane_tiling(gds,uplane_rms,vplane_rms,wplane_rms, uplane_map, vplane_map, wplane_map);
+    if (two_plane)
+      toytiling[i]->twoplane_tiling(gds,uplane_rms,vplane_rms,wplane_rms, uplane_map, vplane_map, wplane_map);
 
 
     GeomCellSelection allcell = toytiling[i]->get_allcell();
@@ -249,7 +273,7 @@ int main(int argc, char* argv[])
   }
   
 
-  // std::cout << "Starting MCMC" << std::endl;
+  std::cout << "Starting MCMC" << std::endl;
 
   // //without  time information
   // for (int i=start_num;i!=end_num+1;i++){
@@ -550,7 +574,12 @@ int main(int argc, char* argv[])
 
  
   
- 
+  TTree *Trun = new TTree("Trun","Trun");
+  Trun->SetDirectory(file);
+  Trun->Branch("eventNo",&event_no,"eventNo/I");
+  Trun->Branch("runNo",&run_no,"runNo/I");
+  Trun->Branch("subRunNo",&subrun_no,"runRunNo/I");
+  
 
 
   file->Write();
