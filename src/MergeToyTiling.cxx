@@ -355,7 +355,9 @@ WireCell2dToy::MergeToyTiling::MergeToyTiling(WireCell2dToy::ToyTiling& tiling, 
     current_ncell = cell_all.size();
     prev_ncell = -1;
     
-    while (cell_all.size() > 2 * wire_all.size() && cell_all.size() - wire_all.size() > 50){
+    while ((cell_all.size() > 2 * wire_all.size() && cell_all.size() - wire_all.size() > 50) || 
+	   (cell_all.size()>80 && cell_all.size() > 0.7 * wire_all.size()) ||
+	   (cell_all.size()>100)){
       dis += 6*units::mm;
       
       

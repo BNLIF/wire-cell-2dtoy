@@ -417,7 +417,7 @@ void WireCell2dToy::ToyTiling::twoplane_tiling(WireCell::GeomDataSource& gds, st
   GeomWireSelection nv_wires;
   GeomWireSelection nw_wires;
 
-  int cut_sigma = 3.2;
+  int cut_sigma = 4;
   
 
   
