@@ -220,7 +220,7 @@ int main(int argc, char* argv[])
 
     
     toytiling[i] = new WireCell2dToy::ToyTiling(slice,gds,0.1,0.1,0.1,threshold_ug,threshold_vg, threshold_wg);
-    //toytiling[i]->twoplane_tiling(gds,uplane_rms,vplane_rms,wplane_rms, uplane_map, vplane_map, wplane_map);
+    toytiling[i]->twoplane_tiling(gds,uplane_rms,vplane_rms,wplane_rms, uplane_map, vplane_map, wplane_map);
 
 
     GeomCellSelection allcell = toytiling[i]->get_allcell();
