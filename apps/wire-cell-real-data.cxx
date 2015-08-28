@@ -102,7 +102,8 @@ int main(int argc, char* argv[])
     return 1;
   }
   
-  float unit_dis = 1.01483;  // 58KV @ 226.5 V/cm
+  //  float unit_dis = 1.01483;  // 58KV @ 226.5 V/cm
+  float unit_dis = 1.14753;  // 58KV @ 226.5 V/cm
 
   int max_events = 100;
   int eve_num  = atoi(argv[3]);
@@ -118,34 +119,42 @@ int main(int argc, char* argv[])
   sst->GetEntry(eve_num);
 
   cout << "Run No: " << run_no << " " << subrun_no << " " << eve_num << endl;
-
-
+  
   WireCellSst::DatauBooNEFrameDataSource data_fds(*sst,gds,9592);
-  data_fds.jump(eve_num);
-  if (save_file == 1)
-    data_fds.Save();
+  if (save_file != 2){
+    data_fds.jump(eve_num);
+    if (save_file == 1)
+      data_fds.Save();
+  }else{
+    
+  }
 
   WireMap& uplane_map = data_fds.get_u_map();
   WireMap& vplane_map = data_fds.get_v_map();
   WireMap& wplane_map = data_fds.get_w_map();
 
   // std::cout << uplane_map.size() << " " << vplane_map.size() << " " << wplane_map.size() << std::endl;
-  
-
   int recon_threshold = 2000;
   
-
   cout << "Deconvolution with Gaussian filter" << endl;
   WireCell2dToy::DataSignalGausFDS gaus_fds(data_fds,gds,9592/4,max_events,1.834,1.555+1.834,-0.5); // gaussian smearing for charge estimation
-  gaus_fds.jump(eve_num);
-  if (save_file == 1)
-    gaus_fds.Save();
+  if (save_file != 2){
+    gaus_fds.jump(eve_num);
+    if (save_file == 1)
+      gaus_fds.Save();
+  }else{
+  
+  }
 
   cout << "Deconvolution with Wiener filter" << endl; 
   WireCell2dToy::DataSignalWienFDS wien_fds(data_fds,gds,9592/4,max_events,1.834,1.555+1.834,-0.5); // weiner smearing for hit identification
-  wien_fds.jump(eve_num);
-  if (save_file == 1)
-    wien_fds.Save();
+  if (save_file !=2 ){
+    wien_fds.jump(eve_num);
+    if (save_file == 1)
+      wien_fds.Save();
+  }else{
+    
+  }
 
   std::vector<float>& uplane_rms = wien_fds.get_uplane_rms();
   std::vector<float>& vplane_rms = wien_fds.get_vplane_rms();
@@ -421,7 +430,7 @@ int main(int argc, char* argv[])
   cout << "Summary: " << ncount << " " << ncount_mcell << " " << ncount_mcell_cluster << endl;
   
 
-  TFile *file = new TFile(Form("shower3D_data_%d.root",eve_num),"RECREATE");
+  TFile *file = new TFile(Form("%d_%d_%d.root",run_no,subrun_no,eve_num),"RECREATE");
   TTree *t_rec = new TTree("T_rec","T_rec");
   TTree *t_rec_charge = new TTree("T_rec_charge","T_rec_charge");
   // TTree *t_rec_charge_blob = new TTree("T_rec_charge_blob","T_rec_charge_blob");
