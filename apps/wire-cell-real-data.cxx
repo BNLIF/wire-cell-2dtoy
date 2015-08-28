@@ -54,23 +54,25 @@ using namespace std;
 int main(int argc, char* argv[])
 {
   if (argc < 4) {
-    cerr << "usage: wire-cell-uboone /path/to/ChannelWireGeometry.txt /path/to/celltree.root eve_num -t[0,1]" << endl;
+    cerr << "usage: wire-cell-uboone /path/to/ChannelWireGeometry.txt /path/to/celltree.root eve_num -t[0,1] -s[0,1,2]" << endl;
     return 1;
   }
 
   int two_plane = 0;
-
+  int save_file = 0;
   for(Int_t i = 1; i != argc; i++){
      switch(argv[i][1]){
      case 't':
        two_plane = atoi(&argv[i][2]); 
+       break;
+     case 's':
+       save_file = atoi(&argv[i][2]); 
        break;
      }
   }
   
   if (two_plane)
     cout << "Enable Two Plane Reconstruction " << endl; 
-
   
   WireCellSst::GeomDataSource gds(argv[1]);
   std::vector<double> ex = gds.extent();
@@ -115,12 +117,13 @@ int main(int argc, char* argv[])
   sst->SetBranchAddress("subRunNo",&subrun_no);
   sst->GetEntry(eve_num);
 
-  cout << run_no << " " << subrun_no << " " << eve_num << endl;
+  cout << "Run No: " << run_no << " " << subrun_no << " " << eve_num << endl;
 
 
   WireCellSst::DatauBooNEFrameDataSource data_fds(*sst,gds,9592);
   data_fds.jump(eve_num);
-  //data_fds.Save();
+  if (save_file == 1)
+    data_fds.Save();
 
   WireMap& uplane_map = data_fds.get_u_map();
   WireMap& vplane_map = data_fds.get_v_map();
@@ -135,12 +138,14 @@ int main(int argc, char* argv[])
   cout << "Deconvolution with Gaussian filter" << endl;
   WireCell2dToy::DataSignalGausFDS gaus_fds(data_fds,gds,9592/4,max_events,1.834,1.555+1.834,-0.5); // gaussian smearing for charge estimation
   gaus_fds.jump(eve_num);
-  // //gaus_fds.Save();
+  if (save_file == 1)
+    gaus_fds.Save();
 
   cout << "Deconvolution with Wiener filter" << endl; 
   WireCell2dToy::DataSignalWienFDS wien_fds(data_fds,gds,9592/4,max_events,1.834,1.555+1.834,-0.5); // weiner smearing for hit identification
   wien_fds.jump(eve_num);
-  //wien_fds.Save();
+  if (save_file == 1)
+    wien_fds.Save();
 
   std::vector<float>& uplane_rms = wien_fds.get_uplane_rms();
   std::vector<float>& vplane_rms = wien_fds.get_vplane_rms();
