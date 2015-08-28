@@ -584,7 +584,7 @@ int main(int argc, char* argv[])
   Trun->Branch("eventNo",&event_no,"eventNo/I");
   Trun->Branch("runNo",&run_no,"runNo/I");
   Trun->Branch("subRunNo",&subrun_no,"runRunNo/I");
-  
+  Trun->Fill();
 
 
   file->Write();
