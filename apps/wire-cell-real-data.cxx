@@ -99,9 +99,9 @@ int main(int argc, char* argv[])
   data_fds.jump(eve_num);
   //data_fds.Save();
 
-  // WireMap& uplane_map = data_fds.get_u_map();
-  // WireMap& vplane_map = data_fds.get_v_map();
-  // WireMap& wplane_map = data_fds.get_w_map();
+  WireMap& uplane_map = data_fds.get_u_map();
+  WireMap& vplane_map = data_fds.get_v_map();
+  WireMap& wplane_map = data_fds.get_w_map();
 
   // std::cout << uplane_map.size() << " " << vplane_map.size() << " " << wplane_map.size() << std::endl;
   
@@ -126,19 +126,27 @@ int main(int argc, char* argv[])
   // hack for now ...  remove the very busy wires ... 
   for (int i=0;i!=uplane_rms.size();i++){
     //cout << "U " << i << " " << uplane_rms.at(i) << endl;
-    if (uplane_rms.at(i) > 1500) uplane_rms.at(i) *=2;
+    if (uplane_rms.at(i) > 1500) {
+      uplane_rms.at(i) *=2;
+      uplane_map.erase(i);
+    }
   }
   for (int i=0;i!=vplane_rms.size();i++){
     //cout << "V " << i << " " << vplane_rms.at(i) << endl;
     if (vplane_rms.at(i) > 2000 && vplane_rms.at(i)<3000){
       vplane_rms.at(i) *=2;
+      vplane_map.erase(i);
     }else if (vplane_rms.at(i)>=3000){
       vplane_rms.at(i) *=10;
+      vplane_map.erase(i);
     }
   }
   for (int i=0;i!=wplane_rms.size();i++){
     //cout << "W " << i << " " << wplane_rms.at(i) << endl;
-    if (wplane_rms.at(i) > 1000) wplane_rms.at(i) *=2;
+    if (wplane_rms.at(i) > 1000) {
+      wplane_rms.at(i) *=2;
+      wplane_map.erase(i);
+    }
   }
   
 
@@ -212,7 +220,7 @@ int main(int argc, char* argv[])
 
     
     toytiling[i] = new WireCell2dToy::ToyTiling(slice,gds,0.1,0.1,0.1,threshold_ug,threshold_vg, threshold_wg);
-    toytiling[i]->twoplane_tiling(gds,uplane_rms,vplane_rms,wplane_rms);
+    toytiling[i]->twoplane_tiling(gds,uplane_rms,vplane_rms,wplane_rms, uplane_map, vplane_map, wplane_map);
 
 
     GeomCellSelection allcell = toytiling[i]->get_allcell();

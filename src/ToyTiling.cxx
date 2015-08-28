@@ -409,7 +409,7 @@ WireCell2dToy::ToyTiling::ToyTiling(const WireCell::Slice& slice,WireCell::GeomD
 }
 
 
-void WireCell2dToy::ToyTiling::twoplane_tiling(WireCell::GeomDataSource& gds, std::vector<float>& uplane_rms, std::vector<float>& vplane_rms, std::vector<float>& wplane_rms){
+void WireCell2dToy::ToyTiling::twoplane_tiling(WireCell::GeomDataSource& gds, std::vector<float>& uplane_rms, std::vector<float>& vplane_rms, std::vector<float>& wplane_rms, WireCell::WireMap& uplane_map, WireCell::WireMap& vplane_map, WireCell::WireMap& wplane_map){
   float tolerance = 0.1 * units::mm;
   int ncell = 10000;
   
@@ -491,7 +491,8 @@ void WireCell2dToy::ToyTiling::twoplane_tiling(WireCell::GeomDataSource& gds, st
 	for (int a1 = 0;a1!=5;a1++){
 	  const GeomWire *n_wire = gds.closest(puv[a1],kYwire);
 	  auto it1 = find(nw_wires.begin(),nw_wires.end(),n_wire);
-	  if (it1 == nw_wires.end()){
+	  auto it2 = wplane_map.find(n_wire->index());
+	  if (it1 == nw_wires.end() && it2 == wplane_map.end()){
 
 	    
 	    nw_wires.push_back(n_wire);
@@ -665,7 +666,8 @@ void WireCell2dToy::ToyTiling::twoplane_tiling(WireCell::GeomDataSource& gds, st
   	for (int a1 = 0;a1!=5;a1++){
   	  const GeomWire *n_wire = gds.closest(puw[a1],kVwire);
   	  auto it1 = find(nv_wires.begin(),nv_wires.end(),n_wire);
-  	  if (it1 == nv_wires.end()){
+	  auto it2 = vplane_map.find(n_wire->index());
+  	  if (it1 == nv_wires.end() && it2 == vplane_map.end()){
   	    nv_wires.push_back(n_wire);
   	    dis_v[0] = gds.wire_dist(*n_wire) - v_pitch/2.;
   	    dis_v[1] = dis_v[0] + v_pitch;
@@ -826,7 +828,8 @@ void WireCell2dToy::ToyTiling::twoplane_tiling(WireCell::GeomDataSource& gds, st
   	for (int a1 = 0;a1!=5;a1++){
   	  const GeomWire *n_wire = gds.closest(pwv[a1],kUwire);
   	  auto it1 = find(nu_wires.begin(),nu_wires.end(),n_wire);
-  	  if (it1 == nu_wires.end()){
+	  auto it2 = uplane_map.find(n_wire->index());
+  	  if (it1 == nu_wires.end() && it2 == uplane_map.end()){
   	    nu_wires.push_back(n_wire);
   	    dis_u[0] = gds.wire_dist(*n_wire) - u_pitch/2.;
   	    dis_u[1] = dis_u[0] + u_pitch;

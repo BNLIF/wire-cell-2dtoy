@@ -20,7 +20,7 @@ namespace WireCell2dToy {
       // ToyTiling(const WireCell::Slice& slice, WireCell::GeomDataSource& gds);
       ToyTiling(const WireCell::Slice& slice, WireCell::GeomDataSource& gds, float rel_u = 0.05, float rel_v=0.05, float rel_w=0.05, float noise_u=14000*0.05, float noise_v=14000*0.03, float noise_w=14000*0.02);
       
-      void twoplane_tiling(WireCell::GeomDataSource& gds, std::vector<float>& uplane_rms, std::vector<float>& vplane_rms, std::vector<float>& wplane_rms);
+      void twoplane_tiling(WireCell::GeomDataSource& gds, std::vector<float>& uplane_rms, std::vector<float>& vplane_rms, std::vector<float>& wplane_rms, WireCell::WireMap& uplane_map, WireCell::WireMap& vplane_map, WireCell::WireMap& wplane_map);
       
 
       virtual ~ToyTiling();
