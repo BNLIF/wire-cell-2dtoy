@@ -30,13 +30,13 @@ namespace WireCell2dToy {
     
     int nwire_u, nwire_v, nwire_w;
 
-    TH1F **hu;
-    TH1F **hv;
-    TH1F **hw;
+    /* TH1F **hu; */
+    /* TH1F **hv; */
+    /* TH1F **hw; */
 
-    /* TH1F *hu; */
-    /* TH1F *hv; */
-    /* TH1F *hw; */
+    TH1F *hu;
+    TH1F *hv;
+    TH1F *hw;
 
     TH1F *hfilter_time_gaus;
     TH1 *hfilter_gaus;
