@@ -137,7 +137,8 @@ int main(int argc, char* argv[])
   int recon_threshold = 2000;
   
   cout << "Deconvolution with Gaussian filter" << endl;
-  WireCell2dToy::DataSignalGausFDS gaus_fds(data_fds,gds,9592/4,max_events,1.834-3.25,1.834-3.25+1.555-0.75,-0.5); // gaussian smearing for charge estimation
+  //WireCell2dToy::DataSignalGausFDS gaus_fds(data_fds,gds,9592/4,max_events,1.834-1.75,1.834-2.25+1.555-0.75,-0.5); // gaussian smearing for charge estimation
+  WireCell2dToy::DataSignalGausFDS gaus_fds(data_fds,gds,9592/4,max_events,-(1.834-1.647)+0.3,-(1.834+1.555-1.539-1.647)+0.7,-0.5); // gaussian smearing for charge estimation
   if (save_file != 2){
     gaus_fds.jump(eve_num);
     if (save_file == 1)
@@ -147,7 +148,8 @@ int main(int argc, char* argv[])
   }
 
   cout << "Deconvolution with Wiener filter" << endl; 
-  WireCell2dToy::DataSignalWienFDS wien_fds(data_fds,gds,9592/4,max_events,1.834-3.25,1.834-3.25+1.555-0.75,-0.5); // weiner smearing for hit identification
+  //WireCell2dToy::DataSignalWienFDS wien_fds(data_fds,gds,9592/4,max_events,1.834-1.75,1.834-2.25+1.555-0.75,-0.5); // weiner smearing for hit identification
+  WireCell2dToy::DataSignalWienFDS wien_fds(data_fds,gds,9592/4,max_events,-(1.834-1.647)+0.3,-(1.834+1.555-1.539-1.647)+0.7,-0.5); // weiner smearing for hit identification
   if (save_file !=2 ){
     wien_fds.jump(eve_num);
     if (save_file == 1)
@@ -256,7 +258,8 @@ int main(int argc, char* argv[])
     WireCell::Slice slice = sds.get();
 
     
-    toytiling[i] = new WireCell2dToy::ToyTiling(slice,gds,0.1,0.1,0.1,threshold_ug,threshold_vg, threshold_wg,&uplane_rms, &vplane_rms, &wplane_rms);
+    toytiling[i] = new WireCell2dToy::ToyTiling(slice,gds,0.15,0.2,0.1,threshold_ug,threshold_vg, threshold_wg,&uplane_rms, &vplane_rms, &wplane_rms);
+
     if (two_plane)
       toytiling[i]->twoplane_tiling(gds,uplane_rms,vplane_rms,wplane_rms, uplane_map, vplane_map, wplane_map);
 

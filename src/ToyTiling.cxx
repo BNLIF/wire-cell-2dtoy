@@ -419,6 +419,14 @@ WireCell2dToy::ToyTiling::ToyTiling(const WireCell::Slice& slice,WireCell::GeomD
   // std::cout << sum << std::endl;
   //std::cout << wire_u.size() << " " << wire_v.size() << " " << wire_w.size() << std::endl;
   
+  //print the first cell and its wire
+  // if (cell_all.size() > 0){
+  //   GeomWireSelection qwires = cellmap[cell_all.at(0)];
+  //   std::cout << qwires.at(0)->index() << " " << qwires.at(0)->plane() << " " 
+  // 	      << qwires.at(1)->index() << " " << qwires.at(1)->plane() << " " 
+  // 	      << qwires.at(2)->index() << " " << qwires.at(2)->plane() << " "  << std::endl;
+  // }
+
 }
 
 
@@ -426,11 +434,23 @@ void WireCell2dToy::ToyTiling::twoplane_tiling(WireCell::GeomDataSource& gds, st
   float tolerance = 0.1 * units::mm;
   int ncell = 10000;
   
+
+
   GeomWireSelection nu_wires;
   GeomWireSelection nv_wires;
   GeomWireSelection nw_wires;
-
   int cut_sigma = 4;
+
+  GeomWireSelection threeplane_wires;
+  for (int i=0;i!=cell_all.size();i++){
+    for (int j=0;j!=cellmap[cell_all.at(i)].size();j++){
+      const GeomWire *wire = cellmap[cell_all.at(i)].at(j);
+      auto it = find(threeplane_wires.begin(),threeplane_wires.end(),wire);
+      if (it == threeplane_wires.end()){
+	threeplane_wires.push_back(wire);
+      }
+    }
+  }
   
 
   
@@ -468,6 +488,8 @@ void WireCell2dToy::ToyTiling::twoplane_tiling(WireCell::GeomDataSource& gds, st
     dis_u[1] = dis_u[0] + u_pitch;
     dis_u[2] = udis.at(i);
 
+    auto qt1 = find(threeplane_wires.begin(),threeplane_wires.end(),wire1);
+
     for (int j=0;j!=wire_v.size();j++){
       const GeomWire *wire2 = wire_v.at(j);
       int channel2 = wire2->index();
@@ -475,6 +497,8 @@ void WireCell2dToy::ToyTiling::twoplane_tiling(WireCell::GeomDataSource& gds, st
       dis_v[0] = vdis.at(j) - v_pitch/2.;
       dis_v[1] = dis_v[0] + v_pitch;
       dis_v[2] = vdis.at(j);
+
+      auto qt2 = find(threeplane_wires.begin(),threeplane_wires.end(),wire2);
 
       //std::cout << i << " " << j << std::endl;
 
@@ -493,6 +517,8 @@ void WireCell2dToy::ToyTiling::twoplane_tiling(WireCell::GeomDataSource& gds, st
       //      std::cout << i << " " << j << " " << flag << std::endl;
 
       if (flag == 1){
+	if (qt1!=threeplane_wires.end() && qt2!=threeplane_wires.end()) continue;
+
 	// start to fill in
 	std::vector<Vector> puv(5);
 	if(!gds.crossing_point(dis_u[2],dis_v[2],kUwire,kVwire, puv[4])) continue;
@@ -646,6 +672,8 @@ void WireCell2dToy::ToyTiling::twoplane_tiling(WireCell::GeomDataSource& gds, st
     dis_u[1] = dis_u[0] + u_pitch;
     dis_u[2] = udis.at(i);
 
+    auto qt1 = find(threeplane_wires.begin(),threeplane_wires.end(),wire1);
+
     for (int j=0;j!=wire_w.size();j++){
       const GeomWire *wire2 = wire_w.at(j);
       int channel2 = wire2->index();
@@ -653,6 +681,8 @@ void WireCell2dToy::ToyTiling::twoplane_tiling(WireCell::GeomDataSource& gds, st
       dis_w[0] = wdis.at(j) - w_pitch/2.;
       dis_w[1] = dis_w[0] + w_pitch;
       dis_w[2] = wdis.at(j);
+
+      auto qt2 = find(threeplane_wires.begin(),threeplane_wires.end(),wire2);
 
       int flag = 1;
       //check all the cells if contain both wires, go on
@@ -668,6 +698,9 @@ void WireCell2dToy::ToyTiling::twoplane_tiling(WireCell::GeomDataSource& gds, st
       
       
       if (flag == 1){
+	if (qt1!=threeplane_wires.end() && qt2!=threeplane_wires.end()) continue;
+
+
   	// start to fill in
   	std::vector<Vector> puw(5);
   	if(!gds.crossing_point(dis_u[2],dis_w[2],kUwire,kYwire, puw[4])) continue;
@@ -808,6 +841,8 @@ void WireCell2dToy::ToyTiling::twoplane_tiling(WireCell::GeomDataSource& gds, st
     dis_w[1] = dis_w[0] + w_pitch;
     dis_w[2] = wdis.at(i);
 
+    auto qt1 = find(threeplane_wires.begin(),threeplane_wires.end(),wire1);
+
     for (int j=0;j!=wire_v.size();j++){
       const GeomWire *wire2 = wire_v.at(j);
       int channel2 = wire2->index();
@@ -815,6 +850,8 @@ void WireCell2dToy::ToyTiling::twoplane_tiling(WireCell::GeomDataSource& gds, st
       dis_v[0] = vdis.at(j) - v_pitch/2.;
       dis_v[1] = dis_v[0] + v_pitch;
       dis_v[2] = vdis.at(j);
+
+      auto qt2 = find(threeplane_wires.begin(),threeplane_wires.end(),wire2);
 
       int flag = 1;
       //check all the cells if contain both wires, go on
@@ -830,6 +867,9 @@ void WireCell2dToy::ToyTiling::twoplane_tiling(WireCell::GeomDataSource& gds, st
       
 
       if (flag == 1){
+	if (qt1!=threeplane_wires.end() && qt2!=threeplane_wires.end()) continue;
+
+
   	// start to fill in
   	std::vector<Vector> pwv(5);
   	if(!gds.crossing_point(dis_w[2],dis_v[2],kYwire,kVwire, pwv[4])) continue;
