@@ -15,13 +15,16 @@ namespace WireCell2dToy {
     class ToyTiling : public WireCell::TilingBase { 
     public:
       ToyTiling();
-	// fixme: tiling should not know about slices data.
+      // fixme: tiling should not know about slices data.
       
       // ToyTiling(const WireCell::Slice& slice, WireCell::GeomDataSource& gds);
       ToyTiling(const WireCell::Slice& slice, WireCell::GeomDataSource& gds, float rel_u = 0.05, float rel_v=0.05, float rel_w=0.05, float noise_u=14000*0.05, float noise_v=14000*0.03, float noise_w=14000*0.02, std::vector<float>* uplane_rms = 0, std::vector<float>* vplane_rms = 0, std::vector<float>* wplane_rms = 0);
       
       void twoplane_tiling(WireCell::GeomDataSource& gds, std::vector<float>& uplane_rms, std::vector<float>& vplane_rms, std::vector<float>& wplane_rms, WireCell::WireMap& uplane_map, WireCell::WireMap& vplane_map, WireCell::WireMap& wplane_map);
       
+      void AddCell(WireCell::GeomDataSource& gds, WireCell::GeomCell *cell, int u_index, int v_index, int w_index, 
+		   float u_charge, float v_charge, float w_charge,
+		   float u_charge_err, float v_charge_err, float w_charge_err);
 
       virtual ~ToyTiling();
       

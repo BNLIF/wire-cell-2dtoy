@@ -33,22 +33,50 @@ int main(int argc, char* argv[])
     return 1;
   }
    
-  TString filename = argv[1];
-  int ncluster = atoi(argv[2]);
+   WireCellSst::GeomDataSource gds(argv[1]);
+  std::vector<double> ex = gds.extent();
+  cerr << "Extent: "
+       << " x:" << ex[0]/units::mm << " mm"
+       << " y:" << ex[1]/units::m << " m"
+       << " z:" << ex[2]/units::m << " m"
+       << endl;
+  cout << "Pitch: " << gds.pitch(WirePlaneType_t(0)) 
+       << " " << gds.pitch(WirePlaneType_t(1)) 
+       << " " << gds.pitch(WirePlaneType_t(2))
+       << endl;
+  cout << "Angle: " << gds.angle(WirePlaneType_t(0)) 
+       << " " << gds.angle(WirePlaneType_t(1)) 
+       << " " << gds.angle(WirePlaneType_t(2))
+       << endl;
+
+  
+  TString filename = argv[2];
+  int ncluster = atoi(argv[3]);
 
 
   TFile *file = new TFile(filename);
   TTree *T = (TTree*)file->Get("T");
   TTree *TC = (TTree*)file->Get("TC");
+  TTree *Trun = (TTree*)file->Get("Trun");
   
-  //cout << T->GetEntries() << " " << TC->GetEntries() << endl;
+  float unit_dis;
+  int nrebin;
+  int total_time_bin;
+  Trun->SetBranchAddress("nrebin",&nrebin);
+  Trun->SetBranchAddress("unit_dis",&unit_dis);
+  Trun->SetBranchAddress("total_time_bin",&total_time_bin);
+  Trun->GetEntry(0);
   
-  WireCell2dToy::ToyTiling **toytiling = new WireCell2dToy::ToyTiling*[2400];
+  //cout << nrebin << " " << unit_dis << " " << total_time_bin << endl;
+  const int ntime = total_time_bin/nrebin;
+  WireCell2dToy::ToyTiling **toytiling = new WireCell2dToy::ToyTiling*[ntime];
+  for (int i=0;i!=ntime;i++){
+    toytiling[i] = new WireCell2dToy::ToyTiling();
+  }
   int time_slice;
-  WireCell2dToy::ToyTiling* tt = 0;
-  
-  T->SetBranchAddress("time_slice",&time_slice);
-  T->SetBranchAddress("toytiling",&tt);
+  // WireCell2dToy::ToyTiling* tt = 0;
+  // T->SetBranchAddress("time_slice",&time_slice);
+  // T->SetBranchAddress("toytiling",&tt);
 
   
 
@@ -79,6 +107,24 @@ int main(int argc, char* argv[])
   TC->SetBranchAddress("mcell_id",&mcell_id);
   TC->SetBranchAddress("cell",&cell);
   
+  int u_index, v_index, w_index;
+  double u_charge, v_charge, w_charge;
+  double u_charge_err, v_charge_err, w_charge_err;
+
+  TC->SetBranchAddress("u_index",&u_index);
+  TC->SetBranchAddress("v_index",&v_index);
+  TC->SetBranchAddress("w_index",&w_index);
+  TC->SetBranchAddress("u_charge",&u_charge);
+  TC->SetBranchAddress("v_charge",&v_charge);
+  TC->SetBranchAddress("w_charge",&w_charge);
+  TC->SetBranchAddress("u_charge_err",&u_charge_err);
+  TC->SetBranchAddress("v_charge_err",&v_charge_err);
+  TC->SetBranchAddress("w_charge_err",&w_charge_err);
+
+
+  
+
+  
   int prev_mcell_id = -1;
   MergeSpaceCellSelection mcells; // save all the cells
   
@@ -105,8 +151,10 @@ int main(int argc, char* argv[])
       //cout << x << " " << y << " " << z << " " << charge << endl;
       
       GeomCell *cell1 = new GeomCell(cell);
+      toytiling[time_slice]->AddCell(gds,cell1,u_index,v_index,w_index,u_charge,v_charge,w_charge,u_charge_err,v_charge_err,w_charge_err);
+      
 
-      SpaceCell *space_cell = new SpaceCell(cluster_num,*cell1,x*units::cm,charge,0.32*units::cm);
+      SpaceCell *space_cell = new SpaceCell(cluster_num,*cell1,x*units::cm,charge,unit_dis/10.*nrebin/2.*units::cm);
       mcell->AddSpaceCell(space_cell);
       cells.push_back(space_cell);
       
@@ -117,6 +165,13 @@ int main(int argc, char* argv[])
   }
   mcells.push_back(mcell);
   
+
+  // for (int i=0;i!=ntime;i++){
+  //   GeomCellSelection allcell = toytiling[i]->get_allcell();
+  //   GeomWireSelection allwire = toytiling[i]->get_allwire();
+  //   cout << "Single Cell: " << i << " "  << allcell.size() << " " << allwire.size() << endl;
+  // }
+
 
   //cout << mcells.size() << endl;
 

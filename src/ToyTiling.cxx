@@ -9,6 +9,78 @@ WireCell2dToy::ToyTiling::ToyTiling()
 {
 }
 
+void WireCell2dToy::ToyTiling::AddCell(WireCell::GeomDataSource& gds, GeomCell *cell, int u_index, int v_index, int w_index, 
+				       float u_charge, float v_charge, float w_charge,
+				       float u_charge_err, float v_charge_err, float w_charge_err){
+  
+  cell_all.push_back(cell);
+  const GeomWire *uwire = gds.by_planeindex(WirePlaneType_t(0),u_index); 
+  const GeomWire *vwire = gds.by_planeindex(WirePlaneType_t(1),v_index); 
+  const GeomWire *wwire = gds.by_planeindex(WirePlaneType_t(2),w_index); 
+  
+  auto it1 = find(wire_all.begin(),wire_all.end(),uwire);
+  if (it1 == wire_all.end()){
+    wire_all.push_back(uwire);
+    wire_u.push_back(uwire);
+    wirechargemap[uwire] = u_charge;
+    wirecharge_errmap[uwire] = u_charge_err;
+  }
+  auto it2 = find(wire_all.begin(),wire_all.end(),vwire);
+  if (it2 == wire_all.end()){
+    wire_all.push_back(vwire);
+    wire_v.push_back(vwire);
+    wirechargemap[vwire] = v_charge;
+    wirecharge_errmap[vwire] = v_charge_err;
+  }
+  auto it3 = find(wire_all.begin(),wire_all.end(),wwire);
+  if (it3 == wire_all.end()){
+    wire_all.push_back(wwire);
+    wire_w.push_back(wwire);
+    wirechargemap[wwire] = w_charge;
+    wirecharge_errmap[wwire] = w_charge_err;
+  }
+
+  GeomWireSelection wires;
+  wires.push_back(uwire);
+  wires.push_back(vwire);
+  wires.push_back(wwire);
+  cellmap[cell] = wires;
+      
+  if (wiremap.find(uwire) == wiremap.end()){
+    //not found
+    GeomCellSelection cellsel;
+    cellsel.push_back(cell);
+    wiremap[uwire]=cellsel;
+  }else{
+    //found
+    wiremap[uwire].push_back(cell);
+  }
+
+
+  if (wiremap.find(vwire) == wiremap.end()){
+    //not found
+    GeomCellSelection cellsel;
+    cellsel.push_back(cell);
+    wiremap[vwire]=cellsel;
+  }else{
+    //found
+    wiremap[vwire].push_back(cell);
+  }
+  
+  if (wiremap.find(wwire) == wiremap.end()){
+    //not found
+    GeomCellSelection cellsel;
+    cellsel.push_back(cell);
+    wiremap[wwire]=cellsel;
+  }else{
+    //found
+    wiremap[wwire].push_back(cell);
+  }
+  
+
+}
+
+
 
 WireCell2dToy::ToyTiling::ToyTiling(const WireCell::Slice& slice,WireCell::GeomDataSource& gds, float rel_u , float rel_v, float rel_w, float noise_u, float noise_v, float noise_w, std::vector<float>* uplane_rms, std::vector<float>* vplane_rms, std::vector<float>* wplane_rms){
   WireCell::Channel::Group group = slice.group();

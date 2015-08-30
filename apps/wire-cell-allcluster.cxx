@@ -32,27 +32,57 @@ int main(int argc, char* argv[])
     return 1;
   }
    
-  TString filename = argv[1];
+     WireCellSst::GeomDataSource gds(argv[1]);
+  std::vector<double> ex = gds.extent();
+  cerr << "Extent: "
+       << " x:" << ex[0]/units::mm << " mm"
+       << " y:" << ex[1]/units::m << " m"
+       << " z:" << ex[2]/units::m << " m"
+       << endl;
+  cout << "Pitch: " << gds.pitch(WirePlaneType_t(0)) 
+       << " " << gds.pitch(WirePlaneType_t(1)) 
+       << " " << gds.pitch(WirePlaneType_t(2))
+       << endl;
+  cout << "Angle: " << gds.angle(WirePlaneType_t(0)) 
+       << " " << gds.angle(WirePlaneType_t(1)) 
+       << " " << gds.angle(WirePlaneType_t(2))
+       << endl;
+
+  TString filename = argv[2];
   
 
   TFile *file = new TFile(filename);
   TTree *T = (TTree*)file->Get("T");
   TTree *TC = (TTree*)file->Get("TC");
+  TTree *Trun = (TTree*)file->Get("Trun");
   
+  float unit_dis;
+  int nrebin;
+  int total_time_bin;
+  Trun->SetBranchAddress("nrebin",&nrebin);
+  Trun->SetBranchAddress("unit_dis",&unit_dis);
+  Trun->SetBranchAddress("total_time_bin",&total_time_bin);
+  Trun->GetEntry(0);
+
+
+
   //cout << T->GetEntries() << " " << TC->GetEntries() << endl;
-  
-  WireCell2dToy::ToyTiling **toytiling = new WireCell2dToy::ToyTiling*[2400];
+  const int ntime = total_time_bin/nrebin;
+  WireCell2dToy::ToyTiling **toytiling = new WireCell2dToy::ToyTiling*[ntime];
+  for (int i=0;i!=ntime;i++){
+    toytiling[i] = new WireCell2dToy::ToyTiling();
+  }
   int time_slice;
-  WireCell2dToy::ToyTiling* tt = 0;
+  //  WireCell2dToy::ToyTiling* tt = 0;
   
-  T->SetBranchAddress("time_slice",&time_slice);
-  T->SetBranchAddress("toytiling",&tt);
+  // T->SetBranchAddress("time_slice",&time_slice);
+  // T->SetBranchAddress("toytiling",&tt);
 
   //T->GetEntry(855);
   // cout << tt->get_allwire().size() << " " << tt->get_allcell().size() << endl;
 
   const GeomCell *cell = 0;//tt->get_allcell().at(5);
-  const GeomWire *wire = 0;//tt->get_allwire().at(3);
+  //const GeomWire *wire = 0;//tt->get_allwire().at(3);
   //cout << cell->cross_section() << " " << cell->center().y << endl;
 
   // GeomCellMap cellmap = tt->cmap();
@@ -75,6 +105,22 @@ int main(int argc, char* argv[])
   TC->SetBranchAddress("mcell_id",&mcell_id);
   TC->SetBranchAddress("cell",&cell);
   
+  int u_index, v_index, w_index;
+  double u_charge, v_charge, w_charge;
+  double u_charge_err, v_charge_err, w_charge_err;
+
+  TC->SetBranchAddress("u_index",&u_index);
+  TC->SetBranchAddress("v_index",&v_index);
+  TC->SetBranchAddress("w_index",&w_index);
+  TC->SetBranchAddress("u_charge",&u_charge);
+  TC->SetBranchAddress("v_charge",&v_charge);
+  TC->SetBranchAddress("w_charge",&w_charge);
+  TC->SetBranchAddress("u_charge_err",&u_charge_err);
+  TC->SetBranchAddress("v_charge_err",&v_charge_err);
+  TC->SetBranchAddress("w_charge_err",&w_charge_err);
+
+
+
   //save all the crawlers ... 
   std::vector<WireCell2dToy::ToyCrawler*> crawlers;
   
@@ -129,6 +175,20 @@ int main(int argc, char* argv[])
       mcell = new MergeSpaceCell();
     }
     GeomCell *cell1 = new GeomCell(cell);
+
+    // if (time_slice == 1041){
+      
+    //   cout << "Single Cell: " << i << " "  << toytiling[time_slice]->get_allcell().size() << " " << toytiling[time_slice]->get_allwire().size() << endl;
+
+      toytiling[time_slice]->AddCell(gds,cell1,u_index,v_index,w_index,u_charge,v_charge,w_charge,u_charge_err,v_charge_err,w_charge_err);
+    
+    //   cout << u_index << " " << v_index << " " << w_index << " " << u_charge << " " << v_charge << " " << w_charge << " " <<u_charge_err << " " << v_charge_err << " " << w_charge_err << endl;
+      
+    //   cout << "Single Cell1: " << i << " "  << toytiling[time_slice]->get_allcell().size() << " " << toytiling[time_slice]->get_allwire().size() << endl;
+    
+    // }
+    
+
     SpaceCell *space_cell = new SpaceCell(cluster_num,*cell1,x*units::cm,charge,0.32*units::cm);
     mcell->AddSpaceCell(space_cell);
     cells.push_back(space_cell);
@@ -138,10 +198,23 @@ int main(int argc, char* argv[])
    
   }
 
+  
+  // for (int i=0;i!=ntime;i++){
+  //   GeomCellSelection allcell = toytiling[i]->get_allcell();
+  //   GeomWireSelection allwire = toytiling[i]->get_allwire();
+  //   cout << "Single Cell: " << i << " "  << allcell.size() << " " << allwire.size() << endl;
+  // }
+
+
   mcells.push_back(mcell);  
   WireCell2dToy::ToyCrawler* toycrawler = new WireCell2dToy::ToyCrawler(mcells);
   toycrawler->FormGraph();
   crawlers.push_back(toycrawler);
+
+
+
+
+
 
   //check # of clusters 
   int sum = 0 ;
