@@ -745,7 +745,27 @@ int main(int argc, char* argv[])
 	cell_save = mcell->get_allcell().at(j);
 
 	//fill the information needed for toytiling
+	GeomWireSelection wires = toytiling[time_slice]->wires(*cell_save);
 	
+	//	if (i==0 && j==0) cout << "abc: " << time_slice << " " << toytiling[time_slice]->get_allcell().size() << " " << wires.size() << endl;
+
+	for (int k=0;k!=wires.size();k++){
+	  const GeomWire *wire = wires.at(k);
+	  WirePlaneType_t plane = wire->plane();
+	  if (plane==0){
+	    u_index = wire->index();
+	    u_charge = toytiling[time_slice]->wcmap()[wire];
+	    u_charge_err = toytiling[time_slice]->wcemap()[wire];
+	  }else if (plane==1){
+	    v_index = wires.at(k)->index();
+	    v_charge = toytiling[time_slice]->wcmap()[wire];
+	    v_charge_err = toytiling[time_slice]->wcemap()[wire];
+	  }else if (plane==2){
+	    w_index = wire->index();
+	    w_charge = toytiling[time_slice]->wcmap()[wire];
+	    w_charge_err = toytiling[time_slice]->wcemap()[wire];
+	  }
+	}
 	//end fill
 
 	Point p = mcell->get_allcell().at(j)->center();

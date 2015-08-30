@@ -594,7 +594,113 @@ int main(int argc, char* argv[])
     ncluster ++;
   }
 
- 
+  
+
+    // save all the toy tiling stuff
+  WireCell2dToy::ToyTiling* tt1 = 0;
+  int time_slice;
+  
+  TTree* ttree = new TTree("T","T");
+  ttree->Branch("time_slice",&time_slice,"time_slice/I");
+  ttree->Branch("toytiling",&tt1);
+  ttree->SetDirectory(file);
+  for (int i=start_num;i!=end_num+1;i++){
+    tt1 = toytiling[i];
+    time_slice = i;
+    ttree->Fill();
+  }
+  ttree->Write();
+
+  TTree *ttree1 = new TTree("TC","TC");
+  // To save cluster, we need to save
+  // 1. time slice
+  // 2. single cell
+  // 3. charge
+  // 4. cluster number
+  const GeomCell* cell_save = 0;
+  int cluster_num = -1;
+  int mcell_id = -1;
+  
+  ttree1->Branch("time_slice",&time_slice,"time_slice/I"); // done
+  ttree1->Branch("cell",&cell_save);
+  ttree1->Branch("ncluster",&cluster_num,"cluster_num/I"); //done
+  ttree1->Branch("mcell_id",&mcell_id,"mcell_id/I");
+  ttree1->Branch("charge",&charge_save,"charge/D"); 
+  
+  double xx;
+  ttree1->Branch("xx",&xx,"xx/D");    //don
+  ttree1->Branch("x",&x,"x/D");    //done
+  ttree1->Branch("y",&y,"y/D");
+  ttree1->Branch("z",&z,"z/D");
+
+  // save information to reconstruct the toytiling
+  int u_index, v_index, w_index;
+  double u_charge, v_charge, w_charge;
+  double u_charge_err, v_charge_err, w_charge_err;
+  
+  ttree1->Branch("u_index",&u_index,"u_index/I");
+  ttree1->Branch("v_index",&v_index,"v_index/I");
+  ttree1->Branch("w_index",&w_index,"w_index/I");
+  
+  ttree1->Branch("u_charge",&u_charge,"u_charge/D");
+  ttree1->Branch("v_charge",&v_charge,"v_charge/D");
+  ttree1->Branch("w_charge",&w_charge,"w_charge/D");
+
+  ttree1->Branch("u_charge_err",&u_charge_err,"u_charge_err/D");
+  ttree1->Branch("v_charge_err",&v_charge_err,"v_charge_err/D");
+  ttree1->Branch("w_charge_err",&w_charge_err,"w_charge_err/D");
+
+  //end save 
+
+  ttree1->SetDirectory(file);
+  
+  for (auto it = cluster_set.begin();it!=cluster_set.end();it++){
+    cluster_num ++;
+    //loop merged cell
+    for (int i=0; i!=(*it)->get_allcell().size();i++){
+      const MergeGeomCell *mcell = (const MergeGeomCell*)((*it)->get_allcell().at(i));
+      mcell_id ++;
+      time_slice = mcell->GetTimeSlice();
+      x = time_slice*nrebin/2.*unit_dis/10. - frame_length/2.*unit_dis/10.;
+      xx =x;
+      //loop single cell
+      for (int j=0; j!=mcell->get_allcell().size();j++){
+	cell_save = mcell->get_allcell().at(j);
+
+	//fill the information needed for toytiling
+	GeomWireSelection wires = toytiling[time_slice]->wires(*cell_save);
+	
+	//	if (i==0 && j==0) cout << "abc: " << time_slice << " " << toytiling[time_slice]->get_allcell().size() << " " << wires.size() << endl;
+
+	for (int k=0;k!=wires.size();k++){
+	  const GeomWire *wire = wires.at(k);
+	  WirePlaneType_t plane = wire->plane();
+	  if (plane==0){
+	    u_index = wire->index();
+	    u_charge = toytiling[time_slice]->wcmap()[wire];
+	    u_charge_err = toytiling[time_slice]->wcemap()[wire];
+	  }else if (plane==1){
+	    v_index = wires.at(k)->index();
+	    v_charge = toytiling[time_slice]->wcmap()[wire];
+	    v_charge_err = toytiling[time_slice]->wcemap()[wire];
+	  }else if (plane==2){
+	    w_index = wire->index();
+	    w_charge = toytiling[time_slice]->wcmap()[wire];
+	    w_charge_err = toytiling[time_slice]->wcemap()[wire];
+	  }
+	}
+	//end fill
+
+	Point p = mcell->get_allcell().at(j)->center();
+	charge_save = toymatrix[time_slice]->Get_Cell_Charge(mcell,1)/mcell->cross_section() * cell_save->cross_section();
+	y = p.y/units::cm;
+  	z = p.z/units::cm;
+	ttree1->Fill();
+	
+      }
+    }
+  }
+  ttree1->Write();
  
   
   TTree *Trun = new TTree("Trun","Trun");
