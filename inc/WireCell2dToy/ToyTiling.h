@@ -45,6 +45,8 @@ namespace WireCell2dToy {
       WireCell::WireChargeMap& wcemap(){return wirecharge_errmap;};
       WireCell::GeomCellMap& cmap(){return cellmap;};
       WireCell::GeomWireMap& wmap(){return wiremap;};
+      
+      float get_ave_charge(){return ave_charge;};
 
     protected:
       WireCell::GeomWireSelection wire_u;
@@ -62,10 +64,10 @@ namespace WireCell2dToy {
       WireCell::WireChargeMap wirecharge_errmap;
 
       //
-
+      float ave_charge;
       
       
-	ClassDef(ToyTiling,1);
+      ClassDef(ToyTiling,1);
 
     };
 

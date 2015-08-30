@@ -76,7 +76,15 @@ void WireCell2dToy::ToyTiling::AddCell(WireCell::GeomDataSource& gds, GeomCell *
     //found
     wiremap[wwire].push_back(cell);
   }
-  
+ 
+  ave_charge = 0;
+  for (int i=0;i!=wire_all.size();i++){
+    ave_charge += wirechargemap[wire_all.at(i)];
+  }
+  if (cell_all.size()!=0){
+    ave_charge = ave_charge / cell_all.size()/3.;
+  }
+ 
 
 }
 
@@ -498,6 +506,14 @@ WireCell2dToy::ToyTiling::ToyTiling(const WireCell::Slice& slice,WireCell::GeomD
   // 	      << qwires.at(1)->index() << " " << qwires.at(1)->plane() << " " 
   // 	      << qwires.at(2)->index() << " " << qwires.at(2)->plane() << " "  << std::endl;
   // }
+
+  ave_charge = 0;
+  for (int i=0;i!=wire_all.size();i++){
+    ave_charge += wirechargemap[wire_all.at(i)];
+  }
+  if (cell_all.size()!=0){
+    ave_charge = ave_charge / cell_all.size()/3.;
+  }
 
 }
 
@@ -1099,7 +1115,13 @@ void WireCell2dToy::ToyTiling::twoplane_tiling(WireCell::GeomDataSource& gds, st
   }
 				    
   
-
+  ave_charge = 0;
+  for (int i=0;i!=wire_all.size();i++){
+    ave_charge += wirechargemap[wire_all.at(i)];
+  }
+  if (cell_all.size()!=0){
+    ave_charge = ave_charge / cell_all.size()/3.;
+  }
 }
 
 

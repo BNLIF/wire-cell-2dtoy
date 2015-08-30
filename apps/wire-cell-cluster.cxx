@@ -67,12 +67,19 @@ int main(int argc, char* argv[])
   Trun->SetBranchAddress("total_time_bin",&total_time_bin);
   Trun->GetEntry(0);
   
+  // unit_dis = 1.6;
+  // total_time_bin = 9600;
+  // nrebin = 4;
+
+  
   //cout << nrebin << " " << unit_dis << " " << total_time_bin << endl;
   const int ntime = total_time_bin/nrebin;
   WireCell2dToy::ToyTiling **toytiling = new WireCell2dToy::ToyTiling*[ntime];
   for (int i=0;i!=ntime;i++){
     toytiling[i] = new WireCell2dToy::ToyTiling();
   }
+
+
   int time_slice;
   // WireCell2dToy::ToyTiling* tt = 0;
   // T->SetBranchAddress("time_slice",&time_slice);

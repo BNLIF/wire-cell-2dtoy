@@ -41,10 +41,10 @@ WireCell2dToy::ToyTracking::ToyTracking(WireCell2dToy::ToyCrawler& toycrawler){
 
     if (success){
       if (!ExamineVertex(vertex,toycrawler)){
-	bool success1 = vertex->FindVertex();
-	if (success1){
-	  ExamineVertex(vertex,toycrawler);
-	}
+  	bool success1 = vertex->FindVertex();
+  	if (success1){
+  	  ExamineVertex(vertex,toycrawler);
+  	}
       }
     }
 
@@ -61,6 +61,8 @@ WireCell2dToy::ToyTracking::ToyTracking(WireCell2dToy::ToyCrawler& toycrawler){
   CheckVertices(toycrawler);
   OrganizeTracks(); 
 
+
+  
   
   //Now do fine tracking??? 
 
@@ -409,28 +411,34 @@ void WireCell2dToy::ToyTracking::BreakTracks(){
 
 
 void WireCell2dToy::ToyTracking::MergeVertices(int flag){
-   WCVertexSelection to_be_removed;
+  WCVertexSelection to_be_removed;
   //prepare to merge vertices 
   for (int i=0;i!=vertices.size();i++){
     WCVertex *vertex1 = vertices.at(i);
+
     if (flag!=2)
       if (vertex1->get_ntracks()==1) continue;
+
     auto it1 = find(to_be_removed.begin(),to_be_removed.end(),vertex1);
     if (it1 == to_be_removed.end()){
       // std::cout << i << " " << vertex1->get_ntracks() << std::endl;
       for (int j=0;j!=vertices.size();j++){
   	WCVertex *vertex2 = vertices.at(j);
-  	if (flag !=2)
-	  if (vertex2->get_ntracks()==1) continue;
+
+	if (flag !=2)
+	  if (vertex2->get_ntracks()==1 ) continue;
+
 	if (vertex2 == vertex1) continue;
   	auto it2 = find(to_be_removed.begin(),to_be_removed.end(),vertex2);
   	if (it2 == to_be_removed.end()){
   	  //std::cout << i << " " << j << " " << vertex2->get_ntracks() << std::endl;
   	  if (vertex1->AddVertex(vertex2, flag)){
+	    
 	    // std::cout << "remove2 " << vertex1->Center().x/units::cm << " " <<
-  	    // vertex1->Center().y/units::cm << " " << vertex1->Center().z/units::cm << " " <<
-  	    // vertex2->Center().x/units::cm << " " <<
-  	    // vertex2->Center().y/units::cm << " " << vertex2->Center().z/units::cm << " " <<std::endl;
+	    //   vertex1->Center().y/units::cm << " " << vertex1->Center().z/units::cm << " " <<
+	    //   vertex2->Center().x/units::cm << " " <<
+	    //   vertex2->Center().y/units::cm << " " << vertex2->Center().z/units::cm << " " <<std::endl;
+	    
   	    to_be_removed.push_back(vertex2);
   	  }
 	  //	  if (vertex1->AddVertex(vertex2, 3)){
