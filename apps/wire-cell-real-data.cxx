@@ -375,7 +375,7 @@ int main(int argc, char* argv[])
     GeomCellSelection allmcell;
     for (int j=0;j!=pallmcell.size();j++){
       const GeomCell* mcell = pallmcell[j];
-      if (toymatrix[i]->Get_Cell_Charge(mcell)> recon_threshold){
+      if (toymatrix[i]->Get_Cell_Charge(mcell)> recon_threshold || toymatrix[i]->Get_Solve_Flag()==0){
 	allmcell.push_back(mcell);
       }
     }
@@ -499,7 +499,10 @@ int main(int argc, char* argv[])
     for (int j=0;j!=allmcell.size();j++){
       MergeGeomCell *mcell = (MergeGeomCell*)allmcell[j];
       double charge = toymatrix[i]->Get_Cell_Charge(mcell,1);
-      if (charge> recon_threshold){
+      if (charge> recon_threshold || toymatrix[i]->Get_Solve_Flag()==0){
+		if (toymatrix[i]->Get_Solve_Flag()==0)
+	  charge = toytiling[i]->get_ave_charge();
+
   	//truth
   	for (int k=0;k!=mcell->get_allcell().size();k++){
   	  Point p = mcell->get_allcell().at(k)->center();
