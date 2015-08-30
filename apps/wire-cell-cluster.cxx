@@ -50,6 +50,8 @@ int main(int argc, char* argv[])
   T->SetBranchAddress("time_slice",&time_slice);
   T->SetBranchAddress("toytiling",&tt);
 
+  
+
   //T->GetEntry(855);
   // cout << tt->get_allwire().size() << " " << tt->get_allcell().size() << endl;
 
@@ -121,9 +123,10 @@ int main(int argc, char* argv[])
   // do the Toy Crawler
   std::cout << "Crawling " << std::endl;
   WireCell2dToy::ToyCrawler toycrawler(mcells);
+
   std::cout << "Tracking " << std::endl;
   WireCell2dToy::ToyTracking toytracking(toycrawler);
-
+  
 
 
   std::cout << "Drawing " << std::endl; 

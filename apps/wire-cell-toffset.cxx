@@ -79,7 +79,43 @@ int main(int argc, char* argv[])
   const char* root_file = argv[2];
   const char* tpath = "/Event/Sim";
   
+  int recon_threshold = 2000;
+  int max_events = 100;
+  int eve_num = atoi(argv[3]);
+  
+  float unit_dis = 1.6;
+
+  float toffset_1=1.647;
+  float toffset_2=1.539+1.647;
+  float toffset_3=0;
+
+  int total_time_bin=9600;
+  int frame_length = 3200;
+  int nrebin = 4;
+
+
+  float threshold_u = 5.87819e+02 * 4.0;
+  float threshold_v = 8.36644e+02 * 4.0;
+  float threshold_w = 5.67974e+02 * 4.0;
+
+  float threshold_ug = 755.96;
+  float threshold_vg = 822.81;
+  float threshold_wg = 510.84;
+
+  int time_offset = 0;
+
   TFile *tfile = TFile::Open(root_file);
+
+  TTree* sst = dynamic_cast<TTree*>(tfile->Get(tpath));
+
+  int run_no, subrun_no, event_no;
+  sst->SetBranchAddress("eventNo",&event_no);
+  sst->SetBranchAddress("runNo",&run_no);
+  sst->SetBranchAddress("subRunNo",&subrun_no);
+  sst->GetEntry(eve_num);
+  
+  cout << "Run No: " << run_no << " " << subrun_no << " " << eve_num << endl;
+
 
   WireCell::FrameDataSource* fds = 0;
   fds = WireCellSst::make_fds(*tfile);
@@ -88,45 +124,44 @@ int main(int argc, char* argv[])
     return 1;
   }
   
+  
 
-  int recon_threshold = 2000;
-  int max_events = 100;
-  int eve_num = atoi(argv[3]);
+  
   // WireCell::ToyDepositor toydep(fds);
   // const PointValueVector pvv = toydep.depositions(eve_num);
   
-  // WireCell::GenerativeFDS gfds(toydep,gds,2400,max_events,2.0*1.6*units::millimeter);
+  // WireCell::GenerativeFDS gfds(toydep,gds,2400,max_events,2.0*unit_dis*units::millimeter);
   // gfds.jump(eve_num);
 
   // WireCellSst::ToyuBooNESliceDataSource sds(gfds,1500); //set threshold at 2000 electrons
 
-  WireCell::ToyDepositor toydep(fds,1);
+  WireCell::ToyDepositor toydep(fds,1,unit_dis);
   const PointValueVector& pvv = toydep.depositions(eve_num);
   const std::vector<int>& timeoffset = toydep.timeoffset();
 
   //cout << pvv.size() << endl;
 
-  //WireCell::GenerativeFDS gfds(toydep,gds,9600,max_events,0.5*1.605723*units::millimeter); // 87 K at 0.5 kV/cm
-  WireCell::GenerativeFDS gfds(toydep,gds,9600,max_events,0.5*1.60*units::millimeter); // 87 K at 0.5 kV/cm
+  //WireCell::GenerativeFDS gfds(toydep,gds,total_time_bin,max_events,0.5*1.605723*units::millimeter); // 87 K at 0.5 kV/cm
+  WireCell::GenerativeFDS gfds(toydep,gds,total_time_bin,max_events,0.5*unit_dis*units::millimeter); // 87 K at 0.5 kV/cm
   
   cout << "Put in Truth " << endl; 
-  WireCell2dToy::ToySignalSimuTrueFDS st_fds(gfds,gds,9600/4,max_events,0); //truth
-  //WireCell::GenerativeFDS st_fds(toydep,gds,9600/4,max_events,2.0*1.60*units::millimeter); // 87 K at 0.5 kV/cm
+  WireCell2dToy::ToySignalSimuTrueFDS st_fds(gfds,gds,total_time_bin/nrebin,max_events,0); //truth
+  //WireCell::GenerativeFDS st_fds(toydep,gds,total_time_bin/nrebin,max_events,2.0*unit_dis*units::millimeter); // 87 K at 0.5 kV/cm
   st_fds.jump(eve_num);
   // st_fds.Save();
   
   cout << "Simulate Raw WaveForm " << endl; 
-  WireCell2dToy::ToySignalSimuFDS simu_fds(gfds,gds,9600,max_events,1.647,1.539+1.647,1); // time offset among different planes for the time electrons travel among different planes
+  WireCell2dToy::ToySignalSimuFDS simu_fds(gfds,gds,total_time_bin,max_events,toffset_1,toffset_2,1); // time offset among different planes for the time electrons travel among different planes
   simu_fds.jump(eve_num);
   //simu_fds.Save();
 
   cout << "Deconvolution with Gaussian filter" << endl;
-  WireCell2dToy::ToySignalGausFDS gaus_fds(simu_fds,gds,9600/4,max_events,1.647,1.539+1.647); // gaussian smearing for charge estimation
+  WireCell2dToy::ToySignalGausFDS gaus_fds(simu_fds,gds,total_time_bin/nrebin,max_events,toffset_1,toffset_2); // gaussian smearing for charge estimation
   gaus_fds.jump(eve_num);
   //gaus_fds.Save();
 
   cout << "Deconvolution with Wiener filter" << endl;
-   WireCell2dToy::ToySignalWienFDS wien_fds(simu_fds,gds,9600/4,max_events,1.647,1.539+1.647); // weiner smearing for hit identification
+   WireCell2dToy::ToySignalWienFDS wien_fds(simu_fds,gds,total_time_bin/nrebin,max_events,toffset_1,toffset_2); // weiner smearing for hit identification
   wien_fds.jump(eve_num);
   //wien_fds.Save();
   
@@ -139,13 +174,7 @@ int main(int argc, char* argv[])
   int nwire_v = wires_v.size();
   int nwire_w = wires_w.size();
   
-  float threshold_u = 5.87819e+02 * 4.0;
-  float threshold_v = 8.36644e+02 * 4.0;
-  float threshold_w = 5.67974e+02 * 4.0;
-
-  float threshold_ug = 755.96;
-  float threshold_vg = 822.81;
-  float threshold_wg = 510.84;
+ 
   
   // float threshold_u = 1000;
   // float threshold_v = 1000;
@@ -225,7 +254,7 @@ int main(int argc, char* argv[])
     cout <<"Blob: " << i << " " << allmcell.size() << " " << allmwire.size() << endl;
     
     
-    truthtiling[i] = new WireCell2dToy::TruthToyTiling(*toytiling[i],pvv,timeoffset,i,gds);
+    truthtiling[i] = new WireCell2dToy::TruthToyTiling(*toytiling[i],pvv,timeoffset,i,gds,unit_dis);
     //cout << "finish truth tiling " << endl; 
     toymatrix[i] = new WireCell2dToy::ToyMatrix(*toytiling[i],*mergetiling[i]);
     // cout << "start the iterate " << endl; 
@@ -237,7 +266,7 @@ int main(int argc, char* argv[])
     cout << "NDF: " << toymatrix[i]->Get_ndf() << endl;
     
     toytiling_th[i] = new WireCell2dToy::ToyTiling(slice_th,gds,0,0,0,threshold_ug,threshold_vg, threshold_wg);
-    truthtiling_th[i] = new WireCell2dToy::TruthToyTiling(*toytiling_th[i],pvv,timeoffset,i,gds);
+    truthtiling_th[i] = new WireCell2dToy::TruthToyTiling(*toytiling_th[i],pvv,timeoffset,i,gds,unit_dis);
     
     
     CellChargeMap ccmap = truthtiling[i]->ccmap();
@@ -512,7 +541,7 @@ int main(int argc, char* argv[])
     CellChargeMap ccmap = truthtiling_th[i]->ccmap();
     for (auto it = ccmap.begin();it!=ccmap.end(); it++){
       Point p = it->first->center();
-      x_save = i*0.32 - 256;
+      x_save = i*nrebin/2.*unit_dis/10. - frame_length/2.*unit_dis/10.;
       y_save = p.y/units::cm;
       z_save = p.z/units::cm;
       charge_save = it->second;
@@ -527,7 +556,7 @@ int main(int argc, char* argv[])
     GeomCellSelection allcell = toytiling[i]->get_allcell();
     for (int j=0;j!=allcell.size();j++){
       Point p = allcell[j]->center();
-      x_save = i*0.32- 256;
+      x_save = i*nrebin/2.*unit_dis/10. - frame_length/2.*unit_dis/10.;
       y_save = p.y/units::cm;
       z_save = p.z/units::cm;
       
@@ -547,7 +576,7 @@ int main(int argc, char* argv[])
   	//truth
   	for (int k=0;k!=mcell->get_allcell().size();k++){
   	  Point p = mcell->get_allcell().at(k)->center();
-  	  x_save = i*0.32- 256;
+  	  x_save = i*nrebin/2.*unit_dis/10. - frame_length/2.*unit_dis/10.;
   	  y_save = p.y/units::cm;
   	  z_save = p.z/units::cm;
   	  charge_save = charge/mcell->get_allcell().size();
@@ -568,7 +597,7 @@ int main(int argc, char* argv[])
     //   for (int j=0;j!=blobtiling[i]->Get_Cells().size();j++){
     // 	const GeomCell *cell = blobtiling[i]->Get_Cells().at(j);
     // 	Point p = cell->center();
-    // 	x_save = i*0.32-256;
+    // 	x_save = i*nrebin/2.*unit_dis/10. - frame_length/2.*unit_dis/10.;
     // 	y_save = p.y/units::cm;
     // 	z_save = p.z/units::cm;
     // 	charge_save = blobtiling[i]->Get_Cell_Charge(cell,1);
@@ -586,7 +615,7 @@ int main(int argc, char* argv[])
       if (charge> recon_threshold ){
 	for (int k=0;k!=mcell->get_allcell().size();k++){
 	  Point p = mcell->get_allcell().at(k)->center();
-	  x_save = i*0.32-256;
+	  x_save = i*nrebin/2.*unit_dis/10. - frame_length/2.*unit_dis/10.;
 	  y_save = p.y/units::cm;
 	  z_save = p.z/units::cm;
 	  charge_save = charge/mcell->get_allcell().size();
@@ -629,7 +658,7 @@ int main(int argc, char* argv[])
       const MergeGeomCell *mcell = (const MergeGeomCell*)((*it)->get_allcell().at(i));
       for (int j=0; j!=mcell->get_allcell().size();j++){
   	Point p = mcell->get_allcell().at(j)->center();
-  	x = mcell->GetTimeSlice()*0.32- 256;
+  	x = mcell->GetTimeSlice()*nrebin/2.*unit_dis/10. - frame_length/2.*unit_dis/10.;
   	y = p.y/units::cm;
   	z = p.z/units::cm;
   	g1->SetPoint(ncount,x,y,z);
@@ -672,10 +701,34 @@ int main(int argc, char* argv[])
   ttree1->Branch("ncluster",&cluster_num,"cluster_num/I"); //done
   ttree1->Branch("mcell_id",&mcell_id,"mcell_id/I");
   ttree1->Branch("charge",&charge_save,"charge/D"); 
+
+  double xx;
+  ttree1->Branch("xx",&xx,"xx/D");    //don
   ttree1->Branch("x",&x,"x/D");    //done
   ttree1->Branch("y",&y,"y/D");
   ttree1->Branch("z",&z,"z/D");
   
+   // save information to reconstruct the toytiling
+  int u_index, v_index, w_index;
+  double u_charge, v_charge, w_charge;
+  double u_charge_err, v_charge_err, w_charge_err;
+  
+  ttree1->Branch("u_index",&u_index,"u_index/I");
+  ttree1->Branch("v_index",&v_index,"v_index/I");
+  ttree1->Branch("w_index",&w_index,"w_index/I");
+  
+  ttree1->Branch("u_charge",&u_charge,"u_charge/D");
+  ttree1->Branch("v_charge",&v_charge,"v_charge/D");
+  ttree1->Branch("w_charge",&w_charge,"w_charge/D");
+
+  ttree1->Branch("u_charge_err",&u_charge_err,"u_charge_err/D");
+  ttree1->Branch("v_charge_err",&v_charge_err,"v_charge_err/D");
+  ttree1->Branch("w_charge_err",&w_charge_err,"w_charge_err/D");
+
+  //end save 
+
+
+
   ttree1->SetDirectory(file);
   
   for (auto it = cluster_set.begin();it!=cluster_set.end();it++){
@@ -685,10 +738,16 @@ int main(int argc, char* argv[])
       const MergeGeomCell *mcell = (const MergeGeomCell*)((*it)->get_allcell().at(i));
       mcell_id ++;
       time_slice = mcell->GetTimeSlice();
-      x = time_slice *0.32- 256;
+      x = time_slice *nrebin/2.*unit_dis/10. - frame_length/2.*unit_dis/10.;
+      xx = x;
       //loop single cell
       for (int j=0; j!=mcell->get_allcell().size();j++){
 	cell_save = mcell->get_allcell().at(j);
+
+	//fill the information needed for toytiling
+	
+	//end fill
+
 	Point p = mcell->get_allcell().at(j)->center();
 	charge_save = toymatrix[time_slice]->Get_Cell_Charge(mcell,1)/mcell->cross_section() * cell_save->cross_section();
 	y = p.y/units::cm;
@@ -701,7 +760,28 @@ int main(int argc, char* argv[])
   ttree1->Write();
   
  
+  TTree *Trun = new TTree("Trun","Trun");
+  Trun->SetDirectory(file);
+  Trun->Branch("eventNo",&event_no,"eventNo/I");
+  Trun->Branch("runNo",&run_no,"runNo/I");
+  Trun->Branch("subRunNo",&subrun_no,"runRunNo/I");
 
+   Trun->Branch("unit_dis",&unit_dis,"unit_dis/F");
+  Trun->Branch("toffset_uv",&toffset_1,"toffset_uv/F");
+  Trun->Branch("toffset_uw",&toffset_2,"toffset_uw/F");
+  Trun->Branch("toffset_u",&toffset_3,"toffset_u/F");
+  Trun->Branch("total_time_bin",&total_time_bin,"total_time_bin/I");
+  Trun->Branch("recon_threshold",&recon_threshold,"recon_threshold/I");
+  Trun->Branch("frame_length",&frame_length,"frame_length/I");
+  Trun->Branch("max_events",&max_events,"max_events/I");
+  Trun->Branch("eve_num",&eve_num,"eve_num/I");
+  Trun->Branch("nrebin",&nrebin,"nrebin/I");
+  Trun->Branch("threshold_u",&threshold_u,"threshold_u/F");
+  Trun->Branch("threshold_v",&threshold_v,"threshold_v/F");
+  Trun->Branch("threshold_w",&threshold_w,"threshold_w/F");
+  Trun->Branch("time_offset",&time_offset,"time_offset/I");
+
+  Trun->Fill();
 
   file->Write();
   file->Close();

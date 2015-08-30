@@ -1,0 +1,15 @@
+inside apps:
+
+1. wire-cell-milind.cxx  (standard program to recon MC)
+2. wire-cell-toffset.cxx (standard program to recon MC with time offset for cosmic rays)
+
+
+3. wire-cell-signal-processing.cxx (convert the data into histograms for real data)
+4. wire-cell-real-data.cxx (simple application to analyze real data)
+
+5. wire-cell-cluster.cxx (test program for clustering/tracking)
+6. wire-cell-allcluster.cxx (test program for all clusters)
+
+7. wire-cell-improve.cxx (MC reconstruction program with clustering/tracking capability)
+
+
