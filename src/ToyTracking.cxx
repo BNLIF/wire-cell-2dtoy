@@ -41,10 +41,10 @@ WireCell2dToy::ToyTracking::ToyTracking(WireCell2dToy::ToyCrawler& toycrawler){
 
     if (success){
       if (!ExamineVertex(vertex,toycrawler)){
-  	bool success1 = vertex->FindVertex();
-  	if (success1){
-  	  ExamineVertex(vertex,toycrawler);
-  	}
+    	bool success1 = vertex->FindVertex();
+    	if (success1){
+    	  ExamineVertex(vertex,toycrawler);
+    	}
       }
     }
 
