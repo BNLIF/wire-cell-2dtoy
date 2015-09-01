@@ -32,20 +32,22 @@ void WireCell2dToy::ClusterDisplay::DrawVertex(WCVertexSelection& vertices, TStr
     WCTrackSelection& tracks = vertices.at(i)->get_tracks();
     if (tracks.size()>=1){
       for (int j=0;j!=tracks.size();j++){
-    	WCTrack *track = tracks.at(j);
-	PointVector& points = track->get_centerVP();
-	for (int k=0;k!=points.size();k++){
-	  Point p1 = points.at(k);
-	  x1[k] = p1.x/units::cm;
-	  y1[k] = p1.y/units::cm;
-	  z1[k] = p1.z/units::cm;
-	}
 
-	TPolyLine3D *l1 = new TPolyLine3D(points.size(),x1,y1,z1);
-    	l1->Draw("same");
-    	l1->SetLineColor(6);
-	
-
+	//	if (j==0&&i==4){
+	  WCTrack *track = tracks.at(j);
+	  PointVector& points = track->get_centerVP();
+	  for (int k=0;k!=points.size();k++){
+	    Point p1 = points.at(k);
+	    x1[k] = p1.x/units::cm;
+	    y1[k] = p1.y/units::cm;
+	    z1[k] = p1.z/units::cm;
+	  }
+	  
+	  TPolyLine3D *l1 = new TPolyLine3D(points.size(),x1,y1,z1);
+	  l1->Draw("same");
+	  l1->SetLineColor(6);
+	  
+	  //	}
     	// Point p1 = track->get_end_scells().at(0)->Get_Center();
     	// Point p2 = track->get_end_scells().at(1)->Get_Center();
     	// x1[0] = p1.x/units::cm;
