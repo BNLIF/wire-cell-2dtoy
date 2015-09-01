@@ -47,7 +47,7 @@ void WireCell2dToy::ClusterDisplay::DrawVertex(WCVertexSelection& vertices, TStr
 	l1->Draw("same");
 	l1->SetLineColor(6);
 	
-	std::cout << i << " " << j << " " << points.size() << std::endl;
+	//	std::cout << i << " " << j << " " << points.size() << std::endl;
 
 	  //	}
     	// Point p1 = track->get_end_scells().at(0)->Get_Center();
