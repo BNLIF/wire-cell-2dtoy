@@ -31,7 +31,8 @@ namespace WireCell2dToy{
 
     bool ExamineVertex(WireCell::WCVertex* vertex, WireCell2dToy::ToyCrawler& toycrawler);
 
-    
+    void update_maps();
+    void fine_tracking();
 
 
   protected: 
@@ -41,8 +42,8 @@ namespace WireCell2dToy{
     /* WireCell::MSC_WCV_Map msc_wcv_map; */
     /* WireCell::MCT_WCT_Map mct_wct_map; */
 
-    /* WCT_WCV_Map wct_wcv_map; */
-    /* WCV_WCT_Map wcv_wct_map; */
+    WCT_WCV_Map wct_wcv_map;
+    WCV_WCT_Map wcv_wct_map; 
     
   };
 }

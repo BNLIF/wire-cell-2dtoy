@@ -62,13 +62,49 @@ WireCell2dToy::ToyTracking::ToyTracking(WireCell2dToy::ToyCrawler& toycrawler){
   OrganizeTracks(); 
 
 
-  
+  update_maps();
   
   //Now do fine tracking??? 
+  fine_tracking();
+}
+
+void WireCell2dToy::ToyTracking::update_maps(){
+  wct_wcv_map.clear();
+  wcv_wct_map.clear();
+
+  for (int i=0; i!=vertices.size();i++){
+    WCVertex *vertex = vertices.at(i);
+    WCTrackSelection tracks = vertex->get_tracks();
+    wcv_wct_map[vertex] = tracks;
+    
+    for (int j=0;j!=tracks.size();j++){
+      WCTrack *track = tracks.at(j);
+      if (wct_wcv_map.find(track)==wct_wcv_map.end()){
+	WCVertexSelection vertexes;
+	vertexes.push_back(vertex);
+	wct_wcv_map[track] = vertexes;
+      }else{
+	wct_wcv_map[track].push_back(vertex);
+      }
+    }
+  }
+  
+
 
 }
 
-
+void WireCell2dToy::ToyTracking::fine_tracking(){
+  for (int i=0;i!=tracks.size();i++){
+    WCTrack *track = tracks.at(i);
+    if (wct_wcv_map.find(track)!=wct_wcv_map.end()){
+      if (wct_wcv_map[track].size()==2){
+	Point p1 = wct_wcv_map[track].at(0)->Center();
+	Point p2 = wct_wcv_map[track].at(1)->Center();
+	track->fine_tracking(p1,p2);
+      }
+    }
+  }
+}
 
 bool WireCell2dToy::ToyTracking::ExamineVertex(WCVertex* vertex, WireCell2dToy::ToyCrawler& toycrawler){
   Point vertex_location = vertex->Center();

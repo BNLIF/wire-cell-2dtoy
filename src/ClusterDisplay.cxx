@@ -28,23 +28,36 @@ void WireCell2dToy::ClusterDisplay::DrawVertex(WCVertexSelection& vertices, TStr
     g1->SetPoint(n,x,y,z);
     n++;
 
-    double x1[2],y1[2],z1[2];
+    double x1[2500],y1[2500],z1[2500];
     WCTrackSelection& tracks = vertices.at(i)->get_tracks();
     if (tracks.size()>=1){
       for (int j=0;j!=tracks.size();j++){
     	WCTrack *track = tracks.at(j);
-    	Point p1 = track->get_end_scells().at(0)->Get_Center();
-    	Point p2 = track->get_end_scells().at(1)->Get_Center();
-    	x1[0] = p1.x/units::cm;
-    	y1[0] = p1.y/units::cm;
-    	z1[0] = p1.z/units::cm;
-	
-    	x1[1] = p2.x/units::cm;
-    	y1[1] = p2.y/units::cm;
-    	z1[1] = p2.z/units::cm;
-    	TPolyLine3D *l1 = new TPolyLine3D(2,x1,y1,z1);
+	PointVector& points = track->get_centerVP();
+	for (int k=0;k!=points.size();k++){
+	  Point p1 = points.at(k);
+	  x1[k] = p1.x/units::cm;
+	  y1[k] = p1.y/units::cm;
+	  z1[k] = p1.z/units::cm;
+	}
+
+	TPolyLine3D *l1 = new TPolyLine3D(points.size(),x1,y1,z1);
     	l1->Draw("same");
     	l1->SetLineColor(6);
+	
+
+    	// Point p1 = track->get_end_scells().at(0)->Get_Center();
+    	// Point p2 = track->get_end_scells().at(1)->Get_Center();
+    	// x1[0] = p1.x/units::cm;
+    	// y1[0] = p1.y/units::cm;
+    	// z1[0] = p1.z/units::cm;
+	
+    	// x1[1] = p2.x/units::cm;
+    	// y1[1] = p2.y/units::cm;
+    	// z1[1] = p2.z/units::cm;
+    	// TPolyLine3D *l1 = new TPolyLine3D(2,x1,y1,z1);
+    	// l1->Draw("same");
+    	// l1->SetLineColor(6);
     	// std::cout << x1[0] << " " << y1[0] << " " << z1[0] << " " 
     	// 	  << x1[1] << " " << y1[1] << " " << z1[1] << std::endl;
       }
