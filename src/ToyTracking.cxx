@@ -98,9 +98,19 @@ void WireCell2dToy::ToyTracking::fine_tracking(){
     WCTrack *track = tracks.at(i);
     if (wct_wcv_map.find(track)!=wct_wcv_map.end()){
       if (wct_wcv_map[track].size()==2){
-	Point p1 = wct_wcv_map[track].at(0)->Center();
-	Point p2 = wct_wcv_map[track].at(1)->Center();
-	track->fine_tracking(p1,p2);
+	WCVertex *vertex1 = wct_wcv_map[track].at(0);
+	WCVertex *vertex2 = wct_wcv_map[track].at(1);
+	Point p1 = vertex1->Center();
+	Point p2 = vertex2->Center();
+	// find the directions 
+	double ky1, kz1, ky2, kz2;
+	ky1 = vertex1->get_ky(track);
+	kz1 = vertex1->get_kz(track);
+	
+	ky2 = vertex2->get_ky(track);
+	kz2 = vertex2->get_kz(track);
+
+	track->fine_tracking(p1,ky1,kz1,p2,ky2,kz2);
       }
     }
   }
