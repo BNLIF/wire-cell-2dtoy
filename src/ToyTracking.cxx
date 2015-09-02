@@ -26,9 +26,9 @@ WireCell2dToy::ToyTracking::ToyTracking(WireCell2dToy::ToyCrawler& toycrawler){
   BreakTracks();    //improve the end points and break things
   OrganizeTracks(); //associate the rest
 
-  // MergeVertices(2);  // merge some vertices together, allow single track
-  // CheckVertices(toycrawler);
-  // OrganizeTracks(); //associate the rest
+  // // MergeVertices(2);  // merge some vertices together, allow single track
+  // // CheckVertices(toycrawler);
+  // // OrganizeTracks(); //associate the rest
 
   Associate();  //associate the rest .. 
   CleanUpVertex(); //do some final clean up ... 
@@ -64,6 +64,14 @@ WireCell2dToy::ToyTracking::ToyTracking(WireCell2dToy::ToyCrawler& toycrawler){
 
   update_maps();
   
+
+  // for (int i=0;i!=tracks.size();i++){
+  //   for (int j=0;j!=tracks.at(i)->get_all_cells().size();j++){
+  //     std::cout << i << " " << j << " " << tracks.at(i)->get_all_cells().at(j)->Get_Center().x/units::cm << " " << tracks.at(i)->get_all_cells().at(j)->Get_Center().y/units::cm << " " << tracks.at(i)->get_all_cells().at(j)->Get_Center().z/units::cm << std::endl;
+  //   }
+  // }
+
+
   //Now do fine tracking??? 
   fine_tracking();
 }
@@ -243,7 +251,9 @@ void WireCell2dToy::ToyTracking::CheckVertices(WireCell2dToy::ToyCrawler& toycra
       WCTrack *track = tracks.at(j);
       MergeSpaceCellSelection& cells = track->get_all_cells();
       auto it = find(cells.begin(),cells.end(),center);
-      if (it == cells.end()){
+      if (it == cells.end() ){
+	  //	  && 
+	  //(cells.at(0)->Get_Center().x - center->Get_Center().x) * (cells.at(cells.size()-1)->Get_Center().x - center->Get_Center().x)>0){
 	// need to fill in ... 
 	float dis1 = fabs(center->Get_Center().x - cells.front()->Get_Center().x);
 	float dis2 = fabs(center->Get_Center().x - cells.back()->Get_Center().x);
@@ -309,18 +319,19 @@ void WireCell2dToy::ToyTracking::CheckVertices(WireCell2dToy::ToyCrawler& toycra
 	  }
 	  
 	}
+	
 	// put the final center in ...
-	  if (dis1 < dis2){
-	    cells.insert(cells.begin(),center);
-	    track->get_end_scells().clear();
-	    track->get_end_scells().push_back(center);
-	    track->get_end_scells().push_back(cells.back());
-	  }else{
-	    cells.push_back(center);
-	    track->get_end_scells().clear();
-	    track->get_end_scells().push_back(cells.front());
-	    track->get_end_scells().push_back(center);
-	  }
+	if (dis1 < dis2){
+	  cells.insert(cells.begin(),center);
+	  track->get_end_scells().clear();
+	  track->get_end_scells().push_back(center);
+	  track->get_end_scells().push_back(cells.back());
+	}else{
+	  cells.push_back(center);
+	  track->get_end_scells().clear();
+	  track->get_end_scells().push_back(cells.front());
+	  track->get_end_scells().push_back(center);
+	}
 	  
       }
     }

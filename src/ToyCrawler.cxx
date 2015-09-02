@@ -23,7 +23,12 @@ WireCell2dToy::ToyCrawler::ToyCrawler(MergeSpaceCellSelection& mcells, int flag)
   // for (int i=0;i!=all_mergeclustertrack.size();i++){
   //   MergeClusterTrack *mct = all_mergeclustertrack.at(i);
   //   std::cout << i << " " << mct->Get_allmcells().size() << std::endl;
-  // }
+  //   if (i==0){
+  //     for (int j=0;j!=mct->Get_allmcells().size();j++){
+  // 	std::cout << i << " " << j << " " << mct->Get_allmcells().at(j)->Get_Center().x/units::cm << " " << mct->Get_allmcells().at(j)->Get_Center().y/units::cm << " " << mct->Get_allmcells().at(j)->Get_Center().z/units::cm << std::endl;
+  //     }
+  //   }
+  //  }
 }
 
 MergeSpaceCell* WireCell2dToy::ToyCrawler::GetClosestMSC(Point p, WireCell::MergeSpaceCellSelection& cells2){
