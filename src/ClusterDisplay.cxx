@@ -33,7 +33,7 @@ void WireCell2dToy::ClusterDisplay::DrawVertex(WCVertexSelection& vertices, TStr
     if (tracks.size()>=1){
       for (int j=0;j!=tracks.size();j++){
 
-	//	if (j==0&&i==4){
+	//	if (j==0&&i==2){
 	WCTrack *track = tracks.at(j);
 	PointVector& points = track->get_centerVP();
 	for (int k=0;k!=points.size();k++){
@@ -50,7 +50,7 @@ void WireCell2dToy::ClusterDisplay::DrawVertex(WCVertexSelection& vertices, TStr
 	
 	//	std::cout << i << " " << j << " " << points.size() << std::endl;
 
-	  //	}
+	//	}
     	// Point p1 = track->get_end_scells().at(0)->Get_Center();
     	// Point p2 = track->get_end_scells().at(1)->Get_Center();
     	// x1[0] = p1.x/units::cm;

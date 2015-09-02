@@ -46,9 +46,15 @@ WireCell2dToy::ToyTracking::ToyTracking(WireCell2dToy::ToyCrawler& toycrawler){
     	  ExamineVertex(vertex,toycrawler);
     	}
       }
+    }else{
+      ExamineVertex(vertex,toycrawler);
+      success = vertex->FindVertex(1);
+      if (success){
+       	ExamineVertex(vertex,toycrawler);
+      }
     }
 
-    std::cout << i << " Vertex " << vertex->get_ntracks() << " " << success << " " << vertex->Center().x/units::cm << " " << vertex->Center().y/units::cm << " " << vertex->Center().z/units::cm << " " << std::endl;
+    std::cout << i << " Vertex " << vertex->get_ntracks() << " " << success << " " << vertex->Center().x/units::cm << " " << vertex->Center().y/units::cm << " " << vertex->Center().z/units::cm << " " << vertex->get_msc()->Get_Center().x/units::cm << std::endl;
     // for (int j=0;j!=vertex->get_ntracks();j++){
     //   std::cout << vertex->get_tracks().at(j)->get_end_scells().at(0)->Get_Center().x/units::cm << " " 
     // 		<< vertex->get_tracks().at(j)->get_end_scells().at(1)->Get_Center().x/units::cm << " " 
@@ -136,6 +142,7 @@ bool WireCell2dToy::ToyTracking::ExamineVertex(WCVertex* vertex, WireCell2dToy::
   }
   
   MergeSpaceCell *vertex_cell = toycrawler.GetClosestMSC(vertex_location,cells1);
+  // std::cout << vertex_location.x/units::cm << " " << vertex_cell->Get_Center().x/units::cm << std::endl;
   
   // std::cout << vertex_cell << " " << cells1.size() << std::endl;
 
@@ -251,6 +258,9 @@ void WireCell2dToy::ToyTracking::CheckVertices(WireCell2dToy::ToyCrawler& toycra
       WCTrack *track = tracks.at(j);
       MergeSpaceCellSelection& cells = track->get_all_cells();
       auto it = find(cells.begin(),cells.end(),center);
+
+      // std::cout << center->Get_Center().x/units::cm << " " << it - cells.end() << std::endl;
+
       if (it == cells.end() ){
 	  //	  && 
 	  //(cells.at(0)->Get_Center().x - center->Get_Center().x) * (cells.at(cells.size()-1)->Get_Center().x - center->Get_Center().x)>0){
