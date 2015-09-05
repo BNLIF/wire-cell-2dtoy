@@ -708,6 +708,10 @@ int main(int argc, char* argv[])
   
   TTree *Trun = new TTree("Trun","Trun");
   Trun->SetDirectory(file);
+
+  int detector = 0; // MicroBooNE
+  Trun->Branch("detector",&detector,"detector/I");
+
   Trun->Branch("eventNo",&event_no,"eventNo/I");
   Trun->Branch("runNo",&run_no,"runNo/I");
   Trun->Branch("subRunNo",&subrun_no,"runRunNo/I");

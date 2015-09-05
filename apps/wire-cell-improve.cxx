@@ -1036,12 +1036,14 @@ int main(int argc, char* argv[])
   ttree1->Branch("ncluster",&cluster_num,"cluster_num/I"); //done
   ttree1->Branch("mcell_id",&mcell_id,"mcell_id/I");
   ttree1->Branch("charge",&charge_save,"charge/D"); 
-  double xx;
+  double xx,yy,zz;
   ttree1->Branch("xx",&xx,"xx/D");    //don
+  ttree1->Branch("yy",&yy,"yy/D");    //don
+  ttree1->Branch("zz",&zz,"zz/D");    //don
 
-  ttree1->Branch("x",&x_save,"x/D");    //done
-  ttree1->Branch("y",&y_save,"y/D");
-  ttree1->Branch("z",&z_save,"z/D");
+  // ttree1->Branch("x",&x_save,"x/D");    //done
+  //ttree1->Branch("y",&y_save,"y/D");
+  //ttree1->Branch("z",&z_save,"z/D");
   
 
    // save information to reconstruct the toytiling
@@ -1110,8 +1112,8 @@ int main(int argc, char* argv[])
 	//charge_save = 1;
 	
 	//std::cout << time_slice << " " << x_save << std::endl;
-	y_save = p.y/units::cm;
-  	z_save = p.z/units::cm;
+	yy = p.y/units::cm;
+  	zz = p.z/units::cm;
 	ttree1->Fill();
 	
       }
@@ -1122,6 +1124,10 @@ int main(int argc, char* argv[])
  
   TTree *Trun = new TTree("Trun","Trun");
   Trun->SetDirectory(file);
+  
+  int detector = 0; // MicroBooNE
+  Trun->Branch("detector",&detector,"detector/I");
+
   Trun->Branch("eventNo",&event_no,"eventNo/I");
   Trun->Branch("runNo",&run_no,"runNo/I");
   Trun->Branch("subRunNo",&subrun_no,"runRunNo/I");
