@@ -156,7 +156,9 @@ int WireCell2dToy::ToySignalSimuFDS::jump(int frame_number){
     int chid = trace.chid;
     int nbins = trace.charge.size();
 
-    
+    //std::cout << chid << " " << std::endl;
+
+
     TH1F *htemp;
     if (chid < nwire_u){
       //      htemp = hu;
