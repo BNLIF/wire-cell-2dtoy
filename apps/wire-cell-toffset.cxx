@@ -135,7 +135,7 @@ int main(int argc, char* argv[])
 
   // WireCellSst::ToyuBooNESliceDataSource sds(gfds,1500); //set threshold at 2000 electrons
 
-  WireCell::ToyDepositor toydep(fds,1,unit_dis);
+  WireCell::ToyDepositor toydep(fds,1,unit_dis,frame_length);
   const PointValueVector& pvv = toydep.depositions(eve_num);
   const std::vector<int>& timeoffset = toydep.timeoffset();
 

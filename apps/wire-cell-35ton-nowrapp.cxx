@@ -87,8 +87,8 @@ int main(int argc, char* argv[])
   float toffset_2=1.539+1.647;
   float toffset_3=0;
 
-  int total_time_bin=9600;
-  int frame_length = 3200;
+  int total_time_bin=3200;
+  int frame_length = 0;
   //int total_time_bin = 3200;
   //int frame_length = 3200;
   int nrebin = 4;
@@ -136,7 +136,7 @@ int main(int argc, char* argv[])
 
   // WireCellSst::ToyuBooNESliceDataSource sds(gfds,1500); //set threshold at 2000 electrons
 
-  WireCell::ToyDepositor toydep(fds,0,unit_dis);
+  WireCell::ToyDepositor toydep(fds,0,unit_dis,frame_length);
   const PointValueVector& pvv = toydep.depositions(eve_num);
   
   //cout << pvv.size() << endl;

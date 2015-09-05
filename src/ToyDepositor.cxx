@@ -3,10 +3,11 @@
 
 using namespace::WireCell;
 
-ToyDepositor::ToyDepositor(WireCell::FrameDataSource* fds1, int flag, float unit_dis)
+ToyDepositor::ToyDepositor(WireCell::FrameDataSource* fds1, int flag, float unit_dis, int toffset)
   : fds(fds1)
   , flag(flag)
   , unit_dis(unit_dis)
+  , toffset(toffset)
 {
 }
 
@@ -39,9 +40,9 @@ const PointValueVector& ToyDepositor::depositions(int frame_number) const{
      
        mchits.push_back(p);
        
-       int offset = st->tdc() - 3200 - (st->x() * units::cm)/(0.5*unit_dis*units::millimeter);
+       int offset = st->tdc() - toffset - (st->x() * units::cm)/(0.5*unit_dis*units::millimeter);
        if (flag==0)
-	 offset = 3200;
+	 offset = toffset;
        //std::cout << offset << std::endl;
        
        time_offset.push_back(offset);

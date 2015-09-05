@@ -133,7 +133,7 @@ int main(int argc, char* argv[])
   
  
   
-  WireCell::ToyDepositor *toydep = new WireCell::ToyDepositor(fds,0,unit_dis);
+  WireCell::ToyDepositor *toydep = new WireCell::ToyDepositor(fds,0,unit_dis,frame_length);
   const PointValueVector& pvv = toydep->depositions(eve_num);
   
   WireCell::GenerativeFDS *gfds = new WireCell::GenerativeFDS(*toydep,gds,total_time_bin,max_events,0.5*unit_dis*units::millimeter); // 87 K at 0.5 kV/cm
