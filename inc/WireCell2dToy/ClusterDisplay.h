@@ -29,6 +29,7 @@ namespace WireCell2dToy {
     
 	void DrawCluster(WireCell::SpaceCellSelection& cells, TString option = "p0");
 	void DrawCluster(WireCell::MergeSpaceCellSelection& mcells, TString option = "p");
+	void DrawCluster(WireCell::MergeSpaceCellSelection& mcells, WireCell2dToy::ToyTracking& toytracking);
 
 	void DrawCrawler(ToyCrawler& toycrawler, TString option = "p", int flag = 0);
 	void DrawHough(WireCell::SpaceCellSelection& cells, WireCell::Point& p, double dis_near, double dis_far);

@@ -116,7 +116,7 @@ int WireCell2dToy::ToySignalSimuTrueFDS::jump(int frame_number){
   
   fds->jump(frame_number);
   
-  //std::cout << "Xin1 " << std::endl; 
+  // std::cout << "Xin1 " << " " << nbin << " " << bins_per_frame << " " << scale << std::endl; 
 
   //fill in the data ... 
   const Frame& frame1 = fds->get();

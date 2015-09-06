@@ -78,8 +78,12 @@ WireCell2dToy::ToyTracking::ToyTracking(WireCell2dToy::ToyCrawler& toycrawler){
   // }
 
 
-  //Now do fine tracking??? 
+  //Now do fine tracking for existing tracks
   fine_tracking();
+
+  // Now need to figure out how to judge whether this is a shower or track ... 
+
+
 }
 
 void WireCell2dToy::ToyTracking::update_maps(){
