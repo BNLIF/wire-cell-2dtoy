@@ -725,10 +725,15 @@ int main(int argc, char* argv[])
   // ttree1->Branch("z",&z,"z/D");
 
   // save information to reconstruct the toytiling
+  
   int u_index, v_index, w_index;
   double u_charge, v_charge, w_charge;
   double u_charge_err, v_charge_err, w_charge_err;
-  
+
+  int tpc_no=1, cryostat_no=0;
+  ttree1->Branch("tpc_no",&tpc_no,"tpc_no/I");
+  ttree1->Branch("cryostat_no",&cryostat_no,"cryostat_no/I");
+
   ttree1->Branch("u_index",&u_index,"u_index/I");
   ttree1->Branch("v_index",&v_index,"v_index/I");
   ttree1->Branch("w_index",&w_index,"w_index/I");
