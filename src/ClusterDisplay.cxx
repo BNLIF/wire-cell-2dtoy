@@ -297,14 +297,54 @@ void WireCell2dToy::ClusterDisplay::DrawCluster(MergeSpaceCellSelection& mcells,
   int n=0;
   for (int i=0;i!=mcells.size();i++){
     MergeSpaceCell *mcell = mcells.at(i);
-    for (int j=0;j!=mcell->Get_all_spacecell().size();j++){
-      SpaceCell *cell = mcell->Get_all_spacecell().at(j);
-      x = cell->x()/units::cm;
-      y = cell->y()/units::cm;
-      z = cell->z()/units::cm;
-      g1->SetPoint(n,x,y,z);
-      n++;
+    WCTrackSelection tracks = toytracking.get_tracks();
+    
+    std::vector<int> track_no;
+    int flag = -1;
+    for (int j=0;j!=tracks.size();j++){
+      if (tracks.at(j)->IsContained(mcell)){
+	flag = 1;
+	track_no.push_back(j);
+      }
     }
+    
+    if (flag == -1){
+      for (int j=0;j!=mcell->Get_all_spacecell().size();j++){
+	SpaceCell *cell = mcell->Get_all_spacecell().at(j);
+	x = cell->x()/units::cm;
+	y = cell->y()/units::cm;
+	z = cell->z()/units::cm;
+	g1->SetPoint(n,x,y,z);
+	n++;
+      }
+    }else{
+      for (int j=0;j!=mcell->Get_all_spacecell().size();j++){
+	SpaceCell *cell = mcell->Get_all_spacecell().at(j);
+	
+	int flag1 = 0;
+	
+	for (int k=0;k!=track_no.size();k++){
+	  double dist = tracks.at(track_no.at(k))->dist(mcell,cell)/units::mm;
+	  if (dist < 6){
+	    flag1 = 1;
+	    break;
+	  }
+	}
+
+	if (flag1 == 0){
+	  x = cell->x()/units::cm;
+	  y = cell->y()/units::cm;
+	  z = cell->z()/units::cm;
+	  g1->SetPoint(n,x,y,z);
+	  n++;
+	}
+	
+
+      }
+    }
+    
+
+
   }
   
   g1->Draw("p");
