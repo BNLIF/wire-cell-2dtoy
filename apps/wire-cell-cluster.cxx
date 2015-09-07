@@ -107,9 +107,9 @@ int main(int argc, char* argv[])
   int mcell_id;
   TC->SetBranchAddress("time_slice",&time_slice);
   TC->SetBranchAddress("charge",&charge);
-  TC->SetBranchAddress("x",&x);
-  TC->SetBranchAddress("y",&y);
-  TC->SetBranchAddress("z",&z);
+  TC->SetBranchAddress("xx",&x);
+  TC->SetBranchAddress("yy",&y);
+  TC->SetBranchAddress("zz",&z);
   TC->SetBranchAddress("ncluster",&cluster_num);
   TC->SetBranchAddress("mcell_id",&mcell_id);
   TC->SetBranchAddress("cell",&cell);
@@ -200,7 +200,7 @@ int main(int argc, char* argv[])
   
   WireCell2dToy::ClusterDisplay display(c1);
   // display.DrawCluster(cells);
-  //  display.DrawCluster(mcells);
+  //display.DrawCluster(mcells);
   display.DrawCluster(mcells,toytracking);
   //display.DrawCrawler(toycrawler,"psame",1);
 

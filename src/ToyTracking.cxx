@@ -39,6 +39,7 @@ WireCell2dToy::ToyTracking::ToyTracking(WireCell2dToy::ToyCrawler& toycrawler){
     //if (i==20)
     bool success = vertex->FindVertex();
 
+    //std::cout << i << " " << vertices.size() << std::endl;
     if (success){
       if (!ExamineVertex(vertex,toycrawler)){
     	bool success1 = vertex->FindVertex();
@@ -46,12 +47,13 @@ WireCell2dToy::ToyTracking::ToyTracking(WireCell2dToy::ToyCrawler& toycrawler){
     	  ExamineVertex(vertex,toycrawler);
     	}
       }
-    }else{
-      ExamineVertex(vertex,toycrawler);
-      success = vertex->FindVertex(1);
-      if (success){
-       	ExamineVertex(vertex,toycrawler);
-      }
+    } else{
+      // to be improved later ...
+      // ExamineVertex(vertex,toycrawler);
+      //   success = vertex->FindVertex(1);
+      //   if (success){
+      //    	ExamineVertex(vertex,toycrawler);
+      //   }
     }
 
     std::cout << i << " Vertex " << vertex->get_ntracks() << " " << success << " " << vertex->Center().x/units::cm << " " << vertex->Center().y/units::cm << " " << vertex->Center().z/units::cm << " " << vertex->get_msc()->Get_Center().x/units::cm << std::endl;
@@ -79,6 +81,7 @@ WireCell2dToy::ToyTracking::ToyTracking(WireCell2dToy::ToyCrawler& toycrawler){
 
 
   //Now do fine tracking for existing tracks
+  std::cout << "FineTracking " << std::endl; 
   fine_tracking();
 
   // Now need to figure out how to judge whether this is a shower or track ... 
