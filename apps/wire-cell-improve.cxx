@@ -1080,7 +1080,7 @@ int main(int argc, char* argv[])
       mcell_id ++;
       time_slice = mcell->GetTimeSlice();
       x_save = time_slice *nrebin/2.*unit_dis/10. - frame_length/2.*unit_dis/10.;
-      xx = x;
+      xx = x_save;
       //loop single cell
       for (int j=0; j!=mcell->get_allcell().size();j++){
 	cell_save = mcell->get_allcell().at(j);
