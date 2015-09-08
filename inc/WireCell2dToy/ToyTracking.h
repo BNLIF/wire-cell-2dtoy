@@ -33,6 +33,7 @@ namespace WireCell2dToy{
 
     void update_maps();
     void fine_tracking();
+    void cleanup_bad_tracks();
 
 
   protected: 

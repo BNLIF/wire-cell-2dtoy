@@ -36,9 +36,8 @@ WireCell2dToy::ToyTracking::ToyTracking(WireCell2dToy::ToyCrawler& toycrawler){
 
   for (int i=0;i!=vertices.size();i++){
     WCVertex *vertex = vertices.at(i);
-    //if (i==20)
+    
     bool success = vertex->FindVertex();
-
     //std::cout << i << " " << vertices.size() << std::endl;
     if (success){
       if (!ExamineVertex(vertex,toycrawler)){
@@ -49,14 +48,17 @@ WireCell2dToy::ToyTracking::ToyTracking(WireCell2dToy::ToyCrawler& toycrawler){
       }
     } else{
       // to be improved later ...
-      // ExamineVertex(vertex,toycrawler);
-      //   success = vertex->FindVertex(1);
-      //   if (success){
-      //    	ExamineVertex(vertex,toycrawler);
-      //   }
+      ExamineVertex(vertex,toycrawler);
+      success = vertex->FindVertex(1);
+      if (success){
+       	ExamineVertex(vertex,toycrawler);
+      }else{
+	vertex->reset_center();
+      }
     }
 
     std::cout << i << " Vertex " << vertex->get_ntracks() << " " << success << " " << vertex->Center().x/units::cm << " " << vertex->Center().y/units::cm << " " << vertex->Center().z/units::cm << " " << vertex->get_msc()->Get_Center().x/units::cm << std::endl;
+    
     // for (int j=0;j!=vertex->get_ntracks();j++){
     //   std::cout << vertex->get_tracks().at(j)->get_end_scells().at(0)->Get_Center().x/units::cm << " " 
     // 		<< vertex->get_tracks().at(j)->get_end_scells().at(1)->Get_Center().x/units::cm << " " 
@@ -71,6 +73,8 @@ WireCell2dToy::ToyTracking::ToyTracking(WireCell2dToy::ToyCrawler& toycrawler){
 
 
   update_maps();
+
+  
   
 
   // for (int i=0;i!=tracks.size();i++){
@@ -83,11 +87,54 @@ WireCell2dToy::ToyTracking::ToyTracking(WireCell2dToy::ToyCrawler& toycrawler){
   //Now do fine tracking for existing tracks
   std::cout << "FineTracking " << std::endl; 
   fine_tracking();
+  cleanup_bad_tracks();
+  update_maps();
 
+ 
+  
   // Now need to figure out how to judge whether this is a shower or track ... 
 
+}
+void WireCell2dToy::ToyTracking::cleanup_bad_tracks(){
+  WCVertexSelection to_be_removed;
+
+  for (int i=0;i!=tracks.size();i++){
+    if (tracks.at(i)->IsBadTrack()){
+      tracks.at(i)->reset_fine_tracking();
+      for (int j=0;j!=vertices.size();j++){
+        WCVertex *vertex = vertices.at(j);
+	WCTrackSelection& vtracks = vertex->get_tracks();
+	auto it = find(vtracks.begin(),vtracks.end(),tracks.at(i));
+	if (it != vtracks.end()){
+	  vtracks.erase(it);
+	}
+	if (vtracks.size()==0){
+	  //eliminate this vertex
+	  auto it1 = find(to_be_removed.begin(),to_be_removed.end(),vertices.at(j));
+	  if (it1 == to_be_removed.end())
+	    to_be_removed.push_back(vertices.at(j));
+	}
+      }
+    }  
+  }
+
+  // for (int i=0;i!=vertices.size();i++){
+  //   auto it1 = find(to_be_removed.begin(),to_be_removed.end(),vertices.at(i));
+  //   if (vertices.at(i)->get_ntracks()==0 && it1==to_be_removed.end())
+  //     to_be_removed.push_back(vertices.at(i));
+  // }
+
+  for (int i=0;i!=to_be_removed.size();i++){
+    WCVertex *vertex = to_be_removed.at(i);
+    auto it = find(vertices.begin(),vertices.end(),vertex);
+    if (it != vertices.end()){
+      vertices.erase(it);
+      delete vertex;
+    }
+  }
 
 }
+
 
 void WireCell2dToy::ToyTracking::update_maps(){
   wct_wcv_map.clear();
@@ -116,11 +163,15 @@ void WireCell2dToy::ToyTracking::update_maps(){
 
 void WireCell2dToy::ToyTracking::fine_tracking(){
   for (int i=0;i!=tracks.size();i++){
+    // std::cout << i << " " << tracks.size() << std::endl;
     WCTrack *track = tracks.at(i);
     if (wct_wcv_map.find(track)!=wct_wcv_map.end()){
       if (wct_wcv_map[track].size()==2){
+	//std::cout << i << "abc1 " << std::endl;
 	WCVertex *vertex1 = wct_wcv_map[track].at(0);
+	//std::cout << i << "abc2 " << std::endl;
 	WCVertex *vertex2 = wct_wcv_map[track].at(1);
+	//std::cout << i << "abc3 " << std::endl;
 	Point p1 = vertex1->Center();
 	Point p2 = vertex2->Center();
 	// find the directions 
@@ -130,8 +181,9 @@ void WireCell2dToy::ToyTracking::fine_tracking(){
 	
 	ky2 = vertex2->get_ky(track);
 	kz2 = vertex2->get_kz(track);
-
+	//	std::cout << i << "abc4 " << std::endl;
 	track->fine_tracking(p1,ky1,kz1,p2,ky2,kz2);
+	//	std::cout << i << "abc5 " << std::endl;
       }
     }
   }
@@ -139,7 +191,15 @@ void WireCell2dToy::ToyTracking::fine_tracking(){
 
 bool WireCell2dToy::ToyTracking::ExamineVertex(WCVertex* vertex, WireCell2dToy::ToyCrawler& toycrawler){
   Point vertex_location = vertex->Center();
+  
+  if (fabs(vertex_location.x - vertex->get_msc()->Get_Center().x) < 0.32*5*units::cm){
+  }else{
+    vertex->reset_center();
+    return false;
+  }
+
   MergeSpaceCellSelection cells1;
+
   for (int i=0;i!=vertex->get_tracks().size();i++){
     WCTrack *track = vertex->get_tracks().at(i);
     for (int j=0;j!=track->get_all_cells().size();j++){
@@ -153,96 +213,106 @@ bool WireCell2dToy::ToyTracking::ExamineVertex(WCVertex* vertex, WireCell2dToy::
   
   // std::cout << vertex_cell << " " << cells1.size() << std::endl;
 
-  //if (vertex_cell!=0)
-  vertex->set_msc(vertex_cell);
-  
-  // Now need to examine the vertex ... 
-  MergeSpaceCell *center = vertex->get_msc();
-  WCTrackSelection tracks = vertex->get_tracks();
-  MergeSpaceCellMap& mcells_map = toycrawler.Get_mcells_map();
-
-  WCTrackSelection tracks_to_be_removed;
-
-  for (int j=0;j!=tracks.size();j++){
-    WCTrack *track = tracks.at(j);
-    MergeSpaceCellSelection& cells = track->get_all_cells();
-
-    auto it = find(cells.begin(),cells.end(),center);
-    if (it == cells.end()){  //does not contain the cell
-      // need to fill in ... 
-      float dis1 = fabs(center->Get_Center().x - cells.front()->Get_Center().x);
-      float dis2 = fabs(center->Get_Center().x - cells.back()->Get_Center().x);
-      MergeSpaceCell *cell1; // the one ... 
-      if (dis1 < dis2){
-	cell1 = cells.front();
-      }else{
-	cell1 = cells.back();
-      }
+  if (vertex_cell!=0){
+    vertex->set_msc(vertex_cell);
+    
+    // Now need to examine the vertex ... 
+    MergeSpaceCell *center = vertex->get_msc();
+    WCTrackSelection tracks = vertex->get_tracks();
+    MergeSpaceCellMap& mcells_map = toycrawler.Get_mcells_map();
+    
+    WCTrackSelection tracks_to_be_removed;
+    
+    for (int j=0;j!=tracks.size();j++){
+      WCTrack *track = tracks.at(j);
+      MergeSpaceCellSelection& cells = track->get_all_cells();
       
-      double x1 = cell1->Get_Center().x;
-      double y1 = cell1->Get_Center().y;
-      double z1 = cell1->Get_Center().z;
-      double ky = (center->Get_Center().y - y1)/(center->Get_Center().x - x1);
-      double kz = (center->Get_Center().z - z1)/(center->Get_Center().x - x1);
-      double dis = center->Get_Center().x - x1;
-      
-      MergeSpaceCell *cell2 = cell1;
-      while( (cell2->Get_Center().x - cell1->Get_Center().x) * (cell2->Get_Center().x - center->Get_Center().x) < 0 || cell2 == cell1){
-	// start to crawl ... 
-	MergeSpaceCellSelection cells2 = mcells_map[cell2];
+      auto it = find(cells.begin(),cells.end(),center);
+      if (it == cells.end()){  //does not contain the cell
+	// need to fill in ... 
+	float dis1 = fabs(center->Get_Center().x - cells.front()->Get_Center().x);
+	float dis2 = fabs(center->Get_Center().x - cells.back()->Get_Center().x);
+	MergeSpaceCell *cell1; // the one ... 
+	if (dis1 < dis2){
+	  cell1 = cells.front();
+	}else{
+	  cell1 = cells.back();
+	}
 	
-	MergeSpaceCell *min_cell3;
-	double min = 1e9;
+	double x1 = cell1->Get_Center().x;
+	double y1 = cell1->Get_Center().y;
+	double z1 = cell1->Get_Center().z;
+	double ky = (center->Get_Center().y - y1)/(center->Get_Center().x - x1);
+	double kz = (center->Get_Center().z - z1)/(center->Get_Center().x - x1);
+	double dis = center->Get_Center().x - x1;
 	
-	for (int k=0;k!=cells2.size();k++){
-	  MergeSpaceCell *cell3 = cells2.at(k);
-	  if (dis * (cell3->Get_Center().x - cell2->Get_Center().x) < 0)
-	    continue;
+	MergeSpaceCell *prev_cell2 = 0;
+	
+	MergeSpaceCell *cell2 = cell1;
+	while( (cell2->Get_Center().x - cell1->Get_Center().x) * (cell2->Get_Center().x - center->Get_Center().x) < 0 || cell2 == cell1){
 	  
-	  double dy = cell3->get_dy();
-	  double dz = cell3->get_dz();
 	  
-	  if (dy == 0) dy = 0.3/2 * units::cm;
-	  if (dz == 0) dz = 0.3/2 * units::cm;
+	  //	std::cout << cell2->Get_Center().x/units::cm << " " << cell2 << std::endl;
 	  
-	  double yp = y1 + ky * (cell3->Get_Center().x-x1);
-	  double zp = z1 + kz * (cell3->Get_Center().x-x1);
-	  double dis_sigma = pow(cell3->Get_Center().y - yp,2)/pow(dy,2)
-	    + pow(cell3->Get_Center().z - zp,2)/pow(dz,2);
+	  // start to crawl ... 
+	  MergeSpaceCellSelection cells2 = mcells_map[cell2];
 	  
+	  MergeSpaceCell *min_cell3;
+	  double min = 1e9;
+	  
+	  for (int k=0;k!=cells2.size();k++){
+	    MergeSpaceCell *cell3 = cells2.at(k);
+	    if (dis * (cell3->Get_Center().x - cell2->Get_Center().x) < 0)
+	      continue;
+	    
+	    double dy = cell3->get_dy();
+	    double dz = cell3->get_dz();
+	    
+	    if (dy == 0) dy = 0.3/2 * units::cm;
+	    if (dz == 0) dz = 0.3/2 * units::cm;
+	    
+	    double yp = y1 + ky * (cell3->Get_Center().x-x1);
+	    double zp = z1 + kz * (cell3->Get_Center().x-x1);
+	    double dis_sigma = pow(cell3->Get_Center().y - yp,2)/pow(dy,2)
+	      + pow(cell3->Get_Center().z - zp,2)/pow(dz,2);
+	    
 	    if (dis_sigma < min){
 	      min = dis_sigma;
 	      min_cell3 = cell3;
 	    }
-	}
-	cell2 = min_cell3;
-	
-	if (cell2 == 0){
-	  tracks_to_be_removed.push_back(track);
-	  break;
-	}else{
-	  if (fabs(cell2->Get_Center().x - center->Get_Center().x) < 0.1 *units::mm && cell2 != center){
+	  }
+	  prev_cell2 = cell2;
+	  cell2 = min_cell3;
+	  
+	  if (cell2 == 0){
 	    tracks_to_be_removed.push_back(track);
 	    break;
+	  }else{
+	    if (fabs(cell2->Get_Center().x - center->Get_Center().x) < 0.1 *units::mm && cell2 != center){
+	      tracks_to_be_removed.push_back(track);
+	      break;
+	    }
 	  }
-	}
+	  if (cell2 == prev_cell2) break;
+	} //while loop
+	
       }
     }
-  }
-  
-  
-
-  if (tracks_to_be_removed.size()>0){
-    std::cout << "Remove Tracks!!! " << std::endl;
-    for (int i = 0 ;i!=tracks_to_be_removed.size();i++){
-      auto it = find(vertex->get_tracks().begin(),vertex->get_tracks().end(),tracks_to_be_removed.at(i));
-      vertex->get_tracks().erase(it);
+    
+    
+    
+    if (tracks_to_be_removed.size()>0){
+      std::cout << "Remove Tracks!!! " << std::endl;
+      for (int i = 0 ;i!=tracks_to_be_removed.size();i++){
+	auto it = find(vertex->get_tracks().begin(),vertex->get_tracks().end(),tracks_to_be_removed.at(i));
+	vertex->get_tracks().erase(it);
+      }
+      return false;
+    }else{
+      return true;
     }
-    return false;
-  }else{
-    return true;
   }
-
+  return false;
 }
 
 
@@ -290,6 +360,7 @@ void WireCell2dToy::ToyTracking::CheckVertices(WireCell2dToy::ToyCrawler& toycra
 	
 	double dis = center->Get_Center().x - x1;
 	
+	MergeSpaceCell *prev_cell2 = 0;
 	MergeSpaceCell *cell2 = cell1;
 	
 	
@@ -322,6 +393,7 @@ void WireCell2dToy::ToyTracking::CheckVertices(WireCell2dToy::ToyCrawler& toycra
 	    }
 	    
 	  }
+	  prev_cell2 = cell2;
 	  cell2 = min_cell3;
 	 
 	  if (cell2 !=0){
@@ -334,7 +406,7 @@ void WireCell2dToy::ToyTracking::CheckVertices(WireCell2dToy::ToyCrawler& toycra
 	      }
 	    }
 	  }
-	  
+	  if (cell2 == prev_cell2 || cell2 == 0) break;
 	}
 	
 	// put the final center in ...

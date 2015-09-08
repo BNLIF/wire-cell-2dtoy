@@ -35,6 +35,10 @@ void WireCell2dToy::ClusterDisplay::DrawVertex(WCVertexSelection& vertices, TStr
 
 	//	if (j==0&&i==2){
 	WCTrack *track = tracks.at(j);
+
+	//temporary 
+	//if (track->IsBadTrack()) continue;
+	
 	PointVector& points = track->get_centerVP();
 	for (int k=0;k!=points.size();k++){
 	  Point p1 = points.at(k);
@@ -89,7 +93,7 @@ void WireCell2dToy::ClusterDisplay::DrawVertex(WCVertexSelection& vertices, TStr
 
   }
   
-  std::cout <<"abc " << n << " " <<std::endl;
+  //std::cout <<"abc " << n << " " <<std::endl;
 
   g1->SetMarkerColor(2);
   g1->SetMarkerStyle(20);
