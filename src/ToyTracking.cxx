@@ -71,26 +71,18 @@ WireCell2dToy::ToyTracking::ToyTracking(WireCell2dToy::ToyCrawler& toycrawler){
   CheckVertices(toycrawler);
   OrganizeTracks(); 
 
-
-  update_maps();
-
-  
-  
-
   // for (int i=0;i!=tracks.size();i++){
   //   for (int j=0;j!=tracks.at(i)->get_all_cells().size();j++){
   //     std::cout << i << " " << j << " " << tracks.at(i)->get_all_cells().at(j)->Get_Center().x/units::cm << " " << tracks.at(i)->get_all_cells().at(j)->Get_Center().y/units::cm << " " << tracks.at(i)->get_all_cells().at(j)->Get_Center().z/units::cm << std::endl;
   //   }
   // }
 
-
   //Now do fine tracking for existing tracks
   std::cout << "FineTracking " << std::endl; 
+  update_maps();
   fine_tracking();
   cleanup_bad_tracks();
   update_maps();
-
- 
   
   // Now need to figure out how to judge whether this is a shower or track ... 
 
@@ -181,8 +173,10 @@ void WireCell2dToy::ToyTracking::fine_tracking(){
 	
 	ky2 = vertex2->get_ky(track);
 	kz2 = vertex2->get_kz(track);
+	int np1 = vertex1->get_ntracks();
+	int np2 = vertex2->get_ntracks();
 	//	std::cout << i << "abc4 " << std::endl;
-	track->fine_tracking(p1,ky1,kz1,p2,ky2,kz2);
+	track->fine_tracking(np1,p1,ky1,kz1,np2,p2,ky2,kz2);
 	//	std::cout << i << "abc5 " << std::endl;
       }
     }

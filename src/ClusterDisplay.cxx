@@ -329,14 +329,14 @@ void WireCell2dToy::ClusterDisplay::DrawCluster(MergeSpaceCellSelection& mcells,
 	for (int k=0;k!=track_no.size();k++){
 	  double dist = tracks.at(track_no.at(k))->dist_proj(mcell,cell)/units::mm;
 	  // if (dist < 10000){
-	    // std::cout << dist << " " << tracks.at(track_no.at(k))->dist(mcell,cell)/units::mm << std::endl;
+	  // std::cout << dist << " " << tracks.at(track_no.at(k))->dist(mcell,cell)/units::mm << std::endl;
 	  // }
 	  
 	  if (dist < 4.5){
 	    flag1 = 1;
 	    break;
 	  }else{
-	    // std::cout << dist << " " << cell->x()/units::cm << std::endl;
+	    //std::cout << dist << " " << cell->x()/units::cm << std::endl;
 	  }
 	}
 
