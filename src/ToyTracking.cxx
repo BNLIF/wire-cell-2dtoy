@@ -57,7 +57,7 @@ WireCell2dToy::ToyTracking::ToyTracking(WireCell2dToy::ToyCrawler& toycrawler){
       }
     }
 
-    std::cout << i << " Vertex " << vertex->get_ntracks() << " " << success << " " << vertex->Center().x/units::cm << " " << vertex->Center().y/units::cm << " " << vertex->Center().z/units::cm << " " << vertex->get_msc()->Get_Center().x/units::cm << std::endl;
+    //std::cout << i << " Vertex " << vertex->get_ntracks() << " " << success << " " << vertex->Center().x/units::cm << " " << vertex->Center().y/units::cm << " " << vertex->Center().z/units::cm << " " << vertex->get_msc()->Get_Center().x/units::cm << std::endl;
     
     // for (int j=0;j!=vertex->get_ntracks();j++){
     //   std::cout << vertex->get_tracks().at(j)->get_end_scells().at(0)->Get_Center().x/units::cm << " " 
@@ -70,6 +70,13 @@ WireCell2dToy::ToyTracking::ToyTracking(WireCell2dToy::ToyCrawler& toycrawler){
   }
   CheckVertices(toycrawler);
   OrganizeTracks(); 
+
+  for (int i=0;i!=vertices.size();i++){
+    WCVertex *vertex = vertices.at(i);
+    
+    bool success = vertex->get_fit_success();
+   std::cout << i << " Vertex " << vertex->get_ntracks() << " " << success << " " << vertex->Center().x/units::cm << " " << vertex->Center().y/units::cm << " " << vertex->Center().z/units::cm << " " << vertex->get_msc()->Get_Center().x/units::cm << std::endl;
+  }
 
   // for (int i=0;i!=tracks.size();i++){
   //   for (int j=0;j!=tracks.at(i)->get_all_cells().size();j++){

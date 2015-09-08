@@ -10,12 +10,13 @@ WireCell2dToy::ToyCrawler::ToyCrawler(MergeSpaceCellSelection& mcells, int flag)
   //std::cout << "Merge Clusters " << std::endl; 
   // Merge Cluster ...
   MergeCTrack();  
+  
   // Further merge trying to extend into other tracks ... 
   FurtherExtendCTrack();
-  
   PurgeMergeCTrack();
   
-
+   
+ 
   //this is not a good assumption
   CleanUpCTTrack(flag);
   
@@ -190,7 +191,8 @@ void WireCell2dToy::ToyCrawler::CleanUpCTTrack(int flag){
 
 
 void WireCell2dToy::ToyCrawler::PurgeMergeCTrack(){
-  //remove merged cluster in which all the merge space cell are accounted for ... 
+  
+  //remove merged cluster in which all the merge space cell are accounted for ... s
   MergeClusterTrackSelection temp1;
   for (int i=0;i!=all_mergeclustertrack.size();i++){
     MergeClusterTrack *mct = all_mergeclustertrack.at(i);
@@ -238,7 +240,7 @@ void WireCell2dToy::ToyCrawler::PurgeMergeCTrack(){
 
 
 
-void WireCell2dToy::ToyCrawler::FurtherExtendCTrack(){
+void WireCell2dToy::ToyCrawler::FurtherExtendCTrack(int flag_qx){
   
   
   MergeClusterTrackSelection temp1;
@@ -296,7 +298,7 @@ void WireCell2dToy::ToyCrawler::FurtherExtendCTrack(){
 	}
 	
 	//Now temp contains all the cells to be merged
-	
+		
 	// add one cell in, and then figure out whether to add its track
 	flag2 = 1;
 	while(flag2){
@@ -504,6 +506,7 @@ void WireCell2dToy::ToyCrawler::FurtherExtendCTrack(){
 
 
 void WireCell2dToy::ToyCrawler::MergeCTrack(){
+  WireCell::ClusterTrackSelection used_clustertrack; // hold the used tracks
 
   for (int i = 0;i!=all_clustertrack.size();i++){
     auto it = find(used_clustertrack.begin(),used_clustertrack.end(),all_clustertrack.at(i));
