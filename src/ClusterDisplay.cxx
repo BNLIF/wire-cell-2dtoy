@@ -269,9 +269,9 @@ void WireCell2dToy::ClusterDisplay::DrawCluster(MergeSpaceCellSelection& mcells,
   //g1->Draw("p0");
 
   //test 
-  // g1->GetXaxis()->SetRangeUser(0,20);
-  // g1->GetYaxis()->SetRangeUser(-80,-74);
-  // g1->GetZaxis()->SetRangeUser(790,810);
+  // g1->GetXaxis()->SetRangeUser(58,60);
+  // g1->GetYaxis()->SetRangeUser(20,-30);
+  // g1->GetZaxis()->SetRangeUser(630,640);
 
   //  std::cout << mcells.size() << std::endl;
 
@@ -321,6 +321,7 @@ void WireCell2dToy::ClusterDisplay::DrawCluster(MergeSpaceCellSelection& mcells,
 	g1->SetPoint(n,x,y,z);
 	n++;
       }
+      //      std::cout << x << " " << y << " " << z << std::endl;
     }else{
       for (int j=0;j!=mcell->Get_all_spacecell().size();j++){
 	SpaceCell *cell = mcell->Get_all_spacecell().at(j);
@@ -332,11 +333,12 @@ void WireCell2dToy::ClusterDisplay::DrawCluster(MergeSpaceCellSelection& mcells,
 	  // std::cout << dist << " " << tracks.at(track_no.at(k))->dist(mcell,cell)/units::mm << std::endl;
 	  // }
 	  
-	  if (dist < 4.5){
+	  if (dist < 6.0){
 	    flag1 = 1;
 	    break;
 	  }else{
-	    //std::cout << dist << " " << cell->x()/units::cm << std::endl;
+	    // if (cell->x()/units::cm < 61) 
+	    //   std::cout << dist << " " << cell->x()/units::cm << std::endl;
 	  }
 	}
 
