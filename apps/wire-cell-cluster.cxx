@@ -202,11 +202,11 @@ int main(int argc, char* argv[])
   // display.DrawCluster(cells);
   display.DrawCluster(mcells);
   //display.DrawCluster(mcells,toytracking);
-  //display.DrawCrawler(toycrawler,"psame",1);
+  display.DrawCrawler(toycrawler,"psame",1);
 
   
   WCVertexSelection& vertices = toytracking.get_vertices();
-  display.DrawVertex(vertices,"psame");
+  //display.DrawVertex(vertices,"psame");
 
   // Point p;
   // p.x = cells.at(0)->x();
