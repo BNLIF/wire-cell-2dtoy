@@ -53,7 +53,7 @@ WireCell2dToy::ToyTracking::ToyTracking(WireCell2dToy::ToyCrawler& toycrawler){
       if (success){
        	ExamineVertex(vertex,toycrawler);
       }else{
-	vertex->reset_center();
+  	vertex->reset_center();
       }
     }
 
