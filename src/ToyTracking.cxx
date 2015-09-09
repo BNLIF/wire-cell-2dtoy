@@ -126,12 +126,52 @@ bool WireCell2dToy::ToyTracking::IsThisShower(WireCell2dToy::ToyCrawler& toycraw
   }
   
   // 2. the connectivity of tracks  (how many big clusters)
+  std::vector<WCTrackSelection> track_cluster;
+  WCTrackSelection used_tracks;
+  WCVertexSelection used_vertices;
+
+  for (auto it = wct_wcv_map.begin(); it!= wct_wcv_map.end(); it++){
+    WCTrack *track = it->first;
+    auto it1 = find(used_tracks.begin(),used_tracks.end(),track);
+    if (it1 == used_tracks.end()){
+      WCTrackSelection cur_tracks;
+      used_tracks.push_back(track);
+      cur_tracks.push_back(track);
+
+      // fill in vertices
+      WCVertexSelection vertices = it->second;
+      WCVertexSelection cur_vertices;
+      cur_vertices.insert(cur_vertices.end(),vertices.begin(),vertices.end());
+
+      int flag = 1;
+      while(flag){
+	flag = 0;
+	if (cur_vertices.size() > 0){
+	  WCVertex *vertex1 = cur_vertices.pop_back();
+	  flag = 1;
+	  auto it2 = find(used_vertices.begin(),used_vertices.end(),vertex1);
+	  if (it2 == used_vertices.end()){
+	    used_vertices.push_back(vertex1);
+	    // find all the tracks associated with vertex
+	    // find all the vertices 
+	    // add them if not used, and not in current one
+
+
+	  }
+	}
+      } // end while
+
+    } // end if
+    //    WCVertexSelection vertices = it->second;
+  }
+
   
   
 
   std::cout << "Number of Tracks " << ntracks << " " <<  wct_wcv_map.size() << " " << wcv_wct_map.size() << " " << all_track_mscs.size() << " " << mcells_map.size() << " " << nmcells << " " << time_mcells_set.size() << std::endl; 
   
   
+  //need better tuning .... 
   // no tracks 
   if (ntracks == 0 ){
     return true;
