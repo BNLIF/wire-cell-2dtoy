@@ -321,7 +321,7 @@ void WireCell2dToy::ClusterDisplay::DrawCluster(MergeSpaceCellSelection& mcells,
 	g1->SetPoint(n,x,y,z);
 	n++;
       }
-      std::cout << x << " " << y << " " << z << std::endl;
+      //  std::cout << x << " " << y << " " << z << std::endl;
     }else{
       for (int j=0;j!=mcell->Get_all_spacecell().size();j++){
 	SpaceCell *cell = mcell->Get_all_spacecell().at(j);

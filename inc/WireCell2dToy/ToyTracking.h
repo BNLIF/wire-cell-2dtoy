@@ -26,12 +26,16 @@ namespace WireCell2dToy{
     void CleanUpVertex();
     void Crawl();
    
+    
+    bool IsThisShower(WireCell2dToy::ToyCrawler& toycrawler);
+    
 
     void CheckVertices(WireCell2dToy::ToyCrawler& toycrawler);
 
     bool ExamineVertex(WireCell::WCVertex* vertex, WireCell2dToy::ToyCrawler& toycrawler);
 
     void update_maps();
+    void update_maps1();
     void fine_tracking();
     void cleanup_bad_tracks();
 

@@ -89,11 +89,68 @@ WireCell2dToy::ToyTracking::ToyTracking(WireCell2dToy::ToyCrawler& toycrawler){
   update_maps();
   fine_tracking();
   cleanup_bad_tracks();
-  update_maps();
+  update_maps1();
   
   // Now need to figure out how to judge whether this is a shower or track ... 
+  // just from the number of tracks and the connectivities?
+  IsThisShower(toycrawler);
+
+  // separate various issues ... 
+}
+
+bool WireCell2dToy::ToyTracking::IsThisShower(WireCell2dToy::ToyCrawler& toycrawler){
+  // find out how many separated tracks are there? 
+  // 1. # of tracks
+  int ntracks = 0;
+  MergeSpaceCellSelection all_track_mscs;
+  for (int i=0;i!=tracks.size();i++){
+    if (tracks.at(i)->get_centerVP().size() > 0){
+      all_track_mscs.insert(all_track_mscs.end(),tracks.at(i)->get_centerVP_cells().begin(),tracks.at(i)->get_centerVP_cells().end()) ; 
+      ntracks ++;
+    }
+  }
+
+  // find out how many blobs are not contained in the tracks
+  // 1. How many blobs are not accounted in tracks (need a cut on size)
+  int nmcells = 0;
+  std::set<int> time_mcells_set;
+  MergeSpaceCellMap mcells_map = toycrawler.Get_mcells_map();
+  for (auto it = mcells_map.begin(); it!= mcells_map.end();it ++ ){
+    MergeSpaceCell *mscell = it->first;
+    auto it1 = find(all_track_mscs.begin(),all_track_mscs.end(),mscell);
+    if (it1 == all_track_mscs.end() && mscell->Get_all_spacecell().size() > 50){
+      int time = mscell->Get_Center().x/mscell->thickness();
+      time_mcells_set.insert(time);
+      nmcells ++;
+    }
+  }
+  
+  // 2. the connectivity of tracks  (how many big clusters)
+  
+  
+
+  std::cout << "Number of Tracks " << ntracks << " " <<  wct_wcv_map.size() << " " << wcv_wct_map.size() << " " << all_track_mscs.size() << " " << mcells_map.size() << " " << nmcells << " " << time_mcells_set.size() << std::endl; 
+  
+  
+  // no tracks 
+  if (ntracks == 0 ){
+    return true;
+  }
+  //unacounted ones spam more than 10
+  if (time_mcells_set.size() >=10){
+    return true; 
+  }
+  
+  
+
+
+  return false;
+  
+
 
 }
+
+
 void WireCell2dToy::ToyTracking::cleanup_bad_tracks(){
   WCVertexSelection to_be_removed;
 
@@ -131,6 +188,41 @@ void WireCell2dToy::ToyTracking::cleanup_bad_tracks(){
       delete vertex;
     }
   }
+
+}
+
+void WireCell2dToy::ToyTracking::update_maps1(){
+  // update maps with good tracks ... 
+  wct_wcv_map.clear();
+  wcv_wct_map.clear();
+
+  for (int i=0; i!=vertices.size();i++){
+    WCVertex *vertex = vertices.at(i);
+    WCTrackSelection tracks = vertex->get_tracks();
+    WCTrackSelection tracks1;
+    for (int j=0;j!=tracks.size();j++){
+      if (tracks.at(j)->get_centerVP().size() > 0){
+	tracks1.push_back(tracks.at(j));
+      }
+    }
+    
+    if (tracks1.size()>0){
+      wcv_wct_map[vertex] = tracks;
+    
+      for (int j=0;j!=tracks1.size();j++){
+	WCTrack *track = tracks1.at(j);
+	if (wct_wcv_map.find(track)==wct_wcv_map.end()){
+	  WCVertexSelection vertexes;
+	  vertexes.push_back(vertex);
+	  wct_wcv_map[track] = vertexes;
+	}else{
+	  wct_wcv_map[track].push_back(vertex);
+	}
+      }
+    }
+  }
+  
+
 
 }
 
