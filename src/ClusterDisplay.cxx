@@ -271,9 +271,9 @@ void WireCell2dToy::ClusterDisplay::DrawCluster(MergeSpaceCellSelection& mcells,
   //g1->Draw("p0");
 
   //test 
-  // g1->GetXaxis()->SetRangeUser(170,190);
-  // g1->GetYaxis()->SetRangeUser(70,85);
-  // g1->GetZaxis()->SetRangeUser(300,330);
+  // g1->GetXaxis()->SetRangeUser(195,205);
+  // g1->GetYaxis()->SetRangeUser(20,30);
+  // g1->GetZaxis()->SetRangeUser(60,80);
 
   //  std::cout << mcells.size() << std::endl;
 
