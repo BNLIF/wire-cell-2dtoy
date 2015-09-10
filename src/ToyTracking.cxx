@@ -259,7 +259,7 @@ bool WireCell2dToy::ToyTracking::grow_track_fill_gap(WireCell2dToy::ToyCrawler& 
 	p1.z = vertex_cell->Get_Center().z + vertex->get_kz(track) * (p1.x - vertex_cell->Get_Center().x);
 	vertex->set_center(p1);
 	//	vertex->reset_center();
-	//vertex->FindVertex();
+	// vertex->FindVertex();
 	// std::cout << final_cell->Get_Center().x/units::cm << " " << 
 	//       final_cell->Get_Center().y/units::cm << " " << 
 	//       final_cell->Get_Center().z/units::cm << " " << std::endl;
@@ -735,6 +735,7 @@ void WireCell2dToy::ToyTracking::fine_tracking(){
 	int np1 = vertex1->get_ntracks();
 	int np2 = vertex2->get_ntracks();
 	//std::cout << i << "abc4 " << std::endl;
+	track->reset_fine_tracking();
 	track->fine_tracking(np1,p1,ky1,kz1,np2,p2,ky2,kz2);
 	//std::cout << i << "abc5 " << std::endl;
       }
