@@ -40,6 +40,7 @@ namespace WireCell2dToy{
     void cleanup_bad_tracks();
 
     void deal_wiggle_tracks();
+    bool grow_track_fill_gap(WireCell2dToy::ToyCrawler& toycrawler);
 
 
   protected: 

@@ -1,4 +1,5 @@
 #include "WireCell2dToy/ToyTracking.h"
+#include "TVector3.h"
 
 using namespace WireCell;
 
@@ -92,6 +93,10 @@ WireCell2dToy::ToyTracking::ToyTracking(WireCell2dToy::ToyCrawler& toycrawler){
   std::cout << "Deal with Wiggle Tracks " << std::endl;
   deal_wiggle_tracks();
   CheckVertices(toycrawler); // redefine all the tracks ... 
+  update_maps();
+  
+  
+  //CheckVertices(toycrawler); // redefine all the tracks ... 
   
   for (int i=0;i!=vertices.size();i++){
     WCVertex *vertex = vertices.at(i);
@@ -111,6 +116,8 @@ WireCell2dToy::ToyTracking::ToyTracking(WireCell2dToy::ToyCrawler& toycrawler){
   fine_tracking();
   cleanup_bad_tracks();
   update_maps1();
+
+  
   
   // Now need to figure out how to judge whether this is a shower or track ... 
   // just from the number of tracks and the connectivities?
@@ -119,7 +126,150 @@ WireCell2dToy::ToyTracking::ToyTracking(WireCell2dToy::ToyCrawler& toycrawler){
   std::cout << "Shower? " << shower_flag << std::endl;
 
   // separate various issues ... 
+
+  if (!shower_flag){
+    //not a shower
+    std::cout << "Grown single track " << std::endl;
+    if (grow_track_fill_gap(toycrawler)){
+      std::cout << "FineTracking Again" << std::endl; 
+      update_maps();
+      fine_tracking();
+    }
+  }else{
+    //is a shower  
+    
+  }
 }
+
+bool WireCell2dToy::ToyTracking::grow_track_fill_gap(WireCell2dToy::ToyCrawler& toycrawler){
+  bool result = false;
+  MergeSpaceCellMap& mcells_map = toycrawler.Get_mcells_map();
+  
+  for (int i=0;i!=vertices.size();i++){
+    WCVertex *vertex = vertices.at(i);
+    if (vertex->get_ntracks() == 1){
+      WCTrack *track = vertex->get_tracks().at(0);
+      MergeSpaceCell *vertex_cell = vertex->get_msc();
+      MergeSpaceCellSelection cells = mcells_map[vertex_cell];
+
+      MergeSpaceCellSelection saved_cells;
+
+      if(cells.size() >1){
+	TVector3 vec(1,vertex->get_ky(track),vertex->get_kz(track));
+	float theta = vec.Theta();
+	float phi  = vec.Phi();
+	Point p = vertex->Center();
+
+	MergeSpaceCell *prev_cell; //previous cell
+	MergeSpaceCellSelection test_cells; // hold cells to be grow
+	MergeSpaceCell *final_cell = vertex_cell;
+	
+	//std::cout << track->get_all_cells().size() << std::endl;
+
+	for (int j=0;j!=cells.size();j++){
+	  MergeSpaceCell *cell = cells.at(j);
+	  auto it = find(track->get_all_cells().begin(), track->get_all_cells().end(), cell);
+	  if (it == track->get_all_cells().end() ){
+	    test_cells.push_back(cell);
+	  }else{
+	    prev_cell = cell;
+	  }
+	}
+
+	//start to crawl ... 
+	int flag = 1;
+	while(flag){
+	  flag = 0;
+	  if (test_cells.size()==1){
+	    prev_cell = final_cell;
+	    final_cell = test_cells.at(0);
+	    flag = 1;
+	  }else{
+	    for (int j=0;j!=test_cells.size();j++){
+	      if (test_cells.at(j)->CrossCell(p,theta,phi)){
+		prev_cell = final_cell;
+		final_cell = test_cells.at(j);
+		flag = 1;
+		break;
+	      }
+	    }
+	  }
+	  
+	  if (flag == 1){
+	    //track->replace_end_scells(final_cell);
+	    //	    track->get_all_cells().insert(track->get_all_cells().begin(),final_cell);
+	    saved_cells.push_back(final_cell);
+
+	    //test if final cell belong to another track, if so end
+	    int flag1 = 0;
+	    for (auto it1 = wct_wcv_map.begin(); it1 != wct_wcv_map.end(); it1++){
+	      WCTrack *ntrack = it1->first;
+	      auto it2 = find(ntrack->get_all_cells().begin(),ntrack->get_all_cells().end(), final_cell);
+	      if (it2 != ntrack->get_all_cells().end()){
+		flag1 = 1;
+		break;
+	      }
+	    }
+	    if (flag1 == 1){
+	      flag = 0;
+	    }else{
+	      test_cells.clear();
+	      for (int j=0;j!=mcells_map[final_cell].size();j++){
+		if ((mcells_map[final_cell].at(j)->Get_Center().x - final_cell->Get_Center().x) * 
+		    (final_cell->Get_Center().x - prev_cell->Get_Center().x) >0){
+		  test_cells.push_back(mcells_map[final_cell].at(j));
+		}
+	      }
+	    }
+	  }
+	}
+
+	float dis1 = fabs(vertex_cell->Get_Center().x - track->get_end_scells().at(0)->Get_Center().x);
+	float dis2 = fabs(vertex_cell->Get_Center().x - track->get_end_scells().at(1)->Get_Center().x);
+	
+	if (dis1 < dis2){
+	  for (int qx = 0; qx!=saved_cells.size();qx++){
+	    track->get_all_cells().insert(track->get_all_cells().begin(),saved_cells.at(qx));
+	  }
+	  //track->ReplaceEndCell(saved_cells.back(),track->get_end_scells().at(1));
+	    // track->get_end_scells().clear();
+	  // track->get_end_scells().push_back(center);
+	  // track->get_end_scells().push_back(cells.back());
+	}else{
+	  for (int qx = 0; qx!=saved_cells.size();qx++){
+	    track->get_all_cells().push_back(saved_cells.at(qx));
+	  }
+	  //	  track->ReplaceEndCell(saved_cells.back(),track->get_end_scells().at(0));
+	  // cells.push_back(center);
+	  // track->get_end_scells().clear();
+	  // track->get_end_scells().push_back(cells.front());
+	  // track->get_end_scells().push_back(center);
+	}
+	
+	vertex->set_msc(final_cell);
+
+	result = true;
+	// std::cout << track->get_all_cells().size() << std::endl;
+	
+	// std::cout << final_cell->Get_Center().x/units::cm << std::endl;
+
+	Point p1;
+	p1.x = final_cell->Get_Center().x;
+	p1.y = vertex_cell->Get_Center().y + vertex->get_ky(track) * (p1.x - vertex_cell->Get_Center().x);
+	p1.z = vertex_cell->Get_Center().z + vertex->get_kz(track) * (p1.x - vertex_cell->Get_Center().x);
+	vertex->set_center(p1);
+	//	vertex->reset_center();
+	//vertex->FindVertex();
+	// std::cout << final_cell->Get_Center().x/units::cm << " " << 
+	//       final_cell->Get_Center().y/units::cm << " " << 
+	//       final_cell->Get_Center().z/units::cm << " " << std::endl;
+
+      }
+    }
+  }
+  return result;
+}
+
 
 void WireCell2dToy::ToyTracking::deal_wiggle_tracks(){
   
