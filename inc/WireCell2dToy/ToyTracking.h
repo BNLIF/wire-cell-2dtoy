@@ -39,10 +39,14 @@ namespace WireCell2dToy{
     void fine_tracking();
     void cleanup_bad_tracks();
 
+    void deal_wiggle_tracks();
+
 
   protected: 
     WireCell::WCTrackSelection tracks;
     WireCell::WCVertexSelection vertices;
+    
+    WireCell::WCTrackCounter type3_tracks;
     
     /* WireCell::MSC_WCV_Map msc_wcv_map; */
     /* WireCell::MCT_WCT_Map mct_wct_map; */

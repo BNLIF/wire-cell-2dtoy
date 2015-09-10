@@ -79,6 +79,20 @@ WireCell2dToy::ToyTracking::ToyTracking(WireCell2dToy::ToyCrawler& toycrawler){
   // no need any more
   //OrganizeTracks(); 
 
+  
+
+  // for (int i=0;i!=tracks.size();i++){
+  //   for (int j=0;j!=tracks.at(i)->get_all_cells().size();j++){
+  //     std::cout << i << " " << j << " " << tracks.at(i)->get_all_cells().at(j)->Get_Center().x/units::cm << " " << tracks.at(i)->get_all_cells().at(j)->Get_Center().y/units::cm << " " << tracks.at(i)->get_all_cells().at(j)->Get_Center().z/units::cm << std::endl;
+  //   }
+  // }
+
+
+  //deal with wiggle tracks
+  std::cout << "Deal with Wiggle Tracks " << std::endl;
+  deal_wiggle_tracks();
+  CheckVertices(toycrawler); // redefine all the tracks ... 
+  
   for (int i=0;i!=vertices.size();i++){
     WCVertex *vertex = vertices.at(i);
     
@@ -90,11 +104,6 @@ WireCell2dToy::ToyTracking::ToyTracking(WireCell2dToy::ToyCrawler& toycrawler){
     // }
   }
 
-  // for (int i=0;i!=tracks.size();i++){
-  //   for (int j=0;j!=tracks.at(i)->get_all_cells().size();j++){
-  //     std::cout << i << " " << j << " " << tracks.at(i)->get_all_cells().at(j)->Get_Center().x/units::cm << " " << tracks.at(i)->get_all_cells().at(j)->Get_Center().y/units::cm << " " << tracks.at(i)->get_all_cells().at(j)->Get_Center().z/units::cm << std::endl;
-  //   }
-  // }
 
   //Now do fine tracking for existing tracks
   std::cout << "FineTracking " << std::endl; 
@@ -110,6 +119,95 @@ WireCell2dToy::ToyTracking::ToyTracking(WireCell2dToy::ToyCrawler& toycrawler){
   std::cout << "Shower? " << shower_flag << std::endl;
 
   // separate various issues ... 
+}
+
+void WireCell2dToy::ToyTracking::deal_wiggle_tracks(){
+  
+  int flag1 = 1;
+  WCTrackSelection used_tracks;
+  
+  while(flag1 ==1){
+    flag1 = 0;
+    for (auto it = type3_tracks.begin();it!=type3_tracks.end();it++){
+      if (it->second == 2 ){
+	WCTrack *track = it->first;
+	
+	if (find(used_tracks.begin(),used_tracks.end(),track) != used_tracks.end())
+	  continue;
+
+	Point end_p1 = track->get_end_scells().at(0)->Get_Center();
+	Point end_p2 = track->get_end_scells().at(1)->Get_Center();
+	
+	MergeSpaceCell *vertex_cell1;
+	MergeSpaceCell *vertex_cell2;
+	
+	float dis;
+	
+	int flag = 0;
+	
+	
+	for (int i=0;i!=vertices.size();i++){
+	  Point p = vertices.at(i)->get_msc()->Get_Center();
+	  auto it = find(track->get_all_cells().begin(), track->get_all_cells().end(),vertices.at(i)->get_msc());
+	  if (it != track->get_all_cells().end()){
+	    float dis1 = sqrt(pow(end_p1.x - p.x,2) + pow(end_p1.y - p.y,2) + pow(end_p1.z - p.z,2));
+	    float dis2 = sqrt(pow(end_p2.x - p.x,2) + pow(end_p2.y - p.y,2) + pow(end_p2.z - p.z,2));
+	    if (dis1<dis2){
+	      vertex_cell1 = vertices.at(i)->get_msc();
+	      vertex_cell2 = track->get_end_scells().at(1);
+	    }else{
+	      vertex_cell1 = vertices.at(i)->get_msc();
+	      vertex_cell2 = track->get_end_scells().at(0);
+	    }
+	    flag = 1;
+	    break;
+	  }
+	  
+	  
+	  dis = sqrt(pow(end_p1.x - p.x,2) + pow(end_p1.y - p.y,2) + pow(end_p1.z - p.z,2));
+	  //	  std::cout << dis/units::cm << std::endl;
+	  if (dis < 2* units::cm && fabs(end_p1.x-p.x) < 0.65*units::cm ){
+	    vertex_cell1 = track->get_end_scells().at(0);
+	    vertex_cell2 = track->get_end_scells().at(1);
+	    flag = 1;
+	    break;
+	  }
+	  
+	  dis = sqrt(pow(end_p2.x - p.x,2) + pow(end_p2.y - p.y,2) + pow(end_p2.z - p.z,2));
+	  //std::cout << dis/units::cm << std::endl;
+	  if (dis < 2* units::cm && fabs(end_p2.x-p.x) < 0.65*units::cm){
+	    vertex_cell1 = track->get_end_scells().at(0);
+	    vertex_cell2 = track->get_end_scells().at(1);
+	    //vertex_cell = track->get_end_scells().at(1);
+	    flag = 1;
+	    break;
+	  }
+	}
+	
+	//std::cout << flag << " " << vertices.size() << std::endl;
+	if (flag == 1){
+	  flag1 = 1;
+	  used_tracks.push_back(track);
+	  
+	  WCVertex *vertex = new WCVertex(*vertex_cell1);
+	  vertex->get_tracks().push_back(track);
+	  vertices.push_back(vertex);
+	  vertex->FindVertex();
+	  
+	  WCVertex *vertex1 = new WCVertex(*vertex_cell2);
+	  vertex1->get_tracks().push_back(track);
+	  vertices.push_back(vertex1);
+	  vertex1->FindVertex();
+	}
+	//std::cout << vertices.size() << std::endl;
+	
+	//      std::cout << track->get_end_scells().at(0)->Get_Center().x/units::cm << " " << 
+	//	track->get_end_scells().at(1)->Get_Center().x/units::cm << std::endl;
+      }
+    }
+  }
+
+
 }
 
 bool WireCell2dToy::ToyTracking::IsThisShower(WireCell2dToy::ToyCrawler& toycrawler){
@@ -467,7 +565,7 @@ void WireCell2dToy::ToyTracking::fine_tracking(){
     // std::cout << i << " " << tracks.size() << std::endl;
     WCTrack *track = tracks.at(i);
     if (wct_wcv_map.find(track)!=wct_wcv_map.end()){
-      // std::cout << wct_wcv_map[track].size() << std::endl;
+      //std::cout << wct_wcv_map[track].size() << std::endl;
       if (wct_wcv_map[track].size()==2){
 	//std::cout << i << "abc1 " << std::endl;
 	WCVertex *vertex1 = wct_wcv_map[track].at(0);
@@ -992,7 +1090,18 @@ void WireCell2dToy::ToyTracking::CreateVertices(ToyCrawler& toycrawler){
     for (int i=0;i!=temp_tracks.size();i++){
       WCTrack *temp_track = temp_tracks.at(i);
       int type = temp_track->TrackType(*cell);
-      //std::cout << "Xin " << type << " " << cell->Get_Center().x/units::cm << " " << cell->Get_Center().y/units::cm << " " << cell->Get_Center().z/units::cm << std::endl;
+      //std::cout << "Xin " << type << " " << cell->Get_Center().x/units::cm << " " << cell->Get_Center().y/units::cm << " " << cell->Get_Center().z/units::cm << " " << temp_track->get_mct().Get_TimeLength() << std::endl;
+
+      // save all the wiggle tracks to be dealt later ... 
+      if (type==3){
+	if (type3_tracks.find(temp_track)==type3_tracks.end()){
+	  type3_tracks[temp_track] = 1;
+	}else{
+	  type3_tracks[temp_track] ++;
+	}
+      }
+      //
+
       if (type==2){
       	vertex->Add(temp_track);
 	auto it = find(saved_tracks.begin(),saved_tracks.end(),temp_track);
