@@ -76,7 +76,8 @@ WireCell2dToy::ToyTracking::ToyTracking(WireCell2dToy::ToyCrawler& toycrawler){
   //     std::cout << "abc " << track->get_end_scells().at(0)->Get_Center().x/units::cm << " " <<  track->get_end_scells().at(1)->Get_Center().x/units::cm << " " <<  std::endl;
   //   }
   // }
-  OrganizeTracks(2); 
+  // no need any more
+  //OrganizeTracks(); 
 
   for (int i=0;i!=vertices.size();i++){
     WCVertex *vertex = vertices.at(i);
@@ -365,6 +366,98 @@ void WireCell2dToy::ToyTracking::update_maps(){
     }
   }
   
+  //protect against the fine_tracking
+  for (auto it = wct_wcv_map.begin(); it!= wct_wcv_map.end();it++){
+    WCTrack *track = it->first;
+    WCVertexSelection& vertices1 = it->second;
+  //   if (vertices1.size() == 1){
+  //     MergeSpaceCell *esell1 = track->get_end_scells().at(0);
+  //     MergeSpaceCell *esell2 = track->get_end_scells().at(1);
+  //     MergeSpaceCell *esell;
+  //     float dis1 = pow(esell1->Get_Center().x-vertices1.at(0)->get_msc()->Get_Center().x,2)
+  // 	+pow(esell1->Get_Center().y-vertices1.at(0)->get_msc()->Get_Center().y,2)
+  // 	+pow(esell1->Get_Center().z-vertices1.at(0)->get_msc()->Get_Center().z,2);
+  //     float dis2 = pow(esell2->Get_Center().x-vertices1.at(0)->get_msc()->Get_Center().x,2)
+  // 	+pow(esell2->Get_Center().y-vertices1.at(0)->get_msc()->Get_Center().y,2)
+  // 	+pow(esell2->Get_Center().z-vertices1.at(0)->get_msc()->Get_Center().z,2);
+
+  //     if (dis1 < dis2){
+  // 	esell = esell2;
+  //     }else{
+  // 	esell = esell1;
+  //     }
+  //     //loop through all vertices
+  //     WCVertex *min_vertex = vertices.at(0);
+  //     float min_dis = pow(esell->Get_Center().x-min_vertex->get_msc()->Get_Center().x,2)
+  // 	+pow(esell->Get_Center().y-min_vertex->get_msc()->Get_Center().y,2)
+  // 	+pow(esell->Get_Center().z-min_vertex->get_msc()->Get_Center().z,2);
+  //     for (int i = 0;i!=vertices.size();i++){
+  // 	float dis3 = pow(esell->Get_Center().x-vertices.at(i)->get_msc()->Get_Center().x,2)
+  // 	  +pow(esell->Get_Center().y-vertices.at(i)->get_msc()->Get_Center().y,2)
+  // 	  +pow(esell->Get_Center().z-vertices.at(i)->get_msc()->Get_Center().z,2);
+  // 	if (dis3 < min_dis){
+  // 	  min_dis = dis3;
+  // 	  min_vertex = vertices.at(i);
+  // 	}
+  //     }
+  //     if (min_vertex != vertices1.at(0)){
+  // 	vertices1.push_back(min_vertex);
+  //     }
+  //     if (wcv_wct_map.find(min_vertex) == wcv_wct_map.end()){
+  // 	WCTrackSelection temp_tracks;
+  // 	temp_tracks.push_back(track);
+  // 	wcv_wct_map[min_vertex] = temp_tracks;
+  //     }else{
+  // 	wcv_wct_map[min_vertex].push_back(track);
+  //     }
+
+  //   }else 
+    if (vertices1.size() > 2){
+      MergeSpaceCell *esell1 = track->get_end_scells().at(0);
+      MergeSpaceCell *esell2 = track->get_end_scells().at(1);
+
+      WCVertex *min_vertex1 = vertices1.at(0);
+      float min_dis1 = pow(esell1->Get_Center().x-min_vertex1->get_msc()->Get_Center().x,2)
+  	+pow(esell1->Get_Center().y-min_vertex1->get_msc()->Get_Center().y,2)
+  	+pow(esell1->Get_Center().z-min_vertex1->get_msc()->Get_Center().z,2);
+      
+      for (int i=0;i!=vertices1.size();i++){
+  	float dis3 = pow(esell1->Get_Center().x-vertices1.at(i)->get_msc()->Get_Center().x,2)
+  	  +pow(esell1->Get_Center().y-vertices1.at(i)->get_msc()->Get_Center().y,2)
+  	  +pow(esell1->Get_Center().z-vertices1.at(i)->get_msc()->Get_Center().z,2);
+  	if (dis3 < min_dis1){
+  	  min_dis1 = dis3;
+  	  min_vertex1 = vertices1.at(i);
+  	}
+      } 
+
+
+      WCVertex *min_vertex2 = vertices1.at(0);
+      float min_dis2 = pow(esell2->Get_Center().x-min_vertex2->get_msc()->Get_Center().x,2)
+  	+pow(esell2->Get_Center().y-min_vertex2->get_msc()->Get_Center().y,2)
+  	+pow(esell2->Get_Center().z-min_vertex2->get_msc()->Get_Center().z,2);
+      
+      for (int i=0;i!=vertices1.size();i++){
+  	float dis3 = pow(esell2->Get_Center().x-vertices1.at(i)->get_msc()->Get_Center().x,2)
+  	  +pow(esell2->Get_Center().y-vertices1.at(i)->get_msc()->Get_Center().y,2)
+  	  +pow(esell2->Get_Center().z-vertices1.at(i)->get_msc()->Get_Center().z,2);
+  	if (dis3 < min_dis2){
+  	  min_dis2 = dis3;
+  	  min_vertex2 = vertices1.at(i);
+  	}
+      } 
+
+      
+      //hack for now .... Not a good map ... 
+      //for (auto it1 = vertices1.begin();it1!=vertices1.end();it1++){
+      //	if (*it1!=min_vertex1 && *it1 !=min_vertex2)
+      //	  it1 = vertices1.erase(it1);
+      vertices1.clear();
+      vertices1.push_back(min_vertex1);
+      vertices1.push_back(min_vertex2);
+      // }
+    }
+  }
 
 
 }
@@ -374,12 +467,14 @@ void WireCell2dToy::ToyTracking::fine_tracking(){
     // std::cout << i << " " << tracks.size() << std::endl;
     WCTrack *track = tracks.at(i);
     if (wct_wcv_map.find(track)!=wct_wcv_map.end()){
+      // std::cout << wct_wcv_map[track].size() << std::endl;
       if (wct_wcv_map[track].size()==2){
 	//std::cout << i << "abc1 " << std::endl;
 	WCVertex *vertex1 = wct_wcv_map[track].at(0);
 	//std::cout << i << "abc2 " << std::endl;
 	WCVertex *vertex2 = wct_wcv_map[track].at(1);
 	//std::cout << i << "abc3 " << std::endl;
+	if (vertex1 == vertex2) continue;
 	Point p1 = vertex1->Center();
 	Point p2 = vertex2->Center();
 	// find the directions 
@@ -391,9 +486,9 @@ void WireCell2dToy::ToyTracking::fine_tracking(){
 	kz2 = vertex2->get_kz(track);
 	int np1 = vertex1->get_ntracks();
 	int np2 = vertex2->get_ntracks();
-	//	std::cout << i << "abc4 " << std::endl;
+	//std::cout << i << "abc4 " << std::endl;
 	track->fine_tracking(np1,p1,ky1,kz1,np2,p2,ky2,kz2);
-	//	std::cout << i << "abc5 " << std::endl;
+	//std::cout << i << "abc5 " << std::endl;
       }
     }
   }
@@ -795,10 +890,10 @@ void WireCell2dToy::ToyTracking::MergeVertices(int flag){
   	  //std::cout << i << " " << j << " " << vertex2->get_ntracks() << std::endl;
   	  if (vertex1->AddVertex(vertex2, flag)){
 	    
-	    std::cout << "remove2 " << vertex1->Center().x/units::cm << " " <<
-	      vertex1->Center().y/units::cm << " " << vertex1->Center().z/units::cm << " " <<
-	      vertex2->Center().x/units::cm << " " <<
-	      vertex2->Center().y/units::cm << " " << vertex2->Center().z/units::cm << " " <<std::endl;
+	    // std::cout << "remove2 " << vertex1->Center().x/units::cm << " " <<
+	    //   vertex1->Center().y/units::cm << " " << vertex1->Center().z/units::cm << " " <<
+	    //   vertex2->Center().x/units::cm << " " <<
+	    //   vertex2->Center().y/units::cm << " " << vertex2->Center().z/units::cm << " " <<std::endl;
 	    
   	    to_be_removed.push_back(vertex2);
   	  }
