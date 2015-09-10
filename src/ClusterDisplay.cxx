@@ -54,19 +54,21 @@ void WireCell2dToy::ClusterDisplay::DrawVertex(WCVertexSelection& vertices, TStr
 	
 	//	std::cout << i << " " << j << " " << points.size() << std::endl;
 
-	//	}
-    	// Point p1 = track->get_end_scells().at(0)->Get_Center();
-    	// Point p2 = track->get_end_scells().at(1)->Get_Center();
-    	// x1[0] = p1.x/units::cm;
-    	// y1[0] = p1.y/units::cm;
-    	// z1[0] = p1.z/units::cm;
+	// //	}
+
 	
-    	// x1[1] = p2.x/units::cm;
-    	// y1[1] = p2.y/units::cm;
-    	// z1[1] = p2.z/units::cm;
-    	// TPolyLine3D *l1 = new TPolyLine3D(2,x1,y1,z1);
-    	// l1->Draw("same");
-    	// l1->SetLineColor(6);
+    	Point p1 = track->get_end_scells().at(0)->Get_Center();
+    	Point p2 = track->get_end_scells().at(1)->Get_Center();
+    	x1[0] = p1.x/units::cm;
+    	y1[0] = p1.y/units::cm;
+    	z1[0] = p1.z/units::cm;
+	
+    	x1[1] = p2.x/units::cm;
+    	y1[1] = p2.y/units::cm;
+    	z1[1] = p2.z/units::cm;
+    	TPolyLine3D *l2 = new TPolyLine3D(2,x1,y1,z1);
+    	l2->Draw("same");
+    	l2->SetLineColor(4);
     	// std::cout << x1[0] << " " << y1[0] << " " << z1[0] << " " 
     	// 	  << x1[1] << " " << y1[1] << " " << z1[1] << std::endl;
       }
@@ -269,9 +271,9 @@ void WireCell2dToy::ClusterDisplay::DrawCluster(MergeSpaceCellSelection& mcells,
   //g1->Draw("p0");
 
   //test 
-  // g1->GetXaxis()->SetRangeUser(130,140);
-  // g1->GetYaxis()->SetRangeUser(50,60);
-  // g1->GetZaxis()->SetRangeUser(160,180);
+  // g1->GetXaxis()->SetRangeUser(170,190);
+  // g1->GetYaxis()->SetRangeUser(70,85);
+  // g1->GetZaxis()->SetRangeUser(300,330);
 
   //  std::cout << mcells.size() << std::endl;
 

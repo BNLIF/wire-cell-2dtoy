@@ -63,7 +63,7 @@ int main(int argc, char* argv[])
   
   gStyle->SetOptStat(0);
 
-  // // display.init(0,10.3698,-2.33/2.,2.33/2.);
+  display.init(0,10.3698,-2.33/2.,2.33/2.);
   display.init();
   display.draw_mc(1,mctruth,"");
   display.draw_mc(2,mctruth,"TEXTsame");

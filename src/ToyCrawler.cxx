@@ -15,8 +15,6 @@ WireCell2dToy::ToyCrawler::ToyCrawler(MergeSpaceCellSelection& mcells, int flag)
   FurtherExtendCTrack();
   PurgeMergeCTrack();
   
-   
- 
   //this is not a good assumption
   CleanUpCTTrack(flag);
   
