@@ -725,6 +725,11 @@ void WireCell2dToy::ToyTracking::fine_tracking(){
 	if (vertex1 == vertex2) continue;
 	Point p1 = vertex1->Center();
 	Point p2 = vertex2->Center();
+
+	// std::cout << p1.x/units::cm << " " << p1.y/units::cm << " " <<p1.z/units::cm 
+	// 	  << " " << p2.x/units::cm << " " << p2.y/units::cm << " " <<p2.z/units::cm 
+	// 	  << std::endl;
+
 	// find the directions 
 	double ky1, kz1, ky2, kz2;
 	ky1 = vertex1->get_ky(track);
