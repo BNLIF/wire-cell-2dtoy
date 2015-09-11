@@ -1,5 +1,7 @@
 #include "WireCell2dToy/ToyTracking.h"
+#include "WireCell2dToy/ToyWalking.h"
 #include "TVector3.h"
+
 
 using namespace WireCell;
 
@@ -338,7 +340,7 @@ void WireCell2dToy::ToyTracking::form_parallel_tiny_tracks(WireCell2dToy::ToyCra
 }
 
 void WireCell2dToy::ToyTracking::parallel_tracking(WCVertex *vertex, MergeSpaceCellSelection &mcells, WireCell2dToy::ToyCrawler& toycrawler){
-  // find the furthest point and mcell, 
+// find the furthest point and mcell, 
   Point p = vertex->Center();
   double max_dis1 = 0;
   
@@ -385,11 +387,20 @@ void WireCell2dToy::ToyTracking::parallel_tracking(WCVertex *vertex, MergeSpaceC
   // std::cout << max_point.x/units::cm << " " << max_point.y/units::cm << " " << max_point.z/units::cm << std::endl;
   // std::cout << max_mcell->Get_Center().x << " " << max_mcell->Get_Center().y << std::endl;
   // walk back to the mcell containing the vertex ...  Progressive tracking ...  
-  
-  MergeSpaceCellSelection used_mcells;
+
+  MergeSpaceCellMap& mcells_map = toycrawler.Get_mcells_map();  
   MergeSpaceCellSelection track_mcells;
+  MergeSpaceCellSelection used_mcells; 
   
-  //form vertex ... 
+  MergeSpaceCell *vertex_cell = vertex->get_msc();
+  // max_cell --> vertex_cell, find the shortest path 
+  WireCell2dToy::ToyWalking walking(max_mcell,vertex_cell,mcells_map);
+  track_mcells = walking.get_cells();
+
+  //std::cout << track_mcells.size() << std::endl;
+  
+
+  // form vertex ... 
   
  
   // what about the duplicated tracks ??? 
