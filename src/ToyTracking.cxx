@@ -169,7 +169,13 @@ void WireCell2dToy::ToyTracking::form_parallel_tiny_tracks(WireCell2dToy::ToyCra
     
     if (flag == -1){
       //entire thing ... 
+      orig_mcells.push_back(mcell);
+      new_mcells.push_back(mcell);
     }else{
+      MergeSpaceCell *nmcell = new MergeSpaceCell();
+      
+      int flag2 = 0;
+
       for (int j=0;j!=mcell->Get_all_spacecell().size();j++){
 	SpaceCell *cell = mcell->Get_all_spacecell().at(j);
 	int flag1 = 0;
@@ -183,11 +189,25 @@ void WireCell2dToy::ToyTracking::form_parallel_tiny_tracks(WireCell2dToy::ToyCra
 	}
 	
 	if (flag1 == 0){
+	  flag2 = 1;
+	  nmcell->AddSpaceCell(cell);
 	  // partial thing
 	}
       }
+      
+      if (flag2 == 1){
+	orig_mcells.push_back(mcell);
+	new_mcells.push_back(nmcell);
+      }else{
+	delete nmcell;
+      }
     }
   }
+
+  
+
+
+  std::cout << vertices.size() << " " << orig_mcells.size() << " " << new_mcells.size() << std::endl;
 
   
 
@@ -223,7 +243,7 @@ bool WireCell2dToy::ToyTracking::grow_track_fill_gap(WireCell2dToy::ToyCrawler& 
 	for (int j=0;j!=cells.size();j++){
 	  MergeSpaceCell *cell = cells.at(j);
 	  auto it = find(track->get_all_cells().begin(), track->get_all_cells().end(), cell);
-	  if (it == track->get_all_cells().end() ){
+	  if (it == track->get_all_cells().end() && fabs(cell->Get_Center().x - final_cell->Get_Center().x)>0.1*units::mm ){
 	    test_cells.push_back(cell);
 	  }else{
 	    prev_cell = cell;
@@ -270,7 +290,8 @@ bool WireCell2dToy::ToyTracking::grow_track_fill_gap(WireCell2dToy::ToyCrawler& 
 	      test_cells.clear();
 	      for (int j=0;j!=mcells_map[final_cell].size();j++){
 		if ((mcells_map[final_cell].at(j)->Get_Center().x - final_cell->Get_Center().x) * 
-		    (final_cell->Get_Center().x - prev_cell->Get_Center().x) >0){
+		    (final_cell->Get_Center().x - prev_cell->Get_Center().x) >0 
+		    && fabs(mcells_map[final_cell].at(j)->Get_Center().x - final_cell->Get_Center().x) > 0.1*units::mm){
 		  test_cells.push_back(mcells_map[final_cell].at(j));
 		}
 	      }
@@ -298,26 +319,33 @@ bool WireCell2dToy::ToyTracking::grow_track_fill_gap(WireCell2dToy::ToyCrawler& 
 	  // track->get_end_scells().clear();
 	  // track->get_end_scells().push_back(cells.front());
 	  // track->get_end_scells().push_back(center);
+	
 	}
 	
-	vertex->set_msc(final_cell);
-
-	result = true;
-	// std::cout << track->get_all_cells().size() << std::endl;
-	
-	// std::cout << final_cell->Get_Center().x/units::cm << std::endl;
-
-	Point p1;
-	p1.x = final_cell->Get_Center().x;
-	p1.y = vertex_cell->Get_Center().y + vertex->get_ky(track) * (p1.x - vertex_cell->Get_Center().x);
-	p1.z = vertex_cell->Get_Center().z + vertex->get_kz(track) * (p1.x - vertex_cell->Get_Center().x);
-	vertex->set_center(p1);
+	if (final_cell != vertex_cell){
+	  vertex->set_msc(final_cell);
+	  
+	  result = true;
+	  // std::cout << track->get_all_cells().size() << std::endl;
+	  // std::cout << final_cell->Get_Center().x/units::cm << std::endl;
+	  
+	  
+	  
+	  Point p1;
+	  p1.x = final_cell->Get_Center().x;
+	  p1.y = vertex_cell->Get_Center().y + vertex->get_ky(track) * (p1.x - vertex_cell->Get_Center().x);
+	  p1.z = vertex_cell->Get_Center().z + vertex->get_kz(track) * (p1.x - vertex_cell->Get_Center().x);
+	  
+	  // std::cout << vertex_cell << " " << final_cell << " " << vertex->Center().x/units::cm << " " << vertex->Center().y/units::cm << " " << vertex->Center().z/units::cm << " " 
+	  // 	    << p1.x/units::cm << " " << p1.y/units::cm << " " << p1.z/units::cm << std::endl;
+	  
+	  vertex->set_center(p1);
 	//	vertex->reset_center();
 	// vertex->FindVertex();
 	// std::cout << final_cell->Get_Center().x/units::cm << " " << 
 	//       final_cell->Get_Center().y/units::cm << " " << 
 	//       final_cell->Get_Center().z/units::cm << " " << std::endl;
-
+	}
       }
     }
   }

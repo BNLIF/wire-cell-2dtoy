@@ -200,8 +200,8 @@ int main(int argc, char* argv[])
   
   WireCell2dToy::ClusterDisplay display(c1);
   // display.DrawCluster(cells);
-  display.DrawCluster(mcells);
-  //  display.DrawCluster(mcells,toytracking);
+  //display.DrawCluster(mcells);
+  display.DrawCluster(mcells,toytracking);
   // display.DrawCrawler(toycrawler,"psame",1);
 
   

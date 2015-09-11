@@ -60,7 +60,8 @@ namespace WireCell2dToy{
     WireCell::WCTrackSelection parallel_tracks;
     WireCell::WCTrackSelection short_tracks;
     
-    
+    WireCell::MergeSpaceCellSelection orig_mcells;
+    WireCell::MergeSpaceCellSelection new_mcells;
 
     /* WireCell::MSC_WCV_Map msc_wcv_map; */
     /* WireCell::MCT_WCT_Map mct_wct_map; */
