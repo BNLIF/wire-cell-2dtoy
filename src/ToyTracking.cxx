@@ -142,7 +142,8 @@ WireCell2dToy::ToyTracking::ToyTracking(WireCell2dToy::ToyCrawler& toycrawler){
       }
       
       form_parallel_tiny_tracks(toycrawler);
-      
+      // update_maps();
+      // fine_tracking();
     }else{
       //is a shower  
       
@@ -370,6 +371,8 @@ void WireCell2dToy::ToyTracking::parallel_tracking(WCVertex *vertex, MergeSpaceC
     }
   }
 
+  max_mcell = new_mcells_map[max_mcell];
+
   max_dis1 = 0;
   Point max_point;
   //find the furtherst point 
@@ -396,10 +399,23 @@ void WireCell2dToy::ToyTracking::parallel_tracking(WCVertex *vertex, MergeSpaceC
   // max_cell --> vertex_cell, find the shortest path 
   WireCell2dToy::ToyWalking walking(max_mcell,vertex_cell,mcells_map);
   track_mcells = walking.get_cells();
-
-  //std::cout << track_mcells.size() << std::endl;
+  double dist = walking.get_dist();
   
+  std::cout << dist << " " << track_mcells.size() << std::endl;
 
+  if (dist < 1e9){
+    WCTrack *track = new WCTrack(track_mcells);
+    vertex->Add(track);
+    tracks.push_back(track);
+    parallel_tracks.push_back(track);
+
+    WCVertex *vertex1 = new WCVertex(*max_mcell);
+    vertex1->set_center(max_point);
+    vertex1->Add(track);
+    vertices.push_back(vertex1);
+  }
+  // std::cout << track_mcells.size() << std::endl;
+  
   // form vertex ... 
   
  
