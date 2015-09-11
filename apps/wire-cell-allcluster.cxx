@@ -1,6 +1,7 @@
 #include "WireCell2dToy/ToyTiling.h"
 #include "WireCell2dToy/ClusterDisplay.h"
 #include "WireCell2dToy/ToyCrawler.h"
+#include "WireCell2dToy/ToyTracking.h"
 
 #include "WireCellData/MergeGeomCell.h"
 #include "WireCellData/MergeGeomWire.h"
@@ -98,9 +99,9 @@ int main(int argc, char* argv[])
   int mcell_id;
   TC->SetBranchAddress("time_slice",&time_slice);
   TC->SetBranchAddress("charge",&charge);
-  TC->SetBranchAddress("x",&x);
-  TC->SetBranchAddress("y",&y);
-  TC->SetBranchAddress("z",&z);
+  TC->SetBranchAddress("xx",&x);
+  TC->SetBranchAddress("yy",&y);
+  TC->SetBranchAddress("zz",&z);
   TC->SetBranchAddress("ncluster",&cluster_num);
   TC->SetBranchAddress("mcell_id",&mcell_id);
   TC->SetBranchAddress("cell",&cell);
@@ -123,7 +124,7 @@ int main(int argc, char* argv[])
 
   //save all the crawlers ... 
   std::vector<WireCell2dToy::ToyCrawler*> crawlers;
-  
+  std::vector<WireCell2dToy::ToyTracking*> trackings;
 
   int prev_mcell_id = -1;
   int prev_cluster_num = -1;
@@ -218,7 +219,11 @@ int main(int argc, char* argv[])
 
   //check # of clusters 
   int sum = 0 ;
+  
   for (int i=0;i!=crawlers.size();i++){
+    WireCell2dToy::ToyTracking* toytracking = new WireCell2dToy::ToyTracking(*crawlers.at(i));
+    trackings.push_back(toytracking);
+
     for (auto it = crawlers.at(i)->Get_mcells_map().begin(); it!= crawlers.at(i)->Get_mcells_map().end();it++){
       MergeSpaceCell *mcell1 = it->first;
       sum += mcell1->Get_all_spacecell().size();
@@ -227,6 +232,136 @@ int main(int argc, char* argv[])
   }
   
   std::cout << "Check: " << crawlers.size() << " " << TC->GetEntries() << " " << sum << std::endl;
+
+  TFile *file1 = new TFile("cluster_tracking.root","RECREATE");
+  TTree *T1 = new TTree("T_goodtrack","T_goodtrack");
+  TTree *T2 = new TTree("T_vertex","T_vertex");
+  TTree *T3 = new TTree("T_badtrack","T_badtrack");
+  
+  T1->SetDirectory(file1);
+  T2->SetDirectory(file1);
+  T3->SetDirectory(file1);
+  
+  Int_t ntracks;
+  Int_t npoints;
+  Double_t xx[3000],yy[3000],zz[3000];
+  Double_t theta[3000],phi[3000];
+  Double_t energy[3000],dedx[3000];
+  Int_t trackid;
+  Int_t vtrack_id[100];
+  
+  T1->Branch("npoints",&npoints,"npoints/I");
+  T1->Branch("trackid",&trackid,"trackid/I");
+  T1->Branch("x",xx,"x[npoints]/D");
+  T1->Branch("y",yy,"y[npoints]/D");
+  T1->Branch("z",zz,"z[npoints]/D");
+
+  T1->Branch("theta",theta,"theta[npoints]/D");
+  T1->Branch("phi",phi,"phi[npoints]/D");
+  T1->Branch("energy",energy,"energy[npoints]/D");
+  T1->Branch("dedx",dedx,"dedx[npoints]/D");
+  
+  T2->Branch("ntracks",&ntracks,"ntracks/I");
+  T2->Branch("x",xx,"x/D");
+  T2->Branch("y",yy,"y/D");
+  T2->Branch("z",zz,"z/D");
+  T2->Branch("vtrack_id",vtrack_id,"vtrack_id[ntracks]/I");
+  
+
+  T3->Branch("npoints",&npoints,"npoints/I");
+  T3->Branch("trackid",&trackid,"trackid/I");
+  T3->Branch("x",xx,"x[npoints]/D");
+  T3->Branch("y",yy,"y[npoints]/D");
+  T3->Branch("z",zz,"z[npoints]/D");
+
+  T3->Branch("theta",theta,"theta[npoints]/D");
+  T3->Branch("phi",phi,"phi[npoints]/D");
+  T3->Branch("energy",energy,"energy[npoints]/D");
+  T3->Branch("dedx",dedx,"dedx[npoints]/D");
+
+
+  WCTrackSelection good_tracks;
+  WCTrackSelection bad_tracks;
+  WCVertexSelection vertices;
+  
+  TGraph2D *g = new TGraph2D();
+  int ncount = 0;
+
+  for (int i=0;i!=trackings.size();i++){
+    for (int j=0;j!=trackings.at(i)->get_good_tracks().size();j++){
+      good_tracks.push_back(trackings.at(i)->get_good_tracks().at(j));
+    }
+    for (int j=0;j!=trackings.at(i)->get_bad_tracks().size();j++){
+      bad_tracks.push_back(trackings.at(i)->get_bad_tracks().at(j));
+    }
+    for (int j=0;j!=trackings.at(i)->get_vertices().size();j++){
+      vertices.push_back(trackings.at(i)->get_vertices().at(j));
+    }
+  }
+  
+  //fill T1
+  for (int i = 0; i!=good_tracks.size();i++){
+    WCTrack *track = good_tracks.at(i);
+    
+    npoints = track->get_centerVP().size();
+    trackid = i;
+    for (int j=0;j!=npoints;j++){
+      xx[j] = track->get_centerVP().at(j).x/units::cm;
+      yy[j] = track->get_centerVP().at(j).y/units::cm;
+      zz[j] = track->get_centerVP().at(j).z/units::cm;
+      theta[j] = track->get_centerVP_theta().at(j);
+      phi[j] = track->get_centerVP_phi().at(j);
+      energy[j] = track->get_centerVP_energy().at(j);
+      dedx[j] = track->get_centerVP_dedx().at(j);
+      g->SetPoint(ncount,xx[j],yy[j],zz[j]);
+      ncount ++;
+    }
+    T1->Fill();
+  }
+  //fill T2
+  for (int i=0;i!=vertices.size();i++){
+    ntracks = 0;
+    WCVertex *vertex = vertices.at(i);
+    xx[0] = vertex->Center().x/units::cm;
+    yy[0] = vertex->Center().y/units::cm;
+    zz[0] = vertex->Center().z/units::cm;
+    for (int j=0;j!=vertex->get_ntracks();j++){
+      WCTrack *track = vertex->get_tracks().at(j);
+      auto it = find(good_tracks.begin(),good_tracks.end(),track);
+      if (it != good_tracks.end()){
+	vtrack_id[ntracks] = it-good_tracks.begin();
+	ntracks ++;
+      }
+    }
+    T2->Fill();
+  }
+
+  //fill T3
+  for (int i = 0; i!=bad_tracks.size();i++){
+    WCTrack *track = bad_tracks.at(i);
+    
+    npoints = track->get_centerVP().size();
+    trackid = i;
+    for (int j=0;j!=npoints;j++){
+      xx[j] = track->get_centerVP().at(j).x/units::cm;
+      yy[j] = track->get_centerVP().at(j).y/units::cm;
+      zz[j] = track->get_centerVP().at(j).z/units::cm;
+      theta[j] = track->get_centerVP_theta().at(j);
+      phi[j] = track->get_centerVP_phi().at(j);
+      energy[j] = track->get_centerVP_energy().at(j);
+      dedx[j] = track->get_centerVP_dedx().at(j);
+      g->SetPoint(ncount,xx[j],yy[j],zz[j]);
+      ncount ++;
+    }
+    T3->Fill();
+  }
+  
+  g->Write("shower3D");
+  file1->Write();
+  file1->Close();
+  
+  
+
 
 
   //start the prepare the important merge cell vectors
@@ -239,47 +374,47 @@ int main(int argc, char* argv[])
   //Good_MCells.push_back(cells);
   // }
 
-  MergeSpaceCellSelection ms_cells;
+  // MergeSpaceCellSelection ms_cells;
   
   
-  for (int i=0;i!=crawlers.size();i++){
-    WireCell2dToy::ToyCrawler *toycrawler = crawlers.at(i);
-    for (int j=0;j!=toycrawler->Get_allMCT().size();j++){
-      MergeClusterTrack *mct = toycrawler->Get_allMCT().at(j);
-      int ntime = mct->Get_TimeLength();
-      if (ntime >=5){
-	// do something
+  // for (int i=0;i!=crawlers.size();i++){
+  //   WireCell2dToy::ToyCrawler *toycrawler = crawlers.at(i);
+  //   for (int j=0;j!=toycrawler->Get_allMCT().size();j++){
+  //     MergeClusterTrack *mct = toycrawler->Get_allMCT().at(j);
+  //     int ntime = mct->Get_TimeLength();
+  //     if (ntime >=5){
+  // 	// do something
 	
-	for (int k=0;k!=ntime;k++){
-	  MergeSpaceCellSelection cells = mct->Get_MSCS(k);
-	  if (cells.size()==1){
-	    ms_cells.push_back(cells.at(0));
-	  }else if (cells.size()>1){
-	    MergeSpaceCell *cell = cells.at(0);
-	    for (int i1 = 1; i1!=cells.size();i1++){
-	      if (cell->Get_all_spacecell().size() < cells.at(i1)->Get_all_spacecell().size()){
-		cell = cells.at(i1);
-	      }
-	    }
-	    ms_cells.push_back(cell);
-	  }
-	}
+  // 	for (int k=0;k!=ntime;k++){
+  // 	  MergeSpaceCellSelection cells = mct->Get_MSCS(k);
+  // 	  if (cells.size()==1){
+  // 	    ms_cells.push_back(cells.at(0));
+  // 	  }else if (cells.size()>1){
+  // 	    MergeSpaceCell *cell = cells.at(0);
+  // 	    for (int i1 = 1; i1!=cells.size();i1++){
+  // 	      if (cell->Get_all_spacecell().size() < cells.at(i1)->Get_all_spacecell().size()){
+  // 		cell = cells.at(i1);
+  // 	      }
+  // 	    }
+  // 	    ms_cells.push_back(cell);
+  // 	  }
+  // 	}
 	
 
-      }
-    }
-  }
+  //     }
+  //   }
+  // }
   
-  // plot it
+  // // plot it
   
-  TApplication theApp("theApp",&argc,argv);
-  theApp.SetReturnFromRun(true);
+  // TApplication theApp("theApp",&argc,argv);
+  // theApp.SetReturnFromRun(true);
   
-  TCanvas c1("ToyMC","ToyMC",800,600);
-  c1.Draw();
+  // TCanvas c1("ToyMC","ToyMC",800,600);
+  // c1.Draw();
   
-  WireCell2dToy::ClusterDisplay display(c1);
-  display.DrawCluster(ms_cells);
+  // WireCell2dToy::ClusterDisplay display(c1);
+  // display.DrawCluster(ms_cells);
 
-  theApp.Run();
+  // theApp.Run();
 }

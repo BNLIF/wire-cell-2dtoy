@@ -90,7 +90,7 @@ WireCell2dToy::ToyTracking::ToyTracking(WireCell2dToy::ToyCrawler& toycrawler){
 
 
   //deal with wiggle tracks
-  std::cout << "Deal with Wiggle Tracks " << std::endl;
+  //std::cout << "Deal with Wiggle Tracks " << std::endl;
   deal_wiggle_tracks();
   CheckVertices(toycrawler); // redefine all the tracks ... 
   update_maps();
@@ -109,38 +109,42 @@ WireCell2dToy::ToyTracking::ToyTracking(WireCell2dToy::ToyCrawler& toycrawler){
     // }
   }
 
-
-  //Now do fine tracking for existing tracks
-  std::cout << "FineTracking " << std::endl; 
-  update_maps();
-  fine_tracking();
-  cleanup_bad_tracks();
-  update_maps1();
-
-  
-  
-  // Now need to figure out how to judge whether this is a shower or track ... 
-  // just from the number of tracks and the connectivities?
-  bool shower_flag = IsThisShower(toycrawler);
-
-  std::cout << "Shower? " << shower_flag << std::endl;
-
-  // separate various issues ... 
-
-  if (!shower_flag){
-    //not a shower
-    std::cout << "Grown single track " << std::endl;
-    if (grow_track_fill_gap(toycrawler)){
-      std::cout << "FineTracking Again" << std::endl; 
-      update_maps();
-      fine_tracking();
-    }
-
-    form_parallel_tiny_tracks(toycrawler);
-
-  }else{
-    //is a shower  
+  if (vertices.size() > 0 ) {
     
+    //Now do fine tracking for existing tracks
+    std::cout << "FineTracking " << std::endl; 
+    update_maps();
+    fine_tracking();
+    cleanup_bad_tracks();
+    
+    update_maps1();
+    
+    
+    
+    
+    // Now need to figure out how to judge whether this is a shower or track ... 
+    // just from the number of tracks and the connectivities?
+    bool shower_flag = IsThisShower(toycrawler);
+    
+    std::cout << "Shower? " << shower_flag << std::endl;
+    
+    // separate various issues ... 
+    
+    if (!shower_flag){
+      //not a shower
+      std::cout << "Grown single track " << std::endl;
+      if (grow_track_fill_gap(toycrawler)){
+	std::cout << "FineTracking Again" << std::endl; 
+	update_maps();
+	fine_tracking();
+      }
+      
+      form_parallel_tiny_tracks(toycrawler);
+      
+    }else{
+      //is a shower  
+      
+    }
   }
 }
 
@@ -152,16 +156,15 @@ void WireCell2dToy::ToyTracking::form_parallel_tiny_tracks(WireCell2dToy::ToyCra
   for (auto it = mcells_map.begin(); it != mcells_map.end(); it++){
     mcells.push_back(it->first);
   }
-
-
+  
   //examine all the cells to find out outlier 
   for (int i=0;i!=mcells.size();i++){
     MergeSpaceCell *mcell = mcells.at(i);
     std::vector<int> track_no;
     
     int flag = -1;
-    for (int j=0;j!=tracks.size();j++){
-      if (tracks.at(j)->IsContained(mcell)){
+    for (int j=0;j!=good_tracks.size();j++){
+      if (good_tracks.at(j)->IsContained(mcell)){
 	flag = 1;
 	track_no.push_back(j);
       }
@@ -169,8 +172,11 @@ void WireCell2dToy::ToyTracking::form_parallel_tiny_tracks(WireCell2dToy::ToyCra
     
     if (flag == -1){
       //entire thing ... 
-      orig_mcells.push_back(mcell);
-      new_mcells.push_back(mcell);
+      if (mcell->Get_all_spacecell().size()>0){
+	//orig_mcells.push_back(mcell);
+	new_mcells.push_back(mcell);
+	new_mcells_map[mcell] = mcell;
+      }
     }else{
       MergeSpaceCell *nmcell = new MergeSpaceCell();
       
@@ -181,7 +187,7 @@ void WireCell2dToy::ToyTracking::form_parallel_tiny_tracks(WireCell2dToy::ToyCra
 	int flag1 = 0;
 
 	for (int k=0;k!=track_no.size();k++){
-	  double dist = tracks.at(track_no.at(k))->dist_proj(mcell,cell)/units::mm;
+	  double dist = good_tracks.at(track_no.at(k))->dist_proj(mcell,cell)/units::mm;
 	  if (dist < 6.0){
 	    flag1 = 1;
 	    break;
@@ -189,26 +195,123 @@ void WireCell2dToy::ToyTracking::form_parallel_tiny_tracks(WireCell2dToy::ToyCra
 	}
 	
 	if (flag1 == 0){
-	  flag2 = 1;
+	  flag2 ++;
 	  nmcell->AddSpaceCell(cell);
 	  // partial thing
 	}
       }
-      
-      if (flag2 == 1){
-	orig_mcells.push_back(mcell);
+      // if (flag2 > 0)
+      // 	std::cout << flag2 << std::endl;
+      if (flag2 >0){
+	//orig_mcells.push_back(mcell);
 	new_mcells.push_back(nmcell);
+	new_mcells_map[nmcell] = mcell;
       }else{
 	delete nmcell;
       }
     }
   }
 
+
+  std::vector<MergeSpaceCellSelection> cluster_msc;
+  // Need to cluster these by whether they are connected ...
+  for (int i=0;i!=new_mcells.size();i++){
+    MergeSpaceCell *mcell = new_mcells.at(i);
+
+    if (cluster_msc.size() == 0 ){
+      MergeSpaceCellSelection mscs;
+      mscs.push_back(mcell);
+      cluster_msc.push_back(mscs);
+    }else{
+      int flag = 0;
+      for (int j=0;j!=cluster_msc.size();j++){
+   	MergeSpaceCellSelection& mscs = cluster_msc.at(j);
+   	for (int k=0;k!=mscs.size();k++){
+   	  MergeSpaceCell *mcell1 = mscs.at(k);
+	  
+   	  if (fabs(mcell1->Get_Center().x - mcell->Get_Center().x) < mcell1->thickness() + 0.2*units::mm &&
+	      mcell1->Overlap(*mcell)){
+   	    mscs.push_back(mcell);
+   	    flag = 1;
+	    break;
+   	  }
+   	}
+	if (flag == 1)
+	  break;
+      }
+      if (flag == 0){
+  	MergeSpaceCellSelection mscs;
+  	mscs.push_back(mcell);
+  	cluster_msc.push_back(mscs);
+      }
+    }
+  }
+  
+  int flag = 1;
+  while(flag){
+    flag = 0;
+    for (int i=0;i!=cluster_msc.size();i++){
+      MergeSpaceCellSelection& mscs_1 = cluster_msc.at(i);
+      for (int j=i+1;j< cluster_msc.size();j++){
+  	MergeSpaceCellSelection& mscs_2 = cluster_msc.at(j);
+	
+  	for (int k1 = 0; k1 != mscs_1.size(); k1++){
+  	  MergeSpaceCell *mcell1 = mscs_1.at(k1);
+  	  for (int k2 = 0; k2!= mscs_2.size(); k2++){
+  	    MergeSpaceCell * mcell2 = mscs_2.at(k2);
+	    
+  	    if (fabs(mcell1->Get_Center().x - mcell2->Get_Center().x) < mcell1->thickness() + 0.2*units::mm &&
+  		mcell1->Overlap(*mcell2)){
+
+  	      cluster_msc.at(i).insert(cluster_msc.at(i).end(),cluster_msc.at(j).begin(),cluster_msc.at(j).end());
+  	      cluster_msc.erase(cluster_msc.begin() + j);
+  	      std::cout << flag << std::endl;
+  	      flag = 1;
+  	      break;
+  	    }
+  	  }
+  	  if (flag == 1) break;
+  	}
+  	if (flag == 1) break;
+      }
+      if (flag == 1) break;
+    }
+  }
+  
+  flag = 1;
+  while (flag){
+    flag = 0;
+    for (int i=0;i!=cluster_msc.size();i++){
+      MergeSpaceCellSelection& mscs_1 = cluster_msc.at(i);
+      int sum = 0;
+      for (int j=0;j!=mscs_1.size();j++){
+  	sum += mscs_1.at(j)->Get_all_spacecell().size();
+      }
+      if (sum < 5){
+  	cluster_msc.erase(cluster_msc.begin() + i);
+  	flag = 1;
+  	break;
+      }
+    }
+  }
+
+
+  // std::cout << vertices.size() << " " << new_mcells.size() << " " << cluster_msc.size() << std::endl;
+  // for (int i=0;i!=cluster_msc.size();i++){
+  //   std::cout << cluster_msc.at(i).at(0)->Get_Center().x/units::cm << " " << cluster_msc.at(i).size() << std::endl;
+  // }
+
+  
+  // Need to judge if the cluster is around a vertex or not (what criteria?)
+  
+  
+
+  // If not, do short track, just save the nmcell etc
+  // if yes, do parallel track finder ... 
   
 
 
-  std::cout << vertices.size() << " " << orig_mcells.size() << " " << new_mcells.size() << std::endl;
-
+  //  
   
 
 
@@ -448,8 +551,9 @@ bool WireCell2dToy::ToyTracking::IsThisShower(WireCell2dToy::ToyCrawler& toycraw
   int ntracks = 0;
   MergeSpaceCellSelection all_track_mscs;
   for (int i=0;i!=tracks.size();i++){
-    //  auto it = find(bad_tracks.begin(),bad_tracks.end(),tracks.at(i));
-    if (tracks.at(i)->get_centerVP().size() > 0 ){
+    auto it = find(good_tracks.begin(),good_tracks.end(),tracks.at(i));
+    if (it != good_tracks.end()){
+    //    if (tracks.at(i)->get_centerVP().size() > 0 ){
       all_track_mscs.insert(all_track_mscs.end(),tracks.at(i)->get_centerVP_cells().begin(),tracks.at(i)->get_centerVP_cells().end()) ; 
       ntracks ++;
     }
@@ -586,16 +690,15 @@ bool WireCell2dToy::ToyTracking::IsThisShower(WireCell2dToy::ToyCrawler& toycraw
 void WireCell2dToy::ToyTracking::cleanup_bad_tracks(){
   WCVertexSelection to_be_removed;
 
-  for (int i=0;i!=tracks.size();i++){
-    if (tracks.at(i)->IsBadTrack()){
-      
-      bad_tracks.push_back(tracks.at(i));
-      tracks.at(i)->reset_fine_tracking();
+  for (int i=0;i!=good_tracks.size();i++){
+    if (good_tracks.at(i)->IsBadTrack()){      
+      bad_tracks.push_back(good_tracks.at(i));
+      //bad_tracks.at(i)->reset_fine_tracking();
       
       for (int j=0;j!=vertices.size();j++){
         WCVertex *vertex = vertices.at(j);
 	WCTrackSelection& vtracks = vertex->get_tracks();
-	auto it = find(vtracks.begin(),vtracks.end(),tracks.at(i));
+	auto it = find(vtracks.begin(),vtracks.end(),good_tracks.at(i));
 	if (it != vtracks.end()){
 	  vtracks.erase(it);
 	}
@@ -607,6 +710,11 @@ void WireCell2dToy::ToyTracking::cleanup_bad_tracks(){
 	}
       }
     }  
+  }
+
+  for (int i=0;i!=bad_tracks.size();i++){
+    auto it = find(good_tracks.begin(),good_tracks.end(),bad_tracks.at(i));
+    good_tracks.erase(it);
   }
 
   // for (int i=0;i!=vertices.size();i++){
@@ -638,13 +746,18 @@ void WireCell2dToy::ToyTracking::update_maps1(){
     // push good tracks in
     WCTrackSelection tracks1;
     for (int j=0;j!=tracks_1.size();j++){
-      if (tracks_1.at(j)->get_centerVP().size() > 0){
+      auto it =  find(good_tracks.begin(),good_tracks.end(),tracks_1.at(j));
+      if (it != good_tracks.end()){
+      //      if (tracks_1.at(j)->get_centerVP().size() > 0){
 	tracks1.push_back(tracks_1.at(j));
       }
     }
+
     // judge the rest of tracks
     for (int j=0;j!=tracks.size();j++){
-      if (tracks.at(j)->get_centerVP().size()>0){
+      auto it3 = find(good_tracks.begin(),good_tracks.end(),tracks.at(j));
+      //  if (tracks.at(j)->get_centerVP().size()>0){
+      if (it3 != good_tracks.end()){
 	auto it = find(tracks1.begin(),tracks1.end(),tracks.at(j));
 	if (it == tracks1.end()){
 	  auto it1 = find(tracks.at(j)->get_centerVP_cells().begin(),
@@ -655,6 +768,7 @@ void WireCell2dToy::ToyTracking::update_maps1(){
 	  }
 	}
       }
+
     }
 
     
@@ -828,6 +942,7 @@ void WireCell2dToy::ToyTracking::fine_tracking(){
 	//std::cout << i << "abc4 " << std::endl;
 	track->reset_fine_tracking();
 	track->fine_tracking(np1,p1,ky1,kz1,np2,p2,ky2,kz2);
+	good_tracks.push_back(track);
 	//std::cout << i << "abc5 " << std::endl;
       }
     }
