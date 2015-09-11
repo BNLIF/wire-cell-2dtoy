@@ -142,8 +142,8 @@ WireCell2dToy::ToyTracking::ToyTracking(WireCell2dToy::ToyCrawler& toycrawler){
       }
       
       form_parallel_tiny_tracks(toycrawler);
-      // update_maps();
-      // fine_tracking();
+      update_maps();
+      fine_tracking();
     }else{
       //is a shower  
       
@@ -401,17 +401,31 @@ void WireCell2dToy::ToyTracking::parallel_tracking(WCVertex *vertex, MergeSpaceC
   track_mcells = walking.get_cells();
   double dist = walking.get_dist();
   
-  std::cout << dist << " " << track_mcells.size() << std::endl;
+  //std::cout << dist << " " << track_mcells.size() << std::endl;
 
   if (dist < 1e9){
     WCTrack *track = new WCTrack(track_mcells);
     vertex->Add(track);
+    
+    double ky, kz;
+    if (max_point.x == p.x){
+      ky = 0;
+      kz = 0;
+    }else{
+      ky = (max_point.y-p.y)/(max_point.x-p.x);
+      kz = (max_point.z-p.z)/(max_point.x-p.x);
+    }
+
+    vertex->set_ky(track,ky);
+    vertex->set_kz(track,kz);
     tracks.push_back(track);
     parallel_tracks.push_back(track);
 
     WCVertex *vertex1 = new WCVertex(*max_mcell);
     vertex1->set_center(max_point);
     vertex1->Add(track);
+    vertex1->set_ky(track,ky);
+    vertex1->set_kz(track,kz);
     vertices.push_back(vertex1);
   }
   // std::cout << track_mcells.size() << std::endl;

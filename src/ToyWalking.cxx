@@ -22,7 +22,7 @@ void WireCell2dToy::ToyWalking::Iterate(MergeSpaceCell *curr_cell, MergeSpaceCel
       + pow(curr_cell->Get_Center().z - curr_cells.at(curr_cells.size()-2)->Get_Center().z,2);
   }
   
-  std::cout << curr_cell->Get_Center().x/units::cm << " " << target_cell->Get_Center().x/units::cm << " " << mcells_map[curr_cell].size() << std::endl;
+  // std::cout << curr_cell->Get_Center().x/units::cm << " " << target_cell->Get_Center().x/units::cm << " " << mcells_map[curr_cell].size() << std::endl;
 
   if (curr_cell == target_cell){
     //end of it, calculate distance ... 
