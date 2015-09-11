@@ -265,7 +265,8 @@ void WireCell2dToy::ToyTracking::form_parallel_tiny_tracks(WireCell2dToy::ToyCra
 
   	      cluster_msc.at(i).insert(cluster_msc.at(i).end(),cluster_msc.at(j).begin(),cluster_msc.at(j).end());
   	      cluster_msc.erase(cluster_msc.begin() + j);
-  	      std::cout << flag << std::endl;
+  	      
+	      //std::cout << flag << std::endl;
   	      flag = 1;
   	      break;
   	    }
@@ -300,10 +301,34 @@ void WireCell2dToy::ToyTracking::form_parallel_tiny_tracks(WireCell2dToy::ToyCra
   // for (int i=0;i!=cluster_msc.size();i++){
   //   std::cout << cluster_msc.at(i).at(0)->Get_Center().x/units::cm << " " << cluster_msc.at(i).size() << std::endl;
   // }
-
   
   // Need to judge if the cluster is around a vertex or not (what criteria?)
-  
+  for (int i=0;i!=cluster_msc.size();i++){
+    WCVertex *vertex;
+    int flag = 0;
+    for (int k=0;k!=cluster_msc.at(i).size();k++){
+      MergeSpaceCell *mcell1 = cluster_msc.at(i).at(k);
+      MergeSpaceCell *mcell2 = new_mcells_map[mcell1];
+      for (int j=0;j!=vertices.size();j++){
+	vertex = vertices.at(j);
+	MergeSpaceCell *vertex_cell = vertex->get_msc();
+	
+	if (fabs(vertex_cell->Get_Center().x - mcell2->Get_Center().x) < 2*vertex_cell->thickness() + 0.5*units::mm && vertex_cell->Overlap(*mcell2)){
+	  flag = 1;
+	  break;
+	}
+      }
+      if (flag == 1)
+	break;
+    }
+    if (flag == 1){
+      //std::cout << flag << " " << vertex->Center().x/units::cm << " " << std::endl;
+    }else{
+      WCTrack *track = new WCTrack(cluster_msc.at(i));
+      short_tracks.push_back(track);
+    }
+  }
+
   
 
   // If not, do short track, just save the nmcell etc

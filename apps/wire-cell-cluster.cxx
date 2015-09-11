@@ -207,9 +207,12 @@ int main(int argc, char* argv[])
   
   WCVertexSelection& vertices = toytracking.get_vertices();
   display.DrawVertex(vertices,"psame");
+  
   WCTrackSelection& bad_tracks = toytracking.get_bad_tracks();
   display.DrawTracks(bad_tracks,"same",2);
 
+  WCTrackSelection& short_tracks = toytracking.get_short_tracks();
+  display.DrawTracks(short_tracks,"psame",4);
 
   // Point p;
   // p.x = cells.at(0)->x();

@@ -113,22 +113,51 @@ void WireCell2dToy::ClusterDisplay::DrawVertex(WCVertexSelection& vertices, TStr
 
 
 void WireCell2dToy::ClusterDisplay::DrawTracks(WireCell::WCTrackSelection& tracks, TString option, int color ){
+  double x1[2500],y1[2500],z1[2500];
+  
   for (int i =0; i!=tracks.size();i++){
     WCTrack *track = tracks.at(i);
-    double x1[10],y1[10],z1[10];
-    Point p1 = track->get_end_scells().at(0)->Get_Center();
-    Point p2 = track->get_end_scells().at(1)->Get_Center();
-    x1[0] = p1.x/units::cm;
-    y1[0] = p1.y/units::cm;
-    z1[0] = p1.z/units::cm;
     
-    x1[1] = p2.x/units::cm;
-    y1[1] = p2.y/units::cm;
-    z1[1] = p2.z/units::cm;
-    TPolyLine3D *l2 = new TPolyLine3D(2,x1,y1,z1);
-    l2->Draw(option);
-    l2->SetLineColor(color);
-    l2->SetLineWidth(2.5);
+    PointVector& points = track->get_centerVP();
+    if (points.size() > 0){
+      for (int k=0;k!=points.size();k++){
+	Point p1 = points.at(k);
+	x1[k] = p1.x/units::cm;
+	y1[k] = p1.y/units::cm;
+	z1[k] = p1.z/units::cm;
+      }
+      
+      TPolyLine3D *l1 = new TPolyLine3D(points.size(),x1,y1,z1);
+      l1->Draw(option);
+      l1->SetLineWidth(2.0);
+      l1->SetLineColor(color);
+    }else{
+      TGraph2D *g = new TGraph2D();
+      int n = 0;
+      for (int j=0;j!=track->get_all_cells().size();j++){
+	g->SetPoint(n,track->get_all_cells().at(j)->Get_Center().x/units::cm,
+		    track->get_all_cells().at(j)->Get_Center().y/units::cm,
+		    track->get_all_cells().at(j)->Get_Center().z/units::cm);
+	g->Draw(option);
+	g->SetMarkerStyle(23);
+	g->SetMarkerColor(color);
+	n++;
+      }
+    }
+    // double x1[10],y1[10],z1[10];
+    // Point p1 = track->get_end_scells().at(0)->Get_Center();
+    // Point p2 = track->get_end_scells().at(1)->Get_Center();
+    // x1[0] = p1.x/units::cm;
+    // y1[0] = p1.y/units::cm;
+    // z1[0] = p1.z/units::cm;
+    
+    // x1[1] = p2.x/units::cm;
+    // y1[1] = p2.y/units::cm;
+    // z1[1] = p2.z/units::cm;
+    // TPolyLine3D *l2 = new TPolyLine3D(2,x1,y1,z1);
+    // l2->Draw(option);
+    // l2->SetLineColor(color);
+    // l2->SetLineWidth(2.5);
   }
 }
 
