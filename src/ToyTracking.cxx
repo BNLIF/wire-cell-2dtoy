@@ -322,24 +322,22 @@ void WireCell2dToy::ToyTracking::form_parallel_tiny_tracks(WireCell2dToy::ToyCra
 	break;
     }
     if (flag == 1){
+      // if yes, do parallel track finder ... 
+      //MergeSpaceCellSelection mcells = cluster_msc.at(i);
+      parallel_tracking(vertex,cluster_msc.at(i),toycrawler);
       //std::cout << flag << " " << vertex->Center().x/units::cm << " " << std::endl;
     }else{
+        // If not, do short track, just save the nmcell etc
       WCTrack *track = new WCTrack(cluster_msc.at(i));
       short_tracks.push_back(track);
     }
   }
 
-  
-
-  // If not, do short track, just save the nmcell etc
-  // if yes, do parallel track finder ... 
-  
-
-
   //  
-  
 
+}
 
+void WireCell2dToy::ToyTracking::parallel_tracking(WCVertex *vertex, MergeSpaceCellSelection &mcells, WireCell2dToy::ToyCrawler& toycrawler){
 }
 
 

@@ -49,6 +49,7 @@ namespace WireCell2dToy{
     bool grow_track_fill_gap(WireCell2dToy::ToyCrawler& toycrawler);
 
     void form_parallel_tiny_tracks(WireCell2dToy::ToyCrawler& toycrawler);
+    void parallel_tracking(WireCell::WCVertex *vertex, WireCell::MergeSpaceCellSelection &mcells, WireCell2dToy::ToyCrawler& toycrawler);
 
   protected: 
     WireCell::WCTrackSelection tracks;
