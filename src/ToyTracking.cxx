@@ -384,9 +384,12 @@ void WireCell2dToy::ToyTracking::parallel_tracking(WCVertex *vertex, MergeSpaceC
   
   // std::cout << max_point.x/units::cm << " " << max_point.y/units::cm << " " << max_point.z/units::cm << std::endl;
   // std::cout << max_mcell->Get_Center().x << " " << max_mcell->Get_Center().y << std::endl;
-  
   // walk back to the mcell containing the vertex ...  Progressive tracking ...  
   
+  MergeSpaceCellSelection used_mcells;
+  MergeSpaceCellSelection track_mcells;
+  
+  //form vertex ... 
   
  
   // what about the duplicated tracks ??? 
