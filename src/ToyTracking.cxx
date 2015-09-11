@@ -227,13 +227,13 @@ void WireCell2dToy::ToyTracking::form_parallel_tiny_tracks(WireCell2dToy::ToyCra
       for (int j=0;j!=cluster_msc.size();j++){
    	MergeSpaceCellSelection& mscs = cluster_msc.at(j);
    	for (int k=0;k!=mscs.size();k++){
-   	  MergeSpaceCell *mcell1 = mscs.at(k);
-	  
-   	  if (fabs(mcell1->Get_Center().x - mcell->Get_Center().x) < mcell1->thickness() + 0.2*units::mm &&
-	      mcell1->Overlap(*mcell)){
-   	    mscs.push_back(mcell);
-   	    flag = 1;
-	    break;
+   	  MergeSpaceCell *mcell1 = mscs.at(k);	  
+   	  if (fabs(mcell1->Get_Center().x - mcell->Get_Center().x) < mcell1->thickness() + 0.2*units::mm ){
+	    if (mcell1->Overlap(*mcell)){
+	      mscs.push_back(mcell);
+	      flag = 1;
+	      break;
+	    }
    	  }
    	}
 	if (flag == 1)
@@ -254,22 +254,22 @@ void WireCell2dToy::ToyTracking::form_parallel_tiny_tracks(WireCell2dToy::ToyCra
       MergeSpaceCellSelection& mscs_1 = cluster_msc.at(i);
       for (int j=i+1;j< cluster_msc.size();j++){
   	MergeSpaceCellSelection& mscs_2 = cluster_msc.at(j);
-	
-  	for (int k1 = 0; k1 != mscs_1.size(); k1++){
+	for (int k1 = 0; k1 != mscs_1.size(); k1++){
   	  MergeSpaceCell *mcell1 = mscs_1.at(k1);
   	  for (int k2 = 0; k2!= mscs_2.size(); k2++){
   	    MergeSpaceCell * mcell2 = mscs_2.at(k2);
 	    
-  	    if (fabs(mcell1->Get_Center().x - mcell2->Get_Center().x) < mcell1->thickness() + 0.2*units::mm &&
-  		mcell1->Overlap(*mcell2)){
+  	    if (fabs(mcell1->Get_Center().x - mcell2->Get_Center().x) < mcell1->thickness() + 0.2*units::mm){ 
+	      if (mcell1->Overlap(*mcell2)){
 
-  	      cluster_msc.at(i).insert(cluster_msc.at(i).end(),cluster_msc.at(j).begin(),cluster_msc.at(j).end());
-  	      cluster_msc.erase(cluster_msc.begin() + j);
-  	      
-	      //std::cout << flag << std::endl;
-  	      flag = 1;
-  	      break;
-  	    }
+		cluster_msc.at(i).insert(cluster_msc.at(i).end(),cluster_msc.at(j).begin(),cluster_msc.at(j).end());
+		cluster_msc.erase(cluster_msc.begin() + j);
+		
+		//std::cout << flag << std::endl;
+		flag = 1;
+		break;
+	      }
+	    }
   	  }
   	  if (flag == 1) break;
   	}
@@ -338,6 +338,58 @@ void WireCell2dToy::ToyTracking::form_parallel_tiny_tracks(WireCell2dToy::ToyCra
 }
 
 void WireCell2dToy::ToyTracking::parallel_tracking(WCVertex *vertex, MergeSpaceCellSelection &mcells, WireCell2dToy::ToyCrawler& toycrawler){
+  // find the furthest point and mcell, 
+  Point p = vertex->Center();
+  double max_dis1 = 0;
+  
+  MergeSpaceCell *max_mcell;
+
+  for (int i=0;i!=mcells.size();i++){
+    MergeSpaceCell *mcell = mcells.at(i);
+    Point center = mcell->Get_Center();
+    double dy = mcell->get_dy();
+    double dz = mcell->get_dz();
+    
+    double max_dis = 0;
+    double dis[5];
+    dis[0] = sqrt(pow(p.x-center.x,2)+pow(p.y-center.y,2)+pow(p.z-center.z,2));
+    dis[1] = sqrt(pow(p.x-center.x,2)+pow(p.y-center.y-dy,2)+pow(p.z-center.z-dz,2));
+    dis[2] = sqrt(pow(p.x-center.x,2)+pow(p.y-center.y+dy,2)+pow(p.z-center.z-dz,2));
+    dis[3] = sqrt(pow(p.x-center.x,2)+pow(p.y-center.y-dy,2)+pow(p.z-center.z+dz,2));
+    dis[4] = sqrt(pow(p.x-center.x,2)+pow(p.y-center.y+dy,2)+pow(p.z-center.z+dz,2));
+    
+    for (int j=0;j!=5;j++){
+      if (max_dis < dis[j]) max_dis = dis[j];
+    }
+    
+    if (max_dis > max_dis1){
+      max_dis1 = max_dis;
+      max_mcell = mcell;
+    }
+  }
+
+  max_dis1 = 0;
+  Point max_point;
+  //find the furtherst point 
+  for (int i=0;i!=max_mcell->Get_all_spacecell().size();i++){
+    SpaceCell *cell = max_mcell->Get_all_spacecell().at(i);
+    double dis = sqrt(pow(p.x-cell->x(),2)+pow(p.y-cell->y(),2)+pow(p.z-cell->z(),2));
+    if (dis > max_dis1){
+      max_dis1 = dis;
+      max_point.x = cell->x();
+      max_point.y = cell->y();
+      max_point.z = cell->z();
+    }
+  }
+  
+  // std::cout << max_point.x/units::cm << " " << max_point.y/units::cm << " " << max_point.z/units::cm << std::endl;
+  // std::cout << max_mcell->Get_Center().x << " " << max_mcell->Get_Center().y << std::endl;
+  
+  // walk back to the mcell containing the vertex ...  Progressive tracking ...  
+  
+  
+ 
+  // what about the duplicated tracks ??? 
 }
 
 
