@@ -135,11 +135,65 @@ WireCell2dToy::ToyTracking::ToyTracking(WireCell2dToy::ToyCrawler& toycrawler){
       update_maps();
       fine_tracking();
     }
+
+    form_parallel_tiny_tracks(toycrawler);
+
   }else{
     //is a shower  
     
   }
 }
+
+void WireCell2dToy::ToyTracking::form_parallel_tiny_tracks(WireCell2dToy::ToyCrawler& toycrawler){
+  
+  //form all the cells
+  MergeSpaceCellMap& mcells_map = toycrawler.Get_mcells_map();
+  MergeSpaceCellSelection mcells;
+  for (auto it = mcells_map.begin(); it != mcells_map.end(); it++){
+    mcells.push_back(it->first);
+  }
+
+
+  //examine all the cells to find out outlier 
+  for (int i=0;i!=mcells.size();i++){
+    MergeSpaceCell *mcell = mcells.at(i);
+    std::vector<int> track_no;
+    
+    int flag = -1;
+    for (int j=0;j!=tracks.size();j++){
+      if (tracks.at(j)->IsContained(mcell)){
+	flag = 1;
+	track_no.push_back(j);
+      }
+    }
+    
+    if (flag == -1){
+      //entire thing ... 
+    }else{
+      for (int j=0;j!=mcell->Get_all_spacecell().size();j++){
+	SpaceCell *cell = mcell->Get_all_spacecell().at(j);
+	int flag1 = 0;
+
+	for (int k=0;k!=track_no.size();k++){
+	  double dist = tracks.at(track_no.at(k))->dist_proj(mcell,cell)/units::mm;
+	  if (dist < 6.0){
+	    flag1 = 1;
+	    break;
+	  }
+	}
+	
+	if (flag1 == 0){
+	  // partial thing
+	}
+      }
+    }
+  }
+
+  
+
+
+}
+
 
 bool WireCell2dToy::ToyTracking::grow_track_fill_gap(WireCell2dToy::ToyCrawler& toycrawler){
   bool result = false;
@@ -366,7 +420,8 @@ bool WireCell2dToy::ToyTracking::IsThisShower(WireCell2dToy::ToyCrawler& toycraw
   int ntracks = 0;
   MergeSpaceCellSelection all_track_mscs;
   for (int i=0;i!=tracks.size();i++){
-    if (tracks.at(i)->get_centerVP().size() > 0){
+    //  auto it = find(bad_tracks.begin(),bad_tracks.end(),tracks.at(i));
+    if (tracks.at(i)->get_centerVP().size() > 0 ){
       all_track_mscs.insert(all_track_mscs.end(),tracks.at(i)->get_centerVP_cells().begin(),tracks.at(i)->get_centerVP_cells().end()) ; 
       ntracks ++;
     }
@@ -505,7 +560,10 @@ void WireCell2dToy::ToyTracking::cleanup_bad_tracks(){
 
   for (int i=0;i!=tracks.size();i++){
     if (tracks.at(i)->IsBadTrack()){
+      
+      bad_tracks.push_back(tracks.at(i));
       tracks.at(i)->reset_fine_tracking();
+      
       for (int j=0;j!=vertices.size();j++){
         WCVertex *vertex = vertices.at(j);
 	WCTrackSelection& vtracks = vertex->get_tracks();

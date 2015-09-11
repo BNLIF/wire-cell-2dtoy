@@ -201,12 +201,15 @@ int main(int argc, char* argv[])
   WireCell2dToy::ClusterDisplay display(c1);
   // display.DrawCluster(cells);
   display.DrawCluster(mcells);
-  //display.DrawCluster(mcells,toytracking);
-  //display.DrawCrawler(toycrawler,"psame",1);
+  //  display.DrawCluster(mcells,toytracking);
+  // display.DrawCrawler(toycrawler,"psame",1);
 
   
   WCVertexSelection& vertices = toytracking.get_vertices();
   display.DrawVertex(vertices,"psame");
+  WCTrackSelection& bad_tracks = toytracking.get_bad_tracks();
+  display.DrawTracks(bad_tracks,"same",2);
+
 
   // Point p;
   // p.x = cells.at(0)->x();

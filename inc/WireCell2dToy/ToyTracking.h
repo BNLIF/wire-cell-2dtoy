@@ -15,6 +15,10 @@ namespace WireCell2dToy{
     ~ToyTracking();
     
     WireCell::WCTrackSelection& get_tracks(){return tracks;};
+    WireCell::WCTrackSelection& get_bad_tracks(){return bad_tracks;};
+    WireCell::WCTrackSelection& get_parallel_tracks(){return parallel_tracks;};
+    WireCell::WCTrackSelection& get_short_tracks(){return short_tracks;};
+    
     WireCell::WCVertexSelection& get_vertices(){return vertices;};
     
     void CreateVertices(ToyCrawler& toycrawler);
@@ -42,13 +46,22 @@ namespace WireCell2dToy{
     void deal_wiggle_tracks();
     bool grow_track_fill_gap(WireCell2dToy::ToyCrawler& toycrawler);
 
+    void form_parallel_tiny_tracks(WireCell2dToy::ToyCrawler& toycrawler);
 
   protected: 
     WireCell::WCTrackSelection tracks;
     WireCell::WCVertexSelection vertices;
     
-    WireCell::WCTrackCounter type3_tracks;
     
+    WireCell::WCTrackSelection bad_tracks;
+    WireCell::WCTrackCounter type3_tracks;
+
+    
+    WireCell::WCTrackSelection parallel_tracks;
+    WireCell::WCTrackSelection short_tracks;
+    
+    
+
     /* WireCell::MSC_WCV_Map msc_wcv_map; */
     /* WireCell::MCT_WCT_Map mct_wct_map; */
 

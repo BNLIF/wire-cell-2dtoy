@@ -36,7 +36,8 @@ namespace WireCell2dToy {
 
 
 	void DrawVertex(WireCell::WCVertexSelection& vertices, TString option = "p");
-
+	
+	void DrawTracks(WireCell::WCTrackSelection& tracks, TString option = "", int color = 1);
     };
 
 }

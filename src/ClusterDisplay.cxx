@@ -95,6 +95,9 @@ void WireCell2dToy::ClusterDisplay::DrawVertex(WCVertexSelection& vertices, TStr
 
   }
   
+  
+
+
   //std::cout <<"abc " << n << " " <<std::endl;
 
   g1->SetMarkerColor(2);
@@ -107,6 +110,28 @@ void WireCell2dToy::ClusterDisplay::DrawVertex(WCVertexSelection& vertices, TStr
   
   
 }
+
+
+void WireCell2dToy::ClusterDisplay::DrawTracks(WireCell::WCTrackSelection& tracks, TString option, int color ){
+  for (int i =0; i!=tracks.size();i++){
+    WCTrack *track = tracks.at(i);
+    double x1[10],y1[10],z1[10];
+    Point p1 = track->get_end_scells().at(0)->Get_Center();
+    Point p2 = track->get_end_scells().at(1)->Get_Center();
+    x1[0] = p1.x/units::cm;
+    y1[0] = p1.y/units::cm;
+    z1[0] = p1.z/units::cm;
+    
+    x1[1] = p2.x/units::cm;
+    y1[1] = p2.y/units::cm;
+    z1[1] = p2.z/units::cm;
+    TPolyLine3D *l2 = new TPolyLine3D(2,x1,y1,z1);
+    l2->Draw(option);
+    l2->SetLineColor(color);
+    l2->SetLineWidth(2.5);
+  }
+}
+
 
 void WireCell2dToy::ClusterDisplay::DrawHough(SpaceCellSelection& cells, Point& p, double dis_near, double dis_far){
   TH2F *h1 = new TH2F("h1","h1",180,0,3.1415926,360,-3.1415926,3.1415926);
@@ -325,21 +350,34 @@ void WireCell2dToy::ClusterDisplay::DrawCluster(MergeSpaceCellSelection& mcells,
       }
       //std::cout << x << " " << y << " " << z << std::endl;
     }else{
+      int flag2 = 0;
+      
       for (int j=0;j!=mcell->Get_all_spacecell().size();j++){
 	SpaceCell *cell = mcell->Get_all_spacecell().at(j);
 	int flag1 = 0;
 	
 	for (int k=0;k!=track_no.size();k++){
-	  
+	  // double dist_u = tracks.at(track_no.at(k))->dist_proj(mcell,cell,1,1.0472)/units::mm;
+	  // double dist_v = tracks.at(track_no.at(k))->dist_proj(mcell,cell,1,-1.0472)/units::mm;
+	  // double dist_w = tracks.at(track_no.at(k))->dist_proj(mcell,cell,1,0)/units::mm;
 	  double dist = tracks.at(track_no.at(k))->dist_proj(mcell,cell)/units::mm;
+
 	  // if (dist < 10000){
 	  // std::cout << dist << " " << tracks.at(track_no.at(k))->dist(mcell,cell)/units::mm << std::endl;
 	  // }
+
+	  //
 	  
-	  if (dist < 6.0){
+	  if ( // (dist_u < 6.0 && dist_v < 6.0) || 
+	       // (dist_w < 6.0 && dist_u < 6.0) ||
+	       // (dist_v < 6.0 && dist_w < 6.0)
+	      dist < 6.0
+	       ){
 	    flag1 = 1;
 	    break;
 	  }else{
+	    //if (cell->x()/units::cm < 92)
+	    // std::cout << cell->x()/units::cm << " " << dist_u << " " << dist_v << " " << dist_w << " " << dist << std::endl;
 	    // if (cell->x()/units::cm < 61) 
 	    // std::cout << dist << " " << cell->x()/units::cm << std::endl;
 	  }
@@ -352,9 +390,25 @@ void WireCell2dToy::ClusterDisplay::DrawCluster(MergeSpaceCellSelection& mcells,
 	  g1->SetPoint(n,x,y,z);
 	  n++;
 	}
-	
-
+	// if (flag1 == 0){
+	//   flag2 = 1;
+	//   break;
+	// }
       }
+
+      // if (flag2 == 1){
+      // 	for (int j=0;j!=mcell->Get_all_spacecell().size();j++){
+      // 	  SpaceCell *cell = mcell->Get_all_spacecell().at(j);
+      // 	  x = cell->x()/units::cm;
+      // 	  y = cell->y()/units::cm;
+      // 	  z = cell->z()/units::cm;
+      // 	  g1->SetPoint(n,x,y,z);
+      // 	  n++;
+      // 	}
+      // }
+      
+
+
     }
     
 
