@@ -144,6 +144,13 @@ WireCell2dToy::ToyTracking::ToyTracking(WireCell2dToy::ToyCrawler& toycrawler){
       fine_tracking(1);
     }else{
       //is a shower  
+      //test ... 
+      std::cout << "Grown single track " << std::endl;
+      if (grow_track_fill_gap(toycrawler)){
+      	std::cout << "FineTracking Again" << std::endl; 
+      	update_maps();
+      	fine_tracking();
+      }
       
     }
   }
