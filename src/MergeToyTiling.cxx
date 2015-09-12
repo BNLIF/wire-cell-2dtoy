@@ -388,6 +388,42 @@ WireCell2dToy::MergeToyTiling::MergeToyTiling(WireCell2dToy::ToyTiling& tiling, 
       prev_ncell = current_ncell;
     }
 
+  }else if (flag_remerge == 2){
+    // merge things that are different by 1 wire gap ... 
+    
+    double dis = (3.0 + 1.5)*units::mm; //slightly bigger than 1 wire pitch
+    for (int i=0;i!=cell_all.size();i++){
+      MergeGeomCell* mcell = (MergeGeomCell*)cell_all.at(i);
+      //std::cout << "Before: " << mcell->boundary().size() << " " ; 
+      mcell->Organize_edge_boundary();
+      //std::cout << mcell->boundary().size() << std::endl;
+    }
+
+    int current_ncell = cell_all.size();
+    int prev_ncell = -1;
+          
+    IsRemerged = true;
+    while(further_merge(cell_all,tiling.get_ncell(),time_slice,dis));
+    current_ncell = cell_all.size();
+    
+    if (current_ncell != prev_ncell){
+      //clear all wire and all maps
+      for (int i=0;i!=wire_all.size();i++){
+	delete wire_all[i];
+      }
+      wire_u.clear();
+      wire_v.clear();
+      wire_w.clear();
+      wire_all.clear();
+      cellmap.clear();
+      wiremap.clear();
+      cellmap1.clear();
+      wiremap1.clear();
+      wwmap.clear();
+      wwsmap.clear();
+      form_wiremap(tiling, time_slice);
+    }
+    
   }
 
   for (int i=0;i!=cell_all.size();i++){

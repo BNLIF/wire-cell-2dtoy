@@ -342,7 +342,11 @@ void WireCell2dToy::ToyTracking::form_parallel_tiny_tracks(WireCell2dToy::ToyCra
 }
 
 void WireCell2dToy::ToyTracking::parallel_tracking(WCVertex *vertex, MergeSpaceCellSelection &mcells, WireCell2dToy::ToyCrawler& toycrawler){
-// find the furthest point and mcell, 
+  
+  // re-organize mcells to do a merge, merge anything that are close ... 
+  MergeSpaceCellMap& mcells_map = toycrawler.Get_mcells_map();  
+
+  // find the furthest point and mcell, 
   Point p = vertex->Center();
   double max_dis1 = 0;
   
@@ -396,7 +400,7 @@ void WireCell2dToy::ToyTracking::parallel_tracking(WCVertex *vertex, MergeSpaceC
   // std::cout << max_mcell->Get_Center().x << " " << max_mcell->Get_Center().y << std::endl;
   // walk back to the mcell containing the vertex ...  Progressive tracking ...  
 
-  MergeSpaceCellMap& mcells_map = toycrawler.Get_mcells_map();  
+  
   MergeSpaceCellSelection track_mcells;
   MergeSpaceCellSelection used_mcells; 
   
@@ -454,6 +458,7 @@ void WireCell2dToy::ToyTracking::parallel_tracking(WCVertex *vertex, MergeSpaceC
     }else{
 
       WCTrack *track = new WCTrack(track_mcells);
+      //put everything into used cells ...
       used_mcells.insert(used_mcells.end(),track_mcells.begin(),track_mcells.end());
       
       vertex->Add(track);
@@ -487,7 +492,7 @@ void WireCell2dToy::ToyTracking::parallel_tracking(WCVertex *vertex, MergeSpaceC
       for (int j = 0;j!=mcells_map[mcell].size();j++){
 	auto it1 = find(used_mcells.begin(),used_mcells.end(),mcells_map[mcell].at(j));
 	auto it2 = find(mcells.begin(),mcells.end(),mcells_map[mcell].at(j));
-	if (it1 == used_mcells.end() && it2 != mcells.end()){
+	if (it1 == used_mcells.end() && it2 != mcells.end() || mcells_map[mcell].at(j) == vertex_cell){
 	  flag = 1;
 	  break;
 	}
@@ -499,6 +504,11 @@ void WireCell2dToy::ToyTracking::parallel_tracking(WCVertex *vertex, MergeSpaceC
   }
 
   std::cout << mcells_save.size() << std::endl;
+  for (int i=0;i!=mcells_save.size();i++){
+    std::cout << mcells_save.at(i)->Get_Center().x/units::cm << " " 
+	      << mcells_save.at(i)->Get_Center().y/units::cm << " " 
+	      << mcells_save.at(i)->Get_Center().z/units::cm << " " <<std::endl;
+  }
 }
 
 
