@@ -42,7 +42,7 @@ namespace WireCell2dToy{
 
     void update_maps();
     void update_maps1();
-    void fine_tracking();
+    void fine_tracking(int flag = 0);
     void cleanup_bad_tracks();
 
     void deal_wiggle_tracks();

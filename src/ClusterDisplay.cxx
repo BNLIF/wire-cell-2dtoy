@@ -390,7 +390,7 @@ void WireCell2dToy::ClusterDisplay::DrawCluster(MergeSpaceCellSelection& mcells,
 	  // double dist_v = tracks.at(track_no.at(k))->dist_proj(mcell,cell,1,-1.0472)/units::mm;
 	  // double dist_w = tracks.at(track_no.at(k))->dist_proj(mcell,cell,1,0)/units::mm;
 	  double dist = tracks.at(track_no.at(k))->dist_proj(mcell,cell)/units::mm;
-
+	  double dist1 = tracks.at(track_no.at(k))->dist(mcell,cell)/units::mm;
 	  // if (dist < 10000){
 	  // std::cout << dist << " " << tracks.at(track_no.at(k))->dist(mcell,cell)/units::mm << std::endl;
 	  // }
@@ -400,7 +400,7 @@ void WireCell2dToy::ClusterDisplay::DrawCluster(MergeSpaceCellSelection& mcells,
 	  if ( // (dist_u < 6.0 && dist_v < 6.0) || 
 	       // (dist_w < 6.0 && dist_u < 6.0) ||
 	       // (dist_v < 6.0 && dist_w < 6.0)
-	      dist < 6.0
+	      dist < 6.0 && dist1 < 20
 	       ){
 	    flag1 = 1;
 	    break;

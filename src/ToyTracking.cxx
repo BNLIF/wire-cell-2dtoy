@@ -136,14 +136,14 @@ WireCell2dToy::ToyTracking::ToyTracking(WireCell2dToy::ToyCrawler& toycrawler){
       //not a shower
       std::cout << "Grown single track " << std::endl;
       if (grow_track_fill_gap(toycrawler)){
-	std::cout << "FineTracking Again" << std::endl; 
-	update_maps();
-	fine_tracking();
+      	std::cout << "FineTracking Again" << std::endl; 
+      	update_maps();
+      	fine_tracking();
       }
       
       form_parallel_tiny_tracks(toycrawler);
       update_maps();
-      fine_tracking();
+      fine_tracking(1);
     }else{
       //is a shower  
       
@@ -191,7 +191,8 @@ void WireCell2dToy::ToyTracking::form_parallel_tiny_tracks(WireCell2dToy::ToyCra
 
 	for (int k=0;k!=track_no.size();k++){
 	  double dist = good_tracks.at(track_no.at(k))->dist_proj(mcell,cell)/units::mm;
-	  if (dist < 6.0){
+	  double dist1 = good_tracks.at(track_no.at(k))->dist(mcell,cell)/units::mm;
+	  if (dist < 6.0 && dist1 <20){
 	    flag1 = 1;
 	    break;
 	  }
@@ -349,7 +350,9 @@ void WireCell2dToy::ToyTracking::parallel_tracking(WCVertex *vertex, MergeSpaceC
 
   for (int i=0;i!=mcells.size();i++){
     MergeSpaceCell *mcell = mcells.at(i);
+    
     Point center = mcell->Get_Center();
+    mcell->CalMinMax();
     double dy = mcell->get_dy();
     double dz = mcell->get_dz();
     
@@ -364,6 +367,8 @@ void WireCell2dToy::ToyTracking::parallel_tracking(WCVertex *vertex, MergeSpaceC
     for (int j=0;j!=5;j++){
       if (max_dis < dis[j]) max_dis = dis[j];
     }
+
+    // std::cout << max_dis << " " << center.x/units::cm << " " << center.y/units::cm << " " << center.z/units::cm << " " << p.x/units::cm << " " << p.y/units::cm << " " << p.z/units::cm << " " << dy/units::cm << " " << dz/units::cm << std::endl;
     
     if (max_dis > max_dis1){
       max_dis1 = max_dis;
@@ -397,16 +402,13 @@ void WireCell2dToy::ToyTracking::parallel_tracking(WCVertex *vertex, MergeSpaceC
   
   MergeSpaceCell *vertex_cell = vertex->get_msc();
   // max_cell --> vertex_cell, find the shortest path 
-  WireCell2dToy::ToyWalking walking(max_mcell,vertex_cell,mcells_map);
+  WireCell2dToy::ToyWalking walking(max_mcell,max_point,vertex_cell,vertex->Center(),mcells_map);
   track_mcells = walking.get_cells();
   double dist = walking.get_dist();
   
   //std::cout << dist << " " << track_mcells.size() << std::endl;
 
   if (dist < 1e9){
-    WCTrack *track = new WCTrack(track_mcells);
-    vertex->Add(track);
-    
     double ky, kz;
     if (max_point.x == p.x){
       ky = 0;
@@ -415,25 +417,88 @@ void WireCell2dToy::ToyTracking::parallel_tracking(WCVertex *vertex, MergeSpaceC
       ky = (max_point.y-p.y)/(max_point.x-p.x);
       kz = (max_point.z-p.z)/(max_point.x-p.x);
     }
+    
+    // judge the angle ... 
+    // find the track that contain max_cell
+    // judge angle between these two tracks
+    float min_angle = 1e9;
+    for (int qx = 0;qx!=vertex->get_tracks().size();qx++){
+      WCTrack *track1 = vertex->get_tracks().at(qx);
+      //auto it = find(track1->get_centerVP_cells().begin(),track1->get_centerVP_cells().end(),max_mcell);
+      //if (it != track1->get_centerVP_cells().end()){
+      TVector3 vec1(max_point.x-p.x,max_point.y-p.y,max_point.z-p.z);
+      TVector3 vec2;
+      
+      for (int qx1 = 0; qx1!= wct_wcv_map[track1].size();qx1++){
+	if (wct_wcv_map[track1].at(qx1) != vertex ){
+	  vec2.SetXYZ(wct_wcv_map[track1].at(qx1)->Center().x - vertex->Center().x,
+		      wct_wcv_map[track1].at(qx1)->Center().y - vertex->Center().y,
+		      wct_wcv_map[track1].at(qx1)->Center().z - vertex->Center().z);
+	  if (vec1.Angle(vec2)/3.1415926*180. < min_angle){
+	    min_angle = vec1.Angle(vec2)/3.1415926*180.;
+	  }
+	  //	  std::cout << mcells.size() << "Angle: " << vec1.Angle(vec2)/3.1415926*180. << std::endl;
+	  break;
+	}
+      }
+     
 
-    vertex->set_ky(track,ky);
-    vertex->set_kz(track,kz);
-    tracks.push_back(track);
-    parallel_tracks.push_back(track);
+      //      (1,vertex->get_ky(track1),vertex->get_kz(track1));
 
-    WCVertex *vertex1 = new WCVertex(*max_mcell);
-    vertex1->set_center(max_point);
-    vertex1->Add(track);
-    vertex1->set_ky(track,ky);
-    vertex1->set_kz(track,kz);
-    vertices.push_back(vertex1);
+     
+	//}
+      
+    }
+
+    if (mcells.size()==1 && min_angle < 25){
+    }else{
+
+      WCTrack *track = new WCTrack(track_mcells);
+      used_mcells.insert(used_mcells.end(),track_mcells.begin(),track_mcells.end());
+      
+      vertex->Add(track);
+      vertex->set_ky(track,ky);
+      vertex->set_kz(track,kz);
+      tracks.push_back(track);
+      parallel_tracks.push_back(track);
+      
+      WCVertex *vertex1 = new WCVertex(*max_mcell);
+      vertex1->set_center(max_point);
+      vertex1->Add(track);
+      vertex1->set_ky(track,ky);
+      vertex1->set_kz(track,kz);
+      vertices.push_back(vertex1);
+    }
   }
   // std::cout << track_mcells.size() << std::endl;
   
   // form vertex ... 
   
- 
+  
   // what about the duplicated tracks ??? 
+  // mcells_map
+  // used_mcells
+  MergeSpaceCellSelection mcells_save;
+  for (int i = 0;i!=mcells.size();i++){
+    MergeSpaceCell *mcell = mcells.at(i);
+    auto it = find(used_mcells.begin(),used_mcells.end(),mcell);
+    int flag = 0;
+    if (it == used_mcells.end()){
+      for (int j = 0;j!=mcells_map[mcell].size();j++){
+	auto it1 = find(used_mcells.begin(),used_mcells.end(),mcells_map[mcell].at(j));
+	auto it2 = find(mcells.begin(),mcells.end(),mcells_map[mcell].at(j));
+	if (it1 == used_mcells.end() && it2 != mcells.end()){
+	  flag = 1;
+	  break;
+	}
+      }
+    }
+    if (flag == 1){
+      mcells_save.push_back(mcell);
+    }
+  }
+
+  std::cout << mcells_save.size() << std::endl;
 }
 
 
@@ -1029,7 +1094,7 @@ void WireCell2dToy::ToyTracking::update_maps(){
 
 }
 
-void WireCell2dToy::ToyTracking::fine_tracking(){
+void WireCell2dToy::ToyTracking::fine_tracking(int flag){
   for (int i=0;i!=tracks.size();i++){
     // std::cout << i << " " << tracks.size() << std::endl;
     WCTrack *track = tracks.at(i);
@@ -1059,8 +1124,9 @@ void WireCell2dToy::ToyTracking::fine_tracking(){
 	int np1 = vertex1->get_ntracks();
 	int np2 = vertex2->get_ntracks();
 	//std::cout << i << "abc4 " << std::endl;
-	track->reset_fine_tracking();
-	track->fine_tracking(np1,p1,ky1,kz1,np2,p2,ky2,kz2);
+	if (flag == 0 )
+	  track->reset_fine_tracking();
+	track->fine_tracking(np1,p1,ky1,kz1,np2,p2,ky2,kz2,flag);
 	good_tracks.push_back(track);
 	//std::cout << i << "abc5 " << std::endl;
       }
