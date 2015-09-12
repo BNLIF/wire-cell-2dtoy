@@ -18,30 +18,37 @@ WireCell2dToy::ToyWalking::ToyWalking(WireCell::MergeSpaceCell *start_cell, Poin
 void WireCell2dToy::ToyWalking::Iterate(MergeSpaceCell *curr_cell, MergeSpaceCellSelection &curr_cells, double dis){
   curr_cells.push_back(curr_cell);
 
+  float dis1=0; 
   if (curr_cells.size()>=2){
-    Point p1,p2;
-    if (curr_cell == target_cell){
-      p1 = target_point;
-    }else{
-      p1 = curr_cell->Get_Center();
-    }
-    if (curr_cells.at(curr_cells.size()-2) == start_cell){
-      p2 = start_point;
-    }else{
-      p2 = curr_cells.at(curr_cells.size()-2)->Get_Center();
-    }
-    dis += pow(p1.x - p2.x,2)
-       + pow(p1.y - p2.y,2)
-      + pow(p1.z - p2.z,2);
+    // Point p1,p2;
+    // if (curr_cell == target_cell){
+    //   p1 = target_point;
+    // }else{
+    //   p1 = curr_cell->Get_Center();
+    // }
+    // if (curr_cells.at(curr_cells.size()-2) == start_cell){
+    //   p2 = start_point;
+    // }else{
+    //   p2 = curr_cells.at(curr_cells.size()-2)->Get_Center();
+    // }
+    
+    // dis1 = pow(p1.x - p2.x,2)
+    //    + pow(p1.y - p2.y,2)
+    //   + pow(p1.z - p2.z,2);
+    dis1 = 1;
+
+    dis += dis1;
   }
   
   // std::cout << curr_cell->Get_Center().x/units::cm << " " << target_cell->Get_Center().x/units::cm << " " << mcells_map[curr_cell].size() << std::endl;
 
   if (curr_cell == target_cell){
     //end of it, calculate distance ... 
-    dist = dis;
-    cells.clear();
-    cells = curr_cells;
+    if (dis < dist){
+      dist = dis;
+      cells.clear();
+      cells = curr_cells;
+    }
   }else{
     if (dis < dist){
       // go in
@@ -53,6 +60,8 @@ void WireCell2dToy::ToyWalking::Iterate(MergeSpaceCell *curr_cell, MergeSpaceCel
     }
   }
 
+  dis -= dis1;
+  
   //move out the last element;
   curr_cells.pop_back();
 }
