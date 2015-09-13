@@ -190,6 +190,8 @@ int main(int argc, char* argv[])
   WireCell2dToy::ToyTracking toytracking(toycrawler);
   
 
+  std::cout << toytracking.get_good_tracks().size() << " " << toytracking.get_vertices().size() << std::endl;
+
 
   std::cout << "Drawing " << std::endl; 
   TApplication theApp("theApp",&argc,argv);

@@ -233,15 +233,29 @@ int main(int argc, char* argv[])
   
   std::cout << "Check: " << crawlers.size() << " " << TC->GetEntries() << " " << sum << std::endl;
 
+
+  // //Check tracking ... 
+  // for (int i=0;i!=trackings.size();i++){
+    
+  // }
+
+
+
   TFile *file1 = new TFile("cluster_tracking.root","RECREATE");
   TTree *T1 = new TTree("T_goodtrack","T_goodtrack");
   TTree *T2 = new TTree("T_vertex","T_vertex");
   TTree *T3 = new TTree("T_badtrack","T_badtrack");
+  TTree *T4 = new TTree("T_shorttrack","T_shortrack");
+  TTree *T5 = new TTree("T_paratrack","T_paratrack");
   
   T1->SetDirectory(file1);
   T2->SetDirectory(file1);
   T3->SetDirectory(file1);
+  T4->SetDirectory(file1);
+  T5->SetDirectory(file1);
   
+  
+
   Int_t ntracks;
   Int_t npoints;
   Double_t xx[3000],yy[3000],zz[3000];
@@ -255,12 +269,12 @@ int main(int argc, char* argv[])
   T1->Branch("x",xx,"x[npoints]/D");
   T1->Branch("y",yy,"y[npoints]/D");
   T1->Branch("z",zz,"z[npoints]/D");
-
   T1->Branch("theta",theta,"theta[npoints]/D");
   T1->Branch("phi",phi,"phi[npoints]/D");
   T1->Branch("energy",energy,"energy[npoints]/D");
   T1->Branch("dedx",dedx,"dedx[npoints]/D");
   
+
   T2->Branch("ntracks",&ntracks,"ntracks/I");
   T2->Branch("x",xx,"x/D");
   T2->Branch("y",yy,"y/D");
@@ -273,16 +287,41 @@ int main(int argc, char* argv[])
   T3->Branch("x",xx,"x[npoints]/D");
   T3->Branch("y",yy,"y[npoints]/D");
   T3->Branch("z",zz,"z[npoints]/D");
-
   T3->Branch("theta",theta,"theta[npoints]/D");
   T3->Branch("phi",phi,"phi[npoints]/D");
   T3->Branch("energy",energy,"energy[npoints]/D");
   T3->Branch("dedx",dedx,"dedx[npoints]/D");
 
 
+  T4->Branch("npoints",&npoints,"npoints/I");
+  T4->Branch("trackid",&trackid,"trackid/I");
+  T4->Branch("x",xx,"x[npoints]/D");
+  T4->Branch("y",yy,"y[npoints]/D");
+  T4->Branch("z",zz,"z[npoints]/D");
+  T4->Branch("theta",theta,"theta[npoints]/D");
+  T4->Branch("phi",phi,"phi[npoints]/D");
+  T4->Branch("energy",energy,"energy[npoints]/D");
+  T4->Branch("dedx",dedx,"dedx[npoints]/D");
+
+
+  T5->Branch("npoints",&npoints,"npoints/I");
+  T5->Branch("trackid",&trackid,"trackid/I");
+  T5->Branch("x",xx,"x[npoints]/D");
+  T5->Branch("y",yy,"y[npoints]/D");
+  T5->Branch("z",zz,"z[npoints]/D");
+  T5->Branch("theta",theta,"theta[npoints]/D");
+  T5->Branch("phi",phi,"phi[npoints]/D");
+  T5->Branch("energy",energy,"energy[npoints]/D");
+  T5->Branch("dedx",dedx,"dedx[npoints]/D");
+
+  
+  WCTrackSelection all_tracks;
   WCTrackSelection good_tracks;
   WCTrackSelection bad_tracks;
+  WCTrackSelection short_tracks;
+  WCTrackSelection parallel_tracks;
   WCVertexSelection vertices;
+  
   
   TGraph2D *g = new TGraph2D();
   int ncount = 0;
@@ -290,21 +329,38 @@ int main(int argc, char* argv[])
   for (int i=0;i!=trackings.size();i++){
     for (int j=0;j!=trackings.at(i)->get_good_tracks().size();j++){
       good_tracks.push_back(trackings.at(i)->get_good_tracks().at(j));
+      all_tracks.push_back(trackings.at(i)->get_good_tracks().at(j));
+      // std::cout <<"Track: " << i << " " << j << " " << good_tracks.size() - 1<< std::endl;
     }
     for (int j=0;j!=trackings.at(i)->get_bad_tracks().size();j++){
       bad_tracks.push_back(trackings.at(i)->get_bad_tracks().at(j));
+      all_tracks.push_back(trackings.at(i)->get_bad_tracks().at(j));
     }
+    for (int j=0;j!=trackings.at(i)->get_short_tracks().size();j++){
+      short_tracks.push_back(trackings.at(i)->get_short_tracks().at(j));
+      all_tracks.push_back(trackings.at(i)->get_short_tracks().at(j));
+    }
+    for (int j=0;j!=trackings.at(i)->get_parallel_tracks().size();j++){
+      parallel_tracks.push_back(trackings.at(i)->get_parallel_tracks().at(j));
+      all_tracks.push_back(trackings.at(i)->get_parallel_tracks().at(j));
+    }
+
     for (int j=0;j!=trackings.at(i)->get_vertices().size();j++){
       vertices.push_back(trackings.at(i)->get_vertices().at(j));
+      // std::cout << i << " " << j << " " << trackings.at(i)->get_vertices().at(j)->Center().x/units::cm << " " <<
+      // 	trackings.at(i)->get_vertices().at(j)->Center().y/units::cm << " " <<
+      // 	trackings.at(i)->get_vertices().at(j)->Center().z/units::cm << " " << 
+      // 	std::endl;
     }
   }
+  
   
   //fill T1
   for (int i = 0; i!=good_tracks.size();i++){
     WCTrack *track = good_tracks.at(i);
     
     npoints = track->get_centerVP().size();
-    trackid = i;
+    trackid = find(all_tracks.begin(),all_tracks.end(),track) - all_tracks.begin();
     for (int j=0;j!=npoints;j++){
       xx[j] = track->get_centerVP().at(j).x/units::cm;
       yy[j] = track->get_centerVP().at(j).y/units::cm;
@@ -318,6 +374,7 @@ int main(int argc, char* argv[])
     }
     T1->Fill();
   }
+
   //fill T2
   for (int i=0;i!=vertices.size();i++){
     ntracks = 0;
@@ -327,9 +384,9 @@ int main(int argc, char* argv[])
     zz[0] = vertex->Center().z/units::cm;
     for (int j=0;j!=vertex->get_ntracks();j++){
       WCTrack *track = vertex->get_tracks().at(j);
-      auto it = find(good_tracks.begin(),good_tracks.end(),track);
-      if (it != good_tracks.end()){
-	vtrack_id[ntracks] = it-good_tracks.begin();
+      auto it = find(all_tracks.begin(),all_tracks.end(),track);
+      if (it != all_tracks.end()){
+	vtrack_id[ntracks] = it-all_tracks.begin();
 	ntracks ++;
       }
     }
@@ -341,7 +398,7 @@ int main(int argc, char* argv[])
     WCTrack *track = bad_tracks.at(i);
     
     npoints = track->get_centerVP().size();
-    trackid = i;
+    trackid = find(all_tracks.begin(),all_tracks.end(),track) - all_tracks.begin();
     for (int j=0;j!=npoints;j++){
       xx[j] = track->get_centerVP().at(j).x/units::cm;
       yy[j] = track->get_centerVP().at(j).y/units::cm;
@@ -356,6 +413,47 @@ int main(int argc, char* argv[])
     T3->Fill();
   }
   
+  //fill T4
+  for (int i = 0; i!=short_tracks.size();i++){
+    WCTrack *track = short_tracks.at(i);
+    npoints = track->get_all_cells().size();
+    trackid = find(all_tracks.begin(),all_tracks.end(),track) - all_tracks.begin();
+    for (int j=0;j!=npoints;j++){
+      xx[j] = track->get_all_cells().at(j)->Get_Center().x/units::cm;
+      yy[j] = track->get_all_cells().at(j)->Get_Center().y/units::cm;
+      zz[j] = track->get_all_cells().at(j)->Get_Center().z/units::cm;
+      theta[j] = 0;
+      phi[j] = 0;
+      energy[j] = track->get_all_cells().at(j)->Get_Charge();
+      dedx[j] = 0;
+      g->SetPoint(ncount,xx[j],yy[j],zz[j]);
+      ncount ++;
+    }
+    T4->Fill();
+  }
+
+
+  //fill T5
+  for (int i = 0; i!=parallel_tracks.size();i++){
+    WCTrack *track = parallel_tracks.at(i);
+    
+    npoints = track->get_centerVP().size();
+    trackid = find(all_tracks.begin(),all_tracks.end(),track) - all_tracks.begin();
+    for (int j=0;j!=npoints;j++){
+      xx[j] = track->get_centerVP().at(j).x/units::cm;
+      yy[j] = track->get_centerVP().at(j).y/units::cm;
+      zz[j] = track->get_centerVP().at(j).z/units::cm;
+      theta[j] = track->get_centerVP_theta().at(j);
+      phi[j] = track->get_centerVP_phi().at(j);
+      energy[j] = track->get_centerVP_energy().at(j);
+      dedx[j] = track->get_centerVP_dedx().at(j);
+      g->SetPoint(ncount,xx[j],yy[j],zz[j]);
+      ncount ++;
+    }
+    T5->Fill();
+  }
+
+
   g->Write("shower3D");
   file1->Write();
   file1->Close();

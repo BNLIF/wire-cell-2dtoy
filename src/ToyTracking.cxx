@@ -1389,7 +1389,9 @@ void WireCell2dToy::ToyTracking::fine_tracking(int flag){
 	if (flag == 0 )
 	  track->reset_fine_tracking();
 	track->fine_tracking(np1,p1,ky1,kz1,np2,p2,ky2,kz2,flag);
-	good_tracks.push_back(track);
+	auto itt = find(good_tracks.begin(),good_tracks.end(),track);
+	if (itt == good_tracks.end())
+	  good_tracks.push_back(track);
 	//std::cout << i << "abc5 " << std::endl;
       }
     }
