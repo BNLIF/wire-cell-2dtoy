@@ -263,7 +263,7 @@ bool  WireCell2dToy::ToyTracking::track_shower_reco(WireCell2dToy::ToyCrawler& t
       for (int j=0;j!=temp_dirs.size();j++){
 	delete temp_dirs.at(j);
       }
-	
+      
 	// std::cout << vertex->Center().x/units::cm << " " 
 	// 	  << vertex->Center().y/units::cm << " " 
 	// 	  << vertex->Center().z/units::cm << " " << " " 
@@ -275,11 +275,11 @@ bool  WireCell2dToy::ToyTracking::track_shower_reco(WireCell2dToy::ToyCrawler& t
 
 
   // Now prepare to remove things ... 
-  MergeSpaceCellSelection all_cells;  
+  // MergeSpaceCellSelection all_cells;  
   
-  for (auto it =toycrawler.Get_mcells_map().begin();it!=toycrawler.Get_mcells_map().end();it++){
-    all_cells.push_back(it->first);
-  }
+  // for (auto it =toycrawler.Get_mcells_map().begin();it!=toycrawler.Get_mcells_map().end();it++){
+  //   all_cells.push_back(it->first);
+  // }
   //  std::cout << all_cells.size() << std::endl;
   
   for (int i=0;i!=possible_vertex.size();i++){
@@ -290,7 +290,7 @@ bool  WireCell2dToy::ToyTracking::track_shower_reco(WireCell2dToy::ToyCrawler& t
       WCTrack *spec_track = temp_track.at(j);
       
       // find the special vertex
-      WCVertex *spec_vertex;
+      WCVertex *spec_vertex = 0;
       for (int k=0;k!=temp_vertex.size();k++){
 	auto it = find(temp_vertex.at(k)->get_tracks().begin(),temp_vertex.at(k)->get_tracks().end(), spec_track);
 	if (it != temp_vertex.at(k)->get_tracks().end()){
@@ -298,6 +298,29 @@ bool  WireCell2dToy::ToyTracking::track_shower_reco(WireCell2dToy::ToyCrawler& t
 	  break;
 	}
       }
+      if (spec_vertex == 0){
+	float min_dis = 1e9;
+	for (int k=0;k!=temp_vertex.size();k++){
+	  float dis1 = sqrt(pow(temp_vertex.at(k)->Center().x - spec_track->get_centerVP_cells().front()->Get_Center().x,2)+
+			    pow(temp_vertex.at(k)->Center().y - spec_track->get_centerVP_cells().front()->Get_Center().y,2)+
+			    pow(temp_vertex.at(k)->Center().z - spec_track->get_centerVP_cells().front()->Get_Center().z,2));
+
+	  if (dis1 < min_dis){
+	    min_dis = dis1;
+	    spec_vertex = temp_vertex.at(k);
+	  }
+
+	  float dis2 = sqrt(pow(temp_vertex.at(k)->Center().x - spec_track->get_centerVP_cells().back()->Get_Center().x,2)+
+			    pow(temp_vertex.at(k)->Center().y - spec_track->get_centerVP_cells().back()->Get_Center().y,2)+
+			    pow(temp_vertex.at(k)->Center().z - spec_track->get_centerVP_cells().back()->Get_Center().z,2));
+
+	  if (dis2 < min_dis){
+	    min_dis = dis2;
+	    spec_vertex = temp_vertex.at(k);
+	  }
+	}
+      }
+
 
       // form excluded cells ...
       MergeSpaceCellSelection exclude_cells;
@@ -338,8 +361,10 @@ bool  WireCell2dToy::ToyTracking::track_shower_reco(WireCell2dToy::ToyCrawler& t
 	}
       }
 
-      // spec_track, bad_track ... 
-      std::cout << i << " " << j << " " << all_cells.size() << " " << exclude_cells.size() << std::endl;
+      WCShower *shower = new WCShower(spec_vertex,spec_track,exclude_cells,toycrawler.Get_mcells_map());
+      showers.push_back(shower);
+      // spec_track, spec_vertex, exclude_cells ... 
+      //std::cout << i << " " << j << " " <<  " " << exclude_cells.size() << std::endl;
 
       // }
       //Judge ... 
@@ -347,6 +372,7 @@ bool  WireCell2dToy::ToyTracking::track_shower_reco(WireCell2dToy::ToyCrawler& t
     }
   }
 
+  std::cout << showers.size() << std::endl;
 
   return result;
 }

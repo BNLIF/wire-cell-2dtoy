@@ -3,6 +3,7 @@
 
 #include "WireCellData/WCTrack.h"
 #include "WireCellData/WCVertex.h"
+#include "WireCellData/WCShower.h"
 #include "WireCell2dToy/ToyCrawler.h"
 
 namespace WireCell2dToy{
@@ -60,6 +61,7 @@ namespace WireCell2dToy{
   protected: 
     WireCell::WCTrackSelection tracks;
     WireCell::WCVertexSelection vertices;
+    WireCell::WCShowerSelection showers;
     
     /* WireCell::WCVertexSelection good_vertices; */
     /* WireCell::WCVertexSelection bad_vertices; */
