@@ -167,6 +167,7 @@ bool  WireCell2dToy::ToyTracking::track_shower_reco(WireCell2dToy::ToyCrawler& t
 
   // find vertex with distance cut
   std::vector<WCVertexSelection> possible_vertex;
+
   WCVertexSelection used_vertices;
   for (int i=0;i!=vertices.size();i++){
     WCVertex *vertex = vertices.at(i);
@@ -191,20 +192,49 @@ bool  WireCell2dToy::ToyTracking::track_shower_reco(WireCell2dToy::ToyCrawler& t
 	}
       }
 
+      WCTrackSelection temp_tracks;
+      std::vector<TVector3*> temp_dirs;
       
       //judge if satisfy requirement
-      if (temp.size()>1 ){
-	
+      if (temp.size()>1 || temp.at(0)->get_ntracks()>1){
+	for (int j = 0; j!= temp.size();j++){
+	  for (int k=0;k!=temp.at(j)->get_ntracks();k++){
+	    WCTrack* track =  temp.at(j)->get_tracks().at(k);
+	    auto it2 = find(good_tracks.begin(),good_tracks.end(),track);
+	    // auto it3 = find(parallel_tracks.begin(),parallel_tracks.end(),track);
+	    if (it2 != good_tracks.end() ){
+	      temp_tracks.push_back(track);
+	      TVector3 *vec = new TVector3(1,temp.at(j)->get_ky(track),temp.at(j)->get_kz(track));
+	      temp_dirs.push_back(vec);
+	    }
+	  }
+	}
 
-	std::cout << vertex->Center().x/units::cm << " " 
-		  << vertex->Center().y/units::cm << " " 
-		  << vertex->Center().z/units::cm << " " << std::endl;
+	if (temp_tracks.size() == 2){
+	  TVector3 *vec1 = temp_dirs.at(0);
+	  TVector3 *vec2 = temp_dirs.at(1);
 	  
-      }else{
+	  double a = (*vec1) * (*vec2) / vec1->Mag() / vec2->Mag();
+	  //std::cout << a << std::endl;
+	  if (fabs(a) <0.9){
+	    possible_vertex.push_back(temp);
+	  }
+	}
 	
+	for (int j=0;j!=temp_dirs.size();j++){
+	  delete temp_dirs.at(j);
+	}
+
+	// std::cout << vertex->Center().x/units::cm << " " 
+	// 	  << vertex->Center().y/units::cm << " " 
+	// 	  << vertex->Center().z/units::cm << " " << " " 
+	// 	  << temp.size() << " " << temp_tracks.size() << std::endl;
+	  
       }
     }
   }
+
+  
 
 
 
