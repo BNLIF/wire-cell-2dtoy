@@ -221,12 +221,15 @@ bool  WireCell2dToy::ToyTracking::track_shower_reco(WireCell2dToy::ToyCrawler& t
 	    possible_vertex.push_back(temp);
 	    possible_track.push_back(temp_tracks);
 	  }
+	}else if (temp_tracks.size()>2){
+	  possible_vertex.push_back(temp);
+	  possible_track.push_back(temp_tracks);
 	}
 	
 	for (int j=0;j!=temp_dirs.size();j++){
 	  delete temp_dirs.at(j);
 	}
-
+	
 	// std::cout << vertex->Center().x/units::cm << " " 
 	// 	  << vertex->Center().y/units::cm << " " 
 	// 	  << vertex->Center().z/units::cm << " " << " " 
@@ -251,13 +254,59 @@ bool  WireCell2dToy::ToyTracking::track_shower_reco(WireCell2dToy::ToyCrawler& t
     
     for (int j=0;j!=temp_track.size();j++){
       WCTrack *spec_track = temp_track.at(j);
+      
       // find the special vertex
-
+      WCVertex *spec_vertex;
+      for (int k=0;k!=temp_vertex.size();k++){
+	auto it = find(temp_vertex.at(k)->get_tracks().begin(),temp_vertex.at(k)->get_tracks().end(), spec_track);
+	if (it != temp_vertex.at(k)->get_tracks().end()){
+	  spec_vertex = temp_vertex.at(k);
+	  break;
+	}
+      }
 
       // form excluded cells ...
       MergeSpaceCellSelection exclude_cells;
+      WCTrackSelection exclude_tracks;
+      //save all exclude tracks ... 
+      for (int k=0;k!=temp_track.size();k++){
+	WCTrack *curr_track = temp_track.at(k);
+	if (curr_track= spec_track){ 
+	  exclude_tracks.push_back(curr_track);
+	}
+      }
       
+      int flag_qx = 1;
+      while(flag_qx){
+	flag_qx = 0;
+	for (int k=0;k!=good_tracks.size();k++){
+	  WCTrack *curr_track = good_tracks.at(k);
+	  if (curr_track != spec_track){
+	    auto it = find(exclude_tracks.begin(),exclude_tracks.end(),
+			   curr_track);
+	    if (it == exclude_tracks.end()){
+	      for (int k1=0;k1!= exclude_tracks.size();k1++){
+		if (curr_track->IsConnected(exclude_tracks.at(k1))){
+		  exclude_tracks.push_back(curr_track);
+		  break;
+		}
+	      }
+	    }
+	  }
+	}
+      }
 
+      for (int k=0;k!=exclude_tracks.size();k++){
+       	for (int k1 = 0; k1!=exclude_tracks.at(k)->get_centerVP_cells().size();k1++){
+	  auto it = find(exclude_cells.begin(),exclude_cells.end(),exclude_tracks.at(k)->get_centerVP_cells().at(k1));
+	  if (it == exclude_cells.end())
+	    exclude_cells.push_back(exclude_tracks.at(k)->get_centerVP_cells().at(k1));
+	}
+      }
+
+      std::cout << i << " " << j << " " << all_cells.size() << " " << exclude_cells.size() << std::endl;
+
+      // }
       //Judge ... 
 
     }
