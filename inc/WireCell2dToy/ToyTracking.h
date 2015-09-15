@@ -22,6 +22,8 @@ namespace WireCell2dToy{
     WireCell::WCTrackSelection& get_short_tracks(){return short_tracks;};
     
     WireCell::WCVertexSelection& get_vertices(){return vertices;};
+    /* WireCell::WCVertexSelection& get_good_vertices(){return good_vertices;}; */
+    /* WireCell::WCVertexSelection& get_bad_vertices(){return bad_vertices;}; */
     
     void CreateVertices(ToyCrawler& toycrawler);
     void RemoveSame();
@@ -59,6 +61,8 @@ namespace WireCell2dToy{
     WireCell::WCTrackSelection tracks;
     WireCell::WCVertexSelection vertices;
     
+    /* WireCell::WCVertexSelection good_vertices; */
+    /* WireCell::WCVertexSelection bad_vertices; */
     
     WireCell::WCTrackSelection good_tracks;
     WireCell::WCTrackSelection bad_tracks;

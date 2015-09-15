@@ -173,9 +173,10 @@ bool  WireCell2dToy::ToyTracking::track_shower_reco(WireCell2dToy::ToyCrawler& t
   for (int i=0;i!=vertices.size();i++){
     WCVertex *vertex = vertices.at(i);
     auto it = find(used_vertices.begin(),used_vertices.end(),vertex);
+
     if (it == used_vertices.end()){
       used_vertices.push_back(vertex);
-      // do something
+      // do something about the distance ... 
       WCVertexSelection temp;
       temp.push_back(vertex);
       
@@ -197,45 +198,78 @@ bool  WireCell2dToy::ToyTracking::track_shower_reco(WireCell2dToy::ToyCrawler& t
       std::vector<TVector3*> temp_dirs;
       
       //judge if satisfy requirement
-      if (temp.size()>1 || temp.at(0)->get_ntracks()>1){
-	for (int j = 0; j!= temp.size();j++){
-	  for (int k=0;k!=temp.at(j)->get_ntracks();k++){
-	    WCTrack* track =  temp.at(j)->get_tracks().at(k);
-	    auto it2 = find(good_tracks.begin(),good_tracks.end(),track);
-	    // auto it3 = find(parallel_tracks.begin(),parallel_tracks.end(),track);
-	    if (it2 != good_tracks.end() ){
-	      temp_tracks.push_back(track);
-	      TVector3 *vec = new TVector3(1,temp.at(j)->get_ky(track),temp.at(j)->get_kz(track));
-	      temp_dirs.push_back(vec);
-	    }
+      //     if (temp.size()>1 || temp.at(0)->get_ntracks()>1){
+      for (int j = 0; j!= temp.size();j++){
+	for (int k=0;k!=temp.at(j)->get_ntracks();k++){
+	  WCTrack* track =  temp.at(j)->get_tracks().at(k);
+	  auto it2 = find(good_tracks.begin(),good_tracks.end(),track);
+	  // auto it3 = find(parallel_tracks.begin(),parallel_tracks.end(),track);
+	  if (it2 != good_tracks.end() ){
+	    temp_tracks.push_back(track);
+	    TVector3 *vec = new TVector3(1,temp.at(j)->get_ky(track),temp.at(j)->get_kz(track));
+	    temp_dirs.push_back(vec);
 	  }
 	}
+      }
 
-	if (temp_tracks.size() == 2){
-	  TVector3 *vec1 = temp_dirs.at(0);
-	  TVector3 *vec2 = temp_dirs.at(1);
-	  
-	  double a = (*vec1) * (*vec2) / vec1->Mag() / vec2->Mag();
-	  //std::cout << a << std::endl;
-	  if (fabs(a) <0.9){
-	    possible_vertex.push_back(temp);
-	    possible_track.push_back(temp_tracks);
+      // look at the bad tracks ...
+      for (int j=0;j!=bad_tracks.size();j++){
+	int flag_qx = 0;
+	for (int k=0;k!=temp.size();k++){
+	  float dis1 = sqrt(pow(temp.at(k)->Center().x - bad_tracks.at(j)->get_centerVP_cells().front()->Get_Center().x,2)
+			    + pow(temp.at(k)->Center().y - bad_tracks.at(j)->get_centerVP_cells().front()->Get_Center().y,2)
+			    + pow(temp.at(k)->Center().z - bad_tracks.at(j)->get_centerVP_cells().front()->Get_Center().z,2));
+	  if (dis1 < 1 * units::cm){
+	    flag_qx = 1;
+	    break;
 	  }
-	}else if (temp_tracks.size()>2){
+
+	  float dis2 = sqrt(pow(temp.at(k)->Center().x - bad_tracks.at(j)->get_centerVP_cells().back()->Get_Center().x,2)
+			    + pow(temp.at(k)->Center().y - bad_tracks.at(j)->get_centerVP_cells().back()->Get_Center().y,2)
+			    + pow(temp.at(k)->Center().z - bad_tracks.at(j)->get_centerVP_cells().back()->Get_Center().z,2));
+	  if (dis2 < 1*units::cm){
+	    flag_qx = 1;
+	    break;
+	  }
+	}
+	
+	if (flag_qx==1){
+	  temp_tracks.push_back(bad_tracks.at(j));
+	  TVector3 *vec = new TVector3(0,0,0);
+	  temp_dirs.push_back(vec);
+	}
+      }
+      // 
+      
+      if (temp_tracks.size() == 2){
+	TVector3 *vec1 = temp_dirs.at(0);
+	TVector3 *vec2 = temp_dirs.at(1);
+	
+	double a = (*vec1) * (*vec2);
+	
+	if (vec1->Mag()!=0 & vec2->Mag()!=0)
+	  a = a / vec1->Mag() / vec2->Mag();
+       
+	//std::cout << a << std::endl;
+	if (fabs(a) <0.9){
 	  possible_vertex.push_back(temp);
 	  possible_track.push_back(temp_tracks);
 	}
-	
-	for (int j=0;j!=temp_dirs.size();j++){
-	  delete temp_dirs.at(j);
-	}
+      }else if (temp_tracks.size()>2){
+	possible_vertex.push_back(temp);
+	possible_track.push_back(temp_tracks);
+      }
+      
+      for (int j=0;j!=temp_dirs.size();j++){
+	delete temp_dirs.at(j);
+      }
 	
 	// std::cout << vertex->Center().x/units::cm << " " 
 	// 	  << vertex->Center().y/units::cm << " " 
 	// 	  << vertex->Center().z/units::cm << " " << " " 
 	// 	  << temp.size() << " " << temp_tracks.size() << std::endl;
 	  
-      }
+	//    }
     }
   }
 
@@ -304,6 +338,7 @@ bool  WireCell2dToy::ToyTracking::track_shower_reco(WireCell2dToy::ToyCrawler& t
 	}
       }
 
+      // spec_track, bad_track ... 
       std::cout << i << " " << j << " " << all_cells.size() << " " << exclude_cells.size() << std::endl;
 
       // }
@@ -1310,6 +1345,7 @@ void WireCell2dToy::ToyTracking::cleanup_bad_tracks(){
         WCVertex *vertex = vertices.at(j);
 	WCTrackSelection& vtracks = vertex->get_tracks();
 	auto it = find(vtracks.begin(),vtracks.end(),good_tracks.at(i));
+	
 	if (it != vtracks.end()){
 	  vtracks.erase(it);
 	}
