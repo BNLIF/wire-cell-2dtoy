@@ -167,6 +167,7 @@ bool  WireCell2dToy::ToyTracking::track_shower_reco(WireCell2dToy::ToyCrawler& t
 
   // find vertex with distance cut
   std::vector<WCVertexSelection> possible_vertex;
+  std::vector<WCTrackSelection> possible_track;
 
   WCVertexSelection used_vertices;
   for (int i=0;i!=vertices.size();i++){
@@ -218,6 +219,7 @@ bool  WireCell2dToy::ToyTracking::track_shower_reco(WireCell2dToy::ToyCrawler& t
 	  //std::cout << a << std::endl;
 	  if (fabs(a) <0.9){
 	    possible_vertex.push_back(temp);
+	    possible_track.push_back(temp_tracks);
 	  }
 	}
 	
@@ -234,8 +236,32 @@ bool  WireCell2dToy::ToyTracking::track_shower_reco(WireCell2dToy::ToyCrawler& t
     }
   }
 
-  
 
+  // Now prepare to remove things ... 
+  MergeSpaceCellSelection all_cells;  
+  
+  for (auto it =toycrawler.Get_mcells_map().begin();it!=toycrawler.Get_mcells_map().end();it++){
+    all_cells.push_back(it->first);
+  }
+  //  std::cout << all_cells.size() << std::endl;
+  
+  for (int i=0;i!=possible_vertex.size();i++){
+    WCVertexSelection temp_vertex = possible_vertex.at(i); 
+    WCTrackSelection temp_track = possible_track.at(i);
+    
+    for (int j=0;j!=temp_track.size();j++){
+      WCTrack *spec_track = temp_track.at(j);
+      // find the special vertex
+
+
+      // form excluded cells ...
+      MergeSpaceCellSelection exclude_cells;
+      
+
+      //Judge ... 
+
+    }
+  }
 
 
   return result;
