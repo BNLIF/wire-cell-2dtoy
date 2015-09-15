@@ -144,7 +144,6 @@ WireCell2dToy::ToyTracking::ToyTracking(WireCell2dToy::ToyCrawler& toycrawler){
       fine_tracking(1);
     }else{
       //is a shower  
-      //test ... 
       std::cout << "Grown single track " << std::endl;
       if (grow_track_fill_gap(toycrawler)){
       	std::cout << "FineTracking Again" << std::endl; 
@@ -152,9 +151,70 @@ WireCell2dToy::ToyTracking::ToyTracking(WireCell2dToy::ToyCrawler& toycrawler){
       	fine_tracking();
       }
       
+      // Judge vertex with multiple tracks ...
+      
+      track_shower_reco(toycrawler);
+      
+      // Judge vertex for single shower ...
+
     }
   }
 }
+
+
+bool  WireCell2dToy::ToyTracking::track_shower_reco(WireCell2dToy::ToyCrawler& toycrawler){
+  bool result = false;
+
+  // find vertex with distance cut
+  std::vector<WCVertexSelection> possible_vertex;
+  WCVertexSelection used_vertices;
+  for (int i=0;i!=vertices.size();i++){
+    WCVertex *vertex = vertices.at(i);
+    auto it = find(used_vertices.begin(),used_vertices.end(),vertex);
+    if (it == used_vertices.end()){
+      used_vertices.push_back(vertex);
+      // do something
+      WCVertexSelection temp;
+      temp.push_back(vertex);
+      
+      for (int j=0;j!=vertices.size();j++){
+	WCVertex* vertex1 = vertices.at(j);
+	auto it1 =find(used_vertices.begin(),used_vertices.end(),vertex1);
+	if (it1 == used_vertices.end()){
+	  float dis = sqrt(pow(vertex->Center().x-vertex1->Center().x,2)
+			   +pow(vertex->Center().y-vertex1->Center().y,2)
+			   +pow(vertex->Center().z-vertex1->Center().z,2));
+	  if (dis < 1*units::cm){
+	    used_vertices.push_back(vertex1);
+	    temp.push_back(vertex1);
+	  }
+	}
+      }
+
+      
+      //judge if satisfy requirement
+      if (temp.size()>1 ){
+	
+
+	std::cout << vertex->Center().x/units::cm << " " 
+		  << vertex->Center().y/units::cm << " " 
+		  << vertex->Center().z/units::cm << " " << std::endl;
+	  
+      }else{
+	
+      }
+    }
+  }
+
+
+
+  return result;
+}
+
+
+void WireCell2dToy::ToyTracking::single_shower_reco(WireCell2dToy::ToyCrawler& toycrawler){
+}
+
 
 void WireCell2dToy::ToyTracking::form_parallel_tiny_tracks(WireCell2dToy::ToyCrawler& toycrawler){
   
@@ -1102,7 +1162,7 @@ bool WireCell2dToy::ToyTracking::IsThisShower(WireCell2dToy::ToyCrawler& toycraw
   // }
 
 
-  std::cout << "Number of Tracks " << ntracks << " "  << time_mcells_set.size() << " " << track_cluster.size() << " " << time_mcells_set1.size() << " " << time_mcells_set2.size() << std::endl; 
+  // std::cout << "Number of Tracks " << ntracks << " "  << time_mcells_set.size() << " " << track_cluster.size() << " " << time_mcells_set1.size() << " " << time_mcells_set2.size() << std::endl; 
   
   
   //need better tuning .... 
