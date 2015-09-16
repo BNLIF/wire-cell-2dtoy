@@ -57,6 +57,8 @@ namespace WireCell2dToy{
     void parallel_tracking(WireCell::WCVertex *vertex, WireCell::MergeSpaceCellSelection &mcells, WireCell2dToy::ToyCrawler& toycrawler);
 
     bool track_shower_reco(WireCell2dToy::ToyCrawler& toycrawler);
+    void Cleanup_showers();
+
     void single_shower_reco(WireCell2dToy::ToyCrawler& toycrawler);
     
 
