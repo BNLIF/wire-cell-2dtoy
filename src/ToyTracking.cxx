@@ -365,12 +365,7 @@ bool  WireCell2dToy::ToyTracking::track_shower_reco(WireCell2dToy::ToyCrawler& t
       if (shower->IsShower()){
 	showers.push_back(shower);
       // spec_track, spec_vertex, exclude_cells ... 
-	std::cout << i << " " << j << " " <<  shower->IsShower() << " " << 
-	  shower->get_all_cells().size() << " " << exclude_cells.size() << " " << exclude_tracks.size() << " " 
-		  << spec_vertex->Center().x/units::cm << " " 
-		  << spec_vertex->Center().y/units::cm << " " 
-		  << spec_vertex->Center().z/units::cm << " " 
-		  << std::endl;
+	
       }else{
 	delete shower;
       }
@@ -383,8 +378,75 @@ bool  WireCell2dToy::ToyTracking::track_shower_reco(WireCell2dToy::ToyCrawler& t
     }
   }
 
-  //  std::cout << showers.size() << std::endl;
+  // find the maximum shower, and judge if other shower belong to it?
+  int max_cells = 0;
+  WCShower *max_shower = 0;
+  for (int i=0;i!=showers.size();i++){
+    WCShower *shower = showers.at(i);
+    if (shower->get_all_cells().size() > max_cells){
+      max_cells = shower->get_all_cells().size();
+      max_shower = shower;
+    }
+  }
+  // go through the rest of shower to judge if they belong to max_shower
+  int flag_qx = 1;
+  while(flag_qx){
+    flag_qx = 0;
+    for (int i=0;i!=showers.size();i++){
+      WCShower *shower = showers.at(i);
+      if (shower != max_shower){
+	if (shower->IsContained(max_shower)){
+	  delete shower;
+	  showers.erase(showers.begin()+i);
+	  flag_qx = 1;
+	  break;
+	}
+      }
+    }
+  }
 
+  // find the second largest shower
+  if (showers.size() >2){
+    int second_max_cells = 0;
+    WCShower *second_max_shower = 0;
+    
+    for (int i=0;i!=showers.size();i++){
+      WCShower *shower = showers.at(i);
+      if (shower->get_all_cells().size() > second_max_cells && shower != max_shower){
+	second_max_cells = shower->get_all_cells().size();
+	second_max_shower = shower;
+      }
+    }
+
+    flag_qx = 1;
+    while(flag_qx){
+      flag_qx = 0;
+      for (int i=0;i!=showers.size();i++){
+	WCShower *shower = showers.at(i);
+	if (shower != max_shower && shower != second_max_shower){
+	  if (shower->IsContained(second_max_shower)){
+	    delete shower;
+	    showers.erase(showers.begin()+i);
+	    flag_qx = 1;
+	    break;
+	  }
+	}
+      }
+    }
+  }
+
+  
+  //  std::cout << showers.size() << std::endl;
+  for (int i=0;i!=showers.size();i++){
+    WCShower *shower = showers.at(i);
+    std::cout << i << " " << " " <<  shower->IsShower() << " " << 
+      shower->get_all_cells().size() << " " 
+	      << shower->get_vertex()->Center().x/units::cm << " " 
+	      << shower->get_vertex()->Center().y/units::cm << " " 
+	      << shower->get_vertex()->Center().z/units::cm << " " 
+	      << std::endl;
+  }
+  
   return result;
 }
 

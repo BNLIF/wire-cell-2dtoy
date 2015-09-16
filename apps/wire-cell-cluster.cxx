@@ -219,7 +219,8 @@ int main(int argc, char* argv[])
   display.DrawTracks(short_tracks,"psame",4);
 
   WCShowerSelection& showers =toytracking.get_showers();
-  display.DrawShower(showers.at(0),"psame",2);
+  if (showers.size() > 0)
+    display.DrawShower(showers.at(0),"psame",2);
   // Point p;
   // p.x = cells.at(0)->x();
   // p.y = cells.at(0)->y();
