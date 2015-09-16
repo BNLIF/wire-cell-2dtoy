@@ -111,15 +111,15 @@ WireCell2dToy::ToyTracking::ToyTracking(WireCell2dToy::ToyCrawler& toycrawler){
     // }
   }
 
+  
+
   if (vertices.size() > 0 ) {
     
     //Now do fine tracking for existing tracks
     std::cout << "FineTracking " << std::endl; 
     update_maps();
     fine_tracking();
-    
     cleanup_bad_tracks();
-    
     update_maps1();
     
         
@@ -154,11 +154,11 @@ WireCell2dToy::ToyTracking::ToyTracking(WireCell2dToy::ToyCrawler& toycrawler){
       
       // Judge vertex with multiple tracks ...
       if (track_shower_reco(toycrawler)){
-	Cleanup_showers();
+	//	Cleanup_showers();
 	// do the rest of fine tracking ... 
-	form_parallel_tiny_tracks(toycrawler);
-	update_maps(1);
-	fine_tracking(1);
+	// form_parallel_tiny_tracks(toycrawler);
+	// update_maps(1);
+	// fine_tracking(1);
       }else{
     	// Judge vertex for single shower ...
     	// single_shower_reco(toycrawler);
