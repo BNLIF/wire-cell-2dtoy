@@ -328,29 +328,29 @@ bool  WireCell2dToy::ToyTracking::track_shower_reco(WireCell2dToy::ToyCrawler& t
       //save all exclude tracks ... 
       for (int k=0;k!=temp_track.size();k++){
 	WCTrack *curr_track = temp_track.at(k);
-	if (curr_track= spec_track){ 
+	if (curr_track != spec_track){ 
 	  exclude_tracks.push_back(curr_track);
 	}
       }
       
       int flag_qx = 1;
       while(flag_qx){
-	flag_qx = 0;
-	for (int k=0;k!=good_tracks.size();k++){
-	  WCTrack *curr_track = good_tracks.at(k);
-	  if (curr_track != spec_track){
-	    auto it = find(exclude_tracks.begin(),exclude_tracks.end(),
-			   curr_track);
-	    if (it == exclude_tracks.end()){
-	      for (int k1=0;k1!= exclude_tracks.size();k1++){
-		if (curr_track->IsConnected(exclude_tracks.at(k1))){
-		  exclude_tracks.push_back(curr_track);
-		  break;
-		}
-	      }
-	    }
-	  }
-	}
+      	flag_qx = 0;
+      	for (int k=0;k!=good_tracks.size();k++){
+      	  WCTrack *curr_track = good_tracks.at(k);
+      	  if (curr_track != spec_track){
+      	    auto it = find(exclude_tracks.begin(),exclude_tracks.end(),
+      			   curr_track);
+      	    if (it == exclude_tracks.end()){
+      	      for (int k1=0;k1!= exclude_tracks.size();k1++){
+      		if (curr_track->IsConnected(exclude_tracks.at(k1))){
+      		  exclude_tracks.push_back(curr_track);
+      		  break;
+      		}
+      	      }
+      	    }
+      	  }
+      	}
       }
 
       for (int k=0;k!=exclude_tracks.size();k++){
@@ -362,9 +362,20 @@ bool  WireCell2dToy::ToyTracking::track_shower_reco(WireCell2dToy::ToyCrawler& t
       }
 
       WCShower *shower = new WCShower(spec_vertex,spec_track,exclude_cells,toycrawler.Get_mcells_map());
-      showers.push_back(shower);
+      if (shower->IsShower()){
+	showers.push_back(shower);
       // spec_track, spec_vertex, exclude_cells ... 
-      std::cout << i << " " << j << " " <<  shower->get_all_cells().size() << " " << exclude_cells.size() << std::endl;
+	std::cout << i << " " << j << " " <<  shower->IsShower() << " " << 
+	  shower->get_all_cells().size() << " " << exclude_cells.size() << " " << exclude_tracks.size() << " " 
+		  << spec_vertex->Center().x/units::cm << " " 
+		  << spec_vertex->Center().y/units::cm << " " 
+		  << spec_vertex->Center().z/units::cm << " " 
+		  << std::endl;
+      }else{
+	delete shower;
+      }
+      
+
 
       // }
       //Judge ... 
