@@ -23,8 +23,8 @@ namespace WireCell2dToy{
     WireCell::WCTrackSelection& get_short_tracks(){return short_tracks;};
     
     WireCell::WCVertexSelection& get_vertices(){return vertices;};
-    /* WireCell::WCVertexSelection& get_good_vertices(){return good_vertices;}; */
-    /* WireCell::WCVertexSelection& get_bad_vertices(){return bad_vertices;}; */
+    /* WireCell::WCVertexSelection& get_good_vertices(){return good_vertices;};  */
+    /* WireCell::WCVertexSelection& get_bad_vertices(){return bad_vertices;}; */ 
     
     WireCell::WCShowerSelection& get_showers(){return showers;};
 
@@ -45,7 +45,7 @@ namespace WireCell2dToy{
 
     bool ExamineVertex(WireCell::WCVertex* vertex, WireCell2dToy::ToyCrawler& toycrawler);
 
-    void update_maps();
+    void update_maps(int flag = 0);
     void update_maps1();
     void fine_tracking(int flag = 0);
     void cleanup_bad_tracks();
@@ -67,8 +67,8 @@ namespace WireCell2dToy{
     WireCell::WCVertexSelection vertices;
     WireCell::WCShowerSelection showers;
     
-    /* WireCell::WCVertexSelection good_vertices; */
-    /* WireCell::WCVertexSelection bad_vertices; */
+    /* WireCell::WCVertexSelection good_vertices;  */
+    /* WireCell::WCVertexSelection bad_vertices;  */
     
     WireCell::WCTrackSelection good_tracks;
     WireCell::WCTrackSelection bad_tracks;

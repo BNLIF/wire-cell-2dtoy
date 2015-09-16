@@ -117,6 +117,7 @@ WireCell2dToy::ToyTracking::ToyTracking(WireCell2dToy::ToyCrawler& toycrawler){
     std::cout << "FineTracking " << std::endl; 
     update_maps();
     fine_tracking();
+    
     cleanup_bad_tracks();
     
     update_maps1();
@@ -135,20 +136,20 @@ WireCell2dToy::ToyTracking::ToyTracking(WireCell2dToy::ToyCrawler& toycrawler){
       std::cout << "Grown single track " << std::endl;
       if (grow_track_fill_gap(toycrawler)){
       	std::cout << "FineTracking Again" << std::endl; 
-      	update_maps();
+      	update_maps(1);
       	fine_tracking();
       }
       
       form_parallel_tiny_tracks(toycrawler);
-      update_maps();
+      update_maps(1);
       fine_tracking(1);
     }else{
       //is a shower  
-      std::cout << "Grown single track " << std::endl;
+      // std::cout << "Grown single track " << std::endl;
       if (grow_track_fill_gap(toycrawler)){
-      	std::cout << "FineTracking Again" << std::endl; 
-      	update_maps();
-      	fine_tracking();
+       	std::cout << "FineTracking Again" << std::endl; 
+       	update_maps(1);
+       	fine_tracking();
       }
       
       // Judge vertex with multiple tracks ...
@@ -156,15 +157,41 @@ WireCell2dToy::ToyTracking::ToyTracking(WireCell2dToy::ToyCrawler& toycrawler){
 	Cleanup_showers();
 	// do the rest of fine tracking ... 
 	form_parallel_tiny_tracks(toycrawler);
-	update_maps();
+	update_maps(1);
 	fine_tracking(1);
       }else{
-	// Judge vertex for single shower ...
-	single_shower_reco(toycrawler);
+    	// Judge vertex for single shower ...
+    	// single_shower_reco(toycrawler);
+    	// Cleanup_showers();
       }
     }
   }
 }
+
+void WireCell2dToy::ToyTracking::single_shower_reco(WireCell2dToy::ToyCrawler& toycrawler){
+  MergeSpaceCellSelection all_cells;  
+  
+  for (auto it =toycrawler.Get_mcells_map().begin();it!=toycrawler.Get_mcells_map().end();it++){
+    all_cells.push_back(it->first);
+  }
+  //  std::cout << all_cells.size() << std::endl;
+
+  for (int i=0;i!=vertices.size();i++){
+    WCVertex *vertex =vertices.at(i);
+    int ntrack = 0;
+    for (int j=0;j!=vertex->get_ntracks();j++){
+      WCTrack *track = vertex->get_tracks().at(j);
+      auto it1 = find(good_tracks.begin(),good_tracks.end(),track);
+    }
+    // find vertex containing on track
+    // form shower
+    // judge if agrees with shower
+    // pick up the furthest one 
+  }
+  
+}
+
+
 
 void WireCell2dToy::ToyTracking::Cleanup_showers(){
   WCVertexSelection not_remove_vertex;
@@ -188,82 +215,81 @@ void WireCell2dToy::ToyTracking::Cleanup_showers(){
       }
       if (flag_qx == 1){
 	to_be_remove_track.push_back(good_tracks.at(i));
-	for (int j=0;j!=vertices.size();j++){
-	  WCVertex *vertex = vertices.at(j);
-	  WCTrackSelection& vtracks = vertex->get_tracks();
-	  auto it = find(vtracks.begin(),vtracks.end(),good_tracks.at(i));
-	  if (it != vtracks.end()){
-	    vtracks.erase(it);
-	  }
-	  if (vtracks.size()==0){
-	    auto it1 = find(to_be_remove_vertex.begin(),to_be_remove_vertex.end(),vertices.at(j));
-	    if (it1 == to_be_remove_vertex.end())
-	      to_be_remove_vertex.push_back(vertices.at(j));
-	  }
-	}
+	// for (int j=0;j!=vertices.size();j++){
+	//   WCVertex *vertex = vertices.at(j);
+	//   WCTrackSelection& vtracks = vertex->get_tracks();
+	//   auto it = find(vtracks.begin(),vtracks.end(),good_tracks.at(i));
+	//   if (it != vtracks.end()){
+	//     vtracks.erase(it);
+	//   }
+	//   if (vtracks.size()==0){
+	//     auto it1 = find(to_be_remove_vertex.begin(),to_be_remove_vertex.end(),vertices.at(j));
+	//     if (it1 == to_be_remove_vertex.end())
+	//       to_be_remove_vertex.push_back(vertices.at(j));
+	//   }
+	// }
       }
     }
   }
 
   for (int i=0;i!=to_be_remove_track.size();i++){
     auto it = find(good_tracks.begin(),good_tracks.end(),to_be_remove_track.at(i));
-    to_be_remove_track.at(i)->reset_fine_tracking();
+    bad_tracks.push_back(to_be_remove_track.at(i));
+    //to_be_remove_track.at(i)->reset_fine_tracking();
     good_tracks.erase(it);
   }
 
-  to_be_remove_track.clear();
+  // to_be_remove_track.clear();
   
   
-  for (int i=0;i!=bad_tracks.size();i++){
-    auto it = find(not_remove_track.begin(),not_remove_track.end(),bad_tracks.at(i));
-    if (it == not_remove_track.end()){
-      int flag_qx = 0;
-      for (int j=0;j!=showers.size();j++){
-	if (showers.at(j)->Contain(bad_tracks.at(i))){
-	  flag_qx = 1;
-	  break;
-	}
-      }
-      if (flag_qx == 1){
-	to_be_remove_track.push_back(bad_tracks.at(i));
-	for (int j=0;j!=vertices.size();j++){
-	  WCVertex *vertex = vertices.at(j);
-	  WCTrackSelection& vtracks = vertex->get_tracks();
-	  auto it = find(vtracks.begin(),vtracks.end(),bad_tracks.at(i));
-	  if (it != vtracks.end()){
-	    vtracks.erase(it);
-	  }
-	  if (vtracks.size()==0){
-	    auto it1 = find(to_be_remove_vertex.begin(),to_be_remove_vertex.end(),vertices.at(j));
-	    if (it1 == to_be_remove_vertex.end())
-	      to_be_remove_vertex.push_back(vertices.at(j));
-	  }
-	}
-      }
-    }
-  }
+  // for (int i=0;i!=bad_tracks.size();i++){
+  //   auto it = find(not_remove_track.begin(),not_remove_track.end(),bad_tracks.at(i));
+  //   if (it == not_remove_track.end()){
+  //     int flag_qx = 0;
+  //     for (int j=0;j!=showers.size();j++){
+  // 	if (showers.at(j)->Contain(bad_tracks.at(i))){
+  // 	  flag_qx = 1;
+  // 	  break;
+  // 	}
+  //     }
+  //     if (flag_qx == 1){
+  // 	to_be_remove_track.push_back(bad_tracks.at(i));
+  // 	for (int j=0;j!=vertices.size();j++){
+  // 	  WCVertex *vertex = vertices.at(j);
+  // 	  WCTrackSelection& vtracks = vertex->get_tracks();
+  // 	  auto it = find(vtracks.begin(),vtracks.end(),bad_tracks.at(i));
+  // 	  if (it != vtracks.end()){
+  // 	    vtracks.erase(it);
+  // 	  }
+  // 	  if (vtracks.size()==0){
+  // 	    auto it1 = find(to_be_remove_vertex.begin(),to_be_remove_vertex.end(),vertices.at(j));
+  // 	    if (it1 == to_be_remove_vertex.end())
+  // 	      to_be_remove_vertex.push_back(vertices.at(j));
+  // 	  }
+  // 	}
+  //     }
+  //   }
+  // }
 
-  for (int i=0;i!=to_be_remove_track.size();i++){
-    auto it = find(bad_tracks.begin(),bad_tracks.end(),to_be_remove_track.at(i));
-    to_be_remove_track.at(i)->reset_fine_tracking();
-    bad_tracks.erase(it);
-  }
+  // for (int i=0;i!=to_be_remove_track.size();i++){
+  //   auto it = find(bad_tracks.begin(),bad_tracks.end(),to_be_remove_track.at(i));
+  //   to_be_remove_track.at(i)->reset_fine_tracking();
+  //   bad_tracks.erase(it);
+  // }
 
  
 
-  for (int i=0;i!=to_be_remove_vertex.size();i++){
-    WCVertex *vertex = to_be_remove_vertex.at(i);
-    auto it = find(vertices.begin(),vertices.end(),vertex);
-    if (it != vertices.end()){
-      vertices.erase(it);
-      delete vertex;
-    }
-  }
+  // for (int i=0;i!=to_be_remove_vertex.size();i++){
+  //   WCVertex *vertex = to_be_remove_vertex.at(i);
+  //   auto it = find(vertices.begin(),vertices.end(),vertex);
+  //   if (it != vertices.end()){
+  //     vertices.erase(it);
+  //     delete vertex;
+  //   }
+  // }
 }
 
 
-void WireCell2dToy::ToyTracking::single_shower_reco(WireCell2dToy::ToyCrawler& toycrawler){
-}
 
 
 
@@ -275,6 +301,21 @@ bool  WireCell2dToy::ToyTracking::track_shower_reco(WireCell2dToy::ToyCrawler& t
   std::vector<WCTrackSelection> possible_track;
 
   WCVertexSelection used_vertices;
+  //put bad vertices in first
+  for (int i=0;i!=vertices.size();i++){
+    WCVertex *vertex = vertices.at(i);
+    int flag = 0;
+    for (int j=0;j!=vertex->get_tracks().size();j++){
+      auto it = find(bad_tracks.begin(),bad_tracks.end(),vertex->get_tracks().at(j));
+      if (it == bad_tracks.end()){
+	flag = 1;
+      }
+    }
+    if (flag == 0 )
+      used_vertices.push_back(vertex);
+  }
+
+
   for (int i=0;i!=vertices.size();i++){
     WCVertex *vertex = vertices.at(i);
     auto it = find(used_vertices.begin(),used_vertices.end(),vertex);
@@ -284,15 +325,25 @@ bool  WireCell2dToy::ToyTracking::track_shower_reco(WireCell2dToy::ToyCrawler& t
       // do something about the distance ... 
       WCVertexSelection temp;
       temp.push_back(vertex);
-      
       for (int j=0;j!=vertices.size();j++){
 	WCVertex* vertex1 = vertices.at(j);
 	auto it1 =find(used_vertices.begin(),used_vertices.end(),vertex1);
-	if (it1 == used_vertices.end()){
+	if (it1 == used_vertices.end() && vertex1 != vertex){
 	  float dis = sqrt(pow(vertex->Center().x-vertex1->Center().x,2)
 			   +pow(vertex->Center().y-vertex1->Center().y,2)
 			   +pow(vertex->Center().z-vertex1->Center().z,2));
-	  if (dis < 1*units::cm){
+	  MergeSpaceCell *vertex_mcell = vertex->get_msc();
+	  MergeSpaceCell *vertex1_mcell = vertex->get_msc();
+	  
+	  if (dis < 1*units::cm ){ 
+	    used_vertices.push_back(vertex1);
+	    temp.push_back(vertex1);
+	  } else if (vertex->get_msc() == vertex1->get_msc() ){
+	    used_vertices.push_back(vertex1);
+	    temp.push_back(vertex1);
+	  }else if (fabs(vertex->get_msc()->Get_Center().x - vertex1->get_msc()->Get_Center().x) < 0.35*units::cm 
+	  	    && fabs(vertex->get_msc()->Get_Center().x - vertex1->get_msc()->Get_Center().x) > 0.05*units::cm 
+	  	    && vertex_mcell->Overlap(*vertex1_mcell)){
 	    used_vertices.push_back(vertex1);
 	    temp.push_back(vertex1);
 	  }
@@ -380,12 +431,7 @@ bool  WireCell2dToy::ToyTracking::track_shower_reco(WireCell2dToy::ToyCrawler& t
 
 
   // Now prepare to remove things ... 
-  // MergeSpaceCellSelection all_cells;  
   
-  // for (auto it =toycrawler.Get_mcells_map().begin();it!=toycrawler.Get_mcells_map().end();it++){
-  //   all_cells.push_back(it->first);
-  // }
-  //  std::cout << all_cells.size() << std::endl;
   
   for (int i=0;i!=possible_vertex.size();i++){
     WCVertexSelection temp_vertex = possible_vertex.at(i); 
@@ -542,15 +588,15 @@ bool  WireCell2dToy::ToyTracking::track_shower_reco(WireCell2dToy::ToyCrawler& t
 
   
   //  std::cout << showers.size() << std::endl;
-  // for (int i=0;i!=showers.size();i++){
-  //   WCShower *shower = showers.at(i);
-  //   std::cout << i << " " << " " <<  shower->IsShower() << " " << 
-  //     shower->get_all_cells().size() << " " 
-  // 	      << shower->get_vertex()->Center().x/units::cm << " " 
-  // 	      << shower->get_vertex()->Center().y/units::cm << " " 
-  // 	      << shower->get_vertex()->Center().z/units::cm << " " 
-  // 	      << std::endl;
-  // }
+  for (int i=0;i!=showers.size();i++){
+    WCShower *shower = showers.at(i);
+    std::cout << i << " " << " " <<  shower->IsShower() << " " << 
+      shower->get_all_cells().size() << " " 
+  	      << shower->get_vertex()->Center().x/units::cm << " " 
+  	      << shower->get_vertex()->Center().y/units::cm << " " 
+  	      << shower->get_vertex()->Center().z/units::cm << " " 
+  	      << std::endl;
+  }
   
   
   if (showers.size() >0)
@@ -1558,21 +1604,21 @@ void WireCell2dToy::ToyTracking::cleanup_bad_tracks(){
       bad_tracks.push_back(good_tracks.at(i));
       //bad_tracks.at(i)->reset_fine_tracking();
       
-      for (int j=0;j!=vertices.size();j++){
-        WCVertex *vertex = vertices.at(j);
-	WCTrackSelection& vtracks = vertex->get_tracks();
-	auto it = find(vtracks.begin(),vtracks.end(),good_tracks.at(i));
-	
-	if (it != vtracks.end()){
-	  vtracks.erase(it);
-	}
-	if (vtracks.size()==0){
-	  //eliminate this vertex
-	  auto it1 = find(to_be_removed.begin(),to_be_removed.end(),vertices.at(j));
-	  if (it1 == to_be_removed.end())
-	    to_be_removed.push_back(vertices.at(j));
-	}
-      }
+      // for (int j=0;j!=vertices.size();j++){
+      //   WCVertex *vertex = vertices.at(j);
+      // 	WCTrackSelection& vtracks = vertex->get_tracks();
+      // 	auto it = find(vtracks.begin(),vtracks.end(),good_tracks.at(i));
+      
+      // if (it != vtracks.end()){
+      //   vtracks.erase(it);
+      // }
+      // if (vtracks.size()==0){
+      //   //eliminate this vertex
+      //   auto it1 = find(to_be_removed.begin(),to_be_removed.end(),vertices.at(j));
+      //   if (it1 == to_be_removed.end())
+      //     to_be_removed.push_back(vertices.at(j));
+      // }
+      // }
     }  
   }
 
@@ -1580,6 +1626,10 @@ void WireCell2dToy::ToyTracking::cleanup_bad_tracks(){
     auto it = find(good_tracks.begin(),good_tracks.end(),bad_tracks.at(i));
     good_tracks.erase(it);
   }
+  
+  //deal with vertices ... 
+  
+
 
   // for (int i=0;i!=vertices.size();i++){
   //   auto it1 = find(to_be_removed.begin(),to_be_removed.end(),vertices.at(i));
@@ -1587,14 +1637,14 @@ void WireCell2dToy::ToyTracking::cleanup_bad_tracks(){
   //     to_be_removed.push_back(vertices.at(i));
   // }
 
-  for (int i=0;i!=to_be_removed.size();i++){
-    WCVertex *vertex = to_be_removed.at(i);
-    auto it = find(vertices.begin(),vertices.end(),vertex);
-    if (it != vertices.end()){
-      vertices.erase(it);
-      delete vertex;
-    }
-  }
+  // for (int i=0;i!=to_be_removed.size();i++){
+  //   WCVertex *vertex = to_be_removed.at(i);
+  //   auto it = find(vertices.begin(),vertices.end(),vertex);
+  //   if (it != vertices.end()){
+  //     vertices.erase(it);
+  //     delete vertex;
+  //   }
+  // }
 
 }
 
@@ -1657,7 +1707,7 @@ void WireCell2dToy::ToyTracking::update_maps1(){
 }
 
 
-void WireCell2dToy::ToyTracking::update_maps(){
+void WireCell2dToy::ToyTracking::update_maps(int flag){
   wct_wcv_map.clear();
   wcv_wct_map.clear();
 
@@ -1668,6 +1718,15 @@ void WireCell2dToy::ToyTracking::update_maps(){
     
     for (int j=0;j!=tracks.size();j++){
       WCTrack *track = tracks.at(j);
+
+      // IF FLAG == 1, REQUIRE THE TRACK TO BE IN GOOD TRACK LIST
+      if (flag==1){
+	auto it = find(good_tracks.begin(),good_tracks.end(),track);
+	auto it1 = find(parallel_tracks.begin(),parallel_tracks.end(),track);
+	if (it == good_tracks.end() && it1 == parallel_tracks.end()) continue;
+      }
+      //
+
       if (wct_wcv_map.find(track)==wct_wcv_map.end()){
 	WCVertexSelection vertexes;
 	vertexes.push_back(vertex);
