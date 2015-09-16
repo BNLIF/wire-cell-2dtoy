@@ -26,6 +26,8 @@ namespace WireCell2dToy{
     /* WireCell::WCVertexSelection& get_good_vertices(){return good_vertices;}; */
     /* WireCell::WCVertexSelection& get_bad_vertices(){return bad_vertices;}; */
     
+    WireCell::WCShowerSelection& get_showers(){return showers;};
+
     void CreateVertices(ToyCrawler& toycrawler);
     void RemoveSame();
     void MergeVertices(int flag  = 1);

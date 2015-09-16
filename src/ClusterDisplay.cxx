@@ -15,6 +15,26 @@ WireCell2dToy::ClusterDisplay::~ClusterDisplay(){
 }
 
 
+void WireCell2dToy::ClusterDisplay::DrawShower(WireCell::WCShower* shower, TString option, int color){
+  TGraph2D *g1 = new TGraph2D();
+  int n = 0;
+  double x,y,z;
+  
+  for (int i=0;i!=shower->get_all_cells().size();i++){
+    MergeSpaceCell *mcell = shower->get_all_cells().at(i);
+    for (int j=0;j!=mcell->Get_all_spacecell().size();j++){
+      x = mcell->Get_all_spacecell().at(j)->x()/units::cm;
+      y = mcell->Get_all_spacecell().at(j)->y()/units::cm;
+      z = mcell->Get_all_spacecell().at(j)->z()/units::cm;
+      g1->SetPoint(n,x,y,z);
+      n++;
+    }
+  }
+  
+  g1->Draw(option);
+  g1->SetMarkerColor(color);
+}
+
 void WireCell2dToy::ClusterDisplay::DrawVertex(WCVertexSelection& vertices, TString option){
   TGraph2D *g1 = new TGraph2D();
   int n = 0;

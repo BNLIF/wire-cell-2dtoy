@@ -364,7 +364,7 @@ bool  WireCell2dToy::ToyTracking::track_shower_reco(WireCell2dToy::ToyCrawler& t
       WCShower *shower = new WCShower(spec_vertex,spec_track,exclude_cells,toycrawler.Get_mcells_map());
       showers.push_back(shower);
       // spec_track, spec_vertex, exclude_cells ... 
-      //std::cout << i << " " << j << " " <<  " " << exclude_cells.size() << std::endl;
+      std::cout << i << " " << j << " " <<  shower->get_all_cells().size() << " " << exclude_cells.size() << std::endl;
 
       // }
       //Judge ... 
@@ -372,7 +372,7 @@ bool  WireCell2dToy::ToyTracking::track_shower_reco(WireCell2dToy::ToyCrawler& t
     }
   }
 
-  std::cout << showers.size() << std::endl;
+  //  std::cout << showers.size() << std::endl;
 
   return result;
 }
