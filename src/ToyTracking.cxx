@@ -169,26 +169,80 @@ WireCell2dToy::ToyTracking::ToyTracking(WireCell2dToy::ToyCrawler& toycrawler){
 }
 
 void WireCell2dToy::ToyTracking::single_shower_reco(WireCell2dToy::ToyCrawler& toycrawler){
-  MergeSpaceCellSelection all_cells;  
+  // MergeSpaceCellSelection all_cells;  
   
-  for (auto it =toycrawler.Get_mcells_map().begin();it!=toycrawler.Get_mcells_map().end();it++){
-    all_cells.push_back(it->first);
-  }
+  // for (auto it =toycrawler.Get_mcells_map().begin();it!=toycrawler.Get_mcells_map().end();it++){
+  //   all_cells.push_back(it->first);
+  // }
   //  std::cout << all_cells.size() << std::endl;
+  
+  MergeSpaceCellMap& mcells_map = toycrawler.Get_mcells_map();
 
   for (int i=0;i!=vertices.size();i++){
     WCVertex *vertex =vertices.at(i);
-    int ntrack = 0;
-    for (int j=0;j!=vertex->get_ntracks();j++){
-      WCTrack *track = vertex->get_tracks().at(j);
-      auto it1 = find(good_tracks.begin(),good_tracks.end(),track);
-    }
+    
     // find vertex containing on track
+    int ntrack = 0;
+    WCTrack *track = 0;
+    for (int j=0;j!=vertex->get_ntracks();j++){
+      auto it1 = find(good_tracks.begin(),good_tracks.end(),vertex->get_tracks().at(j));
+      if (it1 != good_tracks.end()){
+	ntrack ++;
+	track = vertex->get_tracks().at(j);
+      }
+    }
+    
     // form shower
+    if (ntrack == 1){
+      MergeSpaceCellSelection empty_cells;
+      WCShower *shower = new WCShower(vertex,track,empty_cells,mcells_map);
+    
     // judge if agrees with shower
-    // pick up the furthest one 
+      if (shower->IsShower(empty_cells)){
+	showers.push_back(shower);
+      }else{
+	delete shower;
+      }
+    }
+  }
+  // pick up the furthest one 
+  
+  float max_dis = 0;
+  WCShower *max_shower = 0;
+  for (int i=0;i!=showers.size();i++){
+    WCShower *shower = showers.at(i);
+    if (shower->distance_to_center() > max_dis){
+      max_dis = shower->distance_to_center();
+      max_shower = shower;
+    }
+  }
+
+  int flag_qx = 1;
+  while(flag_qx){
+    flag_qx = 0;
+    for (int i=0;i!=showers.size();i++){
+      WCShower *shower = showers.at(i);
+      if (shower != max_shower){
+	delete shower;
+	showers.erase(showers.begin()+i);
+	flag_qx = 1;
+	break;
+      }
+    }
   }
   
+
+  // for (int i=0;i!=showers.size();i++){
+  //  WCShower *shower = showers.at(i);
+   
+  //  std::cout << i << " " << " " <<   shower->distance_to_center() << " " << 
+  //     shower->get_all_cells().size() << " " 
+  // 	      << shower->get_vertex()->Center().x/units::cm << " " 
+  // 	      << shower->get_vertex()->Center().y/units::cm << " " 
+  // 	      << shower->get_vertex()->Center().z/units::cm << " " 
+  // 	      << std::endl;
+  // }
+
 }
 
 
