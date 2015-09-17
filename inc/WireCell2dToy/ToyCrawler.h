@@ -20,6 +20,10 @@ namespace WireCell2dToy{
 
     void CleanUpCTTrack(int flag=1);
 
+    void PrepareTracking();
+
+    void UpdateMap();
+
     WireCell::ClusterTrackSelection& Get_allCT(){return all_clustertrack;};
     WireCell::MergeClusterTrackSelection& Get_allMCT(){return all_mergeclustertrack;};
     WireCell::MSpaceCellClusterMap& Get_ms_ct_map(){return ms_ct_map;};
@@ -27,6 +31,8 @@ namespace WireCell2dToy{
     WireCell::MergeSpaceCellMap& Get_mcells_map(){return mcells_map;};
 
     WireCell::MergeSpaceCell* GetClosestMSC(WireCell::Point p, WireCell::MergeSpaceCellSelection& cells);
+
+   
 
   protected:
     WireCell::ClusterTrackSelection all_clustertrack;
