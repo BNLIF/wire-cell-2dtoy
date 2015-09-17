@@ -127,7 +127,7 @@ WireCell2dToy::ToyTracking::ToyTracking(WireCell2dToy::ToyCrawler& toycrawler){
     // just from the number of tracks and the connectivities?
     bool shower_flag = IsThisShower(toycrawler);
     
-    std::cout << "Shower? " << shower_flag << std::endl;
+    std::cout << "Shower? " << shower_flag << " Vertices " << vertices.size() << std::endl;
     
     // separate various issues ... 
     
@@ -153,7 +153,7 @@ WireCell2dToy::ToyTracking::ToyTracking(WireCell2dToy::ToyCrawler& toycrawler){
       }
       //std::cout << "Test Shower only" << std::endl; 
       
-      // Judge vertex with multiple tracks ...
+      // // Judge vertex with multiple tracks ...
       if (track_shower_reco(toycrawler)){
       	std::cout << "Track + Shower " << std::endl; 
       	Cleanup_showers();
@@ -161,7 +161,6 @@ WireCell2dToy::ToyTracking::ToyTracking(WireCell2dToy::ToyCrawler& toycrawler){
       	form_parallel_tiny_tracks(toycrawler);
       	update_maps(1);
       	fine_tracking(1);
-	//single_shower_reco(toycrawler);
       }else{
       	std::cout << "Shower only" << std::endl; 
       	// Judge vertex for single shower ...
@@ -607,7 +606,16 @@ bool  WireCell2dToy::ToyTracking::track_shower_reco(WireCell2dToy::ToyCrawler& t
       }
 
       WCShower *shower = new WCShower(spec_vertex,spec_track,exclude_cells,toycrawler.Get_mcells_map());
-      if (shower->IsShower(good_cells)){
+
+      bool flag_shower = shower->IsShower(good_cells);
+
+      // std::cout << spec_vertex->Center().x/units::cm << " "
+      // 		<< spec_vertex->Center().y/units::cm << " " 
+      // 		<< spec_vertex->Center().z/units::cm << " " 
+      // 		<< flag_shower << std::endl;
+	
+
+      if (flag_shower){
 	showers.push_back(shower);
       // spec_track, spec_vertex, exclude_cells ... 
 	

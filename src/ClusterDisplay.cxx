@@ -45,6 +45,8 @@ void WireCell2dToy::ClusterDisplay::DrawVertex(WCVertexSelection& vertices, TStr
     y = center.y/units::cm;// + gRandom->Uniform(-0.15,0.15);
     z = center.z/units::cm;// + gRandom->Uniform(-0.15,0.15);
     
+    //std::cout << x << " " << y << " " << z << std::endl;
+
     g1->SetPoint(n,x,y,z);
     n++;
 
@@ -121,7 +123,7 @@ void WireCell2dToy::ClusterDisplay::DrawVertex(WCVertexSelection& vertices, TStr
   //std::cout <<"abc " << n << " " <<std::endl;
 
   g1->SetMarkerColor(2);
-  g1->SetMarkerStyle(20);
+  g1->SetMarkerStyle(21);
   g1->SetMarkerSize(1.0);
   g1->Draw(option);
   
