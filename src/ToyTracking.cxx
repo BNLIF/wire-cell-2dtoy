@@ -103,16 +103,20 @@ WireCell2dToy::ToyTracking::ToyTracking(WireCell2dToy::ToyCrawler& toycrawler){
   for (int i=0;i!=vertices.size();i++){
     WCVertex *vertex = vertices.at(i);
     //
-    if (vertex->center_dist()/units::cm < 0.01)
-      vertex->FindVertex();
     bool success = vertex->get_fit_success();
+    
+    // std::cout << i << " Vertex " << vertex->get_ntracks() << " " << success << " " << vertex->Center().x/units::cm << " " << vertex->Center().y/units::cm << " " << vertex->Center().z/units::cm << " " << vertex->get_msc()->Get_Center().x/units::cm << std::endl;
+    
+    // if (vertex->center_dist()/units::cm == 0)
+    //   vertex->FindVertex(1);
+    
     std::cout << i << " Vertex " << vertex->get_ntracks() << " " << success << " " << vertex->Center().x/units::cm << " " << vertex->Center().y/units::cm << " " << vertex->Center().z/units::cm << " " << vertex->get_msc()->Get_Center().x/units::cm << std::endl;
     // for (int j=0;j!=vertex->get_ntracks();j++){
     //   std::cout << j << " " << vertex->get_tracks().at(j)->get_end_scells().at(0)->Get_Center().x/units::cm 
     // 		<< " " << vertex->get_tracks().at(j)->get_end_scells().at(1)->Get_Center().x/units::cm  << std::endl;
     // }
   }
-
+  CheckVertices(toycrawler); // redefine all the tracks ... 
   
 
   if (vertices.size() > 0 ) {
@@ -134,6 +138,17 @@ WireCell2dToy::ToyTracking::ToyTracking(WireCell2dToy::ToyCrawler& toycrawler){
     // separate various issues ... 
     
     if (!shower_flag){
+      //try to refit vertex ... 
+       for (int i=0;i!=vertices.size();i++){
+	 WCVertex *vertex = vertices.at(i);
+	 if (vertex->center_dist()/units::cm == 0)
+	   vertex->FindVertex();
+       }
+       CheckVertices(toycrawler); // redefine all the tracks ... 
+       update_maps();
+       fine_tracking();
+       // to fix the bad vertex fitting if any ... 
+
       //not a shower
       std::cout << "Grown single track " << std::endl;
       if (grow_track_fill_gap(toycrawler)){
