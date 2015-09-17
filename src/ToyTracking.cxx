@@ -151,18 +151,22 @@ WireCell2dToy::ToyTracking::ToyTracking(WireCell2dToy::ToyCrawler& toycrawler){
        	update_maps(1);
        	fine_tracking();
       }
+      //std::cout << "Test Shower only" << std::endl; 
       
       // Judge vertex with multiple tracks ...
       if (track_shower_reco(toycrawler)){
-	Cleanup_showers();
-	// do the rest of fine tracking ... 
-	form_parallel_tiny_tracks(toycrawler);
-	update_maps(1);
-	fine_tracking(1);
+      	std::cout << "Track + Shower " << std::endl; 
+      	Cleanup_showers();
+      	// do the rest of fine tracking ... 
+      	form_parallel_tiny_tracks(toycrawler);
+      	update_maps(1);
+      	fine_tracking(1);
+	//single_shower_reco(toycrawler);
       }else{
-    	// Judge vertex for single shower ...
-	single_shower_reco(toycrawler);
-	Cleanup_showers();
+      	std::cout << "Shower only" << std::endl; 
+      	// Judge vertex for single shower ...
+      	single_shower_reco(toycrawler);
+      	Cleanup_showers();
       }
     }
   }
@@ -197,6 +201,9 @@ void WireCell2dToy::ToyTracking::single_shower_reco(WireCell2dToy::ToyCrawler& t
       MergeSpaceCellSelection empty_cells;
       WCShower *shower = new WCShower(vertex,track,empty_cells,mcells_map);
     
+      // std::cout << vertex->Center().x/units::cm << " " << 
+      // 	vertex->Center().y/units::cm << " " <<
+      // 	vertex->Center().z/units::cm << std::endl;
     // judge if agrees with shower
       if (shower->IsShower(empty_cells)){
 	showers.push_back(shower);
@@ -223,25 +230,24 @@ void WireCell2dToy::ToyTracking::single_shower_reco(WireCell2dToy::ToyCrawler& t
     for (int i=0;i!=showers.size();i++){
       WCShower *shower = showers.at(i);
       if (shower != max_shower){
-	delete shower;
-	showers.erase(showers.begin()+i);
-	flag_qx = 1;
-	break;
+  	delete shower;
+  	showers.erase(showers.begin()+i);
+  	flag_qx = 1;
+  	break;
       }
     }
   }
   
 
-  // for (int i=0;i!=showers.size();i++){
-  //  WCShower *shower = showers.at(i);
-   
-  //  std::cout << i << " " << " " <<   shower->distance_to_center() << " " << 
-  //     shower->get_all_cells().size() << " " 
-  // 	      << shower->get_vertex()->Center().x/units::cm << " " 
-  // 	      << shower->get_vertex()->Center().y/units::cm << " " 
-  // 	      << shower->get_vertex()->Center().z/units::cm << " " 
-  // 	      << std::endl;
-  // }
+  for (int i=0;i!=showers.size();i++){
+   WCShower *shower = showers.at(i);
+   std::cout << i << " " << " " <<   shower->distance_to_center() << " " << 
+      shower->get_all_cells().size() << " " 
+  	      << shower->get_vertex()->Center().x/units::cm << " " 
+  	      << shower->get_vertex()->Center().y/units::cm << " " 
+  	      << shower->get_vertex()->Center().z/units::cm << " " 
+  	      << std::endl;
+  }
 
 }
 
@@ -492,8 +498,10 @@ bool  WireCell2dToy::ToyTracking::track_shower_reco(WireCell2dToy::ToyCrawler& t
 	if (vec1->Mag()!=0 & vec2->Mag()!=0)
 	  a = a / vec1->Mag() / vec2->Mag();
        
-	//std::cout << a << std::endl;
-	if (fabs(a) <0.9){
+	// std::cout << temp.at(0)->Center().x/units::cm << " " 
+	// 	  << temp.at(0)->Center().y/units::cm << " " 
+	// 	  << temp.at(0)->Center().z/units::cm << " " << a << std::endl;
+	if (fabs(a) <0.9 ){
 	  possible_vertex.push_back(temp);
 	  possible_track.push_back(temp_tracks);
 	}
@@ -506,10 +514,10 @@ bool  WireCell2dToy::ToyTracking::track_shower_reco(WireCell2dToy::ToyCrawler& t
 	delete temp_dirs.at(j);
       }
       
-	std::cout << vertex->Center().x/units::cm << " " 
-		  << vertex->Center().y/units::cm << " " 
-		  << vertex->Center().z/units::cm << " " << " " 
-		  << temp.size() << " " << temp_tracks.size() << std::endl;
+	// std::cout << vertex->Center().x/units::cm << " " 
+	// 	  << vertex->Center().y/units::cm << " " 
+	// 	  << vertex->Center().z/units::cm << " " << " " 
+	// 	  << temp.size() << " " << temp_tracks.size() << std::endl;
 	  
 	//    }
     }
@@ -687,7 +695,7 @@ bool  WireCell2dToy::ToyTracking::track_shower_reco(WireCell2dToy::ToyCrawler& t
 	    shower2->SC_Hough(shower2->get_vertex()->Center());
 	    float rms1 = shower1->SC_proj_Hough(shower1->get_vertex()->Center());
 	    float rms2 = shower2->SC_proj_Hough(shower2->get_vertex()->Center());
-	    std::cout << rms1 << " " << rms2 << " " << shower1->get_all_cells().size() << " " << shower2->get_all_cells().size() << std::endl;
+	    //std::cout << rms1 << " " << rms2 << " " << shower1->get_all_cells().size() << " " << shower2->get_all_cells().size() << std::endl;
 	    if (rms1 < rms2){
 	      delete shower2;
 	      showers.erase(showers.begin()+j);
@@ -706,15 +714,15 @@ bool  WireCell2dToy::ToyTracking::track_shower_reco(WireCell2dToy::ToyCrawler& t
 
   
   //  std::cout << showers.size() << std::endl;
-  // for (int i=0;i!=showers.size();i++){
-  //   WCShower *shower = showers.at(i);
-  //   std::cout << i << " " << " " <<  shower->IsShower(good_cells) << " " << 
-  //     shower->get_all_cells().size() << " " 
-  // 	      << shower->get_vertex()->Center().x/units::cm << " " 
-  // 	      << shower->get_vertex()->Center().y/units::cm << " " 
-  // 	      << shower->get_vertex()->Center().z/units::cm << " " 
-  // 	      << std::endl;
-  // }
+  for (int i=0;i!=showers.size();i++){
+    WCShower *shower = showers.at(i);
+    std::cout << i << " " << " " <<  shower->IsShower(good_cells) << " " << 
+      shower->get_all_cells().size() << " " 
+  	      << shower->get_vertex()->Center().x/units::cm << " " 
+  	      << shower->get_vertex()->Center().y/units::cm << " " 
+  	      << shower->get_vertex()->Center().z/units::cm << " " 
+  	      << std::endl;
+  }
   
   
   if (showers.size() >0)
