@@ -61,7 +61,7 @@ WireCell2dToy::ToyTracking::ToyTracking(WireCell2dToy::ToyCrawler& toycrawler){
       }
     }
 
-    //std::cout << i << " Vertex " << vertex->get_ntracks() << " " << success << " " << vertex->Center().x/units::cm << " " << vertex->Center().y/units::cm << " " << vertex->Center().z/units::cm << " " << vertex->get_msc()->Get_Center().x/units::cm << std::endl;
+    // std::cout << i << " Vertex " << vertex->get_ntracks() << " " << success << " " << vertex->Center().x/units::cm << " " << vertex->Center().y/units::cm << " " << vertex->Center().z/units::cm << " " << vertex->get_msc()->Get_Center().x/units::cm << std::endl;
     // for (int j=0;j!=vertex->get_ntracks();j++){
     //   std::cout << vertex->get_tracks().at(j)->get_end_scells().at(0)->Get_Center().x/units::cm << " " 
     // 		<< vertex->get_tracks().at(j)->get_end_scells().at(1)->Get_Center().x/units::cm << " " 
@@ -1156,7 +1156,9 @@ void WireCell2dToy::ToyTracking::parallel_tracking(WCVertex *vertex, MergeSpaceC
            
     }
 
-    if (mcells.size()==1 && min_angle < 25){
+    //  std::cout << mcells.size() << " " << min_angle << std::endl;
+
+    if (mcells.size()==1 && min_angle < 25 || min_angle < 5){
     }else{
 
       WCTrack *track = new WCTrack(track_mcells);
@@ -1183,6 +1185,11 @@ void WireCell2dToy::ToyTracking::parallel_tracking(WCVertex *vertex, MergeSpaceC
       vertex1->set_ky(track,ky);
       vertex1->set_kz(track,kz);
       vertices.push_back(vertex1);
+
+       WCVertexSelection qvertex;
+	  qvertex.push_back(vertex);
+	  qvertex.push_back(vertex1);
+	  wct_wcv_map[track] = qvertex; 
     }
   }
   // std::cout << track_mcells.size() << std::endl;
@@ -1331,7 +1338,7 @@ void WireCell2dToy::ToyTracking::parallel_tracking(WCVertex *vertex, MergeSpaceC
 	  
 	}
 	
-	if (mcells.size()==1 && min_angle < 25){
+	if (mcells.size()==1 && min_angle < 25 || min_angle < 5){
 	}else{
 	  
 	  WCTrack *track = new WCTrack(track_mcells);
@@ -1350,6 +1357,11 @@ void WireCell2dToy::ToyTracking::parallel_tracking(WCVertex *vertex, MergeSpaceC
 	  vertex1->set_ky(track,ky);
 	  vertex1->set_kz(track,kz);
 	  vertices.push_back(vertex1);
+
+	  WCVertexSelection qvertex;
+	  qvertex.push_back(vertex);
+	  qvertex.push_back(vertex1);
+	  wct_wcv_map[track] = qvertex; 
 	}
       }
     }
