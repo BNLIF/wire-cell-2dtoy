@@ -154,15 +154,15 @@ WireCell2dToy::ToyTracking::ToyTracking(WireCell2dToy::ToyCrawler& toycrawler){
       
       // Judge vertex with multiple tracks ...
       if (track_shower_reco(toycrawler)){
-	//	Cleanup_showers();
+	Cleanup_showers();
 	// do the rest of fine tracking ... 
-	// form_parallel_tiny_tracks(toycrawler);
-	// update_maps(1);
-	// fine_tracking(1);
+	form_parallel_tiny_tracks(toycrawler);
+	update_maps(1);
+	fine_tracking(1);
       }else{
     	// Judge vertex for single shower ...
-    	// single_shower_reco(toycrawler);
-    	// Cleanup_showers();
+	single_shower_reco(toycrawler);
+	Cleanup_showers();
       }
     }
   }
@@ -300,6 +300,14 @@ bool  WireCell2dToy::ToyTracking::track_shower_reco(WireCell2dToy::ToyCrawler& t
   std::vector<WCVertexSelection> possible_vertex;
   std::vector<WCTrackSelection> possible_track;
 
+  MergeSpaceCellSelection good_cells;
+  for (int i= 0;i!=good_tracks.size();i++){
+    WCTrack *track = good_tracks.at(i);
+    for (int j=0;j!=track->get_centerVP_cells().size();j++){
+      good_cells.push_back(track->get_centerVP_cells().at(j));
+    }
+  }
+
   WCVertexSelection used_vertices;
   //put bad vertices in first
   for (int i=0;i!=vertices.size();i++){
@@ -308,12 +316,16 @@ bool  WireCell2dToy::ToyTracking::track_shower_reco(WireCell2dToy::ToyCrawler& t
     for (int j=0;j!=vertex->get_tracks().size();j++){
       auto it = find(bad_tracks.begin(),bad_tracks.end(),vertex->get_tracks().at(j));
       if (it == bad_tracks.end()){
-	flag = 1;
+  	flag = 1;
       }
     }
     if (flag == 0 )
       used_vertices.push_back(vertex);
   }
+
+  
+ 
+
 
 
   for (int i=0;i!=vertices.size();i++){
@@ -329,26 +341,40 @@ bool  WireCell2dToy::ToyTracking::track_shower_reco(WireCell2dToy::ToyCrawler& t
 	WCVertex* vertex1 = vertices.at(j);
 	auto it1 =find(used_vertices.begin(),used_vertices.end(),vertex1);
 	if (it1 == used_vertices.end() && vertex1 != vertex){
-	  float dis = sqrt(pow(vertex->Center().x-vertex1->Center().x,2)
-			   +pow(vertex->Center().y-vertex1->Center().y,2)
-			   +pow(vertex->Center().z-vertex1->Center().z,2));
-	  MergeSpaceCell *vertex_mcell = vertex->get_msc();
-	  MergeSpaceCell *vertex1_mcell = vertex->get_msc();
+
+	  //Need to look through every thing inside the temp
 	  
-	  if (dis < 1*units::cm ){ 
-	    used_vertices.push_back(vertex1);
-	    temp.push_back(vertex1);
-	  } else if (vertex->get_msc() == vertex1->get_msc() ){
-	    used_vertices.push_back(vertex1);
-	    temp.push_back(vertex1);
-	  }else if (fabs(vertex->get_msc()->Get_Center().x - vertex1->get_msc()->Get_Center().x) < 0.35*units::cm 
-	  	    && fabs(vertex->get_msc()->Get_Center().x - vertex1->get_msc()->Get_Center().x) > 0.05*units::cm 
-	  	    && vertex_mcell->Overlap(*vertex1_mcell)){
-	    used_vertices.push_back(vertex1);
-	    temp.push_back(vertex1);
+	  for (int k=0;k!=temp.size();k++){
+	    WCVertex *vertex2 = temp.at(k);
+	    float dis = sqrt(pow(vertex2->Center().x-vertex1->Center().x,2)
+			     +pow(vertex2->Center().y-vertex1->Center().y,2)
+			     +pow(vertex2->Center().z-vertex1->Center().z,2));
+	    MergeSpaceCell *vertex_mcell = vertex2->get_msc();
+	    MergeSpaceCell *vertex1_mcell = vertex1->get_msc();
+	    
+	    int flag = 0;
+	    if (dis < 1*units::cm && vertex2 != vertex1){ 
+	      flag = 1;
+	    }else if (vertex2->get_msc() == vertex1->get_msc() && vertex2 != vertex1){
+	      flag = 1;
+	    }else if (fabs(vertex2->get_msc()->Get_Center().x - vertex1->get_msc()->Get_Center().x) < 0.35*units::cm 		       
+		      && vertex_mcell->Overlap(*vertex1_mcell)
+		      && vertex2 != vertex1){
+	      flag = 1;
+	    }
+	    
+	    if (flag == 1){
+	      used_vertices.push_back(vertex1);
+	      temp.push_back(vertex1);
+	      break;
+	    }
 	  }
+	  
+	  
+
 	}
       }
+
 
       WCTrackSelection temp_tracks;
       std::vector<TVector3*> temp_dirs;
@@ -359,8 +385,8 @@ bool  WireCell2dToy::ToyTracking::track_shower_reco(WireCell2dToy::ToyCrawler& t
 	for (int k=0;k!=temp.at(j)->get_ntracks();k++){
 	  WCTrack* track =  temp.at(j)->get_tracks().at(k);
 	  auto it2 = find(good_tracks.begin(),good_tracks.end(),track);
-	  // auto it3 = find(parallel_tracks.begin(),parallel_tracks.end(),track);
-	  if (it2 != good_tracks.end() ){
+	  auto it3 = find(bad_tracks.begin(),bad_tracks.end(),track);
+	  if (it2 != good_tracks.end() || it3 != bad_tracks.end()){
 	    temp_tracks.push_back(track);
 	    TVector3 *vec = new TVector3(1,temp.at(j)->get_ky(track),temp.at(j)->get_kz(track));
 	    temp_dirs.push_back(vec);
@@ -368,33 +394,39 @@ bool  WireCell2dToy::ToyTracking::track_shower_reco(WireCell2dToy::ToyCrawler& t
 	}
       }
 
-      // look at the bad tracks ...
-      for (int j=0;j!=bad_tracks.size();j++){
-	int flag_qx = 0;
-	for (int k=0;k!=temp.size();k++){
-	  float dis1 = sqrt(pow(temp.at(k)->Center().x - bad_tracks.at(j)->get_centerVP_cells().front()->Get_Center().x,2)
-			    + pow(temp.at(k)->Center().y - bad_tracks.at(j)->get_centerVP_cells().front()->Get_Center().y,2)
-			    + pow(temp.at(k)->Center().z - bad_tracks.at(j)->get_centerVP_cells().front()->Get_Center().z,2));
-	  if (dis1 < 1 * units::cm){
-	    flag_qx = 1;
-	    break;
-	  }
+      
 
-	  float dis2 = sqrt(pow(temp.at(k)->Center().x - bad_tracks.at(j)->get_centerVP_cells().back()->Get_Center().x,2)
-			    + pow(temp.at(k)->Center().y - bad_tracks.at(j)->get_centerVP_cells().back()->Get_Center().y,2)
-			    + pow(temp.at(k)->Center().z - bad_tracks.at(j)->get_centerVP_cells().back()->Get_Center().z,2));
-	  if (dis2 < 1*units::cm){
-	    flag_qx = 1;
-	    break;
-	  }
-	}
+      
+
+      // // look at the bad tracks ...
+      // for (int j=0;j!=bad_tracks.size();j++){
+      // 	int flag_qx = 0;
+      // 	for (int k=0;k!=temp.size();k++){
+      // 	  float dis1 = sqrt(pow(temp.at(k)->Center().x - bad_tracks.at(j)->get_centerVP_cells().front()->Get_Center().x,2)
+      // 			    + pow(temp.at(k)->Center().y - bad_tracks.at(j)->get_centerVP_cells().front()->Get_Center().y,2)
+      // 			    + pow(temp.at(k)->Center().z - bad_tracks.at(j)->get_centerVP_cells().front()->Get_Center().z,2));
+      // 	  if (dis1 < 1 * units::cm){
+      // 	    flag_qx = 1;
+      // 	    break;
+      // 	  }
+
+      // 	  float dis2 = sqrt(pow(temp.at(k)->Center().x - bad_tracks.at(j)->get_centerVP_cells().back()->Get_Center().x,2)
+      // 			    + pow(temp.at(k)->Center().y - bad_tracks.at(j)->get_centerVP_cells().back()->Get_Center().y,2)
+      // 			    + pow(temp.at(k)->Center().z - bad_tracks.at(j)->get_centerVP_cells().back()->Get_Center().z,2));
+      // 	  if (dis2 < 1*units::cm){
+      // 	    flag_qx = 1;
+      // 	    break;
+      // 	  }
+      // 	}
 	
-	if (flag_qx==1){
-	  temp_tracks.push_back(bad_tracks.at(j));
-	  TVector3 *vec = new TVector3(0,0,0);
-	  temp_dirs.push_back(vec);
-	}
-      }
+      // 	if (flag_qx==1){
+      // 	  temp_tracks.push_back(bad_tracks.at(j));
+      // 	  TVector3 *vec = new TVector3(0,0,0);
+      // 	  temp_dirs.push_back(vec);
+      // 	}
+      // }
+
+      
       // 
       
       if (temp_tracks.size() == 2){
@@ -420,10 +452,10 @@ bool  WireCell2dToy::ToyTracking::track_shower_reco(WireCell2dToy::ToyCrawler& t
 	delete temp_dirs.at(j);
       }
       
-	// std::cout << vertex->Center().x/units::cm << " " 
-	// 	  << vertex->Center().y/units::cm << " " 
-	// 	  << vertex->Center().z/units::cm << " " << " " 
-	// 	  << temp.size() << " " << temp_tracks.size() << std::endl;
+	std::cout << vertex->Center().x/units::cm << " " 
+		  << vertex->Center().y/units::cm << " " 
+		  << vertex->Center().z/units::cm << " " << " " 
+		  << temp.size() << " " << temp_tracks.size() << std::endl;
 	  
 	//    }
     }
@@ -513,7 +545,7 @@ bool  WireCell2dToy::ToyTracking::track_shower_reco(WireCell2dToy::ToyCrawler& t
       }
 
       WCShower *shower = new WCShower(spec_vertex,spec_track,exclude_cells,toycrawler.Get_mcells_map());
-      if (shower->IsShower()){
+      if (shower->IsShower(good_cells)){
 	showers.push_back(shower);
       // spec_track, spec_vertex, exclude_cells ... 
 	
@@ -586,17 +618,49 @@ bool  WireCell2dToy::ToyTracking::track_shower_reco(WireCell2dToy::ToyCrawler& t
     }
   }
 
+  //Now for the remaining showers, judge if any of two showers are overlapping, 
+  //if so, delete the one with larger rms ... 
+  flag_qx = 1;
+  while(flag_qx){
+    flag_qx = 0;
+    for (int i=0;i!=showers.size();i++){
+      WCShower *shower1 = showers.at(i);
+      for (int j=0;j!=showers.size();j++){
+	WCShower *shower2 = showers.at(j);
+	if (shower1!=shower2){
+	  if (shower1->Overlap(shower2)){
+	    shower1->SC_Hough(shower1->get_vertex()->Center());
+	    shower2->SC_Hough(shower2->get_vertex()->Center());
+	    float rms1 = shower1->SC_proj_Hough(shower1->get_vertex()->Center());
+	    float rms2 = shower2->SC_proj_Hough(shower2->get_vertex()->Center());
+	    std::cout << rms1 << " " << rms2 << " " << shower1->get_all_cells().size() << " " << shower2->get_all_cells().size() << std::endl;
+	    if (rms1 < rms2){
+	      delete shower2;
+	      showers.erase(showers.begin()+j);
+	    }else{
+	      delete shower1;
+	      showers.erase(showers.begin()+i);
+	    }
+	    flag_qx = 1;
+	    break;
+	  }
+	}
+      }
+      if (flag_qx == 1) break;
+    }
+  }
+
   
   //  std::cout << showers.size() << std::endl;
-  for (int i=0;i!=showers.size();i++){
-    WCShower *shower = showers.at(i);
-    std::cout << i << " " << " " <<  shower->IsShower() << " " << 
-      shower->get_all_cells().size() << " " 
-  	      << shower->get_vertex()->Center().x/units::cm << " " 
-  	      << shower->get_vertex()->Center().y/units::cm << " " 
-  	      << shower->get_vertex()->Center().z/units::cm << " " 
-  	      << std::endl;
-  }
+  // for (int i=0;i!=showers.size();i++){
+  //   WCShower *shower = showers.at(i);
+  //   std::cout << i << " " << " " <<  shower->IsShower(good_cells) << " " << 
+  //     shower->get_all_cells().size() << " " 
+  // 	      << shower->get_vertex()->Center().x/units::cm << " " 
+  // 	      << shower->get_vertex()->Center().y/units::cm << " " 
+  // 	      << shower->get_vertex()->Center().z/units::cm << " " 
+  // 	      << std::endl;
+  // }
   
   
   if (showers.size() >0)
@@ -2121,6 +2185,40 @@ void WireCell2dToy::ToyTracking::CheckVertices(WireCell2dToy::ToyCrawler& toycra
     
 
   }
+
+  
+  // Check if any of the two vertices are the same, if so merge them
+  int flag_qx = 1;
+  while(flag_qx){
+    flag_qx = 0;
+    for (int i=0;i!=vertices.size();i++){
+      WCVertex *vertex1 = vertices.at(i);
+      for (int j=0;j!=vertices.size();j++){
+  	WCVertex *vertex2 = vertices.at(j);
+  	if (vertex1!=vertex2){
+  	  if (vertex1->get_ntracks() > vertex2->get_ntracks()){
+  	    if (vertex1->MergeVertex(vertex2)){
+	      //std::cout << vertex2->get_ntracks() << " " << vertex1->get_ntracks() << std::endl;
+  	      flag_qx = 1;
+  	      vertices.erase(vertices.begin()+j);
+  	      break;
+  	    }
+  	  }else{
+  	    if (vertex2->MergeVertex(vertex1)){
+	      //std::cout << vertex2->get_ntracks() << " " << vertex1->get_ntracks() << std::endl;
+  	      flag_qx = 1;
+  	      vertices.erase(vertices.begin()+i);
+  	      break;
+  	    }
+  	  }
+  	}
+      }
+      if (flag_qx==1)
+  	break;
+    }
+  }
+
+
 }
 
 
