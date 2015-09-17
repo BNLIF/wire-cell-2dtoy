@@ -102,7 +102,9 @@ WireCell2dToy::ToyTracking::ToyTracking(WireCell2dToy::ToyCrawler& toycrawler){
   //second round vertex fitting ... 
   for (int i=0;i!=vertices.size();i++){
     WCVertex *vertex = vertices.at(i);
-    vertex->FindVertex();
+    //
+    if (vertex->center_dist()/units::cm < 0.01)
+      vertex->FindVertex();
     bool success = vertex->get_fit_success();
     std::cout << i << " Vertex " << vertex->get_ntracks() << " " << success << " " << vertex->Center().x/units::cm << " " << vertex->Center().y/units::cm << " " << vertex->Center().z/units::cm << " " << vertex->get_msc()->Get_Center().x/units::cm << std::endl;
     // for (int j=0;j!=vertex->get_ntracks();j++){
