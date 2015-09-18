@@ -1627,10 +1627,12 @@ bool WireCell2dToy::ToyTracking::grow_track_fill_gap(WireCell2dToy::ToyCrawler& 
 			    track);
 	    if (it2 == vertex1->get_tracks().end()){
 	      vertex1->get_tracks().push_back(track);
-	      // vertex1->set_ky(track,vertex2->get_ky(track));
-	      // vertex1->set_kz(track,vertex2->get_kz(track));
+	      vertex1->set_ky(track,vertex2->get_ky(track));
+	      vertex1->set_kz(track,vertex2->get_kz(track));
 	    }
+	    //std::cout << vertex1->get_ntracks() << " " << vertex2->get_ntracks() << std::endl;
 	    vertex1->FindVertex();
+	    //std::cout << vertex1->get_ntracks() << " " << vertex2->get_ntracks() << " " << vertex1->get_fit_success() << std::endl;
 	  }
 	  temp_vertices.push_back(vertex2);
 	}else{
@@ -1641,10 +1643,12 @@ bool WireCell2dToy::ToyTracking::grow_track_fill_gap(WireCell2dToy::ToyCrawler& 
 			    track);
 	    if (it2 == vertex2->get_tracks().end()){
 	      vertex2->get_tracks().push_back(track);
-	      // vertex2->set_ky(track,vertex1->get_ky(track));
-	      // vertex2->set_kz(track,vertex1->get_kz(track));
+	      vertex2->set_ky(track,vertex1->get_ky(track));
+	      vertex2->set_kz(track,vertex1->get_kz(track));
 	    }
+	    //std::cout << vertex2->get_ntracks() << " " << vertex1->get_ntracks() << std::endl;
 	    vertex2->FindVertex();
+	    //std::cout << vertex2->get_ntracks() << " " << vertex1->get_ntracks() << " " << vertex2->get_fit_success() << std::endl;
 	  }
 	  // vertex2->AddVertex(vertex1);
 	  temp_vertices.push_back(vertex1);
@@ -1652,11 +1656,15 @@ bool WireCell2dToy::ToyTracking::grow_track_fill_gap(WireCell2dToy::ToyCrawler& 
       }
       //std::cout << vertices.at(i) << " " << vertices.at(i)->get_msc() << std::endl;
     }
+    //std::cout << i << " " << vertices.size() << std::endl;
   }
   
   for (int i=0;i!=temp_vertices.size();i++){
     auto it = find(vertices.begin(),vertices.end(),temp_vertices.at(i));
-    vertices.erase(it);
+    if (it != vertices.end()){
+      delete temp_vertices.at(i);
+      vertices.erase(it);
+    }
   }
 
   return result;
