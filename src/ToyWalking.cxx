@@ -11,11 +11,32 @@ WireCell2dToy::ToyWalking::ToyWalking(WireCell::MergeSpaceCell *start_cell, Poin
   , counter_limit(counter_limit)
 {
   dist = 1e9;
-  MergeSpaceCellSelection curr_cells;
-  Iterate(start_cell,curr_cells,0);
   counter = 0;
   global_counter = 0;
+  must_cells.clear();
+  MergeSpaceCellSelection curr_cells;
+  Iterate(start_cell,curr_cells,0);
+  
 }
+
+
+WireCell2dToy::ToyWalking::ToyWalking(WireCell::MergeSpaceCell *start_cell, Point start_point, WireCell::MergeSpaceCell *target_cell, Point target_point, WireCell::MergeSpaceCellMap& mcells_map, WireCell::MergeSpaceCellSelection must_cells, int counter_limit)
+  : start_cell(start_cell)
+  , target_cell(target_cell)
+  , mcells_map(mcells_map)
+  , start_point(start_point)
+  , target_point(target_point)
+  , counter_limit(counter_limit)
+  , must_cells(must_cells)
+{
+  dist = 1e9;
+  counter = 0;
+  global_counter = 0;
+  MergeSpaceCellSelection curr_cells;
+  Iterate(start_cell,curr_cells,0);
+  
+}
+
 
 void WireCell2dToy::ToyWalking::Iterate(MergeSpaceCell *curr_cell, MergeSpaceCellSelection &curr_cells, double dis){
   curr_cells.push_back(curr_cell);
@@ -63,8 +84,8 @@ void WireCell2dToy::ToyWalking::Iterate(MergeSpaceCell *curr_cell, MergeSpaceCel
       // go in
       for (int i=0;i!=mcells_map[curr_cell].size();i++){
 	auto it = find(curr_cells.begin(),curr_cells.end(),mcells_map[curr_cell].at(i));
-	//	auto it1 = find(tried_cells.begin(),tried_cells.end(),mcells_map[curr_cell].at(i));
-	if (it == curr_cells.end() )
+	auto it1 = find(must_cells.begin(),must_cells.end(),mcells_map[curr_cell].at(i));
+	if (it == curr_cells.end() && it1 != must_cells.end())
 	  Iterate(mcells_map[curr_cell].at(i), curr_cells,dis);
       }
     }else{
