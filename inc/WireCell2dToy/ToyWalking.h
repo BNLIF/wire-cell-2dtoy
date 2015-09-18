@@ -6,7 +6,7 @@
 namespace WireCell2dToy{
   class ToyWalking{
   public:
-    ToyWalking(WireCell::MergeSpaceCell *start_cell, WireCell::Point start_point, WireCell::MergeSpaceCell *target_cell, WireCell::Point target_point, WireCell::MergeSpaceCellMap& mcells_map);
+    ToyWalking(WireCell::MergeSpaceCell *start_cell, WireCell::Point start_point, WireCell::MergeSpaceCell *target_cell, WireCell::Point target_point, WireCell::MergeSpaceCellMap& mcells_map, int counter_limit=1000);
     ~ToyWalking();
     
     void Iterate(WireCell::MergeSpaceCell *curr_cell, WireCell::MergeSpaceCellSelection &curr_cells, double dis);
@@ -24,8 +24,11 @@ namespace WireCell2dToy{
     WireCell::MergeSpaceCellMap& mcells_map;
     WireCell::Point start_point;
     WireCell::Point target_point;
+
+    int global_counter;
     
-    
+    int counter;
+    int counter_limit;
   };
 }
 

@@ -9,17 +9,20 @@ WireCell2dToy::ToyCrawler::ToyCrawler(MergeSpaceCellSelection& mcells, int flag)
   CreateClusterTrack(mcells);
   FormGraph(); 
 
-  //std::cout << "Merge Clusters " << std::endl; 
+  std::cout << "Crawler: Merge Clusters " << std::endl; 
   // Merge Cluster ...
   MergeCTrack();  
   
+  std::cout << "Crawler: Further Extend " << std::endl;
   // Further merge trying to extend into other tracks ... 
   FurtherExtendCTrack();
   PurgeMergeCTrack();
   
+  std::cout << "Crawler: CleanUp " << std::endl;
   //this is not a good assumption
   CleanUpCTTrack(flag);
   
+  std::cout << "Crawler: Prepare Tracking " << std::endl;
   PrepareTracking(); //Get the order correct ... not well tuned yet ... 
   UpdateMap();
 
@@ -38,6 +41,7 @@ void WireCell2dToy::ToyCrawler::PrepareTracking(){
   MergeClusterTrackSelection to_be_removed;
   MergeClusterTrackSelection to_be_added;
   for (int i=0;i!=all_mergeclustertrack.size();i++){
+    //if (i%1000) std::cout << i << " " << all_mergeclustertrack.at(i)->Get_ctracks().size() << " " << all_mergeclustertrack.size() << std::endl;
     int n_same = 0;
     int n_diff = 0;
     int first = -1;
@@ -73,14 +77,16 @@ void WireCell2dToy::ToyCrawler::PrepareTracking(){
     if (n_same >2 && n_diff >2 && n_same > 0.1 * all_mergeclustertrack.at(i)->Get_ctracks().size()
 	&& n_diff > 0.1 * all_mergeclustertrack.at(i)->Get_ctracks().size()
 	&& first >=2 && first <all_mergeclustertrack.at(i)->Get_ctracks().size()-1){
-      to_be_removed.push_back(all_mergeclustertrack.at(i));
+      
       // Create two new MergedClusterTrack // just handle two ... 
       
+      // std::cout << "Walk 1" << std::endl;
+
       ToyWalking walking(all_mergeclustertrack.at(i)->Get_FirstMSCell(), all_mergeclustertrack.at(i)->Get_FirstMSCell()->Get_Center(), all_mergeclustertrack.at(i)->Get_LastMSCell(), all_mergeclustertrack.at(i)->Get_LastMSCell()->Get_Center(), mcells_map);
       //std::cout << walking.get_dist() << " " << walking.get_cells().size() << std::endl;
       MergeSpaceCellSelection qx_mcells = walking.get_cells();
       MergeClusterTrack *track1 = new MergeClusterTrack(qx_mcells);
-      to_be_added.push_back(track1);
+     
       
       
 
@@ -115,10 +121,18 @@ void WireCell2dToy::ToyCrawler::PrepareTracking(){
       // 		<< second_cell->Get_Center().z/units::cm << " " 
       // 		<< std::endl;
 
+      //std::cout << "Walk 2" << std::endl;
+
       ToyWalking walking1(first_cell, first_cell->Get_Center(), second_cell, second_cell->Get_Center(), mcells_map);
       MergeSpaceCellSelection qx_mcells1 = walking1.get_cells();
       MergeClusterTrack *track2= new MergeClusterTrack(qx_mcells1);
-      to_be_added.push_back(track2);
+
+
+      if (qx_mcells.size() !=0 && qx_mcells1.size()!=0){
+	to_be_removed.push_back(all_mergeclustertrack.at(i));
+	to_be_added.push_back(track1);
+	to_be_added.push_back(track2);
+      }
 
       // MergeClusterTrack *track2 = new MergeClusterTrack( all_mergeclustertrack.at(i)->Get_ctracks().back());
       // for (int j=all_mergeclustertrack.at(i)->Get_ctracks().size()-1;j>=first;j--){
