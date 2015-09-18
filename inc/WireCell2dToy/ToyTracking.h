@@ -67,6 +67,8 @@ namespace WireCell2dToy{
     WireCell::WCVertexSelection vertices;
     WireCell::WCShowerSelection showers;
     
+    //WireCell::WCVertexSelection wiggle_vertices;
+    
     /* WireCell::WCVertexSelection good_vertices;  */
     /* WireCell::WCVertexSelection bad_vertices;  */
     
