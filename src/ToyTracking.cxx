@@ -148,7 +148,6 @@ WireCell2dToy::ToyTracking::ToyTracking(WireCell2dToy::ToyCrawler& toycrawler){
     // separate various issues ... 
     
     if (!shower_flag){
-       
       //not a shower
       std::cout << "Grown single track " << std::endl;
       if (grow_track_fill_gap(toycrawler)){
@@ -258,7 +257,7 @@ void WireCell2dToy::ToyTracking::single_shower_reco(WireCell2dToy::ToyCrawler& t
 
   for (int i=0;i!=showers.size();i++){
    WCShower *shower = showers.at(i);
-   std::cout << i << " " << " " <<   shower->distance_to_center() << " " << 
+   std::cout << "Showers "<< i << " " << " " <<   shower->distance_to_center() << " " << 
       shower->get_all_cells().size() << " " 
   	      << shower->get_vertex()->Center().x/units::cm << " " 
   	      << shower->get_vertex()->Center().y/units::cm << " " 
@@ -633,10 +632,10 @@ bool  WireCell2dToy::ToyTracking::track_shower_reco(WireCell2dToy::ToyCrawler& t
 
       bool flag_shower = shower->IsShower(good_cells);
 
-      std::cout << spec_vertex->Center().x/units::cm << " "
-      		<< spec_vertex->Center().y/units::cm << " " 
-      		<< spec_vertex->Center().z/units::cm << " " 
-      		<< flag_shower << " " << good_cells.size() << " " << shower->get_all_cells().size()  << std::endl;
+      // std::cout << spec_vertex->Center().x/units::cm << " "
+      // 		<< spec_vertex->Center().y/units::cm << " " 
+      // 		<< spec_vertex->Center().z/units::cm << " " 
+      // 		<< flag_shower << " " << good_cells.size() << " " << shower->get_all_cells().size()  << std::endl;
 	
 
       if (flag_shower){
@@ -652,6 +651,72 @@ bool  WireCell2dToy::ToyTracking::track_shower_reco(WireCell2dToy::ToyCrawler& t
       // }
       //Judge ... 
 
+    } // end loop of temp_tracks ... 
+
+    // Add in a shower without any tracks ... 
+    for (int j=0;j!=temp_vertex.size();j++){
+      WCVertex *spec_vertex = temp_vertex.at(j);
+      int ngood_track = 0;
+      WCTrackSelection exclude_tracks;
+      for (int k=0;k!=spec_vertex->get_tracks().size();k++){
+	WCTrack *spec_track = spec_vertex->get_tracks().at(k);
+	auto itq = find(good_tracks.begin(),good_tracks.end(),spec_track);
+	if (itq != good_tracks.end()){
+	  exclude_tracks.push_back(spec_track);
+	}
+      }
+      // Need to contain more than one good tracks
+      if (exclude_tracks.size() <2) continue; // not working 
+      
+      // work out exclude cells 
+      MergeSpaceCellSelection exclude_cells;
+      int flag_qx = 1;
+      while(flag_qx){
+      	flag_qx = 0;
+      	for (int k=0;k!=good_tracks.size();k++){
+      	  WCTrack *curr_track = good_tracks.at(k);
+	  auto it = find(exclude_tracks.begin(),exclude_tracks.end(),
+			 curr_track);
+	  if (it == exclude_tracks.end()){
+	    for (int k1=0;k1!= exclude_tracks.size();k1++){
+	      if (curr_track->IsConnected(exclude_tracks.at(k1))){
+		exclude_tracks.push_back(curr_track);
+		break;
+	      }
+	    }
+      	  }
+      	}
+      }
+      
+      for (int k=0;k!=exclude_tracks.size();k++){
+       	for (int k1 = 0; k1!=exclude_tracks.at(k)->get_centerVP_cells().size();k1++){
+	  auto it = find(exclude_cells.begin(),exclude_cells.end(),exclude_tracks.at(k)->get_centerVP_cells().at(k1));
+	  if (it == exclude_cells.end())
+	    exclude_cells.push_back(exclude_tracks.at(k)->get_centerVP_cells().at(k1));
+	}
+      }
+      // at least one adajcent cell not inside good tracks 
+      MergeSpaceCellSelection& ad_mcells = toycrawler.Get_mcells_map()[spec_vertex->get_msc()];
+      int flag_cont = 0;
+      for (int k=0;k!=ad_mcells.size();k++){
+	auto it = find(exclude_cells.begin(),exclude_cells.end(),ad_mcells.at(k));
+	if (it == exclude_cells.end()){
+	  flag_cont = 1;
+	  break;
+	}
+      }
+      // Set track to zero, and need to make sure the other code are compatible
+      if (flag_cont ==1){
+	WCShower *shower = new WCShower(spec_vertex,0,exclude_cells,toycrawler.Get_mcells_map());
+	bool flag_shower = shower->IsShower(good_cells);
+	
+	if (flag_shower ){
+	  showers.push_back(shower);
+	  // spec_track, spec_vertex, exclude_cells ... 
+	}else{
+	  delete shower;
+	}
+      }
     }
   }
 
@@ -748,7 +813,7 @@ bool  WireCell2dToy::ToyTracking::track_shower_reco(WireCell2dToy::ToyCrawler& t
   //  std::cout << showers.size() << std::endl;
   for (int i=0;i!=showers.size();i++){
     WCShower *shower = showers.at(i);
-    std::cout << i << " " << " " <<  shower->IsShower(good_cells) << " " << 
+    std::cout << "Showers: "<< i << " " << " " <<  shower->IsShower(good_cells) << " " << 
       shower->get_all_cells().size() << " " 
   	      << shower->get_vertex()->Center().x/units::cm << " " 
   	      << shower->get_vertex()->Center().y/units::cm << " " 
@@ -963,6 +1028,7 @@ void WireCell2dToy::ToyTracking::form_parallel_tiny_tracks(WireCell2dToy::ToyCra
     }
   }
 
+  // std::cout << short_tracks.size() << " " << parallel_tracks.size() << std::endl;
   //  
 
 }
@@ -1145,7 +1211,7 @@ void WireCell2dToy::ToyTracking::parallel_tracking(WCVertex *vertex, MergeSpaceC
   track_mcells = walking.get_cells();
   double dist = walking.get_dist();
   
-  //std::cout << dist << " " << track_mcells.size() << std::endl;
+  //  std::cout << dist << " " << track_mcells.size() << std::endl;
 
   if (dist < 1e9){
     double ky, kz;

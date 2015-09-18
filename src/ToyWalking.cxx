@@ -85,7 +85,7 @@ void WireCell2dToy::ToyWalking::Iterate(MergeSpaceCell *curr_cell, MergeSpaceCel
       for (int i=0;i!=mcells_map[curr_cell].size();i++){
 	auto it = find(curr_cells.begin(),curr_cells.end(),mcells_map[curr_cell].at(i));
 	auto it1 = find(must_cells.begin(),must_cells.end(),mcells_map[curr_cell].at(i));
-	if (it == curr_cells.end() && it1 != must_cells.end())
+	if (it == curr_cells.end() && (it1 != must_cells.end() || must_cells.size()==0))
 	  Iterate(mcells_map[curr_cell].at(i), curr_cells,dis);
       }
     }else{

@@ -185,17 +185,17 @@ void WireCell2dToy::ToyCrawler::PrepareTracking(){
       }
 
 
-      std::cout << first_cell->Get_Center().x/units::cm << " " 
-      	<< first_cell->Get_Center().y/units::cm << " " 
-      	<< first_cell->Get_Center().z/units::cm << " " 
-      	<< second_cell->Get_Center().x/units::cm << " " 
-      	<< second_cell->Get_Center().y/units::cm << " " 
-      	<< second_cell->Get_Center().z/units::cm << " "
-      	<< min_x/units::cm  << " " << max_x/units::cm  << " " 
-      	<< all_mergeclustertrack.at(i)->Get_FirstMSCell()->Get_Center().x /units::cm << " " 
-      	<< all_mergeclustertrack.at(i)->Get_LastMSCell()->Get_Center().x /units::cm << " " 
-		<< max_dist1 << " " << max_dist2 << " "  << qx_mcells.size() << " " 
-      	<< std::endl;
+      // std::cout << first_cell->Get_Center().x/units::cm << " " 
+      // 	<< first_cell->Get_Center().y/units::cm << " " 
+      // 	<< first_cell->Get_Center().z/units::cm << " " 
+      // 	<< second_cell->Get_Center().x/units::cm << " " 
+      // 	<< second_cell->Get_Center().y/units::cm << " " 
+      // 	<< second_cell->Get_Center().z/units::cm << " "
+      // 	<< min_x/units::cm  << " " << max_x/units::cm  << " " 
+      // 	<< all_mergeclustertrack.at(i)->Get_FirstMSCell()->Get_Center().x /units::cm << " " 
+      // 	<< all_mergeclustertrack.at(i)->Get_LastMSCell()->Get_Center().x /units::cm << " " 
+      // 		<< max_dist1 << " " << max_dist2 << " "  << qx_mcells.size() << " " 
+      // 	<< std::endl;
 
 
 

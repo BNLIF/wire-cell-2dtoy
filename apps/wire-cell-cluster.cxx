@@ -190,7 +190,11 @@ int main(int argc, char* argv[])
   WireCell2dToy::ToyTracking toytracking(toycrawler);
   
 
-  std::cout << toytracking.get_good_tracks().size() << " " << toytracking.get_vertices().size() << " " << toytracking.get_bad_tracks().size() << std::endl;
+  std::cout << "Good Tracks:     " << toytracking.get_good_tracks().size() <<std::endl;
+  std::cout << "Vertices:        " << toytracking.get_vertices().size() << std::endl;
+  std::cout << "Bad Tracks:      " << toytracking.get_bad_tracks().size() << std::endl;
+  std::cout << "Parallel Tracks: " << toytracking.get_parallel_tracks().size() << std::endl;
+  std::cout << "Showers:         " << toytracking.get_showers().size() << std::endl;
 
 
   std::cout << "Drawing " << std::endl; 
