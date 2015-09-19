@@ -873,7 +873,7 @@ void WireCell2dToy::ToyTracking::form_parallel_tiny_tracks(WireCell2dToy::ToyCra
       }
     }else{
       MergeSpaceCell *nmcell = new MergeSpaceCell();
-      
+      nmcell->set_mcell(mcell->get_mcell());
       int flag2 = 0;
 
       for (int j=0;j!=mcell->Get_all_spacecell().size();j++){

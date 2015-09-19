@@ -141,7 +141,7 @@ int main(int argc, char* argv[])
       if (prev_cluster_num!=-1){
 	mcells.push_back(mcell);  
 	WireCell2dToy::ToyCrawler* toycrawler = new WireCell2dToy::ToyCrawler(mcells);
-	toycrawler->FormGraph();
+	//toycrawler->FormGraph();
 
 	// if (cluster_num==3){
 	//   TApplication theApp("theApp",&argc,argv);
@@ -247,12 +247,14 @@ int main(int argc, char* argv[])
   TTree *T3 = new TTree("T_badtrack","T_badtrack");
   TTree *T4 = new TTree("T_shorttrack","T_shortrack");
   TTree *T5 = new TTree("T_paratrack","T_paratrack");
+  TTree *T6 = new TTree("T_shower","T_shower");
   
   T1->SetDirectory(file1);
   T2->SetDirectory(file1);
   T3->SetDirectory(file1);
   T4->SetDirectory(file1);
   T5->SetDirectory(file1);
+  T6->SetDirectory(file1);
   
   
 
