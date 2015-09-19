@@ -12,7 +12,7 @@ namespace WireCell2dToy{
 
   class ToyTracking{
   public:
-    ToyTracking(ToyCrawler& toycrawler);
+    ToyTracking(ToyCrawler& toycrawler, int tracking_type = 0);
     ~ToyTracking();
     
     WireCell::WCTrackSelection& get_tracks(){return tracks;};

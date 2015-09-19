@@ -5,7 +5,7 @@
 
 using namespace WireCell;
 
-WireCell2dToy::ToyTracking::ToyTracking(WireCell2dToy::ToyCrawler& toycrawler){
+WireCell2dToy::ToyTracking::ToyTracking(WireCell2dToy::ToyCrawler& toycrawler, int tracking_type){
   CreateVertices(toycrawler);
   RemoveSame(); // get rid of duplicated ones
   
@@ -131,58 +131,77 @@ WireCell2dToy::ToyTracking::ToyTracking(WireCell2dToy::ToyCrawler& toycrawler){
 
   if (vertices.size() > 0 ) {
     
-    //Now do fine tracking for existing tracks
-    std::cout << "FineTracking " << std::endl; 
-    update_maps();
-    fine_tracking();
-    cleanup_bad_tracks();
-    update_maps1();
+  
     
-        
-    // Now need to figure out how to judge whether this is a shower or track ... 
-    // just from the number of tracks and the connectivities?
-    bool shower_flag = IsThisShower(toycrawler);
     
-    std::cout << "Shower? " << shower_flag << " Vertices " << vertices.size() << std::endl;
-    
-    // separate various issues ... 
-    
-    if (!shower_flag){
-      //not a shower
-      std::cout << "Grown single track " << std::endl;
+    if (tracking_type == 0){
+      //Now do fine tracking for existing tracks
+      std::cout << "FineTracking " << std::endl; 
+      update_maps();
+      fine_tracking();
+      cleanup_bad_tracks();
+      update_maps1();
+
+      // Now need to figure out how to judge whether this is a shower or track ... 
+      // just from the number of tracks and the connectivities?
+      bool shower_flag = IsThisShower(toycrawler);
+      
+      std::cout << "Shower? " << shower_flag << " Vertices " << vertices.size() << std::endl;
+      
+      // separate various issues ... 
+      
+      if (!shower_flag){
+	//not a shower
+	std::cout << "Grown single track " << std::endl;
+	if (grow_track_fill_gap(toycrawler)){
+	  std::cout << "FineTracking Again" << std::endl; 
+	  update_maps(1);
+	  fine_tracking();
+	}
+	form_parallel_tiny_tracks(toycrawler);
+	update_maps(1);
+	fine_tracking(1);
+      }else{
+	//is a shower  
+	// std::cout << "Grown single track " << std::endl;
+	if (grow_track_fill_gap(toycrawler)){
+	  std::cout << "FineTracking Again" << std::endl; 
+	  update_maps(1);
+	  fine_tracking();
+	}
+	//std::cout << "Test Shower only" << std::endl; 
+	
+	// // Judge vertex with multiple tracks ...
+	if (track_shower_reco(toycrawler)){
+	  std::cout << "Track + Shower " << std::endl; 
+	  Cleanup_showers();
+	  std::cout << "Parallel Tracking " << std::endl; 
+	  // do the rest of fine tracking ... 
+	  form_parallel_tiny_tracks(toycrawler);
+	  update_maps(1);
+	  fine_tracking(1);
+	}else{
+	  std::cout << "Shower only" << std::endl; 
+	  // Judge vertex for single shower ...
+	  single_shower_reco(toycrawler);
+	  Cleanup_showers();
+	}
+      }
+    }else if (tracking_type == 1){
+      //Now do fine tracking for existing tracks
+      std::cout << "FineTracking " << std::endl; 
+      update_maps();
+      fine_tracking();
+      
+      //cosmic ray tuned
       if (grow_track_fill_gap(toycrawler)){
-      	std::cout << "FineTracking Again" << std::endl; 
-      	update_maps(1);
-      	fine_tracking();
+	std::cout << "FineTracking Again" << std::endl; 
+	update_maps(1);
+	fine_tracking();
       }
       form_parallel_tiny_tracks(toycrawler);
       update_maps(1);
       fine_tracking(1);
-    }else{
-      //is a shower  
-      // std::cout << "Grown single track " << std::endl;
-      if (grow_track_fill_gap(toycrawler)){
-       	std::cout << "FineTracking Again" << std::endl; 
-       	update_maps(1);
-       	fine_tracking();
-      }
-      //std::cout << "Test Shower only" << std::endl; 
-      
-      // // Judge vertex with multiple tracks ...
-      if (track_shower_reco(toycrawler)){
-      	std::cout << "Track + Shower " << std::endl; 
-      	Cleanup_showers();
-      	std::cout << "Parallel Tracking " << std::endl; 
-      	// do the rest of fine tracking ... 
-      	form_parallel_tiny_tracks(toycrawler);
-      	update_maps(1);
-      	fine_tracking(1);
-      }else{
-      	std::cout << "Shower only" << std::endl; 
-      	// Judge vertex for single shower ...
-      	single_shower_reco(toycrawler);
-      	Cleanup_showers();
-      }
     }
   }
 }
