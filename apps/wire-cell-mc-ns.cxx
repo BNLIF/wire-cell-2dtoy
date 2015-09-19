@@ -789,16 +789,19 @@ int main(int argc, char* argv[])
   
   // start crawler
   cout << "Start Crawling after solving equations " << endl;
-  
+  int mcell_id = 0;
   ncluster = 0;
   for (auto it = cluster_list.begin();it!=cluster_list.end();it++){
     
     MergeSpaceCellSelection mscells;
     for (int i=0; i!=(*it)->get_allcell().size();i++){
       const MergeGeomCell *mcell = (const MergeGeomCell*)((*it)->get_allcell().at(i));
+      mcell->set_id(mcell_id);
+      mcell_id ++;
       MergeSpaceCell *mscell = new MergeSpaceCell();
       all_msc_cells.push_back(mscell);
       mscell->set_mcell(mcell);
+      mscell->set_id(mcell->get_id());
       for (int j=0;j!=mcell->get_allcell().size();j++){
   	const GeomCell *cell = mcell->get_allcell().at(j);
   	SpaceCell *space_cell = new SpaceCell(ncluster,*cell,(mcell->GetTimeSlice()*nrebin/2.*unit_dis/10. - frame_length/2.*unit_dis/10.)*units::cm,1,unit_dis/10.*nrebin/2.*units::cm);
@@ -1038,7 +1041,7 @@ int main(int argc, char* argv[])
   // 4. cluster number
   const GeomCell* cell_save = 0;
   int cluster_num = -1;
-  int mcell_id = -1;
+  
   
   ttree1->Branch("time_slice",&time_slice,"time_slice/I"); // done
   ttree1->Branch("cell",&cell_save);
@@ -1086,7 +1089,8 @@ int main(int argc, char* argv[])
     //loop merged cell
     for (int i=0; i!=(*it)->get_allcell().size();i++){
       const MergeGeomCell *mcell = (const MergeGeomCell*)((*it)->get_allcell().at(i));
-      mcell_id ++;
+      //mcell_id ++;
+      mcell_id = mcell->get_id();
       time_slice = mcell->GetTimeSlice();
       x_save = time_slice *nrebin/2.*unit_dis/10. - frame_length/2.*unit_dis/10.;
       xx = x_save;
@@ -1165,29 +1169,31 @@ int main(int argc, char* argv[])
   Trun->Fill();
 
 
-
-
   TTree *T1 = new TTree("T_goodtrack","T_goodtrack");
   TTree *T2 = new TTree("T_vertex","T_vertex");
   TTree *T3 = new TTree("T_badtrack","T_badtrack");
   TTree *T4 = new TTree("T_shorttrack","T_shortrack");
   TTree *T5 = new TTree("T_paratrack","T_paratrack");
+  TTree *T6 = new TTree("T_shower","T_shower");
   
   T1->SetDirectory(file);
   T2->SetDirectory(file);
   T3->SetDirectory(file);
   T4->SetDirectory(file);
   T5->SetDirectory(file);
+  T6->SetDirectory(file);
   
-  
-
   Int_t ntracks;
+  Int_t nshowers;
   Int_t npoints;
-  Double_t xx1[3000],yy1[3000],zz1[3000];
-  Double_t theta[3000],phi[3000];
-  Double_t energy[3000],dedx[3000];
+  Double_t xx1[10000],yy1[10000],zz1[10000];
+  Double_t theta[10000],phi[10000];
+  Double_t energy[10000],dedx[10000];
+  Int_t msc_id[10000];
   Int_t trackid;
   Int_t vtrack_id[100];
+  Int_t showerid;
+  Int_t vshower_id[100];
   
   T1->Branch("npoints",&npoints,"npoints/I");
   T1->Branch("trackid",&trackid,"trackid/I");
@@ -1198,13 +1204,16 @@ int main(int argc, char* argv[])
   T1->Branch("phi",phi,"phi[npoints]/D");
   T1->Branch("energy",energy,"energy[npoints]/D");
   T1->Branch("dedx",dedx,"dedx[npoints]/D");
-  
+  T1->Branch("msc_id",msc_id,"msc_id[npoints]/I");
 
-  T2->Branch("ntracks",&ntracks,"ntracks/I");
+
   T2->Branch("x",xx1,"x/D");
   T2->Branch("y",yy1,"y/D");
   T2->Branch("z",zz1,"z/D");
+  T2->Branch("ntracks",&ntracks,"ntracks/I");
   T2->Branch("vtrack_id",vtrack_id,"vtrack_id[ntracks]/I");
+  T2->Branch("nshowers",&nshowers,"nshowers/I");
+  T2->Branch("vshower_id",vshower_id,"vshower_id[nshowers]/I");
   
 
   T3->Branch("npoints",&npoints,"npoints/I");
@@ -1216,7 +1225,7 @@ int main(int argc, char* argv[])
   T3->Branch("phi",phi,"phi[npoints]/D");
   T3->Branch("energy",energy,"energy[npoints]/D");
   T3->Branch("dedx",dedx,"dedx[npoints]/D");
-
+  T3->Branch("msc_id",msc_id,"msc_id[npoints]/I");
 
   T4->Branch("npoints",&npoints,"npoints/I");
   T4->Branch("trackid",&trackid,"trackid/I");
@@ -1227,7 +1236,7 @@ int main(int argc, char* argv[])
   T4->Branch("phi",phi,"phi[npoints]/D");
   T4->Branch("energy",energy,"energy[npoints]/D");
   T4->Branch("dedx",dedx,"dedx[npoints]/D");
-
+  T4->Branch("msc_id",msc_id,"msc_id[npoints]/I");
 
   T5->Branch("npoints",&npoints,"npoints/I");
   T5->Branch("trackid",&trackid,"trackid/I");
@@ -1238,14 +1247,25 @@ int main(int argc, char* argv[])
   T5->Branch("phi",phi,"phi[npoints]/D");
   T5->Branch("energy",energy,"energy[npoints]/D");
   T5->Branch("dedx",dedx,"dedx[npoints]/D");
-
+  T5->Branch("msc_id",msc_id,"msc_id[npoints]/I");
   
+  T6->Branch("showerid",&showerid,"showerid/I");
+  T6->Branch("npoints",&npoints,"npoints/I");
+  T6->Branch("energy",energy,"energy[npoints]/D");
+  T6->Branch("msc_id",msc_id,"msc_id[npoints]/I");
+  T6->Branch("vertex_x",xx1,"vertex_x/D");
+  T6->Branch("vertex_y",yy1,"vertex_y/D");
+  T6->Branch("vertex_z",zz1,"vertex_z/D");
+  
+  
+
   WCTrackSelection all_tracks;
   WCTrackSelection good_tracks;
   WCTrackSelection bad_tracks;
   WCTrackSelection short_tracks;
   WCTrackSelection parallel_tracks;
   WCVertexSelection vertices;
+  WCShowerSelection showers;
   
   
   TGraph2D *g_tracking = new TGraph2D();
@@ -1277,6 +1297,9 @@ int main(int argc, char* argv[])
       // 	trackings.at(i)->get_vertices().at(j)->Center().z/units::cm << " " << 
       // 	std::endl;
     }
+    for (int j=0;j!=trackings.at(i)->get_showers().size();j++){
+      showers.push_back(trackings.at(i)->get_showers().at(j));
+    }
   }
   
   
@@ -1294,13 +1317,14 @@ int main(int argc, char* argv[])
       phi[j] = track->get_centerVP_phi().at(j);
       energy[j] = track->get_centerVP_energy().at(j);
       dedx[j] = track->get_centerVP_dedx().at(j);
+      msc_id[j] = track->get_centerVP_cells().at(j)->get_id();
       g_tracking->SetPoint(ncount,xx1[j],yy1[j],zz1[j]);
       ncount ++;
     }
     T1->Fill();
   }
 
-  //fill T2
+  //fill T2  //Vertex
   for (int i=0;i!=vertices.size();i++){
     ntracks = 0;
     WCVertex *vertex = vertices.at(i);
@@ -1315,6 +1339,14 @@ int main(int argc, char* argv[])
 	ntracks ++;
       }
     }
+    nshowers = 0;
+    for (int j=0;j!=showers.size();j++){
+      if (vertex == showers.at(j)->get_vertex()){
+	vshower_id[nshowers] = j;
+	nshowers++;
+      }
+    }
+
     T2->Fill();
   }
 
@@ -1332,6 +1364,7 @@ int main(int argc, char* argv[])
       phi[j] = track->get_centerVP_phi().at(j);
       energy[j] = track->get_centerVP_energy().at(j);
       dedx[j] = track->get_centerVP_dedx().at(j);
+      msc_id[j] = track->get_centerVP_cells().at(j)->get_id();
       g_tracking->SetPoint(ncount,xx1[j],yy1[j],zz1[j]);
       ncount ++;
     }
@@ -1351,6 +1384,7 @@ int main(int argc, char* argv[])
       phi[j] = 0;
       energy[j] = track->get_all_cells().at(j)->Get_Charge();
       dedx[j] = 0;
+      msc_id[j] = track->get_all_cells().at(j)->get_id();
       g_tracking->SetPoint(ncount,xx1[j],yy1[j],zz1[j]);
       ncount ++;
     }
@@ -1372,16 +1406,38 @@ int main(int argc, char* argv[])
       phi[j] = track->get_centerVP_phi().at(j);
       energy[j] = track->get_centerVP_energy().at(j);
       dedx[j] = track->get_centerVP_dedx().at(j);
+      msc_id[j] = track->get_centerVP_cells().at(j)->get_id();
       g_tracking->SetPoint(ncount,xx1[j],yy1[j],zz1[j]);
       ncount ++;
     }
     T5->Fill();
   }
 
+  //fill T6
+  for (int i=0;i!=showers.size();i++){
+    WCShower *shower = showers.at(i);
+    npoints = shower->get_all_cells().size();
+    showerid = find(showers.begin(),showers.end(),shower) - showers.begin();
+    xx1[0] = shower->get_vertex()->Center().x/units::cm;
+    yy1[0] = shower->get_vertex()->Center().y/units::cm;
+    zz1[0] = shower->get_vertex()->Center().z/units::cm;
+    for (int j=0;j!=npoints;j++){
+      g_tracking->SetPoint(ncount,
+		  shower->get_all_cells().at(j)->Get_Center().x/units::cm,
+		  shower->get_all_cells().at(j)->Get_Center().y/units::cm,
+		  shower->get_all_cells().at(j)->Get_Center().z/units::cm);
+      ncount ++;
+      energy[j] = shower->get_all_cells().at(j)->Get_Charge();
+      msc_id[j] = shower->get_all_cells().at(j)->get_id();
+    }
+    T6->Fill();
+  }
+  
 
-  g_tracking->Write("shower3D_tracking");
+  
 
 
+  g_tracking->Write("shower3D");
 
 
 
