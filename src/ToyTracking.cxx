@@ -151,41 +151,41 @@ WireCell2dToy::ToyTracking::ToyTracking(WireCell2dToy::ToyCrawler& toycrawler, i
       // separate various issues ... 
       
       if (!shower_flag){
-	//not a shower
-	std::cout << "Grown single track " << std::endl;
-	if (grow_track_fill_gap(toycrawler)){
-	  std::cout << "FineTracking Again" << std::endl; 
-	  update_maps(1);
-	  fine_tracking();
-	}
-	form_parallel_tiny_tracks(toycrawler);
-	update_maps(1);
-	fine_tracking(1);
+  	//not a shower
+  	std::cout << "Grown single track " << std::endl;
+  	if (grow_track_fill_gap(toycrawler)){
+  	  std::cout << "FineTracking Again" << std::endl; 
+  	  update_maps(1);
+  	  fine_tracking();
+  	}
+  	form_parallel_tiny_tracks(toycrawler);
+  	update_maps(1);
+  	fine_tracking(1);
       }else{
-	//is a shower  
-	// std::cout << "Grown single track " << std::endl;
-	if (grow_track_fill_gap(toycrawler)){
-	  std::cout << "FineTracking Again" << std::endl; 
-	  update_maps(1);
-	  fine_tracking();
-	}
-	//std::cout << "Test Shower only" << std::endl; 
+  	//is a shower  
+  	// std::cout << "Grown single track " << std::endl;
+  	if (grow_track_fill_gap(toycrawler)){
+  	  std::cout << "FineTracking Again" << std::endl; 
+  	  update_maps(1);
+  	  fine_tracking();
+  	}
+  	//std::cout << "Test Shower only" << std::endl; 
 	
-	// // Judge vertex with multiple tracks ...
-	if (track_shower_reco(toycrawler)){
-	  std::cout << "Track + Shower " << std::endl; 
-	  Cleanup_showers();
-	  std::cout << "Parallel Tracking " << std::endl; 
-	  // do the rest of fine tracking ... 
-	  form_parallel_tiny_tracks(toycrawler);
-	  update_maps(1);
-	  fine_tracking(1);
-	}else{
-	  std::cout << "Shower only" << std::endl; 
-	  // Judge vertex for single shower ...
-	  single_shower_reco(toycrawler);
-	  Cleanup_showers();
-	}
+  	// // Judge vertex with multiple tracks ...
+  	if (track_shower_reco(toycrawler)){
+  	  std::cout << "Track + Shower " << std::endl; 
+  	  Cleanup_showers();
+  	  std::cout << "Parallel Tracking " << std::endl; 
+  	  // do the rest of fine tracking ... 
+  	  form_parallel_tiny_tracks(toycrawler);
+  	  update_maps(1);
+  	  fine_tracking(1);
+  	}else{
+  	  std::cout << "Shower only" << std::endl; 
+  	  // Judge vertex for single shower ...
+  	  single_shower_reco(toycrawler);
+  	  Cleanup_showers();
+  	}
       }
     }else if (tracking_type == 1){
       //Now do fine tracking for existing tracks
@@ -198,9 +198,9 @@ WireCell2dToy::ToyTracking::ToyTracking(WireCell2dToy::ToyCrawler& toycrawler, i
       std::cout << "Grow tracks" << std::endl;
       //cosmic ray tuned
       if (grow_track_fill_gap(toycrawler)){
-	std::cout << "FineTracking Again" << std::endl; 
-	update_maps(1);
-	fine_tracking();
+  	std::cout << "FineTracking Again" << std::endl; 
+  	update_maps(1);
+  	fine_tracking();
       }
       
 
@@ -2756,7 +2756,7 @@ void WireCell2dToy::ToyTracking::CreateVertices(ToyCrawler& toycrawler){
       WCTrack *temp_track = temp_tracks.at(i);
       int type = temp_track->TrackType(*cell);
       
-      // std::cout << "Xin " << type << " " << cell->Get_Center().x/units::cm << " " << cell->Get_Center().y/units::cm << " " << cell->Get_Center().z/units::cm << " " << temp_track->get_mct().Get_TimeLength() << std::endl;
+      //std::cout << "Xin " << type << " " << cell->Get_Center().x/units::cm << " " << cell->Get_Center().y/units::cm << " " << cell->Get_Center().z/units::cm << " " << temp_track->get_mct().Get_TimeLength() << std::endl;
 
       // save all the wiggle tracks to be dealt later ... 
       if (type==3){
