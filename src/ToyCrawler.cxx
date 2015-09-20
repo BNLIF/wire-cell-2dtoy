@@ -27,6 +27,14 @@ WireCell2dToy::ToyCrawler::ToyCrawler(MergeSpaceCellSelection& mcells, int flag)
   //this is not a good assumption
   CleanUpCTTrack(flag);
   
+
+  // for (int i=0;i!=mcells.size();i++){
+  //   std::cout << mcells.at(i) << " " << mcells.at(i)->Get_Center().x << " " 
+  // 	      << mcells.at(i)->Get_Center().y << " " 
+  // 	      << mcells.at(i)->Get_Center().z << " " 
+  // 	      << std::endl;
+  // }
+
   std::cout << "Crawler: Prepare Tracking " << std::endl;
   PrepareTracking(); //Get the order correct ... not well tuned yet ... 
   UpdateMap();
@@ -112,7 +120,7 @@ void WireCell2dToy::ToyCrawler::PrepareTracking(){
 	
       }
 
-      MergeSpaceCell *first_cell, *second_cell, *third_cell;
+      MergeSpaceCell *first_cell=0, *second_cell=0, *third_cell=0;
       if (fabs(all_mergeclustertrack.at(i)->Get_FirstMSCell()->Get_Center().x -min_x) < 0.5*units::mm ){
 	//std::cout << " a1 " << std::endl; 
 	first_cell = all_mergeclustertrack.at(i)->Get_FirstMSCell();
@@ -147,76 +155,81 @@ void WireCell2dToy::ToyCrawler::PrepareTracking(){
       
       // std::cout << "Walk 1" << std::endl;
 
-      ToyWalking walking(first_cell, first_cell->Get_Center(), second_cell, second_cell->Get_Center(), mcells_map, must_cells);
+      MergeSpaceCellSelection qx_mcells;
+      MergeClusterTrack *track1 = 0;
+      
+      if (first_cell !=0 && second_cell !=0){
+	ToyWalking walking(first_cell, first_cell->Get_Center(), second_cell, second_cell->Get_Center(), mcells_map, must_cells);
       //std::cout << walking.get_dist() << " " << walking.get_cells().size() << std::endl;
-      MergeSpaceCellSelection qx_mcells = walking.get_cells();
-      MergeClusterTrack *track1 = new MergeClusterTrack(qx_mcells);
-           
-      //std::cout << track1->Get_allmcells().size() << " " << track1->Get_ctracks().size() << std::endl;
-      MergeSpaceCell *next_cell1;
-      float max_dist1 = 0;
-      MergeSpaceCell *next_cell2;
-      float max_dist2 = 0;
-      for (int qx = 0; qx!= all_mergeclustertrack.at(i)->Get_allmcells().size();qx++){
-	MergeSpaceCell *mcell = all_mergeclustertrack.at(i)->Get_allmcells().at(qx);
-	auto it = find(qx_mcells.begin(),qx_mcells.end(),mcell);
-	if (it == qx_mcells.end()){
-	 
-	  if (fabs(mcell->Get_Center().x - first_cell->Get_Center().x) > max_dist1){
-	    max_dist1 = fabs(mcell->Get_Center().x - first_cell->Get_Center().x);
-	    next_cell1 = mcell;
+	qx_mcells = walking.get_cells();
+	track1 = new MergeClusterTrack(qx_mcells);
+	
+	//std::cout << track1->Get_allmcells().size() << " " << track1->Get_ctracks().size() << std::endl;
+	MergeSpaceCell *next_cell1=0;
+	float max_dist1 = 0;
+	MergeSpaceCell *next_cell2=0;
+	float max_dist2 = 0;
+	for (int qx = 0; qx!= all_mergeclustertrack.at(i)->Get_allmcells().size();qx++){
+	  MergeSpaceCell *mcell = all_mergeclustertrack.at(i)->Get_allmcells().at(qx);
+	  auto it = find(qx_mcells.begin(),qx_mcells.end(),mcell);
+	  if (it == qx_mcells.end()){
+	    
+	    if (fabs(mcell->Get_Center().x - first_cell->Get_Center().x) > max_dist1){
+	      max_dist1 = fabs(mcell->Get_Center().x - first_cell->Get_Center().x);
+	      next_cell1 = mcell;
+	    }
+	    
+	    if (fabs(mcell->Get_Center().x - second_cell->Get_Center().x) > max_dist2){
+	      max_dist2 = fabs(mcell->Get_Center().x - second_cell->Get_Center().x);
+	      next_cell2 = mcell;
+	    }
+	    
 	  }
-
-	  if (fabs(mcell->Get_Center().x - second_cell->Get_Center().x) > max_dist2){
-	    max_dist2 = fabs(mcell->Get_Center().x - second_cell->Get_Center().x);
-	    next_cell2 = mcell;
-	  }
-
+	}
+	
+	if (max_dist1 < max_dist2){
+	  // if (next_cell->Get_Center().x < third_cell->Get_Center().x){
+	  //   first_cell = next_cell;
+	  //   second_cell = third_cell;
+	  // }else{
+	  //   first_cell = third_cell;
+	  //   second_cell = next_cell;
+	  // }
+	  second_cell = next_cell1;
+	}else{
+	  first_cell = next_cell2;
+	}
+	
+	
+	// std::cout << first_cell->Get_Center().x/units::cm << " " 
+	// 	<< first_cell->Get_Center().y/units::cm << " " 
+	// 	<< first_cell->Get_Center().z/units::cm << " " 
+	// 	<< second_cell->Get_Center().x/units::cm << " " 
+	// 	<< second_cell->Get_Center().y/units::cm << " " 
+	// 	<< second_cell->Get_Center().z/units::cm << " "
+	// 	<< min_x/units::cm  << " " << max_x/units::cm  << " " 
+	// 	<< all_mergeclustertrack.at(i)->Get_FirstMSCell()->Get_Center().x /units::cm << " " 
+	// 	<< all_mergeclustertrack.at(i)->Get_LastMSCell()->Get_Center().x /units::cm << " " 
+	// 		<< max_dist1 << " " << max_dist2 << " "  << qx_mcells.size() << " " 
+	// 	<< std::endl;
+	//std::cout << "Walk 2" << std::endl;
+	//std::cout << first_cell << " " << second_cell << std::endl;
+	
+	MergeSpaceCellSelection qx_mcells1;
+	MergeClusterTrack *track2=0;
+	
+	if (first_cell !=0 && second_cell !=0){
+	  ToyWalking walking1(first_cell, first_cell->Get_Center(), second_cell, second_cell->Get_Center(),  mcells_map, must_cells);
+	  qx_mcells1 = walking1.get_cells();
+	  track2= new MergeClusterTrack(qx_mcells1);
+	}
+	
+	if (qx_mcells.size() !=0 && qx_mcells1.size()!=0){
+	  to_be_removed.push_back(all_mergeclustertrack.at(i));
+	  to_be_added.push_back(track1);
+	  to_be_added.push_back(track2);
 	}
       }
-     
-      if (max_dist1 < max_dist2){
-	// if (next_cell->Get_Center().x < third_cell->Get_Center().x){
-	//   first_cell = next_cell;
-	//   second_cell = third_cell;
-	// }else{
-	//   first_cell = third_cell;
-	//   second_cell = next_cell;
-	// }
-        second_cell = next_cell1;
-      }else{
-	first_cell = next_cell2;
-	
-      }
-
-
-      // std::cout << first_cell->Get_Center().x/units::cm << " " 
-      // 	<< first_cell->Get_Center().y/units::cm << " " 
-      // 	<< first_cell->Get_Center().z/units::cm << " " 
-      // 	<< second_cell->Get_Center().x/units::cm << " " 
-      // 	<< second_cell->Get_Center().y/units::cm << " " 
-      // 	<< second_cell->Get_Center().z/units::cm << " "
-      // 	<< min_x/units::cm  << " " << max_x/units::cm  << " " 
-      // 	<< all_mergeclustertrack.at(i)->Get_FirstMSCell()->Get_Center().x /units::cm << " " 
-      // 	<< all_mergeclustertrack.at(i)->Get_LastMSCell()->Get_Center().x /units::cm << " " 
-      // 		<< max_dist1 << " " << max_dist2 << " "  << qx_mcells.size() << " " 
-      // 	<< std::endl;
-
-
-
-      //std::cout << "Walk 2" << std::endl;
-
-      ToyWalking walking1(first_cell, first_cell->Get_Center(), second_cell, second_cell->Get_Center(),  mcells_map, must_cells);
-      MergeSpaceCellSelection qx_mcells1 = walking1.get_cells();
-      MergeClusterTrack *track2= new MergeClusterTrack(qx_mcells1);
-
-
-      if (qx_mcells.size() !=0 && qx_mcells1.size()!=0){
-	to_be_removed.push_back(all_mergeclustertrack.at(i));
-	to_be_added.push_back(track1);
-	to_be_added.push_back(track2);
-      }
-
       // MergeClusterTrack *track2 = new MergeClusterTrack( all_mergeclustertrack.at(i)->Get_ctracks().back());
       // for (int j=all_mergeclustertrack.at(i)->Get_ctracks().size()-1;j>=first;j--){
       // 	track2->Add(all_mergeclustertrack.at(i)->Get_ctracks().at(j),all_mergeclustertrack.at(i)->Get_ctracks().at(j)->Get_FirstMSCell());

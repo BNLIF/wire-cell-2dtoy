@@ -142,8 +142,11 @@ int main(int argc, char* argv[])
   MergeSpaceCell *mcell;
   
   for (int i=0;i!=TC->GetEntries();i++){
+    //std::cout << i << std::endl;
     TC->GetEntry(i);
    
+    //std::cout << i << std::endl;
+
     //cluster starting at 0
     if (cluster_num == ncluster){
       
@@ -155,7 +158,7 @@ int main(int argc, char* argv[])
 	mcell = new MergeSpaceCell();
       }
 
-      //cout << x << " " << y << " " << z << " " << charge << endl;
+      // cout << x << " " << y << " " << z << " " << charge << endl;
       
       GeomCell *cell1 = new GeomCell(cell);
       toytiling[time_slice]->AddCell(gds,cell1,u_index,v_index,w_index,u_charge,v_charge,w_charge,u_charge_err,v_charge_err,w_charge_err);
@@ -186,8 +189,10 @@ int main(int argc, char* argv[])
   std::cout << "Crawling " << std::endl;
   WireCell2dToy::ToyCrawler toycrawler(mcells);
 
+  // test
   std::cout << "Tracking " << std::endl;
-  WireCell2dToy::ToyTracking toytracking(toycrawler);
+  //  WireCell2dToy::ToyTracking toytracking(toycrawler);
+  WireCell2dToy::ToyTracking toytracking(toycrawler,1);
   
 
   std::cout << "Good Tracks:     " << toytracking.get_good_tracks().size() <<std::endl;
