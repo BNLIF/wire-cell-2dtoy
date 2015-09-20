@@ -810,10 +810,10 @@ int main(int argc, char* argv[])
       }
       mscells.push_back(mscell);
     }
-    //WireCell2dToy::ToyCrawler* toycrawler = new WireCell2dToy::ToyCrawler(mscells,2);
-    //crawlers.push_back(toycrawler);
-    //WireCell2dToy::ToyTracking* toytracking = new WireCell2dToy::ToyTracking(*toycrawler,1);
-    //trackings.push_back(toytracking);
+    WireCell2dToy::ToyCrawler* toycrawler = new WireCell2dToy::ToyCrawler(mscells,2);
+    crawlers.push_back(toycrawler);
+    WireCell2dToy::ToyTracking* toytracking = new WireCell2dToy::ToyTracking(*toycrawler,1);
+    trackings.push_back(toytracking);
     
     
 

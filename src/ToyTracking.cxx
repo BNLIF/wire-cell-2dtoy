@@ -200,10 +200,10 @@ WireCell2dToy::ToyTracking::ToyTracking(WireCell2dToy::ToyCrawler& toycrawler, i
 	fine_tracking();
       }
       
-      std::cout << "Parallel Tracking " << std::endl; 
-      form_parallel_tiny_tracks(toycrawler);
-      update_maps(1);
-      fine_tracking(1);
+      // std::cout << "Parallel Tracking " << std::endl; 
+      // form_parallel_tiny_tracks(toycrawler);
+      // update_maps(1);
+      // fine_tracking(1);
     }
   }
 }
@@ -1226,13 +1226,14 @@ void WireCell2dToy::ToyTracking::parallel_tracking(WCVertex *vertex, MergeSpaceC
   
   MergeSpaceCellSelection track_mcells;
   
-  
+  std::cout << "Start Walking  " << std::endl;
   
   // max_cell --> vertex_cell, find the shortest path 
   WireCell2dToy::ToyWalking walking(max_mcell,max_point,vertex_cell,vertex->Center(),mcells_map);
   track_mcells = walking.get_cells();
   double dist = walking.get_dist();
   
+    std::cout << "End Walking  " << std::endl;
   //  std::cout << dist << " " << track_mcells.size() << std::endl;
 
   if (dist < 1e9){

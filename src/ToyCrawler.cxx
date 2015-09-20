@@ -759,8 +759,8 @@ void WireCell2dToy::ToyCrawler::MergeCTrack(){
 	
 	ClusterTrackSelection cts = ms_ct_map[vertex];
 	
-	std::cout << i << " " << vertices.size() << " " << cts.size() << " " << vertex->Get_Center().x/units::cm << " " << 
-	  vertex->Get_Center().y/units::cm << " " <<  vertex->Get_Center().z/units::cm << " " << std::endl;
+	// std::cout << i << " " << vertices.size() << " " << cts.size() << " " << vertex->Get_Center().x/units::cm << " " << 
+	//   vertex->Get_Center().y/units::cm << " " <<  vertex->Get_Center().z/units::cm << " " << std::endl;
 	//std::cout << theta1 << " " << phi1 << " " << cts.size() << std::endl;
 
 	int flag_special = 0;

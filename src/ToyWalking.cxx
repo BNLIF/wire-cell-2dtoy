@@ -80,7 +80,7 @@ void WireCell2dToy::ToyWalking::Iterate(MergeSpaceCell *curr_cell, MergeSpaceCel
       cells = curr_cells;
     }
   }else{
-    if (dis < dist && counter < counter_limit && global_counter < 50*counter_limit){
+    if (dis < dist && counter < counter_limit && global_counter < 20*counter_limit){
       // go in
       for (int i=0;i!=mcells_map[curr_cell].size();i++){
 	auto it = find(curr_cells.begin(),curr_cells.end(),mcells_map[curr_cell].at(i));
