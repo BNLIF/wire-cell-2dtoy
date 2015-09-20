@@ -113,11 +113,11 @@ WireCell2dToy::ToyTracking::ToyTracking(WireCell2dToy::ToyCrawler& toycrawler, i
     
    
     
-    // std::cout << i << " Vertex " << vertex->get_ntracks() << " " << success << " " << vertex->Center().x/units::cm << " " << vertex->Center().y/units::cm << " " << vertex->Center().z/units::cm << " " << vertex->get_msc()->Get_Center().x/units::cm << std::endl;
+    std::cout << i << " Vertex " << vertex->get_ntracks() << " " << success << " " << vertex->Center().x/units::cm << " " << vertex->Center().y/units::cm << " " << vertex->Center().z/units::cm << " " << vertex->get_msc()->Get_Center().x/units::cm << std::endl;
     
     if (vertex_track_map[vertex] != vertex->get_ntracks()){
       vertex->FindVertex(1);
-      std::cout << i << " Vertex " << vertex << " " << vertex->get_msc() << " " << vertex->get_ntracks() << " " << success << " " << vertex->Center().x/units::cm << " " << vertex->Center().y/units::cm << " " << vertex->Center().z/units::cm << " " << vertex->get_msc()->Get_Center().x/units::cm << std::endl;
+      //std::cout << i << " Vertex " << vertex << " " << vertex->get_msc() << " " << vertex->get_ntracks() << " " << success << " " << vertex->Center().x/units::cm << " " << vertex->Center().y/units::cm << " " << vertex->Center().z/units::cm << " " << vertex->get_msc()->Get_Center().x/units::cm << std::endl;
     }
     
     
@@ -191,8 +191,11 @@ WireCell2dToy::ToyTracking::ToyTracking(WireCell2dToy::ToyCrawler& toycrawler, i
       //Now do fine tracking for existing tracks
       std::cout << "FineTracking " << std::endl; 
       update_maps();
+      std::cout << "FineTracking 1" << std::endl; 
       fine_tracking();
-      
+      std::cout << "FineTracking 2" << std::endl; 
+      update_maps1();      
+      std::cout << "Grow tracks" << std::endl;
       //cosmic ray tuned
       if (grow_track_fill_gap(toycrawler)){
 	std::cout << "FineTracking Again" << std::endl; 
@@ -200,9 +203,9 @@ WireCell2dToy::ToyTracking::ToyTracking(WireCell2dToy::ToyCrawler& toycrawler, i
 	fine_tracking();
       }
       
-      // std::cout << "Parallel Tracking " << std::endl; 
+      //std::cout << "Parallel Tracking " << std::endl; 
       // form_parallel_tiny_tracks(toycrawler);
-      // update_maps(1);
+      // update_map(1);
       // fine_tracking(1);
     }
   }

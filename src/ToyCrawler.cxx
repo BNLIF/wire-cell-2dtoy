@@ -923,28 +923,46 @@ void WireCell2dToy::ToyCrawler::MergeCTrack(){
 
 void WireCell2dToy::ToyCrawler::CreateClusterTrack(MergeSpaceCellSelection& mcells){
 
+  for (int i = 0; i!=mcells.size();i++){
+    MergeSpaceCell *mcell1 = mcells.at(i);
+    MergeSpaceCellSelection mcell1_sel;
+    mcells_map[mcell1] = mcell1_sel; //create basic ... 
+    MergeSpaceCellSelection mcell2_sel;
+    mcells_save[mcell1] = mcell2_sel;
+  }
+
+  //  std::cout << mcells.size() << std::endl;
   // form associations ...
   for (int i = 0; i!=mcells.size();i++){
+    
+    //std::cout << i << " " << mcells.size() << std::endl;
+    
     MergeSpaceCell *mcell1 = mcells.at(i);
     Point m1center = mcell1->Get_Center();
     double thickness = mcell1->thickness();
     
-    MergeSpaceCellSelection mcell1_sel;
-
+    //MergeSpaceCellSelection mcell1_sel;
     for (int j=0;j!=mcells.size();j++){
       MergeSpaceCell *mcell2 = mcells.at(j);
       Point m2center = mcell2->Get_Center();
 
       if (fabs(fabs(m1center.x - m2center.x)-thickness) < 0.1*thickness ){
-	if (mcell1->Overlap(*mcell2))
-	    mcell1_sel.push_back(mcell2);
+	
+	auto it = find(mcells_map[mcell1].begin(),mcells_map[mcell1].end(),
+		       mcell2);
+	if (it != mcells_map[mcell1].end()) continue;
+	
+	if (mcell1->Overlap(*mcell2)){
+	  //mcell1_sel.push_back(mcell2);
+	  mcells_map[mcell1].push_back(mcell2);
+	  mcells_map[mcell2].push_back(mcell1);
+	  
+	  
+	}
       }
-      
-      
     }
-    MergeSpaceCellSelection mcell2_sel;
-    mcells_save[mcell1] = mcell2_sel;
-    mcells_map[mcell1] = mcell1_sel; // form structure   adjacent ones ...
+
+    //mcells_map[mcell1] = mcell1_sel; // form structure   adjacent ones ...
     //    mcells_counter[mcell1] = 0;  // initiliaization
   }
 
@@ -956,7 +974,7 @@ void WireCell2dToy::ToyCrawler::CreateClusterTrack(MergeSpaceCellSelection& mcel
   //for (int qx = 0; qx!=14;qx++){
   //
   while(used_mcells.size()!=mcells_map.size()){
-    //  std::cout << "Xin: " << qx << " " << used_mcells.size() << " " << mcells_map.size() << std::endl;
+    //std::cout << "Xin: "  << " " << used_mcells.size() << " " << mcells_map.size() << std::endl;
     //start to construct ClusterTrack ... first one 
     ClusterTrack *ctrack;
     // find the start point
