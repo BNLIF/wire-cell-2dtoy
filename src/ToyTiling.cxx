@@ -18,6 +18,10 @@ void WireCell2dToy::ToyTiling::AddCell(WireCell::GeomDataSource& gds, GeomCell *
   const GeomWire *vwire = gds.by_planeindex(WirePlaneType_t(1),v_index); 
   const GeomWire *wwire = gds.by_planeindex(WirePlaneType_t(2),w_index); 
   
+  cell->set_uwire(uwire);
+  cell->set_vwire(vwire);
+  cell->set_wwire(wwire);
+
   auto it1 = find(wire_all.begin(),wire_all.end(),uwire);
   if (it1 == wire_all.end()){
     wire_all.push_back(uwire);
@@ -401,6 +405,11 @@ WireCell2dToy::ToyTiling::ToyTiling(const WireCell::Slice& slice,WireCell::GeomD
 	    
 	    
 	    GeomCell *cell = new GeomCell(ncell,pcell);
+	    cell->set_uwire(wire_u.at(i));
+	    cell->set_vwire(wire_v.at(j));
+	    cell->set_wwire(wire_w.at(k));
+
+
 	    Point cell_center = cell->center();
 	    if (gds.contained_yz(cell_center)){
 	      
@@ -690,6 +699,9 @@ void WireCell2dToy::ToyTiling::twoplane_tiling(WireCell::GeomDataSource& gds, st
 	      //	      std::cout << " Form Cell" << std::endl;
 
 	      GeomCell *cell = new GeomCell(ncell,pcell);
+	      cell->set_uwire(wire_u[i]);
+	      cell->set_vwire(wire_v[j]);
+	      cell->set_wwire(n_wire);
 	      Point cell_center = cell->center();
 
 
@@ -864,7 +876,10 @@ void WireCell2dToy::ToyTiling::twoplane_tiling(WireCell::GeomDataSource& gds, st
 
   	    if (pcell.size()>=3){
   	      GeomCell *cell = new GeomCell(ncell,pcell);
-  	      Point cell_center = cell->center();
+  	      cell->set_uwire(wire_u[i]);
+	      cell->set_vwire(n_wire);
+	      cell->set_wwire(wire_w[j]);
+	      Point cell_center = cell->center();
 
   	      GeomWireSelection wiresel;
   	      wiresel.push_back(wire_u[i]);
@@ -1032,7 +1047,10 @@ void WireCell2dToy::ToyTiling::twoplane_tiling(WireCell::GeomDataSource& gds, st
 
   	    if (pcell.size()>=3){
   	      GeomCell *cell = new GeomCell(ncell,pcell);
-  	      Point cell_center = cell->center();
+  	      cell->set_uwire(n_wire);
+	      cell->set_vwire(wire_v[j]);
+	      cell->set_wwire(wire_w[i]);
+	      Point cell_center = cell->center();
 
   	      GeomWireSelection wiresel;
   	      wiresel.push_back(wire_w[i]);
