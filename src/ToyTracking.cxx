@@ -199,6 +199,8 @@ WireCell2dToy::ToyTracking::ToyTracking(WireCell2dToy::ToyCrawler& toycrawler, i
 	update_maps(1);
 	fine_tracking();
       }
+      
+      std::cout << "Parallel Tracking " << std::endl; 
       form_parallel_tiny_tracks(toycrawler);
       update_maps(1);
       fine_tracking(1);

@@ -9,10 +9,15 @@ WireCell2dToy::ToyCrawler::ToyCrawler(MergeSpaceCellSelection& mcells, int flag)
   CreateClusterTrack(mcells);
   FormGraph(); 
 
+
+  // std::cout << all_clustertrack.size() << std::endl;
+
   std::cout << "Crawler: Merge Clusters " << std::endl; 
   // Merge Cluster ...
   MergeCTrack();  
   
+
+
   std::cout << "Crawler: Further Extend " << std::endl;
   // Further merge trying to extend into other tracks ... 
   FurtherExtendCTrack();
@@ -717,11 +722,15 @@ void WireCell2dToy::ToyCrawler::MergeCTrack(){
   WireCell::ClusterTrackSelection used_clustertrack; // hold the used tracks
 
   for (int i = 0;i!=all_clustertrack.size();i++){
+    
     auto it = find(used_clustertrack.begin(),used_clustertrack.end(),all_clustertrack.at(i));
     if (it == used_clustertrack.end()){
       MergeClusterTrack *mct = new MergeClusterTrack(all_clustertrack.at(i));
       
       MergeSpaceCellSelection vertices; // save existing vertices
+
+      MergeSpaceCellSelection used_vertices; // save used vertices
+
       all_mergeclustertrack.push_back(mct);
       used_clustertrack.push_back(all_clustertrack.at(i));
       vertices.push_back(all_clustertrack.at(i)->Get_FirstMSCell());
@@ -729,12 +738,16 @@ void WireCell2dToy::ToyCrawler::MergeCTrack(){
 
       // start to add stuff ... 
       while (vertices.size()!=0){
+
+
 	MergeSpaceCell *vertex = vertices.back();
 	vertices.pop_back();
+	used_vertices.push_back(vertex);
+
 
 	// find the track inside MergeClusterTrack which contain this vertex
-	ClusterTrack* old_cct = mct->GetClusterTrack(vertex);
-	mct->SC_Hough(vertex->Get_Center());
+	//ClusterTrack* old_cct = mct->GetClusterTrack(vertex);
+	mct->SC_Hough(vertex->Get_Center(),-1,3);
 	float theta1 = mct->Get_Theta();
 	float phi1 = mct->Get_Phi();
 
@@ -745,7 +758,9 @@ void WireCell2dToy::ToyCrawler::MergeCTrack(){
 
 	
 	ClusterTrackSelection cts = ms_ct_map[vertex];
-
+	
+	std::cout << i << " " << vertices.size() << " " << cts.size() << " " << vertex->Get_Center().x/units::cm << " " << 
+	  vertex->Get_Center().y/units::cm << " " <<  vertex->Get_Center().z/units::cm << " " << std::endl;
 	//std::cout << theta1 << " " << phi1 << " " << cts.size() << std::endl;
 
 	int flag_special = 0;
@@ -762,13 +777,6 @@ void WireCell2dToy::ToyCrawler::MergeCTrack(){
 	    //Judge angle matching ... 
 	    int flag = 0;
 	    // write the main alg. ...
-	    cct->SC_Hough(vertex->Get_Center());
-	    float theta2 = cct->Get_Theta();
-	    float phi2 = cct->Get_Phi();
-
-	    cct->SC_Hough(vertex->Get_Center(),-1,2);
-	    float theta2_m = cct->Get_Theta();
-	    float phi2_m = cct->Get_Phi();
 	    
 	    float cut_angle;
 	    if (flag_special > 2){
@@ -780,17 +788,31 @@ void WireCell2dToy::ToyCrawler::MergeCTrack(){
 
 	    float shift_angle = 100;
 
-	    if ((fabs(theta1+theta2-3.1415926)<cut_angle/180.*3.1415926 // 5 degrees
-	    	 && fabs(fabs(phi1-phi2)-3.1415926)<cut_angle/180.*3.1415926)
-	    	){
-	      flag = 1;
-	    }
+
+	    cct->SC_Hough(vertex->Get_Center(),-1,2);
+	    float theta2_m = cct->Get_Theta();
+	    float phi2_m = cct->Get_Phi();
 
 	    if ((fabs(theta1_m+theta2_m-3.1415926)<cut_angle1/180.*3.1415926 // 5 degrees
 	    	 && fabs(fabs(phi1_m-phi2_m)-3.1415926)<cut_angle1/180.*3.1415926)
 	    	){
 	      flag = 1;
 	    }
+
+
+	    if (flag == 0 ){
+	      cct->SC_Hough(vertex->Get_Center(),-1,3);
+	      float theta2 = cct->Get_Theta();
+	      float phi2 = cct->Get_Phi();
+	      
+	      if ((fabs(theta1+theta2-3.1415926)<cut_angle/180.*3.1415926 // 5 degrees
+		   && fabs(fabs(phi1-phi2)-3.1415926)<cut_angle/180.*3.1415926)
+		  ){
+		flag = 1;
+	      }
+	    }
+
+	   
 
 	    
 	    // std::cout << theta1_m/3.1415926*180. << " " << theta2_m/3.1415926*180.
@@ -800,7 +822,8 @@ void WireCell2dToy::ToyCrawler::MergeCTrack(){
 	    
 
 	    if (flag == 0 ){
-	      int cross_num = cct->CrossNum(vertex->Get_Center(), theta1_m,phi1_m);
+	      // int cross_num = cct->CrossNum(vertex->Get_Center(), theta1_m,phi1_m);
+	      int cross_num = cct->CrossNum(vertex, theta1_m,phi1_m);
 	      if ( cross_num == cct->Get_allmcells().size()){
 	      	flag = 1;
 	      }
@@ -858,12 +881,20 @@ void WireCell2dToy::ToyCrawler::MergeCTrack(){
 	    if (flag==1){
 	      mct->Add(cct,vertex);
 	      used_clustertrack.push_back(cct);
-	      if (cct->Get_FirstMSCell()!=vertex) vertices.push_back(cct->Get_FirstMSCell());
-	      if (cct->Get_LastMSCell()!=vertex) vertices.push_back(cct->Get_LastMSCell());
+	      if (cct->Get_FirstMSCell()!=vertex) {
+		auto it_qx1 = find(used_vertices.begin(),used_vertices.end(),cct->Get_FirstMSCell());
+		if (it_qx1 == used_vertices.end())
+		  vertices.push_back(cct->Get_FirstMSCell());
+	      }
+	      if (cct->Get_LastMSCell()!=vertex) {
+		auto it_qx1 = find(used_vertices.begin(),used_vertices.end(),cct->Get_LastMSCell());
+		if (it_qx1 == used_vertices.end())
+		vertices.push_back(cct->Get_LastMSCell());
+	      }
 	    }
 	  }
-	}
-      }
+	} // end for loop
+      } // end while
     }
   }
 

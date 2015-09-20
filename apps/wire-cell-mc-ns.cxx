@@ -810,12 +810,13 @@ int main(int argc, char* argv[])
       }
       mscells.push_back(mscell);
     }
-    WireCell2dToy::ToyCrawler* toycrawler = new WireCell2dToy::ToyCrawler(mscells,2);
+    //WireCell2dToy::ToyCrawler* toycrawler = new WireCell2dToy::ToyCrawler(mscells,2);
+    //crawlers.push_back(toycrawler);
+    //WireCell2dToy::ToyTracking* toytracking = new WireCell2dToy::ToyTracking(*toycrawler,1);
+    //trackings.push_back(toytracking);
     
-    crawlers.push_back(toycrawler);
-    WireCell2dToy::ToyTracking* toytracking = new WireCell2dToy::ToyTracking(*toycrawler,1);
-    trackings.push_back(toytracking);
     
+
     // std::cout << ncluster << " " << toycrawler->Get_mcells_map().size() << " " << toycrawler->Get_allCT().size() << " " << toycrawler->Get_allMCT().size()  << std::endl;
 
     // if (toycrawler->Get_mcells_map().size()>200){
