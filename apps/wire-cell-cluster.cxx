@@ -191,8 +191,8 @@ int main(int argc, char* argv[])
 
   // test
   std::cout << "Tracking " << std::endl;
-  //  WireCell2dToy::ToyTracking toytracking(toycrawler);
-  WireCell2dToy::ToyTracking toytracking(toycrawler,1);
+  WireCell2dToy::ToyTracking toytracking(toycrawler);
+  //WireCell2dToy::ToyTracking toytracking(toycrawler,1);
   
 
   std::cout << "Good Tracks:     " << toytracking.get_good_tracks().size() <<std::endl;

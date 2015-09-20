@@ -2549,9 +2549,13 @@ void WireCell2dToy::ToyTracking::Crawl(){
     WCVertex *vertex = vertices.at(i);
 
     //if (i==1){
-    vertex->OrganizeTracks();
+    WCVertex *vertex1 = vertex->OrganizeTracks();
+    
+    if (vertex1 !=0){
+      vertices.push_back(vertex1);
+    }
     //std::cout << vertex->get_ntracks() << " " << vertex->Center().x/units::cm << " " << vertex->Center().y/units::cm << " " << vertex->Center().z/units::cm << std::endl;
-    // }
+    //}
   }
 }
 
