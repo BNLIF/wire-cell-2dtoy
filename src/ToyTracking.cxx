@@ -108,7 +108,6 @@ WireCell2dToy::ToyTracking::ToyTracking(WireCell2dToy::ToyCrawler& toycrawler, i
   //second round vertex fitting ... 
   for (int i=0;i!=vertices.size();i++){
     WCVertex *vertex = vertices.at(i);
-    //
     bool success = vertex->get_fit_success();
     
    
@@ -2722,6 +2721,11 @@ void WireCell2dToy::ToyTracking::CreateVertices(ToyCrawler& toycrawler){
    // fill in tracks ... 
   for (int i=0;i!=toycrawler.Get_allMCT().size();i++){
     toycrawler.Get_allMCT().at(i)->Organize();
+    
+    // int flag = 0;
+    // for (int j=0;j!=tracks.size();j++){
+    // }
+    // if (flag == 1) continue;
 
     WCTrack *track = new WCTrack(*toycrawler.Get_allMCT().at(i));
     tracks.push_back(track);

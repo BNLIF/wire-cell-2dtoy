@@ -21,11 +21,11 @@ WireCell2dToy::ToyCrawler::ToyCrawler(MergeSpaceCellSelection& mcells, int flag)
   std::cout << "Crawler: Further Extend " << std::endl;
   // Further merge trying to extend into other tracks ... 
   FurtherExtendCTrack();
-  PurgeMergeCTrack();
+  // PurgeMergeCTrack();
   
-  std::cout << "Crawler: CleanUp " << std::endl;
-  //this is not a good assumption
-  CleanUpCTTrack(flag);
+  // std::cout << "Crawler: CleanUp " << std::endl;
+  // //this is not a good assumption
+  // CleanUpCTTrack(flag);
   
 
   // for (int i=0;i!=mcells.size();i++){
@@ -39,6 +39,10 @@ WireCell2dToy::ToyCrawler::ToyCrawler(MergeSpaceCellSelection& mcells, int flag)
   PrepareTracking(); //Get the order correct ... not well tuned yet ... 
   UpdateMap();
 
+  std::cout << "Crawler: CleanUp " << std::endl;
+  PurgeMergeCTrack();
+  CleanUpCTTrack(flag);
+  
   // for (int i=0;i!=all_mergeclustertrack.size();i++){
   //   MergeClusterTrack *mct = all_mergeclustertrack.at(i);
   //   std::cout << i << " " << mct->Get_allmcells().size() << std::endl;
