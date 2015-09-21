@@ -21,11 +21,11 @@ WireCell2dToy::ToyCrawler::ToyCrawler(MergeSpaceCellSelection& mcells, int flag)
   std::cout << "Crawler: Further Extend " << std::endl;
   // Further merge trying to extend into other tracks ... 
   FurtherExtendCTrack();
-  // PurgeMergeCTrack();
+  PurgeMergeCTrack();
   
-  // std::cout << "Crawler: CleanUp " << std::endl;
-  // //this is not a good assumption
-  // CleanUpCTTrack(flag);
+  std::cout << "Crawler: CleanUp " << std::endl;
+  //this is not a good assumption
+  CleanUpCTTrack(flag);
   
 
   // for (int i=0;i!=mcells.size();i++){
@@ -764,7 +764,8 @@ void WireCell2dToy::ToyCrawler::MergeCTrack(){
 
 	// find the track inside MergeClusterTrack which contain this vertex
 	//ClusterTrack* old_cct = mct->GetClusterTrack(vertex);
-	mct->SC_Hough(vertex->Get_Center(),-1,3);
+	//mct->SC_Hough(vertex->Get_Center(),-1,3);
+	mct->SC_Hough(vertex->Get_Center());
 	float theta1 = mct->Get_Theta();
 	float phi1 = mct->Get_Phi();
 
@@ -820,7 +821,8 @@ void WireCell2dToy::ToyCrawler::MergeCTrack(){
 
 
 	    if (flag == 0 ){
-	      cct->SC_Hough(vertex->Get_Center(),-1,3);
+	      //cct->SC_Hough(vertex->Get_Center(),-1,3);
+	      cct->SC_Hough(vertex->Get_Center());
 	      float theta2 = cct->Get_Theta();
 	      float phi2 = cct->Get_Phi();
 	      
@@ -841,7 +843,7 @@ void WireCell2dToy::ToyCrawler::MergeCTrack(){
 	    
 
 	    if (flag == 0 ){
-	      // int cross_num = cct->CrossNum(vertex->Get_Center(), theta1_m,phi1_m);
+	      //int cross_num = cct->CrossNum(vertex->Get_Center(), theta1_m,phi1_m);
 	      int cross_num = cct->CrossNum(vertex, theta1_m,phi1_m);
 	      if ( cross_num == cct->Get_allmcells().size()){
 	      	flag = 1;

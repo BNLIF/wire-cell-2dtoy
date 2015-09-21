@@ -30,6 +30,8 @@ namespace WireCell2dToy{
 
     void CreateVertices(ToyCrawler& toycrawler);
     void RemoveSame();
+    void RemoveSameTrack();
+
     void MergeVertices(int flag  = 1);
     void BreakTracks();
     void OrganizeTracks(int flag = 1);
