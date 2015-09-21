@@ -36,6 +36,8 @@ WireCell2dToy::ToyTracking::ToyTracking(WireCell2dToy::ToyCrawler& toycrawler, i
   // CheckVertices(toycrawler);
   // OrganizeTracks(); //associate the rest
 
+  RemoveSameTrack();
+
   Associate();  //associate the rest .. 
   CleanUpVertex(); //do some final clean up ...
   
@@ -615,7 +617,7 @@ bool  WireCell2dToy::ToyTracking::track_shower_reco(WireCell2dToy::ToyCrawler& t
 	// std::cout << temp.at(0)->Center().x/units::cm << " " 
 	// 	  << temp.at(0)->Center().y/units::cm << " " 
 	// 	  << temp.at(0)->Center().z/units::cm << " " << a << std::endl;
-	if (a > -0.9 ){
+	if (a > -0.9 && a < 0.9){
 	  possible_vertex.push_back(temp);
 	  possible_track.push_back(temp_tracks);
 	}
@@ -724,13 +726,12 @@ bool  WireCell2dToy::ToyTracking::track_shower_reco(WireCell2dToy::ToyCrawler& t
 
       bool flag_shower = shower->IsShower(good_cells);
 
-      //add a protection ... 
-      //
+      
 
-      std::cout << spec_vertex->Center().x/units::cm << " "
-      		<< spec_vertex->Center().y/units::cm << " " 
-      		<< spec_vertex->Center().z/units::cm << " " 
-      		<< flag_shower << " " << good_cells.size() << " " << shower->get_all_cells().size()  << std::endl;
+      // std::cout << spec_vertex->Center().x/units::cm << " "
+      // 		<< spec_vertex->Center().y/units::cm << " " 
+      // 		<< spec_vertex->Center().z/units::cm << " " 
+      // 		<< flag_shower << " " << good_cells.size() << " " << shower->get_all_cells().size()  << " " << nvertex_outside << std::endl;
       
       if (flag_shower){
 	showers.push_back(shower);
@@ -902,7 +903,31 @@ bool  WireCell2dToy::ToyTracking::track_shower_reco(WireCell2dToy::ToyCrawler& t
     }
   }
 
-  
+  WCShowerSelection bad_showers;
+
+  for (int i=0;i!=showers.size();i++){
+    WCShower *shower = showers.at(i);
+    int nvertex_outside = 0;
+    for (int k=0;k!=vertices.size();k++){
+      auto it = find(shower->get_all_cells().begin(),
+		     shower->get_all_cells().end(),
+		     vertices.at(k)->get_msc());
+      if (it == shower->get_all_cells().end())
+	nvertex_outside ++;
+    }
+
+    if (nvertex_outside >=8){
+      bad_showers.push_back(shower);
+    }
+  }
+
+  for (int i=0;i!=bad_showers.size();i++){
+    WCShower *shower = bad_showers.at(i);
+    auto it = find(showers.begin(),showers.end(),shower);
+    showers.erase(it);
+  }
+
+
   //  std::cout << showers.size() << std::endl;
   for (int i=0;i!=showers.size();i++){
     WCShower *shower = showers.at(i);
