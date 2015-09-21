@@ -735,7 +735,7 @@ void WireCell2dToy::ToyCrawler::FurtherExtendCTrack(int flag_qx){
 }
 
 
-void WireCell2dToy::ToyCrawler::MergeCTrack(int flag){
+void WireCell2dToy::ToyCrawler::MergeCTrack(int flag1){
   WireCell::ClusterTrackSelection used_clustertrack; // hold the used tracks
 
   for (int i = 0;i!=all_clustertrack.size();i++){
@@ -764,7 +764,7 @@ void WireCell2dToy::ToyCrawler::MergeCTrack(int flag){
 
 	// find the track inside MergeClusterTrack which contain this vertex
 	//ClusterTrack* old_cct = mct->GetClusterTrack(vertex);
-	if (flag==1){
+	if (flag1==1){
 	  mct->SC_Hough(vertex->Get_Center());
 	}else{
 	  mct->SC_Hough(vertex->Get_Center(),-1,3);
@@ -827,7 +827,7 @@ void WireCell2dToy::ToyCrawler::MergeCTrack(int flag){
 
 	    if (flag == 0 ){
 	      //
-	      if (flag == 1){
+	      if (flag1 == 1){
 		cct->SC_Hough(vertex->Get_Center());
 	      }else{
 		cct->SC_Hough(vertex->Get_Center(),-1,3);

@@ -64,7 +64,7 @@ namespace WireCell2dToy{
     void single_shower_reco(WireCell2dToy::ToyCrawler& toycrawler);
     
     void cosmic_finder_all(WireCell2dToy::ToyCrawler& toycrawler);
-
+    void cosmic_finder_part(WireCell2dToy::ToyCrawler& toycrawler);
 
   protected: 
     WireCell::WCTrackSelection tracks;

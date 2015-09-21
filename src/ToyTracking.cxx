@@ -239,17 +239,143 @@ WireCell2dToy::ToyTracking::ToyTracking(WireCell2dToy::ToyCrawler& toycrawler, i
     // deal with the case where there are all black 
     if (good_tracks.size() == 0 ){
       cosmic_finder_all(toycrawler);
-      std::cout << "FineTracking Again" << std::endl; 
-      update_maps();
-      fine_tracking();
+      std::cout << "FineTracking Again All" << std::endl; 
+      if (vertices.size() > 0){
+	update_maps();
+	fine_tracking();
+      }
     }else{
       // deal with the case where there are some black cases
-      
+      cosmic_finder_part(toycrawler);
+      std::cout << "FineTracking Again Part" << std::endl; 
+      if (vertices.size() > 0 ){
+	update_maps();
+	fine_tracking();
+      }
     }
     
   }
 
 }
+
+void WireCell2dToy::ToyTracking::cosmic_finder_part(WireCell2dToy::ToyCrawler& toycrawler){
+  MergeSpaceCellMap& mcells_map = toycrawler.Get_mcells_map();
+  MergeSpaceCellSelection all_cells;  
+  
+  for (auto it =toycrawler.Get_mcells_map().begin();it!=toycrawler.Get_mcells_map().end();it++){
+    MergeSpaceCell *mcell = it->first;
+    int flag = 0;
+    for (int i=0;i!=good_tracks.size();i++){
+      WCTrack *track = good_tracks.at(i);
+      auto it = find(track->get_centerVP_cells().begin(),
+		     track->get_centerVP_cells().end(),
+		     mcell);
+      if (it != track->get_centerVP_cells().end()){
+	flag = 1;
+	break;
+      }
+      //save everything not inside the good tracks
+    }
+    if (flag == 0){
+      all_cells.push_back(mcell);
+    }
+  }
+
+  
+
+  //std::cout << all_cells.size() << std::endl;
+
+  
+  std::vector<MergeSpaceCellSelection> cluster_msc;
+  // Need to cluster these by whether they are connected ...
+  for (int i=0;i!=all_cells.size();i++){
+    MergeSpaceCell *mcell = all_cells.at(i);
+    
+    if (cluster_msc.size() == 0 ){
+      MergeSpaceCellSelection mscs;
+      mscs.push_back(mcell);
+      cluster_msc.push_back(mscs);
+    }else{
+      int flag = 0;
+      for (int j=0;j!=cluster_msc.size();j++){
+   	MergeSpaceCellSelection& mscs = cluster_msc.at(j);
+   	for (int k=0;k!=mscs.size();k++){
+   	  MergeSpaceCell *mcell1 = mscs.at(k);	  
+   	  if (fabs(mcell1->Get_Center().x - mcell->Get_Center().x) < mcell1->thickness() + 0.2*units::mm ){
+	    if (mcell1->Overlap(*mcell)){
+	      mscs.push_back(mcell);
+	      flag = 1;
+	      break;
+	    }
+   	  }
+   	}
+	if (flag == 1)
+	  break;
+      }
+      if (flag == 0){
+  	MergeSpaceCellSelection mscs;
+  	mscs.push_back(mcell);
+  	cluster_msc.push_back(mscs);
+      }
+    }
+  }
+  
+  int flag = 1;
+  while(flag){
+    flag = 0;
+    for (int i=0;i!=cluster_msc.size();i++){
+      MergeSpaceCellSelection& mscs_1 = cluster_msc.at(i);
+      for (int j=i+1;j< cluster_msc.size();j++){
+  	MergeSpaceCellSelection& mscs_2 = cluster_msc.at(j);
+	for (int k1 = 0; k1 != mscs_1.size(); k1++){
+  	  MergeSpaceCell *mcell1 = mscs_1.at(k1);
+  	  for (int k2 = 0; k2!= mscs_2.size(); k2++){
+  	    MergeSpaceCell * mcell2 = mscs_2.at(k2);
+	    
+  	    if (fabs(mcell1->Get_Center().x - mcell2->Get_Center().x) < mcell1->thickness() + 0.2*units::mm){ 
+	      if (mcell1->Overlap(*mcell2)){
+
+		cluster_msc.at(i).insert(cluster_msc.at(i).end(),cluster_msc.at(j).begin(),cluster_msc.at(j).end());
+		cluster_msc.erase(cluster_msc.begin() + j);
+		
+		//std::cout << flag << std::endl;
+		flag = 1;
+		break;
+	      }
+	    }
+  	  }
+  	  if (flag == 1) break;
+  	}
+  	if (flag == 1) break;
+      }
+      if (flag == 1) break;
+    }
+  }
+  
+  flag = 1;
+  while (flag){
+    flag = 0;
+    for (int i=0;i!=cluster_msc.size();i++){
+      MergeSpaceCellSelection& mscs_1 = cluster_msc.at(i);
+      int sum = 0;
+      for (int j=0;j!=mscs_1.size();j++){
+  	sum += mscs_1.at(j)->Get_all_spacecell().size();
+      }
+      if (sum < 50){
+  	cluster_msc.erase(cluster_msc.begin() + i);
+  	flag = 1;
+  	break;
+      }
+    }
+  }
+
+  std::cout << cluster_msc.size() << std::endl;
+
+
+
+
+}
+
 
 void WireCell2dToy::ToyTracking::cosmic_finder_all(WireCell2dToy::ToyCrawler& toycrawler){
   MergeSpaceCellMap& mcells_map = toycrawler.Get_mcells_map();
@@ -2439,10 +2565,10 @@ void WireCell2dToy::ToyTracking::update_maps(int flag){
 
 void WireCell2dToy::ToyTracking::fine_tracking(int flag){
   for (int i=0;i!=tracks.size();i++){
-    // std::cout << i << " " << tracks.size() << std::endl;
+    //std::cout << i << " " << tracks.size() << std::endl;
     WCTrack *track = tracks.at(i);
     if (wct_wcv_map.find(track)!=wct_wcv_map.end()){
-      //std::cout << wct_wcv_map[track].size() << std::endl;
+      // std::cout << wct_wcv_map[track].size() << std::endl;
       if (wct_wcv_map[track].size()==2){
 	//std::cout << i << "abc1 " << std::endl;
 	WCVertex *vertex1 = wct_wcv_map[track].at(0);

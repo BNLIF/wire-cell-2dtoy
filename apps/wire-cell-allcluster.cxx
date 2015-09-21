@@ -140,7 +140,7 @@ int main(int argc, char* argv[])
     if (cluster_num != prev_cluster_num){
       if (prev_cluster_num!=-1){
 	mcells.push_back(mcell);  
-	WireCell2dToy::ToyCrawler* toycrawler = new WireCell2dToy::ToyCrawler(mcells);
+	WireCell2dToy::ToyCrawler* toycrawler = new WireCell2dToy::ToyCrawler(mcells,1,2); // cosmic tune
 	//toycrawler->FormGraph();
 
 	// if (cluster_num==3){
@@ -223,8 +223,15 @@ int main(int argc, char* argv[])
   int sum = 0 ;
   
   for (int i=0;i!=crawlers.size();i++){
-    WireCell2dToy::ToyTracking* toytracking = new WireCell2dToy::ToyTracking(*crawlers.at(i));
+    WireCell2dToy::ToyTracking* toytracking = new WireCell2dToy::ToyTracking(*crawlers.at(i),1); // cosmic tune
     trackings.push_back(toytracking);
+
+    std::cout << i << std::endl;
+    std::cout << "Good Tracks:     " << toytracking->get_good_tracks().size() <<std::endl;
+    std::cout << "Vertices:        " << toytracking->get_vertices().size() << std::endl;
+    std::cout << "Bad Tracks:      " << toytracking->get_bad_tracks().size() << std::endl;
+    std::cout << "Parallel Tracks: " << toytracking->get_parallel_tracks().size() << std::endl;
+    std::cout << "Showers:         " << toytracking->get_showers().size() << std::endl;
 
     for (auto it = crawlers.at(i)->Get_mcells_map().begin(); it!= crawlers.at(i)->Get_mcells_map().end();it++){
       MergeSpaceCell *mcell1 = it->first;
