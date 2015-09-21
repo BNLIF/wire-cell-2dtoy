@@ -810,13 +810,19 @@ int main(int argc, char* argv[])
       }
       mscells.push_back(mscell);
     }
+    //ncluster++;
     WireCell2dToy::ToyCrawler* toycrawler = new WireCell2dToy::ToyCrawler(mscells,2);
     crawlers.push_back(toycrawler);
     WireCell2dToy::ToyTracking* toytracking = new WireCell2dToy::ToyTracking(*toycrawler,1);
     trackings.push_back(toytracking);
     
+    std::cout << "Cluster:         " << ncluster << std::endl;
+    std::cout << "Good Tracks:     " << toytracking->get_good_tracks().size() <<std::endl;
+    std::cout << "Vertices:        " << toytracking->get_vertices().size() << std::endl;
+    std::cout << "Bad Tracks:      " << toytracking->get_bad_tracks().size() << std::endl;
+    std::cout << "Parallel Tracks: " << toytracking->get_parallel_tracks().size() << std::endl;
+    std::cout << "Showers:         " << toytracking->get_showers().size() << std::endl;
     
-
     // std::cout << ncluster << " " << toycrawler->Get_mcells_map().size() << " " << toycrawler->Get_allCT().size() << " " << toycrawler->Get_allMCT().size()  << std::endl;
 
     // if (toycrawler->Get_mcells_map().size()>200){
