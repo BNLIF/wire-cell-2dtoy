@@ -2,6 +2,36 @@
 
 using namespace WireCell;
 
+WireCell2dToy::ToyNWalking::ToyNWalking(WireCell::MergeSpaceCell *start_cell, WireCell::MergeSpaceCellMap& mcells_map, WireCell::MergeSpaceCellSelection& used_cell, WireCell::MergeSpaceCellSelection& must_cell)
+  : start_cell(start_cell)
+  , mcells_map(mcells_map)
+  , used_cell(used_cell)
+  , must_cell(must_cell)
+{
+  Iterate(start_cell);
+}
+
+void WireCell2dToy::ToyNWalking::Iterate(MergeSpaceCell *curr_cell){
+  cells.push_back(curr_cell);
+  
+  for (int i=0;i!=mcells_map[curr_cell].size();i++){
+    MergeSpaceCell *next_cell = mcells_map[curr_cell].at(i);
+    auto it3 = find(cells.begin(), cells.end(), next_cell);
+    if (it3 == cells.end()){
+      auto it2 = find(used_cell.begin(), used_cell.end(), next_cell);
+      if (it2 == used_cell.end()){
+	auto it1 = find(must_cell.begin(), must_cell.end(), next_cell);
+	if (it1 != must_cell.end())
+	  Iterate(next_cell);
+      }
+    }
+  }
+}
+
+WireCell2dToy::ToyNWalking::~ToyNWalking(){
+}
+
+
 WireCell2dToy::ToyWalking::ToyWalking(WireCell::MergeSpaceCell *start_cell, Point start_point, WireCell::MergeSpaceCell *target_cell, Point target_point, WireCell::MergeSpaceCellMap& mcells_map, int counter_limit)
   : start_cell(start_cell)
   , target_cell(target_cell)

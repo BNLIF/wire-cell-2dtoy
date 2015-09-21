@@ -281,101 +281,173 @@ void WireCell2dToy::ToyTracking::cosmic_finder_part(WireCell2dToy::ToyCrawler& t
     }
   }
 
-  
-
-  //std::cout << all_cells.size() << std::endl;
-
-  
   std::vector<MergeSpaceCellSelection> cluster_msc;
-  // Need to cluster these by whether they are connected ...
-  for (int i=0;i!=all_cells.size();i++){
-    MergeSpaceCell *mcell = all_cells.at(i);
-    
-    if (cluster_msc.size() == 0 ){
-      MergeSpaceCellSelection mscs;
-      mscs.push_back(mcell);
-      cluster_msc.push_back(mscs);
-    }else{
-      int flag = 0;
-      for (int j=0;j!=cluster_msc.size();j++){
-   	MergeSpaceCellSelection& mscs = cluster_msc.at(j);
-   	for (int k=0;k!=mscs.size();k++){
-   	  MergeSpaceCell *mcell1 = mscs.at(k);	  
-   	  if (fabs(mcell1->Get_Center().x - mcell->Get_Center().x) < mcell1->thickness() + 0.2*units::mm ){
-	    if (mcell1->Overlap(*mcell)){
-	      mscs.push_back(mcell);
-	      flag = 1;
-	      break;
-	    }
-   	  }
-   	}
-	if (flag == 1)
-	  break;
-      }
-      if (flag == 0){
-  	MergeSpaceCellSelection mscs;
-  	mscs.push_back(mcell);
-  	cluster_msc.push_back(mscs);
-      }
-    }
-  }
-  
-  int flag = 1;
-  while(flag){
-    flag = 0;
-    for (int i=0;i!=cluster_msc.size();i++){
-      MergeSpaceCellSelection& mscs_1 = cluster_msc.at(i);
-      for (int j=i+1;j< cluster_msc.size();j++){
-  	MergeSpaceCellSelection& mscs_2 = cluster_msc.at(j);
-	for (int k1 = 0; k1 != mscs_1.size(); k1++){
-  	  MergeSpaceCell *mcell1 = mscs_1.at(k1);
-  	  for (int k2 = 0; k2!= mscs_2.size(); k2++){
-  	    MergeSpaceCell * mcell2 = mscs_2.at(k2);
-	    
-  	    if (fabs(mcell1->Get_Center().x - mcell2->Get_Center().x) < mcell1->thickness() + 0.2*units::mm){ 
-	      if (mcell1->Overlap(*mcell2)){
 
-		cluster_msc.at(i).insert(cluster_msc.at(i).end(),cluster_msc.at(j).begin(),cluster_msc.at(j).end());
-		cluster_msc.erase(cluster_msc.begin() + j);
-		
-		//std::cout << flag << std::endl;
-		flag = 1;
-		break;
-	      }
-	    }
-  	  }
-  	  if (flag == 1) break;
-  	}
-  	if (flag == 1) break;
+  MergeSpaceCellSelection used_cell;
+  MergeSpaceCellSelection must_cell = all_cells;
+  int start_num = 0;
+  while(used_cell.size() != must_cell.size() && start_num < must_cell.size()){
+    MergeSpaceCell* start_cell=0;
+    for (int i=start_num; i<must_cell.size();i++){
+      start_cell = must_cell.at(i);
+      auto it = find(used_cell.begin(),used_cell.end(),start_cell);
+      if (it == used_cell.end()){
+	start_num = i+1;
+	break;
       }
-      if (flag == 1) break;
     }
+    
+    ToyNWalking toynwalking(start_cell,mcells_map,used_cell,must_cell);
+    MergeSpaceCellSelection cells = toynwalking.get_cells();
+    
+    used_cell.insert(used_cell.end(),cells.begin(),cells.end());
+
+    int sum = 0;
+    for (int i=0;i!=cells.size();i++){
+      sum += cells.at(i)->Get_all_spacecell().size();
+    }
+    if (sum >= 150 && cells.size() >3)
+      cluster_msc.push_back(cells);
+
+    // std::cout << used_cell.size() << " " << must_cell.size() << " " 
+    // 	      << start_num << " " << cluster_msc.size() << std::endl; 
   }
   
-  flag = 1;
-  while (flag){
-    flag = 0;
-    for (int i=0;i!=cluster_msc.size();i++){
-      MergeSpaceCellSelection& mscs_1 = cluster_msc.at(i);
-      int sum = 0;
-      for (int j=0;j!=mscs_1.size();j++){
-  	sum += mscs_1.at(j)->Get_all_spacecell().size();
-      }
-      if (sum < 150 || mscs_1.size() <=3){
-  	cluster_msc.erase(cluster_msc.begin() + i);
-  	flag = 1;
-  	break;
-      }
-    }
-  }
 
   std::cout << cluster_msc.size() << std::endl;
+  // for (int i=0;i!=cluster_msc.size();i++){
+  //     MergeSpaceCellSelection& mscs_1 = cluster_msc.at(i);
+  //     std::cout << mscs_1.size() << std::endl;
+  // }
+
   for (int i=0;i!=cluster_msc.size();i++){
-      MergeSpaceCellSelection& mscs_1 = cluster_msc.at(i);
-      std::cout << mscs_1.size() << std::endl;
+    Point p(0,0,0);
+    int sum = 0;
+    all_cells.clear();
+    all_cells = cluster_msc.at(i);
+    for (int j = 0; j!= all_cells.size();j++){
+      MergeSpaceCell *mcell = all_cells.at(j);
+      p.x += mcell->Get_Center().x * mcell->Get_all_spacecell().size(); 
+      p.y += mcell->Get_Center().y * mcell->Get_all_spacecell().size(); 
+      p.z += mcell->Get_Center().z * mcell->Get_all_spacecell().size(); 
+      sum += mcell->Get_all_spacecell().size(); 
+    }
+    p.x/=sum;
+    p.y/=sum;
+    p.z/=sum;
+
+    ClusterTrack ct(all_cells.front());
+    for (int i=1;i< all_cells.size();i++){
+      ct.AddMSCell_anyway(all_cells.at(i));
+    }
+    ct.SC_Hough(p);
+    float theta = ct.Get_Theta();
+    float phi = ct.Get_Phi();
+    
+    Point p1(p.x + sin(theta)*cos(phi), p.y + sin(theta)*sin(phi), p.z + cos(theta));
+    Line l1(p,p1);
+    TVector3 dir = l1.vec();
+    
+    
+    float max_dis = 0;
+    float min_dis = 0;
+    MergeSpaceCell *max_cell = all_cells.at(0);
+    MergeSpaceCell *min_cell = all_cells.at(0);
+    for (int i=0;i!=all_cells.size();i++){
+      MergeSpaceCell *mcell = all_cells.at(i);
+      TVector3 dir1(mcell->Get_Center().x-p.x,mcell->Get_Center().y-p.y,mcell->Get_Center().z-p.z);
+      float dis = dir.Dot(dir1);
+      float dis1 = l1.closest_dis(mcell->Get_Center());
+      if (dis >0 ) dis = dis - dis1;
+      if (dis <0 ) dis = dis + dis1;
+      
+      if (dis > max_dis){
+	max_dis = dis;
+	max_cell = mcell;
+      }
+      if (dis < min_dis){
+	min_dis = dis;
+	min_cell = mcell;
+      }
+    }
+    
+    Point max_point = max_cell->Get_Center();
+    Point min_point = min_cell->Get_Center();
+    for (int i=0;i!=max_cell->Get_all_spacecell().size();i++){
+      SpaceCell *cell = max_cell->Get_all_spacecell().at(i);
+      TVector3 dir1(cell->x()-p.x,cell->y()-p.y,cell->z()-p.z);
+      float dis = dir.Dot(dir1);
+      Point p2(cell->x(),cell->y(),cell->z());
+      float dis1 = l1.closest_dis(p2);
+      if (dis >0 ) dis = dis - dis1;
+      if (dis <0 ) dis = dis + dis1;
+      if (dis > max_dis){
+	max_dis = dis;
+	max_point = p2;
+      }
+    }
+    
+    for (int i=0;i!=min_cell->Get_all_spacecell().size();i++){
+      SpaceCell *cell = min_cell->Get_all_spacecell().at(i);
+      TVector3 dir1(cell->x()-p.x,cell->y()-p.y,cell->z()-p.z);
+      float dis = dir.Dot(dir1);
+      Point p2(cell->x(),cell->y(),cell->z());
+      float dis1 = l1.closest_dis(p2);
+      if (dis >0 ) dis = dis - dis1;
+      if (dis <0 ) dis = dis + dis1;
+      if (dis < min_dis){
+	min_dis = dis;
+	min_point = p2;
+      }
+    }
+    
+    
+    MergeSpaceCellSelection track_mcells;
+    WireCell2dToy::ToyWalking walking(max_cell,max_point,min_cell,min_point,mcells_map);
+    track_mcells = walking.get_cells();
+    
+    //std::cout << track_mcells.size() << " " << walking.get_counter() << " " << walking.get_global_counter() << std::endl;
+    if (track_mcells.size() > 0){
+      double ky, kz;
+      if (max_point.x == p.x){
+	ky = 0;
+	kz = 0;
+      }else{
+	ky = (max_point.y-p.y)/(max_point.x-p.x);
+	kz = (max_point.z-p.z)/(max_point.x-p.x);
+      }
+      
+      
+      WCTrack *track = new WCTrack(track_mcells);
+      tracks.push_back(track);
+      
+      WCVertex *vertex1 = new WCVertex(*max_cell);
+      vertex1->set_center(max_point);
+      vertex1->Add(track);
+      vertex1->set_ky(track,ky);
+      vertex1->set_kz(track,kz);
+      vertices.push_back(vertex1);
+      
+      
+      if (min_point.x == p.x){
+	ky = 0;
+	kz = 0;
+      }else{
+	ky = (min_point.y-p.y)/(min_point.x-p.x);
+	kz = (min_point.z-p.z)/(min_point.x-p.x);
+      }
+      
+      WCVertex *vertex2 = new WCVertex(*min_cell);
+      vertex2->set_center(min_point);
+      vertex2->Add(track);
+      vertex2->set_ky(track,ky);
+      vertex2->set_kz(track,kz);
+      vertices.push_back(vertex2);
+
+
+      std::cout << tracks.size() << " " << vertices.size() << std::endl;
+    }
   }
-
-
 
 }
 
