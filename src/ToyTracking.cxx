@@ -361,7 +361,7 @@ void WireCell2dToy::ToyTracking::cosmic_finder_part(WireCell2dToy::ToyCrawler& t
       for (int j=0;j!=mscs_1.size();j++){
   	sum += mscs_1.at(j)->Get_all_spacecell().size();
       }
-      if (sum < 50){
+      if (sum < 150 || mscs_1.size() <=3){
   	cluster_msc.erase(cluster_msc.begin() + i);
   	flag = 1;
   	break;
@@ -370,7 +370,10 @@ void WireCell2dToy::ToyTracking::cosmic_finder_part(WireCell2dToy::ToyCrawler& t
   }
 
   std::cout << cluster_msc.size() << std::endl;
-
+  for (int i=0;i!=cluster_msc.size();i++){
+      MergeSpaceCellSelection& mscs_1 = cluster_msc.at(i);
+      std::cout << mscs_1.size() << std::endl;
+  }
 
 
 
