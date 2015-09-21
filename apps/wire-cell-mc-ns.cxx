@@ -691,7 +691,7 @@ int main(int argc, char* argv[])
 //   cluster_list.clear();
   
 //   ncount_mcell = 0;
-
+   int time_slice;
   //Now do cluster
   for (int i=start_num;i!=end_num+1;i++){
     GeomCellSelection pallmcell = mergetiling[i]->get_allcell();
@@ -799,12 +799,15 @@ int main(int argc, char* argv[])
       mcell->set_id(mcell_id);
       mcell_id ++;
       MergeSpaceCell *mscell = new MergeSpaceCell();
+      time_slice = mcell->GetTimeSlice();
       all_msc_cells.push_back(mscell);
       mscell->set_mcell(mcell);
       mscell->set_id(mcell->get_id());
       for (int j=0;j!=mcell->get_allcell().size();j++){
   	const GeomCell *cell = mcell->get_allcell().at(j);
-  	SpaceCell *space_cell = new SpaceCell(ncluster,*cell,(mcell->GetTimeSlice()*nrebin/2.*unit_dis/10. - frame_length/2.*unit_dis/10.)*units::cm,1,unit_dis/10.*nrebin/2.*units::cm);
+
+	float charge = toymatrix[time_slice]->Get_Cell_Charge(mcell,1)/mcell->cross_section() * cell->cross_section();
+  	SpaceCell *space_cell = new SpaceCell(ncluster,*cell,(mcell->GetTimeSlice()*nrebin/2.*unit_dis/10. - frame_length/2.*unit_dis/10.)*units::cm,charge,unit_dis/10.*nrebin/2.*units::cm);
 	all_sc_cells.push_back(space_cell);
   	mscell->AddSpaceCell(space_cell);
       }
@@ -1034,7 +1037,7 @@ int main(int argc, char* argv[])
 
   // // save all the toy tiling stuff
   // WireCell2dToy::ToyTiling* tt1 = 0;
-  int time_slice;
+  
   
   // TTree* ttree = new TTree("T","T");
   // ttree->Branch("time_slice",&time_slice,"time_slice/I");
@@ -1106,6 +1109,8 @@ int main(int argc, char* argv[])
       //mcell_id ++;
       mcell_id = mcell->get_id();
       time_slice = mcell->GetTimeSlice();
+
+      // mcell->GetTimeSlice()*nrebin/2.*unit_dis/10. - frame_length/2.*unit_dis/10.)*units::cm
       x_save = time_slice *nrebin/2.*unit_dis/10. - frame_length/2.*unit_dis/10.;
       xx = x_save;
       //loop single cell
