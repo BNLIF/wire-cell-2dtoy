@@ -4,7 +4,7 @@
 
 using namespace WireCell;
 
-WireCell2dToy::ToyCrawler::ToyCrawler(MergeSpaceCellSelection& mcells, int flag){
+WireCell2dToy::ToyCrawler::ToyCrawler(MergeSpaceCellSelection& mcells, int flag, int flag1){
 
   CreateClusterTrack(mcells);
   FormGraph(); 
@@ -14,7 +14,7 @@ WireCell2dToy::ToyCrawler::ToyCrawler(MergeSpaceCellSelection& mcells, int flag)
 
   std::cout << "Crawler: Merge Clusters " << std::endl; 
   // Merge Cluster ...
-  MergeCTrack();  
+  MergeCTrack(flag1);  
   
 
 
@@ -735,7 +735,7 @@ void WireCell2dToy::ToyCrawler::FurtherExtendCTrack(int flag_qx){
 }
 
 
-void WireCell2dToy::ToyCrawler::MergeCTrack(){
+void WireCell2dToy::ToyCrawler::MergeCTrack(int flag){
   WireCell::ClusterTrackSelection used_clustertrack; // hold the used tracks
 
   for (int i = 0;i!=all_clustertrack.size();i++){
@@ -764,8 +764,13 @@ void WireCell2dToy::ToyCrawler::MergeCTrack(){
 
 	// find the track inside MergeClusterTrack which contain this vertex
 	//ClusterTrack* old_cct = mct->GetClusterTrack(vertex);
-	//mct->SC_Hough(vertex->Get_Center(),-1,3);
-	mct->SC_Hough(vertex->Get_Center());
+	if (flag==1){
+	  mct->SC_Hough(vertex->Get_Center());
+	}else{
+	  mct->SC_Hough(vertex->Get_Center(),-1,3);
+	}
+	//
+	
 	float theta1 = mct->Get_Theta();
 	float phi1 = mct->Get_Phi();
 
@@ -821,8 +826,12 @@ void WireCell2dToy::ToyCrawler::MergeCTrack(){
 
 
 	    if (flag == 0 ){
-	      //cct->SC_Hough(vertex->Get_Center(),-1,3);
-	      cct->SC_Hough(vertex->Get_Center());
+	      //
+	      if (flag == 1){
+		cct->SC_Hough(vertex->Get_Center());
+	      }else{
+		cct->SC_Hough(vertex->Get_Center(),-1,3);
+	      }
 	      float theta2 = cct->Get_Theta();
 	      float phi2 = cct->Get_Phi();
 	      

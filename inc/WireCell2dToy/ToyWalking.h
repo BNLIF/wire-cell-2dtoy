@@ -14,7 +14,9 @@ namespace WireCell2dToy{
     
     WireCell::MergeSpaceCellSelection get_cells(){return cells;};
     double get_dist(){return dist;};
-    
+    int get_counter(){return counter;};
+    int get_global_counter(){return global_counter;};
+
   protected:
     double dist;
     WireCell::MergeSpaceCellSelection cells;

@@ -9,12 +9,12 @@ namespace WireCell2dToy{
   
   class ToyCrawler {
   public:
-    ToyCrawler(WireCell::MergeSpaceCellSelection& mcells, int flag = 1);
+    ToyCrawler(WireCell::MergeSpaceCellSelection& mcells, int flag = 1, int flag1 = 1);
     ~ToyCrawler();
 
     void CreateClusterTrack(WireCell::MergeSpaceCellSelection& mcells);
     void FormGraph();
-    void MergeCTrack();
+    void MergeCTrack(int flag = 1);
     void FurtherExtendCTrack(int flag_qx = 0);
     void PurgeMergeCTrack();
 

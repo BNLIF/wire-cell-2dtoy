@@ -187,7 +187,8 @@ int main(int argc, char* argv[])
 
   // do the Toy Crawler
   std::cout << "Crawling " << std::endl;
-  WireCell2dToy::ToyCrawler toycrawler(mcells);
+  //  WireCell2dToy::ToyCrawler toycrawler(mcells);
+  WireCell2dToy::ToyCrawler toycrawler(mcells,1,2);
 
   // test
   std::cout << "Tracking " << std::endl;

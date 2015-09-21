@@ -235,11 +235,18 @@ WireCell2dToy::ToyTracking::ToyTracking(WireCell2dToy::ToyCrawler& toycrawler, i
   }
 
   if (tracking_type==1){
+    std::cout << "Special tracking for cosmic " << std::endl; 
     // deal with the case where there are all black 
-    if (good_tracks.size() == 0 )
+    if (good_tracks.size() == 0 ){
       cosmic_finder_all(toycrawler);
+      std::cout << "FineTracking Again" << std::endl; 
+      update_maps();
+      fine_tracking();
+    }else{
+      // deal with the case where there are some black cases
+      
+    }
     
-    // deal with the case where there are some black cases
   }
 
 }
@@ -257,124 +264,126 @@ void WireCell2dToy::ToyTracking::cosmic_finder_all(WireCell2dToy::ToyCrawler& to
     p.z += mcell->Get_Center().z * mcell->Get_all_spacecell().size(); 
     sum += mcell->Get_all_spacecell().size(); 
   }
-  p.x/=sum;
-  p.y/=sum;
-  p.z/=sum;
 
-  ClusterTrack ct(all_cells.front());
-  for (int i=1;i< all_cells.size();i++){
-    ct.AddMSCell_anyway(all_cells.at(i));
-  }
-  ct.SC_Hough(p);
-  float theta = ct.Get_Theta();
-  float phi = ct.Get_Phi();
-
-  Point p1(p.x + sin(theta)*cos(phi), p.y + sin(theta)*sin(phi), p.z + cos(theta));
-  Line l1(p,p1);
-  TVector3 dir = l1.vec();
-  
-  
-  float max_dis = 0;
-  float min_dis = 0;
-  MergeSpaceCell *max_cell = all_cells.at(0);
-  MergeSpaceCell *min_cell = all_cells.at(0);
-  for (int i=0;i!=all_cells.size();i++){
-    MergeSpaceCell *mcell = all_cells.at(i);
-    TVector3 dir1(mcell->Get_Center().x-p.x,mcell->Get_Center().y-p.y,mcell->Get_Center().z-p.z);
-    float dis = dir.Dot(dir1);
-    float dis1 = l1.closest_dis(mcell->Get_Center());
-    if (dis >0 ) dis = dis - dis1;
-    if (dis <0 ) dis = dis + dis1;
+  if (sum >0){
+    p.x/=sum;
+    p.y/=sum;
+    p.z/=sum;
     
-    if (dis > max_dis){
-      max_dis = dis;
-      max_cell = mcell;
+    ClusterTrack ct(all_cells.front());
+    for (int i=1;i< all_cells.size();i++){
+      ct.AddMSCell_anyway(all_cells.at(i));
     }
-    if (dis < min_dis){
-      min_dis = dis;
-      min_cell = mcell;
+    ct.SC_Hough(p);
+    float theta = ct.Get_Theta();
+    float phi = ct.Get_Phi();
+    
+    Point p1(p.x + sin(theta)*cos(phi), p.y + sin(theta)*sin(phi), p.z + cos(theta));
+    Line l1(p,p1);
+    TVector3 dir = l1.vec();
+    
+    
+    float max_dis = 0;
+    float min_dis = 0;
+    MergeSpaceCell *max_cell = all_cells.at(0);
+    MergeSpaceCell *min_cell = all_cells.at(0);
+    for (int i=0;i!=all_cells.size();i++){
+      MergeSpaceCell *mcell = all_cells.at(i);
+      TVector3 dir1(mcell->Get_Center().x-p.x,mcell->Get_Center().y-p.y,mcell->Get_Center().z-p.z);
+      float dis = dir.Dot(dir1);
+      float dis1 = l1.closest_dis(mcell->Get_Center());
+      if (dis >0 ) dis = dis - dis1;
+      if (dis <0 ) dis = dis + dis1;
+      
+      if (dis > max_dis){
+	max_dis = dis;
+	max_cell = mcell;
+      }
+      if (dis < min_dis){
+	min_dis = dis;
+	min_cell = mcell;
+      }
+    }
+    
+    Point max_point = max_cell->Get_Center();
+    Point min_point = min_cell->Get_Center();
+    for (int i=0;i!=max_cell->Get_all_spacecell().size();i++){
+      SpaceCell *cell = max_cell->Get_all_spacecell().at(i);
+      TVector3 dir1(cell->x()-p.x,cell->y()-p.y,cell->z()-p.z);
+      float dis = dir.Dot(dir1);
+      Point p2(cell->x(),cell->y(),cell->z());
+      float dis1 = l1.closest_dis(p2);
+      if (dis >0 ) dis = dis - dis1;
+      if (dis <0 ) dis = dis + dis1;
+      if (dis > max_dis){
+	max_dis = dis;
+	max_point = p2;
+      }
+    }
+    
+    for (int i=0;i!=min_cell->Get_all_spacecell().size();i++){
+      SpaceCell *cell = min_cell->Get_all_spacecell().at(i);
+      TVector3 dir1(cell->x()-p.x,cell->y()-p.y,cell->z()-p.z);
+      float dis = dir.Dot(dir1);
+      Point p2(cell->x(),cell->y(),cell->z());
+      float dis1 = l1.closest_dis(p2);
+      if (dis >0 ) dis = dis - dis1;
+      if (dis <0 ) dis = dis + dis1;
+      if (dis < min_dis){
+	min_dis = dis;
+	min_point = p2;
+      }
+    }
+    
+    
+    MergeSpaceCellSelection track_mcells;
+    WireCell2dToy::ToyWalking walking(max_cell,max_point,min_cell,min_point,mcells_map);
+    track_mcells = walking.get_cells();
+    
+    //std::cout << track_mcells.size() << " " << walking.get_counter() << " " << walking.get_global_counter() << std::endl;
+    if (track_mcells.size() > 0){
+      double ky, kz;
+      if (max_point.x == p.x){
+	ky = 0;
+	kz = 0;
+      }else{
+	ky = (max_point.y-p.y)/(max_point.x-p.x);
+	kz = (max_point.z-p.z)/(max_point.x-p.x);
+      }
+      
+      
+      WCTrack *track = new WCTrack(track_mcells);
+      tracks.push_back(track);
+      
+      WCVertex *vertex1 = new WCVertex(*max_cell);
+      vertex1->set_center(max_point);
+      vertex1->Add(track);
+      vertex1->set_ky(track,ky);
+      vertex1->set_kz(track,kz);
+      vertices.push_back(vertex1);
+      
+      
+      if (min_point.x == p.x){
+	ky = 0;
+	kz = 0;
+      }else{
+	ky = (min_point.y-p.y)/(min_point.x-p.x);
+	kz = (min_point.z-p.z)/(min_point.x-p.x);
+      }
+      
+      WCVertex *vertex2 = new WCVertex(*min_cell);
+      vertex2->set_center(min_point);
+      vertex2->Add(track);
+      vertex2->set_ky(track,ky);
+      vertex2->set_kz(track,kz);
+      vertices.push_back(vertex2);
+      
+      
+      // std::cout << all_cells.size() << " " << p.x/units::cm << " " << p.y/units::cm << " " << p.z/units::cm << " " << 
+      //   theta << " " << phi << " " << max_dis << " " << min_dis << " " << track_mcells.size() << std::endl;
     }
   }
-
-  Point max_point = max_cell->Get_Center();
-  Point min_point = min_cell->Get_Center();
-  for (int i=0;i!=max_cell->Get_all_spacecell().size();i++){
-    SpaceCell *cell = max_cell->Get_all_spacecell().at(i);
-    TVector3 dir1(cell->x()-p.x,cell->y()-p.y,cell->z()-p.z);
-    float dis = dir.Dot(dir1);
-    Point p2(cell->x(),cell->y(),cell->z());
-    float dis1 = l1.closest_dis(p2);
-    if (dis >0 ) dis = dis - dis1;
-    if (dis <0 ) dis = dis + dis1;
-    if (dis > max_dis){
-      max_dis = dis;
-      max_point = p2;
-    }
-  }
-
-  for (int i=0;i!=min_cell->Get_all_spacecell().size();i++){
-    SpaceCell *cell = min_cell->Get_all_spacecell().at(i);
-    TVector3 dir1(cell->x()-p.x,cell->y()-p.y,cell->z()-p.z);
-    float dis = dir.Dot(dir1);
-    Point p2(cell->x(),cell->y(),cell->z());
-    float dis1 = l1.closest_dis(p2);
-    if (dis >0 ) dis = dis - dis1;
-    if (dis <0 ) dis = dis + dis1;
-    if (dis < min_dis){
-      min_dis = dis;
-      min_point = p2;
-    }
-  }
-
-  
-  MergeSpaceCellSelection track_mcells;
-  WireCell2dToy::ToyWalking walking(max_cell,max_point,min_cell,min_point,mcells_map);
-  track_mcells = walking.get_cells();
- 
-
-  double ky, kz;
-  if (max_point.x == p.x){
-    ky = 0;
-    kz = 0;
-  }else{
-    ky = (max_point.y-p.y)/(max_point.x-p.x);
-    kz = (max_point.z-p.z)/(max_point.x-p.x);
-  }
-  
-  
-  WCTrack *track = new WCTrack(track_mcells);
-  tracks.push_back(track);
-
-  WCVertex *vertex1 = new WCVertex(*max_cell);
-  vertex1->set_center(max_point);
-  vertex1->Add(track);
-  vertex1->set_ky(track,ky);
-  vertex1->set_kz(track,kz);
-  vertices.push_back(vertex1);
-  
-  
-  if (min_point.x == p.x){
-    ky = 0;
-    kz = 0;
-  }else{
-    ky = (min_point.y-p.y)/(min_point.x-p.x);
-    kz = (min_point.z-p.z)/(min_point.x-p.x);
-  }
-
-  WCVertex *vertex2 = new WCVertex(*min_cell);
-  vertex2->set_center(min_point);
-  vertex2->Add(track);
-  vertex2->set_ky(track,ky);
-  vertex2->set_kz(track,kz);
-  vertices.push_back(vertex2);
-  
-  update_maps();
-  fine_tracking();
-  // std::cout << all_cells.size() << " " << p.x/units::cm << " " << p.y/units::cm << " " << p.z/units::cm << " " << 
-  //   theta << " " << phi << " " << max_dis << " " << min_dis << " " << track_mcells.size() << std::endl;
-  
 }
-
 
 void WireCell2dToy::ToyTracking::RemoveSameTrack(){
   WCTrackSelection to_be_removed;
