@@ -1,4 +1,5 @@
 #include "WireCell2dToy/ToyCosmic.h"
+#include "TVector3.h"
 
 using namespace WireCell;
 
@@ -50,14 +51,21 @@ WireCell2dToy::ToyCosmic::ToyCosmic(WireCell2dToy::ToyTrackingSelection& trackin
 bool WireCell2dToy::ToyCosmic::IsConnected(ToyTracking *tracking1, ToyTracking *tracking2){
   WCTrackSelection& tracking1_tracks = tracking1->get_good_tracks();
   WCTrackSelection& tracking2_tracks = tracking2->get_good_tracks();
+  
   MergeSpaceCellSelection tracking1_mcells;
   MergeSpaceCellSelection tracking2_mcells;
   
+  std::map<WCTrack*, std::vector<float>> tracks_angle_map;
+
   for (int i = 0;i!=tracking1_tracks.size();i++){
     WCTrack *track = tracking1_tracks.at(i);
     for (int j=0;j!=track->get_centerVP_cells().size();j++){
       tracking1_mcells.push_back(track->get_centerVP_cells().at(j));
     }
+    
+    tracks_angle_map[track] = track->get_direction();
+    //std::vector<float> abc = track->get_direction();
+    //std::cout << abc.at(0) << " " << abc.at(1) << " " << abc.at(2) << std::endl;
   }
   
   for (int i = 0;i!=tracking2_tracks.size();i++){
@@ -65,8 +73,12 @@ bool WireCell2dToy::ToyCosmic::IsConnected(ToyTracking *tracking1, ToyTracking *
     for (int j=0;j!=track->get_centerVP_cells().size();j++){
       tracking2_mcells.push_back(track->get_centerVP_cells().at(j));
     }
+    tracks_angle_map[track] = track->get_direction();
+    //std::vector<float> abc = track->get_direction();
+    //std::cout << abc.at(0) << " " << abc.at(1) << " " << abc.at(2) << std::endl;
   }
 
+  
   
   // std::cout << tracking1_tracks.size() << " " << tracking2_tracks.size() << " " << tracking1_mcells.size() << " " << tracking2_mcells.size() << std::endl;
 
