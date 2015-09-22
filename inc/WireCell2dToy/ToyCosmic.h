@@ -2,6 +2,7 @@
 #define WIRECELL_TOYCOSMIC_H
 
 #include "WireCell2dToy/ToyTracking.h"
+#include "WireCell2dToy/WCCosmic.h"
 
 namespace WireCell2dToy{
   class ToyCosmic{
@@ -16,6 +17,7 @@ namespace WireCell2dToy{
     
   protected:
     ToyTrackingSelection& trackings;
+    WCCosmicSelection cosmics;
     std::vector<ToyTrackingSelection> cosmic_candidates;
   };
 }

@@ -45,7 +45,12 @@ WireCell2dToy::ToyCosmic::ToyCosmic(WireCell2dToy::ToyTrackingSelection& trackin
     } // end while loop
   }
   
-  std::cout << trackings.size() << " " << cosmic_candidates.size() << std::endl;
+  //  std::cout << trackings.size() << " " << cosmic_candidates.size() << std::endl;
+
+  for (int i = 0;i!=cosmic_candidates.size();i++){
+    WCCosmic *cosmic = new WCCosmic(cosmic_candidates.at(i));
+    cosmics.push_back(cosmic);
+  }
 }
 
 bool WireCell2dToy::ToyCosmic::IsConnected(ToyTracking *tracking1, ToyTracking *tracking2){
