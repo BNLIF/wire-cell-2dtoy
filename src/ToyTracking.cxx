@@ -309,7 +309,7 @@ void WireCell2dToy::ToyTracking::cosmic_finder_part(WireCell2dToy::ToyCrawler& t
       sum += cells.at(i)->Get_all_spacecell().size();
     }
     if (sum >= 150 && cells.size() >3 || sum > 500 && cells.size() > 2 ||
-	sum >=1000 && cells.size() > 1)
+	sum >=1000 && cells.size() > 1 || sum >=2000 && cells.size() ==1)
       cluster_msc.push_back(cells);
 
     // std::cout << used_cell.size() << " " << must_cell.size() << " " 

@@ -250,10 +250,9 @@ int main(int argc, char* argv[])
 
   
   WireCell2dToy::ToyCosmic toycosmic(trackings);
-
+  
   // //Check tracking ... 
   // for (int i=0;i!=trackings.size();i++){
-    
   // }
 
 
@@ -265,6 +264,8 @@ int main(int argc, char* argv[])
   TTree *T4 = new TTree("T_shorttrack","T_shortrack");
   TTree *T5 = new TTree("T_paratrack","T_paratrack");
   TTree *T6 = new TTree("T_shower","T_shower");
+
+  TTree *T7 = new TTree("T_cosmic","T_cosmic");
   
   T1->SetDirectory(file1);
   T2->SetDirectory(file1);
@@ -272,6 +273,7 @@ int main(int argc, char* argv[])
   T4->SetDirectory(file1);
   T5->SetDirectory(file1);
   T6->SetDirectory(file1);
+  T7->SetDirectory(file1);
   
   
 
@@ -349,6 +351,12 @@ int main(int argc, char* argv[])
   T6->Branch("vertex_y",yy,"vertex_y/D");
   T6->Branch("vertex_z",zz,"vertex_z/D");
   
+
+  T7->Branch("trackid",&trackid,"trackid/I");
+  T7->Branch("npoints",&npoints,"npoints/I");
+  T7->Branch("x",xx,"x[npoints]/D");
+  T7->Branch("y",yy,"y[npoints]/D");
+  T7->Branch("z",zz,"z[npoints]/D");
   
 
   WCTrackSelection all_tracks;
@@ -525,9 +533,29 @@ int main(int argc, char* argv[])
     T6->Fill();
   }
   
-
+  std::vector<WireCell2dToy::ToyTrackingSelection>& cosmics = toycosmic.get_raw_candidates();
+  //int sum1 = 0;
+  for (int i=0;i!=cosmics.size();i++){
+    trackid = i;
+    npoints = 0;
+    for (int j=0;j!=cosmics.at(i).size();j++){
+      WireCell2dToy::ToyTracking *tracking = cosmics.at(i).at(j);
+      // sum1 ++;
+      WCTrackSelection tracking_tracks = tracking->get_good_tracks();
+      for (int k=0;k!=tracking_tracks.size();k++){
+	WCTrack *track = tracking_tracks.at(k);
+	for (int k1=0;k1!= track->get_centerVP_cells().size();k1++){
+	  xx[npoints] = track->get_centerVP_cells().at(k1)->Get_Center().x/units::cm;
+	  yy[npoints] = track->get_centerVP_cells().at(k1)->Get_Center().y/units::cm;
+	  zz[npoints] = track->get_centerVP_cells().at(k1)->Get_Center().z/units::cm;
+	  npoints ++;
+	}
+      }
+    }
+    T7->Fill();
+  }
   
-
+  //std::cout << sum1 << std::endl;
 
   g->Write("shower3D");
 

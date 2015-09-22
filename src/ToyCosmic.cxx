@@ -7,7 +7,7 @@ WireCell2dToy::ToyCosmic::ToyCosmic(WireCell2dToy::ToyTrackingSelection& trackin
   : trackings(trackings)
 {
   ToyTrackingSelection used_trackings;
-  std::vector<ToyTrackingSelection> cosmic_candidates;
+  cosmic_candidates.clear();
   
   while(used_trackings.size() != trackings.size()){
     ToyTracking *curr_tracking;
@@ -32,9 +32,9 @@ WireCell2dToy::ToyCosmic::ToyCosmic(WireCell2dToy::ToyTrackingSelection& trackin
 	ToyTracking *curr_tracking = trackings.at(i);
 	auto it = find(used_trackings.begin(),used_trackings.end(),curr_tracking);
 	if (it != used_trackings.end()) continue;
-	for (int j=0;j!=temp.size();j++){
-	  if (IsConnected(temp.at(j),curr_tracking)){
-	    temp.push_back(curr_tracking);
+	for (int j=0;j!=cosmic_candidates.back().size();j++){
+	  if (IsConnected(cosmic_candidates.back().at(j),curr_tracking)){
+	    cosmic_candidates.back().push_back(curr_tracking);
 	    used_trackings.push_back(curr_tracking);
 	    flag = 1;
 	    break;
@@ -49,42 +49,148 @@ WireCell2dToy::ToyCosmic::ToyCosmic(WireCell2dToy::ToyTrackingSelection& trackin
 }
 
 bool WireCell2dToy::ToyCosmic::IsConnected(ToyTracking *tracking1, ToyTracking *tracking2){
+  //return false;
   WCTrackSelection& tracking1_tracks = tracking1->get_good_tracks();
   WCTrackSelection& tracking2_tracks = tracking2->get_good_tracks();
   
-  MergeSpaceCellSelection tracking1_mcells;
-  MergeSpaceCellSelection tracking2_mcells;
-  
   std::map<WCTrack*, std::vector<float>> tracks_angle_map;
-
+  std::map<WCTrack*, std::vector<float>> tracks_pos_map;
+  
   for (int i = 0;i!=tracking1_tracks.size();i++){
     WCTrack *track = tracking1_tracks.at(i);
-    for (int j=0;j!=track->get_centerVP_cells().size();j++){
-      tracking1_mcells.push_back(track->get_centerVP_cells().at(j));
-    }
-    
     tracks_angle_map[track] = track->get_direction();
-    //std::vector<float> abc = track->get_direction();
-    //std::cout << abc.at(0) << " " << abc.at(1) << " " << abc.at(2) << std::endl;
+    tracks_pos_map[track] = track->get_position();
   }
   
   for (int i = 0;i!=tracking2_tracks.size();i++){
     WCTrack *track = tracking2_tracks.at(i);
-    for (int j=0;j!=track->get_centerVP_cells().size();j++){
-      tracking2_mcells.push_back(track->get_centerVP_cells().at(j));
-    }
     tracks_angle_map[track] = track->get_direction();
-    //std::vector<float> abc = track->get_direction();
-    //std::cout << abc.at(0) << " " << abc.at(1) << " " << abc.at(2) << std::endl;
+    tracks_pos_map[track] = track->get_position();
   }
 
-  
+  for (int i=0;i!=tracking1_tracks.size();i++){
+    WCTrack *track1 = tracking1_tracks.at(i);
+    TVector3 dir1(tracks_angle_map[track1].at(0),
+		  tracks_angle_map[track1].at(1),
+		  tracks_angle_map[track1].at(2));
+    TVector3 pos1(tracks_pos_map[track1].at(0),
+		  tracks_pos_map[track1].at(1),
+		  tracks_pos_map[track1].at(2));
+    
+    // Point track1_p1(tracks_pos_map[track1].at(0),tracks_pos_map[track1].at(1),tracks_pos_map[track1].at(2));
+    // Point track1_p2(tracks_pos_map[track1].at(0) + tracks_direction_map[track1].at(0),
+    // 		    tracks_pos_map[track1].at(1) + tracks_direction_map[track1].at(1),
+    // 		    tracks_pos_map[track1].at(2) + tracks_direction_map[track1].at(2));
+    // Line l1(track1_p1, track1_p2);
+    
+    for (int j=0;j!=tracking2_tracks.size();j++){
+      WCTrack *track2 = tracking2_tracks.at(j);
+      TVector3 dir2(tracks_angle_map[track2].at(0),
+		    tracks_angle_map[track2].at(1),
+		    tracks_angle_map[track2].at(2));
+      TVector3 pos2(tracks_pos_map[track2].at(0),
+		    tracks_pos_map[track2].at(1),
+		    tracks_pos_map[track2].at(2));
+
+      TVector3 perp1 = dir1.Cross(dir2);
+      TVector3 perp2 = pos1 - pos2;
+      float abc = perp1.Dot(perp2);
+
+      float dis=1e9;
+      if (perp1.Mag() == 0){
+	TVector3 perp3 = perp2.Cross(dir1);
+	dis = perp3.Mag()/dir1.Mag();
+      }else{
+	dis = fabs(abc/perp1.Mag());
+      }
+      float angle = fabs(dir1.Dot(dir2)/dir1.Mag()/dir2.Mag());
+
+      //std::cout << "qx: " << dis << " " << angle << std::endl;
+
+      float dis_cut=3.0*units::cm;
+      if (dis < 5*units::cm && angle >= 0.97){
+       	dis_cut = 12*units::cm;
+      }else if (dis < 10*units::cm && angle > 0.94){
+	dis_cut = 6 * units::cm;
+      }
+
+      // MergeSpaceCell *mcell1_f = track1->get_centerVP_cells().front();
+      // MergeSpaceCell *mcell1_b = track1->get_centerVP_cells().back();
+      // MergeSpaceCell *mcell2_f = track2->get_centerVP_cells().front();
+      // MergeSpaceCell *mcell2_b = track2->get_centerVP_cells().back();
+
+      // if (IsConnected(mcell1_f,mcell2_f,dis_cut)) return true;
+      // if (IsConnected(mcell1_f,mcell2_b,dis_cut)) return true;
+      // if (IsConnected(mcell1_b,mcell2_f,dis_cut)) return true;
+      // if (IsConnected(mcell1_b,mcell2_b,dis_cut)) return true;
+
+      // check five cells
+      for (int k1 = 0; k1!= track1->get_centerVP_cells().size();k1++){
+	if (k1>=5 && k1 < track1->get_centerVP_cells().size()-5) continue;
+	MergeSpaceCell *mcell1 = track1->get_centerVP_cells().at(k1);
+	for (int k2 = 0; k2!= track2->get_centerVP_cells().size();k2++){
+	  if (k2>=5 && k2 < track2->get_centerVP_cells().size()-5) continue;
+	  MergeSpaceCell *mcell2 = track2->get_centerVP_cells().at(k2);
+	  if (IsConnected(mcell1,mcell2,dis_cut)) return true;
+	}
+      }
+      
+    }
+  }
   
   // std::cout << tracking1_tracks.size() << " " << tracking2_tracks.size() << " " << tracking1_mcells.size() << " " << tracking2_mcells.size() << std::endl;
-
-
+  
   return false;
 }
+
+bool WireCell2dToy::ToyCosmic::IsConnected(MergeSpaceCell *mcell1, MergeSpaceCell *mcell2, float dis_cut){
+  float dy1 = mcell1->get_dy();
+  float dz1 = mcell1->get_dz();
+  Point p1 = mcell1->Get_Center();
+
+  float dy2 = mcell2->get_dy();
+  float dz2 = mcell2->get_dz();
+  Point p2 = mcell2->Get_Center();
+
+  int flag_x = 0;
+  int flag_y = 0; 
+  int flag_z = 0;
+  
+  if (fabs(p1.x-p2.x)<dis_cut) flag_x = 1;
+  if (flag_x == 0 ) return false;
+  
+  float min_y = 1e9;
+  float max_y = -1e9;
+  
+  if (min_y > p1.y - dy1) min_y = p1.y - dy1;
+  if (max_y < p1.y + dy1) max_y = p1.y + dy1;  
+  if (min_y > p2.y - dy2) min_y = p2.y - dy2;
+  if (max_y < p2.y + dy2) max_y = p2.y + dy2;
+
+  if (max_y - min_y < dis_cut + dy1*2 + dy2*2)
+    flag_y = 1;
+  
+  if (flag_y ==0 )return false;
+  
+  float min_z = 1e9;
+  float max_z = -1e9;
+  
+  
+  if (min_z > p1.z - dz1) min_z = p1.z - dz1;
+  if (max_z < p1.z + dz1) max_z = p1.z + dz1;  
+  if (min_z > p2.z - dz2) min_z = p2.z - dz2;
+  if (max_z < p2.z + dz2) max_z = p2.z + dz2;
+
+  if (max_z - min_z < dis_cut + dz1*2 + dz2*2)
+    flag_z = 1;
+
+  
+  if (flag_x == 1 && flag_y == 1 && flag_z == 1) 
+    return true;
+  
+  return false;
+}
+
 
 WireCell2dToy::ToyCosmic::~ToyCosmic(){
   
