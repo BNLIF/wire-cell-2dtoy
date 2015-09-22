@@ -238,6 +238,7 @@ WireCell2dToy::ToyTracking::ToyTracking(WireCell2dToy::ToyCrawler& toycrawler, i
     std::cout << "Special tracking for cosmic " << std::endl; 
     // deal with the case where there are all black 
     if (good_tracks.size() == 0 ){
+      std::cout << "Cosmic all " << std::endl;
       cosmic_finder_all(toycrawler);
       std::cout << "FineTracking Again All" << std::endl; 
       if (vertices.size() > 0){
@@ -246,6 +247,7 @@ WireCell2dToy::ToyTracking::ToyTracking(WireCell2dToy::ToyCrawler& toycrawler, i
       }
     }else{
       // deal with the case where there are some black cases
+      std::cout << "Cosmic part " << std::endl;
       cosmic_finder_part(toycrawler);
       std::cout << "FineTracking Again Part" << std::endl; 
       if (vertices.size() > 0 ){
@@ -314,7 +316,7 @@ void WireCell2dToy::ToyTracking::cosmic_finder_part(WireCell2dToy::ToyCrawler& t
   }
   
 
-  std::cout << cluster_msc.size() << std::endl;
+  //std::cout << cluster_msc.size() << std::endl;
   // for (int i=0;i!=cluster_msc.size();i++){
   //     MergeSpaceCellSelection& mscs_1 = cluster_msc.at(i);
   //     std::cout << mscs_1.size() << std::endl;
@@ -445,7 +447,7 @@ void WireCell2dToy::ToyTracking::cosmic_finder_part(WireCell2dToy::ToyCrawler& t
       vertices.push_back(vertex2);
 
 
-      std::cout << tracks.size() << " " << vertices.size() << std::endl;
+      //std::cout << tracks.size() << " " << vertices.size() << std::endl;
     }
   }
 
