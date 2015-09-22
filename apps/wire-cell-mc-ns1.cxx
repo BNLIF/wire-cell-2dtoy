@@ -249,7 +249,7 @@ int main(int argc, char* argv[])
   std::cout << "Check: " << crawlers.size() << " " << TC->GetEntries() << " " << sum << std::endl;
 
   
-
+  WireCell2dToy::ToyCosmic toycosmic(trackings);
 
   // //Check tracking ... 
   // for (int i=0;i!=trackings.size();i++){
