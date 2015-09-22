@@ -95,6 +95,9 @@ namespace WireCell2dToy{
     WCV_WCT_Map wcv_wct_map; 
     
   };
+  
+  typedef std::vector<ToyTracking*> ToyTrackingSelection;
+
 }
 
 #endif

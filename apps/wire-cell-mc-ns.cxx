@@ -813,22 +813,22 @@ int main(int argc, char* argv[])
       }
       mscells.push_back(mscell);
     }
-    //ncluster++;
-    WireCell2dToy::ToyCrawler* toycrawler = new WireCell2dToy::ToyCrawler(mscells,1,2);  // cosmic tune
-    crawlers.push_back(toycrawler);
-    WireCell2dToy::ToyTracking* toytracking = new WireCell2dToy::ToyTracking(*toycrawler,1); // cosmic tune
-    trackings.push_back(toytracking);
+    // //ncluster++;
+    // WireCell2dToy::ToyCrawler* toycrawler = new WireCell2dToy::ToyCrawler(mscells,1,2);  // cosmic tune
+    // crawlers.push_back(toycrawler);
+    // WireCell2dToy::ToyTracking* toytracking = new WireCell2dToy::ToyTracking(*toycrawler,1); // cosmic tune
+    // trackings.push_back(toytracking);
 
-    if (mscells.size() >0){
-      std::cout << "Cluster:         " << ncluster << " " << mscells.at(0)->Get_Center().x/units::cm << std::endl;
-    }else{
-      std::cout << "Cluster:         " << ncluster << std::endl;
-    }
-    std::cout << "Good Tracks:     " << toytracking->get_good_tracks().size() <<std::endl;
-    std::cout << "Vertices:        " << toytracking->get_vertices().size() << std::endl;
-    std::cout << "Bad Tracks:      " << toytracking->get_bad_tracks().size() << std::endl;
-    std::cout << "Parallel Tracks: " << toytracking->get_parallel_tracks().size() << std::endl;
-    std::cout << "Showers:         " << toytracking->get_showers().size() << std::endl;
+    // if (mscells.size() >0){
+    //   std::cout << "Cluster:         " << ncluster << " " << mscells.at(0)->Get_Center().x/units::cm << std::endl;
+    // }else{
+    //   std::cout << "Cluster:         " << ncluster << std::endl;
+    // }
+    // std::cout << "Good Tracks:     " << toytracking->get_good_tracks().size() <<std::endl;
+    // std::cout << "Vertices:        " << toytracking->get_vertices().size() << std::endl;
+    // std::cout << "Bad Tracks:      " << toytracking->get_bad_tracks().size() << std::endl;
+    // std::cout << "Parallel Tracks: " << toytracking->get_parallel_tracks().size() << std::endl;
+    // std::cout << "Showers:         " << toytracking->get_showers().size() << std::endl;
 
 
 
