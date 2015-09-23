@@ -351,7 +351,8 @@ int main(int argc, char* argv[])
   T6->Branch("vertex_y",yy,"vertex_y/D");
   T6->Branch("vertex_z",zz,"vertex_z/D");
   
-
+  int cosmic_flag;
+  T7->Branch("cosmic_flag",&cosmic_flag,"cosmic_flag/I");
   T7->Branch("trackid",&trackid,"trackid/I");
   T7->Branch("npoints",&npoints,"npoints/I");
   T7->Branch("x",xx,"x[npoints]/D");
@@ -538,6 +539,11 @@ int main(int argc, char* argv[])
     trackid = i;
     npoints = 0;
     WireCell2dToy::WCCosmic *cosmic = cosmics.at(i);
+    if (cosmic->IsCosmic()){
+      cosmic_flag = 1;
+    }else{
+      cosmic_flag = 0;
+    }
     for (int j=0;j!=cosmic->get_points().size();j++){
       xx[npoints] = cosmic->get_points().at(j).x/units::cm;
       yy[npoints] = cosmic->get_points().at(j).y/units::cm;

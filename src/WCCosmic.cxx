@@ -9,6 +9,8 @@ WireCell2dToy::WCCosmic::WCCosmic(WireCell2dToy::ToyTrackingSelection& toytracki
   center.x = 0;
   center.y = 0;
   center.z = 0;
+
+  cosmic_flag = false;
   
   int sum = 0;
   for (int i=0;i!=toytrackings.size();i++){
@@ -28,6 +30,8 @@ WireCell2dToy::WCCosmic::WCCosmic(WireCell2dToy::ToyTrackingSelection& toytracki
       }
     }
   }
+
+  ct = 0;
 
   //std::cout << mcells.size() << std::endl;
   if (sum >1){
@@ -51,8 +55,63 @@ WireCell2dToy::WCCosmic::WCCosmic(WireCell2dToy::ToyTrackingSelection& toytracki
     //std::cout << "Fill Points" << std::endl;
     fill_points();
     //std::cout << mcells.size() << " " << cal_pos(mcells.front()) << " " << cal_pos(mcells.back()) << std::endl;
+    judge_cosmic();
   }
 }
+
+void WireCell2dToy::WCCosmic::judge_cosmic(){
+  cosmic_flag = false;
+  
+  // if anythng is outside x
+  for (int i=0;i!=points.size();i++){
+    if (points.at(i).x < 10*units::cm || points.at(i).x > (256 - 10) * units::cm){
+      // std::cout << points.at(i) << std::endl;
+      cosmic_flag = true;
+      break;
+    }
+  }
+
+  if (!cosmic_flag){
+    bool front_boundary = false;
+    bool back_boundary = false;
+
+    if (fabs(points.front().y) > 233 * units::cm - 10*units::cm) front_boundary = true;
+    if (fabs(points.back().y) > 233 * units::cm - 10*units::cm) back_boundary = true;
+    if (points.front().z < 10 * units::cm || points.front().z > 10.3692 *100 * units::cm - 10 * units::cm) front_boundary = true;
+    if (points.back().z < 10 * units::cm || points.back().z > 10.3692 *100 * units::cm - 10 * units::cm) back_boundary = true;
+
+    if (front_boundary && back_boundary) cosmic_flag = true;
+
+    if (front_boundary || back_boundary){
+      // look at the angle
+      TVector3 dir1(0,1,0);
+      TVector3 dir2(sin(theta)*cos(phi),sin(theta)*sin(phi),cos(theta));
+      //     std::cout << dir1.Dot(dir2)/dir2.Mag() << std::endl;
+      
+      if (fabs(dir1.Dot(dir2)/dir2.Mag()) > 0.9) cosmic_flag = true;
+
+      if (!cosmic_flag){
+	// count how many good tracks were in ... 
+	int ntrack = 0 ;
+	for (int i=0;i!=toytrackings.size();i++){
+	  WireCell2dToy::ToyTracking *toytracking = toytrackings.at(i);
+	  for (int j=0;j!=toytracking->get_vertices().size();j++){
+	    WCVertex *vertex = toytracking->get_vertices().at(j);
+	    //if (
+	    // std::cout << vertex->get_ntracks() << std::endl;
+	    // ntrack += toytrackings.at(i)->get_good_tracks().size();
+	    //	for (int j=0;j!=toytrackings.at(i)->get_good_tracks().size()
+	  }
+	}
+      }
+
+	//std::cout << theta << " " << phi << " " << ntrack << std::endl;
+    }
+    
+  }
+  
+}
+
 
 void WireCell2dToy::WCCosmic::Add(WCCosmic *cosmic){
   toytrackings.insert(toytrackings.end(), cosmic->get_trackings().begin(),
@@ -90,6 +149,7 @@ void WireCell2dToy::WCCosmic::Add(WCCosmic *cosmic){
     Sort();
     //std::cout << "Fill Points" << std::endl;
     fill_points();
+    judge_cosmic();
   }
 
 }
@@ -252,5 +312,6 @@ float WireCell2dToy::WCCosmic::cal_costh(WireCell2dToy::WCCosmic *cosmic){
 
 
 WireCell2dToy::WCCosmic::~WCCosmic(){
-  delete ct;
+  if (ct != 0)
+    delete ct;
 }

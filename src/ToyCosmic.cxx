@@ -61,10 +61,20 @@ WireCell2dToy::ToyCosmic::ToyCosmic(WireCell2dToy::ToyTrackingSelection& trackin
     for (int i=0;i!=cosmics.size();i++){
       WCCosmic *cosmic1 = cosmics.at(i);
       if (cosmic1->get_points().size()==0) continue;
+      // if (cosmic1->get_points().size()==0){
+      // 	flag = 1;
+      // 	temp.push_back(cosmic1);
+      // 	break;
+      // }
       for (int j=0;j!=cosmics.size();j++){
 	WCCosmic *cosmic2 = cosmics.at(j);
 	if (cosmic1 == cosmic2) continue;
 	if (cosmic2->get_points().size() == 0) continue;
+	// if (cosmic2->get_points().size() == 0){
+	//   flag = 1;
+	//   temp.push_back(cosmic1);
+	//   break;
+	// }
 	  
 	// judge wheter merge
 	float dis = cosmic1->cal_dist(cosmic2);
@@ -111,6 +121,9 @@ WireCell2dToy::ToyCosmic::ToyCosmic(WireCell2dToy::ToyTrackingSelection& trackin
     }
   }
   
+
+  // judge if anything is cosmics ... 
+
   
 
 }

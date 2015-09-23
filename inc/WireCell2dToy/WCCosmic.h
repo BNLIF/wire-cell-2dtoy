@@ -20,9 +20,11 @@ namespace WireCell2dToy{
     WireCell::PointVector& get_points(){return points;};
     float cal_pos(WireCell::MergeSpaceCell *mcell1);
     float cal_pos(WireCell::SpaceCell *cell);
-
     void Sort();
     void fill_points();
+    void judge_cosmic();
+
+    bool IsCosmic(){return cosmic_flag;};
 
   protected:
     ToyTrackingSelection& toytrackings;
@@ -32,6 +34,8 @@ namespace WireCell2dToy{
     WireCell::PointVector points;
     float theta;
     float phi;
+    bool cosmic_flag;
+
   };
   
   struct MSC_Struct
