@@ -538,14 +538,29 @@ int main(int argc, char* argv[])
     trackid = i;
     npoints = 0;
     WireCell2dToy::WCCosmic *cosmic = cosmics.at(i);
-    for (int j=0;j!=cosmic->get_mcells().size();j++){
-      xx[npoints] = cosmic->get_mcells().at(j)->Get_Center().x/units::cm;
-      yy[npoints] = cosmic->get_mcells().at(j)->Get_Center().y/units::cm;
-      zz[npoints] = cosmic->get_mcells().at(j)->Get_Center().z/units::cm;
+    for (int j=0;j!=cosmic->get_points().size();j++){
+      xx[npoints] = cosmic->get_points().at(j).x/units::cm;
+      yy[npoints] = cosmic->get_points().at(j).y/units::cm;
+      zz[npoints] = cosmic->get_points().at(j).z/units::cm;
       npoints ++;
+
     }
     T7->Fill();
   }
+
+
+  // for (int i=0;i!=cosmics.size();i++){
+  //   trackid = i;
+  //   npoints = 0;
+  //   WireCell2dToy::WCCosmic *cosmic = cosmics.at(i);
+  //   for (int j=0;j!=cosmic->get_mcells().size();j++){
+  //     xx[npoints] = cosmic->get_mcells().at(j)->Get_Center().x/units::cm;
+  //     yy[npoints] = cosmic->get_mcells().at(j)->Get_Center().y/units::cm;
+  //     zz[npoints] = cosmic->get_mcells().at(j)->Get_Center().z/units::cm;
+  //     npoints ++;
+  //   }
+  //   T7->Fill();
+  // }
   // std::vector<WireCell2dToy::ToyTrackingSelection>& cosmics = toycosmic.get_raw_candidates();
   // //int sum1 = 0;
   // for (int i=0;i!=cosmics.size();i++){

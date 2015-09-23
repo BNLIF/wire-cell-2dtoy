@@ -52,6 +52,8 @@ WireCell2dToy::ToyCosmic::ToyCosmic(WireCell2dToy::ToyTrackingSelection& trackin
     cosmics.push_back(cosmic);
   }
 
+
+  
   
 
 }
@@ -134,10 +136,10 @@ bool WireCell2dToy::ToyCosmic::IsConnected(ToyTracking *tracking1, ToyTracking *
 
       // check five cells
       for (int k1 = 0; k1!= track1->get_centerVP_cells().size();k1++){
-	if (k1>=5 && k1 < track1->get_centerVP_cells().size()-5) continue;
+	if (k1>=5 && k1 + 5 < track1->get_centerVP_cells().size()) continue;
 	MergeSpaceCell *mcell1 = track1->get_centerVP_cells().at(k1);
 	for (int k2 = 0; k2!= track2->get_centerVP_cells().size();k2++){
-	  if (k2>=5 && k2 < track2->get_centerVP_cells().size()-5) continue;
+	  if (k2>=5 && k2 + 5 < track2->get_centerVP_cells().size()) continue;
 	  MergeSpaceCell *mcell2 = track2->get_centerVP_cells().at(k2);
 	  if (IsConnected(mcell1,mcell2,dis_cut)) return true;
 	}

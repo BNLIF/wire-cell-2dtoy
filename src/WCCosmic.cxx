@@ -29,25 +29,121 @@ WireCell2dToy::WCCosmic::WCCosmic(WireCell2dToy::ToyTrackingSelection& toytracki
     }
   }
 
-  //calculate the center
-  center.x = center.x/sum;
-  center.y = center.y/sum;
-  center.z = center.z/sum;
-
-  
-  //calculate the angle
-  ct = new ClusterTrack(mcells.at(0));
-  for (int i=1;i< mcells.size();i++){
-    ct->AddMSCell_anyway(mcells.at(i));
+  std::cout << mcells.size() << std::endl;
+  if (sum >1){
+    //calculate the center
+    center.x = center.x/sum;
+    center.y = center.y/sum;
+    center.z = center.z/sum;
+    
+    std::cout << "Hough " << std::endl;
+    //calculate the angle
+    ct = new ClusterTrack(mcells.at(0));
+    for (int i=1;i< mcells.size();i++){
+      ct->AddMSCell_anyway(mcells.at(i));
+    }
+    ct->SC_Hough(center);
+    theta = ct->Get_Theta();
+    phi = ct->Get_Phi();
+    
+    std::cout << "Sort " << std::endl; 
+    Sort();
+    std::cout << "Fill Points" << std::endl;
+    fill_points();
+    //std::cout << mcells.size() << " " << cal_pos(mcells.front()) << " " << cal_pos(mcells.back()) << std::endl;
   }
-  ct->SC_Hough(center);
-  theta = ct->Get_Theta();
-  phi = ct->Get_Phi();
-
-  Sort();
 }
 
 
+void WireCell2dToy::WCCosmic::fill_points(){
+  points.clear();
+  
+  //find the smallest point and largest point
+  float min_dis = 20*units::m;
+  Point min_point;
+  float max_dis = -20*units::m;
+  Point max_point;
+
+  // std::cout << "qx: q "  << mcells.size() << std::endl;
+  for (int i=0;i!=mcells.size();i++){
+    MergeSpaceCell *mcell = mcells.at(i);
+    if (i < 5){
+      for (int j=0;j!=mcell->Get_all_spacecell().size();j++){
+	SpaceCell *cell = mcell->Get_all_spacecell().at(j);
+	float dis = cal_pos(cell);
+	if (dis < min_dis){
+	  min_dis = dis;
+	  min_point.x = cell->x();
+	  min_point.y = cell->y();
+	  min_point.z = cell->z();
+	}
+      }
+    }
+    
+    if (i +5 >= mcells.size()){
+      //std::cout << "qx: q " << i << " " << mcells.size() << std::endl;
+      for (int j=0;j!=mcell->Get_all_spacecell().size();j++){
+	SpaceCell *cell = mcell->Get_all_spacecell().at(j);
+	float dis = cal_pos(cell);
+	//std::cout << "qx: " << dis/units::cm <<std::endl;
+	if (dis > max_dis){
+	  max_dis = dis;
+	  max_point.x = cell->x();
+	  max_point.y = cell->y();
+	  max_point.z = cell->z();
+	}
+      }
+    }
+  }
+  
+
+  
+  
+  //at the beginning
+  points.push_back(min_point);
+  
+  int nbin = (max_dis - min_dis)/(1*units::cm);
+  
+  if (nbin >0){
+    // calculate middle points
+    TH1F *hx = new TH1F("hx","hx",nbin,min_dis,max_dis);
+    TH1F *hy = new TH1F("hy","hy",nbin,min_dis,max_dis);
+    TH1F *hz = new TH1F("hz","hz",nbin,min_dis,max_dis);
+    TH1F *hc = new TH1F("hc","hc",nbin,min_dis,max_dis);
+    
+    for (int i=0;i!=mcells.size();i++){
+      MergeSpaceCell *mcell = mcells.at(i);
+      for (int j=0;j!=mcell->Get_all_spacecell().size();j++){
+	SpaceCell *cell = mcell->Get_all_spacecell().at(j);
+	float dis = cal_pos(cell);
+	hx->Fill(dis,cell->x());
+	hy->Fill(dis,cell->y());
+	hz->Fill(dis,cell->z());
+	hc->Fill(dis,1);
+      }
+    }
+    
+    Point p;
+    for (int i=0;i!=nbin;i++){
+      if (hc->GetBinContent(i+1)!=0){
+	p.x = hx->GetBinContent(i+1)/hc->GetBinContent(i+1);
+	p.y = hy->GetBinContent(i+1)/hc->GetBinContent(i+1);
+	p.z = hz->GetBinContent(i+1)/hc->GetBinContent(i+1);
+	points.push_back(p);
+      }
+    }
+    delete hx;
+    delete hy;
+    delete hz;
+    delete hc;
+  }
+
+  //at the end
+  points.push_back(max_point);
+
+  // std::cout << "qx: " << min_dis << " " << min_point.x/units::cm << " " << min_point.y/units::cm << " " << min_point.z/units::cm << " " 
+  // 	    << max_dis << " " << max_point.x/units::cm << " " << max_point.y/units::cm << " " << max_point.z/units::cm << std::endl;
+}
 
 void WireCell2dToy::WCCosmic::Sort(){
   //Sorting 
@@ -62,6 +158,15 @@ void WireCell2dToy::WCCosmic::Sort(){
   for (int i=0;i!=msc_vector.size();i++){
     mcells.push_back(msc_vector.at(i).mcell);
   }
+}
+
+float WireCell2dToy::WCCosmic::cal_pos(SpaceCell *cell){
+  TVector3 dir(sin(theta)*cos(phi),sin(theta)*sin(phi),cos(theta));
+  TVector3 dir1(cell->x() - center.x,
+		cell->y() - center.y,
+		cell->z() - center.z);
+  float dis1 = dir.Dot(dir1);
+  return dis1;
 }
 
 float WireCell2dToy::WCCosmic::cal_pos(MergeSpaceCell *mcell1){

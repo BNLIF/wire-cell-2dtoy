@@ -16,16 +16,19 @@ namespace WireCell2dToy{
     float cal_costh(WCCosmic *cosmic);
     float cal_dist(WCCosmic *cosmic);
     WireCell::Point get_center(){return center;};
-    
+    WireCell::PointVector& get_points(){return points;};
     float cal_pos(WireCell::MergeSpaceCell *mcell1);
+    float cal_pos(WireCell::SpaceCell *cell);
 
     void Sort();
+    void fill_points();
 
   protected:
     ToyTrackingSelection& toytrackings;
     WireCell::MergeSpaceCellSelection mcells;
     WireCell::ClusterTrack *ct;
     WireCell::Point center;
+    WireCell::PointVector points;
     float theta;
     float phi;
   };
