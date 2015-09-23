@@ -123,16 +123,16 @@ WireCell2dToy::ToyCosmic::ToyCosmic(WireCell2dToy::ToyTrackingSelection& trackin
   
 
   // judge if anything is cosmics ... if not delete them ...  
-  WCCosmicSelection temp;
-  for (int i=0;i!=cosmics.size();i++){
-    if (!cosmics.at(i)->IsCosmic())
-      temp.push_back(cosmics.at(i));
-  }
-  for (int i=0;i!=temp.size();i++){
-    auto it = find(cosmics.begin(),cosmics.end(),temp.at(i));
-    delete *it;
-    cosmics.erase(it);
-  }
+  // WCCosmicSelection temp;
+  // for (int i=0;i!=cosmics.size();i++){
+  //   if (!cosmics.at(i)->IsCosmic())
+  //     temp.push_back(cosmics.at(i));
+  // }
+  // for (int i=0;i!=temp.size();i++){
+  //   auto it = find(cosmics.begin(),cosmics.end(),temp.at(i));
+  //   delete *it;
+  //   cosmics.erase(it);
+  // }
   
   // Now loop over all other toytrackings to see if any one is saved
 

@@ -127,18 +127,26 @@ void WireCell2dToy::WCCosmic::judge_cosmic(){
 		std::vector<float> pp = track->get_direction();
 		TVector3 dir5(pp.at(0),pp.at(1),pp.at(2));
 		float dis = sqrt(pow(vertex_p.x - vertex->Center().x,2) + pow(vertex_p.y - vertex->Center().y,2) + pow(vertex_p.z - vertex->Center().z,2));
-		
-		if (dis < 5*units::cm){
-		  if (fabs(dir5.Dot(dir2)/dir5.Mag()/dir2.Mag()) < 0.9)
-		    ntrack ++;
+
+		if (dir3.Dot(dir2)/dir2.Mag() < 0.5 && fabs(dir1.Dot(dir2)/dir2.Mag()) > 0.5){ // angle to the beam,   angle to vertical 
+		  if (dis < 5*units::cm){
+		    if (fabs(dir5.Dot(dir2)/dir5.Mag()/dir2.Mag()) < 0.9)
+		      ntrack ++;
+		  }else{
+		    if (track->get_range()/units::cm > 10 && fabs(dir5.Dot(dir2)/dir5.Mag()/dir2.Mag()) < 0.9)
+		      ntrack++;
+		  }
 		}else{
-		  if (track->get_range()/units::cm > 5 && fabs(dir5.Dot(dir2)/dir5.Mag()/dir2.Mag()) < 0.9)
-		    ntrack++;
+		  if (dis < 5*units::cm){
+		    if (fabs(dir5.Dot(dir2)/dir5.Mag()/dir2.Mag()) < 0.9)
+		      ntrack ++;
+		  }else{
+		    if (track->get_range()/units::cm > 5 && fabs(dir5.Dot(dir2)/dir5.Mag()/dir2.Mag()) < 0.9)
+		      ntrack++;
+		  }
 		}
 		
-		//		if (fabs(dir5.Dot(dir2)/dir5.Mag()/dir2.Mag()) < 0.9)
-		//ntrack ++;
-		//		std::cout << i << " " << j << " " << dir5.Dot(dir2)/dir5.Mag()/dir2.Mag() << " " << track->get_range()/units::cm<< std::endl;
+		std::cout << i << " " << j << " " << fabs(dir1.Dot(dir2)/dir2.Mag()) << " " <<  dir3.Dot(dir2)/dir2.Mag() << " " << dir5.Dot(dir2)/dir5.Mag()/dir2.Mag() << " " << track->get_range()/units::cm<< " " << ntrack << " " << dis/units::cm << std::endl;
 	      }
 	    }
 	    // std::cout << vertex->get_ntracks() << std::endl;
