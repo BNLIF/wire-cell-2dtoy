@@ -29,14 +29,14 @@ WireCell2dToy::WCCosmic::WCCosmic(WireCell2dToy::ToyTrackingSelection& toytracki
     }
   }
 
-  std::cout << mcells.size() << std::endl;
+  //std::cout << mcells.size() << std::endl;
   if (sum >1){
     //calculate the center
     center.x = center.x/sum;
     center.y = center.y/sum;
     center.z = center.z/sum;
     
-    std::cout << "Hough " << std::endl;
+    //std::cout << "Hough " << std::endl;
     //calculate the angle
     ct = new ClusterTrack(mcells.at(0));
     for (int i=1;i< mcells.size();i++){
@@ -46,12 +46,52 @@ WireCell2dToy::WCCosmic::WCCosmic(WireCell2dToy::ToyTrackingSelection& toytracki
     theta = ct->Get_Theta();
     phi = ct->Get_Phi();
     
-    std::cout << "Sort " << std::endl; 
+    //std::cout << "Sort " << std::endl; 
     Sort();
-    std::cout << "Fill Points" << std::endl;
+    //std::cout << "Fill Points" << std::endl;
     fill_points();
     //std::cout << mcells.size() << " " << cal_pos(mcells.front()) << " " << cal_pos(mcells.back()) << std::endl;
   }
+}
+
+void WireCell2dToy::WCCosmic::Add(WCCosmic *cosmic){
+  toytrackings.insert(toytrackings.end(), cosmic->get_trackings().begin(),
+		      cosmic->get_trackings().end());
+  mcells.insert(mcells.end(),cosmic->get_mcells().begin(),cosmic->get_mcells().end());
+  center.x = 0;
+  center.y = 0;
+  center.z = 0;
+  
+  int sum = 0;
+  for (int i=0;i!=mcells.size();i++){
+    MergeSpaceCell *mcell = mcells.at(i);
+    center.x += mcell->Get_all_spacecell().size() * mcell->Get_Center().x;
+    center.y += mcell->Get_all_spacecell().size() * mcell->Get_Center().y;
+    center.z += mcell->Get_all_spacecell().size() * mcell->Get_Center().z;
+    sum += mcell->Get_all_spacecell().size();
+  }
+  
+  if (sum >1){
+    //calculate the center
+    center.x = center.x/sum;
+    center.y = center.y/sum;
+    center.z = center.z/sum;
+
+    delete ct;
+    ct = new ClusterTrack(mcells.at(0));
+    for (int i=1;i< mcells.size();i++){
+      ct->AddMSCell_anyway(mcells.at(i));
+    }
+    ct->SC_Hough(center);
+    theta = ct->Get_Theta();
+    phi = ct->Get_Phi();
+    
+    //std::cout << "Sort " << std::endl; 
+    Sort();
+    //std::cout << "Fill Points" << std::endl;
+    fill_points();
+  }
+
 }
 
 
@@ -102,7 +142,7 @@ void WireCell2dToy::WCCosmic::fill_points(){
   //at the beginning
   points.push_back(min_point);
   
-  int nbin = (max_dis - min_dis)/(1*units::cm);
+  int nbin = (max_dis - min_dis)/(5*units::cm);
   
   if (nbin >0){
     // calculate middle points

@@ -9,6 +9,7 @@ namespace WireCell2dToy{
     WCCosmic(ToyTrackingSelection& toytrackings);
     ~WCCosmic();
 
+    void Add(WCCosmic *cosmic);
     ToyTrackingSelection& get_trackings(){return toytrackings;};
     WireCell::MergeSpaceCellSelection& get_mcells(){return mcells;};
     float get_theta(){return theta;};

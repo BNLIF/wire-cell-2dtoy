@@ -53,6 +53,63 @@ WireCell2dToy::ToyCosmic::ToyCosmic(WireCell2dToy::ToyTrackingSelection& trackin
   }
 
 
+  //further merge things
+  int flag = 1;
+  while(flag){
+    flag = 0;
+    WCCosmicSelection temp;
+    for (int i=0;i!=cosmics.size();i++){
+      WCCosmic *cosmic1 = cosmics.at(i);
+      if (cosmic1->get_points().size()==0) continue;
+      for (int j=0;j!=cosmics.size();j++){
+	WCCosmic *cosmic2 = cosmics.at(j);
+	if (cosmic1 == cosmic2) continue;
+	if (cosmic2->get_points().size() == 0) continue;
+	  
+	// judge wheter merge
+	float dis = cosmic1->cal_dist(cosmic2);
+	float angle = cosmic1->cal_costh(cosmic2);
+	
+	if (dis < 10*units::cm && fabs(angle) > 0.94){
+	  Point p1_f = cosmic1->get_points().front();
+	  Point p1_b = cosmic1->get_points().back();
+	  Point p2_f = cosmic2->get_points().front();
+	  Point p2_b = cosmic2->get_points().back();
+	  
+	  int flag1 = 0;
+	  if (sqrt(pow(p1_f.x-p2_f.x,2) +pow(p1_f.y-p2_f.y,2) + pow(p1_f.z-p2_f.z,2)) < 10*units::cm){
+	    flag1 = 1;
+	  }
+	  if (flag1 == 0)
+	    if (sqrt(pow(p1_f.x-p2_b.x,2) +pow(p1_f.y-p2_b.y,2) + pow(p1_f.z-p2_b.z,2)) < 10*units::cm){
+	      flag1 = 1;
+	    }
+	  if(flag1 == 0)
+	    if (sqrt(pow(p1_b.x-p2_f.x,2) +pow(p1_b.y-p2_f.y,2) + pow(p1_b.z-p2_f.z,2)) < 10*units::cm){
+	      flag1 = 1;
+	    }
+	  if (flag1==0)
+	    if (sqrt(pow(p1_b.x-p2_b.x,2) +pow(p1_b.y-p2_b.y,2) + pow(p1_b.z-p2_b.z,2)) < 10*units::cm){
+	      flag1 = 1;
+	    }
+
+	  if (flag1==1){
+	    cosmic1->Add(cosmic2);
+	    temp.push_back(cosmic2);
+	    flag = 1;
+	    break;
+	  }
+	}
+      }
+      if (flag==1) break;
+    }
+    
+    for (int i=0;i!=temp.size();i++){
+      auto it = find(cosmics.begin(),cosmics.end(),temp.at(i));
+      delete *it;
+      cosmics.erase(it);
+    }
+  }
   
   
 
@@ -144,7 +201,6 @@ bool WireCell2dToy::ToyCosmic::IsConnected(ToyTracking *tracking1, ToyTracking *
 	  if (IsConnected(mcell1,mcell2,dis_cut)) return true;
 	}
       }
-      
     }
   }
   
