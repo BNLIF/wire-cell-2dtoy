@@ -43,7 +43,36 @@ WireCell2dToy::WCCosmic::WCCosmic(WireCell2dToy::ToyTrackingSelection& toytracki
   ct->SC_Hough(center);
   theta = ct->Get_Theta();
   phi = ct->Get_Phi();
+
+  Sort();
 }
+
+
+
+void WireCell2dToy::WCCosmic::Sort(){
+  //Sorting 
+  std::vector<WireCell2dToy::MSC_Struct> msc_vector;
+  for (int i=0;i!=mcells.size();i++){
+    msc_vector.push_back(WireCell2dToy::MSC_Struct(cal_pos(mcells.at(i)),mcells.at(i)));
+  }
+  
+  std::sort(msc_vector.begin(),msc_vector.end(),WireCell2dToy::less_than_key());
+  
+  mcells.clear();
+  for (int i=0;i!=msc_vector.size();i++){
+    mcells.push_back(msc_vector.at(i).mcell);
+  }
+}
+
+float WireCell2dToy::WCCosmic::cal_pos(MergeSpaceCell *mcell1){
+  TVector3 dir(sin(theta)*cos(phi),sin(theta)*sin(phi),cos(theta));
+  TVector3 dir1(mcell1->Get_Center().x - center.x,
+		mcell1->Get_Center().y - center.y,
+		mcell1->Get_Center().z - center.z);
+  float dis1 = dir.Dot(dir1);
+  return dis1;
+}
+
 
 float WireCell2dToy::WCCosmic::cal_dist(WireCell2dToy::WCCosmic *cosmic){
   TVector3 dir1(sin(theta)*cos(phi),sin(theta)*sin(phi),cos(theta));

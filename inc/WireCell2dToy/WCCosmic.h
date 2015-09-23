@@ -17,6 +17,10 @@ namespace WireCell2dToy{
     float cal_dist(WCCosmic *cosmic);
     WireCell::Point get_center(){return center;};
     
+    float cal_pos(WireCell::MergeSpaceCell *mcell1);
+
+    void Sort();
+
   protected:
     ToyTrackingSelection& toytrackings;
     WireCell::MergeSpaceCellSelection mcells;
@@ -26,6 +30,20 @@ namespace WireCell2dToy{
     float phi;
   };
   
+  struct MSC_Struct
+  {
+    float key;
+    WireCell::MergeSpaceCell *mcell;
+  MSC_Struct(float key, WireCell::MergeSpaceCell *mcell) : key(key), mcell(mcell) {}
+  };
+
+  struct less_than_key{
+    inline bool operator() (const MSC_Struct& s1, const MSC_Struct& s2)
+    {
+      return (s1.key < s2.key);
+    }
+  };
+
   typedef std::vector<WCCosmic*> WCCosmicSelection;
 }
 

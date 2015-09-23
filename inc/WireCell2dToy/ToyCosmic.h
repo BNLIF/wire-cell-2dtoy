@@ -15,6 +15,8 @@ namespace WireCell2dToy{
     bool IsConnected(ToyTracking *tracking1, ToyTracking *tracking2);
     bool IsConnected(WireCell::MergeSpaceCell *mcell1, WireCell::MergeSpaceCell *mcell2, float dis_cut);
     
+    WCCosmicSelection& get_cosmics(){return cosmics;};
+    
   protected:
     ToyTrackingSelection& trackings;
     WCCosmicSelection cosmics;

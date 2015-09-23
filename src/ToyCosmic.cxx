@@ -51,6 +51,9 @@ WireCell2dToy::ToyCosmic::ToyCosmic(WireCell2dToy::ToyTrackingSelection& trackin
     WCCosmic *cosmic = new WCCosmic(cosmic_candidates.at(i));
     cosmics.push_back(cosmic);
   }
+
+  
+
 }
 
 bool WireCell2dToy::ToyCosmic::IsConnected(ToyTracking *tracking1, ToyTracking *tracking2){
