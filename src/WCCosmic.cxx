@@ -64,7 +64,7 @@ void WireCell2dToy::WCCosmic::judge_cosmic(){
   
   // if anythng is outside x
   for (int i=0;i!=points.size();i++){
-    if (points.at(i).x < 10*units::cm || points.at(i).x > (256 - 10) * units::cm){
+    if (points.at(i).x < 1*units::cm || points.at(i).x > (256 - 1) * units::cm){
       // std::cout << points.at(i) << std::endl;
       cosmic_flag = true;
       break;
@@ -75,37 +75,82 @@ void WireCell2dToy::WCCosmic::judge_cosmic(){
     bool front_boundary = false;
     bool back_boundary = false;
 
-    if (fabs(points.front().y) > 233 * units::cm - 10*units::cm) front_boundary = true;
-    if (fabs(points.back().y) > 233 * units::cm - 10*units::cm) back_boundary = true;
+    if (fabs(points.front().y) > 233 * units::cm/2. - 10*units::cm) front_boundary = true;
+    if (fabs(points.back().y) > 233 * units::cm/2. - 10*units::cm) back_boundary = true;
     if (points.front().z < 10 * units::cm || points.front().z > 10.3692 *100 * units::cm - 10 * units::cm) front_boundary = true;
     if (points.back().z < 10 * units::cm || points.back().z > 10.3692 *100 * units::cm - 10 * units::cm) back_boundary = true;
 
     if (front_boundary && back_boundary) cosmic_flag = true;
 
-    if (front_boundary || back_boundary){
+    if ((front_boundary || back_boundary) && (!cosmic_flag)){
       // look at the angle
       TVector3 dir1(0,1,0);
+      TVector3 dir3(0,0,1);
       TVector3 dir2(sin(theta)*cos(phi),sin(theta)*sin(phi),cos(theta));
       //     std::cout << dir1.Dot(dir2)/dir2.Mag() << std::endl;
-      
       if (fabs(dir1.Dot(dir2)/dir2.Mag()) > 0.9) cosmic_flag = true;
+      TVector3 dir4;
+      Point vertex_p;
+      if (front_boundary){
+	dir4.SetXYZ(points.front().x - points.back().x, points.front().y - points.back().y, points.front().z - points.back().z);
 
+	vertex_p.x = points.back().x;
+	vertex_p.y = points.back().y;
+	vertex_p.z = points.back().z;
+
+	if (dir4.Dot(dir2) < 0 ) 
+	  dir2.SetXYZ(-dir2.x(), -dir2.y(), -dir2.z());
+      }else{
+	dir4.SetXYZ(points.back().x - points.front().x, points.back().y - points.front().y, points.back().z - points.front().z);
+
+	vertex_p.x = points.front().x;
+	vertex_p.y = points.front().y;
+	vertex_p.z = points.front().z;
+
+	if (dir4.Dot(dir2) < 0)
+	  dir2.SetXYZ(-dir2.x(), -dir2.y(), -dir2.z());
+      }
+      
+      if (dir3.Dot(dir2)/dir2.Mag() < -0.5) cosmic_flag = true;
+      //std::cout << dir3.Dot(dir2)/dir2.Mag() << " " << front_boundary << " " << back_boundary << std::endl;
+      
       if (!cosmic_flag){
 	// count how many good tracks were in ... 
-	int ntrack = 0 ;
+	int ntrack = 0;
 	for (int i=0;i!=toytrackings.size();i++){
 	  WireCell2dToy::ToyTracking *toytracking = toytrackings.at(i);
 	  for (int j=0;j!=toytracking->get_vertices().size();j++){
 	    WCVertex *vertex = toytracking->get_vertices().at(j);
-	    //if (
+	    if (vertex->get_ntracks() >=2){
+	      for (int k=0;k!=vertex->get_ntracks();k++){
+		WCTrack *track = vertex->get_tracks().at(k);
+		std::vector<float> pp = track->get_direction();
+		TVector3 dir5(pp.at(0),pp.at(1),pp.at(2));
+		float dis = sqrt(pow(vertex_p.x - vertex->Center().x,2) + pow(vertex_p.y - vertex->Center().y,2) + pow(vertex_p.z - vertex->Center().z,2));
+		
+		if (dis < 5*units::cm){
+		  if (fabs(dir5.Dot(dir2)/dir5.Mag()/dir2.Mag()) < 0.9)
+		    ntrack ++;
+		}else{
+		  if (track->get_range()/units::cm > 5 && fabs(dir5.Dot(dir2)/dir5.Mag()/dir2.Mag()) < 0.9)
+		    ntrack++;
+		}
+		
+		//		if (fabs(dir5.Dot(dir2)/dir5.Mag()/dir2.Mag()) < 0.9)
+		//ntrack ++;
+		//		std::cout << i << " " << j << " " << dir5.Dot(dir2)/dir5.Mag()/dir2.Mag() << " " << track->get_range()/units::cm<< std::endl;
+	      }
+	    }
 	    // std::cout << vertex->get_ntracks() << std::endl;
 	    // ntrack += toytrackings.at(i)->get_good_tracks().size();
 	    //	for (int j=0;j!=toytrackings.at(i)->get_good_tracks().size()
 	  }
 	}
-      }
 
-	//std::cout << theta << " " << phi << " " << ntrack << std::endl;
+	if (ntrack == 0) cosmic_flag = true;
+	
+      }
+      //std::cout << theta << " " << phi << " " << ntrack << std::endl;
     }
     
   }
