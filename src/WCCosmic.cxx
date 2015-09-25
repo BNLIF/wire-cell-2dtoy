@@ -24,14 +24,14 @@ bool WireCell2dToy::WCCosmic::IsNearBy(ToyTracking *toytracking){
 		       +pow(mcells.at(i)->Get_Center().y - points.at(j).y,2)
 		       +pow(mcells.at(i)->Get_Center().z - points.at(j).z,2));
       if (min_dis > dis ) min_dis = dis;
-      if (dis < 20*units::cm){
+      if (dis < 25*units::cm){
 	nsum_cut += mcells.at(i)->Get_all_spacecell().size();
 	break;
       }
     }
   }
-
-  //std::cout << min_dis / units::cm << " " << nsum_cut << " " << nsum << std::endl;
+  if (min_dis < 50 * units::cm)
+    std::cout << min_dis / units::cm << " " << nsum_cut << " " << nsum << std::endl;
   if (nsum_cut > nsum * 0.8) return true;
 
   return false;
@@ -100,6 +100,7 @@ void WireCell2dToy::WCCosmic::judge_cosmic(){
   for (int i=0;i!=points.size();i++){
     if (points.at(i).x < 1*units::cm || points.at(i).x > (256 - 1) * units::cm){
       // std::cout << points.at(i) << std::endl;
+      //std::cout << "qx1: " <<  points.at(i).x/units::cm << std::endl;
       cosmic_flag = true;
       break;
     }
@@ -113,6 +114,8 @@ void WireCell2dToy::WCCosmic::judge_cosmic(){
     if (fabs(points.back().y) > 233 * units::cm/2. - 10*units::cm) back_boundary = true;
     if (points.front().z < 10 * units::cm || points.front().z > 10.3692 *100 * units::cm - 10 * units::cm) front_boundary = true;
     if (points.back().z < 10 * units::cm || points.back().z > 10.3692 *100 * units::cm - 10 * units::cm) back_boundary = true;
+
+    //std::cout << "qx2: " << front_boundary << " " << back_boundary << std::endl;
 
     if (front_boundary && back_boundary) cosmic_flag = true;
 
@@ -146,7 +149,8 @@ void WireCell2dToy::WCCosmic::judge_cosmic(){
       }
       
       if (dir3.Dot(dir2)/dir2.Mag() < -0.5) cosmic_flag = true;
-      //std::cout << dir3.Dot(dir2)/dir2.Mag() << " " << front_boundary << " " << back_boundary << std::endl;
+      
+      //std::cout << "qx3: " << fabs(dir1.Dot(dir2)/dir2.Mag()) << " " << dir3.Dot(dir2)/dir2.Mag() << " " << front_boundary << " " << back_boundary << std::endl;
       
       if (!cosmic_flag){
 	// count how many good tracks were in ... 
@@ -180,7 +184,15 @@ void WireCell2dToy::WCCosmic::judge_cosmic(){
 		  }
 		}
 		
-		std::cout << i << " " << j << " " << fabs(dir1.Dot(dir2)/dir2.Mag()) << " " <<  dir3.Dot(dir2)/dir2.Mag() << " " << dir5.Dot(dir2)/dir5.Mag()/dir2.Mag() << " " << track->get_range()/units::cm<< " " << ntrack << " " << dis/units::cm << std::endl;
+		//std::cout << "qx4: " << i << " " << j << " " << fabs(dir1.Dot(dir2)/dir2.Mag()) << " " <<  dir3.Dot(dir2)/dir2.Mag() << " " << dir5.Dot(dir2)/dir5.Mag()/dir2.Mag() << " " << track->get_range()/units::cm<< " " << ntrack << " " << dis/units::cm << " " << vertex->Center().x/units::cm << " " << vertex->Center().y/units::cm << " " << vertex->Center().z/units::cm << std::endl;
+	      }
+	    }else if (vertex->get_ntracks() ==1){
+	      WCTrack *track = vertex->get_tracks().at(0);
+	      float dis = sqrt(pow(vertex_p.x - vertex->Center().x,2) + pow(vertex_p.y - vertex->Center().y,2) + pow(vertex_p.z - vertex->Center().z,2));
+	      
+	      if (dis > 10 *units::cm && track->get_range()/units::cm > 10){
+		if (dir3.Dot(dir2)/dir2.Mag() > 0.5 && fabs(dir1.Dot(dir2)/dir2.Mag()) < 0.5)
+		  ntrack ++;
 	      }
 	    }
 	    // std::cout << vertex->get_ntracks() << std::endl;

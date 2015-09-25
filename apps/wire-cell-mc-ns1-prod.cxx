@@ -257,7 +257,7 @@ int main(int argc, char* argv[])
 
 
 
-  TFile *file1 = new TFile(Form("cluster_tracking_%d.root",eve_no),"RECREATE");
+  TFile *file1 = new TFile(Form("./rootfiles/cosmic_%d_%d_%d.root",run_no,subrun_no,event_no),"RECREATE");
   TTree *T1 = new TTree("T_goodtrack","T_goodtrack");
   TTree *T2 = new TTree("T_vertex","T_vertex");
   TTree *T3 = new TTree("T_badtrack","T_badtrack");

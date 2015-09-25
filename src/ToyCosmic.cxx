@@ -153,10 +153,10 @@ WireCell2dToy::ToyCosmic::ToyCosmic(WireCell2dToy::ToyTrackingSelection& trackin
     if (nocosmic_trackings.at(i)->IsContained()){
       
       for (int j=0;j!=cosmics.size();j++){
-	if (cosmics.at(j)->IsNearBy(nocosmic_trackings.at(i))){
-	  flag_remove = 1;
-	  break;
-	}
+  	if (cosmics.at(j)->IsNearBy(nocosmic_trackings.at(i))){
+  	  flag_remove = 1;
+  	  break;
+  	}
       }
     }else{
       flag_remove = 1;
