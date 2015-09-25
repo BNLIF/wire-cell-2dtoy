@@ -6,6 +6,26 @@
 
 using namespace WireCell;
 
+bool WireCell2dToy::ToyTracking::IsContained(){
+  MergeSpaceCellSelection all_cells;
+  for (int i=0;i!=tracks.size();i++){
+    for (int j=0;j!=tracks.at(i)->get_all_cells().size();j++){
+      auto it = find(all_cells.begin(), all_cells.end(), tracks.at(i)->get_all_cells().at(j));
+      if (it == all_cells.end()) all_cells.push_back(tracks.at(i)->get_all_cells().at(j));
+    }
+  }
+  
+  for (int i=0;i!=all_cells.size();i++){
+    if (all_cells.at(i)->Get_Center().x < 1*units::cm || all_cells.at(i)->Get_Center().x > (256 - 1) * units::cm) 
+      return false;
+    if (fabs(all_cells.at(i)->Get_Center().y) > 233 * units::cm/2. - 10*units::cm)
+      return false;
+    if (all_cells.at(i)->Get_Center().z < 10 * units::cm || all_cells.at(i)->Get_Center().z > 10.3692 *100 * units::cm - 10 * units::cm) 
+      return false;
+  }
+  return true;
+}
+
 WireCell2dToy::ToyTracking::ToyTracking(WireCell2dToy::ToyCrawler& toycrawler, int tracking_type){
   CreateVertices(toycrawler);
   RemoveSame(); // get rid of duplicated ones

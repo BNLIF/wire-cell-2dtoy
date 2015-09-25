@@ -39,7 +39,7 @@ namespace WireCell2dToy{
     void CleanUpVertex();
     void Crawl();
    
-    
+    bool IsContained();
     bool IsThisShower(WireCell2dToy::ToyCrawler& toycrawler);
     
 

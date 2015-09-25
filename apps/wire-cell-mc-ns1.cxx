@@ -266,7 +266,8 @@ int main(int argc, char* argv[])
   TTree *T6 = new TTree("T_shower","T_shower");
 
   TTree *T7 = new TTree("T_cosmic","T_cosmic");
-  
+  TTree *T8 = new TTree("T_neutrino","T_neutrino");
+
   T1->SetDirectory(file1);
   T2->SetDirectory(file1);
   T3->SetDirectory(file1);
@@ -274,6 +275,7 @@ int main(int argc, char* argv[])
   T5->SetDirectory(file1);
   T6->SetDirectory(file1);
   T7->SetDirectory(file1);
+  T8->SetDirectory(file1);
   
   
 
@@ -359,6 +361,18 @@ int main(int argc, char* argv[])
   T7->Branch("y",yy,"y[npoints]/D");
   T7->Branch("z",zz,"z[npoints]/D");
   
+
+  T8->Branch("npoints",&npoints,"npoints/I");
+  T8->Branch("trackid",&trackid,"trackid/I");
+  T8->Branch("x",xx,"x[npoints]/D");
+  T8->Branch("y",yy,"y[npoints]/D");
+  T8->Branch("z",zz,"z[npoints]/D");
+  T8->Branch("theta",theta,"theta[npoints]/D");
+  T8->Branch("phi",phi,"phi[npoints]/D");
+  T8->Branch("energy",energy,"energy[npoints]/D");
+  T8->Branch("dedx",dedx,"dedx[npoints]/D");
+  T8->Branch("msc_id",msc_id,"msc_id[npoints]/I");
+
 
   WCTrackSelection all_tracks;
   WCTrackSelection good_tracks;
@@ -552,6 +566,35 @@ int main(int argc, char* argv[])
 
     }
     T7->Fill();
+  }
+
+
+  //fill T8
+  WCTrackSelection neutrino_tracks;
+  for (int i=0;i!=toycosmic.get_neutrinos().size();i++){
+    for(int j=0;j!=toycosmic.get_neutrinos().at(i)->get_good_tracks().size();j++){
+      neutrino_tracks.push_back(toycosmic.get_neutrinos().at(i)->get_good_tracks().at(j));
+    }
+  }
+
+  for (int i = 0; i!=neutrino_tracks.size();i++){
+    WCTrack *track = neutrino_tracks.at(i);
+    
+    npoints = track->get_centerVP().size();
+    trackid = find(all_tracks.begin(),all_tracks.end(),track) - all_tracks.begin();
+    for (int j=0;j!=npoints;j++){
+      xx[j] = track->get_centerVP().at(j).x/units::cm;
+      yy[j] = track->get_centerVP().at(j).y/units::cm;
+      zz[j] = track->get_centerVP().at(j).z/units::cm;
+      theta[j] = track->get_centerVP_theta().at(j);
+      phi[j] = track->get_centerVP_phi().at(j);
+      energy[j] = track->get_centerVP_energy().at(j);
+      dedx[j] = track->get_centerVP_dedx().at(j);
+      msc_id[j] = track->get_centerVP_cells().at(j)->get_id();
+      g->SetPoint(ncount,xx[j],yy[j],zz[j]);
+      ncount ++;
+    }
+    T8->Fill();
   }
 
 

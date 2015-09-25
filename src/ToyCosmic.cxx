@@ -123,19 +123,59 @@ WireCell2dToy::ToyCosmic::ToyCosmic(WireCell2dToy::ToyTrackingSelection& trackin
   
 
   // judge if anything is cosmics ... if not delete them ...  
-  // WCCosmicSelection temp;
-  // for (int i=0;i!=cosmics.size();i++){
-  //   if (!cosmics.at(i)->IsCosmic())
-  //     temp.push_back(cosmics.at(i));
-  // }
-  // for (int i=0;i!=temp.size();i++){
-  //   auto it = find(cosmics.begin(),cosmics.end(),temp.at(i));
-  //   delete *it;
-  //   cosmics.erase(it);
-  // }
-  
+  WCCosmicSelection temp;
+  for (int i=0;i!=cosmics.size();i++){
+    if (!cosmics.at(i)->IsCosmic())
+      temp.push_back(cosmics.at(i));
+  }
+  for (int i=0;i!=temp.size();i++){
+    auto it = find(cosmics.begin(),cosmics.end(),temp.at(i));
+    delete *it;
+    cosmics.erase(it);
+  }  
   // Now loop over all other toytrackings to see if any one is saved
+  nocosmic_trackings.clear();
+  ToyTrackingSelection cosmic_trackings;
+  for (int i=0;i!=cosmics.size();i++){
+    cosmic_trackings.insert(cosmic_trackings.end(),cosmics.at(i)->get_trackings().begin(),cosmics.at(i)->get_trackings().end());
+  }
+  for (int i=0;i!=trackings.size();i++){
+    auto it = find(cosmic_trackings.begin(),cosmic_trackings.end(),trackings.at(i));
+    if (it == cosmic_trackings.end())
+      nocosmic_trackings.push_back(trackings.at(i));
+  }
 
+  
+  ToyTrackingSelection temp1;
+  for (int i=0; i!= nocosmic_trackings.size();i++){
+    int flag_remove = 0;
+    
+    if (nocosmic_trackings.at(i)->IsContained()){
+      
+      for (int j=0;j!=cosmics.size();j++){
+	if (cosmics.at(j)->IsNearBy(nocosmic_trackings.at(i))){
+	  flag_remove = 1;
+	  break;
+	}
+      }
+    }else{
+      flag_remove = 1;
+    }
+    if (flag_remove == 1){
+      temp1.push_back(nocosmic_trackings.at(i));
+    }
+  }
+
+  for (int i=0;i!=temp1.size();i++){
+    auto it = find(nocosmic_trackings.begin(),nocosmic_trackings.end(),temp1.at(i));
+    nocosmic_trackings.erase(it);
+  }
+
+  // std::cout << nocosmic_trackings.size() << " " << cosmics.size() << " " << cosmic_trackings.size() << std::endl;
+  // for (int i=0;i!=nocosmic_trackings.size();i++){
+  //   std::cout << i << " " << nocosmic_trackings.at(i)->get_good_track.size() << std::endl;
+    
+  // }
 }
 
 bool WireCell2dToy::ToyCosmic::IsConnected(ToyTracking *tracking1, ToyTracking *tracking2){
@@ -229,6 +269,8 @@ bool WireCell2dToy::ToyCosmic::IsConnected(ToyTracking *tracking1, ToyTracking *
   
   // std::cout << tracking1_tracks.size() << " " << tracking2_tracks.size() << " " << tracking1_mcells.size() << " " << tracking2_mcells.size() << std::endl;
   
+
+
   return false;
 }
 

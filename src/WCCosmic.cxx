@@ -3,6 +3,40 @@
 
 using namespace WireCell;
 
+bool WireCell2dToy::WCCosmic::IsNearBy(ToyTracking *toytracking){
+  //collect all the mcells inside the good tracks.
+  MergeSpaceCellSelection mcells;
+  for (int i=0;i!=toytracking->get_good_tracks().size();i++){
+    for (int j=0;j!=toytracking->get_good_tracks().at(i)->get_centerVP_cells().size();j++){
+      auto it = find(mcells.begin(),mcells.end(),toytracking->get_good_tracks().at(i)->get_centerVP_cells().at(j));
+      if (it == mcells.end())
+	mcells.push_back(toytracking->get_good_tracks().at(i)->get_centerVP_cells().at(j));
+    }
+  }
+  
+  int nsum = 0;
+  int nsum_cut = 0;
+  float min_dis = 1e9;
+  for (int i=0;i!=mcells.size();i++){
+    nsum += mcells.at(i)->Get_all_spacecell().size();
+    for (int j=0;j!=points.size();j++){
+      float dis = sqrt(pow(mcells.at(i)->Get_Center().x - points.at(j).x,2)
+		       +pow(mcells.at(i)->Get_Center().y - points.at(j).y,2)
+		       +pow(mcells.at(i)->Get_Center().z - points.at(j).z,2));
+      if (min_dis > dis ) min_dis = dis;
+      if (dis < 20*units::cm){
+	nsum_cut += mcells.at(i)->Get_all_spacecell().size();
+	break;
+      }
+    }
+  }
+
+  //std::cout << min_dis / units::cm << " " << nsum_cut << " " << nsum << std::endl;
+  if (nsum_cut > nsum * 0.8) return true;
+
+  return false;
+}
+
 WireCell2dToy::WCCosmic::WCCosmic(WireCell2dToy::ToyTrackingSelection& toytrackings)
   : toytrackings(toytrackings)
 {

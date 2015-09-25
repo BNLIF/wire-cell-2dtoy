@@ -11,6 +11,7 @@ namespace WireCell2dToy{
     ~ToyCosmic();
     
     std::vector<ToyTrackingSelection>& get_raw_candidates(){return cosmic_candidates;};
+    ToyTrackingSelection& get_neutrinos(){return nocosmic_trackings;};
 
     bool IsConnected(ToyTracking *tracking1, ToyTracking *tracking2);
     bool IsConnected(WireCell::MergeSpaceCell *mcell1, WireCell::MergeSpaceCell *mcell2, float dis_cut);
@@ -19,6 +20,7 @@ namespace WireCell2dToy{
     
   protected:
     ToyTrackingSelection& trackings;
+    ToyTrackingSelection nocosmic_trackings;
     WCCosmicSelection cosmics;
     std::vector<ToyTrackingSelection> cosmic_candidates;
   };

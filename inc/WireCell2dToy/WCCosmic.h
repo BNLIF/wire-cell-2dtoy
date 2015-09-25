@@ -25,6 +25,7 @@ namespace WireCell2dToy{
     void judge_cosmic();
 
     bool IsCosmic(){return cosmic_flag;};
+    bool IsNearBy(ToyTracking *toytracking);
 
   protected:
     ToyTrackingSelection& toytrackings;
