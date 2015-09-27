@@ -2668,7 +2668,7 @@ void WireCell2dToy::ToyTracking::fine_tracking(int flag){
       if (wct_wcv_map[track].size()==2){
 	//std::cout << i << "abc1 " << std::endl;
 	WCVertex *vertex1 = wct_wcv_map[track].at(0);
-	//std::cout << i << "abc2 " << std::endl;
+	//	std::cout << i << "abc2 " << std::endl;
 	WCVertex *vertex2 = wct_wcv_map[track].at(1);
 	//std::cout << i << "abc3 " << std::endl;
 	if (vertex1 == vertex2) continue;
@@ -2695,6 +2695,11 @@ void WireCell2dToy::ToyTracking::fine_tracking(int flag){
 	//std::cout << i << "abc4 " << std::endl;
 	if (flag == 0 )
 	  track->reset_fine_tracking();
+
+	//std::cout << np1 << " " << p1.x/units::cm << " " << p1.y/units::cm << " " << p1.z/units::cm << " " << ky1 << " " << ky2 << " " << np2 << " " << 
+	//  p2.x/units::cm << " " << p2.y/units::cm << " " << p2.z/units::cm <<
+	//  " " << kz1 << " " << kz2 << std::endl;
+
 	track->fine_tracking(np1,p1,ky1,kz1,np2,p2,ky2,kz2,flag);
 	auto itt = find(good_tracks.begin(),good_tracks.end(),track);
 	auto itt1 = find(parallel_tracks.begin(),parallel_tracks.end(),track);
