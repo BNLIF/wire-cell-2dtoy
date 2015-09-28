@@ -1,4 +1,5 @@
 #include "WireCell2dToy/WCCosmic.h"
+#include "WireCellData/Line.h"
 #include "TVector3.h"
 
 using namespace WireCell;
@@ -30,8 +31,8 @@ bool WireCell2dToy::WCCosmic::IsNearBy(ToyTracking *toytracking){
       }
     }
   }
-  if (min_dis < 50 * units::cm)
-    std::cout << min_dis / units::cm << " " << nsum_cut << " " << nsum << std::endl;
+  // if (min_dis < 50 * units::cm)
+  //   std::cout << min_dis / units::cm << " " << nsum_cut << " " << nsum << std::endl;
   if (nsum_cut > nsum * 0.8) return true;
 
   return false;
@@ -202,9 +203,88 @@ void WireCell2dToy::WCCosmic::judge_cosmic(){
 	}
 
 	if (ntrack == 0) cosmic_flag = true;
-	
       }
+      
+      if (!cosmic_flag){
+	//figure out the direction, and then compare with dir2 ...
+	WCTrackSelection tracks;
+	for (int i=0;i!=toytrackings.size();i++){
+	  for (int j=0;j!=toytrackings.at(i)->get_good_tracks().size();j++){
+	    tracks.push_back(toytrackings.at(i)->get_good_tracks().at(j));
+	  }
+	}
+	double sum = 0;
+	// go through all the tracks 
+	for (int i=0;i!=tracks.size();i++){
+	  WCTrack *track = tracks.at(i);
+	  // find out the cloest point and furthest point
+	  Point end_p1 = track->get_centerVP().front();
+	  Point end_p2 = track->get_centerVP().back();
+
+	  //	  if one of the end point is too close to the end
+	  float temp_dis1 = sqrt(pow(vertex_p.x - end_p1.x,2) + pow(vertex_p.y - end_p1.y,2) + pow(vertex_p.z - end_p1.z,2));
+	  if (temp_dis1 < 10*units::cm) continue;
+	  float temp_dis2 = sqrt(pow(vertex_p.x - end_p2.x,2) + pow(vertex_p.y - end_p2.y,2) + pow(vertex_p.z - end_p2.z,2));
+	  if (temp_dis2 < 10*units::cm) continue;
+
+	  float min_dis1 = 1e9;
+	  float min_dis2 = 1e9;
+	  float dis1, dis2, dis1_save, dis2_save;
+	  for (int j=0;j!=points.size();j++){
+	    dis1 = sqrt(pow(end_p1.x-points.at(j).x,2)+pow(end_p1.y-points.at(j).y,2)+pow(end_p1.z-points.at(j).z,2));
+	    if (dis1 < min_dis1) {
+	      min_dis1 = dis1;
+	      Point temp_p(points.at(j).x + dir2.x(),
+			   points.at(j).y + dir2.y(),
+			   points.at(j).z + dir2.z());
+	      Line l1(points.at(j), temp_p);
+	      dis1_save = l1.closest_dis(end_p1);
+	    }
+	    dis2 = sqrt(pow(end_p2.x-points.at(j).x,2)+pow(end_p2.y-points.at(j).y,2)+pow(end_p2.z-points.at(j).z,2));
+	    if (dis2 < min_dis2) {
+	      min_dis2 = dis2;
+	      Point temp_p(points.at(j).x + dir2.x(),
+			   points.at(j).y + dir2.y(),
+			   points.at(j).z + dir2.z());
+	      Line l1(points.at(j), temp_p);
+	      dis2_save = l1.closest_dis(end_p2);
+	    }
+	  }
+	  float max_dis;
+	  // define direction as cloest --> furthest
+	  TVector3 track_dir;
+	  if(dis2_save > dis1_save){
+	    max_dis = dis2_save;
+	    track_dir.SetXYZ(end_p2.x-end_p1.x,end_p2.y-end_p1.y,end_p2.z-end_p1.z);
+	  }else{
+	    max_dis = dis1_save;
+	    track_dir.SetXYZ(end_p1.x-end_p2.x,end_p1.y-end_p2.y,end_p1.z-end_p2.z);
+	  }
+	  
+	  
+	  
+	  // sign is the determined by dot
+	  // magnitude is determined by the furthest distance
+	  if (dir2.Dot(track_dir)>0){
+	    sum += fabs(max_dis);
+	  }else{
+	    sum -= fabs(max_dis);
+	  }
+	  
+	  
+	}
+	// calculate sum , if sum is too negative, 
+	//std::cout << "dis: " << sum/units::cm << std::endl;
+	if (sum <=-3*units::cm) cosmic_flag = true;
+      }
+      
       //std::cout << theta << " " << phi << " " << ntrack << std::endl;
+    }
+
+    if (!cosmic_flag && !front_boundary && !back_boundary){
+      TVector3 dir1(0,1,0);
+      TVector3 dir2(sin(theta)*cos(phi),sin(theta)*sin(phi),cos(theta));
+      if (fabs(dir1.Dot(dir2)/dir2.Mag()) > 0.9) cosmic_flag = true;
     }
     
   }

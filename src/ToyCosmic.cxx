@@ -15,7 +15,7 @@ WireCell2dToy::ToyCosmic::ToyCosmic(WireCell2dToy::ToyTrackingSelection& trackin
   
 
   while(used_trackings.size() != trackings.size()){
-    std::cout << "xin1 " << used_trackings.size() << " " << trackings.size() << std::endl;
+    //std::cout << "xin1 " << used_trackings.size() << " " << trackings.size() << std::endl;
     ToyTracking *curr_tracking;
     // for (int i=start_num;i!=trackings.size();i++){
     //   curr_tracking = trackings.at(i);
