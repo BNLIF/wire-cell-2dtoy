@@ -25,18 +25,26 @@ bool WireCell2dToy::ToyTracking::IsContained(){
 }
 
 WireCell2dToy::ToyTracking::ToyTracking(WireCell2dToy::ToyCrawler& toycrawler, int tracking_type){
+
+  
   CreateVertices(toycrawler);
   RemoveSame(); // get rid of duplicated ones
   
+  // std::cout << "abc: " << std::endl;
+
   MergeVertices();   // merge things that are common ...
   OrganizeTracks();  // improve the end points nearby and break things
   Associate();    //associate the rest
-   
+
+  //  std::cout << "abc: " << std::endl;
+
   MergeVertices(0); //merge things, but require the center must be at the end of common track
   //CheckVertices(toycrawler);
   OrganizeTracks(); //improve the end points nearby and break things
   Associate(); //associate the rest
   
+  //  std::cout << "abc: " << std::endl;
+
   MergeVertices(2);  // merge some vertices with distance cut only 
   CheckVertices(toycrawler);
   Crawl();
@@ -45,12 +53,17 @@ WireCell2dToy::ToyTracking::ToyTracking(WireCell2dToy::ToyCrawler& toycrawler, i
 
   RemoveSameTrack();
 
+  // std::cout << "abc: " << std::endl;
     
   MergeVertices(2);  // merge some vertices together, allow single track
+  // std::cout << "abc: " << std::endl;
   CheckVertices(toycrawler);
+  // std::cout << "abc: " << std::endl;
   BreakTracks();    //improve the end points and break things
+  // std::cout << "abc: " << std::endl;
   OrganizeTracks(); //associate the rest
-
+  //std::cout << "abc: " << std::endl;
+  
   // MergeVertices(2);  // merge some vertices together, allow single track
   // CheckVertices(toycrawler);
   // OrganizeTracks(); //associate the rest
@@ -60,7 +73,7 @@ WireCell2dToy::ToyTracking::ToyTracking(WireCell2dToy::ToyCrawler& toycrawler, i
   Associate();  //associate the rest .. 
   CleanUpVertex(); //do some final clean up ...
   
-  
+  //std::cout << "abc: " << std::endl;
 
   if (tracking_type == 0 ){
     for (int i=0;i!=vertices.size();i++){
@@ -2668,9 +2681,9 @@ void WireCell2dToy::ToyTracking::fine_tracking(int flag){
       if (wct_wcv_map[track].size()==2){
 	//std::cout << i << "abc1 " << std::endl;
 	WCVertex *vertex1 = wct_wcv_map[track].at(0);
-	//	std::cout << i << "abc2 " << std::endl;
+	//std::cout << i << "abc2 " << std::endl;
 	WCVertex *vertex2 = wct_wcv_map[track].at(1);
-	//std::cout << i << "abc3 " << std::endl;
+	//	std::cout << i << "abc3 " << std::endl;
 	if (vertex1 == vertex2) continue;
 	Point p1 = vertex1->Center();
 	Point p2 = vertex2->Center();
@@ -2696,15 +2709,17 @@ void WireCell2dToy::ToyTracking::fine_tracking(int flag){
 	if (flag == 0 )
 	  track->reset_fine_tracking();
 
-	//std::cout << np1 << " " << p1.x/units::cm << " " << p1.y/units::cm << " " << p1.z/units::cm << " " << ky1 << " " << ky2 << " " << np2 << " " << 
-	//  p2.x/units::cm << " " << p2.y/units::cm << " " << p2.z/units::cm <<
-	//  " " << kz1 << " " << kz2 << std::endl;
+	//	std::cout << np1 << " " << p1.x/units::cm << " " << p1.y/units::cm << " " << p1.z/units::cm << " " << ky1 << " " << ky2 << " " << np2 << " " << 
+	//	 p2.x/units::cm << " " << p2.y/units::cm << " " << p2.z/units::cm <<
+	// " " << kz1 << " " << kz2 << std::endl;
 
 	track->fine_tracking(np1,p1,ky1,kz1,np2,p2,ky2,kz2,flag);
-	auto itt = find(good_tracks.begin(),good_tracks.end(),track);
-	auto itt1 = find(parallel_tracks.begin(),parallel_tracks.end(),track);
-	if (itt == good_tracks.end() && itt1 == parallel_tracks.end())
-	  good_tracks.push_back(track);
+	if (track->get_centerVP().size() > 0){
+	  auto itt = find(good_tracks.begin(),good_tracks.end(),track);
+	  auto itt1 = find(parallel_tracks.begin(),parallel_tracks.end(),track);
+	  if (itt == good_tracks.end() && itt1 == parallel_tracks.end())
+	    good_tracks.push_back(track);
+	}
 	//std::cout << i << "abc5 " << std::endl;
       }
     }
@@ -3053,7 +3068,7 @@ void WireCell2dToy::ToyTracking::Crawl(){
 
 void WireCell2dToy::ToyTracking::BreakTracks(){
   // Now need to break the track?
-   
+  //std::cout << "abc" << std::endl;
 
   // first break the track if a vertice is in the middle
   WCTrackSelection break_tracks;
@@ -3077,7 +3092,7 @@ void WireCell2dToy::ToyTracking::BreakTracks(){
     }
   }
 
-
+  std::cout << "abc: " << std::endl;
   // second break the track if there is a direction change ... 
   break_tracks.clear();
   WCTrackSelection finished_tracks;
@@ -3085,14 +3100,16 @@ void WireCell2dToy::ToyTracking::BreakTracks(){
   
   for (int i=0;i!=vertices.size();i++){
     WCVertex *vertex = vertices.at(i);
+    //std::cout << "abc1: " << std::endl;
     break_tracks = vertex->BreakTracksAngle(finished_tracks);
+    //std::cout << "abc2: " << std::endl;
     if (break_tracks.size()>0){
 
-      for (int j=1;j!=break_tracks.size();j++){
+      for (int j=1;j<break_tracks.size();j++){
       	tracks.push_back(break_tracks.at(j));
       }
       // Form new vertices
-      for (int j=0;j!=break_tracks.size()-1;j++){
+      for (int j=0;j<break_tracks.size()-1;j++){
       	//WCVertex *vertex2 = FormNewVertex(break_tracks.at(j),break_tracks.at(j+1));
       	WCVertex *vertex2 = new WCVertex(*(break_tracks.at(j)->get_all_cells().back()));
       	vertex2->get_tracks().push_back(break_tracks.at(j));
@@ -3113,7 +3130,7 @@ void WireCell2dToy::ToyTracking::BreakTracks(){
       }
       }
   }
-
+  //std::cout << "abc: " << std::endl;
 
   for (int i=0;i!=NewVertices.size();i++){
     vertices.push_back(NewVertices.at(i));
