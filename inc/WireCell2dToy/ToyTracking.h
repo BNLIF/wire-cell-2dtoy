@@ -6,6 +6,7 @@
 #include "WireCellData/WCShower.h"
 #include "WireCell2dToy/ToyCrawler.h"
 
+
 namespace WireCell2dToy{
   typedef std::map<WireCell::WCTrack*, WireCell::WCVertexSelection> WCT_WCV_Map;
   typedef std::map<WireCell::WCVertex*, WireCell::WCTrackSelection> WCV_WCT_Map;
@@ -65,8 +66,14 @@ namespace WireCell2dToy{
     
     void cosmic_finder_all(WireCell2dToy::ToyCrawler& toycrawler);
     void cosmic_finder_part(WireCell2dToy::ToyCrawler& toycrawler);
+    std::map<WireCell::WCTrack*, std::vector<float>>& get_gt_angle_map(){return tracks_angle_map;};
+    std::map<WireCell::WCTrack*, std::vector<float>>& get_gt_pos_map(){return tracks_pos_map;};
+    void fill_maps();
 
   protected: 
+    std::map<WireCell::WCTrack*, std::vector<float>> tracks_angle_map;
+    std::map<WireCell::WCTrack*, std::vector<float>> tracks_pos_map;
+
     WireCell::WCTrackSelection tracks;
     WireCell::WCVertexSelection vertices;
     WireCell::WCShowerSelection showers;

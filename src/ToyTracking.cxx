@@ -6,6 +6,16 @@
 
 using namespace WireCell;
 
+void WireCell2dToy::ToyTracking::fill_maps(){
+  if (tracks_angle_map.size()==0){
+    for (int i = 0;i!=good_tracks.size();i++){
+      WCTrack *track = good_tracks.at(i);
+      tracks_angle_map[track] = track->get_direction();
+      tracks_pos_map[track] = track->get_position();
+    }
+  }
+}
+
 bool WireCell2dToy::ToyTracking::IsContained(){
   MergeSpaceCellSelection all_cells;
   for (int i=0;i!=tracks.size();i++){
@@ -3092,7 +3102,7 @@ void WireCell2dToy::ToyTracking::BreakTracks(){
     }
   }
 
-  std::cout << "abc: " << std::endl;
+  //std::cout << "abc: " << std::endl;
   // second break the track if there is a direction change ... 
   break_tracks.clear();
   WCTrackSelection finished_tracks;

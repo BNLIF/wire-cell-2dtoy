@@ -6,17 +6,27 @@ using namespace WireCell;
 WireCell2dToy::ToyCosmic::ToyCosmic(WireCell2dToy::ToyTrackingSelection& trackings)
   : trackings(trackings)
 {
+
+  std::cout << "Start Cosmic" << " " << trackings.size() << std::endl;
   ToyTrackingSelection used_trackings;
   cosmic_candidates.clear();
   
+  std::list<ToyTracking*> trackings_list(trackings.begin(),trackings.end());
+  
+
   while(used_trackings.size() != trackings.size()){
+    std::cout << "xin1 " << used_trackings.size() << " " << trackings.size() << std::endl;
     ToyTracking *curr_tracking;
-    for (int i=0;i!=trackings.size();i++){
-      curr_tracking = trackings.at(i);
-      auto it = find(used_trackings.begin(),used_trackings.end(),curr_tracking);
-      if (it == used_trackings.end())
-	break;
-    }
+    // for (int i=start_num;i!=trackings.size();i++){
+    //   curr_tracking = trackings.at(i);
+    //   auto it = find(used_trackings.begin(),used_trackings.end(),curr_tracking);
+    //   if (it == used_trackings.end()){
+    // 	start_num = i+1;
+    // 	break;
+    //   }
+    // }
+    curr_tracking = trackings_list.front();
+    trackings_list.erase(trackings_list.begin());
     used_trackings.push_back(curr_tracking);
     
     //push it in anyway
@@ -26,22 +36,54 @@ WireCell2dToy::ToyCosmic::ToyCosmic(WireCell2dToy::ToyTrackingSelection& trackin
 
     //loop over all the trackings to add in
     int flag = 1;
+    int j_save = 0;
     while(flag){
       flag = 0;
-      for (int i=0;i!=trackings.size();i++){
-	ToyTracking *curr_tracking = trackings.at(i);
-	auto it = find(used_trackings.begin(),used_trackings.end(),curr_tracking);
-	if (it != used_trackings.end()) continue;
-	for (int j=0;j!=cosmic_candidates.back().size();j++){
-	  if (IsConnected(cosmic_candidates.back().at(j),curr_tracking)){
-	    cosmic_candidates.back().push_back(curr_tracking);
-	    used_trackings.push_back(curr_tracking);
+      ToyTrackingSelection saved_trackings;
+      
+      //std::cout << j_save << " " << cosmic_candidates.back().size() << " " << cosmic_candidates.back().at(j_save)->get_good_tracks().size() << std::endl;
+      
+      for (int j=j_save;j!=cosmic_candidates.back().size();j++){
+	for (auto it = trackings_list.begin(); it!= trackings_list.end();it++){
+	  ToyTracking *curr_tracking1 =*it;
+	  if (IsConnected(cosmic_candidates.back().at(j),curr_tracking1)){
+	    //cosmic_candidates.back().push_back(curr_tracking1);
+	    saved_trackings.push_back(curr_tracking1);
+	    it = trackings_list.erase(it);
+	    used_trackings.push_back(curr_tracking1);
 	    flag = 1;
-	    break;
 	  }
 	}
-	if (flag == 1) break;
       }
+	
+      j_save = cosmic_candidates.back().size();
+      cosmic_candidates.back().insert(cosmic_candidates.back().end(),saved_trackings.begin(),saved_trackings.end());
+      
+      
+      
+	
+	
+	   
+	  
+
+      
+      // for (int i=start_num;i!=trackings.size();i++){
+      // 	ToyTracking *curr_tracking = trackings.at(i);
+      // 	auto it = find(used_trackings.begin(),used_trackings.end(),curr_tracking);
+      // 	if (it != used_trackings.end()) continue;
+      // 	for (int j=0;j!=cosmic_candidates.back().size();j++){
+      // 	  if (IsConnected(cosmic_candidates.back().at(j),curr_tracking)){
+      // 	    cosmic_candidates.back().push_back(curr_tracking);
+      // 	    used_trackings.push_back(curr_tracking);
+      // 	    flag = 1;
+      // 	    break;
+      // 	  }
+      // 	}
+      // 	if (flag == 1) flag1 = 1;
+      // }
+      
+      // if (flag1 == 1) flag = 1;
+
     } // end while loop
   }
   
@@ -52,6 +94,7 @@ WireCell2dToy::ToyCosmic::ToyCosmic(WireCell2dToy::ToyTrackingSelection& trackin
     cosmics.push_back(cosmic);
   }
 
+  std::cout << "Merge Cosmic" << " " << cosmic_candidates.size() << std::endl;
 
   //further merge things
   int flag = 1;
@@ -76,6 +119,7 @@ WireCell2dToy::ToyCosmic::ToyCosmic(WireCell2dToy::ToyTrackingSelection& trackin
 	//   break;
 	// }
 	  
+	//	std::cout << "xin2 " << i << " " << j << std::endl;
 	// judge wheter merge
 	float dis = cosmic1->cal_dist(cosmic2);
 	float angle = cosmic1->cal_costh(cosmic2);
@@ -146,6 +190,8 @@ WireCell2dToy::ToyCosmic::ToyCosmic(WireCell2dToy::ToyTrackingSelection& trackin
   }
 
   
+  std::cout << "Check NearBy " << " " << cosmics.size() << " " << nocosmic_trackings.size() << std::endl;
+
   ToyTrackingSelection temp1;
   for (int i=0; i!= nocosmic_trackings.size();i++){
     int flag_remove = 0;
@@ -153,6 +199,7 @@ WireCell2dToy::ToyCosmic::ToyCosmic(WireCell2dToy::ToyTrackingSelection& trackin
     if (nocosmic_trackings.at(i)->IsContained()){
       
       for (int j=0;j!=cosmics.size();j++){
+	//	std::cout << "xin3 " << i << " " << j << std::endl;
   	if (cosmics.at(j)->IsNearBy(nocosmic_trackings.at(i))){
   	  flag_remove = 1;
   	  break;
@@ -182,30 +229,31 @@ bool WireCell2dToy::ToyCosmic::IsConnected(ToyTracking *tracking1, ToyTracking *
   //return false;
   WCTrackSelection& tracking1_tracks = tracking1->get_good_tracks();
   WCTrackSelection& tracking2_tracks = tracking2->get_good_tracks();
+  tracking1->fill_maps();
+  tracking2->fill_maps();
+
+  std::map<WCTrack*, std::vector<float>>& tracks1_angle_map = tracking1->get_gt_angle_map();
+  std::map<WCTrack*, std::vector<float>>& tracks1_pos_map = tracking1->get_gt_pos_map();
+
+  std::map<WCTrack*, std::vector<float>>& tracks2_angle_map = tracking2->get_gt_angle_map();
+  std::map<WCTrack*, std::vector<float>>& tracks2_pos_map = tracking2->get_gt_pos_map();
   
-  std::map<WCTrack*, std::vector<float>> tracks_angle_map;
-  std::map<WCTrack*, std::vector<float>> tracks_pos_map;
   
-  for (int i = 0;i!=tracking1_tracks.size();i++){
-    WCTrack *track = tracking1_tracks.at(i);
-    tracks_angle_map[track] = track->get_direction();
-    tracks_pos_map[track] = track->get_position();
-  }
   
-  for (int i = 0;i!=tracking2_tracks.size();i++){
-    WCTrack *track = tracking2_tracks.at(i);
-    tracks_angle_map[track] = track->get_direction();
-    tracks_pos_map[track] = track->get_position();
-  }
+  // for (int i = 0;i!=tracking2_tracks.size();i++){
+  //   WCTrack *track = tracking2_tracks.at(i);
+  //   tracks_angle_map[track] = track->get_direction();
+  //   tracks_pos_map[track] = track->get_position();
+  // }
 
   for (int i=0;i!=tracking1_tracks.size();i++){
     WCTrack *track1 = tracking1_tracks.at(i);
-    TVector3 dir1(tracks_angle_map[track1].at(0),
-		  tracks_angle_map[track1].at(1),
-		  tracks_angle_map[track1].at(2));
-    TVector3 pos1(tracks_pos_map[track1].at(0),
-		  tracks_pos_map[track1].at(1),
-		  tracks_pos_map[track1].at(2));
+    TVector3 dir1(tracks1_angle_map[track1].at(0),
+		  tracks1_angle_map[track1].at(1),
+		  tracks1_angle_map[track1].at(2));
+    TVector3 pos1(tracks1_pos_map[track1].at(0),
+		  tracks1_pos_map[track1].at(1),
+		  tracks1_pos_map[track1].at(2));
     
     // Point track1_p1(tracks_pos_map[track1].at(0),tracks_pos_map[track1].at(1),tracks_pos_map[track1].at(2));
     // Point track1_p2(tracks_pos_map[track1].at(0) + tracks_direction_map[track1].at(0),
@@ -215,12 +263,12 @@ bool WireCell2dToy::ToyCosmic::IsConnected(ToyTracking *tracking1, ToyTracking *
     
     for (int j=0;j!=tracking2_tracks.size();j++){
       WCTrack *track2 = tracking2_tracks.at(j);
-      TVector3 dir2(tracks_angle_map[track2].at(0),
-		    tracks_angle_map[track2].at(1),
-		    tracks_angle_map[track2].at(2));
-      TVector3 pos2(tracks_pos_map[track2].at(0),
-		    tracks_pos_map[track2].at(1),
-		    tracks_pos_map[track2].at(2));
+      TVector3 dir2(tracks2_angle_map[track2].at(0),
+		    tracks2_angle_map[track2].at(1),
+		    tracks2_angle_map[track2].at(2));
+      TVector3 pos2(tracks2_pos_map[track2].at(0),
+		    tracks2_pos_map[track2].at(1),
+		    tracks2_pos_map[track2].at(2));
 
       TVector3 perp1 = dir1.Cross(dir2);
       TVector3 perp2 = pos1 - pos2;
@@ -256,14 +304,36 @@ bool WireCell2dToy::ToyCosmic::IsConnected(ToyTracking *tracking1, ToyTracking *
 
       // check five cells
       for (int k1 = 0; k1!= track1->get_centerVP_cells().size();k1++){
-	if (k1>=5 && k1 + 5 < track1->get_centerVP_cells().size()) continue;
+	if (k1>=5) break;
 	MergeSpaceCell *mcell1 = track1->get_centerVP_cells().at(k1);
 	for (int k2 = 0; k2!= track2->get_centerVP_cells().size();k2++){
-	  if (k2>=5 && k2 + 5 < track2->get_centerVP_cells().size()) continue;
+	  if (k2>=5 ) break;
+	  MergeSpaceCell *mcell2 = track2->get_centerVP_cells().at(k2);
+	  if (IsConnected(mcell1,mcell2,dis_cut)) return true;
+	}
+	for (int k2 = track2->get_centerVP_cells().size()-6; k2!= track2->get_centerVP_cells().size();k2++){
+	  if (k2<0) continue;
 	  MergeSpaceCell *mcell2 = track2->get_centerVP_cells().at(k2);
 	  if (IsConnected(mcell1,mcell2,dis_cut)) return true;
 	}
       }
+
+      for (int k1 = track1->get_centerVP_cells().size()-6; k1!= track1->get_centerVP_cells().size();k1++){
+	if (k1<0) continue;
+	MergeSpaceCell *mcell1 = track1->get_centerVP_cells().at(k1);
+	for (int k2 = 0; k2!= track2->get_centerVP_cells().size();k2++){
+	  if (k2>=5 ) break;
+	  MergeSpaceCell *mcell2 = track2->get_centerVP_cells().at(k2);
+	  if (IsConnected(mcell1,mcell2,dis_cut)) return true;
+	}
+	for (int k2 = track2->get_centerVP_cells().size()-6; k2!= track2->get_centerVP_cells().size();k2++){
+	  if (k2<0) continue;
+	  MergeSpaceCell *mcell2 = track2->get_centerVP_cells().at(k2);
+	  if (IsConnected(mcell1,mcell2,dis_cut)) return true;
+	}
+      }
+
+      
     }
   }
   
