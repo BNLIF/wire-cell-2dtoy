@@ -527,7 +527,7 @@ WireCell2dToy::ToyTiling::ToyTiling(const WireCell::Slice& slice,WireCell::GeomD
 }
 
 
-void WireCell2dToy::ToyTiling::twoplane_tiling(WireCell::GeomDataSource& gds, std::vector<float>& uplane_rms, std::vector<float>& vplane_rms, std::vector<float>& wplane_rms, WireCell::WireMap& uplane_map, WireCell::WireMap& vplane_map, WireCell::WireMap& wplane_map){
+void WireCell2dToy::ToyTiling::twoplane_tiling(int time, int nrebin, WireCell::GeomDataSource& gds, std::vector<float>& uplane_rms, std::vector<float>& vplane_rms, std::vector<float>& wplane_rms, WireCell::ChirpMap& uplane_map, WireCell::ChirpMap& vplane_map, WireCell::ChirpMap& wplane_map){
   float tolerance = 0.1 * units::mm;
   int ncell = 10000;
   
@@ -628,8 +628,12 @@ void WireCell2dToy::ToyTiling::twoplane_tiling(WireCell::GeomDataSource& gds, st
 	  const GeomWire *n_wire = gds.closest(puv[a1],kYwire);
 	  auto it1 = find(nw_wires.begin(),nw_wires.end(),n_wire);
 	  auto it2 = wplane_map.find(n_wire->index());
-	  if (it1 == nw_wires.end() && it2 == wplane_map.end()){
 
+	  	
+	  //if (it1 == nw_wires.end() && it2 == wplane_map.end()){
+	  if (it1 == nw_wires.end() && 
+	      (it2 == wplane_map.end()
+	       || it2!=wplane_map.end() && (time > wplane_map[n_wire->index()].second /nrebin || time + 1 < wplane_map[n_wire->index()].first /nrebin ) )){
 	    
 	    nw_wires.push_back(n_wire);
 	    dis_w[0] = gds.wire_dist(*n_wire) - w_pitch/2.;
@@ -813,7 +817,12 @@ void WireCell2dToy::ToyTiling::twoplane_tiling(WireCell::GeomDataSource& gds, st
   	  const GeomWire *n_wire = gds.closest(puw[a1],kVwire);
   	  auto it1 = find(nv_wires.begin(),nv_wires.end(),n_wire);
 	  auto it2 = vplane_map.find(n_wire->index());
-  	  if (it1 == nv_wires.end() && it2 == vplane_map.end()){
+
+	   if (it1 == nv_wires.end() && 
+	      (it2 == vplane_map.end()
+	       || it2!=vplane_map.end() && (time > vplane_map[n_wire->index()].second /nrebin || time + 1 < vplane_map[n_wire->index()].first /nrebin ) )){
+
+	     //  	  if (it1 == nv_wires.end() && it2 == vplane_map.end()){
   	    nv_wires.push_back(n_wire);
   	    dis_v[0] = gds.wire_dist(*n_wire) - v_pitch/2.;
   	    dis_v[1] = dis_v[0] + v_pitch;
@@ -985,7 +994,9 @@ void WireCell2dToy::ToyTiling::twoplane_tiling(WireCell::GeomDataSource& gds, st
   	  const GeomWire *n_wire = gds.closest(pwv[a1],kUwire);
   	  auto it1 = find(nu_wires.begin(),nu_wires.end(),n_wire);
 	  auto it2 = uplane_map.find(n_wire->index());
-  	  if (it1 == nu_wires.end() && it2 == uplane_map.end()){
+  	  if (it1 == nu_wires.end() && 
+	      (it2 == uplane_map.end()
+	       || it2!=uplane_map.end() && (time > uplane_map[n_wire->index()].second /nrebin || time + 1 < uplane_map[n_wire->index()].first /nrebin ) )){
   	    nu_wires.push_back(n_wire);
   	    dis_u[0] = gds.wire_dist(*n_wire) - u_pitch/2.;
   	    dis_u[1] = dis_u[0] + u_pitch;

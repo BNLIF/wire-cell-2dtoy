@@ -146,13 +146,16 @@ int main(int argc, char* argv[])
     
   }
 
-  WireMap& uplane_map = data_fds.get_u_map();
-  WireMap& vplane_map = data_fds.get_v_map();
-  WireMap& wplane_map = data_fds.get_w_map();
+  // WireMap& uplane_map = data_fds.get_u_map();
+  // WireMap& vplane_map = data_fds.get_v_map();
+  // WireMap& wplane_map = data_fds.get_w_map();
+
+  ChirpMap& uplane_map = data_fds.get_u_cmap();
+  ChirpMap& vplane_map = data_fds.get_v_cmap();
+  ChirpMap& wplane_map = data_fds.get_w_cmap();
 
   // std::cout << uplane_map.size() << " " << vplane_map.size() << " " << wplane_map.size() << std::endl;
-  
-  
+    
   cout << "Deconvolution with Gaussian filter" << endl;
   WireCell2dToy::DataSignalGausFDS gaus_fds(data_fds,gds,total_time_bin/nrebin,max_events,toffset_1,toffset_2,toffset_3); // gaussian smearing for charge estimation
   if (save_file != 2){
@@ -177,31 +180,31 @@ int main(int argc, char* argv[])
   std::vector<float>& vplane_rms = wien_fds.get_vplane_rms();
   std::vector<float>& wplane_rms = wien_fds.get_wplane_rms();
 
-  // hack for now ...  remove the very busy wires ... 
-  for (int i=0;i!=uplane_rms.size();i++){
-    //cout << "U " << i << " " << uplane_rms.at(i) << endl;
-    if (uplane_rms.at(i) > 1500) {
-      uplane_rms.at(i) *=2;
-      uplane_map.erase(i);
-    }
-  }
-  for (int i=0;i!=vplane_rms.size();i++){
-    //cout << "V " << i << " " << vplane_rms.at(i) << endl;
-    if (vplane_rms.at(i) > 2000 && vplane_rms.at(i)<3000){
-      vplane_rms.at(i) *=2;
-      vplane_map.erase(i);
-    }else if (vplane_rms.at(i)>=3000){
-      vplane_rms.at(i) *=10;
-      vplane_map.erase(i);
-    }
-  }
-  for (int i=0;i!=wplane_rms.size();i++){
-    //cout << "W " << i << " " << wplane_rms.at(i) << endl;
-    if (wplane_rms.at(i) > 1000) {
-      wplane_rms.at(i) *=2;
-      wplane_map.erase(i);
-    }
-  }
+  // // hack for now ...  remove the very busy wires ... 
+  // for (int i=0;i!=uplane_rms.size();i++){
+  //   //cout << "U " << i << " " << uplane_rms.at(i) << endl;
+  //   if (uplane_rms.at(i) > 1500) {
+  //     uplane_rms.at(i) *=2;
+  //     uplane_map.erase(i);
+  //   }
+  // }
+  // for (int i=0;i!=vplane_rms.size();i++){
+  //   //cout << "V " << i << " " << vplane_rms.at(i) << endl;
+  //   if (vplane_rms.at(i) > 2000 && vplane_rms.at(i)<3000){
+  //     vplane_rms.at(i) *=2;
+  //     vplane_map.erase(i);
+  //   }else if (vplane_rms.at(i)>=3000){
+  //     vplane_rms.at(i) *=10;
+  //     vplane_map.erase(i);
+  //   }
+  // }
+  // for (int i=0;i!=wplane_rms.size();i++){
+  //   //cout << "W " << i << " " << wplane_rms.at(i) << endl;
+  //   if (wplane_rms.at(i) > 1000) {
+  //     wplane_rms.at(i) *=2;
+  //     wplane_map.erase(i);
+  //   }
+  // }
   
 
   GeomWireSelection wires_u = gds.wires_in_plane(WirePlaneType_t(0));
@@ -266,7 +269,7 @@ int main(int argc, char* argv[])
     toytiling[i] = new WireCell2dToy::ToyTiling(slice,gds,0.15,0.2,0.1,threshold_ug,threshold_vg, threshold_wg,&uplane_rms, &vplane_rms, &wplane_rms);
 
     if (two_plane)
-      toytiling[i]->twoplane_tiling(gds,uplane_rms,vplane_rms,wplane_rms, uplane_map, vplane_map, wplane_map);
+      toytiling[i]->twoplane_tiling(i,nrebin,gds,uplane_rms,vplane_rms,wplane_rms, uplane_map, vplane_map, wplane_map);
 
 
     GeomCellSelection allcell = toytiling[i]->get_allcell();
