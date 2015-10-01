@@ -103,7 +103,7 @@ int main(int argc, char* argv[])
   }
   
   //float unit_dis = 1.01483;  // 58KV @ 226.5 V/cm
-  float unit_dis = 1.14753;  // 58KV @ 226.5 V/cm
+  float unit_dis = 1.14753;  // 70 KV @ 226.5 V/cm
   float toffset_1=-(1.834-1.647)+0.3;  // time offset between u/v 
   float toffset_2=-(1.834+1.555-1.539-1.647)+0.7; // time offset between u/w
   float toffset_3=-0.5; //overall time shift
@@ -262,7 +262,7 @@ int main(int argc, char* argv[])
     sds.jump(i);
     WireCell::Slice slice = sds.get();
 
-    
+    //cout << i << " " << slice.group().size() << std::endl;
     toytiling[i] = new WireCell2dToy::ToyTiling(slice,gds,0.15,0.2,0.1,threshold_ug,threshold_vg, threshold_wg,&uplane_rms, &vplane_rms, &wplane_rms);
 
     if (two_plane)
@@ -274,7 +274,7 @@ int main(int argc, char* argv[])
 
     cout << i << " " << allcell.size() << " " << allwire.size() << endl;
 
-    mergetiling[i] = new WireCell2dToy::MergeToyTiling(*toytiling[i],i,3,1);
+    mergetiling[i] = new WireCell2dToy::MergeToyTiling(*toytiling[i],i,3);
     
    
     GeomCellSelection allmcell = mergetiling[i]->get_allcell();
