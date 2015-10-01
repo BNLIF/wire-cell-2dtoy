@@ -306,13 +306,27 @@ int WireCell2dToy::DataSignalWienFDS::jump(int frame_number){
 	end = wmap[chid-nwire_u-nwire_v].second;
       }
     }
-    
-    
-    
+        
     for (int i=0;i!=htemp->GetNbinsX();i++){
       if (i < start || i > end){
-     	rms1 += pow(htemp->GetBinContent(i+1),2);
+     	rms += pow(htemp->GetBinContent(i+1),2);
      	rms2 ++;
+      }
+    }
+    if (rms2!=0){
+      rms = sqrt(rms/rms2);
+    }else{
+      rms = 0;   
+    }
+
+    //try to exclude signal
+    rms2 = 0;
+     for (int i=0;i!=htemp->GetNbinsX();i++){
+      if (i < start || i > end){
+	if (htemp->GetBinContent(i+1) < 5*rms){
+	  rms1 += pow(htemp->GetBinContent(i+1),2);
+	  rms2 ++;
+	}
       }
     }
     if (rms2!=0){
@@ -320,6 +334,7 @@ int WireCell2dToy::DataSignalWienFDS::jump(int frame_number){
     }else{
       rms1 = 0;   
     }
+
 
     if (chid < nwire_u){
       uplane_rms[chid] = rms1*scale;
