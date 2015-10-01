@@ -3,6 +3,7 @@
 
 #include "WireCellNav/FrameDataSource.h"
 #include "WireCellNav/GeomDataSource.h"
+#include "WireCellData/GeomWire.h"
 #include "TH1F.h"
 #include "TGraph.h"
 
@@ -10,7 +11,7 @@ namespace WireCell2dToy {
   class DataSignalWienFDS : public WireCell::FrameDataSource
   {
   public:
-    DataSignalWienFDS(WireCell::FrameDataSource& fds, const WireCell::GeomDataSource& gds, int bins_per_frame1 = 9600, int nframes_total = -1, float time_offset_uv = 0, float time_offset_uw = 0, float overall_time_offset = 0);
+    DataSignalWienFDS(WireCell::FrameDataSource& fds, const WireCell::GeomDataSource& gds, WireCell::ChirpMap& umap, WireCell::ChirpMap& vmap, WireCell::ChirpMap& wmap, int bins_per_frame1 = 9600, int nframes_total = -1, float time_offset_uv = 0, float time_offset_uw = 0, float overall_time_offset = 0);
     ~DataSignalWienFDS();
 
     virtual int size() const;
@@ -27,6 +28,10 @@ namespace WireCell2dToy {
     const WireCell::GeomDataSource& gds;
     int  max_frames;
     int nbin;
+
+    WireCell::ChirpMap& umap;
+    WireCell::ChirpMap& vmap;
+    WireCell::ChirpMap& wmap;
 
     float time_offset_uv;
     float time_offset_uw;

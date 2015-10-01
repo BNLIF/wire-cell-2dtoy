@@ -167,7 +167,7 @@ int main(int argc, char* argv[])
   }
 
   cout << "Deconvolution with Wiener filter" << endl; 
-  WireCell2dToy::DataSignalWienFDS wien_fds(data_fds,gds,total_time_bin/nrebin,max_events,toffset_1,toffset_2,toffset_3); // weiner smearing for hit identification
+  WireCell2dToy::DataSignalWienFDS wien_fds(data_fds,gds,uplane_map, vplane_map, wplane_map, total_time_bin/nrebin,max_events,toffset_1,toffset_2,toffset_3); // weiner smearing for hit identification
   if (save_file !=2 ){
     wien_fds.jump(eve_num);
     if (save_file == 1)

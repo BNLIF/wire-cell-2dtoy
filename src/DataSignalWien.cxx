@@ -8,13 +8,16 @@
 
 using namespace WireCell;
 
-WireCell2dToy::DataSignalWienFDS::DataSignalWienFDS(WireCell::FrameDataSource& fds, const WireCell::GeomDataSource& gds,int bins_per_frame1, int nframes_total, float time_offset_uv, float time_offset_uw, float overall_time_offset)
+WireCell2dToy::DataSignalWienFDS::DataSignalWienFDS(WireCell::FrameDataSource& fds, const WireCell::GeomDataSource& gds,WireCell::ChirpMap& umap, WireCell::ChirpMap& vmap, WireCell::ChirpMap& wmap, int bins_per_frame1, int nframes_total, float time_offset_uv, float time_offset_uw, float overall_time_offset)
   : fds(fds)
   , gds(gds)
   , max_frames(nframes_total)
   , time_offset_uv(time_offset_uv)
   , time_offset_uw(time_offset_uw)
   , overall_time_offset(overall_time_offset)
+  , umap(umap)
+  , vmap(vmap)
+  , wmap(wmap)
 {  
   bins_per_frame = bins_per_frame1;
 
@@ -284,17 +287,32 @@ int WireCell2dToy::DataSignalWienFDS::jump(int frame_number){
     }
     frame.traces.push_back(t);
 
-     //calculate rms, this is to be used for threshold purpose
+    //calculate rms, this is to be used for threshold purpose
     float rms = 0, rms1 = 0,rms2 = 0;
-    for (int i=0;i!=htemp->GetNbinsX();i++){
-      rms += pow(htemp->GetBinContent(i+1),2);
+    int start=-1, end=-1;
+    if (chid < nwire_u){
+      if (umap.find(chid)!=umap.end()){
+	start = umap[chid].first;
+	end = umap[chid].second;
+      }
+    }else if (chid < nwire_u + nwire_v){
+      if (vmap.find(chid-nwire_u)!=vmap.end()){
+	start = vmap[chid-nwire_u].first;
+	end = vmap[chid-nwire_u].second;
+      }
+    }else{
+      if (wmap.find(chid-nwire_u-nwire_v)!=wmap.end()){
+	start = wmap[chid-nwire_u-nwire_v].first;
+	end = wmap[chid-nwire_u-nwire_v].second;
+      }
     }
-    rms = sqrt(rms/htemp->GetNbinsX());
-
+    
+    
+    
     for (int i=0;i!=htemp->GetNbinsX();i++){
-      if (fabs(htemp->GetBinContent(i+1)) < 6 * rms){
-    	rms1 += pow(htemp->GetBinContent(i+1),2);
-    	rms2 ++;
+      if (i < start || i > end){
+     	rms1 += pow(htemp->GetBinContent(i+1),2);
+     	rms2 ++;
       }
     }
     if (rms2!=0){

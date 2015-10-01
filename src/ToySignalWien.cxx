@@ -8,7 +8,7 @@
 
 using namespace WireCell;
 
-WireCell2dToy::ToySignalWienFDS::ToySignalWienFDS(WireCell::FrameDataSource& fds, const WireCell::GeomDataSource& gds,int bins_per_frame1, int nframes_total, float time_offset_uv, float time_offset_uw, float overall_time_offset)
+WireCell2dToy::ToySignalWienFDS::ToySignalWienFDS(WireCell::FrameDataSource& fds, const WireCell::GeomDataSource& gds, int bins_per_frame1, int nframes_total, float time_offset_uv, float time_offset_uw, float overall_time_offset)
   : fds(fds)
   , gds(gds)
   , max_frames(nframes_total)
