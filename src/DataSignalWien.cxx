@@ -323,7 +323,7 @@ int WireCell2dToy::DataSignalWienFDS::jump(int frame_number){
     rms2 = 0;
      for (int i=0;i!=htemp->GetNbinsX();i++){
       if (i < start || i > end){
-	if (htemp->GetBinContent(i+1) < 5*rms){
+	if (htemp->GetBinContent(i+1) < 6*rms){
 	  rms1 += pow(htemp->GetBinContent(i+1),2);
 	  rms2 ++;
 	}

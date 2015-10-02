@@ -632,8 +632,7 @@ void WireCell2dToy::ToyTiling::twoplane_tiling(int time, int nrebin, WireCell::G
 	  	
 	  //if (it1 == nw_wires.end() && it2 == wplane_map.end()){
 	  if (it1 == nw_wires.end() && 
-	      (it2 == wplane_map.end()
-	       || it2!=wplane_map.end() && (time > wplane_map[n_wire->index()].second /nrebin || time + 1 < wplane_map[n_wire->index()].first /nrebin ) )){
+	      (it2!=wplane_map.end() && (time <= wplane_map[n_wire->index()].second /nrebin && time >= wplane_map[n_wire->index()].first /nrebin ) )){
 	    
 	    nw_wires.push_back(n_wire);
 	    dis_w[0] = gds.wire_dist(*n_wire) - w_pitch/2.;
@@ -819,8 +818,7 @@ void WireCell2dToy::ToyTiling::twoplane_tiling(int time, int nrebin, WireCell::G
 	  auto it2 = vplane_map.find(n_wire->index());
 
 	   if (it1 == nv_wires.end() && 
-	      (it2 == vplane_map.end()
-	       || it2!=vplane_map.end() && (time > vplane_map[n_wire->index()].second /nrebin || time + 1 < vplane_map[n_wire->index()].first /nrebin ) )){
+	       (it2!=vplane_map.end() && (time <= vplane_map[n_wire->index()].second /nrebin && time >= vplane_map[n_wire->index()].first /nrebin ) )){
 
 	     //  	  if (it1 == nv_wires.end() && it2 == vplane_map.end()){
   	    nv_wires.push_back(n_wire);
@@ -995,8 +993,7 @@ void WireCell2dToy::ToyTiling::twoplane_tiling(int time, int nrebin, WireCell::G
   	  auto it1 = find(nu_wires.begin(),nu_wires.end(),n_wire);
 	  auto it2 = uplane_map.find(n_wire->index());
   	  if (it1 == nu_wires.end() && 
-	      (it2 == uplane_map.end()
-	       || it2!=uplane_map.end() && (time > uplane_map[n_wire->index()].second /nrebin || time + 1 < uplane_map[n_wire->index()].first /nrebin ) )){
+	      (it2!=uplane_map.end() && (time >= uplane_map[n_wire->index()].first /nrebin && time <= uplane_map[n_wire->index()].second /nrebin ) )){
   	    nu_wires.push_back(n_wire);
   	    dis_u[0] = gds.wire_dist(*n_wire) - u_pitch/2.;
   	    dis_u[1] = dis_u[0] + u_pitch;
