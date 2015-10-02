@@ -614,7 +614,7 @@ void WireCell2dToy::ToyTiling::twoplane_tiling(int time, int nrebin, WireCell::G
       //      std::cout << i << " " << j << " " << flag << std::endl;
 
       if (flag == 1){
-	if (qt1!=threeplane_wires.end() && qt2!=threeplane_wires.end()) continue;
+	if (qt1!=threeplane_wires.end() || qt2!=threeplane_wires.end()) continue;
 
 	// start to fill in
 	std::vector<Vector> puv(5);
@@ -801,7 +801,7 @@ void WireCell2dToy::ToyTiling::twoplane_tiling(int time, int nrebin, WireCell::G
       
       
       if (flag == 1){
-	if (qt1!=threeplane_wires.end() && qt2!=threeplane_wires.end()) continue;
+	if (qt1!=threeplane_wires.end() || qt2!=threeplane_wires.end()) continue;
 
 
   	// start to fill in
@@ -977,7 +977,7 @@ void WireCell2dToy::ToyTiling::twoplane_tiling(int time, int nrebin, WireCell::G
       
 
       if (flag == 1){
-	if (qt1!=threeplane_wires.end() && qt2!=threeplane_wires.end()) continue;
+       	if (qt1!=threeplane_wires.end() || qt2!=threeplane_wires.end()) continue;
 
 
   	// start to fill in
