@@ -76,26 +76,28 @@ WireCell2dToy::DataSignalGausFDS::DataSignalGausFDS(WireCell::FrameDataSource& f
   
   for (int i=0; i!=nbin; i++){  
     double time = hur->GetBinCenter(i+1)/2.-50 ;
-
-    double x = time-overall_time_offset;
+    float scale = 0.86;
+    float scale_u = 1.56/1.03;
+    float scale_v = 1.21*1.06/1.025;
+    double x = scale*(time-overall_time_offset);
     if (x > -35 && x  < 15){
       if (gu->Eval(x) > 0 && x < 0){
-	hur->SetBinContent(i+1,gu->Eval(x)*0.5/0.8);
+	hur->SetBinContent(i+1,gu->Eval(x)*0.5/0.8/scale_u);
       }else{
-	hur->SetBinContent(i+1,gu->Eval(x)/0.8);
+	hur->SetBinContent(i+1,gu->Eval(x)/0.8/scale_u);
       }
     }
 
-    x = time-time_offset_uv-overall_time_offset;
+    x = scale*(time-time_offset_uv-overall_time_offset);
     if (x > -35 && x  < 15){
       if (gv->Eval(x) > 0 && x < 0){
-	hvr->SetBinContent(i+1,gv->Eval(x)*0.6);
+	hvr->SetBinContent(i+1,gv->Eval(x)*0.6/scale_v);
       }else{
-	hvr->SetBinContent(i+1,gv->Eval(x));
+	hvr->SetBinContent(i+1,gv->Eval(x)/scale_v);
       }
     }
     
-    x = time-time_offset_uw-overall_time_offset;
+    x = scale*(time-time_offset_uw-overall_time_offset);
     if (x > -35 && x  < 15){
       hwr->SetBinContent(i+1,gw->Eval(x));
     } 

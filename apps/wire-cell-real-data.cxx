@@ -60,6 +60,8 @@ int main(int argc, char* argv[])
 
   int two_plane = 0;
   int save_file = 0;
+  int nt_off1 = 0;
+  int nt_off2 = 0;
   for(Int_t i = 1; i != argc; i++){
      switch(argv[i][1]){
      case 't':
@@ -67,6 +69,12 @@ int main(int argc, char* argv[])
        break;
      case 's':
        save_file = atoi(&argv[i][2]); 
+       break;
+     case 'a':
+       nt_off1 = atoi(&argv[i][2]);
+       break;
+     case 'b':
+       nt_off2 = atoi(&argv[i][2]);
        break;
      }
   }
@@ -104,8 +112,8 @@ int main(int argc, char* argv[])
   
   //float unit_dis = 1.01483;  // 58KV @ 226.5 V/cm
   float unit_dis = 1.14753;  // 70 KV @ 226.5 V/cm
-  float toffset_1=-(1.834-1.647)+0.3;  // time offset between u/v 
-  float toffset_2=-(1.834+1.555-1.539-1.647)+0.7; // time offset between u/w
+  float toffset_1=-(1.834-1.647) -0.1;//+ 0.1 + (nt_off1 * 0.1 - 0.5 );  // time offset between u/v 
+  float toffset_2=-(1.834+1.555-1.539-1.647) +0.1;//+ 0.3 + (nt_off2*0.2 - 1); // time offset between u/w
   float toffset_3=-0.5; //overall time shift
   int total_time_bin=9592;
   int recon_threshold = 2000;
@@ -266,7 +274,7 @@ int main(int argc, char* argv[])
     WireCell::Slice slice = sds.get();
 
     //cout << i << " " << slice.group().size() << std::endl;
-    toytiling[i] = new WireCell2dToy::ToyTiling(slice,gds,0.15,0.2,0.1,threshold_ug,threshold_vg, threshold_wg,&uplane_rms, &vplane_rms, &wplane_rms);
+    toytiling[i] = new WireCell2dToy::ToyTiling(slice,gds,0.15,0.2,0.1,threshold_ug,threshold_vg, threshold_wg, &uplane_rms, &vplane_rms, &wplane_rms);
 
     if (two_plane)
       toytiling[i]->twoplane_tiling(i,nrebin,gds,uplane_rms,vplane_rms,wplane_rms, uplane_map, vplane_map, wplane_map);
@@ -441,7 +449,7 @@ int main(int argc, char* argv[])
   cout << "Summary: " << ncount << " " << ncount_mcell << " " << ncount_mcell_cluster << endl;
   
 
-  TFile *file = new TFile(Form("%d_%d_%d.root",run_no,subrun_no,eve_num),"RECREATE");
+  TFile *file = new TFile(Form("%d_%d.root",run_no,eve_num),"RECREATE");
   TTree *t_rec = new TTree("T_rec","T_rec");
   TTree *t_rec_charge = new TTree("T_rec_charge","T_rec_charge");
   // TTree *t_rec_charge_blob = new TTree("T_rec_charge_blob","T_rec_charge_blob");
