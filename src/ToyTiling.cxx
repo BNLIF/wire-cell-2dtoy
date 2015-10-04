@@ -626,6 +626,7 @@ void WireCell2dToy::ToyTiling::twoplane_tiling(int time, int nrebin, WireCell::G
 	
 	for (int a1 = 0;a1!=5;a1++){
 	  const GeomWire *n_wire = gds.closest(puv[a1],kYwire);
+	  if (n_wire == 0) continue;
 	  auto it1 = find(nw_wires.begin(),nw_wires.end(),n_wire);
 	  auto it2 = wplane_map.find(n_wire->index());
 
@@ -814,6 +815,7 @@ void WireCell2dToy::ToyTiling::twoplane_tiling(int time, int nrebin, WireCell::G
 	
   	for (int a1 = 0;a1!=5;a1++){
   	  const GeomWire *n_wire = gds.closest(puw[a1],kVwire);
+	  if (n_wire == 0 ) continue;
   	  auto it1 = find(nv_wires.begin(),nv_wires.end(),n_wire);
 	  auto it2 = vplane_map.find(n_wire->index());
 
@@ -990,6 +992,7 @@ void WireCell2dToy::ToyTiling::twoplane_tiling(int time, int nrebin, WireCell::G
 	
   	for (int a1 = 0;a1!=5;a1++){
   	  const GeomWire *n_wire = gds.closest(pwv[a1],kUwire);
+	  if (n_wire ==0 ) continue;
   	  auto it1 = find(nu_wires.begin(),nu_wires.end(),n_wire);
 	  auto it2 = uplane_map.find(n_wire->index());
   	  if (it1 == nu_wires.end() && 
