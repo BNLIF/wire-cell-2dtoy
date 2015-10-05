@@ -606,7 +606,9 @@ void WireCell2dToy::ToyMatrixMarkov::Iterate(WireCell2dToy::ToyMatrixKalman &toy
 	std::vector<int> already_removed = toykalman.Get_already_removed();
 	already_removed.push_back(i);
 	WireCell2dToy::ToyMatrixKalman kalman(already_removed,toykalman.Get_no_need_remove(),*toymatrix,0);
-	
+	// this part seems to be able to improve
+	// to get the first solution, one should not take too much time ...
+	// consider to improve in the future ... 
 	Iterate(kalman);
 	
 	toykalman.Get_no_need_remove().push_back(i);
