@@ -78,66 +78,101 @@ WireCell2dToy::ToyMatrixMarkov::ToyMatrixMarkov(WireCell2dToy::ToyMatrix &toycur
   find_subset(*toymatrixkalman,toycur,use_time);
   already_removed.clear();
   
+  std::cout << use_time.size() << std::endl;
   // recalculate
   delete toymatrixkalman;
   toymatrixkalman = new WireCell2dToy::ToyMatrixKalman(already_removed, use_time, toycur,1,0);
   toymatrix->Set_Solve_Flag(0);
   toymatrix->Set_chi2(-1);
 
-
-  if (allmcell_c.size()<50){
-    while (ncount < 1e4 
-	   && (cur_chi2 > 5*(cur_dof+0.1) || ncount < 6000) 
-	   && (cur_chi2 > 4*(cur_dof+0.1) || ncount < 3000) 
-	   && (cur_chi2 > 3*(cur_dof+0.1) || ncount < 1500) 
-	   && (cur_chi2 > 2*(cur_dof+0.1) || ncount < 800)
-	   && (cur_chi2 > 1*(cur_dof+0.1) || ncount < 10)
-	   ){
-      if (ncount == 1 || (ncount % 1000 ==0&&ncount >0) )
-	std::cout << "MCMC: " << ncount << " " << cur_chi2 << " " << cur_dof << std::endl;
-      
-      make_guess();
-      next_chi2 = toymatrix->Get_Chi2();
-      next_dof = toymatrix->Get_ndf();
+  if (use_time.size() !=0){
+    std::cout << "Start making guesses " << std::endl;
+    if (allmcell_c.size()<50){
+      while (ncount < 1e4 
+	     && (cur_chi2 > 5*(cur_dof+0.1) || ncount < 6000) 
+	     && (cur_chi2 > 4*(cur_dof+0.1) || ncount < 3000) 
+	     && (cur_chi2 > 3*(cur_dof+0.1) || ncount < 1500) 
+	     && (cur_chi2 > 2*(cur_dof+0.1) || ncount < 800)
+	     && (cur_chi2 > 1*(cur_dof+0.1) || ncount < 10)
+	     ){
+	if (ncount == 1 || (ncount % 1000 ==0&&ncount >0) )
+	  std::cout << "MCMC: " << ncount << " " << cur_chi2 << " " << cur_dof << std::endl;
+	
+	make_guess();
+	next_chi2 = toymatrix->Get_Chi2();
+	next_dof = toymatrix->Get_ndf();
+      }
+    }else if (allmcell_c.size()<75){
+      while (ncount < 5000 
+	     && (cur_chi2 > 5*(cur_dof+0.1) || ncount < 6000) 
+	     && (cur_chi2 > 4*(cur_dof+0.1) || ncount < 3000) 
+	     && (cur_chi2 > 3*(cur_dof+0.1) || ncount < 1500) 
+	     && (cur_chi2 > 2*(cur_dof+0.1) || ncount < 800)
+	     && (cur_chi2 > 1*(cur_dof+0.1) || ncount < 10)
+	     ){
+	if (ncount == 1 || (ncount % 1000 ==0&&ncount >0) )
+	  std::cout << "MCMC: " << ncount << " " << cur_chi2 << " " << cur_dof << std::endl;
+	
+	make_guess();
+	next_chi2 = toymatrix->Get_Chi2();
+	next_dof = toymatrix->Get_ndf();
+      }
+    }else if (allmcell_c.size()<110){
+      while (ncount < 2000
+	     && (cur_chi2 > 5*(cur_dof+0.1) || ncount < 6000) 
+	     && (cur_chi2 > 4*(cur_dof+0.1) || ncount < 3000) 
+	     && (cur_chi2 > 3*(cur_dof+0.1) || ncount < 1500) 
+	     && (cur_chi2 > 2*(cur_dof+0.1) || ncount < 800)
+	     && (cur_chi2 > 1*(cur_dof+0.1) || ncount < 10)
+	     ){
+	if (ncount == 1 || (ncount % 1000 ==0&&ncount >0) )
+	  std::cout << "MCMC: " << ncount << " " << cur_chi2 << " " << cur_dof << std::endl;
+	
+	make_guess();
+	next_chi2 = toymatrix->Get_Chi2();
+	next_dof = toymatrix->Get_ndf();
+      }
+    }else if (allmcell_c.size()<150){
+      for (int i=0;i!=200;i++){
+	make_guess();
+	next_chi2 = toymatrix->Get_Chi2();
+	next_dof = toymatrix->Get_ndf();
+      }
     }
-  }else if (allmcell_c.size()<75){
-    while (ncount < 5000 
-	   && (cur_chi2 > 5*(cur_dof+0.1) || ncount < 6000) 
-	   && (cur_chi2 > 4*(cur_dof+0.1) || ncount < 3000) 
-	   && (cur_chi2 > 3*(cur_dof+0.1) || ncount < 1500) 
-	   && (cur_chi2 > 2*(cur_dof+0.1) || ncount < 800)
-	   && (cur_chi2 > 1*(cur_dof+0.1) || ncount < 10)
-	   ){
-      if (ncount == 1 || (ncount % 1000 ==0&&ncount >0) )
-	std::cout << "MCMC: " << ncount << " " << cur_chi2 << " " << cur_dof << std::endl;
-      
-      make_guess();
-      next_chi2 = toymatrix->Get_Chi2();
-      next_dof = toymatrix->Get_ndf();
-    }
-  }else if (allmcell_c.size()<110){
-    while (ncount < 2000
-	   && (cur_chi2 > 5*(cur_dof+0.1) || ncount < 6000) 
-	   && (cur_chi2 > 4*(cur_dof+0.1) || ncount < 3000) 
-	   && (cur_chi2 > 3*(cur_dof+0.1) || ncount < 1500) 
-	   && (cur_chi2 > 2*(cur_dof+0.1) || ncount < 800)
-	   && (cur_chi2 > 1*(cur_dof+0.1) || ncount < 10)
-	   ){
-      if (ncount == 1 || (ncount % 1000 ==0&&ncount >0) )
-	std::cout << "MCMC: " << ncount << " " << cur_chi2 << " " << cur_dof << std::endl;
-      
-      make_guess();
-      next_chi2 = toymatrix->Get_Chi2();
-      next_dof = toymatrix->Get_ndf();
-    }
-  }else if (allmcell_c.size()<150){
-    for (int i=0;i!=200;i++){
-      make_guess();
-      next_chi2 = toymatrix->Get_Chi2();
-      next_dof = toymatrix->Get_ndf();
+  
+  }else{
+    if (allmcell_c.size()<30){
+      while (ncount < 1e4 
+	     && (cur_chi2 > 5*(cur_dof+0.1) || ncount < 6000) 
+	     && (cur_chi2 > 4*(cur_dof+0.1) || ncount < 3000) 
+	     && (cur_chi2 > 3*(cur_dof+0.1) || ncount < 1500) 
+	     && (cur_chi2 > 2*(cur_dof+0.1) || ncount < 800)
+	     && (cur_chi2 > 1*(cur_dof+0.1) || ncount < 10)
+	     ){
+	if (ncount == 1 || (ncount % 1000 ==0&&ncount >0) )
+	  std::cout << "MCMC: " << ncount << " " << cur_chi2 << " " << cur_dof << std::endl;
+	
+	make_guess();
+	next_chi2 = toymatrix->Get_Chi2();
+	next_dof = toymatrix->Get_ndf();
+      }
+    }else if (allmcell_c.size()<60){
+      while (ncount < 5000 
+	     && (cur_chi2 > 5*(cur_dof+0.1) || ncount < 6000) 
+	     && (cur_chi2 > 4*(cur_dof+0.1) || ncount < 3000) 
+	     && (cur_chi2 > 3*(cur_dof+0.1) || ncount < 1500) 
+	     && (cur_chi2 > 2*(cur_dof+0.1) || ncount < 800) 
+	     && (cur_chi2 > 1*(cur_dof+0.1) || ncount < 10) 
+	     ){
+	if (ncount == 1 || (ncount % 1000 ==0&&ncount >0) )
+	  std::cout << "MCMC: " << ncount << " " << cur_chi2 << " " << cur_dof << std::endl;
+	
+	make_guess();
+	next_chi2 = toymatrix->Get_Chi2();
+	next_dof = toymatrix->Get_ndf();
+      }
     }
   }
-  
 }
 
 
@@ -209,68 +244,102 @@ WireCell2dToy::ToyMatrixMarkov::ToyMatrixMarkov(WireCell2dToy::ToyMatrix &toybef
   find_subset(*toymatrixkalman,toycur,use_time);
   already_removed.clear();
   
+  //std::cout << use_time.size() << std::endl;
   // recalculate
   delete toymatrixkalman;
   toymatrixkalman = new WireCell2dToy::ToyMatrixKalman(already_removed, use_time, toycur,1,0);
   toymatrix->Set_Solve_Flag(0);
   toymatrix->Set_chi2(-1);
 
-
-  if (allmcell_c.size()<50){
-    while (ncount < 1e4 
-	   && (cur_chi2 > 5*(cur_dof+0.1) || ncount < 6000) 
-	   && (cur_chi2 > 4*(cur_dof+0.1) || ncount < 3000) 
-	   && (cur_chi2 > 3*(cur_dof+0.1) || ncount < 1500) 
-	   && (cur_chi2 > 2*(cur_dof+0.1) || ncount < 800) 
-	   && (cur_chi2 > 1*(cur_dof+0.1) || ncount < 10) 
-	   ){
-      if (ncount == 1 || (ncount % 1000 ==0&&ncount >0) )
-	std::cout << "MCMC: " << ncount << " " << cur_chi2 << " " << cur_dof << std::endl;
-      
-      make_guess();
-      next_chi2 = toymatrix->Get_Chi2();
-      next_dof = toymatrix->Get_ndf();
+  if (use_time.size() != 0 ){
+    
+    std::cout << "Start making guesses " << std::endl;
+    if (allmcell_c.size()<50){
+      while (ncount < 1e4 
+	     && (cur_chi2 > 5*(cur_dof+0.1) || ncount < 6000) 
+	     && (cur_chi2 > 4*(cur_dof+0.1) || ncount < 3000) 
+	     && (cur_chi2 > 3*(cur_dof+0.1) || ncount < 1500) 
+	     && (cur_chi2 > 2*(cur_dof+0.1) || ncount < 800) 
+	     && (cur_chi2 > 1*(cur_dof+0.1) || ncount < 10) 
+	     ){
+	if (ncount == 1 || (ncount % 1000 ==0&&ncount >0) )
+	  std::cout << "MCMC: " << ncount << " " << cur_chi2 << " " << cur_dof << std::endl;
+	
+	make_guess();
+	next_chi2 = toymatrix->Get_Chi2();
+	next_dof = toymatrix->Get_ndf();
+      }
+    }else if (allmcell_c.size()<75){
+      while (ncount < 5000 
+	     && (cur_chi2 > 5*(cur_dof+0.1) || ncount < 6000) 
+	     && (cur_chi2 > 4*(cur_dof+0.1) || ncount < 3000) 
+	     && (cur_chi2 > 3*(cur_dof+0.1) || ncount < 1500) 
+	     && (cur_chi2 > 2*(cur_dof+0.1) || ncount < 800) 
+	     && (cur_chi2 > 1*(cur_dof+0.1) || ncount < 10) 
+	     ){
+	if (ncount == 1 || (ncount % 1000 ==0&&ncount >0) )
+	  std::cout << "MCMC: " << ncount << " " << cur_chi2 << " " << cur_dof << std::endl;
+	
+	make_guess();
+	next_chi2 = toymatrix->Get_Chi2();
+	next_dof = toymatrix->Get_ndf();
+      }
+    }else if (allmcell_c.size()<110){
+      while (ncount < 2000 
+	     && (cur_chi2 > 5*(cur_dof+0.1) || ncount < 6000) 
+	     && (cur_chi2 > 4*(cur_dof+0.1) || ncount < 3000) 
+	     && (cur_chi2 > 3*(cur_dof+0.1) || ncount < 1500) 
+	     && (cur_chi2 > 2*(cur_dof+0.1) || ncount < 800) 
+	     && (cur_chi2 > 1*(cur_dof+0.1) || ncount < 10) 
+	     ){
+	if (ncount == 1 || (ncount % 1000 ==0&&ncount >0) )
+	  std::cout << "MCMC: " << ncount << " " << cur_chi2 << " " << cur_dof << std::endl;
+	
+	make_guess();
+	next_chi2 = toymatrix->Get_Chi2();
+	next_dof = toymatrix->Get_ndf();
+      }
+    }else if (allmcell_c.size()<150){
+      for (int i=0;i!=200;i++){
+	make_guess();
+	next_chi2 = toymatrix->Get_Chi2();
+	next_dof = toymatrix->Get_ndf();
+      }
     }
-  }else if (allmcell_c.size()<75){
-    while (ncount < 5000 
-	   && (cur_chi2 > 5*(cur_dof+0.1) || ncount < 6000) 
-	   && (cur_chi2 > 4*(cur_dof+0.1) || ncount < 3000) 
-	   && (cur_chi2 > 3*(cur_dof+0.1) || ncount < 1500) 
-	   && (cur_chi2 > 2*(cur_dof+0.1) || ncount < 800) 
-	   && (cur_chi2 > 1*(cur_dof+0.1) || ncount < 10) 
-	   ){
-      if (ncount == 1 || (ncount % 1000 ==0&&ncount >0) )
-	std::cout << "MCMC: " << ncount << " " << cur_chi2 << " " << cur_dof << std::endl;
-      
-      make_guess();
-      next_chi2 = toymatrix->Get_Chi2();
-      next_dof = toymatrix->Get_ndf();
-    }
-  }else if (allmcell_c.size()<110){
-    while (ncount < 2000 
-	   && (cur_chi2 > 5*(cur_dof+0.1) || ncount < 6000) 
-	   && (cur_chi2 > 4*(cur_dof+0.1) || ncount < 3000) 
-	   && (cur_chi2 > 3*(cur_dof+0.1) || ncount < 1500) 
-	   && (cur_chi2 > 2*(cur_dof+0.1) || ncount < 800) 
-	   && (cur_chi2 > 1*(cur_dof+0.1) || ncount < 10) 
-	   ){
-      if (ncount == 1 || (ncount % 1000 ==0&&ncount >0) )
-	std::cout << "MCMC: " << ncount << " " << cur_chi2 << " " << cur_dof << std::endl;
-      
-      make_guess();
-      next_chi2 = toymatrix->Get_Chi2();
-      next_dof = toymatrix->Get_ndf();
-    }
-  }else if (allmcell_c.size()<150){
-    for (int i=0;i!=200;i++){
-      make_guess();
-      next_chi2 = toymatrix->Get_Chi2();
-      next_dof = toymatrix->Get_ndf();
+  }else{ // test use ... 
+    if (allmcell_c.size()<30){
+      while (ncount < 1e4 
+	     && (cur_chi2 > 5*(cur_dof+0.1) || ncount < 6000) 
+	     && (cur_chi2 > 4*(cur_dof+0.1) || ncount < 3000) 
+	     && (cur_chi2 > 3*(cur_dof+0.1) || ncount < 1500) 
+	     && (cur_chi2 > 2*(cur_dof+0.1) || ncount < 800) 
+	     && (cur_chi2 > 1*(cur_dof+0.1) || ncount < 10) 
+	     ){
+	if (ncount == 1 || (ncount % 1000 ==0&&ncount >0) )
+	  std::cout << "MCMC: " << ncount << " " << cur_chi2 << " " << cur_dof << std::endl;
+	
+	make_guess();
+	next_chi2 = toymatrix->Get_Chi2();
+	next_dof = toymatrix->Get_ndf();
+      }
+    }else if (allmcell_c.size()<60){
+      while (ncount < 5000 
+	     && (cur_chi2 > 5*(cur_dof+0.1) || ncount < 6000) 
+	     && (cur_chi2 > 4*(cur_dof+0.1) || ncount < 3000) 
+	     && (cur_chi2 > 3*(cur_dof+0.1) || ncount < 1500) 
+	     && (cur_chi2 > 2*(cur_dof+0.1) || ncount < 800) 
+	     && (cur_chi2 > 1*(cur_dof+0.1) || ncount < 10) 
+	     ){
+	if (ncount == 1 || (ncount % 1000 ==0&&ncount >0) )
+	  std::cout << "MCMC: " << ncount << " " << cur_chi2 << " " << cur_dof << std::endl;
+	
+	make_guess();
+	next_chi2 = toymatrix->Get_Chi2();
+	next_dof = toymatrix->Get_ndf();
+      }
     }
   }
 }
-
-
 
 
 
