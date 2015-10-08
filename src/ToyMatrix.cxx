@@ -570,7 +570,8 @@ void WireCell2dToy::ToyMatrix::Buildup_index(WireCell2dToy::MergeToyTiling& merg
       for (int k=0;k!=wires.size();k++){
 	//construct merged wire index
 	const MergeGeomWire *mwire = (MergeGeomWire*)wires[k];
-	if (mwimap.find(mwire) == mwimap.end()){
+	// require all the wire must be good to be used in the matrix solving 
+	if (mwimap.find(mwire) == mwimap.end() && mergetiling.wcmap()[mwire] >10){
 	  mwimap[mwire] = mwindex;
 	  mwindex ++;
 	  
@@ -590,6 +591,7 @@ void WireCell2dToy::ToyMatrix::Buildup_index(WireCell2dToy::MergeToyTiling& merg
     }
   }
   
+  //std::cout << mcindex << " " << mwindex << " " << swindex << std::endl;
 }
 
 

@@ -473,6 +473,21 @@ void WireCell2dToy::MergeToyTiling::form_wiremap(WireCell2dToy::ToyTiling& tilin
   while(further_mergewire(wire_all,50000,time_slice));
   
 
+  //std::cout << wire_all.size() << std::endl;
+  WireChargeMap wcmap = tiling.wcmap();
+  for (int i=0;i!=wire_all.size();i++){
+    MergeGeomWire *mwire = (MergeGeomWire*)wire_all[i];
+    GeomWireSelection wires = mwire->get_allwire();
+    float charge = 0;
+    for (int j=0;j!=wires.size();j++){
+      charge += wcmap[wires.at(j)];
+    }
+    // std::cout << i << " " << charge << std::endl;
+    wirechargemap[mwire] = charge;
+  }
+  //
+
+
   // Now construc the wire map;
   for (int i=0;i!=wire_all.size();i++){
     MergeGeomWire *mwire = (MergeGeomWire*)wire_all[i];
