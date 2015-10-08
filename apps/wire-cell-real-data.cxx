@@ -100,15 +100,14 @@ int main(int argc, char* argv[])
        << endl;
   
   
-  const char* root_file = argv[2];
-  const char* tpath = "/Event/Sim";
   
-  WireCell::FrameDataSource* fds = 0;
-  fds = WireCellSst::make_fds(root_file);
-  if (!fds) {
-    cerr << "ERROR: failed to get FDS from " << root_file << endl;
-    return 1;
-  }
+  
+  // WireCell::FrameDataSource* fds = 0;
+  // fds = WireCellSst::make_fds(root_file);
+  // if (!fds) {
+  //   cerr << "ERROR: failed to get FDS from " << root_file << endl;
+  //   return 1;
+  // }
   
   //float unit_dis = 1.01483;  // 58KV @ 226.5 V/cm
   float unit_dis = 1.14753;  // 70 KV @ 226.5 V/cm
@@ -133,26 +132,29 @@ int main(int argc, char* argv[])
   
 
 
+  const char* root_file = argv[2];
+ 
   
-  TFile tfile(root_file,"read");
-  TTree* sst = dynamic_cast<TTree*>(tfile.Get(tpath));
-
   int run_no, subrun_no, event_no;
-  sst->SetBranchAddress("eventNo",&event_no);
-  sst->SetBranchAddress("runNo",&run_no);
-  sst->SetBranchAddress("subRunNo",&subrun_no);
-  sst->GetEntry(eve_num);
-
-  cout << "Run No: " << run_no << " " << subrun_no << " " << eve_num << endl;
+  // sst->SetBranchAddress("eventNo",&event_no);
+  // sst->SetBranchAddress("runNo",&run_no);
+  // sst->SetBranchAddress("subRunNo",&subrun_no);
+  // sst->GetEntry(eve_num);
   
-  WireCellSst::DatauBooNEFrameDataSource data_fds(*sst,gds,total_time_bin);
+  
+  WireCellSst::DatauBooNEFrameDataSource data_fds(root_file,gds,total_time_bin);
   if (save_file != 2){
     data_fds.jump(eve_num);
     if (save_file == 1)
       data_fds.Save();
-  }else{
-    
   }
+  
+  run_no = data_fds.get_run_no();
+  subrun_no = data_fds.get_subrun_no();
+  event_no = data_fds.get_event_no();
+  
+  cout << "Run No: " << run_no << " " << subrun_no << " " << eve_num << endl;
+
 
   // WireMap& uplane_map = data_fds.get_u_map();
   // WireMap& vplane_map = data_fds.get_v_map();
@@ -183,6 +185,9 @@ int main(int argc, char* argv[])
   }else{
     
   }
+
+
+  data_fds.Clear();
 
   std::vector<float>& uplane_rms = wien_fds.get_uplane_rms();
   std::vector<float>& vplane_rms = wien_fds.get_vplane_rms();
@@ -266,6 +271,10 @@ int main(int argc, char* argv[])
 
   int start_num = 0 ;
   int end_num = sds.size()-1;
+
+  // cout << "Check Memory! " << std::endl; 
+  // int qxqx;
+  // cin >> qxqx;
 
 
   for (int i=start_num;i!=end_num+1;i++){
