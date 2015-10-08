@@ -597,25 +597,25 @@ int main(int argc, char* argv[])
   
   Double_t x,y,z;
   //save cluster
-  int ncluster = 0;
-  for (auto it = cluster_set.begin();it!=cluster_set.end();it++){
-    ncount = 0;
-    TGraph2D *g1 = new TGraph2D();
-    for (int i=0; i!=(*it)->get_allcell().size();i++){
-      const MergeGeomCell *mcell = (const MergeGeomCell*)((*it)->get_allcell().at(i));
-      for (int j=0; j!=mcell->get_allcell().size();j++){
-  	Point p = mcell->get_allcell().at(j)->center();
-  	x = mcell->GetTimeSlice()*unit_dis/10.*nrebin/2. - unit_dis/10.0*frame_length/2.-time_offset*unit_dis/10.;
-  	y = p.y/units::cm;
-  	z = p.z/units::cm;
-  	g1->SetPoint(ncount,x,y,z);
-  	ncount ++;
-      }
-    }
-    // cout << ncount << endl;
-    g1->Write(Form("cluster_%d",ncluster));
-    ncluster ++;
-  }
+  // int ncluster = 0;
+  // for (auto it = cluster_set.begin();it!=cluster_set.end();it++){
+  //   ncount = 0;
+  //   TGraph2D *g1 = new TGraph2D();
+  //   for (int i=0; i!=(*it)->get_allcell().size();i++){
+  //     const MergeGeomCell *mcell = (const MergeGeomCell*)((*it)->get_allcell().at(i));
+  //     for (int j=0; j!=mcell->get_allcell().size();j++){
+  // 	Point p = mcell->get_allcell().at(j)->center();
+  // 	x = mcell->GetTimeSlice()*unit_dis/10.*nrebin/2. - unit_dis/10.0*frame_length/2.-time_offset*unit_dis/10.;
+  // 	y = p.y/units::cm;
+  // 	z = p.z/units::cm;
+  // 	g1->SetPoint(ncount,x,y,z);
+  // 	ncount ++;
+  //     }
+  //   }
+  //   // cout << ncount << endl;
+  //   g1->Write(Form("cluster_%d",ncluster));
+  //   ncluster ++;
+  // }
 
   
 

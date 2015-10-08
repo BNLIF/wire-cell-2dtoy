@@ -571,7 +571,8 @@ void WireCell2dToy::ToyMatrix::Buildup_index(WireCell2dToy::MergeToyTiling& merg
 	//construct merged wire index
 	const MergeGeomWire *mwire = (MergeGeomWire*)wires[k];
 	// require all the wire must be good to be used in the matrix solving 
-	if (mwimap.find(mwire) == mwimap.end() && mergetiling.wcmap()[mwire] >10){
+	//	if (mwimap.find(mwire) == mwimap.end() && mergetiling.wcmap()[mwire] >10){
+	if (mwimap.find(mwire) == mwimap.end() ){
 	  mwimap[mwire] = mwindex;
 	  mwindex ++;
 	  
