@@ -69,8 +69,8 @@ WireCell2dToy::DataSignalWienFDS::DataSignalWienFDS(WireCell::FrameDataSource& f
     // hvr->SetBinContent(i+1,gv->Eval(time-time_offset_uv-overall_time_offset));
     // hwr->SetBinContent(i+1,gw->Eval(time-time_offset_uw-overall_time_offset));
     float scale = 0.86; 
-    float scale_u = 1.56/1.03;
-    float scale_v = 1.21*1.06/1.025;
+    float scale_u = 1.51;
+    float scale_v = 1.251;
     double x = scale*(time-overall_time_offset);
     if (x > -35 && x  < 15){
       if (gu->Eval(x) > 0 && x < 0){

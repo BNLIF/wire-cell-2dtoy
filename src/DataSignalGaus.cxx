@@ -77,8 +77,8 @@ WireCell2dToy::DataSignalGausFDS::DataSignalGausFDS(WireCell::FrameDataSource& f
   for (int i=0; i!=nbin; i++){  
     double time = hur->GetBinCenter(i+1)/2.-50 ;
     float scale = 0.86;
-    float scale_u = 1.56/1.03;
-    float scale_v = 1.21*1.06/1.025;
+    float scale_u = 1.51;
+    float scale_v = 1.251;
     double x = scale*(time-overall_time_offset);
     if (x > -35 && x  < 15){
       if (gu->Eval(x) > 0 && x < 0){
