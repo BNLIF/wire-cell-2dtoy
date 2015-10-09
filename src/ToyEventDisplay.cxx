@@ -83,20 +83,20 @@ int ToyEventDisplay::draw_mc(int flag, const WireCell::PointValueVector& mctruth
 void ToyEventDisplay::draw_bad_cell(WireCell::GeomCellSelection& cells){
   pad.cd();
   for (int i=0;i!=cells.size();i++){
-    double x[5];
-    double y[5];
+    double x[100];
+    double y[100];
     
-    for (int j=0;j!=4;j++){
+    for (int j=0;j!=cells.at(i)->boundary().size();j++){
       x[j] = cells.at(i)->boundary().at(j).z/units::m;
       y[j] = cells.at(i)->boundary().at(j).y/units::m;
       //std::cout << x[j] << " " << y[j] << std::endl;
     }
-    x[4] = x[0];
-    y[4] = y[0];
+    x[cells.at(i)->boundary().size()] = x[0];
+    y[cells.at(i)->boundary().size()] = y[0];
     // std::cout << x[4] << " " << y[4] << std::endl;
     // std::cout << std::endl;
 
-    TPolyLine *pline = new TPolyLine(5,x,y);
+    TPolyLine *pline = new TPolyLine(cells.at(i)->boundary().size()+1,x,y);
     pline->SetFillColor(5);
     pline->SetLineColor(5);
     //pline->SetLineWidth(1);
