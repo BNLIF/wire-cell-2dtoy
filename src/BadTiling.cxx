@@ -87,7 +87,7 @@ WireCell2dToy::BadTiling::BadTiling(int time, int scale, WireCell::ChirpMap& upl
   //Now form cells ... 
 
  
-  std::vector<Vector> pcross(4);
+  
 
   num = 0;
   // deal with u-v
@@ -108,16 +108,113 @@ WireCell2dToy::BadTiling::BadTiling(int time, int scale, WireCell::ChirpMap& upl
       dis_v[0] = gds.wire_dist(*vwire_1) - v_pitch/2.;
       dis_v[1] = gds.wire_dist(*vwire_2) + v_pitch/2.;
 
-      PointVector pcell;
-      bool flag = false;
-      flag = flag || gds.crossing_point(dis_u[0],dis_v[0],kUwire,kVwire, pcross[0]); pcell.push_back(pcross[0]);
-      flag = flag || gds.crossing_point(dis_u[0],dis_v[1],kUwire,kVwire, pcross[1]); pcell.push_back(pcross[1]);
-      flag = flag || gds.crossing_point(dis_u[1],dis_v[0],kUwire,kVwire, pcross[2]); pcell.push_back(pcross[2]);
-      flag = flag || gds.crossing_point(dis_u[1],dis_v[1],kUwire,kVwire, pcross[3]); pcell.push_back(pcross[3]);
-      if (flag){
+       PointVector pcell;
+      std::vector<Vector> pcross(4);
+      
+      
+      bool flag1 = gds.crossing_point(dis_u[0],dis_v[0],kUwire,kVwire, pcross[0]); 
+      if (flag1){
+	pcell.push_back(pcross[0]);
+      }else{
+	Point p1 = uwire_1->point1();
+	Point p2 = uwire_1->point2();
+	Point p3 = vwire_1->point1();
+	Point p4 = vwire_1->point2();
+
+	if (pow(p1.y-pcross[0].y,2) + pow(p1.z-pcross[0].z,2) > 
+	    pow(p2.y-pcross[0].y,2) + pow(p2.z-pcross[0].z,2)){
+	  pcell.push_back(p2);
+	}else{
+	  pcell.push_back(p1);
+	}
+	if (pow(p3.y-pcross[0].y,2) + pow(p3.z-pcross[0].z,2) > 
+	    pow(p4.y-pcross[0].y,2) + pow(p4.z-pcross[0].z,2)){
+	  pcell.push_back(p4);
+	}else{
+	  pcell.push_back(p3);
+	}
+      }
+      bool flag2 = gds.crossing_point(dis_u[0],dis_v[1],kUwire,kVwire, pcross[1]); 
+      if (flag2){
+	pcell.push_back(pcross[1]);
+      }else{
+	Point p1 = uwire_1->point1();
+	Point p2 = uwire_1->point2();
+	Point p3 = vwire_2->point1();
+	Point p4 = vwire_2->point2();
+
+	if (pow(p1.y-pcross[1].y,2) + pow(p1.z-pcross[1].z,2) > 
+	    pow(p2.y-pcross[1].y,2) + pow(p2.z-pcross[1].z,2)){
+	  pcell.push_back(p2);
+	}else{
+	  pcell.push_back(p1);
+	}
+	if (pow(p3.y-pcross[1].y,2) + pow(p3.z-pcross[1].z,2) > 
+	    pow(p4.y-pcross[1].y,2) + pow(p4.z-pcross[1].z,2)){
+	  pcell.push_back(p4);
+	}else{
+	  pcell.push_back(p3);
+	}
+      }
+      bool flag3 = gds.crossing_point(dis_u[1],dis_v[0],kUwire,kVwire, pcross[2]); 
+      if (flag3){
+	pcell.push_back(pcross[2]);
+      }else{
+	Point p1 = uwire_2->point1();
+	Point p2 = uwire_2->point2();
+	Point p3 = vwire_1->point1();
+	Point p4 = vwire_1->point2();
+
+	if (pow(p1.y-pcross[2].y,2) + pow(p1.z-pcross[2].z,2) > 
+	    pow(p2.y-pcross[2].y,2) + pow(p2.z-pcross[2].z,2)){
+	  pcell.push_back(p2);
+	}else{
+	  pcell.push_back(p1);
+	}
+	if (pow(p3.y-pcross[2].y,2) + pow(p3.z-pcross[2].z,2) > 
+	    pow(p4.y-pcross[2].y,2) + pow(p4.z-pcross[2].z,2)){
+	  pcell.push_back(p4);
+	}else{
+	  pcell.push_back(p3);
+	}
+      }
+      bool flag4 = gds.crossing_point(dis_u[1],dis_v[1],kUwire,kVwire, pcross[3]); 
+      if (flag4){
+	pcell.push_back(pcross[3]);
+      }else{
+	Point p1 = uwire_2->point1();
+	Point p2 = uwire_2->point2();
+	Point p3 = vwire_2->point1();
+	Point p4 = vwire_2->point2();
+
+	if (pow(p1.y-pcross[3].y,2) + pow(p1.z-pcross[3].z,2) > 
+	    pow(p2.y-pcross[3].y,2) + pow(p2.z-pcross[3].z,2)){
+	  pcell.push_back(p2);
+	}else{
+	  pcell.push_back(p1);
+	}
+	if (pow(p3.y-pcross[3].y,2) + pow(p3.z-pcross[3].z,2) > 
+	    pow(p4.y-pcross[3].y,2) + pow(p4.z-pcross[3].z,2)){
+	  pcell.push_back(p4);
+	}else{
+	  pcell.push_back(p3);
+	}
+      }
+      //std::cout << dis_u[0] << " " << dis_u[1] << " " << dis_w[0] << " " << dis_w[1] << std::endl;
+      // for (int k=0;k!=4;k++){
+      // 	std::cout << pcross[k].z/units::m << " " << pcross[k].y/units::m << " " << 
+      // 	  pcell.at(k).z/units::m << " " << pcell.at(k).y/units::m << std::endl;
+      // }
+      
+      if (flag1 || flag2 || flag3 || flag4){
 	GeomCell *cell = new GeomCell(num,pcell);
+	// for (int k=0;k!=4;k++){
+	// 	std::cout << pcell.at(k).z/units::m << " " << pcell.at(k).y/units::m << " " 
+	// 		  << cell->boundary().at(k).z/units::m << " " << cell->boundary().at(k).y/units::m << std::endl;
+	// }
 	num ++;
 	cell_all.push_back(cell);
+	// std::cout << std::endl;
       }
     } 
   }
@@ -141,15 +238,111 @@ WireCell2dToy::BadTiling::BadTiling(int time, int scale, WireCell::ChirpMap& upl
       dis_w[1] = gds.wire_dist(*wwire_2) + w_pitch/2.;
 
       PointVector pcell;
-      bool flag = false;
-      flag = flag || gds.crossing_point(dis_u[0],dis_w[0],kUwire,kYwire, pcross[0]); pcell.push_back(pcross[0]);
-      flag = flag || gds.crossing_point(dis_u[0],dis_w[1],kUwire,kYwire, pcross[1]); pcell.push_back(pcross[1]);
-      flag = flag || gds.crossing_point(dis_u[1],dis_w[0],kUwire,kYwire, pcross[2]); pcell.push_back(pcross[2]);
-      flag = flag || gds.crossing_point(dis_u[1],dis_w[1],kUwire,kYwire, pcross[3]); pcell.push_back(pcross[3]);
-      if (flag){
+      std::vector<Vector> pcross(4);
+      
+      bool flag1 = gds.crossing_point(dis_u[0],dis_w[0],kUwire,kYwire, pcross[0]); 
+      if (flag1){
+	pcell.push_back(pcross[0]);
+      }else{
+	Point p1 = uwire_1->point1();
+	Point p2 = uwire_1->point2();
+	Point p3 = wwire_1->point1();
+	Point p4 = wwire_1->point2();
+
+	if (pow(p1.y-pcross[0].y,2) + pow(p1.z-pcross[0].z,2) > 
+	    pow(p2.y-pcross[0].y,2) + pow(p2.z-pcross[0].z,2)){
+	  pcell.push_back(p2);
+	}else{
+	  pcell.push_back(p1);
+	}
+	if (pow(p3.y-pcross[0].y,2) + pow(p3.z-pcross[0].z,2) > 
+	    pow(p4.y-pcross[0].y,2) + pow(p4.z-pcross[0].z,2)){
+	  pcell.push_back(p4);
+	}else{
+	  pcell.push_back(p3);
+	}
+      }
+      bool flag2 = gds.crossing_point(dis_u[0],dis_w[1],kUwire,kYwire, pcross[1]); 
+      if (flag2){
+	pcell.push_back(pcross[1]);
+      }else{
+	Point p1 = uwire_1->point1();
+	Point p2 = uwire_1->point2();
+	Point p3 = wwire_2->point1();
+	Point p4 = wwire_2->point2();
+
+	if (pow(p1.y-pcross[1].y,2) + pow(p1.z-pcross[1].z,2) > 
+	    pow(p2.y-pcross[1].y,2) + pow(p2.z-pcross[1].z,2)){
+	  pcell.push_back(p2);
+	}else{
+	  pcell.push_back(p1);
+	}
+	if (pow(p3.y-pcross[1].y,2) + pow(p3.z-pcross[1].z,2) > 
+	    pow(p4.y-pcross[1].y,2) + pow(p4.z-pcross[1].z,2)){
+	  pcell.push_back(p4);
+	}else{
+	  pcell.push_back(p3);
+	}
+      }
+      bool flag3 = gds.crossing_point(dis_u[1],dis_w[0],kUwire,kYwire, pcross[2]); 
+      if (flag3){
+	pcell.push_back(pcross[2]);
+      }else{
+	Point p1 = uwire_2->point1();
+	Point p2 = uwire_2->point2();
+	Point p3 = wwire_1->point1();
+	Point p4 = wwire_1->point2();
+
+	if (pow(p1.y-pcross[2].y,2) + pow(p1.z-pcross[2].z,2) > 
+	    pow(p2.y-pcross[2].y,2) + pow(p2.z-pcross[2].z,2)){
+	  pcell.push_back(p2);
+	}else{
+	  pcell.push_back(p1);
+	}
+	if (pow(p3.y-pcross[2].y,2) + pow(p3.z-pcross[2].z,2) > 
+	    pow(p4.y-pcross[2].y,2) + pow(p4.z-pcross[2].z,2)){
+	  pcell.push_back(p4);
+	}else{
+	  pcell.push_back(p3);
+	}
+      }
+      bool flag4 = gds.crossing_point(dis_u[1],dis_w[1],kUwire,kYwire, pcross[3]); 
+      if (flag4){
+	pcell.push_back(pcross[3]);
+      }else{
+	Point p1 = uwire_2->point1();
+	Point p2 = uwire_2->point2();
+	Point p3 = wwire_2->point1();
+	Point p4 = wwire_2->point2();
+
+	if (pow(p1.y-pcross[3].y,2) + pow(p1.z-pcross[3].z,2) > 
+	    pow(p2.y-pcross[3].y,2) + pow(p2.z-pcross[3].z,2)){
+	  pcell.push_back(p2);
+	}else{
+	  pcell.push_back(p1);
+	}
+	if (pow(p3.y-pcross[3].y,2) + pow(p3.z-pcross[3].z,2) > 
+	    pow(p4.y-pcross[3].y,2) + pow(p4.z-pcross[3].z,2)){
+	  pcell.push_back(p4);
+	}else{
+	  pcell.push_back(p3);
+	}
+      }
+      //std::cout << dis_u[0] << " " << dis_u[1] << " " << dis_w[0] << " " << dis_w[1] << std::endl;
+      // for (int k=0;k!=4;k++){
+      // 	std::cout << pcross[k].z/units::m << " " << pcross[k].y/units::m << " " << 
+      // 	  pcell.at(k).z/units::m << " " << pcell.at(k).y/units::m << std::endl;
+      // }
+      
+      if (flag1 || flag2 || flag3 || flag4){
 	GeomCell *cell = new GeomCell(num,pcell);
+	// for (int k=0;k!=4;k++){
+	// 	std::cout << pcell.at(k).z/units::m << " " << pcell.at(k).y/units::m << " " 
+	// 		  << cell->boundary().at(k).z/units::m << " " << cell->boundary().at(k).y/units::m << std::endl;
+	// }
 	num ++;
 	cell_all.push_back(cell);
+	// std::cout << std::endl;
       }
     } 
   }
@@ -173,15 +366,112 @@ WireCell2dToy::BadTiling::BadTiling(int time, int scale, WireCell::ChirpMap& upl
       dis_v[1] = gds.wire_dist(*vwire_2) + v_pitch/2.;
 
       PointVector pcell;
-      bool flag = false;
-      flag = flag || gds.crossing_point(dis_w[0],dis_v[0],kYwire,kVwire, pcross[0]); pcell.push_back(pcross[0]);
-      flag = flag || gds.crossing_point(dis_w[0],dis_v[1],kYwire,kVwire, pcross[1]); pcell.push_back(pcross[1]);
-      flag = flag || gds.crossing_point(dis_w[1],dis_v[0],kYwire,kVwire, pcross[2]); pcell.push_back(pcross[2]);
-      flag = flag || gds.crossing_point(dis_w[1],dis_v[1],kYwire,kVwire, pcross[3]); pcell.push_back(pcross[3]);
-      if (flag){
+      std::vector<Vector> pcross(4);
+      
+      
+      bool flag1 = gds.crossing_point(dis_w[0],dis_v[0],kYwire,kVwire, pcross[0]); 
+      if (flag1){
+	pcell.push_back(pcross[0]);
+      }else{
+	Point p1 = wwire_1->point1();
+	Point p2 = wwire_1->point2();
+	Point p3 = vwire_1->point1();
+	Point p4 = vwire_1->point2();
+
+	if (pow(p1.y-pcross[0].y,2) + pow(p1.z-pcross[0].z,2) > 
+	    pow(p2.y-pcross[0].y,2) + pow(p2.z-pcross[0].z,2)){
+	  pcell.push_back(p2);
+	}else{
+	  pcell.push_back(p1);
+	}
+	if (pow(p3.y-pcross[0].y,2) + pow(p3.z-pcross[0].z,2) > 
+	    pow(p4.y-pcross[0].y,2) + pow(p4.z-pcross[0].z,2)){
+	  pcell.push_back(p4);
+	}else{
+	  pcell.push_back(p3);
+	}
+      }
+      bool flag2 = gds.crossing_point(dis_w[0],dis_v[1],kYwire,kVwire, pcross[1]); 
+      if (flag2){
+	pcell.push_back(pcross[1]);
+      }else{
+	Point p1 = wwire_1->point1();
+	Point p2 = wwire_1->point2();
+	Point p3 = vwire_2->point1();
+	Point p4 = vwire_2->point2();
+
+	if (pow(p1.y-pcross[1].y,2) + pow(p1.z-pcross[1].z,2) > 
+	    pow(p2.y-pcross[1].y,2) + pow(p2.z-pcross[1].z,2)){
+	  pcell.push_back(p2);
+	}else{
+	  pcell.push_back(p1);
+	}
+	if (pow(p3.y-pcross[1].y,2) + pow(p3.z-pcross[1].z,2) > 
+	    pow(p4.y-pcross[1].y,2) + pow(p4.z-pcross[1].z,2)){
+	  pcell.push_back(p4);
+	}else{
+	  pcell.push_back(p3);
+	}
+      }
+      bool flag3 = gds.crossing_point(dis_w[1],dis_v[0],kYwire,kVwire, pcross[2]); 
+      if (flag3){
+	pcell.push_back(pcross[2]);
+      }else{
+	Point p1 = wwire_2->point1();
+	Point p2 = wwire_2->point2();
+	Point p3 = vwire_1->point1();
+	Point p4 = vwire_1->point2();
+
+	if (pow(p1.y-pcross[2].y,2) + pow(p1.z-pcross[2].z,2) > 
+	    pow(p2.y-pcross[2].y,2) + pow(p2.z-pcross[2].z,2)){
+	  pcell.push_back(p2);
+	}else{
+	  pcell.push_back(p1);
+	}
+	if (pow(p3.y-pcross[2].y,2) + pow(p3.z-pcross[2].z,2) > 
+	    pow(p4.y-pcross[2].y,2) + pow(p4.z-pcross[2].z,2)){
+	  pcell.push_back(p4);
+	}else{
+	  pcell.push_back(p3);
+	}
+      }
+      bool flag4 = gds.crossing_point(dis_w[1],dis_v[1],kYwire,kVwire, pcross[3]); 
+      if (flag4){
+	pcell.push_back(pcross[3]);
+      }else{
+	Point p1 = wwire_2->point1();
+	Point p2 = wwire_2->point2();
+	Point p3 = vwire_2->point1();
+	Point p4 = vwire_2->point2();
+
+	if (pow(p1.y-pcross[3].y,2) + pow(p1.z-pcross[3].z,2) > 
+	    pow(p2.y-pcross[3].y,2) + pow(p2.z-pcross[3].z,2)){
+	  pcell.push_back(p2);
+	}else{
+	  pcell.push_back(p1);
+	}
+	if (pow(p3.y-pcross[3].y,2) + pow(p3.z-pcross[3].z,2) > 
+	    pow(p4.y-pcross[3].y,2) + pow(p4.z-pcross[3].z,2)){
+	  pcell.push_back(p4);
+	}else{
+	  pcell.push_back(p3);
+	}
+      }
+      //std::cout << dis_u[0] << " " << dis_u[1] << " " << dis_w[0] << " " << dis_w[1] << std::endl;
+      // for (int k=0;k!=4;k++){
+      // 	std::cout << pcross[k].z/units::m << " " << pcross[k].y/units::m << " " << 
+      // 	  pcell.at(k).z/units::m << " " << pcell.at(k).y/units::m << std::endl;
+      // }
+      
+      if (flag1 || flag2 || flag3 || flag4){
 	GeomCell *cell = new GeomCell(num,pcell);
+	// for (int k=0;k!=4;k++){
+	// 	std::cout << pcell.at(k).z/units::m << " " << pcell.at(k).y/units::m << " " 
+	// 		  << cell->boundary().at(k).z/units::m << " " << cell->boundary().at(k).y/units::m << std::endl;
+	// }
 	num ++;
 	cell_all.push_back(cell);
+	// std::cout << std::endl;
       }
     } 
   }

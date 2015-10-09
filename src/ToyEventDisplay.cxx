@@ -89,14 +89,17 @@ void ToyEventDisplay::draw_bad_cell(WireCell::GeomCellSelection& cells){
     for (int j=0;j!=4;j++){
       x[j] = cells.at(i)->boundary().at(j).z/units::m;
       y[j] = cells.at(i)->boundary().at(j).y/units::m;
+      //std::cout << x[j] << " " << y[j] << std::endl;
     }
     x[4] = x[0];
     y[4] = y[0];
+    // std::cout << x[4] << " " << y[4] << std::endl;
+    // std::cout << std::endl;
 
     TPolyLine *pline = new TPolyLine(5,x,y);
-    pline->SetFillColor(38);
-    pline->SetLineColor(2);
-    pline->SetLineWidth(1);
+    pline->SetFillColor(5);
+    pline->SetLineColor(5);
+    //pline->SetLineWidth(1);
     pline->Draw("fsame");
     pline->Draw("same");
   }
