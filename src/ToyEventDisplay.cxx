@@ -309,6 +309,8 @@ int ToyEventDisplay::draw_wires_charge(const WireCell::WireChargeMap& wcmap, TSt
     if (color>254) color =254;
     color += FI;
     g3->Draw(option);
+    g3->SetLineColor(1);
+    g3->SetLineWidth(1);
     g3->SetFillColor(color);
   
   }
