@@ -56,6 +56,7 @@ namespace WireCell2dToy {
 	void Set_TruthThreshold(int abc){truth_threshold = abc;};
 
 	void draw_bad_region(WireCell::ChirpMap& chirpmap, int time, int scale, int plane, TString option);
+	void draw_bad_cell(WireCell::GeomCellSelection& cells);
 
 	/// Clear visual the event display data.
 	void clear();

@@ -80,6 +80,28 @@ int ToyEventDisplay::draw_mc(int flag, const WireCell::PointValueVector& mctruth
 }
 
 
+void ToyEventDisplay::draw_bad_cell(WireCell::GeomCellSelection& cells){
+  pad.cd();
+  for (int i=0;i!=cells.size();i++){
+    double x[5];
+    double y[5];
+    
+    for (int j=0;j!=4;j++){
+      x[j] = cells.at(i)->boundary().at(j).z/units::m;
+      y[j] = cells.at(i)->boundary().at(j).y/units::m;
+    }
+    x[4] = x[0];
+    y[4] = y[0];
+
+    TPolyLine *pline = new TPolyLine(5,x,y);
+    pline->SetFillColor(38);
+    pline->SetLineColor(2);
+    pline->SetLineWidth(1);
+    pline->Draw("fsame");
+    pline->Draw("same");
+  }
+}
+
 void ToyEventDisplay::draw_bad_region(WireCell::ChirpMap& chirpmap, int time, int scale, int plane, TString option){
   pad.cd();
 
@@ -87,7 +109,7 @@ void ToyEventDisplay::draw_bad_region(WireCell::ChirpMap& chirpmap, int time, in
   // int nwire_v = gds.wires_in_plane(WirePlaneType_t(1)).size();
   // int nwire_w = gds.wires_in_plane(WirePlaneType_t(2)).size();
   
-  std::cout << chirpmap.size() << std::endl;
+  //  std::cout << chirpmap.size() << std::endl;
 
   for (auto it = chirpmap.begin(); it!=chirpmap.end(); it++){
     if (time >= it->second.first/scale && time <= it->second.second/scale){
