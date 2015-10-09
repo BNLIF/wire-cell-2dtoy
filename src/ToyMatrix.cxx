@@ -382,6 +382,17 @@ void WireCell2dToy::ToyMatrix::Update_pred(){
   *MWy_pred = (*MA) * (*Cx);
 }
 
+void WireCell2dToy::ToyMatrix::Print(){
+
+  MA->Print();
+  std::cout << std::endl;
+  Cx->Print();
+
+  for (int i=0;i!=mwindex;i++){
+    std::cout << "wire: " << i << " " << (*MWy)[i] << " " << (*MWy_pred)[i] << " " << sqrt((*VBy)[i][i]) << std::endl;
+  }
+}
+
 double WireCell2dToy::ToyMatrix::Get_residual(const WireCell::GeomCell *cell){
   double res=0;
   int index = mcimap[cell];
@@ -571,7 +582,7 @@ void WireCell2dToy::ToyMatrix::Buildup_index(WireCell2dToy::MergeToyTiling& merg
 	//construct merged wire index
 	const MergeGeomWire *mwire = (MergeGeomWire*)wires[k];
 	// require all the wire must be good to be used in the matrix solving 
-	//	if (mwimap.find(mwire) == mwimap.end() && mergetiling.wcmap()[mwire] >10){
+	//if (mwimap.find(mwire) == mwimap.end() && mergetiling.wcmap()[mwire] >10){
 	if (mwimap.find(mwire) == mwimap.end() ){
 	  mwimap[mwire] = mwindex;
 	  mwindex ++;

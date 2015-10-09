@@ -979,7 +979,7 @@ void WireCell2dToy::ToyTiling::twoplane_tiling(int time, int nrebin, WireCell::G
       
 
       if (flag == 1){
-       	if (qt1!=threeplane_wires.end() || qt2!=threeplane_wires.end()) continue;
+	if (qt1!=threeplane_wires.end() || qt2!=threeplane_wires.end()) continue;
 
 
   	// start to fill in

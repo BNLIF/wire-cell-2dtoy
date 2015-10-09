@@ -79,6 +79,30 @@ int ToyEventDisplay::draw_mc(int flag, const WireCell::PointValueVector& mctruth
   return 0;
 }
 
+
+void ToyEventDisplay::draw_bad_region(WireCell::ChirpMap& chirpmap, int time, int scale, int plane, TString option){
+  pad.cd();
+
+  // int nwire_u = gds.wires_in_plane(WirePlaneType_t(0)).size();
+  // int nwire_v = gds.wires_in_plane(WirePlaneType_t(1)).size();
+  // int nwire_w = gds.wires_in_plane(WirePlaneType_t(2)).size();
+  
+  std::cout << chirpmap.size() << std::endl;
+
+  for (auto it = chirpmap.begin(); it!=chirpmap.end(); it++){
+    if (time >= it->second.first/scale && time <= it->second.second/scale){
+      const WireCell::GeomWire *wire = gds.by_planeindex(WireCell::WirePlaneType_t(plane),it->first);
+      float pitch = gds.pitch(wire->plane());
+      float angle = gds.angle(wire->plane());
+      TLine *l3 = new TLine(wire->point1().z/units::m  ,wire->point1().y/units::m,
+			    wire->point2().z/units::m  ,wire->point2().y/units::m);
+      l3->SetLineColor(5);
+      l3->Draw(option);
+    }
+  }
+
+}
+
 int ToyEventDisplay::draw_slice(const WireCell::Slice& slice, TString option)
 {
   pad.cd();
@@ -143,6 +167,7 @@ int ToyEventDisplay::draw_mergecells(const WireCell::GeomCellSelection& cellall,
   for (int i=0;i!=cellall.size();i++){
     if (flag==0){
       g2->SetPoint(np,cellall[i]->center().z/units::m,cellall[i]->center().y/units::m);
+      std::cout << cellall[i]->center().z/units::m << " " << cellall[i]->center().y/units::m << std::endl;
       np++;
     }else if (flag==1){
       WireCell::MergeGeomCell *mcell = (WireCell::MergeGeomCell*)cellall[i];
