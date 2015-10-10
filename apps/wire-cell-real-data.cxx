@@ -13,6 +13,8 @@
 #include "WireCell2dToy/ToyMatrixExclusive.h"
 #include "WireCell2dToy/ToyMatrixKalman.h"
 #include "WireCell2dToy/ToyMatrixIterate.h"
+#include "WireCell2dToy/ToyMatrixIterate_SingleWire.h"
+
 #include "WireCell2dToy/ToyMatrixMarkov.h"
 #include "WireCell2dToy/ToyMetric.h"
 #include "WireCell2dToy/BlobMetric.h"
@@ -311,6 +313,7 @@ int main(int argc, char* argv[])
     toymatrix[i] = new WireCell2dToy::ToyMatrix(*toytiling[i],*mergetiling[i]);
     if (toymatrix[i]->Get_Solve_Flag()==0){
       if (two_plane){
+	WireCell2dToy::ToyMatrixIterate_SingleWire toymatrix_single_wire_it(*toymatrix[i],mergetiling[i]);
       }else{
 	WireCell2dToy::ToyMatrixIterate toymatrix_it(*toymatrix[i],2000,1e5);
       }

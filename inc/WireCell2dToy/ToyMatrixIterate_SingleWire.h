@@ -11,7 +11,13 @@ namespace WireCell2dToy{
     ToyMatrixIterate_SingleWire(WireCell2dToy::ToyMatrix& toymatrix, WireCell2dToy::MergeToyTiling* mergetiling);
     virtual ~ToyMatrixIterate_SingleWire();
   protected:
+    WireCell2dToy::ToyMatrix &toymatrix;
+    WireCell2dToy::MergeToyTiling *mergetiling;
+    WireCell::WireChargeMap wirechargemap;
+    int ncount;
     
+    void Iterate(WireCell::GeomCellSelection cells, WireCell::GeomCellSelection single_cells, WireCell::GeomCellSelection tried_cell, WireCell::GeomCellMap cellmap, WireCell::GeomWireMap wiremap);
+
   };
 }
 

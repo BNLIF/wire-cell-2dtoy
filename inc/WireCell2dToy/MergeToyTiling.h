@@ -11,7 +11,7 @@ namespace WireCell2dToy{
     ~MergeToyTiling();
 
     const WireCell::GeomCell* cell(const WireCell::GeomWireSelection& wires)const ;
-    
+    WireCell::GeomCellSelection& get_single_wire_cells(){return single_wire_cells;};
     int further_merge(WireCell::GeomCellSelection &allcell, int ncell, int time_slice, double dis = 0.2 * units::mm);
     int further_mergewire(WireCell::GeomWireSelection &allwire, int nwire, int time_slice);
     bool GetRemerged(){return IsRemerged;};
@@ -37,6 +37,7 @@ namespace WireCell2dToy{
     WireCell::GeomWireWireMap wwmap; // wire to merged wire
     WireCell::GeomWireWiresMap wwsmap; // merged wire to wires
     
+    WireCell::GeomCellSelection single_wire_cells;
 
    ClassDef(MergeToyTiling,1);
   };

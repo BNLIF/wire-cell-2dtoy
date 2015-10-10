@@ -445,7 +445,7 @@ void WireCell2dToy::MergeToyTiling::deghost(){
   
   while(flag1==1){
     flag1 = 0;
-    GeomCellSelection single_wire_cells;
+    single_wire_cells.clear();
     GeomCellSelection to_be_removed_cells;
     for (int i=0;i!=cell_all.size();i++){
       MergeGeomCell *mcell = (MergeGeomCell*) cell_all.at(i);
