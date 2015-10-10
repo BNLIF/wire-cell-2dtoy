@@ -19,6 +19,8 @@ namespace WireCell2dToy{
     static double Time2Dis(int time){return time*time_convert + dis_offset;};
     static int Dis2Time(double dis){ return round((dis/units::cm-dis_offset)/time_convert);}; //in cm
 
+    void deghost();
+
 
   protected:
     bool IsRemerged;
