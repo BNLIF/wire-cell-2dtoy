@@ -433,7 +433,7 @@ WireCell2dToy::MergeToyTiling::MergeToyTiling(WireCell2dToy::ToyTiling& tiling, 
 
 
 
-  deghost();
+  //  deghost();
   
 }
 
@@ -508,8 +508,16 @@ void WireCell2dToy::MergeToyTiling::deghost(){
 	}
       }
     }
+
+    if (flag1 == 0){
+      //  std::cout << "All Cells " << cell_all.size() << " " << single_wire_cells.size() << " " << to_be_removed_cells.size() << std::endl;
+    }
+
   }
-  //std::cout << "All Cells " << cell_all.size() << " " << single_wire_cells.size() << " " << to_be_removed_cells.size() << std::endl;
+
+
+
+  //
   
   
   

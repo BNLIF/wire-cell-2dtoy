@@ -299,6 +299,8 @@ int main(int argc, char* argv[])
 
     mergetiling[i] = new WireCell2dToy::MergeToyTiling(*toytiling[i],i,3);
     
+    if (two_plane) 
+      mergetiling[i]->deghost();
    
     GeomCellSelection allmcell = mergetiling[i]->get_allcell();
     GeomWireSelection allmwire = mergetiling[i]->get_allwire();
@@ -308,7 +310,10 @@ int main(int argc, char* argv[])
 
     toymatrix[i] = new WireCell2dToy::ToyMatrix(*toytiling[i],*mergetiling[i]);
     if (toymatrix[i]->Get_Solve_Flag()==0){
-      WireCell2dToy::ToyMatrixIterate toymatrix_it(*toymatrix[i],2000,1e5);
+      if (two_plane){
+      }else{
+	WireCell2dToy::ToyMatrixIterate toymatrix_it(*toymatrix[i],2000,1e5);
+      }
     }
     
     cout << "chi2: " << toymatrix[i]->Get_Chi2() << endl;
