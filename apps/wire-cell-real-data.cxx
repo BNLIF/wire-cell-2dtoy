@@ -824,7 +824,7 @@ int main(int argc, char* argv[])
       const MergeGeomCell *mcell = (const MergeGeomCell*)((*it)->get_allcell().at(i));
       mcell_id ++;
       time_slice = mcell->GetTimeSlice();
-      x = time_slice*nrebin/2.*unit_dis/10. - frame_length/2.*unit_dis/10.;
+      x = time_slice*nrebin/2.*unit_dis/10. - frame_length/2.*unit_dis/10.-time_offset*unit_dis/10.;
       xx =x;
       //loop single cell
       for (int j=0; j!=mcell->get_allcell().size();j++){
