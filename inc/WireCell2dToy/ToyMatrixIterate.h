@@ -8,7 +8,7 @@ namespace WireCell2dToy {
   class ToyMatrixIterate {
   public:
     ToyMatrixIterate(WireCell2dToy::ToyMatrix &toymatrix, int recon_t = 2000, float limit = 1e6);
-    ToyMatrixIterate(WireCell2dToy::ToyMatrix &toymatrix, std::vector<int>& already_removed, int recon_t = 2000);
+    ToyMatrixIterate(WireCell2dToy::ToyMatrix &toymatrix, std::vector<int>& already_removed, int recon_t = 2000, int limit = 1e6);
     ToyMatrixIterate(WireCell2dToy::ToyMatrix &toymatrix, WireCell2dToy::MergeToyTiling &mergecur, WireCell::GeomCellSelection &cells, int recon_t = 2000);
 
     void UseTime(WireCell2dToy::ToyMatrix &toybefore, WireCell2dToy::ToyMatrix &toycur, WireCell2dToy::ToyMatrix &toyafter, WireCell2dToy::MergeToyTiling &mergebefore, WireCell2dToy::MergeToyTiling &mergecur, WireCell2dToy::MergeToyTiling &mergeafter);

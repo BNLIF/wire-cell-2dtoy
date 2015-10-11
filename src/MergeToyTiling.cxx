@@ -517,9 +517,28 @@ void WireCell2dToy::MergeToyTiling::deghost(){
 
 
 
-  //
+  // fill the three-wires cells and two-wires cells 
+  two_wires_cells.clear();
+  three_wires_cells.clear();
   
+  for (int i=0;i!=cell_all.size();i++){
+    MergeGeomCell *mcell = (MergeGeomCell*) cell_all.at(i);
+    GeomWireSelection wires = cellmap[mcell];
+    int nwire = 0;
+    for (int j=0;j!=wires.size();j++){
+      MergeGeomWire *mwire = (MergeGeomWire*)wires.at(j);
+      if (wirechargemap[mwire] > 10){
+	nwire ++;
+      }
+    }
+    if (nwire == 3){
+      three_wires_cells.push_back(mcell);
+    }else{
+      two_wires_cells.push_back(mcell);
+    }
+  }
   
+  //  std::cout << "Check: " << cell_all.size() << " " << three_wires_cells.size() << " " << two_wires_cells.size() << std::endl;
   
 }
 

@@ -311,7 +311,19 @@ int main(int argc, char* argv[])
     toymatrix[i] = new WireCell2dToy::ToyMatrix(*toytiling[i],*mergetiling[i]);
     if (toymatrix[i]->Get_Solve_Flag()==0){
       if (two_plane){
-	WireCell2dToy::ToyMatrixIterate_SingleWire toymatrix_single_wire_it(*toymatrix[i],mergetiling[i]);
+	// WireCell2dToy::ToyMatrixIterate_SingleWire toymatrix_single_wire_it(*toymatrix[i],mergetiling[i]);
+	
+	GeomCellSelection& two_wires_cells = mergetiling[i]->get_two_wires_cells();
+	GeomCellSelection& three_wires_cells = mergetiling[i]->get_three_wires_cells();
+	// deal with three-planes cells
+	
+	
+	// deal with two-planes cells
+	
+	
+	//comebine them 
+	
+	
       }else{
 	WireCell2dToy::ToyMatrixIterate toymatrix_it(*toymatrix[i],2000,1e5);
       }

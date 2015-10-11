@@ -4,7 +4,7 @@ using namespace WireCell;
 
 #include "TMath.h"
 
-WireCell2dToy::ToyMatrixIterate::ToyMatrixIterate(WireCell2dToy::ToyMatrix &toymatrix, std::vector<int>& already_removed, int recon_t){
+WireCell2dToy::ToyMatrixIterate::ToyMatrixIterate(WireCell2dToy::ToyMatrix &toymatrix, std::vector<int>& already_removed, int recon_t, int limit){
   prev_ncount = -1;
   ncount = 0;
   nlevel = 0;
@@ -28,7 +28,7 @@ WireCell2dToy::ToyMatrixIterate::ToyMatrixIterate(WireCell2dToy::ToyMatrix &toym
   
   std::cout << estimated_loop << " " << toymatrix.Get_mcindex() << " " << toymatrixkalman->Get_numz() << std::endl;
 
-  if (estimated_loop < 1e6 && toymatrixkalman->Get_numz()!=toymatrix.Get_mcindex() && toymatrix.Get_mcindex() - toymatrixkalman->Get_numz() > toymatrixkalman->Get_numz()){
+  if (estimated_loop < limit && toymatrixkalman->Get_numz()!=toymatrix.Get_mcindex() && toymatrix.Get_mcindex() - toymatrixkalman->Get_numz() > toymatrixkalman->Get_numz()){
     time_flag = 0;
     delete toymatrixkalman;
     toymatrixkalman = new WireCell2dToy::ToyMatrixKalman(already_removed, no_need_remove, toymatrix, 0,1); 
