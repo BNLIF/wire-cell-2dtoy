@@ -315,9 +315,9 @@ int main(int argc, char* argv[])
     GeomCellSelection& two_wires_cells = mergetiling[i]->get_two_wires_cells();
     GeomCellSelection& three_wires_cells = mergetiling[i]->get_three_wires_cells();
 
-    if (two_plane){
-      if (toymatrix[i]->Get_Solve_Flag()==0)
-      	WireCell2dToy::ToyMatrixIterate_SingleWire toymatrix_single_wire_it(*toymatrix[i],mergetiling[i]);
+    // if (two_plane){
+    //   if (toymatrix[i]->Get_Solve_Flag()==0)
+    //   	WireCell2dToy::ToyMatrixIterate_SingleWire toymatrix_single_wire_it(*toymatrix[i],mergetiling[i]);
       
       // double chi2_3p = 0;
       // double ndf_3p = 0;
@@ -366,10 +366,10 @@ int main(int argc, char* argv[])
       
       
 
-    }else{
-      if (toymatrix[i]->Get_Solve_Flag()==0)
-	WireCell2dToy::ToyMatrixIterate toymatrix_it(*toymatrix[i],2000,1e5);
-    }
+    // }else{
+    if (toymatrix[i]->Get_Solve_Flag()==0)
+      WireCell2dToy::ToyMatrixIterate toymatrix_it(*toymatrix[i],2000,1e5);
+    // }
 
     
      
