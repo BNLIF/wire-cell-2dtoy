@@ -14,6 +14,8 @@
 #include "WireCell2dToy/ToyMatrixKalman.h"
 #include "WireCell2dToy/ToyMatrixIterate.h"
 #include "WireCell2dToy/ToyMatrixIterate_SingleWire.h"
+#include "WireCell2dToy/ToyMatrixIterate_Only.h"
+
 
 #include "WireCell2dToy/ToyMatrixMarkov.h"
 #include "WireCell2dToy/ToyMetric.h"
@@ -314,47 +316,48 @@ int main(int argc, char* argv[])
     GeomCellSelection& three_wires_cells = mergetiling[i]->get_three_wires_cells();
 
     if (two_plane){
-      // if (toymatrix[i]->Get_Solve_Flag()==0)
-      // 	WireCell2dToy::ToyMatrixIterate_SingleWire toymatrix_single_wire_it(*toymatrix[i],mergetiling[i]);
+      if (toymatrix[i]->Get_Solve_Flag()==0)
+      	WireCell2dToy::ToyMatrixIterate_SingleWire toymatrix_single_wire_it(*toymatrix[i],mergetiling[i]);
       
-      double chi2_3p = 0;
-      double ndf_3p = 0;
-      std::vector<double> Cxt, dCxt;
-      Cxt.resize(toymatrix[i]->Get_mcindex());
-      dCxt.resize(toymatrix[i]->Get_mcindex());
+      // double chi2_3p = 0;
+      // double ndf_3p = 0;
+      // std::vector<double> Cxt, dCxt;
+      // Cxt.resize(toymatrix[i]->Get_mcindex());
+      // dCxt.resize(toymatrix[i]->Get_mcindex());
       
-      //clean up the results first ... 
-      toymatrix[i]->Set_Solve_Flag(0);
-      toymatrix[i]->Set_chi2(-1);
+      // //clean up the results first ... 
+      // toymatrix[i]->Set_Solve_Flag(0);
+      // toymatrix[i]->Set_chi2(-1);
       
-      // deal with three planes
-      std::vector<int> already_removed;
-      for (int j=0;j!=two_wires_cells.size();j++){
-	int index = toymatrix[i]->Get_mcindex(two_wires_cells.at(j));
-	already_removed.push_back(index);
-      }
-      if (three_wires_cells.size() > 0){
-	WireCell2dToy::ToyMatrixIterate toymatrix_it(*toymatrix[i],already_removed, 2000 , 1e5);
-	if (toymatrix[i]->Get_Solve_Flag()==0 ){
-	  // if not solved
-	  // deal everything together ... 
-	  
-	}else{ 
-	  // if solved?
-	  chi2_3p = toymatrix[i]->Get_Chi2();
-	  ndf_3p = toymatrix[i]->Get_ndf();
-	  for (int j=0;j!=toymatrix[i]->Get_mcindex();j++){
-	    Cxt.at(j) = toymatrix[i]->Get_value(j);
-	    dCxt.at(j) = toymatrix[i]->Get_error(j);
-	  }
-	  // deal with two planes
-	  
-	  //combine them together ... 
-	}
-      }else{
-        // deal with two planes without any constraints, like to deal everything together
-
-      }
+      // // deal with three planes
+      // std::vector<int> already_removed;
+      // for (int j=0;j!=two_wires_cells.size();j++){
+      // 	int index = toymatrix[i]->Get_mcindex(two_wires_cells.at(j));
+      // 	already_removed.push_back(index);
+      // }
+      // if (three_wires_cells.size() > 0){
+      // 	WireCell2dToy::ToyMatrixIterate_Only toymatrix_it_only(*toymatrix[i],mergetiling[i]);
+      // 	// WireCell2dToy::ToyMatrixIterate toymatrix_it(*toymatrix[i],already_removed, 2000 , 1e5);
+      // 	// if (toymatrix[i]->Get_Solve_Flag()==0 ){
+      // 	//   // if not solved
+      // 	//   // deal everything together ... 
+      // 	//   WireCell2dToy::ToyMatrixIterate_Only toymatrix_it_only(*toymatrix[i],mergetiling[i]);
+      // 	// }else{ 
+      // 	//   // if solved?
+      // 	//   chi2_3p = toymatrix[i]->Get_Chi2();
+      // 	//   ndf_3p = toymatrix[i]->Get_ndf();
+      // 	//   for (int j=0;j!=toymatrix[i]->Get_mcindex();j++){
+      // 	//     Cxt.at(j) = toymatrix[i]->Get_value(j);
+      // 	//     dCxt.at(j) = toymatrix[i]->Get_error(j);
+      // 	//   }
+      // 	//   // deal with two planes
+	
+      // 	//   //combine them together ... 
+      // 	// }
+      // }else{
+      //   // deal with two planes without any constraints, like to deal everything together
+      // 	WireCell2dToy::ToyMatrixIterate_Only toymatrix_it_only(*toymatrix[i],mergetiling[i]);
+      // }
       
       
       
