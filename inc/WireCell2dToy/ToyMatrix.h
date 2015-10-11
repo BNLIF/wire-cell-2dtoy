@@ -46,6 +46,10 @@ namespace WireCell2dToy{
     void Set_chi2(double chi2t){chi2 = chi2t;};
     void Set_value(double value, int index){ (*Cx)[index] = value;};
     void Set_error(double value, int index){ (*dCx)[index] = value;};
+
+    double Get_value(int index){return (*Cx)[index];};
+    double  Get_error(int index){return (*dCx)[index];};
+
     void Set_ndf(double ndf1){ndf = ndf1;};
     void Set_Solve_Flag(float solve_flag1){solve_flag=solve_flag1;};
     void Print();
