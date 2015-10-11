@@ -129,7 +129,7 @@ int main(int argc, char* argv[])
   //st_fds.Save();
   
   
-  int time_offset = -46;
+  int time_offset = -52;
   // //test
   // cout << "Simulate Raw WaveForm " << endl; 
   // //WireCell2dToy::ToySignalSimuFDS simu_fds(gfds,gds,9600,max_events,1.647,1.539+1.647,1,-55); // time offset among different planes for the time electrons travel among different planes

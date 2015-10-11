@@ -134,7 +134,7 @@ int main(int argc, char* argv[])
   float threshold_vg = 822.81;
   float threshold_wg = 510.84;
   
-  int time_offset = -46;
+  int time_offset = -52.;
   
 
 
