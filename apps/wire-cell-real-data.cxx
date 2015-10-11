@@ -277,10 +277,8 @@ int main(int argc, char* argv[])
   int start_num = 0 ;
   int end_num = sds.size()-1;
 
-  // cout << "Check Memory! " << std::endl; 
-  // int qxqx;
-  // cin >> qxqx;
-
+  // int start_num = 61 ;
+  // int end_num = 61;
 
   for (int i=start_num;i!=end_num+1;i++){
  

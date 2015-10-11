@@ -15,6 +15,7 @@ namespace WireCell2dToy{
     WireCell2dToy::MergeToyTiling *mergetiling;
     WireCell::WireChargeMap wirechargemap;
     int ncount;
+    int nlevel;
     
     void Iterate(WireCell::GeomCellSelection cells, WireCell::GeomCellSelection single_cells, WireCell::GeomCellSelection tried_cell, WireCell::GeomCellMap cellmap, WireCell::GeomWireMap wiremap);
 

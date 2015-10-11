@@ -22,29 +22,50 @@ WireCell2dToy::ToyMatrixIterate_SingleWire::ToyMatrixIterate_SingleWire(WireCell
   GeomCellMap cellmap = mergetiling->cmap();
   GeomWireMap wiremap = mergetiling->wmap();
   
-  std::cout << "Test: " << cells.size() << std::endl;
+  //  std::cout << "Test: " << cells.size() << std::endl;
   ncount = 0;
-  GeomCellSelection tried_cell;
-  Iterate(cells,single_wire_cells, tried_cell, cellmap,wiremap);
-  
+  nlevel = 0;
+  if (cells.size() != 0){
+    GeomCellSelection tried_cell;
+    Iterate(cells,single_wire_cells, tried_cell, cellmap,wiremap);
+  }else{
+    std::vector<int> already_removed; 
+    std::vector<int> no_need_remove; 
+	
+    for (int i=0;i!=mergetiling->get_allcell().size();i++){
+      MergeGeomCell *mcell = (MergeGeomCell*)mergetiling->get_allcell().at(i);
+      int index = toymatrix.Get_mcindex(mcell);
+      no_need_remove.push_back(index);
+    }
+	
+    WireCell2dToy::ToyMatrixKalman toykalman(already_removed, no_need_remove, toymatrix,0,0);
+    //std::cout << "Test: " << cellmap.size() << " " << wiremap.size() << " " << toykalman.Get_numz() << " " << ncount << std::endl;
+  }
 
   
   
 }
 
 void WireCell2dToy::ToyMatrixIterate_SingleWire::Iterate(WireCell::GeomCellSelection cells, WireCell::GeomCellSelection single_cells, WireCell::GeomCellSelection tried_cell, WireCell::GeomCellMap cellmap, WireCell::GeomWireMap wiremap){
-  GeomCellSelection tried_cells = tried_cell;
+  if (ncount > 1e5) return;
+
   
+
+  nlevel ++;
   for (int i1=0;i1!=cells.size();i1++){
      // stuff that will get passed ... 
     GeomCellSelection cells_1 = cells;
     GeomCellMap cellmap_1 = cellmap;
     GeomWireMap wiremap_1 = wiremap;
     GeomCellSelection single_wire_cells = single_cells;
-
-
+    GeomCellSelection tried_cells = tried_cell;  
     auto it = find(tried_cells.begin(),tried_cells.end(),cells.at(i1));
     if (it == tried_cells.end()){
+      
+      // std::cout << "Start: " << nlevel << " " << tried_cells.size() << " " << 
+      // 	cells_1.size() << " " << single_wire_cells.size() << " " <<
+      // 	cellmap_1.size() << " " << wiremap_1.size() << std::endl;
+
       //remove the cell
       tried_cells.push_back(cells.at(i1));
       auto it1 = find(cells_1.begin(),cells_1.end(),cells.at(i1));
@@ -77,13 +98,21 @@ void WireCell2dToy::ToyMatrixIterate_SingleWire::Iterate(WireCell::GeomCellSelec
 	      }
 	    }
 	  }
-	  if (flag==1)
-	    single_wire_cells.push_back(mcell);
+	  if (flag==1){
+	    auto it4 = find(single_wire_cells.begin(),single_wire_cells.end(),mcell);
+	    if (it4 == single_wire_cells.end())
+	      single_wire_cells.push_back(mcell);
+	    
+	  }
 	}
 	
 	for (int i=0;i!=single_wire_cells.size();i++){
 	  MergeGeomCell *mcell = (MergeGeomCell*)single_wire_cells.at(i);
 	  
+	  auto it6 = find(cells_1.begin(),cells_1.end(),mcell);
+	  if (it6 != cells_1.end())
+	    cells_1.erase(it6);
+
 	  GeomWireSelection wires = cellmap_1[mcell];
 	  for (int j=0;j!=wires.size();j++){
 	    MergeGeomWire *mwire = (MergeGeomWire*)wires.at(j);
@@ -101,15 +130,17 @@ void WireCell2dToy::ToyMatrixIterate_SingleWire::Iterate(WireCell::GeomCellSelec
 	  }
 	}
 	
+
+
 	if (to_be_removed_cells.size() !=0) flag1 = 1; 
 	
 	//Now remove these cells, and the update the two maps
 	for (int i=0;i!=to_be_removed_cells.size();i++){
 	  MergeGeomCell *mcell = (MergeGeomCell*)to_be_removed_cells.at(i);
-	  // put into tried pool
-	  auto it7 = find(tried_cells.begin(),tried_cells.end(),mcell);
-	  if (it7 == tried_cells.end())
-	    tried_cells.push_back(mcell);
+	  // // put into tried pool
+	  // auto it7 = find(tried_cells.begin(),tried_cells.end(),mcell);
+	  // if (it7 == tried_cells.end())
+	  //   tried_cells.push_back(mcell);
 	  //remove it
 	  auto it4 = find(cells_1.begin(),cells_1.end(),mcell);
 	  cells_1.erase(it4);
@@ -121,9 +152,19 @@ void WireCell2dToy::ToyMatrixIterate_SingleWire::Iterate(WireCell::GeomCellSelec
 	      it5->second.erase(it6);
 	  }
 	}
+
+	// std::cout << "Middle: " << nlevel << " " << tried_cells.size() << " " << 
+	//   cells_1.size() << " " << single_wire_cells.size() << " " <<
+	//   cellmap_1.size() << " " << wiremap_1.size() << std::endl;
+
       }
       // go to next level
       if (cells_1.size() >0){
+
+	// std::cout << "End: " << nlevel << " " << tried_cells.size() << " " << 
+	//   cells_1.size() << " " << single_wire_cells.size() << " " <<
+	//   cellmap_1.size() << " " << wiremap_1.size() << std::endl;
+
 	Iterate(cells_1,single_wire_cells, tried_cells,cellmap_1,wiremap_1);
       }else{
 	std::vector<int> already_removed; 
@@ -132,7 +173,7 @@ void WireCell2dToy::ToyMatrixIterate_SingleWire::Iterate(WireCell::GeomCellSelec
 	for (int i=0;i!=mergetiling->get_allcell().size();i++){
 	  MergeGeomCell *mcell = (MergeGeomCell*)mergetiling->get_allcell().at(i);
 	  int index = toymatrix.Get_mcindex(mcell);
-	  if (cellmap.find(mcell) == cellmap.end()){
+	  if (cellmap_1.find(mcell) == cellmap_1.end()){
 	    already_removed.push_back(index);
 	  }else{
 	    no_need_remove.push_back(index);
@@ -140,12 +181,15 @@ void WireCell2dToy::ToyMatrixIterate_SingleWire::Iterate(WireCell::GeomCellSelec
 	}
 	
 	WireCell2dToy::ToyMatrixKalman toykalman(already_removed, no_need_remove, toymatrix,0,0);
-
+	if (ncount > 1e5) return;
 	ncount ++;
-	std::cout << "Test: " << cellmap.size() << " " << wiremap.size() << " " << toykalman.Get_numz() << " " << ncount << std::endl;
+
+	//std::cout << "Test: " << cellmap.size() << " " << wiremap.size() << " " << toykalman.Get_numz() << " " << ncount << std::endl;
       }
     }
   }
+
+  nlevel --;
   
 }
 
