@@ -439,81 +439,7 @@ WireCell2dToy::MergeToyTiling::MergeToyTiling(WireCell2dToy::ToyTiling& tiling, 
 
 
 void WireCell2dToy::MergeToyTiling::deghost(){
-  // // first figure out how many cells are single wire cell
   
-  // int flag1 = 1;
-  
-  // while(flag1==1){
-  //   flag1 = 0;
-  //   single_wire_cells.clear();
-  //   GeomCellSelection to_be_removed_cells;
-  //   for (int i=0;i!=cell_all.size();i++){
-  //     MergeGeomCell *mcell = (MergeGeomCell*) cell_all.at(i);
-  //     GeomWireSelection wires = cellmap[mcell];
-  //     int flag = 0;
-  //     for (int j=0;j!=wires.size();j++){
-  // 	MergeGeomWire *mwire = (MergeGeomWire*)wires.at(j);
-  // 	if (wirechargemap[mwire] > 10){
-  // 	  if (wiremap[mwire].size()==1){
-  // 	    flag = 1;
-  // 	    break;
-  // 	  }
-  // 	}
-  //     }
-  //     if (flag==1)
-  // 	single_wire_cells.push_back(mcell);
-  //   }
-  
-  //   //figure out to be removed cells
-  //   for (int i=0;i!=single_wire_cells.size();i++){
-  //     MergeGeomCell *mcell = (MergeGeomCell*)single_wire_cells.at(i);
-  //     GeomWireSelection wires = cellmap[mcell];
-  //     for (int j=0;j!=wires.size();j++){
-  // 	MergeGeomWire *mwire = (MergeGeomWire*)wires.at(j);
-  // 	GeomCellSelection cells = wiremap[mwire];
-  // 	for (int k=0;k!=cells.size();k++){
-  // 	  auto it = find(single_wire_cells.begin(),single_wire_cells.end(),
-  // 			 cells.at(k));
-  // 	  if (it == single_wire_cells.end()){
-  // 	    auto it1 = find(to_be_removed_cells.begin(), to_be_removed_cells.end(), cells.at(k));
-	    
-  // 	    if (it1 == to_be_removed_cells.end())
-  // 	      to_be_removed_cells.push_back(cells.at(k));
-  // 	  }
-  // 	}
-  //     }
-  //   }
-  
-  //   if (to_be_removed_cells.size() !=0 ) flag1 = 1; 
-    
-  //   //Now remove all cells and then reconstruct the two maps;
-  //   for (int i=0;i!=to_be_removed_cells.size();i++){
-  //     MergeGeomCell *mcell = (MergeGeomCell*)to_be_removed_cells.at(i);
-  //     auto it = find(cell_all.begin(),cell_all.end(),mcell);
-  //     cell_all.erase(it);
-  //     delete mcell;
-  //   }
-  //   GeomCellMap cellmap_save = cellmap;
-  //   cellmap.clear();
-  //   wiremap.clear();
-  //   for (int i=0;i!=cell_all.size();i++){
-  //     cellmap[cell_all.at(i)] = cellmap_save[cell_all.at(i)];
-  //     for (int j=0;j!=cellmap[cell_all.at(i)].size();j++){
-  // 	if (wiremap.find(cellmap[cell_all.at(i)].at(j)) == wiremap.end()){
-  // 	  GeomCellSelection cells;
-  // 	  cells.push_back(cell_all.at(i));
-  // 	  wiremap[cellmap[cell_all.at(i)].at(j)] = cells;
-  // 	}else{
-  // 	  wiremap[cellmap[cell_all.at(i)].at(j)].push_back(cell_all.at(i));
-  // 	}
-  //     }
-  //   }
-
-  //   if (flag1 == 0){
-  //     //  std::cout << "All Cells " << cell_all.size() << " " << single_wire_cells.size() << " " << to_be_removed_cells.size() << std::endl;
-  //   }
-
-  // }
 
 
 
@@ -582,7 +508,81 @@ void WireCell2dToy::MergeToyTiling::deghost(){
     delete mcell;
   }
   
+  // first figure out how many cells are single wire cell
+  
+  int flag1 = 1;
+  
+  while(flag1==1){
+    flag1 = 0;
+    single_wire_cells.clear();
+    GeomCellSelection to_be_removed_cells;
+    for (int i=0;i!=cell_all.size();i++){
+      MergeGeomCell *mcell = (MergeGeomCell*) cell_all.at(i);
+      GeomWireSelection wires = cellmap[mcell];
+      int flag = 0;
+      for (int j=0;j!=wires.size();j++){
+  	MergeGeomWire *mwire = (MergeGeomWire*)wires.at(j);
+  	if (wirechargemap[mwire] > 10){
+  	  if (wiremap[mwire].size()==1){
+  	    flag = 1;
+  	    break;
+  	  }
+  	}
+      }
+      if (flag==1)
+  	single_wire_cells.push_back(mcell);
+    }
+  
+    //figure out to be removed cells
+    for (int i=0;i!=single_wire_cells.size();i++){
+      MergeGeomCell *mcell = (MergeGeomCell*)single_wire_cells.at(i);
+      GeomWireSelection wires = cellmap[mcell];
+      for (int j=0;j!=wires.size();j++){
+  	MergeGeomWire *mwire = (MergeGeomWire*)wires.at(j);
+  	GeomCellSelection cells = wiremap[mwire];
+  	for (int k=0;k!=cells.size();k++){
+  	  auto it = find(single_wire_cells.begin(),single_wire_cells.end(),
+  			 cells.at(k));
+  	  if (it == single_wire_cells.end()){
+  	    auto it1 = find(to_be_removed_cells.begin(), to_be_removed_cells.end(), cells.at(k));
+	    
+  	    if (it1 == to_be_removed_cells.end())
+  	      to_be_removed_cells.push_back(cells.at(k));
+  	  }
+  	}
+      }
+    }
+  
+    if (to_be_removed_cells.size() !=0 ) flag1 = 1; 
+    
+    //Now remove all cells and then reconstruct the two maps;
+    for (int i=0;i!=to_be_removed_cells.size();i++){
+      MergeGeomCell *mcell = (MergeGeomCell*)to_be_removed_cells.at(i);
+      auto it = find(cell_all.begin(),cell_all.end(),mcell);
+      cell_all.erase(it);
+      delete mcell;
+    }
+    GeomCellMap cellmap_save = cellmap;
+    cellmap.clear();
+    wiremap.clear();
+    for (int i=0;i!=cell_all.size();i++){
+      cellmap[cell_all.at(i)] = cellmap_save[cell_all.at(i)];
+      for (int j=0;j!=cellmap[cell_all.at(i)].size();j++){
+  	if (wiremap.find(cellmap[cell_all.at(i)].at(j)) == wiremap.end()){
+  	  GeomCellSelection cells;
+  	  cells.push_back(cell_all.at(i));
+  	  wiremap[cellmap[cell_all.at(i)].at(j)] = cells;
+  	}else{
+  	  wiremap[cellmap[cell_all.at(i)].at(j)].push_back(cell_all.at(i));
+  	}
+      }
+    }
 
+    if (flag1 == 0){
+      //  std::cout << "All Cells " << cell_all.size() << " " << single_wire_cells.size() << " " << to_be_removed_cells.size() << std::endl;
+    }
+
+  }
 
   //  std::cout << "Check: " << cell_all.size() << " " << three_wires_cells.size() << " " << two_wires_cells.size() << std::endl;
   
