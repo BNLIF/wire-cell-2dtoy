@@ -85,6 +85,8 @@ int main(int argc, char* argv[])
      }
   }
 
+
+
   x_center *= units::m;
   y_center *= units::m;
   z_center *= units::m;
@@ -868,7 +870,7 @@ int main(int argc, char* argv[])
 
 
   //save files
-  TFile *file = new TFile(Form("shower3D_cluster_%d_%d.root",eve_num, int(rotate_angle)),"RECREATE");
+  TFile *file = new TFile(Form("shower3D_cluster_%d_%d.root",eve_num, int(round(rotate_angle/3.1415926*180.))),"RECREATE");
   TTree *t_true = new TTree("T_true","T_true");
   TTree *t_rec = new TTree("T_rec","T_rec");
   TTree *t_rec_charge = new TTree("T_rec_charge","T_rec_charge");
