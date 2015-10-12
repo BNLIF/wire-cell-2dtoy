@@ -279,6 +279,12 @@ WireCell2dToy::BadTiling::BadTiling(int time, int scale, WireCell::ChirpMap& upl
     
       if(pcell.size() >=3){
 	GeomCell *cell = new GeomCell(num,pcell);
+
+	GeomWireSelection bad_wires;
+	bad_wires.push_back(wire_u.at(i));
+	bad_wires.push_back(wire_v.at(j));
+	cellmap[cell] = bad_wires;
+
 	num ++;
 	cell_all.push_back(cell);
       }
@@ -476,6 +482,12 @@ WireCell2dToy::BadTiling::BadTiling(int time, int scale, WireCell::ChirpMap& upl
     
       if(pcell.size() >=3){
 	GeomCell *cell = new GeomCell(num,pcell);
+
+	GeomWireSelection bad_wires;
+	bad_wires.push_back(wire_u.at(i));
+	bad_wires.push_back(wire_w.at(j));
+	cellmap[cell] = bad_wires;
+
 	num ++;
 	cell_all.push_back(cell);
       }
@@ -671,13 +683,18 @@ WireCell2dToy::BadTiling::BadTiling(int time, int scale, WireCell::ChirpMap& upl
     
       if(pcell.size() >=3){
 	GeomCell *cell = new GeomCell(num,pcell);
+
+	GeomWireSelection bad_wires;
+	bad_wires.push_back(wire_w.at(i));
+	bad_wires.push_back(wire_v.at(j));
+	cellmap[cell] = bad_wires;
 	num ++;
 	cell_all.push_back(cell);
       }
     } 
   }
 
-  std::cout << "Bad: " << wire_u.size() << " " << wire_v.size() << " " << wire_w.size() << " " << cell_all.size() << std::endl;
+  // std::cout << "Bad: " << wire_u.size() << " " << wire_v.size() << " " << wire_w.size() << " " << cell_all.size() << std::endl;
 }
 
 
