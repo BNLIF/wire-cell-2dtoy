@@ -243,7 +243,7 @@ int main(int argc, char* argv[])
     cout << "Single Cell: " << i << " "  << allcell.size() << " " << allwire.size() << endl;
     
 
-    mergetiling[i] = new WireCell2dToy::MergeToyTiling(*toytiling[i],i,3,1);
+    mergetiling[i] = new WireCell2dToy::MergeToyTiling(*toytiling[i],i,3);
     
     
     GeomCellSelection allmcell = mergetiling[i]->get_allcell();

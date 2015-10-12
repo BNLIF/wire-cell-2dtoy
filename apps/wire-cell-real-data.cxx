@@ -396,7 +396,7 @@ int main(int argc, char* argv[])
     cout << "chi2: " << toymatrix[i]->Get_Chi2() << endl;
     cout << "NDF: " << toymatrix[i]->Get_ndf() << endl;
     
-    badtiling[i] = new WireCell2dToy::BadTiling(i,nrebin,uplane_map,vplane_map,wplane_map,gds);
+    //    badtiling[i] = new WireCell2dToy::BadTiling(i,nrebin,uplane_map,vplane_map,wplane_map,gds);
 
     // // if (toymatrix[i]->Get_Solve_Flag()!=0){
     // //   toymatrix[i]->Update_pred();
@@ -771,79 +771,79 @@ int main(int argc, char* argv[])
   // ttree->Write();
 
 
-  TTree *ttree2 = new TTree("TB","TB");
-  // save center, and boundar points
-  Double_t x_center, y_center, z_center;
-  Double_t x_b[20], y_b[20], z_b[20];
-  Int_t npoints_b;
-  // save all the wires 
-  Int_t ub_index[2400], vb_index[2400], wb_index[3500];
-  Int_t unc, vnc, wnc;
+  // TTree *ttree2 = new TTree("TB","TB");
+  // // save center, and boundar points
+  // Double_t x_center, y_center, z_center;
+  // Double_t x_b[20], y_b[20], z_b[20];
+  // Int_t npoints_b;
+  // // save all the wires 
+  // Int_t ub_index[2400], vb_index[2400], wb_index[3500];
+  // Int_t unc, vnc, wnc;
   
-  ttree2->SetDirectory(file);
+  // ttree2->SetDirectory(file);
 
-  ttree2->Branch("time_slice",&time_slice,"time_slice/I"); // done
+  // ttree2->Branch("time_slice",&time_slice,"time_slice/I"); // done
   
-  ttree2->Branch("x_center",&x_center,"x_center/D");
-  ttree2->Branch("y_center",&y_center,"y_center/D");
-  ttree2->Branch("z_center",&z_center,"z_center/D");
+  // ttree2->Branch("x_center",&x_center,"x_center/D");
+  // ttree2->Branch("y_center",&y_center,"y_center/D");
+  // ttree2->Branch("z_center",&z_center,"z_center/D");
   
-  ttree2->Branch("npoints_b",&npoints_b,"npoints_b/I");
-  ttree2->Branch("x_b",x_b,"x_b[npoints_b]/D");
-  ttree2->Branch("y_b",y_b,"y_b[npoints_b]/D");
-  ttree2->Branch("z_b",z_b,"z_b[npoints_b]/D");
+  // ttree2->Branch("npoints_b",&npoints_b,"npoints_b/I");
+  // ttree2->Branch("x_b",x_b,"x_b[npoints_b]/D");
+  // ttree2->Branch("y_b",y_b,"y_b[npoints_b]/D");
+  // ttree2->Branch("z_b",z_b,"z_b[npoints_b]/D");
 
-  ttree2->Branch("unc",&unc,"unc/I");
-  ttree2->Branch("vnc",&vnc,"vnc/I");
-  ttree2->Branch("wnc",&wnc,"wnc/I");
+  // ttree2->Branch("unc",&unc,"unc/I");
+  // ttree2->Branch("vnc",&vnc,"vnc/I");
+  // ttree2->Branch("wnc",&wnc,"wnc/I");
 
-  ttree2->Branch("ub_index",ub_index,"ub_index[unc]");
-  ttree2->Branch("vb_index",vb_index,"vb_index[vnc]");
-  ttree2->Branch("wb_index",wb_index,"wb_index[wnc]");
+  // ttree2->Branch("ub_index",ub_index,"ub_index[unc]");
+  // ttree2->Branch("vb_index",vb_index,"vb_index[vnc]");
+  // ttree2->Branch("wb_index",wb_index,"wb_index[wnc]");
   
   
   
 
-  for (int i=start_num;i!=end_num+1;i++){
-    time_slice = i;
-    for (int j=0;j!= badtiling[i]->get_cell_all().size();j++){
-      const GeomCell *cell = badtiling[i]->get_cell_all().at(j);
-      x_center = i*unit_dis/10.*nrebin/2. - unit_dis/10.*frame_length/2. -time_offset*unit_dis/10.;
-      y_center = cell->center().y/units::cm;
-      z_center = cell->center().z/units::cm;
+  // for (int i=start_num;i!=end_num+1;i++){
+  //   time_slice = i;
+  //   for (int j=0;j!= badtiling[i]->get_cell_all().size();j++){
+  //     const GeomCell *cell = badtiling[i]->get_cell_all().at(j);
+  //     x_center = i*unit_dis/10.*nrebin/2. - unit_dis/10.*frame_length/2. -time_offset*unit_dis/10.;
+  //     y_center = cell->center().y/units::cm;
+  //     z_center = cell->center().z/units::cm;
 
-      npoints_b = cell->boundary().size();
-      for (int k=0;k!=npoints_b;k++){
-	x_b[k] = i*unit_dis/10.*nrebin/2. - unit_dis/10.*frame_length/2. -time_offset*unit_dis/10.;
-	y_b[k] = cell->boundary().at(k).y/units::cm;
-	z_b[k] = cell->boundary().at(k).z/units::cm;
-      }
+  //     npoints_b = cell->boundary().size();
+  //     for (int k=0;k!=npoints_b;k++){
+  // 	x_b[k] = i*unit_dis/10.*nrebin/2. - unit_dis/10.*frame_length/2. -time_offset*unit_dis/10.;
+  // 	y_b[k] = cell->boundary().at(k).y/units::cm;
+  // 	z_b[k] = cell->boundary().at(k).z/units::cm;
+  //     }
 
-      unc = 0;
-      vnc = 0;
-      wnc = 0;
+  //     unc = 0;
+  //     vnc = 0;
+  //     wnc = 0;
       
-      for (int k=0;k!=badtiling[i]->cmap()[cell].size();k++){
-	MergeGeomWire *mwire = (MergeGeomWire*)badtiling[i]->cmap()[cell].at(k);
-	for (int k1 = 0; k1 != mwire->get_allwire().size(); k1++){
-	  GeomWire *wire = (GeomWire*) mwire->get_allwire().at(k1);
-	  if (wire->plane()==0){
-	    ub_index[unc] = wire->index();
-	    unc ++;
-	  }else if (wire->plane()==1){
-	    vb_index[vnc] = wire->index();
-	    vnc++;
-	  }else if (wire->plane()==2){
-	    wb_index[wnc] = wire->index();
-	    wnc++;
-	  }
-	}
-      }
+  //     for (int k=0;k!=badtiling[i]->cmap()[cell].size();k++){
+  // 	MergeGeomWire *mwire = (MergeGeomWire*)badtiling[i]->cmap()[cell].at(k);
+  // 	for (int k1 = 0; k1 != mwire->get_allwire().size(); k1++){
+  // 	  GeomWire *wire = (GeomWire*) mwire->get_allwire().at(k1);
+  // 	  if (wire->plane()==0){
+  // 	    ub_index[unc] = wire->index();
+  // 	    unc ++;
+  // 	  }else if (wire->plane()==1){
+  // 	    vb_index[vnc] = wire->index();
+  // 	    vnc++;
+  // 	  }else if (wire->plane()==2){
+  // 	    wb_index[wnc] = wire->index();
+  // 	    wnc++;
+  // 	  }
+  // 	}
+  //     }
       
-      ttree2->Fill();
+  //     ttree2->Fill();
       
-    }
-  }
+  //   }
+  // }
   
 
   
