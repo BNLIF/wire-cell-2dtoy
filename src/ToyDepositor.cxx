@@ -3,11 +3,15 @@
 
 using namespace::WireCell;
 
-ToyDepositor::ToyDepositor(WireCell::FrameDataSource* fds1, int flag, float unit_dis, int toffset)
+ToyDepositor::ToyDepositor(WireCell::FrameDataSource* fds1, int flag, float unit_dis, int toffset, float x_center, float y_center, float z_center, float rotate_angle)
   : fds(fds1)
   , flag(flag)
   , unit_dis(unit_dis)
   , toffset(toffset)
+  , x_center(x_center)
+  , y_center(y_center)
+  , z_center(z_center)
+  , rotate_angle(rotate_angle)
 {
 }
 
@@ -28,9 +32,9 @@ const PointValueVector& ToyDepositor::depositions(int frame_number) const{
   for (size_t itruth = 0; itruth < sts.size(); ++itruth) {
      const WireCell::SimTruth* st = sts[itruth];
      PointValue p;
-     p.first.x = st->x() * units::cm;
+     p.first.x = (st->x() * units::cm - x_center)*cos(rotate_angle) + (st->z() * units::cm - z_center)*sin(rotate_angle)   + x_center;
      p.first.y = st->y() * units::cm;
-     p.first.z = st->z() * units::cm;
+     p.first.z = -(st->x() * units::cm - x_center)*sin(rotate_angle) + (st->z() * units::cm - z_center)*cos(rotate_angle)   + z_center;
      p.second = st->charge()/3.;
      
      //hack for test, to be removed
