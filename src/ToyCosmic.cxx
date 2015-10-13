@@ -3,7 +3,7 @@
 
 using namespace WireCell;
 
-WireCell2dToy::ToyCosmic::ToyCosmic(WireCell2dToy::ToyTrackingSelection& trackings)
+WireCell2dToy::ToyCosmic::ToyCosmic(WireCell2dToy::ToyTrackingSelection& trackings, float abc, float abc1)
   : trackings(trackings)
 {
 
@@ -13,6 +13,9 @@ WireCell2dToy::ToyCosmic::ToyCosmic(WireCell2dToy::ToyTrackingSelection& trackin
   
   std::list<ToyTracking*> trackings_list(trackings.begin(),trackings.end());
   
+
+  gap_cut = abc; // gap between two tracks (10 cm default) 
+  gap_cut1 = abc1;
 
   while(used_trackings.size() != trackings.size()){
     //std::cout << "xin1 " << used_trackings.size() << " " << trackings.size() << std::endl;
@@ -131,19 +134,19 @@ WireCell2dToy::ToyCosmic::ToyCosmic(WireCell2dToy::ToyTrackingSelection& trackin
 	  Point p2_b = cosmic2->get_points().back();
 	  
 	  int flag1 = 0;
-	  if (sqrt(pow(p1_f.x-p2_f.x,2) +pow(p1_f.y-p2_f.y,2) + pow(p1_f.z-p2_f.z,2)) < 10*units::cm){
+	  if (sqrt(pow(p1_f.x-p2_f.x,2) +pow(p1_f.y-p2_f.y,2) + pow(p1_f.z-p2_f.z,2)) < gap_cut*units::cm){
 	    flag1 = 1;
 	  }
 	  if (flag1 == 0)
-	    if (sqrt(pow(p1_f.x-p2_b.x,2) +pow(p1_f.y-p2_b.y,2) + pow(p1_f.z-p2_b.z,2)) < 10*units::cm){
+	    if (sqrt(pow(p1_f.x-p2_b.x,2) +pow(p1_f.y-p2_b.y,2) + pow(p1_f.z-p2_b.z,2)) < gap_cut*units::cm){
 	      flag1 = 1;
 	    }
 	  if(flag1 == 0)
-	    if (sqrt(pow(p1_b.x-p2_f.x,2) +pow(p1_b.y-p2_f.y,2) + pow(p1_b.z-p2_f.z,2)) < 10*units::cm){
+	    if (sqrt(pow(p1_b.x-p2_f.x,2) +pow(p1_b.y-p2_f.y,2) + pow(p1_b.z-p2_f.z,2)) < gap_cut*units::cm){
 	      flag1 = 1;
 	    }
 	  if (flag1==0)
-	    if (sqrt(pow(p1_b.x-p2_b.x,2) +pow(p1_b.y-p2_b.y,2) + pow(p1_b.z-p2_b.z,2)) < 10*units::cm){
+	    if (sqrt(pow(p1_b.x-p2_b.x,2) +pow(p1_b.y-p2_b.y,2) + pow(p1_b.z-p2_b.z,2)) < gap_cut*units::cm){
 	      flag1 = 1;
 	    }
 
@@ -285,11 +288,11 @@ bool WireCell2dToy::ToyCosmic::IsConnected(ToyTracking *tracking1, ToyTracking *
 
       //std::cout << "qx: " << dis << " " << angle << std::endl;
 
-      float dis_cut=3.0*units::cm;
+      float dis_cut=gap_cut1*units::cm;
       if (dis < 5*units::cm && angle >= 0.97){
-       	dis_cut = 12*units::cm;
+       	dis_cut = gap_cut1 * 4 *units::cm;
       }else if (dis < 10*units::cm && angle > 0.94){
-	dis_cut = 6 * units::cm;
+	dis_cut = gap_cut1 * 2 * units::cm;
       }
 
       // MergeSpaceCell *mcell1_f = track1->get_centerVP_cells().front();

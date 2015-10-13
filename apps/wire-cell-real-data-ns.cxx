@@ -249,7 +249,7 @@ int main(int argc, char* argv[])
   std::cout << "Check: " << crawlers.size() << " " << TC->GetEntries() << " " << sum << std::endl;
 
   
-  WireCell2dToy::ToyCosmic toycosmic(trackings);
+  WireCell2dToy::ToyCosmic toycosmic(trackings,100,10);
   
   // //Check tracking ... 
   // for (int i=0;i!=trackings.size();i++){
@@ -257,7 +257,7 @@ int main(int argc, char* argv[])
 
 
 
-  TFile *file1 = new TFile(Form("cluster_tracking_%d.root",eve_no),"RECREATE");
+  TFile *file1 = new TFile(Form("cluster_%d_%d.root",run_no,event_no),"RECREATE");
   TTree *T1 = new TTree("T_goodtrack","T_goodtrack");
   TTree *T2 = new TTree("T_vertex","T_vertex");
   TTree *T3 = new TTree("T_badtrack","T_badtrack");
