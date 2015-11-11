@@ -187,13 +187,13 @@ int main(int argc, char* argv[])
 
   // do the Toy Crawler
   std::cout << "Crawling " << std::endl;
-  //  WireCell2dToy::ToyCrawler toycrawler(mcells);
-  WireCell2dToy::ToyCrawler toycrawler(mcells,1,2);
+  WireCell2dToy::ToyCrawler toycrawler(mcells);
+  //WireCell2dToy::ToyCrawler toycrawler(mcells,1,2); //cosmic tune?
 
   // test
   std::cout << "Tracking " << std::endl;
-  //WireCell2dToy::ToyTracking toytracking(toycrawler);
-  WireCell2dToy::ToyTracking toytracking(toycrawler,1);
+  WireCell2dToy::ToyTracking toytracking(toycrawler);
+  //WireCell2dToy::ToyTracking toytracking(toycrawler,1); //cosmic tune?
   
 
   std::cout << "Good Tracks:     " << toytracking.get_good_tracks().size() <<std::endl;
