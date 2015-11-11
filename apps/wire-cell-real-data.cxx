@@ -865,10 +865,10 @@ int main(int argc, char* argv[])
   ttree1->Branch("charge",&charge_save,"charge/D"); 
   
   double xx;
-  ttree1->Branch("xx",&xx,"xx/D");    //don
-  ttree1->Branch("x",&x,"x/D");    //done
-  ttree1->Branch("y",&y,"y/D");
-  ttree1->Branch("z",&z,"z/D");
+  //ttree1->Branch("xx",&xx,"xx/D");    //don
+  ttree1->Branch("xx",&x,"xx/D");    //done
+  ttree1->Branch("yy",&y,"yy/D");
+  ttree1->Branch("zz",&z,"zz/D");
 
   // save information to reconstruct the toytiling
   int u_index, v_index, w_index;
