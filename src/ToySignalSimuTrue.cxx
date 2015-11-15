@@ -13,6 +13,9 @@ WireCell2dToy::ToySignalSimuTrueFDS::ToySignalSimuTrueFDS(WireCell::FrameDataSou
   : fds(&fds1)
   , max_frames(nframes_total)
   , flag_smear(flag_smear)
+  , gds(&gds)
+  , dgds(0)
+  , gds_flag(0)
 {  
   bins_per_frame = bins_per_frame1;
 
@@ -25,9 +28,7 @@ WireCell2dToy::ToySignalSimuTrueFDS::ToySignalSimuTrueFDS(WireCell::FrameDataSou
   // nwire_w = wires_w.size();
   
   nbin = fds1.Get_Bins_Per_Frame();
-  
  
-
   // hu = new TH1F*[nwire_u];
   // hv = new TH1F*[nwire_v];
   // hw = new TH1F*[nwire_w];
@@ -68,6 +69,9 @@ WireCell2dToy::ToySignalSimuTrueFDS::ToySignalSimuTrueFDS(WireCell::FrameDataSou
   : fds(&fds1)
   , max_frames(nframes_total)
   , flag_smear(flag_smear)
+  , dgds(&gds)
+  , gds(0)
+  , gds_flag(1)
 {  
   bins_per_frame = bins_per_frame1;
 
@@ -81,8 +85,6 @@ WireCell2dToy::ToySignalSimuTrueFDS::ToySignalSimuTrueFDS(WireCell::FrameDataSou
   
   nbin = fds1.Get_Bins_Per_Frame();
   
- 
-
   // hu = new TH1F*[nwire_u];
   // hv = new TH1F*[nwire_v];
   // hw = new TH1F*[nwire_w];
@@ -186,6 +188,29 @@ int WireCell2dToy::ToySignalSimuTrueFDS::jump(int frame_number){
     
     
     TH1F *htemp;
+    if (gds_flag == 0){
+      // regular gds
+      
+      WirePlaneType_t plane = gds->by_channel(chid).at(0)->plane();
+      if (plane == WirePlaneType_t(0)){
+	htemp = hu;
+      }else if (plane == WirePlaneType_t(1)){
+	htemp = hv;
+      }else if (plane == WirePlaneType_t(2)){
+	htemp= hw;
+      }
+    }else{
+      // detector gds 
+      //dgds->by_channel(chid);
+      WirePlaneType_t plane = dgds->by_channel(chid).at(0)->plane();
+      if (plane == WirePlaneType_t(0)){
+	htemp = hu;
+      }else if (plane == WirePlaneType_t(1)){
+	htemp = hv;
+      }else if (plane == WirePlaneType_t(2)){
+	htemp= hw;
+      }
+    }
     // if (chid < nwire_u){
     //   //htemp = hu[chid];
     //   htemp = hu;
@@ -196,7 +221,7 @@ int WireCell2dToy::ToySignalSimuTrueFDS::jump(int frame_number){
     //   //htemp = hw[chid - nwire_u - nwire_v];
     //   htemp = hw;
     // }
-    htemp = hu;
+    
     htemp->Reset();
     
     for (int j = 0; j!= nbins; j++){

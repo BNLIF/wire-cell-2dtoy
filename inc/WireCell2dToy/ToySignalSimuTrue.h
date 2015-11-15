@@ -25,7 +25,10 @@ namespace WireCell2dToy {
     
   private:
     WireCell::FrameDataSource* fds;
-    //    const WireCell::GeomDataSource& gds;
+
+    int gds_flag;
+    const WireCell::GeomDataSource* gds;
+    const WireCell::DetectorGDS* dgds;
     int  max_frames;
 
     // int nwire_u, nwire_v, nwire_w;
