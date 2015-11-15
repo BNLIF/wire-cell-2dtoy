@@ -21,28 +21,28 @@ WireCell2dToy::ToySignalSimuFDS::ToySignalSimuFDS(WireCell::FrameDataSource& fds
 {  
   bins_per_frame = bins_per_frame1;
 
-  GeomWireSelection wires_u = gds.wires_in_plane(WirePlaneType_t(0));
-  GeomWireSelection wires_v = gds.wires_in_plane(WirePlaneType_t(1));
-  GeomWireSelection wires_w = gds.wires_in_plane(WirePlaneType_t(2));
+  // GeomWireSelection wires_u = gds.wires_in_plane(WirePlaneType_t(0));
+  // GeomWireSelection wires_v = gds.wires_in_plane(WirePlaneType_t(1));
+  // GeomWireSelection wires_w = gds.wires_in_plane(WirePlaneType_t(2));
 
-  nwire_u = wires_u.size();
-  nwire_v = wires_v.size();
-  nwire_w = wires_w.size();
+  // nwire_u = wires_u.size();
+  // nwire_v = wires_v.size();
+  // nwire_w = wires_w.size();
 
   //test save
-  hu1 = new TH1F*[nwire_u];
-  hv1 = new TH1F*[nwire_v];
-  hw1 = new TH1F*[nwire_w];
+  // hu1 = new TH1F*[nwire_u];
+  // hv1 = new TH1F*[nwire_v];
+  // hw1 = new TH1F*[nwire_w];
   
-  for (int i=0;i!=nwire_u;i++){
-    hu1[i] = new TH1F(Form("U_%d",i),Form("U_%d",i),bins_per_frame,0,bins_per_frame);
-  }
-  for (int i=0;i!=nwire_v;i++){
-    hv1[i] = new TH1F(Form("V_%d",i),Form("V_%d",i),bins_per_frame,0,bins_per_frame);
-  }
-  for (int i=0;i!=nwire_w;i++){
-    hw1[i] = new TH1F(Form("W_%d",i),Form("W_%d",i),bins_per_frame,0,bins_per_frame);
-  }
+  // for (int i=0;i!=nwire_u;i++){
+  //   hu1[i] = new TH1F(Form("U_%d",i),Form("U_%d",i),bins_per_frame,0,bins_per_frame);
+  // }
+  // for (int i=0;i!=nwire_v;i++){
+  //   hv1[i] = new TH1F(Form("V_%d",i),Form("V_%d",i),bins_per_frame,0,bins_per_frame);
+  // }
+  // for (int i=0;i!=nwire_w;i++){
+  //   hw1[i] = new TH1F(Form("W_%d",i),Form("W_%d",i),bins_per_frame,0,bins_per_frame);
+  // }
   //test save
   
   hu = new TH1F("U","U",bins_per_frame,0,bins_per_frame);
@@ -85,9 +85,9 @@ WireCell2dToy::ToySignalSimuFDS::ToySignalSimuFDS(WireCell::FrameDataSource& fds
 {  
   bins_per_frame = bins_per_frame1;
   
-  nwire_u = dgds->get_total_nwires(WirePlaneType_t(0));
-  nwire_v = dgds->get_total_nwires(WirePlaneType_t(1));
-  nwire_w = dgds->get_total_nwires(WirePlaneType_t(2));
+  // nwire_u = dgds->get_total_nwires(WirePlaneType_t(0));
+  // nwire_v = dgds->get_total_nwires(WirePlaneType_t(1));
+  // nwire_w = dgds->get_total_nwires(WirePlaneType_t(2));
 
   //test save
   // hu1 = new TH1F*[nwire_u];

@@ -12,7 +12,9 @@ using namespace WireCell;
 
 WireCell2dToy::ToySignalGausFDS::ToySignalGausFDS(WireCell::FrameDataSource& fds, const WireCell::GeomDataSource& gds, int bins_per_frame1, int nframes_total, float time_offset_uv, float time_offset_uw, float overall_time_offset)
   : fds(fds)
-  , gds(gds)
+  , gds_flag(0)
+  , gds(&gds)
+  , dgds(0)
   , max_frames(nframes_total)
   , time_offset_uv(time_offset_uv)
   , time_offset_uw(time_offset_uw)
@@ -20,13 +22,13 @@ WireCell2dToy::ToySignalGausFDS::ToySignalGausFDS(WireCell::FrameDataSource& fds
 {  
   bins_per_frame = bins_per_frame1;
 
-  GeomWireSelection wires_u = gds.wires_in_plane(WirePlaneType_t(0));
-  GeomWireSelection wires_v = gds.wires_in_plane(WirePlaneType_t(1));
-  GeomWireSelection wires_w = gds.wires_in_plane(WirePlaneType_t(2));
+  // GeomWireSelection wires_u = gds.wires_in_plane(WirePlaneType_t(0));
+  // GeomWireSelection wires_v = gds.wires_in_plane(WirePlaneType_t(1));
+  // GeomWireSelection wires_w = gds.wires_in_plane(WirePlaneType_t(2));
 
-  nwire_u = wires_u.size();
-  nwire_v = wires_v.size();
-  nwire_w = wires_w.size();
+  // nwire_u = wires_u.size();
+  // nwire_v = wires_v.size();
+  // nwire_w = wires_w.size();
 
   nbin = fds.Get_Bins_Per_Frame();
 
@@ -89,6 +91,90 @@ WireCell2dToy::ToySignalGausFDS::ToySignalGausFDS(WireCell::FrameDataSource& fds
   hpr_v = 0;
   hpr_w = 0;
 }
+
+WireCell2dToy::ToySignalGausFDS::ToySignalGausFDS(WireCell::FrameDataSource& fds, const WireCell::DetectorGDS& gds, int bins_per_frame1, int nframes_total, float time_offset_uv, float time_offset_uw, float overall_time_offset)
+  : fds(fds)
+  , gds_flag(1)
+  , gds(0)
+  , dgds(&gds)
+  , max_frames(nframes_total)
+  , time_offset_uv(time_offset_uv)
+  , time_offset_uw(time_offset_uw)
+  , overall_time_offset(overall_time_offset)
+{  
+  bins_per_frame = bins_per_frame1;
+
+  // GeomWireSelection wires_u = gds.wires_in_plane(WirePlaneType_t(0));
+  // GeomWireSelection wires_v = gds.wires_in_plane(WirePlaneType_t(1));
+  // GeomWireSelection wires_w = gds.wires_in_plane(WirePlaneType_t(2));
+
+  // nwire_u = wires_u.size();
+  // nwire_v = wires_v.size();
+  // nwire_w = wires_w.size();
+
+  nbin = fds.Get_Bins_Per_Frame();
+
+  // hu = new TH1F*[nwire_u];
+  // hv = new TH1F*[nwire_v];
+  // hw = new TH1F*[nwire_w];
+
+  // for (int i=0;i!=nwire_u;i++){
+  //   hu[i] = new TH1F(Form("U3_%d",i),Form("U3_%d",i),nbin,0,nbin);
+  // }
+  // for (int i=0;i!=nwire_v;i++){
+  //   hv[i] = new TH1F(Form("V3_%d",i),Form("V3_%d",i),nbin,0,nbin);
+  // }
+  // for (int i=0;i!=nwire_w;i++){
+  //   hw[i] = new TH1F(Form("W3_%d",i),Form("W3_%d",i),nbin,0,nbin);
+  // }
+  
+  hu = new TH1F("U3","U3",nbin,0,nbin);
+  hv = new TH1F("V3","V3",nbin,0,nbin);
+  hw = new TH1F("W3","W3",nbin,0,nbin);
+
+  
+  //define filters
+  filter_g = new TF1("filger_g","1./sqrt(2.*3.1415926)/[0]*exp(-x*x/2./[0]/[0])");
+  double par3[1] = {2./2.2};
+  filter_g->SetParameters(par3);
+  
+  hfilter_time_gaus =new TH1F("hfilter_time_gaus","hfilter_time_gaus",nbin,0,nbin);
+  for (int i=0;i!=nbin;i++){
+    double xx = hfilter_time_gaus->GetBinCenter(i+1)/2.-nbin/4.;
+    hfilter_time_gaus->SetBinContent(i+1,filter_g->Eval(xx));
+  }
+  hfilter_time_gaus->Scale(1./hfilter_time_gaus->GetSum());
+  hfilter_gaus = 0;
+  hfilter_gaus = hfilter_time_gaus->FFT(hfilter_gaus,"MAG");
+  
+
+  //get in the response function ... 
+  #include "data.txt"
+
+  gu = new TGraph(5000,xu,yu);
+  gv = new TGraph(5000,xv,yv);
+  gw = new TGraph(5000,xw,yw);
+
+  hur = new TH1F("hur2","hur2",nbin,0,nbin); // half us tick
+  hvr = new TH1F("hvr2","hvr2",nbin,0,nbin); // half us tick
+  hwr = new TH1F("hwr2","hwr2",nbin,0,nbin); // half us tick
+  
+  for (int i=0; i!=nbin; i++){  
+    double time = hur->GetBinCenter(i+1)/2.-50 ;
+    hur->SetBinContent(i+1,gu->Eval(time-overall_time_offset));
+    hvr->SetBinContent(i+1,gv->Eval(time-time_offset_uv-overall_time_offset));
+    hwr->SetBinContent(i+1,gw->Eval(time-time_offset_uw-overall_time_offset));
+  } 
+  
+  hmr_u = 0;
+  hmr_v = 0;
+  hmr_w = 0;
+  hpr_u = 0;
+  hpr_v = 0;
+  hpr_w = 0;
+}
+
+
 
 
 int WireCell2dToy::ToySignalGausFDS::size() const{
@@ -161,19 +247,53 @@ int WireCell2dToy::ToySignalGausFDS::jump(int frame_number){
     TH1F *htemp;
     TF1 *filter;
     
-    if (chid < nwire_u){
-      htemp = hu;
-      hmr = hmr_u;
-      hpr = hpr_u;
-    }else if (chid < nwire_u + nwire_v){
-      htemp = hv;
-      hmr = hmr_v;
-      hpr = hpr_v;
+    if (gds_flag == 0){
+      WirePlaneType_t plane = gds->by_channel(chid).at(0)->plane();
+      if (plane == WirePlaneType_t(0)){
+	htemp = hu;
+	hmr = hmr_u;
+	hpr = hpr_u;
+      }else if (plane == WirePlaneType_t(1)){
+	htemp = hv;
+	hmr = hmr_v;
+	hpr = hpr_v;
+      }else if (plane == WirePlaneType_t(2)){
+	htemp= hw;
+	hmr = hmr_w;
+	hpr = hpr_w;
+      }
     }else{
-      htemp = hw;
-      hmr = hmr_w;
-      hpr = hpr_w;
+      WirePlaneType_t plane = dgds->by_channel(chid).at(0)->plane();
+      if (plane == WirePlaneType_t(0)){
+	htemp = hu;
+	hmr = hmr_u;
+	hpr = hpr_u;
+      }else if (plane == WirePlaneType_t(1)){
+	htemp = hv;
+	hmr = hmr_v;
+	hpr = hpr_v;
+      }else if (plane == WirePlaneType_t(2)){
+	htemp= hw;
+	hmr = hmr_w;
+	hpr = hpr_w;
+      }
     }
+    // if (chid < nwire_u){
+    //   htemp = hu;
+    //   hmr = hmr_u;
+    //   hpr = hpr_u;
+    // }else if (chid < nwire_u + nwire_v){
+    //   htemp = hv;
+    //   hmr = hmr_v;
+    //   hpr = hpr_v;
+    // }else{
+    //   htemp = hw;
+    //   hmr = hmr_w;
+    //   hpr = hpr_w;
+    // }
+
+    
+
     htemp->Reset();
 
     for (int i = tbin;i!=tbin+nbins;i++){

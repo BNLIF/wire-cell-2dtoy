@@ -3,6 +3,8 @@
 
 #include "WireCellNav/FrameDataSource.h"
 #include "WireCellNav/GeomDataSource.h"
+#include "WireCellNav/DetectorGDS.h"
+
 #include "TH1F.h"
 #include "TGraph.h"
 
@@ -11,6 +13,7 @@ namespace WireCell2dToy {
   {
   public:
     ToySignalGausFDS(WireCell::FrameDataSource& fds,  const WireCell::GeomDataSource& gds, int bins_per_frame1 = 9600, int nframes_total = -1, float time_offset_uv = 0, float time_offset_uw = 0, float overall_time_offset = 0);
+    ToySignalGausFDS(WireCell::FrameDataSource& fds,  const WireCell::DetectorGDS& gds, int bins_per_frame1 = 9600, int nframes_total = -1, float time_offset_uv = 0, float time_offset_uw = 0, float overall_time_offset = 0);
     ~ToySignalGausFDS();
 
     virtual int size() const;
@@ -20,7 +23,9 @@ namespace WireCell2dToy {
 
   private:
     WireCell::FrameDataSource& fds;
-    const WireCell::GeomDataSource& gds;
+    int gds_flag;
+    const WireCell::GeomDataSource* gds;
+    const WireCell::DetectorGDS* dgds;
     int max_frames;
     int nbin;
 

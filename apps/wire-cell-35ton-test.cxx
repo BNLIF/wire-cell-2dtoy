@@ -106,10 +106,10 @@ int main(int argc, char* argv[])
   simu_fds.jump(eve_num);
   //simu_fds.Save();
   
-  //cout << "Deconvolution with Gaussian filter" << endl;
-  //WireCell2dToy::ToySignalGausFDS gaus_fds(simu_fds,gds,total_time_bin/nrebin,max_events,toffset_1,toffset_2); // gaussian smearing for charge estimation
-  //gaus_fds.jump(eve_num);
-  // //gaus_fds.Save();
+  cout << "Deconvolution with Gaussian filter" << endl;
+  WireCell2dToy::ToySignalGausFDS gaus_fds(simu_fds,gds,total_time_bin/nrebin,max_events,toffset_1,toffset_2); // gaussian smearing for charge estimation
+  gaus_fds.jump(eve_num);
+  //gaus_fds.Save();
 
   // cout << "Deconvolution with Wiener filter" << endl;
   //  WireCell2dToy::ToySignalWienFDS wien_fds(simu_fds,gds,total_time_bin/nrebin,max_events,toffset_1,toffset_2); // weiner smearing for hit identification
