@@ -3,6 +3,7 @@
 
 #include "WireCellNav/FrameDataSource.h"
 #include "WireCellNav/GeomDataSource.h"
+#include "WireCellNav/DetectorGDS.h"
 #include "TH1F.h"
 #include "TGraph.h"
 
@@ -11,6 +12,7 @@ namespace WireCell2dToy {
   {
   public:
     ToySignalSimuFDS(WireCell::FrameDataSource& fds, const WireCell::GeomDataSource& gds, int bins_per_frame1 = 9600, int nframes_total = -1,float time_offset_uv = 0, float time_offset_uw = 0, int flag_random = 1, float overall_time_offset = 0, int overall_time_shift = 0);
+    ToySignalSimuFDS(WireCell::FrameDataSource& fds, const WireCell::DetectorGDS& gds, int bins_per_frame1 = 9600, int nframes_total = -1,float time_offset_uv = 0, float time_offset_uw = 0, int flag_random = 1, float overall_time_offset = 0, int overall_time_shift = 0);
     ~ToySignalSimuFDS();
 
     virtual int size() const;
@@ -22,7 +24,10 @@ namespace WireCell2dToy {
     
   private:
     WireCell::FrameDataSource& fds;
-    const WireCell::GeomDataSource& gds;
+
+    int gds_flag;
+    const WireCell::GeomDataSource* gds;
+    const WireCell::DetectorGDS* dgds;
     int  max_frames;
     int overall_time_shift;
 
