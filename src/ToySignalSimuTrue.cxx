@@ -11,19 +11,18 @@ using namespace WireCell;
 WireCell2dToy::ToySignalSimuTrueFDS::ToySignalSimuTrueFDS(WireCell::FrameDataSource& fds1, const WireCell::GeomDataSource& gds,
 							  int bins_per_frame1, int nframes_total, int flag_smear)
   : fds(&fds1)
-  , gds(gds)
   , max_frames(nframes_total)
   , flag_smear(flag_smear)
 {  
   bins_per_frame = bins_per_frame1;
 
-  GeomWireSelection wires_u = gds.wires_in_plane(WirePlaneType_t(0));
-  GeomWireSelection wires_v = gds.wires_in_plane(WirePlaneType_t(1));
-  GeomWireSelection wires_w = gds.wires_in_plane(WirePlaneType_t(2));
+  // GeomWireSelection wires_u = gds.wires_in_plane(WirePlaneType_t(0));
+  // GeomWireSelection wires_v = gds.wires_in_plane(WirePlaneType_t(1));
+  // GeomWireSelection wires_w = gds.wires_in_plane(WirePlaneType_t(2));
 
-  nwire_u = wires_u.size();
-  nwire_v = wires_v.size();
-  nwire_w = wires_w.size();
+  // nwire_u = wires_u.size();
+  // nwire_v = wires_v.size();
+  // nwire_w = wires_w.size();
   
   nbin = fds1.Get_Bins_Per_Frame();
   
@@ -62,6 +61,64 @@ WireCell2dToy::ToySignalSimuTrueFDS::ToySignalSimuTrueFDS(WireCell::FrameDataSou
   hfilter_gaus = hfilter_time_gaus->FFT(0,"MAG");
   
 }
+
+
+WireCell2dToy::ToySignalSimuTrueFDS::ToySignalSimuTrueFDS(WireCell::FrameDataSource& fds1, const WireCell::DetectorGDS& gds,
+							  int bins_per_frame1, int nframes_total, int flag_smear)
+  : fds(&fds1)
+  , max_frames(nframes_total)
+  , flag_smear(flag_smear)
+{  
+  bins_per_frame = bins_per_frame1;
+
+  // GeomWireSelection wires_u = gds.wires_in_plane(WirePlaneType_t(0));
+  // GeomWireSelection wires_v = gds.wires_in_plane(WirePlaneType_t(1));
+  // GeomWireSelection wires_w = gds.wires_in_plane(WirePlaneType_t(2));
+
+  // nwire_u = wires_u.size();
+  // nwire_v = wires_v.size();
+  // nwire_w = wires_w.size();
+  
+  nbin = fds1.Get_Bins_Per_Frame();
+  
+ 
+
+  // hu = new TH1F*[nwire_u];
+  // hv = new TH1F*[nwire_v];
+  // hw = new TH1F*[nwire_w];
+  
+  // for (int i=0;i!=nwire_u;i++){
+  //   hu[i] = new TH1F(Form("U5_%d",i),Form("U5_%d",i),nbin,0,nbin);
+  // }
+  // for (int i=0;i!=nwire_v;i++){
+  //   hv[i] = new TH1F(Form("V5_%d",i),Form("V5_%d",i),nbin,0,nbin);
+  // }
+  // for (int i=0;i!=nwire_w;i++){
+  //   hw[i] = new TH1F(Form("W5_%d",i),Form("W5_%d",i),nbin,0,nbin);
+  // }
+
+  hu = new TH1F("U5","U5",nbin,0,nbin);
+  hv = new TH1F("V5","V5",nbin,0,nbin);
+  hw = new TH1F("W5","W5",nbin,0,nbin);
+  
+  //define filters
+  filter_g = new TF1("filger_g","1./sqrt(2.*3.1415926)/[0]*exp(-x*x/2./[0]/[0])");
+  double par3[1] = {2./2.2};
+  filter_g->SetParameters(par3);
+  
+  hfilter_time_gaus =new TH1F("hfilter_time_gaus1","hfilter_time_gaus1",nbin,0,nbin);
+  for (int i=0;i!=nbin;i++){
+    double xx = hfilter_time_gaus->GetBinCenter(i+1)/2.-nbin/4.;
+    hfilter_time_gaus->SetBinContent(i+1,filter_g->Eval(xx));
+  }
+  hfilter_time_gaus->Scale(1./hfilter_time_gaus->GetSum());
+  hfilter_gaus = 0;
+  hfilter_gaus = hfilter_time_gaus->FFT(0,"MAG");
+  
+}
+
+
+
 
 int WireCell2dToy::ToySignalSimuTrueFDS::size() const{
   return max_frames;
@@ -129,16 +186,17 @@ int WireCell2dToy::ToySignalSimuTrueFDS::jump(int frame_number){
     
     
     TH1F *htemp;
-    if (chid < nwire_u){
-      //htemp = hu[chid];
-      htemp = hu;
-    }else if (chid < nwire_u + nwire_v){
-      //htemp = hv[chid - nwire_u];
-      htemp = hv;
-    }else{
-      //htemp = hw[chid - nwire_u - nwire_v];
-      htemp = hw;
-    }
+    // if (chid < nwire_u){
+    //   //htemp = hu[chid];
+    //   htemp = hu;
+    // }else if (chid < nwire_u + nwire_v){
+    //   //htemp = hv[chid - nwire_u];
+    //   htemp = hv;
+    // }else{
+    //   //htemp = hw[chid - nwire_u - nwire_v];
+    //   htemp = hw;
+    // }
+    htemp = hu;
     htemp->Reset();
     
     for (int j = 0; j!= nbins; j++){

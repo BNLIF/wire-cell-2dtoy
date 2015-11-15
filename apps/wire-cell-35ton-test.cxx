@@ -1,7 +1,13 @@
 #include "WireCellNav/DetectorGDS.h"
+#include "WireCellNav/DetGenerativeFDS.h"
 #include "WireCellNav/FrameDataSource.h"
 #include "WireCell2dToy/ToyDepositor.h"
 #include "WireCellSst/Util.h"
+#include "WireCell2dToy/ToySignalSimu.h"
+#include "WireCell2dToy/ToySignalSimuTrue.h"
+#include "WireCell2dToy/ToySignalGaus.h"
+#include "WireCell2dToy/ToySignalWien.h"
+
 
 
 #include "TCanvas.h"
@@ -54,6 +60,10 @@ int main(int argc, char* argv[])
   int max_events = 100;
   int eve_num = atoi(argv[2]);
   float unit_dis = 1.6;  
+  float toffset_1=1.647;
+  float toffset_2=1.539+1.647;
+  float toffset_3=0;
+
   
   int total_time_bin=9600;
   int frame_length = 3200;
@@ -80,43 +90,66 @@ int main(int argc, char* argv[])
   WireCell::ToyDepositor toydep(fds,0,unit_dis,frame_length);
   const PointValueVector& pvv = toydep.depositions(eve_num);
 
-  std::cout << pvv.size() << std::endl;
+  std::cout << "Points deposited: " << pvv.size() << std::endl;
 
+  DetGenerativeFDS gfds(toydep, gds,total_time_bin,max_events,0.5*unit_dis*units::millimeter);
+  
+  cout << "Put in Truth " << endl; 
+  WireCell2dToy::ToySignalSimuTrueFDS st_fds(gfds,gds,total_time_bin/nrebin,max_events,0); //truth
+  st_fds.jump(eve_num);
+  
+  // cout << "Simulate Raw WaveForm " << endl; 
+  // WireCell2dToy::ToySignalSimuFDS simu_fds(gfds,gds,total_time_bin,max_events,toffset_1,toffset_2,1); // time offset among different planes for the time electrons travel among different planes
+  // simu_fds.jump(eve_num);
+  // //simu_fds.Save();
+  
+  // cout << "Deconvolution with Gaussian filter" << endl;
+  // WireCell2dToy::ToySignalGausFDS gaus_fds(simu_fds,gds,total_time_bin/nrebin,max_events,toffset_1,toffset_2); // gaussian smearing for charge estimation
+  // gaus_fds.jump(eve_num);
+  // //gaus_fds.Save();
 
-    // TCanvas *c = new TCanvas();
-    // c->Range(-5*units::cm, -90*units::cm, 160*units::cm, 120*units::cm);    
+  // cout << "Deconvolution with Wiener filter" << endl;
+  //  WireCell2dToy::ToySignalWienFDS wien_fds(simu_fds,gds,total_time_bin/nrebin,max_events,toffset_1,toffset_2); // weiner smearing for hit identification
+  // wien_fds.jump(eve_num);
+  // //wien_fds.Save();
 
-    // TLine *l = new TLine();
-    // l->SetLineWidth(0);
-    // c->cd();
+  
+  
 
-
-
-    // int colors[] = {2,4,1};
-    // for (short cryo = 0; cryo < gds.ncryos(); cryo++) {
-    //   for (short apa = 0; apa < gds.napa(cryo); apa++) {
-    // 	std::cout << cryo << " " << apa << std::endl;
-
-    // 	    const WrappedGDS *apa_gds = gds.get_apaGDS(cryo, apa);
-    // 	    for (int iplane=0; iplane<3; ++iplane) {
-    // 	        WirePlaneType_t plane = (WirePlaneType_t)iplane;
-    // 		GeomWireSelection wip = apa_gds->wires_in_plane(plane);
-    // 	        // std::cout<<"\n[CRYO] "<<cryo<<" [APA] "<<apa<<" [PLANE] "<<iplane
-    // 		// 	 <<" has "<< wip.size()<<" wires, wire angle is "<<apa_gds->angle(plane)*180/TMath::Pi()<<std::endl;
-    // 		//for (auto wit = wip.begin(); wit != wip.end(); ++wit) {
-    // 		//  const GeomWire& wire = **wit;
-    // 		for (int index=0; index<(int)wip.size(); ++index) {
-    // 		    const GeomWire* wire = apa_gds->by_planeindex(plane, index);
-    // 		    //if (wire.face() == 0) continue;
-    // 		    const Vector& p1 = wire->point1();
-    // 		    const Vector& p2 = wire->point2();
-    // 		    //  std::cout<<*wire<<" ("<<p1.x<<","<<p1.y<<","<<p1.z<<") ("<<p2.x<<","<<p2.y<<","<<p2.z<<")\n";
-    // 		    l->SetLineColor(colors[iplane]);
-    // 		    l->DrawLine(p1.z, p1.y, p2.z, p2.y);
-    // 		}
-    // 	    }	    
-    // 	}
-    // }
-    
-    // c->SaveAs("./test_detectorgds_35t.pdf");
+  // TCanvas *c = new TCanvas();
+  // c->Range(-5*units::cm, -90*units::cm, 160*units::cm, 120*units::cm);    
+  
+  // TLine *l = new TLine();
+  // l->SetLineWidth(0);
+  // c->cd();
+  
+  
+  
+  // int colors[] = {2,4,1};
+  // for (short cryo = 0; cryo < gds.ncryos(); cryo++) {
+  //   for (short apa = 0; apa < gds.napa(cryo); apa++) {
+  // 	std::cout << cryo << " " << apa << std::endl;
+  
+  // 	    const WrappedGDS *apa_gds = gds.get_apaGDS(cryo, apa);
+  // 	    for (int iplane=0; iplane<3; ++iplane) {
+  // 	        WirePlaneType_t plane = (WirePlaneType_t)iplane;
+  // 		GeomWireSelection wip = apa_gds->wires_in_plane(plane);
+  // 	        // std::cout<<"\n[CRYO] "<<cryo<<" [APA] "<<apa<<" [PLANE] "<<iplane
+  // 		// 	 <<" has "<< wip.size()<<" wires, wire angle is "<<apa_gds->angle(plane)*180/TMath::Pi()<<std::endl;
+  // 		//for (auto wit = wip.begin(); wit != wip.end(); ++wit) {
+  // 		//  const GeomWire& wire = **wit;
+  // 		for (int index=0; index<(int)wip.size(); ++index) {
+  // 		    const GeomWire* wire = apa_gds->by_planeindex(plane, index);
+  // 		    //if (wire.face() == 0) continue;
+  // 		    const Vector& p1 = wire->point1();
+  // 		    const Vector& p2 = wire->point2();
+  // 		    //  std::cout<<*wire<<" ("<<p1.x<<","<<p1.y<<","<<p1.z<<") ("<<p2.x<<","<<p2.y<<","<<p2.z<<")\n";
+  // 		    l->SetLineColor(colors[iplane]);
+  // 		    l->DrawLine(p1.z, p1.y, p2.z, p2.y);
+  // 		}
+  // 	    }	    
+  // 	}
+  // }
+  
+  // c->SaveAs("./test_detectorgds_35t.pdf");
 }
