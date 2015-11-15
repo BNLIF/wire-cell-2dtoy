@@ -95,7 +95,9 @@ int main(int argc, char* argv[])
   DetGenerativeFDS gfds(toydep, gds,total_time_bin,max_events,0.5*unit_dis*units::millimeter);
   gfds.jump(eve_num);
   
-  cout << "Put in Truth " << endl; 
+  
+
+  // cout << "Put in Truth " << endl; 
   // WireCell2dToy::ToySignalSimuTrueFDS st_fds(gfds,gds,total_time_bin/nrebin,max_events,0); //truth
   // st_fds.jump(eve_num);
   
