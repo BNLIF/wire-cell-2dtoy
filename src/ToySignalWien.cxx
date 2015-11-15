@@ -34,7 +34,71 @@ WireCell2dToy::ToySignalWienFDS::ToySignalWienFDS(WireCell::FrameDataSource& fds
   vplane_rms.resize(nwire_v,0);
   wplane_rms.resize(nwire_w,0);
 
+  // hu = new TH1F*[nwire_u];
+  // hv = new TH1F*[nwire_v];
+  // hw = new TH1F*[nwire_w];
+  
+  // for (int i=0;i!=nwire_u;i++){
+  //   hu[i] = new TH1F(Form("U4_%d",i),Form("U4_%d",i),nbin,0,nbin);
+  // }
+  // for (int i=0;i!=nwire_v;i++){
+  //   hv[i] = new TH1F(Form("V4_%d",i),Form("V4_%d",i),nbin,0,nbin);
+  // }
+  // for (int i=0;i!=nwire_w;i++){
+  //   hw[i] = new TH1F(Form("W4_%d",i),Form("W4_%d",i),nbin,0,nbin);
+  // }
 
+  hu = new TH1F("U4","U4",nbin,0,nbin);
+  hv = new TH1F("V4","V4",nbin,0,nbin);
+  hw = new TH1F("W4","W4",nbin,0,nbin);
+
+  #include "data.txt"
+
+  gu = new TGraph(5000,xu,yu);
+  gv = new TGraph(5000,xv,yv);
+  gw = new TGraph(5000,xw,yw);
+
+  hur = new TH1F("hur1","hur1",nbin,0,nbin); // half us tick
+  hvr = new TH1F("hvr1","hvr1",nbin,0,nbin); // half us tick
+  hwr = new TH1F("hwr1","hwr1",nbin,0,nbin); // half us tick
+  
+  for (int i=0; i!=nbin; i++){  
+    double time = hur->GetBinCenter(i+1)/2.-50 ;
+    hur->SetBinContent(i+1,gu->Eval(time-overall_time_offset));
+    hvr->SetBinContent(i+1,gv->Eval(time-time_offset_uv-overall_time_offset));
+    hwr->SetBinContent(i+1,gw->Eval(time-time_offset_uw-overall_time_offset));
+  } 
+  
+  hmr_u = 0;
+  hmr_v = 0;
+  hmr_w = 0;
+  hpr_u = 0;
+  hpr_v = 0;
+  hpr_w = 0;
+  
+}
+
+WireCell2dToy::ToySignalWienFDS::ToySignalWienFDS(WireCell::FrameDataSource& fds, const WireCell::DetectorGDS& gds, int bins_per_frame1, int nframes_total, float time_offset_uv, float time_offset_uw, float overall_time_offset)
+  : fds(fds)
+  , gds_flag(1)
+  , gds(0)
+  , dgds(&gds)
+  , max_frames(nframes_total)
+  , time_offset_uv(time_offset_uv)
+  , time_offset_uw(time_offset_uw)
+  , overall_time_offset(overall_time_offset)
+{  
+  bins_per_frame = bins_per_frame1;
+  
+  nwire_u = dgds->channel_count(WirePlaneType_t(0));
+  nwire_v = dgds->channel_count(WirePlaneType_t(1));
+  nwire_w = dgds->channel_count(WirePlaneType_t(2));
+
+  nbin = fds.Get_Bins_Per_Frame();
+
+  uplane_rms.resize(nwire_u,0);
+  vplane_rms.resize(nwire_v,0);
+  wplane_rms.resize(nwire_w,0);
 
   // hu = new TH1F*[nwire_u];
   // hv = new TH1F*[nwire_v];
@@ -79,6 +143,10 @@ WireCell2dToy::ToySignalWienFDS::ToySignalWienFDS(WireCell::FrameDataSource& fds
   hpr_w = 0;
   
 }
+
+
+
+
 
 int WireCell2dToy::ToySignalWienFDS::size() const{
   return max_frames;
@@ -165,22 +233,62 @@ int WireCell2dToy::ToySignalWienFDS::jump(int frame_number){
     TH1F *htemp;
     TF1 *filter;
     
-    if (chid < nwire_u){
-      htemp = hu;
-      hmr = hmr_u;
-      hpr = hpr_u;
-      filter = filter_u;
-    }else if (chid < nwire_u + nwire_v){
-      htemp = hv;
-      hmr = hmr_v;
-      hpr = hpr_v;
-      filter = filter_v;
+    if (gds_flag == 0){
+      WirePlaneType_t plane = gds->by_channel(chid).at(0)->plane();
+      if (plane == WirePlaneType_t(0)){
+	htemp = hu;
+	hmr = hmr_u;
+	hpr = hpr_u;
+	filter = filter_u;
+      }else if (plane == WirePlaneType_t(1)){
+	htemp = hv;
+	hmr = hmr_v;
+	hpr = hpr_v;
+	filter = filter_v;
+      }else if (plane == WirePlaneType_t(2)){
+	htemp= hw;
+	hmr = hmr_w;
+	hpr = hpr_w;
+	filter = filter_w;
+      }
     }else{
-      htemp = hw;
-      hmr = hmr_w;
-      hpr = hpr_w;
-      filter = filter_w;
+      WirePlaneType_t plane = dgds->by_channel(chid).at(0)->plane();
+      if (plane == WirePlaneType_t(0)){
+	htemp = hu;
+	hmr = hmr_u;
+	hpr = hpr_u;
+	filter = filter_u;
+      }else if (plane == WirePlaneType_t(1)){
+	htemp = hv;
+	hmr = hmr_v;
+	hpr = hpr_v;
+	filter = filter_v;
+      }else if (plane == WirePlaneType_t(2)){
+	htemp= hw;
+	hmr = hmr_w;
+	hpr = hpr_w;
+	filter = filter_w;
+      }
     }
+    
+    // if (chid < nwire_u){
+    //   htemp = hu;
+    //   hmr = hmr_u;
+    //   hpr = hpr_u;
+    //   filter = filter_u;
+    // }else if (chid < nwire_u + nwire_v){
+    //   htemp = hv;
+    //   hmr = hmr_v;
+    //   hpr = hpr_v;
+    //   filter = filter_v;
+    // }else{
+    //   htemp = hw;
+    //   hmr = hmr_w;
+    //   hpr = hpr_w;
+    //   filter = filter_w;
+    // }
+    
+
     htemp->Reset();
     for (int i = tbin;i!=tbin+nbins;i++){
       int tt = i+1;// + overall_time_shift * 2;
@@ -280,12 +388,24 @@ int WireCell2dToy::ToySignalWienFDS::jump(int frame_number){
     }
     rms1 = sqrt(rms1/rms2);
     
-    if (chid < nwire_u){
-      uplane_rms[chid] = rms1;
-    }else if (chid < nwire_u + nwire_v){
-      vplane_rms[chid - nwire_u] = rms1;
+    if (gds_flag == 0 ){
+      if (chid < nwire_u){
+	uplane_rms[chid] = rms1;
+      }else if (chid < nwire_u + nwire_v){
+	vplane_rms[chid - nwire_u] = rms1;
+      }else{
+	wplane_rms[chid - nwire_u - nwire_v] = rms1;
+      }
     }else{
-      wplane_rms[chid - nwire_u - nwire_v] = rms1;
+      WirePlaneType_t plane = dgds->channel_plane_conv(chid);
+      int count = dgds->channel_count_conv(chid);
+      if (plane == WirePlaneType_t(0)){
+	uplane_rms[count] = rms1;
+      }else if (plane == WirePlaneType_t(1)){
+	vplane_rms[count] = rms1;
+      }else if (plane == WirePlaneType_t(2)){
+	wplane_rms[count] = rms1;
+      }
     }
 
   }

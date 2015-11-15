@@ -111,9 +111,9 @@ int main(int argc, char* argv[])
   gaus_fds.jump(eve_num);
   //gaus_fds.Save();
 
-  // cout << "Deconvolution with Wiener filter" << endl;
-  //  WireCell2dToy::ToySignalWienFDS wien_fds(simu_fds,gds,total_time_bin/nrebin,max_events,toffset_1,toffset_2); // weiner smearing for hit identification
-  // wien_fds.jump(eve_num);
+  cout << "Deconvolution with Wiener filter" << endl;
+  WireCell2dToy::ToySignalWienFDS wien_fds(simu_fds,gds,total_time_bin/nrebin,max_events,toffset_1,toffset_2); // weiner smearing for hit identification
+  wien_fds.jump(eve_num);
   // //wien_fds.Save();
 
   
