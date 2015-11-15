@@ -87,6 +87,8 @@ int main(int argc, char* argv[])
     return 1;
   }
   
+  TH1::AddDirectory(kFALSE);
+  
   WireCell::ToyDepositor toydep(fds,0,unit_dis,frame_length);
   const PointValueVector& pvv = toydep.depositions(eve_num);
 
