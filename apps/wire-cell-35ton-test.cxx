@@ -13,6 +13,8 @@
 #include "WireCell2dToy/TruthToyTiling.h"
 #include "WireCellData/MergeGeomCell.h"
 
+#include "WireCell2dToy/ToyEventDisplay.h"
+
 #include "TApplication.h"
 #include "TCanvas.h"
 #include "TBenchmark.h"
@@ -152,7 +154,33 @@ int main(int argc, char* argv[])
     TCanvas c1("ToyMC","ToyMC",1200,600);
     c1.Divide(2,1);
     c1.Draw();
-  
+    
+    float charge_min = 0;
+    float charge_max = 1e5;
+
+
+    WireCell2dToy::ToyEventDisplay display(c1, gds);
+    display.charge_min = charge_min;
+    display.charge_max = charge_max;
+
+
+    gStyle->SetOptStat(0);
+    
+    const Int_t NRGBs = 5;
+    const Int_t NCont = 255;
+    Int_t MyPalette[NCont];
+    Double_t stops[NRGBs] = {0.0, 0.34, 0.61, 0.84, 1.0};
+    Double_t red[NRGBs] = {0.0, 0.0, 0.87 ,1.0, 0.51};
+    Double_t green[NRGBs] = {0.0, 0.81, 1.0, 0.2 ,0.0};
+    Double_t blue[NRGBs] = {0.51, 1.0, 0.12, 0.0, 0.0};
+    Int_t FI = TColor::CreateGradientColorTable(NRGBs, stops, red, green, blue, NCont);
+    gStyle->SetNumberContours(NCont);
+    for (int kk=0;kk!=NCont;kk++) MyPalette[kk] = FI+kk;
+    gStyle->SetPalette(NCont,MyPalette);
+    
+    display.init(-0.03,1.568,-0.845,1.151);
+    display.draw_mc(1,WireCell::PointValueVector(),"colz");
+    
   
     theApp.Run();
   // TCanvas *c = new TCanvas();

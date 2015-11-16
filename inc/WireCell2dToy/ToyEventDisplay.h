@@ -9,6 +9,8 @@
 
 #include "WireCellNav/SliceDataSource.h"
 #include "WireCellNav/GeomDataSource.h"
+#include "WireCellNav/DetectorGDS.h"
+
 #include "TPad.h"
 #include "TH2F.h"
 #include "TString.h"
@@ -21,9 +23,12 @@ namespace WireCell2dToy {
     private:
     
 	TPad &pad;
-	const WireCell::GeomDataSource& gds;
+	int gds_flag;
+	const WireCell::GeomDataSource* gds;
+	const WireCell::DetectorGDS* dgds;
 
 	TH2F *h1;
+	TH2F *h2;
 	TGraph *g1;
 	TGraph *g2;
 	TPolyLine *g3;
@@ -31,6 +36,7 @@ namespace WireCell2dToy {
     public:
 	/// Create a ToyEventDisplay drawing into the given TPad using the given GeomDataSource.
 	ToyEventDisplay(TPad& pad, const WireCell::GeomDataSource& gds);
+	ToyEventDisplay(TPad& pad, const WireCell::DetectorGDS& gds);
 	virtual ~ToyEventDisplay();
     
 	/// Initialize with extents

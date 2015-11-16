@@ -9,8 +9,25 @@ using namespace WireCell2dToy;
 
 ToyEventDisplay::ToyEventDisplay(TPad& pad, const WireCell::GeomDataSource& gds)
     : pad(pad)
-    , gds(gds)
+    , gds_flag(0)
+    , gds(&gds)
+    , dgds(0)
     , h1(0)
+    , h2(0)
+    , g1(0)
+    , g2(0)
+{
+  recon_threshold = 1500;
+  truth_threshold = 2000;
+}
+
+ToyEventDisplay::ToyEventDisplay(TPad& pad, const WireCell::DetectorGDS& gds)
+    : pad(pad)
+    , gds_flag(1)
+    , gds(0)
+    , dgds(&gds)
+    , h1(0)
+    , h2(0)
     , g1(0)
     , g2(0)
 {
@@ -27,6 +44,9 @@ void ToyEventDisplay::clear()
     if (h1) {
       delete h1;
     }
+    if (h2) {
+      delete h2;
+    }
     if (g1) {
       delete g1;
     }
@@ -40,7 +60,11 @@ int ToyEventDisplay::init(float x_min, float x_max, float y_min, float y_max)
   this->clear();
 
   h1 = new TH2F("h1","h1",1000,x_min,x_max,1000,y_min,y_max);
-  h1->SetTitle("Wires and True Hits");
+  if (gds_flag == 0){
+    h1->SetTitle("Wires and True Hits ");
+  }else{
+    h1->SetTitle("Wires and True Hits (Front)");
+  }
   h1->GetYaxis()->SetNdivisions(506);
   h1->GetXaxis()->SetNdivisions(506);
   h1->SetXTitle("Z (m)");
@@ -48,32 +72,50 @@ int ToyEventDisplay::init(float x_min, float x_max, float y_min, float y_max)
   h1->SetBinContent(0,0,1);
   h1->GetZaxis()->SetRangeUser(charge_min,charge_max);
 
+  if (gds_flag == 1){
+    h2 = new TH2F("h2","h2",1000,x_min,x_max,1000,y_min,y_max);
+    h2->SetTitle("Wires and True Hits (Front)");
+    h2->GetYaxis()->SetNdivisions(506);
+    h2->GetXaxis()->SetNdivisions(506);
+    h2->SetXTitle("Z (m)");
+    h2->SetYTitle("Y (m)");
+    h2->SetBinContent(0,0,1);
+    h2->GetZaxis()->SetRangeUser(charge_min,charge_max);
+  }
+
   return 0;
 }
 
 int ToyEventDisplay::draw_mc(int flag, const WireCell::PointValueVector& mctruth, TString option)
 {
-  pad.cd();
+  if (gds_flag == 0 ){
+    pad.cd();
 
-  if (flag==1){
-    h1->Draw(option);
-    
-  }else if (flag==2){
-    h1->Reset();
-    for (int i=0;i!=mctruth.size();i++){
-      h1->Fill(mctruth[i].first.z/units::m,mctruth[i].first.y/units::m-0.02,int(mctruth[i].second*10)/10.);
-    }
-    h1->Draw(option);
-  }else if (flag==3){
+    if (flag==1){
+      h1->Draw(option);
+      
+    }else if (flag==2){
+      h1->Reset();
+      for (int i=0;i!=mctruth.size();i++){
+	h1->Fill(mctruth[i].first.z/units::m,mctruth[i].first.y/units::m-0.02,int(mctruth[i].second*10)/10.);
+      }
+      h1->Draw(option);
+    }else if (flag==3){
       //if (g1) delete g1;
-    g1 = new TGraph();
-    for (int i=0;i!=mctruth.size();i++){
-      g1->SetPoint(i,mctruth[i].first.z/units::m,mctruth[i].first.y/units::m);
+      g1 = new TGraph();
+      for (int i=0;i!=mctruth.size();i++){
+	g1->SetPoint(i,mctruth[i].first.z/units::m,mctruth[i].first.y/units::m);
+      }
+      g1->SetMarkerColor(2);
+      g1->SetMarkerSize(0.6);
+      g1->Draw(option);
+      g1->SetMarkerStyle(20);
     }
-    g1->SetMarkerColor(2);
-    g1->SetMarkerSize(0.6);
-    g1->Draw(option);
-    g1->SetMarkerStyle(20);
+  }else{
+    pad.cd(1);
+    h1->Draw(option);
+    pad.cd(2);
+    h2->Draw(option);
   }
   
   return 0;
@@ -108,17 +150,17 @@ void ToyEventDisplay::draw_bad_cell(WireCell::GeomCellSelection& cells){
 void ToyEventDisplay::draw_bad_region(WireCell::ChirpMap& chirpmap, int time, int scale, int plane, TString option){
   pad.cd();
 
-  // int nwire_u = gds.wires_in_plane(WirePlaneType_t(0)).size();
-  // int nwire_v = gds.wires_in_plane(WirePlaneType_t(1)).size();
-  // int nwire_w = gds.wires_in_plane(WirePlaneType_t(2)).size();
+  // int nwire_u = gds->wires_in_plane(WirePlaneType_t(0)).size();
+  // int nwire_v = gds->wires_in_plane(WirePlaneType_t(1)).size();
+  // int nwire_w = gds->wires_in_plane(WirePlaneType_t(2)).size();
   
   //  std::cout << chirpmap.size() << std::endl;
 
   for (auto it = chirpmap.begin(); it!=chirpmap.end(); it++){
     if (time >= it->second.first/scale && time <= it->second.second/scale){
-      const WireCell::GeomWire *wire = gds.by_planeindex(WireCell::WirePlaneType_t(plane),it->first);
-      float pitch = gds.pitch(wire->plane());
-      float angle = gds.angle(wire->plane());
+      const WireCell::GeomWire *wire = gds->by_planeindex(WireCell::WirePlaneType_t(plane),it->first);
+      float pitch = gds->pitch(wire->plane());
+      float angle = gds->angle(wire->plane());
       TLine *l3 = new TLine(wire->point1().z/units::m  ,wire->point1().y/units::m,
 			    wire->point2().z/units::m  ,wire->point2().y/units::m);
       l3->SetLineColor(5);
@@ -137,12 +179,12 @@ int ToyEventDisplay::draw_slice(const WireCell::Slice& slice, TString option)
   
   for (int i=0;i!=group.size();i++){
     //std::cout << group.at(i).first << std::endl;
-    const WireCell::GeomWire *wire = gds.by_channel_segment(group.at(i).first,0);
+    const WireCell::GeomWire *wire = gds->by_channel_segment(group.at(i).first,0);
     // std::cout << wire->channel() << std::endl;
     // if ( wire->channel() ==1429 || wire->channel() ==4461){
     
-      float pitch = gds.pitch(wire->plane());
-      float angle = gds.angle(wire->plane());
+      float pitch = gds->pitch(wire->plane());
+      float angle = gds->angle(wire->plane());
       
       //std::cout << pitch << " " << angle << std::endl;
       
@@ -288,8 +330,8 @@ int ToyEventDisplay::draw_wires_charge(const WireCell::WireChargeMap& wcmap, TSt
     const WireCell::GeomWire *wire = it->first;
     float charge = it->second;
     
-    float pitch = gds.pitch(wire->plane());
-    float angle = gds.angle(wire->plane());
+    float pitch = gds->pitch(wire->plane());
+    float angle = gds->angle(wire->plane());
     
     
     x[0] = wire->point1().z/units::m - pitch/2./units::m/std::cos(angle/units::radian); 
