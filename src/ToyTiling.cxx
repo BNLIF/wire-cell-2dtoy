@@ -93,6 +93,24 @@ void WireCell2dToy::ToyTiling::AddCell(WireCell::GeomDataSource& gds, GeomCell *
 }
 
 WireCell2dToy::ToyTiling::ToyTiling(const WireCell::Slice& slice,WireCell::DetectorGDS& gds, float rel_u , float rel_v, float rel_w, float noise_u, float noise_v, float noise_w, std::vector<float>* uplane_rms, std::vector<float>* vplane_rms, std::vector<float>* wplane_rms){
+  WireCell::Channel::Group group = slice.group();
+  float tolerance = 0.1 * units::mm;
+  //save all the wires
+  for (int i=0;i!=group.size();i++){
+    const GeomWireSelection& wires = gds.by_channel(group.at(i).first);
+    for (int j=0;j!=wires.size();j++){
+      const GeomWire *wire = wires.at(j);
+      wire_all.push_back(wire);
+      if (wire->plane() == WirePlaneType_t(0)){
+	wire_u.push_back(wire);
+      }else if (wire->plane() == WirePlaneType_t(1)){
+	wire_v.push_back(wire);
+      }else if (wire->plane() == WirePlaneType_t(2)){
+	wire_w.push_back(wire);
+      }
+    }
+  }
+  
 }
 
 WireCell2dToy::ToyTiling::ToyTiling(const WireCell::Slice& slice,WireCell::GeomDataSource& gds, float rel_u , float rel_v, float rel_w, float noise_u, float noise_v, float noise_w, std::vector<float>* uplane_rms, std::vector<float>* vplane_rms, std::vector<float>* wplane_rms){
@@ -526,6 +544,10 @@ WireCell2dToy::ToyTiling::ToyTiling(const WireCell::Slice& slice,WireCell::GeomD
   }
 
 }
+
+
+
+
 
 
 void WireCell2dToy::ToyTiling::twoplane_tiling(int time, int nrebin, WireCell::GeomDataSource& gds, std::vector<float>& uplane_rms, std::vector<float>& vplane_rms, std::vector<float>& wplane_rms, WireCell::ChirpMap& uplane_map, WireCell::ChirpMap& vplane_map, WireCell::ChirpMap& wplane_map){
