@@ -8,7 +8,10 @@
 #include "WireCell2dToy/ToySignalGaus.h"
 #include "WireCell2dToy/ToySignalWien.h"
 #include "WireCellSst/ToyuBooNESliceDataSource.h"
-
+#include "WireCell2dToy/ToyTiling.h"
+#include "WireCell2dToy/MergeToyTiling.h"
+#include "WireCell2dToy/TruthToyTiling.h"
+#include "WireCellData/MergeGeomCell.h"
 
 #include "TCanvas.h"
 #include "TBenchmark.h"
@@ -122,7 +125,10 @@ int main(int argc, char* argv[])
   // wien_fds.jump(eve_num);
   // // //wien_fds.Save();
 
-  
+
+   WireCell2dToy::ToyTiling **toytiling = new WireCell2dToy::ToyTiling*[2400];
+   WireCell2dToy::MergeToyTiling **mergetiling = new WireCell2dToy::MergeToyTiling*[2400];
+   WireCell2dToy::TruthToyTiling **truthtiling = new WireCell2dToy::TruthToyTiling*[2400];
   
    //for (int i=0;i!=2400;i++)
    int i = 1137;
@@ -131,6 +137,8 @@ int main(int argc, char* argv[])
      WireCell::Slice slice = sds.get();
      if ( slice.group().size() >0){
        cout << i << " " << slice.group().size() << endl;
+       toytiling[i] = new WireCell2dToy::ToyTiling(slice,gds);
+       //GeomCellSelection allcell = toytiling[i]->get_allcell();
      }
    }
   

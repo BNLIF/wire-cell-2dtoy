@@ -92,7 +92,8 @@ void WireCell2dToy::ToyTiling::AddCell(WireCell::GeomDataSource& gds, GeomCell *
 
 }
 
-
+WireCell2dToy::ToyTiling::ToyTiling(const WireCell::Slice& slice,WireCell::DetectorGDS& gds, float rel_u , float rel_v, float rel_w, float noise_u, float noise_v, float noise_w, std::vector<float>* uplane_rms, std::vector<float>* vplane_rms, std::vector<float>* wplane_rms){
+}
 
 WireCell2dToy::ToyTiling::ToyTiling(const WireCell::Slice& slice,WireCell::GeomDataSource& gds, float rel_u , float rel_v, float rel_w, float noise_u, float noise_v, float noise_w, std::vector<float>* uplane_rms, std::vector<float>* vplane_rms, std::vector<float>* wplane_rms){
   WireCell::Channel::Group group = slice.group();
