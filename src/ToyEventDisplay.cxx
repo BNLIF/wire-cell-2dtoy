@@ -196,7 +196,7 @@ int ToyEventDisplay::draw_slice(const WireCell::Slice& slice, TString option)
 	 l3->Draw(option);
        }
        
-       break;
+       // break;
 
     }else if (gds_flag == 0 ){
       pad.cd();
