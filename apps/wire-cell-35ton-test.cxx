@@ -13,6 +13,7 @@
 #include "WireCell2dToy/TruthToyTiling.h"
 #include "WireCellData/MergeGeomCell.h"
 
+#include "TApplication.h"
 #include "TCanvas.h"
 #include "TBenchmark.h"
 #include "TH1F.h"
@@ -20,6 +21,9 @@
 #include "TMath.h"
 #include "TFile.h"
 #include "TTree.h"
+#include "TGraph2D.h"
+#include "TColor.h"
+#include "TStyle.h"
 
 #include <iostream>
 #include <string>
@@ -141,9 +145,16 @@ int main(int argc, char* argv[])
        //GeomCellSelection allcell = toytiling[i]->get_allcell();
      }
    }
-  
-  
 
+    TApplication theApp("theApp",&argc,argv);
+    theApp.SetReturnFromRun(true);
+    
+    TCanvas c1("ToyMC","ToyMC",1200,600);
+    c1.Divide(2,1);
+    c1.Draw();
+  
+  
+    theApp.Run();
   // TCanvas *c = new TCanvas();
   // c->Range(-5*units::cm, -90*units::cm, 160*units::cm, 120*units::cm);    
   
