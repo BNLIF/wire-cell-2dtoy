@@ -56,9 +56,11 @@ namespace WireCell2dToy {
       WireCell::GeomWireSelection wire_w;
       WireCell::GeomWireSelection wire_all;
       int ncell;
-
       WireCell::GeomCellSelection cell_all;
       
+
+
+
       WireCell::GeomCellMap cellmap;
       WireCell::GeomWireMap wiremap;
       
