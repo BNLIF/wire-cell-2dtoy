@@ -7,7 +7,7 @@
 #include "WireCell2dToy/ToySignalSimuTrue.h"
 #include "WireCell2dToy/ToySignalGaus.h"
 #include "WireCell2dToy/ToySignalWien.h"
-
+#include "WireCellSst/ToyuBooNESliceDataSource.h"
 
 
 #include "TCanvas.h"
@@ -94,29 +94,35 @@ int main(int argc, char* argv[])
 
   std::cout << "Points deposited: " << pvv.size() << std::endl;
 
-  DetGenerativeFDS gfds(toydep, gds,total_time_bin,max_events,0.5*unit_dis*units::millimeter);
-  //gfds.jump(eve_num);
-  
-  
+  DetGenerativeFDS gfds(toydep,gds, 2400,max_events,2.0*1.6*units::millimeter);
+  gfds.jump(eve_num);
 
-  cout << "Put in Truth " << endl; 
-  WireCell2dToy::ToySignalSimuTrueFDS st_fds(gfds,gds,total_time_bin/nrebin,max_events,0); //truth
-  st_fds.jump(eve_num);
-  
-  cout << "Simulate Raw WaveForm " << endl; 
-  WireCell2dToy::ToySignalSimuFDS simu_fds(gfds,gds,total_time_bin,max_events,toffset_1,toffset_2,1); // time offset among different planes for the time electrons travel among different planes
-  simu_fds.jump(eve_num);
-  //simu_fds.Save();
-  
-  cout << "Deconvolution with Gaussian filter" << endl;
-  WireCell2dToy::ToySignalGausFDS gaus_fds(simu_fds,gds,total_time_bin/nrebin,max_events,toffset_1,toffset_2); // gaussian smearing for charge estimation
-  gaus_fds.jump(eve_num);
-  //gaus_fds.Save();
+   WireCellSst::ToyuBooNESliceDataSource sds(gfds,1500); //set threshold at 2000 electrons
 
-  cout << "Deconvolution with Wiener filter" << endl;
-  WireCell2dToy::ToySignalWienFDS wien_fds(simu_fds,gds,total_time_bin/nrebin,max_events,toffset_1,toffset_2); // weiner smearing for hit identification
-  wien_fds.jump(eve_num);
-  // //wien_fds.Save();
+  // DetGenerativeFDS gfds(toydep, gds,total_time_bin,max_events,0.5*unit_dis*units::millimeter);
+  // //gfds.jump(eve_num);
+  
+  // cout << "Put in Truth " << endl; 
+  // WireCell2dToy::ToySignalSimuTrueFDS st_fds(gfds,gds,total_time_bin/nrebin,max_events,0); //truth
+  // st_fds.jump(eve_num);
+  
+  // cout << "Simulate Raw WaveForm " << endl; 
+  // WireCell2dToy::ToySignalSimuFDS simu_fds(gfds,gds,total_time_bin,max_events,toffset_1,toffset_2,1); // time offset among different planes for the time electrons travel among different planes
+  // simu_fds.jump(eve_num);
+  // //simu_fds.Save();
+  
+  // cout << "Deconvolution with Gaussian filter" << endl;
+  // WireCell2dToy::ToySignalGausFDS gaus_fds(simu_fds,gds,total_time_bin/nrebin,max_events,toffset_1,toffset_2); // gaussian smearing for charge estimation
+  // gaus_fds.jump(eve_num);
+  // //gaus_fds.Save();
+
+  // cout << "Deconvolution with Wiener filter" << endl;
+  // WireCell2dToy::ToySignalWienFDS wien_fds(simu_fds,gds,total_time_bin/nrebin,max_events,toffset_1,toffset_2); // weiner smearing for hit identification
+  // wien_fds.jump(eve_num);
+  // // //wien_fds.Save();
+
+  
+  
 
   
   
