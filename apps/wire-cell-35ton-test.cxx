@@ -66,7 +66,8 @@ int main(int argc, char* argv[])
 
   
   int total_time_bin=9600;
-  int frame_length = 3200;
+  //  int frame_length = 3200;
+  int frame_length = 800;  // hack for now
   int nrebin = 4;
 
   TFile *tfile = TFile::Open(root_file);
@@ -123,7 +124,15 @@ int main(int argc, char* argv[])
 
   
   
-
+   //for (int i=0;i!=2400;i++)
+   int i = 1137;
+   {
+     sds.jump(i);
+     WireCell::Slice slice = sds.get();
+     if ( slice.group().size() >0){
+       cout << i << " " << slice.group().size() << endl;
+     }
+   }
   
   
 
