@@ -146,9 +146,8 @@ int main(int argc, char* argv[])
        toytiling[i] = new WireCell2dToy::ToyTiling(slice,gds);
        //GeomCellSelection allcell = toytiling[i]->get_allcell();
      }
-   }
-
-    TApplication theApp("theApp",&argc,argv);
+     
+     TApplication theApp("theApp",&argc,argv);
     theApp.SetReturnFromRun(true);
     
     TCanvas c1("ToyMC","ToyMC",1200,600);
@@ -180,9 +179,12 @@ int main(int argc, char* argv[])
     
     display.init(-0.03,1.568,-0.845,1.151);
     display.draw_mc(1,WireCell::PointValueVector(),"colz");
-    
+    display.draw_slice(slice,"");
   
     theApp.Run();
+   }
+
+    
   // TCanvas *c = new TCanvas();
   // c->Range(-5*units::cm, -90*units::cm, 160*units::cm, 120*units::cm);    
   

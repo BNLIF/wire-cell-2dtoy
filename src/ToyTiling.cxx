@@ -110,6 +110,8 @@ WireCell2dToy::ToyTiling::ToyTiling(const WireCell::Slice& slice,WireCell::Detec
       }
     }
   }
+
+  std::cout << wire_all.size() << " " << wire_u.size() << " " << wire_v.size() << " " << wire_w.size() << std::endl;
   
 }
 

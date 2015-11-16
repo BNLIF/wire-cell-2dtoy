@@ -74,7 +74,7 @@ int ToyEventDisplay::init(float x_min, float x_max, float y_min, float y_max)
 
   if (gds_flag == 1){
     h2 = new TH2F("h2","h2",1000,x_min,x_max,1000,y_min,y_max);
-    h2->SetTitle("Wires and True Hits (Front)");
+    h2->SetTitle("Wires and True Hits (Back)");
     h2->GetYaxis()->SetNdivisions(506);
     h2->GetXaxis()->SetNdivisions(506);
     h2->SetXTitle("Z (m)");
@@ -114,6 +114,7 @@ int ToyEventDisplay::draw_mc(int flag, const WireCell::PointValueVector& mctruth
   }else{
     pad.cd(1);
     h1->Draw(option);
+    
     pad.cd(2);
     h2->Draw(option);
   }
@@ -172,17 +173,38 @@ void ToyEventDisplay::draw_bad_region(WireCell::ChirpMap& chirpmap, int time, in
 
 int ToyEventDisplay::draw_slice(const WireCell::Slice& slice, TString option)
 {
-  pad.cd();
+  
 
   WireCell::Channel::Group group = slice.group();
   //std::cout << group.size() << std::endl;
   
   for (int i=0;i!=group.size();i++){
-    //std::cout << group.at(i).first << std::endl;
-    const WireCell::GeomWire *wire = gds->by_channel_segment(group.at(i).first,0);
-    // std::cout << wire->channel() << std::endl;
-    // if ( wire->channel() ==1429 || wire->channel() ==4461){
-    
+
+    if (gds_flag == 1 ){
+      const WireCell::GeomWireSelection& wires = dgds->by_channel(group.at(i).first);
+       for (int j=0;j!=wires.size();j++){
+	 pad.cd(1);
+	 const WireCell::GeomWire *wire = wires.at(j);
+	 
+	 // std::cout << wire->point1().z/units::m  << " " << wire->point1().y/units::m << " " << 
+	 //   wire->point2().z/units::m  << " " << wire->point2().y/units::m << std::endl;
+	 std::cout << wire->cryo() << " " << wire->apa() << " " << wire->face() << std::endl;
+	 
+	 TLine *l3 = new TLine(wire->point1().z/units::m  ,wire->point1().y/units::m,
+			       wire->point2().z/units::m  ,wire->point2().y/units::m);
+	 l3->SetLineColor(2);
+	 l3->Draw(option);
+       }
+       
+       break;
+
+    }else if (gds_flag == 0 ){
+      pad.cd();
+      //std::cout << group.at(i).first << std::endl;
+      const WireCell::GeomWire *wire = gds->by_channel_segment(group.at(i).first,0);
+      // std::cout << wire->channel() << std::endl;
+      // if ( wire->channel() ==1429 || wire->channel() ==4461){
+      
       float pitch = gds->pitch(wire->plane());
       float angle = gds->angle(wire->plane());
       
@@ -202,7 +224,8 @@ int ToyEventDisplay::draw_slice(const WireCell::Slice& slice, TString option)
       l3->SetLineColor(2);
       l3->Draw(option);
     }
-  // }
+  }
+    // }
   return 0;
 }
 
