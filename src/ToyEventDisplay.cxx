@@ -184,13 +184,17 @@ int ToyEventDisplay::draw_slice(const WireCell::Slice& slice, TString option)
       const WireCell::GeomWireSelection& wires = dgds->by_channel(group.at(i).first);
       //std::cout << wires.at(0)->plane() << " " << group.at(i).first << std::endl;
        for (int j=0;j!=wires.size();j++){
-	 pad.cd(1);
+	 
 	 const WireCell::GeomWire *wire = wires.at(j);
 	 
 	 // std::cout << wire->point1().z/units::m  << " " << wire->point1().y/units::m << " " << 
 	 //   wire->point2().z/units::m  << " " << wire->point2().y/units::m << std::endl;
 	 //std::cout << wire->cryo() << " " << wire->apa() << " " << wire->face() << std::endl;
-	 
+	 if (wire->face()==1){
+	   pad.cd(1);
+	 }else if (wire->face()==0){
+	   pad.cd(2);
+	 }	  
 	 TLine *l3 = new TLine(wire->point1().z/units::m  ,wire->point1().y/units::m,
 			       wire->point2().z/units::m  ,wire->point2().y/units::m);
 	 l3->SetLineColor(2);
