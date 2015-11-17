@@ -195,13 +195,21 @@ int ToyEventDisplay::draw_slice(const WireCell::Slice& slice, TString option)
 	 if (wire->face()==1){
 	   pad.cd(1);
 	   pitch = dgds->get_pitch(wire->cryo(),wire->plane());
-	   angle = dgds->get_angle(wire->cryo(),wire->plane());
+	   angle = -dgds->get_angle(wire->cryo(),wire->plane());
 	 }else if (wire->face()==0){
 	   pad.cd(2);
 	   pitch = dgds->get_pitch(wire->cryo(),wire->plane());
 	   angle = dgds->get_angle(wire->cryo(),wire->plane());
 	 }	 
-	 std::cout << pitch/units::mm << " " << angle << std::endl;
+	 //	 std::cout << pitch/units::mm << " " << angle << std::endl;
+	 
+	 TLine *l1 = new TLine(wire->point1().z/units::m - pitch/2./units::m/std::cos(angle/units::radian) ,wire->point1().y/units::m,
+			       wire->point2().z/units::m - pitch/2./units::m/std::cos(angle/units::radian) ,wire->point2().y/units::m);
+	 l1->Draw(option);
+	 
+	 TLine *l2 = new TLine(wire->point1().z/units::m + pitch/2./units::m/std::cos(angle/units::radian) ,wire->point1().y/units::m,
+			       wire->point2().z/units::m + pitch/2./units::m/std::cos(angle/units::radian) ,wire->point2().y/units::m);
+	 l2->Draw(option);
 	 
 	 TLine *l3 = new TLine(wire->point1().z/units::m  ,wire->point1().y/units::m,
 			       wire->point2().z/units::m  ,wire->point2().y/units::m);
