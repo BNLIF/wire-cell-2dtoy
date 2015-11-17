@@ -142,10 +142,12 @@ int main(int argc, char* argv[])
    {
      sds.jump(i);
      WireCell::Slice slice = sds.get();
+     
+
      if ( slice.group().size() >0){
        cout << i << " " << slice.group().size() << endl;
        toytiling[i] = new WireCell2dToy::ToyTiling(slice,gds);
-       //GeomCellSelection allcell = toytiling[i]->get_allcell();
+       //allcell = toytiling[i]->get_allcell();
      }
      
      TApplication theApp("theApp",&argc,argv);
@@ -181,7 +183,8 @@ int main(int argc, char* argv[])
     display.init(-0.03,1.568,-0.845,1.151);
     display.draw_mc(1,WireCell::PointValueVector(),"colz");
     display.draw_slice(slice,"");
-  
+    display.draw_cells(toytiling[i]->get_allcell(),"*same");
+
     theApp.Run();
    }
 

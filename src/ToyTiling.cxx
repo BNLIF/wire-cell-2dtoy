@@ -96,9 +96,15 @@ WireCell2dToy::ToyTiling::ToyTiling(const WireCell::Slice& slice,WireCell::Detec
   WireCell::Channel::Group group = slice.group();
   float tolerance = 0.1 * units::mm;
   //save all the wires
+
+  ncell = 1;
+
   for (int i=0;i!=group.size();i++){
     const GeomWireSelection& wires = gds.by_channel(group.at(i).first);
     //std::cout << "abc: " << wires.at(0)->plane() << " " << group.at(i).first << " " << group.at(i).second << std::endl;
+    
+    
+
     
     for (int j=0;j!=wires.size();j++){
       const GeomWire *wire = wires.at(j);
@@ -142,7 +148,11 @@ WireCell2dToy::ToyTiling::ToyTiling(const WireCell::Slice& slice,WireCell::Detec
 	}
 	
 	//std::cout << i << " " << j << " " << this_face << " " << temp_uwire.size() << " " << temp_vwire.size() << " " << temp_wwire.size() << std::endl;
+	//	det_gds.get_apaGDS(det_gds.in_which_cryo(pt), det_gds.in_which_apa(pt));
 	
+	const GeomDataSource *gds_apa = gds.get_apaGDS(i,j);
+	
+	CreateCell(tolerance, *gds_apa,this_face, n_tpc,temp_uwire, temp_vwire, temp_wwire);
 	
 	
 
@@ -151,9 +161,11 @@ WireCell2dToy::ToyTiling::ToyTiling(const WireCell::Slice& slice,WireCell::Detec
   }
  
 
-  // std::cout << wire_all.size() << " " << wire_u.size() << " " << wire_v.size() << " " << wire_w.size() << std::endl;
+  // std::cout << wire_all.size() << " " << wire_u.size() << " " << wire_v.size() << " " << wire_w.size() << " " << cell_all.size() << std::endl;
   
 }
+
+
 
 WireCell2dToy::ToyTiling::ToyTiling(const WireCell::Slice& slice,WireCell::GeomDataSource& gds, float rel_u , float rel_v, float rel_w, float noise_u, float noise_v, float noise_w, std::vector<float>* uplane_rms, std::vector<float>* vplane_rms, std::vector<float>* wplane_rms){
   WireCell::Channel::Group group = slice.group();
@@ -1296,5 +1308,240 @@ const GeomCell* WireCell2dToy::ToyTiling::cell(const GeomWireSelection& wires) c
   return 0;
 
 }
+
+
+
+void WireCell2dToy::ToyTiling::CreateCell(float tolerance, const GeomDataSource& gds, int face, int n_tpc, GeomWireSelection& temp_wire_u, 
+					  GeomWireSelection& temp_wire_v, GeomWireSelection& temp_wire_w){
+   float dis_u[3],dis_v[3],dis_w[3],
+    dis_puv[5],dis_puw[5],dis_pwv[5];
+  
+   
+  // calculate all the costant
+  std::vector<float> udis,vdis,wdis;
+  for (int i=0;i!=temp_wire_u.size();i++){
+    udis.push_back(gds.wire_dist(*temp_wire_u[i]));
+  }
+  for (int j=0;j!=temp_wire_v.size();j++){
+    vdis.push_back(gds.wire_dist(*temp_wire_v[j]));
+  }
+  for (int k=0;k!=temp_wire_w.size();k++){
+    wdis.push_back(gds.wire_dist(*temp_wire_w[k]));
+  }
+
+  //precalculate all the offsets
+  std::vector<Vector> puv_save(5), puw_save(5), pwv_save(5);
+  float dis_puv_save[5], dis_puw_save[5], dis_pwv_save[5];
+  
+  double u_pitch, v_pitch, w_pitch;
+  u_pitch = gds.pitch(face,kUwire);
+  v_pitch = gds.pitch(face,kVwire);
+  w_pitch = gds.pitch(face,kYwire);
+
+  //std::cout << u_pitch << " " << v_pitch << " " << w_pitch << std::endl;
+
+  if (temp_wire_u.size()>=1&&temp_wire_v.size()>=1){
+    dis_u[0] = udis.at(0) - gds.pitch(face,kUwire)/2.;
+    dis_u[1] = dis_u[0] + gds.pitch(face,kUwire);
+    dis_u[2] = udis.at(0);
+
+    dis_v[0] = vdis.at(0) - gds.pitch(face,kVwire)/2.;
+    dis_v[1] = dis_v[0] + gds.pitch(face,kVwire);
+    dis_v[2] = vdis.at(0);
+
+    gds.crossing_point(dis_u[0],dis_v[0],kUwire,kVwire, puv_save[0],face);
+    gds.crossing_point(dis_u[0],dis_v[1],kUwire,kVwire, puv_save[1],face);
+    gds.crossing_point(dis_u[1],dis_v[1],kUwire,kVwire, puv_save[2],face);
+    gds.crossing_point(dis_u[1],dis_v[0],kUwire,kVwire, puv_save[3],face);
+    gds.crossing_point(dis_u[2],dis_v[2],kUwire,kVwire, puv_save[4],face);
+
+    for (int k=0;k!=5;k++){
+      dis_puv_save[k] = gds.wire_dist(puv_save[k],kYwire,face);
+    }
+    
+  }
+
+  if (temp_wire_u.size()>=1&&temp_wire_w.size()>=1){
+    dis_u[0] = udis.at(0) - gds.pitch(face,kUwire)/2.;
+    dis_u[1] = dis_u[0] + gds.pitch(face,kUwire);
+    dis_u[2] = udis.at(0);
+
+    dis_w[0] = wdis.at(0) - w_pitch/2.;
+    dis_w[1] = dis_w[0] + w_pitch;
+    dis_w[2] = wdis.at(0);
+
+    gds.crossing_point(dis_u[0],dis_w[0],kUwire,kYwire, puw_save[0],face);
+    gds.crossing_point(dis_u[0],dis_w[1],kUwire,kYwire, puw_save[1],face);
+    gds.crossing_point(dis_u[1],dis_w[1],kUwire,kYwire, puw_save[2],face);
+    gds.crossing_point(dis_u[1],dis_w[0],kUwire,kYwire, puw_save[3],face);
+    gds.crossing_point(dis_u[2],dis_w[2],kUwire,kYwire, puw_save[4],face);
+
+    for (int k=0;k!=5;k++){
+      dis_puw_save[k] = gds.wire_dist(puw_save[k],kVwire,face);
+    }
+  }
+
+  if (temp_wire_v.size()>=1&&temp_wire_w.size()>=1){
+
+    dis_w[0] = wdis.at(0) - w_pitch/2.;
+    dis_w[1] = dis_w[0] + w_pitch;
+    dis_w[2] = wdis.at(0);
+
+    dis_v[0] = vdis.at(0) - gds.pitch(face,kVwire)/2.;
+    dis_v[1] = dis_v[0] + gds.pitch(face,kVwire);
+    dis_v[2] = vdis.at(0);
+    
+    gds.crossing_point(dis_v[0],dis_w[0],kVwire,kYwire, pwv_save[0],face);
+    gds.crossing_point(dis_v[0],dis_w[1],kVwire,kYwire, pwv_save[1],face);
+    gds.crossing_point(dis_v[1],dis_w[1],kVwire,kYwire, pwv_save[2],face);
+    gds.crossing_point(dis_v[1],dis_w[0],kVwire,kYwire, pwv_save[3],face);
+    gds.crossing_point(dis_v[2],dis_w[2],kVwire,kYwire, pwv_save[4],face);
+    
+    for (int k=0;k!=5;k++){
+      dis_pwv_save[k] = gds.wire_dist(pwv_save[k],kUwire,face);
+    }
+  }
+
+  for (int i=0;i!=temp_wire_u.size();i++){
+    dis_u[0] = udis.at(i) - u_pitch/2.;
+    dis_u[1] = dis_u[0] + u_pitch;
+    dis_u[2] = udis.at(i);
+
+    for (int j=0;j!=temp_wire_v.size();j++){
+      dis_v[0] = vdis.at(j) - v_pitch/2.;
+      dis_v[1] = dis_v[0] + v_pitch;
+      dis_v[2] = vdis.at(j);
+      
+      //four vertices around
+      std::vector<Vector> puv(5);
+      if(!gds.crossing_point(dis_u[2],dis_v[2],kUwire,kVwire, puv[4],face)) continue;
+
+      dis_puv[4] = gds.wire_dist(puv[4],kYwire,face);
+      for (int k=0;k!=4;k++){
+ 	puv[k] = puv[4] + (puv_save[k]-puv_save[4]);
+ 	dis_puv[k] = dis_puv[4] +(dis_puv_save[k]-dis_puv_save[4]);
+      }
+       
+      for (int k=0;k!=temp_wire_w.size();k++){
+ 	int flag = 0;
+ 	PointVector pcell;
+ 	dis_w[0] = wdis.at(k) - w_pitch/2.;
+   	dis_w[1] = dis_w[0] + w_pitch;//gds.wire_dist(*temp_wire_w[k]) + gds.pitch(kYwire)/2.;	
+ 	dis_w[2] = wdis.at(k);
+
+ 	if (fabs(dis_w[0] - dis_puv[0])>3*units::cm) continue;
+	
+ 	for (int m = 0;m!=4;m++){
+ 	  if (dis_puv[m] > dis_w[0]-tolerance/2. && dis_puv[m] < dis_w[1]+tolerance/2.){
+ 	    flag = 1;
+ 	    pcell.push_back(puv[m]);
+ 	  }
+ 	}
+
+ 	if (flag==1 ) {
+	  std::vector<Vector> puw(5);
+	  gds.crossing_point(dis_u[2],dis_w[2],kUwire,kYwire, puw[4],face);
+ 	  dis_puw[4] = gds.wire_dist(puw[4],kVwire,face);
+	  for (int k1=0;k1!=4;k1++){
+ 	    puw[k1] = puw[4] + (puw_save[k1]-puw_save[4]);
+ 	    dis_puw[k1] = dis_puw[4] +(dis_puw_save[k1]-dis_puw_save[4]);
+ 	    if (dis_puw[k1] > dis_v[0]-tolerance/2. && dis_puw[k1] < dis_v[1]+tolerance/2.){
+ 	      int flag_abc = 0;
+	      for (int kk = 0; kk!=pcell.size();kk++){
+ 	      	float dis = sqrt(pow(puw[k1].y-pcell.at(kk).y,2) + pow(puw[k1].z-pcell.at(kk).z,2));
+ 	      	if (dis < tolerance) {
+ 	      	  flag_abc = 1;
+ 	      	  break;
+ 	      	}
+ 	      }
+ 	      if (flag_abc == 0)
+ 	    	pcell.push_back(puw[k1]);
+ 	    }
+ 	  }
+ 	  std::vector<Vector> pwv(5);
+ 	  gds.crossing_point(dis_v[2],dis_w[2],kVwire,kYwire, pwv[4],face);
+ 	  dis_pwv[4] = gds.wire_dist(pwv[4],kUwire,face);
+
+ 	  for (int k1=0;k1!=4;k1++){
+ 	    pwv[k1] = pwv[4] + (pwv_save[k1]-pwv_save[4]);
+ 	    dis_pwv[k1] = dis_pwv[4] +(dis_pwv_save[k1]-dis_pwv_save[4]);
+	    if (dis_pwv[k1] > dis_u[0]-tolerance/2. && dis_pwv[k1] < dis_u[1]+tolerance/2.){
+ 	      int flag_abc = 0;
+ 	      for (int kk = 0; kk!=pcell.size();kk++){
+ 	      	float dis = sqrt(pow(pwv[k1].y-pcell.at(kk).y,2) + pow(pwv[k1].z-pcell.at(kk).z,2));
+ 	      	if (dis < tolerance) {
+ 	      	  flag_abc = 1;
+ 	      	  break;
+ 	      	}
+ 	      }
+ 	      if (flag_abc == 0)
+ 	      	pcell.push_back(pwv[k1]);
+ 	    }
+ 	  }
+
+	  
+ 	  if (pcell.size()>=3){
+	    
+ 	    GeomCell *cell = new GeomCell(ncell,pcell);
+ 	    cell->set_uwire(temp_wire_u.at(i));
+ 	    cell->set_vwire(temp_wire_v.at(j));
+ 	    cell->set_wwire(temp_wire_w.at(k));
+	    cell->set_tpc_no(n_tpc);
+
+ 	    Point cell_center = cell->center();
+ 	    if (gds.contained_yz(cell_center)){
+	      
+ 	      // fill cellmap
+ 	      GeomWireSelection wiresel;
+ 	      wiresel.push_back(temp_wire_u[i]);
+ 	      wiresel.push_back(temp_wire_v[j]);
+ 	      wiresel.push_back(temp_wire_w[k]);	
+ 	      cellmap[cell]=wiresel;
+	      
+ 	      //fill wiremap
+ 	      if (wiremap.find(temp_wire_u[i]) == wiremap.end()){
+ 		//not found
+		GeomCellSelection cellsel;
+		cellsel.push_back(cell);
+		wiremap[temp_wire_u[i]]=cellsel;
+	      }else{
+		//found
+		wiremap[temp_wire_u[i]].push_back(cell);
+	      }
+	      
+	      if (wiremap.find(temp_wire_v[j]) == wiremap.end()){
+		//not found
+		GeomCellSelection cellsel;
+		cellsel.push_back(cell);
+		wiremap[temp_wire_v[j]]=cellsel;
+	      }else{
+		//found
+		wiremap[temp_wire_v[j]].push_back(cell);
+	      }
+	      
+	      if (wiremap.find(temp_wire_w[k]) == wiremap.end()){
+		//not found
+		GeomCellSelection cellsel;
+		cellsel.push_back(cell);
+		wiremap[temp_wire_w[k]]=cellsel;
+	      }else{
+		//found
+		wiremap[temp_wire_w[k]].push_back(cell);
+	      }
+	      
+ 	      cell_all.push_back(cell);
+ 	      ncell++;
+	    }else{
+	      delete cell;
+	    }
+	  }
+	}
+	
+      } // W-loop
+    }
+  }
+}
+
+
 
 ClassImp(WireCell2dToy::ToyTiling);

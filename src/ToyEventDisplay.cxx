@@ -253,18 +253,40 @@ int ToyEventDisplay::draw_slice(const WireCell::Slice& slice, TString option)
 
 int ToyEventDisplay::draw_cells(const WireCell::GeomCellSelection& cellall, TString option, int color)
 {
-  pad.cd();
+  if (gds_flag == 1){
+    g2 = new TGraph();
+    g2b = new TGraph();
+    for (int i=0;i!=cellall.size();i++){
+      if (cellall[i]->get_face()==1){
+	g2->SetPoint(i,cellall[i]->center().z/units::m,cellall[i]->center().y/units::m);
+      }else{
+	g2b->SetPoint(i,cellall[i]->center().z/units::m,cellall[i]->center().y/units::m);
+      }
+    }
+    pad.cd(1);
+    g2->SetMarkerColor(color);
+    g2->SetMarkerSize(0.8);
+    g2->Draw(option);
+    g2->SetMarkerStyle(21);
 
-  //if (g2) delete g2;
-  g2 = new TGraph();
-  for (int i=0;i!=cellall.size();i++){
-    g2->SetPoint(i,cellall[i]->center().z/units::m,cellall[i]->center().y/units::m);
+    pad.cd(2);
+    g2b->SetMarkerColor(color);
+    g2b->SetMarkerSize(0.8);
+    g2b->Draw(option);
+    g2b->SetMarkerStyle(21);
+  }else{
+    pad.cd();
+    
+    //if (g2) delete g2;
+    g2 = new TGraph();
+    for (int i=0;i!=cellall.size();i++){
+      g2->SetPoint(i,cellall[i]->center().z/units::m,cellall[i]->center().y/units::m);
+    }
+    g2->SetMarkerColor(color);
+    g2->SetMarkerSize(0.8);
+    g2->Draw(option);
+    g2->SetMarkerStyle(21);
   }
-  g2->SetMarkerColor(color);
-  g2->SetMarkerSize(0.8);
-  g2->Draw(option);
-  g2->SetMarkerStyle(21);
-  
   return 0;
 }
 

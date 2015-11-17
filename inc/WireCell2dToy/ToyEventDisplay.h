@@ -31,6 +31,7 @@ namespace WireCell2dToy {
 	TH2F *h2;
 	TGraph *g1;
 	TGraph *g2;
+	TGraph *g2b;
 	TPolyLine *g3;
     
     public:
