@@ -107,7 +107,7 @@ int main(int argc, char* argv[])
   DetGenerativeFDS gfds(toydep,gds, 2400,max_events,2.0*1.6*units::millimeter);
   gfds.jump(eve_num);
 
-   WireCellSst::ToyuBooNESliceDataSource sds(gfds,1500); //set threshold at 2000 electrons
+  WireCellSst::ToyuBooNESliceDataSource sds(gfds,1); //set threshold at 2000 electrons
 
   // DetGenerativeFDS gfds(toydep, gds,total_time_bin,max_events,0.5*unit_dis*units::millimeter);
   // //gfds.jump(eve_num);
@@ -137,7 +137,7 @@ int main(int argc, char* argv[])
    WireCell2dToy::TruthToyTiling **truthtiling = new WireCell2dToy::TruthToyTiling*[2400];
   
    //for (int i=0;i!=2400;i++)
-   int i = 1137;
+     int i = 317+800;
    {
      sds.jump(i);
      WireCell::Slice slice = sds.get();

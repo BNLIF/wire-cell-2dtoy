@@ -98,20 +98,22 @@ WireCell2dToy::ToyTiling::ToyTiling(const WireCell::Slice& slice,WireCell::Detec
   //save all the wires
   for (int i=0;i!=group.size();i++){
     const GeomWireSelection& wires = gds.by_channel(group.at(i).first);
-    for (int j=0;j!=wires.size();j++){
-      const GeomWire *wire = wires.at(j);
-      wire_all.push_back(wire);
-      if (wire->plane() == WirePlaneType_t(0)){
-	wire_u.push_back(wire);
-      }else if (wire->plane() == WirePlaneType_t(1)){
-	wire_v.push_back(wire);
-      }else if (wire->plane() == WirePlaneType_t(2)){
-	wire_w.push_back(wire);
-      }
-    }
+    //std::cout << "abc: " << wires.at(0)->plane() << " " << group.at(i).first << " " << group.at(i).second << std::endl;
+    
+    // for (int j=0;j!=wires.size();j++){
+    //   const GeomWire *wire = wires.at(j);
+    //   wire_all.push_back(wire);
+    //   if (wire->plane() == WirePlaneType_t(0)){
+    // 	wire_u.push_back(wire);
+    //   }else if (wire->plane() == WirePlaneType_t(1)){
+    // 	wire_v.push_back(wire);
+    //   }else if (wire->plane() == WirePlaneType_t(2)){
+    // 	wire_w.push_back(wire);
+    //   }
+    // }
   }
 
-  std::cout << wire_all.size() << " " << wire_u.size() << " " << wire_v.size() << " " << wire_w.size() << std::endl;
+  // std::cout << wire_all.size() << " " << wire_u.size() << " " << wire_v.size() << " " << wire_w.size() << std::endl;
   
 }
 
