@@ -63,7 +63,7 @@ int ToyEventDisplay::init(float x_min, float x_max, float y_min, float y_max)
   if (gds_flag == 0){
     h1->SetTitle("Wires and True Hits ");
   }else{
-    h1->SetTitle("Wires and True Hits (Front)");
+    h1->SetTitle("Wires and True Hits (B face +x)");
   }
   h1->GetYaxis()->SetNdivisions(506);
   h1->GetXaxis()->SetNdivisions(506);
@@ -74,7 +74,7 @@ int ToyEventDisplay::init(float x_min, float x_max, float y_min, float y_max)
 
   if (gds_flag == 1){
     h2 = new TH2F("h2","h2",1000,x_min,x_max,1000,y_min,y_max);
-    h2->SetTitle("Wires and True Hits (Back)");
+    h2->SetTitle("Wires and True Hits (A face -x)");
     h2->GetYaxis()->SetNdivisions(506);
     h2->GetXaxis()->SetNdivisions(506);
     h2->SetXTitle("Z (m)");

@@ -137,7 +137,8 @@ int main(int argc, char* argv[])
    WireCell2dToy::TruthToyTiling **truthtiling = new WireCell2dToy::TruthToyTiling*[2400];
   
    //for (int i=0;i!=2400;i++)
-     int i = 317+800;
+   int i = 317+800;
+   //int i = 292+800;
    {
      sds.jump(i);
      WireCell::Slice slice = sds.get();
