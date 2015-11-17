@@ -113,6 +113,25 @@ WireCell2dToy::ToyTiling::ToyTiling(const WireCell::Slice& slice,WireCell::Detec
     }
   }
 
+  //sort wires as APA and faces, do tiling one APA by one APA
+  // for cells save n_cryos*10000 + n_apa*10 + face
+  int n_cryos = gds.ncryos();
+  for (int i=0;i!=n_cryos;i++){
+    int n_apa = gds.napa(i);
+    for (int j=0;j!=n_apa;j++){
+      // loop over face
+      for (int this_face = 0; this_face!=2;this_face++){
+	int n_tpc = i*10000 + j*10 + this_face;
+	//	std::cout << i << " " << j << " " << n_tpc << std::endl;
+	
+	GeomWireSelection temp_uwire, temp_vwire, temp_wwire;
+	
+	
+      }
+    }
+  }
+ 
+
   // std::cout << wire_all.size() << " " << wire_u.size() << " " << wire_v.size() << " " << wire_w.size() << std::endl;
   
 }

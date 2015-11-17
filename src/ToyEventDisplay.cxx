@@ -190,11 +190,19 @@ int ToyEventDisplay::draw_slice(const WireCell::Slice& slice, TString option)
 	 // std::cout << wire->point1().z/units::m  << " " << wire->point1().y/units::m << " " << 
 	 //   wire->point2().z/units::m  << " " << wire->point2().y/units::m << std::endl;
 	 //std::cout << wire->cryo() << " " << wire->apa() << " " << wire->face() << std::endl;
+	 float pitch;
+	 float angle;
 	 if (wire->face()==1){
 	   pad.cd(1);
+	   pitch = dgds->get_pitch(wire->cryo(),wire->plane());
+	   angle = dgds->get_angle(wire->cryo(),wire->plane());
 	 }else if (wire->face()==0){
 	   pad.cd(2);
-	 }	  
+	   pitch = dgds->get_pitch(wire->cryo(),wire->plane());
+	   angle = dgds->get_angle(wire->cryo(),wire->plane());
+	 }	 
+	 std::cout << pitch/units::mm << " " << angle << std::endl;
+	 
 	 TLine *l3 = new TLine(wire->point1().z/units::m  ,wire->point1().y/units::m,
 			       wire->point2().z/units::m  ,wire->point2().y/units::m);
 	 l3->SetLineColor(2);
