@@ -123,10 +123,29 @@ WireCell2dToy::ToyTiling::ToyTiling(const WireCell::Slice& slice,WireCell::Detec
       for (int this_face = 0; this_face!=2;this_face++){
 	int n_tpc = i*10000 + j*10 + this_face;
 	//	std::cout << i << " " << j << " " << n_tpc << std::endl;
-	
 	GeomWireSelection temp_uwire, temp_vwire, temp_wwire;
 	
+	for (int k = 0; k!= wire_u.size();k++){
+	  const GeomWire *wire = wire_u.at(k);
+	  if (wire->cryo() == i && wire->apa() == j && wire->face() == this_face)
+	    temp_uwire.push_back(wire);
+	}
+	for (int k = 0; k!= wire_v.size();k++){
+	  const GeomWire *wire = wire_v.at(k);
+	  if (wire->cryo() == i && wire->apa() == j && wire->face() == this_face)
+	    temp_vwire.push_back(wire);
+	}
+	for (int k = 0; k!= wire_w.size();k++){
+	  const GeomWire *wire = wire_w.at(k);
+	  if (wire->cryo() == i && wire->apa() == j && wire->face() == this_face)
+	    temp_wwire.push_back(wire);
+	}
 	
+	//std::cout << i << " " << j << " " << this_face << " " << temp_uwire.size() << " " << temp_vwire.size() << " " << temp_wwire.size() << std::endl;
+	
+	
+	
+
       }
     }
   }
