@@ -159,9 +159,9 @@ int main(int argc, char* argv[])
   int end_num = sds.size()-1;
   
    //for (int i=0;i!=2400;i++)
-  //int i = 317+800;{
+  int i = 317+800;{
    //int i = 292+800;
-  for (int i=start_num;i!=end_num+1;i++){
+    //for (int i=start_num;i!=end_num+1;i++){
     sds.jump(i);
      WireCell::Slice slice = sds.get();
      
@@ -171,50 +171,53 @@ int main(int argc, char* argv[])
      //allcell = toytiling[i]->get_allcell();
      
      truthtiling[i] = new WireCell2dToy::TruthToyTiling(*toytiling[i],pvv,i,gds,frame_length);
+     mergetiling[i] = new WireCell2dToy::MergeToyTiling(gds,*toytiling[i],i); 
      
        //}
      
-    //  TApplication theApp("theApp",&argc,argv);
-    // theApp.SetReturnFromRun(true);
+     TApplication theApp("theApp",&argc,argv);
+    theApp.SetReturnFromRun(true);
     
-    // TCanvas c1("ToyMC","ToyMC",1200,600);
-    // c1.Divide(2,1);
-    // c1.Draw();
+    TCanvas c1("ToyMC","ToyMC",1200,600);
+    c1.Divide(2,1);
+    c1.Draw();
     
-    // float charge_min = 0;
-    // float charge_max = 1e5;
+    float charge_min = 0;
+    float charge_max = 1e5;
 
 
-    // WireCell2dToy::ToyEventDisplay display(c1, gds);
-    // display.charge_min = charge_min;
-    // display.charge_max = charge_max;
+    WireCell2dToy::ToyEventDisplay display(c1, gds);
+    display.charge_min = charge_min;
+    display.charge_max = charge_max;
 
 
-    // gStyle->SetOptStat(0);
+    gStyle->SetOptStat(0);
     
-    // const Int_t NRGBs = 5;
-    // const Int_t NCont = 255;
-    // Int_t MyPalette[NCont];
-    // Double_t stops[NRGBs] = {0.0, 0.34, 0.61, 0.84, 1.0};
-    // Double_t red[NRGBs] = {0.0, 0.0, 0.87 ,1.0, 0.51};
-    // Double_t green[NRGBs] = {0.0, 0.81, 1.0, 0.2 ,0.0};
-    // Double_t blue[NRGBs] = {0.51, 1.0, 0.12, 0.0, 0.0};
-    // Int_t FI = TColor::CreateGradientColorTable(NRGBs, stops, red, green, blue, NCont);
-    // gStyle->SetNumberContours(NCont);
-    // for (int kk=0;kk!=NCont;kk++) MyPalette[kk] = FI+kk;
-    // gStyle->SetPalette(NCont,MyPalette);
+    const Int_t NRGBs = 5;
+    const Int_t NCont = 255;
+    Int_t MyPalette[NCont];
+    Double_t stops[NRGBs] = {0.0, 0.34, 0.61, 0.84, 1.0};
+    Double_t red[NRGBs] = {0.0, 0.0, 0.87 ,1.0, 0.51};
+    Double_t green[NRGBs] = {0.0, 0.81, 1.0, 0.2 ,0.0};
+    Double_t blue[NRGBs] = {0.51, 1.0, 0.12, 0.0, 0.0};
+    Int_t FI = TColor::CreateGradientColorTable(NRGBs, stops, red, green, blue, NCont);
+    gStyle->SetNumberContours(NCont);
+    for (int kk=0;kk!=NCont;kk++) MyPalette[kk] = FI+kk;
+    gStyle->SetPalette(NCont,MyPalette);
     
-    // display.init(-0.03,1.568,-0.845,1.151);
-    // display.draw_mc(1,WireCell::PointValueVector(),"colz");
-    // display.draw_slice(slice,"");
-    // display.draw_cells(toytiling[i]->get_allcell(),"*same");
+    display.init(-0.03,1.568,-0.845,1.151);
+    display.draw_mc(1,WireCell::PointValueVector(),"colz");
+    display.draw_slice(slice,"");
+    display.draw_cells(toytiling[i]->get_allcell(),"*same");
 
-    // CellChargeMap ccmap = truthtiling[i]->ccmap();
+    CellChargeMap ccmap = truthtiling[i]->ccmap();
     
-    // //std::cout << ccmap.size() << std::endl;
-    // display.draw_truthcells(ccmap,"*same");
+    //std::cout << ccmap.size() << std::endl;
+    display.draw_truthcells(ccmap,"*same");
+    display.draw_mergecells(mergetiling[i]->get_allcell(),"*same",0); //0 is normal, 1 is only draw the ones containt the truth cell
 
-    // theApp.Run();
+    
+    theApp.Run();
    }
 
     

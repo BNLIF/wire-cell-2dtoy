@@ -7,6 +7,7 @@ namespace WireCell2dToy{
   class MergeToyTiling : public WireCell2dToy::ToyTiling {
   public:
     MergeToyTiling(){};
+    MergeToyTiling(const WireCell::DetectorGDS& gds, WireCell2dToy::ToyTiling& tiling, int time_slice = -1);
     MergeToyTiling(WireCell2dToy::ToyTiling& tiling, int time_slice=-1, int merge_strategy = 3, int flag_remerge=0);
     ~MergeToyTiling();
 
@@ -22,7 +23,7 @@ namespace WireCell2dToy{
     static double Time2Dis(int time){return time*time_convert + dis_offset;};
     static int Dis2Time(double dis){ return round((dis/units::cm-dis_offset)/time_convert);}; //in cm
 
-    void deghost();
+    void deghost(); //used for MicroBooNE data ... 
 
 
   protected:

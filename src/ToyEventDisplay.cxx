@@ -1,6 +1,7 @@
 #include "WireCell2dToy/ToyEventDisplay.h"
 #include "WireCellData/Units.h"
 #include "WireCellData/Point.h"
+//#include "WireCellData/MergeGeomCell.h"
 #include "TGraph.h"
 #include "TLine.h"
 #include <iostream>
@@ -298,28 +299,57 @@ int ToyEventDisplay::draw_cells(const WireCell::GeomCellSelection& cellall, TStr
 
 int ToyEventDisplay::draw_mergecells(const WireCell::GeomCellSelection& cellall, TString option, int flag)
 {
-  pad.cd();
+ 
   
   int np = 0;
+  int npb = 0;
   g2 = new TGraph();
+  g2b = new TGraph();
+  
   for (int i=0;i!=cellall.size();i++){
+    const WireCell::MergeGeomCell* mcell = (const WireCell::MergeGeomCell*)cellall.at(i);
+    int face = mcell->get_allcell().at(0)->get_face();
+
     if (flag==0){
-      g2->SetPoint(np,cellall[i]->center().z/units::m,cellall[i]->center().y/units::m);
-      std::cout << cellall[i]->center().z/units::m << " " << cellall[i]->center().y/units::m << std::endl;
-      np++;
+      
+      if (face == 1){
+	g2->SetPoint(np,cellall[i]->center().z/units::m,cellall[i]->center().y/units::m);
+	//std::cout << cellall[i]->center().z/units::m << " " << cellall[i]->center().y/units::m << std::endl;
+	np++;
+      }else{
+	g2b->SetPoint(npb,cellall[i]->center().z/units::m,cellall[i]->center().y/units::m);
+	//std::cout << cellall[i]->center().z/units::m << " " << cellall[i]->center().y/units::m << std::endl;
+	npb++;
+      }
     }else if (flag==1){
       WireCell::MergeGeomCell *mcell = (WireCell::MergeGeomCell*)cellall[i];
       if (mcell->GetContainTruthCell()){
-	g2->SetPoint(np,cellall[i]->center().z/units::m,cellall[i]->center().y/units::m);
-	np++;
+	if (face == 1){
+	  g2->SetPoint(np,cellall[i]->center().z/units::m,cellall[i]->center().y/units::m);
+	  np++;
+	}else{
+	  g2b->SetPoint(npb,cellall[i]->center().z/units::m,cellall[i]->center().y/units::m);
+	  npb++;
+	}
       }
     }
   }
+
+  
+  pad.cd(1);
   g2->SetMarkerColor(2);
   g2->SetMarkerSize(0.8);
-  g2->Draw(option);
+  if (g2->GetN()!=0)
+    g2->Draw(option);
   g2->SetMarkerStyle(24);
   
+  pad.cd(2);
+  g2b->SetMarkerColor(2);
+  g2b->SetMarkerSize(0.8);
+  if (g2b->GetN()!=0)
+    g2b->Draw(option);
+  g2b->SetMarkerStyle(24);
+
   return 0;
 }
 
