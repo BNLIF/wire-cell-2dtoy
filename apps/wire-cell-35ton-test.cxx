@@ -79,6 +79,18 @@ int main(int argc, char* argv[])
   int frame_length = 800;  // hack for now
   int nrebin = 4;
 
+   float threshold_u = 5.87819e+02 * 4.0;
+  float threshold_v = 8.36644e+02 * 4.0;
+  float threshold_w = 5.67974e+02 * 4.0;
+
+  float threshold_ug = 755.96;
+  float threshold_vg = 822.81;
+  float threshold_wg = 510.84;
+  
+  int time_offset = 0;
+
+
+
   TFile *tfile = TFile::Open(root_file);
   TTree* sst = dynamic_cast<TTree*>(tfile->Get(tpath));
 
@@ -131,64 +143,203 @@ int main(int argc, char* argv[])
   // wien_fds.jump(eve_num);
   // // //wien_fds.Save();
 
+   int ncount = 0;
+  int ncount1 = 0;  
+  int ncount2 = 0;
+
+  int ncount_t = 0;
+
 
    WireCell2dToy::ToyTiling **toytiling = new WireCell2dToy::ToyTiling*[2400];
    WireCell2dToy::MergeToyTiling **mergetiling = new WireCell2dToy::MergeToyTiling*[2400];
    WireCell2dToy::TruthToyTiling **truthtiling = new WireCell2dToy::TruthToyTiling*[2400];
+
+
+   int start_num = 0 ;
+  int end_num = sds.size()-1;
   
    //for (int i=0;i!=2400;i++)
-   int i = 317+800;
+  //int i = 317+800;{
    //int i = 292+800;
-   {
-     sds.jump(i);
+  for (int i=start_num;i!=end_num+1;i++){
+    sds.jump(i);
      WireCell::Slice slice = sds.get();
      
-
-     if ( slice.group().size() >0){
-       cout << i << " " << slice.group().size() << endl;
-       toytiling[i] = new WireCell2dToy::ToyTiling(slice,gds);
-       //allcell = toytiling[i]->get_allcell();
-     }
+     // if ( slice.group().size() >0){
+     cout << i << " " << slice.group().size() << endl;
+     toytiling[i] = new WireCell2dToy::ToyTiling(slice,gds);
+     //allcell = toytiling[i]->get_allcell();
      
-     TApplication theApp("theApp",&argc,argv);
-    theApp.SetReturnFromRun(true);
+     truthtiling[i] = new WireCell2dToy::TruthToyTiling(*toytiling[i],pvv,i,gds,frame_length);
+     
+       //}
+     
+    //  TApplication theApp("theApp",&argc,argv);
+    // theApp.SetReturnFromRun(true);
     
-    TCanvas c1("ToyMC","ToyMC",1200,600);
-    c1.Divide(2,1);
-    c1.Draw();
+    // TCanvas c1("ToyMC","ToyMC",1200,600);
+    // c1.Divide(2,1);
+    // c1.Draw();
     
-    float charge_min = 0;
-    float charge_max = 1e5;
+    // float charge_min = 0;
+    // float charge_max = 1e5;
 
 
-    WireCell2dToy::ToyEventDisplay display(c1, gds);
-    display.charge_min = charge_min;
-    display.charge_max = charge_max;
+    // WireCell2dToy::ToyEventDisplay display(c1, gds);
+    // display.charge_min = charge_min;
+    // display.charge_max = charge_max;
 
 
-    gStyle->SetOptStat(0);
+    // gStyle->SetOptStat(0);
     
-    const Int_t NRGBs = 5;
-    const Int_t NCont = 255;
-    Int_t MyPalette[NCont];
-    Double_t stops[NRGBs] = {0.0, 0.34, 0.61, 0.84, 1.0};
-    Double_t red[NRGBs] = {0.0, 0.0, 0.87 ,1.0, 0.51};
-    Double_t green[NRGBs] = {0.0, 0.81, 1.0, 0.2 ,0.0};
-    Double_t blue[NRGBs] = {0.51, 1.0, 0.12, 0.0, 0.0};
-    Int_t FI = TColor::CreateGradientColorTable(NRGBs, stops, red, green, blue, NCont);
-    gStyle->SetNumberContours(NCont);
-    for (int kk=0;kk!=NCont;kk++) MyPalette[kk] = FI+kk;
-    gStyle->SetPalette(NCont,MyPalette);
+    // const Int_t NRGBs = 5;
+    // const Int_t NCont = 255;
+    // Int_t MyPalette[NCont];
+    // Double_t stops[NRGBs] = {0.0, 0.34, 0.61, 0.84, 1.0};
+    // Double_t red[NRGBs] = {0.0, 0.0, 0.87 ,1.0, 0.51};
+    // Double_t green[NRGBs] = {0.0, 0.81, 1.0, 0.2 ,0.0};
+    // Double_t blue[NRGBs] = {0.51, 1.0, 0.12, 0.0, 0.0};
+    // Int_t FI = TColor::CreateGradientColorTable(NRGBs, stops, red, green, blue, NCont);
+    // gStyle->SetNumberContours(NCont);
+    // for (int kk=0;kk!=NCont;kk++) MyPalette[kk] = FI+kk;
+    // gStyle->SetPalette(NCont,MyPalette);
     
-    display.init(-0.03,1.568,-0.845,1.151);
-    display.draw_mc(1,WireCell::PointValueVector(),"colz");
-    display.draw_slice(slice,"");
-    display.draw_cells(toytiling[i]->get_allcell(),"*same");
+    // display.init(-0.03,1.568,-0.845,1.151);
+    // display.draw_mc(1,WireCell::PointValueVector(),"colz");
+    // display.draw_slice(slice,"");
+    // display.draw_cells(toytiling[i]->get_allcell(),"*same");
 
-    theApp.Run();
+    // CellChargeMap ccmap = truthtiling[i]->ccmap();
+    
+    // //std::cout << ccmap.size() << std::endl;
+    // display.draw_truthcells(ccmap,"*same");
+
+    // theApp.Run();
    }
 
     
+  TFile *file = new TFile(Form("shower3D_signal_%d.root",eve_num),"RECREATE");
+  TTree *t_true = new TTree("T_true","T_true");
+  TTree *t_rec = new TTree("T_rec","T_rec");
+  TTree *t_rec_charge = new TTree("T_rec_charge","T_rec_charge");
+  TTree *t_rec_charge_blob = new TTree("T_rec_charge_blob","T_rec_charge_blob");
+
+  Double_t x_save, y_save, z_save;
+  Double_t charge_save;
+  Double_t ncharge_save;
+  Double_t chi2_save;
+  Double_t ndf_save;
+
+  t_true->SetDirectory(file);
+  t_true->Branch("x",&x_save,"x/D");
+  t_true->Branch("y",&y_save,"y/D");
+  t_true->Branch("z",&z_save,"z/D");
+  t_true->Branch("q",&charge_save,"q/D");
+  
+  t_rec->SetDirectory(file);
+  t_rec->Branch("x",&x_save,"x/D");
+  t_rec->Branch("y",&y_save,"y/D");
+  t_rec->Branch("z",&z_save,"z/D");
+  
+  t_rec_charge->SetDirectory(file);
+  t_rec_charge->Branch("x",&x_save,"x/D");
+  t_rec_charge->Branch("y",&y_save,"y/D");
+  t_rec_charge->Branch("z",&z_save,"z/D");
+  t_rec_charge->Branch("q",&charge_save,"q/D");
+  t_rec_charge->Branch("nq",&ncharge_save,"nq/D");
+  t_rec_charge->Branch("chi2",&chi2_save,"chi2/D");
+  t_rec_charge->Branch("ndf",&ndf_save,"ndf/D");
+
+  //blob stuff
+  t_rec_charge_blob->SetDirectory(file);
+  t_rec_charge_blob->Branch("x",&x_save,"x/D");
+  t_rec_charge_blob->Branch("y",&y_save,"y/D");
+  t_rec_charge_blob->Branch("z",&z_save,"z/D");
+  t_rec_charge_blob->Branch("q",&charge_save,"q/D");
+  t_rec_charge_blob->Branch("nq",&ncharge_save,"nq/D");
+  
+  TGraph2D *g = new TGraph2D();
+  TGraph2D *gt = new TGraph2D();
+  TGraph2D *g_rec = new TGraph2D();
+  TGraph2D *g_rec_blob = new TGraph2D();
+
+   //save results 
+  for (int i=start_num;i!=end_num+1;i++){
+    //truth
+    CellChargeMap ccmap = truthtiling[i]->ccmap();
+    for (auto it = ccmap.begin();it!=ccmap.end(); it++){
+      Point p = it->first->center();
+      x_save = i*nrebin/2.*unit_dis/10. - frame_length/2.*unit_dis/10.*4; // *4 is temporary
+      y_save = p.y/units::cm;
+      z_save = p.z/units::cm;
+      charge_save = it->second;
+      
+      gt->SetPoint(ncount_t,x_save,y_save,z_save);
+      t_true->Fill();
+            
+      ncount_t ++;
+    }
+
+     //recon 1
+    GeomCellSelection allcell = toytiling[i]->get_allcell();
+    for (int j=0;j!=allcell.size();j++){
+      Point p = allcell[j]->center();
+      x_save = i*nrebin/2.*unit_dis/10. - frame_length/2.*unit_dis/10.*4;
+      y_save = p.y/units::cm;
+      z_save = p.z/units::cm;
+      
+
+      g->SetPoint(ncount,x_save,y_save,z_save);
+      t_rec->Fill();
+
+      ncount ++;
+    }
+  }
+
+  g->Write("shower3D");
+  gt->Write("shower3D_truth");
+  g_rec->Write("shower3D_charge");
+  g_rec_blob->Write("shower3D_charge_blob");
+
+  
+  
+
+
+  TTree *Trun = new TTree("Trun","Trun");
+  Trun->SetDirectory(file);
+
+  int detector = 1; // 35 ton
+  Trun->Branch("detector",&detector,"detector/I");
+
+  Trun->Branch("eventNo",&event_no,"eventNo/I");
+  Trun->Branch("runNo",&run_no,"runNo/I");
+  Trun->Branch("subRunNo",&subrun_no,"runRunNo/I");
+
+  Trun->Branch("unit_dis",&unit_dis,"unit_dis/F");
+  Trun->Branch("toffset_uv",&toffset_1,"toffset_uv/F");
+  Trun->Branch("toffset_uw",&toffset_2,"toffset_uw/F");
+  Trun->Branch("toffset_u",&toffset_3,"toffset_u/F");
+  Trun->Branch("total_time_bin",&total_time_bin,"total_time_bin/I");
+  Trun->Branch("recon_threshold",&recon_threshold,"recon_threshold/I");
+  Trun->Branch("frame_length",&frame_length,"frame_length/I");
+  Trun->Branch("max_events",&max_events,"max_events/I");
+  Trun->Branch("eve_num",&eve_num,"eve_num/I");
+  Trun->Branch("nrebin",&nrebin,"nrebin/I");
+  Trun->Branch("threshold_u",&threshold_u,"threshold_u/F");
+  Trun->Branch("threshold_v",&threshold_v,"threshold_v/F");
+  Trun->Branch("threshold_w",&threshold_w,"threshold_w/F");
+  Trun->Branch("time_offset",&time_offset,"time_offset/I");
+
+
+
+  Trun->Fill();
+
+
+  file->Write();
+  file->Close();
+
+  return 0;
+
   // TCanvas *c = new TCanvas();
   // c->Range(-5*units::cm, -90*units::cm, 160*units::cm, 120*units::cm);    
   
@@ -225,4 +376,4 @@ int main(int argc, char* argv[])
   // }
   
   // c->SaveAs("./test_detectorgds_35t.pdf");
-}
+  }

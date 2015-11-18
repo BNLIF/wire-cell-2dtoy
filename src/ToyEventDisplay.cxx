@@ -256,11 +256,15 @@ int ToyEventDisplay::draw_cells(const WireCell::GeomCellSelection& cellall, TStr
   if (gds_flag == 1){
     g2 = new TGraph();
     g2b = new TGraph();
+    int nf = 0;
+    int nb = 0;
     for (int i=0;i!=cellall.size();i++){
       if (cellall[i]->get_face()==1){
-	g2->SetPoint(i,cellall[i]->center().z/units::m,cellall[i]->center().y/units::m);
+	g2->SetPoint(nf,cellall[i]->center().z/units::m,cellall[i]->center().y/units::m);
+	nf ++;
       }else{
-	g2b->SetPoint(i,cellall[i]->center().z/units::m,cellall[i]->center().y/units::m);
+	g2b->SetPoint(nb,cellall[i]->center().z/units::m,cellall[i]->center().y/units::m);
+	nb ++;
       }
     }
     pad.cd(1);
@@ -272,7 +276,8 @@ int ToyEventDisplay::draw_cells(const WireCell::GeomCellSelection& cellall, TStr
     pad.cd(2);
     g2b->SetMarkerColor(color);
     g2b->SetMarkerSize(0.8);
-    g2b->Draw(option);
+    if (g2b->GetN()!=0)
+      g2b->Draw(option);
     g2b->SetMarkerStyle(21);
   }else{
     pad.cd();
@@ -322,22 +327,61 @@ int ToyEventDisplay::draw_mergecells(const WireCell::GeomCellSelection& cellall,
 
 int ToyEventDisplay::draw_truthcells(const WireCell::CellChargeMap& ccmap, TString option)
 {
-  pad.cd();
-  
-  g2 = new TGraph();
-  int i=0;
-  for (auto it = ccmap.begin();it!=ccmap.end(); it++){
-    WireCell::Point p = it->first->center();
-    if (it->second > truth_threshold){
-      g2->SetPoint(i,p.z/units::m,p.y/units::m);
-      i++;
+  if (gds_flag==1){
+    g2 = new TGraph();
+    g2b = new TGraph();
+    int nf = 0;
+    int nb = 0;
+    
+    int i=0;
+    for (auto it = ccmap.begin();it!=ccmap.end(); it++){
+      WireCell::Point p = it->first->center();
+      if (it->first->get_face()==1){
+	if (it->second > truth_threshold){
+	  g2->SetPoint(nf,p.z/units::m,p.y/units::m);
+	  nf++;
+	}
+      }else{
+	if (it->second > truth_threshold){
+	  g2b->SetPoint(nb,p.z/units::m,p.y/units::m);
+	  nb++;
+	}
+      }
+      
     }
+    pad.cd(1);
+    g2->SetMarkerColor(8);
+    //g2->SetMarkerColor(1);
+    g2->SetMarkerSize(0.8);
+    g2->Draw(option);
+    g2->SetMarkerStyle(26);
+
+    pad.cd(2);
+    g2b->SetMarkerColor(8);
+    //g2->SetMarkerColor(1);
+    g2b->SetMarkerSize(0.8);
+    if (g2b->GetN()!=0)
+      g2b->Draw(option);
+    g2b->SetMarkerStyle(26);
+
+  }else{
+    pad.cd();
+    
+    g2 = new TGraph();
+    int i=0;
+    for (auto it = ccmap.begin();it!=ccmap.end(); it++){
+      WireCell::Point p = it->first->center();
+      if (it->second > truth_threshold){
+	g2->SetPoint(i,p.z/units::m,p.y/units::m);
+	i++;
+      }
+    }
+    g2->SetMarkerColor(8);
+    //g2->SetMarkerColor(1);
+    g2->SetMarkerSize(0.8);
+    g2->Draw(option);
+    g2->SetMarkerStyle(26);
   }
-  g2->SetMarkerColor(8);
-  //g2->SetMarkerColor(1);
-  g2->SetMarkerSize(0.8);
-  g2->Draw(option);
-  g2->SetMarkerStyle(26);
   
   return 0;
 }
