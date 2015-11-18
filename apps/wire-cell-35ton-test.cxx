@@ -22,6 +22,8 @@
 #include "WireCell2dToy/ToyMatrixMarkov.h"
 #include "WireCell2dToy/ToyMetric.h"
 
+#include "WireCellData/GeomCluster.h"
+
 #include "TApplication.h"
 #include "TCanvas.h"
 #include "TBenchmark.h"
@@ -194,6 +196,14 @@ int main(int argc, char* argv[])
    WireCell2dToy::ToyMatrix **toymatrix = new WireCell2dToy::ToyMatrix*[2400];
    WireCell2dToy::ToyMetric toymetric;
    
+
+   //add in cluster
+   GeomClusterSet cluster_set, cluster_delset;
+   
+   int ncount_mcell = 0;
+   
+   delete fds;
+
    int start_num = 0 ;
    int end_num = sds.size()-1;
    
@@ -379,7 +389,74 @@ int main(int argc, char* argv[])
     }
   }
 
-   
+    //do clustering ... 
+   for (int i=start_num;i!=end_num+1;i++){
+     GeomCellSelection pallmcell = mergetiling[i]->get_allcell();
+     GeomCellSelection allmcell;
+     for (int j=0;j!=pallmcell.size();j++){
+       const GeomCell* mcell = pallmcell[j];
+       if (toymatrix[i]->Get_Cell_Charge(mcell)> recon_threshold || toymatrix[i]->Get_Solve_Flag()==0){
+  	 allmcell.push_back(mcell);
+       }
+     }
+     
+     
+     if (cluster_set.empty()){
+       // if cluster is empty, just insert all the mcell, each as a cluster
+       for (int j=0;j!=allmcell.size();j++){
+  	 GeomCluster *cluster = new GeomCluster(*((MergeGeomCell*)allmcell[j]));
+  	 cluster_set.insert(cluster);
+       }
+     }else{
+       for (int j=0;j!=allmcell.size();j++){
+  	 int flag = 0;
+  	 int flag_save = 0;
+  	 GeomCluster *cluster_save = 0;
+	 
+  	 cluster_delset.clear();
+	 
+  	 // loop through merged cell
+  	 for (auto it = cluster_set.begin();it!=cluster_set.end();it++){
+  	   //loop through clusters
+	   
+  	   flag += (*it)->AddCell(*((MergeGeomCell*)allmcell[j]));
+  	   if (flag==1 && flag != flag_save){
+  	     cluster_save = *it;
+  	   }else if (flag>1 && flag != flag_save){
+  	     cluster_save->MergeCluster(*(*it));
+  	     cluster_delset.insert(*it);
+  	   }
+  	   flag_save = flag;
+  	   
+  	 }
+	 
+  	 for (auto it = cluster_delset.begin();it!=cluster_delset.end();it++){
+  	   cluster_set.erase(*it);
+  	   delete (*it);
+  	 }
+	 
+  	 if (flag==0){
+  	   GeomCluster *cluster = new GeomCluster(*((MergeGeomCell*)allmcell[j]));
+  	   cluster_set.insert(cluster);
+  	 }
+	 
+       }
+     }
+
+     int ncount_mcell_cluster = 0;
+      for (auto it = cluster_set.begin();it!=cluster_set.end();it++){
+  	ncount_mcell_cluster += (*it)->get_allcell().size();
+      }
+      ncount_mcell += allmcell.size();
+      cout << i << " " << allmcell.size()  << " " << cluster_set.size()  << endl;
+   }
+
+   int ncount_mcell_cluster = 0;
+   for (auto it = cluster_set.begin();it!=cluster_set.end();it++){
+     ncount_mcell_cluster += (*it)->get_allcell().size();
+   }
+   cout << "Summary: " << ncount << " " << ncount_mcell << " " << ncount_mcell_cluster << endl;
+
  
   TFile *file = new TFile(Form("shower3D_signal_%d.root",eve_num),"RECREATE");
   TTree *t_true = new TTree("T_true","T_true");
@@ -573,7 +650,119 @@ int main(int argc, char* argv[])
   g_rec_blob->Write("shower3D_charge_blob");
 
   
+   TTree *ttree1 = new TTree("TC","TC");
+  // To save cluster, we need to save
+  // 1. time slice
+  // 2. single cell
+  // 3. charge
+  // 4. cluster number
+  const GeomCell* cell_save = 0;
+  int cluster_num = -1;
+  int mcell_id = -1;
+  int time_slice;
   
+  ttree1->Branch("time_slice",&time_slice,"time_slice/I"); // done
+  ttree1->Branch("cell",&cell_save);
+  ttree1->Branch("ncluster",&cluster_num,"cluster_num/I"); //done
+  ttree1->Branch("mcell_id",&mcell_id,"mcell_id/I");
+  ttree1->Branch("charge",&charge_save,"charge/D"); 
+  
+  double xx,yy,zz;
+
+  ttree1->Branch("xx",&xx,"xx/D");    //don
+  ttree1->Branch("yy",&yy,"yy/D");    //don
+  ttree1->Branch("zz",&zz,"zz/D");    //don
+  // ttree1->Branch("x",&x,"x/D");    //done
+  // ttree1->Branch("y",&y,"y/D");
+  // ttree1->Branch("z",&z,"z/D");
+
+  // save information to reconstruct the toytiling
+  int u_index, v_index, w_index;
+  double u_charge, v_charge, w_charge;
+  double u_charge_err, v_charge_err, w_charge_err;
+  
+  int tpc_no=0, cryostat_no=0;
+  ttree1->Branch("tpc_no",&tpc_no,"tpc_no/I");
+  ttree1->Branch("cryostat_no",&cryostat_no,"cryostat_no/I");
+
+  ttree1->Branch("u_index",&u_index,"u_index/I");
+  ttree1->Branch("v_index",&v_index,"v_index/I");
+  ttree1->Branch("w_index",&w_index,"w_index/I");
+  
+  ttree1->Branch("u_charge",&u_charge,"u_charge/D");
+  ttree1->Branch("v_charge",&v_charge,"v_charge/D");
+  ttree1->Branch("w_charge",&w_charge,"w_charge/D");
+
+  ttree1->Branch("u_charge_err",&u_charge_err,"u_charge_err/D");
+  ttree1->Branch("v_charge_err",&v_charge_err,"v_charge_err/D");
+  ttree1->Branch("w_charge_err",&w_charge_err,"w_charge_err/D");
+
+  //end save 
+
+  ttree1->SetDirectory(file);
+  
+  for (auto it = cluster_set.begin();it!=cluster_set.end();it++){
+    cluster_num ++;
+    //loop merged cell
+    for (int i=0; i!=(*it)->get_allcell().size();i++){
+      const MergeGeomCell *mcell = (const MergeGeomCell*)((*it)->get_allcell().at(i));
+      mcell_id ++;
+      time_slice = mcell->GetTimeSlice();
+
+      //      
+      //loop single cell
+      for (int j=0; j!=mcell->get_allcell().size();j++){
+	cell_save = mcell->get_allcell().at(j);
+
+	//fill the information needed for toytiling
+	GeomWireSelection wires = toytiling[time_slice]->wires(*cell_save);
+	
+	//	if (i==0 && j==0) cout << "abc: " << time_slice << " " << toytiling[time_slice]->get_allcell().size() << " " << wires.size() << endl;
+
+	for (int k=0;k!=wires.size();k++){
+	  const GeomWire *wire = wires.at(k);
+	  WirePlaneType_t plane = wire->plane();
+	  if (plane==0){
+	    u_index = wire->index();
+	    u_charge = toytiling[time_slice]->wcmap()[wire];
+	    u_charge_err = toytiling[time_slice]->wcemap()[wire];
+	  }else if (plane==1){
+	    v_index = wires.at(k)->index();
+	    v_charge = toytiling[time_slice]->wcmap()[wire];
+	    v_charge_err = toytiling[time_slice]->wcemap()[wire];
+	  }else if (plane==2){
+	    w_index = wire->index();
+	    w_charge = toytiling[time_slice]->wcmap()[wire];
+	    w_charge_err = toytiling[time_slice]->wcemap()[wire];
+	  }
+	}
+
+	//end fill
+
+	Point p = mcell->get_allcell().at(j)->center();
+
+	int cryo = mcell->get_allcell().at(j)->get_cryo();
+	int apa = mcell->get_allcell().at(j)->get_apa();
+	int face = mcell->get_allcell().at(j)->get_face();
+	const WrappedGDS *apa_gds = gds.get_apaGDS(cryo,apa);
+	std::pair<double, double> xmm = apa_gds->minmax(0); 
+	
+	if (face == 1){
+	  xx = (i*nrebin/2.*unit_dis/10. - frame_length/2.*unit_dis/10.*4) + xmm.second/units::cm; // *4 is temporary
+	}else if (face == 0){
+	  xx = xmm.first/units::cm - (i*nrebin/2.*unit_dis/10. - frame_length/2.*unit_dis/10.*4);
+	}
+	//xx = time_slice*nrebin/2.*unit_dis/10. - frame_length/2.*unit_dis/10.;
+	
+	charge_save = toymatrix[time_slice]->Get_Cell_Charge(mcell,1)/mcell->cross_section() * cell_save->cross_section();
+	yy = p.y/units::cm;
+  	zz = p.z/units::cm;
+	ttree1->Fill();
+	
+      }
+    }
+  }
+  ttree1->Write();
 
 
   TTree *Trun = new TTree("Trun","Trun");
