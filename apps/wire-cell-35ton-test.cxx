@@ -263,13 +263,29 @@ int main(int argc, char* argv[])
   TGraph2D *g_rec = new TGraph2D();
   TGraph2D *g_rec_blob = new TGraph2D();
 
+  
+  
+  
+
+
    //save results 
   for (int i=start_num;i!=end_num+1;i++){
     //truth
     CellChargeMap ccmap = truthtiling[i]->ccmap();
     for (auto it = ccmap.begin();it!=ccmap.end(); it++){
       Point p = it->first->center();
-      x_save = i*nrebin/2.*unit_dis/10. - frame_length/2.*unit_dis/10.*4; // *4 is temporary
+      
+      int cryo = it->first->get_cryo();
+      int apa = it->first->get_apa();
+      int face = it->first->get_face();
+      const WrappedGDS *apa_gds = gds.get_apaGDS(cryo,apa);
+      std::pair<double, double> xmm = apa_gds->minmax(0); 
+      
+      if (face == 1){
+	x_save = (i*nrebin/2.*unit_dis/10. - frame_length/2.*unit_dis/10.*4) + xmm.second/units::cm; // *4 is temporary
+      }else if (face == 0){
+	x_save = xmm.first/units::cm - (i*nrebin/2.*unit_dis/10. - frame_length/2.*unit_dis/10.*4);
+      }
       y_save = p.y/units::cm;
       z_save = p.z/units::cm;
       charge_save = it->second;
@@ -284,7 +300,20 @@ int main(int argc, char* argv[])
     GeomCellSelection allcell = toytiling[i]->get_allcell();
     for (int j=0;j!=allcell.size();j++){
       Point p = allcell[j]->center();
-      x_save = i*nrebin/2.*unit_dis/10. - frame_length/2.*unit_dis/10.*4;
+
+      int cryo = allcell[j]->get_cryo();
+      int apa = allcell[j]->get_apa();
+      int face = allcell[j]->get_face();
+      const WrappedGDS *apa_gds = gds.get_apaGDS(cryo,apa);
+      std::pair<double, double> xmm = apa_gds->minmax(0); 
+      
+      if (face == 1){
+	x_save = (i*nrebin/2.*unit_dis/10. - frame_length/2.*unit_dis/10.*4) + xmm.second/units::cm; // *4 is temporary
+      }else if (face == 0){
+	x_save = xmm.first/units::cm - (i*nrebin/2.*unit_dis/10. - frame_length/2.*unit_dis/10.*4);
+      }
+
+      //      x_save = i*nrebin/2.*unit_dis/10. - frame_length/2.*unit_dis/10.*4;
       y_save = p.y/units::cm;
       z_save = p.z/units::cm;
       
