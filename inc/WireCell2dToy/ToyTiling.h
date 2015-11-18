@@ -49,6 +49,10 @@ namespace WireCell2dToy {
 
       WireCell::WireChargeMap& wcmap(){return wirechargemap;};
       WireCell::WireChargeMap& wcemap(){return wirecharge_errmap;};
+
+      std::map<int,float>& ccmap(){return channelchargemap;};
+      std::map<int,float>& ccemap(){return channelcharge_errmap;};
+
       WireCell::GeomCellMap& cmap(){return cellmap;};
       WireCell::GeomWireMap& wmap(){return wiremap;};
       
@@ -71,6 +75,9 @@ namespace WireCell2dToy {
       WireCell::WireChargeMap wirechargemap;
       WireCell::WireChargeMap wirecharge_errmap;
 
+      std::map<int,float> channelchargemap;
+      std::map<int,float> channelcharge_errmap;
+      
       //
       float ave_charge;
       

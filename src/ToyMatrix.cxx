@@ -138,12 +138,12 @@ WireCell2dToy::ToyMatrix::ToyMatrix(WireCell2dToy::ToyTiling& toytiling, WireCel
   //std::cout << mcindex << " " << mwindex << " " << swindex << std::endl;
   if (mcindex >0){
   //Construct Matrix
-    MA = new TMatrixD(mwindex,mcindex);
-    MB = new TMatrixD(mwindex,swindex);
-    MAT = new TMatrixD(mcindex,mwindex);
+    MA = new TMatrixD(mwindex,mcindex); // merged wire to merged cell
+    MB = new TMatrixD(mwindex,swindex); // merged wire to single wire (single channel?)
+    MAT = new TMatrixD(mcindex,mwindex); 
     MBT = new TMatrixD(swindex,mwindex);
     
-    Vy = new TMatrixD(swindex,swindex);
+    Vy = new TMatrixD(swindex,swindex); // single wire (single channel)
     VBy = new TMatrixD(mwindex,mwindex);
     VBy_inv = new TMatrixD(mwindex,mwindex);
     Vx = new TMatrixD(mcindex,mcindex);

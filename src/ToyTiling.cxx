@@ -100,11 +100,63 @@ WireCell2dToy::ToyTiling::ToyTiling(const WireCell::Slice& slice,WireCell::Detec
   ncell = 1;
 
   for (int i=0;i!=group.size();i++){
+    
     const GeomWireSelection& wires = gds.by_channel(group.at(i).first);
     //std::cout << "abc: " << wires.at(0)->plane() << " " << group.at(i).first << " " << group.at(i).second << std::endl;
     
-    
-
+    for (int i1 = 0;i1 != wires.size();i1++){
+      const GeomWire *wire = wires.at(i1);
+      int channel = group.at(i).first;
+      float charge = group.at(i).second;
+      // sum += charge;
+      if (wirechargemap.find(wire) == wirechargemap.end()){
+	//not found
+	wirechargemap[wire] = charge;
+      }else{
+	wirechargemap[wire] += charge;
+      }
+      //fill in the error ...
+      WirePlaneType_t plane = wire->plane();
+      // std::cout << i << " " << plane << " " << charge << std::endl;
+      
+      double charge_noise;
+      double rel_charge_err;
+      if (plane ==0){
+	charge_noise = noise_u;
+	rel_charge_err = rel_u;
+      }else if (plane == 1){
+	charge_noise = noise_v;
+	rel_charge_err = rel_v;
+      }else if (plane == 2){
+	charge_noise = noise_w;
+	rel_charge_err = rel_w;
+      }
+      
+      if (uplane_rms !=0 && vplane_rms !=0 && wplane_rms !=0){
+	int index = wire->index();
+	if (plane ==0){
+	  charge_noise = uplane_rms->at(index);
+	}else if (plane == 1){
+	  charge_noise = vplane_rms->at(index);
+	}else if (plane == 2){
+	  charge_noise = wplane_rms->at(index);
+	}
+      }
+      wirecharge_errmap[wire] = sqrt(charge_noise*charge_noise + pow(rel_charge_err,2) * charge*charge);
+      
+      if (i1 == 0){
+	if (channelchargemap.find(channel) == channelchargemap.end()){
+	  //not found
+	  channelchargemap[channel] = charge;
+	}else{
+	  channelchargemap[channel] += charge;
+	}
+        channelcharge_errmap[channel] = sqrt(charge_noise*charge_noise + pow(rel_charge_err,2) * charge*charge);
+	
+      }
+      
+    }
+      
     
     for (int j=0;j!=wires.size();j++){
       const GeomWire *wire = wires.at(j);
