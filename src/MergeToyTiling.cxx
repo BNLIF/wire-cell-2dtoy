@@ -643,6 +643,10 @@ void WireCell2dToy::MergeToyTiling::form_wiremap(const DetectorGDS& gds, WireCel
   //deal with associations ... 
   
   
+  
+
+
+  
   // Now construc the wire map;
   for (int i=0;i!=wire_all.size();i++){
     MergeGeomWire *mwire = (MergeGeomWire*)wire_all[i];
@@ -739,13 +743,31 @@ void WireCell2dToy::MergeToyTiling::form_wiremap(const DetectorGDS& gds, WireCel
     }
   }
   
+  // fill in charge
+  std::map<int,float> ccmap = tiling.ccmap();
+  for (int i=0;i!=wire_all.size();i++){
+    MergeGeomWire *mwire = (MergeGeomWire*)wire_all[i];
+    float charge = 0;
+    GeomWireSelection wires = mwire->get_allwire();
+    std::set<int> channels;
+    for (int j=0;j!=wires.size();j++){
+      int channel = wires.at(j)->channel();
+      if (channels.find(channel) != channels.end()){
+      }else{
+	channels.insert(channel);
+	charge += ccmap[channel];
+      }
+    }
+    wirechargemap[mwire] = charge;
+  }
+
   
   //check ... 
   // for (int i=0;i!=cell_all.size();i++){
   //   std::cout << i << " " << cellmap[cell_all.at(i)].size() << std::endl;
   // }
   // for (int i=0;i!=wire_all.size();i++){
-  //   std::cout << i << " " << wiremap[wire_all.at(i)].size() << std::endl;
+  //   std::cout << i << " " << wiremap[wire_all.at(i)].size() << " " << wirechargemap[wire_all.at(i)]<< std::endl;
   // }
 
 }
