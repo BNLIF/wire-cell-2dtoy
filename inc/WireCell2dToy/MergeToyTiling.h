@@ -34,6 +34,7 @@ namespace WireCell2dToy{
 
 
     void form_wiremap(WireCell2dToy::ToyTiling& tiling, int time_slice);
+    void form_wiremap(const WireCell::DetectorGDS& gds, WireCell2dToy::ToyTiling& tiling, int time_slice);
 
     WireCell::GeomCellMap cellmap1;
     WireCell::GeomWireMap wiremap1;

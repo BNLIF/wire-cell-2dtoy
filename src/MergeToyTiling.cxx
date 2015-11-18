@@ -590,14 +590,59 @@ WireCell2dToy::MergeToyTiling::MergeToyTiling(const DetectorGDS& gds, WireCell2d
       }
       
       //      std::cout << ii << " " << jj << " " << cell_all.size() << std::endl;
-      
-      
+    
     }
   }
   
   
+  form_wiremap(gds,tiling,time_slice);
+  
 }
 
+
+void WireCell2dToy::MergeToyTiling::form_wiremap(const DetectorGDS& gds, WireCell2dToy::ToyTiling& tiling, int time_slice){
+  int ident_wire = 50000;
+
+  for (int i=0;i!=cell_all.size();i++){    
+    GeomCellSelection call =  ((MergeGeomCell*)cell_all[i])->get_allcell();
+    for (int k=0;k!=3;k++){
+      WirePlaneType_t plane = (WirePlaneType_t)k;
+      MergeGeomWire *mwire = 0;
+      int flag = 0;
+
+      for (int j=0;j!=call.size();j++){
+   	GeomWireSelection wires = tiling.wires(*call[j]);
+  	for (int nwire = 0; nwire!=wires.size();nwire++){
+
+  	  // std::cout << wires[nwire]->plane() << " " << plane << std::endl;
+
+   	  if (wires[nwire]->plane()==plane){
+	    if (flag==0){
+	      mwire = new MergeGeomWire(ident_wire,*wires[nwire]);
+	      mwire->SetTimeSlice(time_slice);
+	      
+	      ident_wire++;
+	      flag = 1;
+	    }else {
+	      mwire->AddWire(*wires[nwire]);
+	    }
+  	  }
+  	}
+      }
+      
+     wire_all.push_back(mwire);
+           
+    }
+  }
+
+  // std::cout <<cell_all.size() << " " << wire_all.size() << std::endl;
+  while(further_mergewire(wire_all,50000,time_slice));
+  //std::cout <<cell_all.size() << " " << wire_all.size() << std::endl;
+  
+
+  //deal with associations ... 
+  
+}
 
 
 void WireCell2dToy::MergeToyTiling::deghost(){
