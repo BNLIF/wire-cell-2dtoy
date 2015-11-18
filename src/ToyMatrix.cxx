@@ -252,7 +252,136 @@ WireCell2dToy::ToyMatrix::ToyMatrix(WireCell2dToy::ToyTiling& toytiling, WireCel
   
 }
 
+void WireCell2dToy::ToyMatrix::Buildup_index(const WireCell::DetectorGDS& gds, WireCell2dToy::MergeToyTiling& mergetiling){
+  mcindex = 0; // merged cell
+  mwindex = 0; // merged wire
+  swindex = 0; // single channel
+  
+  GeomCellSelection allmcell = mergetiling.get_allcell();
 
+  for (int j=0;j!=allmcell.size();j++){
+    //construct merged cell index
+    const MergeGeomCell *mcell = (MergeGeomCell*)allmcell[j];
+    if (mcimap.find(mcell) == mcimap.end()){
+      mcimap[mcell] = mcindex;
+      mcindex ++;
+      
+      const GeomWireSelection wires = mergetiling.wires(*allmcell[j]);
+       for (int k=0;k!=wires.size();k++){
+	 const MergeGeomWire *mwire = (MergeGeomWire*)wires[k];
+	 // require all the wire must be good to be used in the matrix solving 
+	 if (mwimap.find(mwire) == mwimap.end() && mergetiling.wcmap()[mwire] >10){
+	   //if (mwimap.find(mwire) == mwimap.end() ){
+	   mwimap[mwire] = mwindex;
+	   mwindex ++;
+	   
+	   //construct single channel index
+	   GeomWireSelection swires = mwire->get_allwire();
+	   for (int kk = 0; kk!=swires.size(); kk++){
+	     const GeomWire* wire1 = swires[kk];
+	     if (scimap.find(wire1->channel()) == scimap.end()){
+	       scimap[wire1->channel()] = swindex;
+	       swindex ++; 
+	     }
+	   }
+	   
+	 }
+       }
+    }
+  }
+}
+
+WireCell2dToy::ToyMatrix::ToyMatrix(const DetectorGDS& gds,WireCell2dToy::ToyTiling& toytiling, WireCell2dToy::MergeToyTiling& mergetiling, int recon_t){
+  solve_flag = -1;
+  chi2 = -1;
+  svd_flag = 0;
+  num_blob = 0;
+  simple_blob_reduction = false;
+  recon_threshold = recon_t;
+  
+  //building up index 
+  Buildup_index(gds,mergetiling);
+  //std::cout << mcindex << " " << mwindex << " " << swindex << std::endl;
+  
+  if (mcindex >0){
+    //Construct Matrix
+    MA = new TMatrixD(mwindex,mcindex);
+    MB = new TMatrixD(mwindex,swindex);
+    MAT = new TMatrixD(mcindex,mwindex);
+    MBT = new TMatrixD(swindex,mwindex);
+    
+    Vy = new TMatrixD(swindex,swindex);
+    VBy = new TMatrixD(mwindex,mwindex);
+    VBy_inv = new TMatrixD(mwindex,mwindex);
+    Vx = new TMatrixD(mcindex,mcindex);
+    Vx_inv = new TMatrixD(mcindex,mcindex);
+    
+    MC = new TMatrixD(mcindex,mcindex);
+    MC_inv = new TMatrixD(mcindex,mcindex);
+    
+    //Construct Vector
+    Wy = new TVectorD(swindex);
+    
+    MWy = new TVectorD(mwindex);
+    MWy_pred = new TVectorD(mwindex);
+    
+    Cx = new TVectorD(mcindex);
+    dCx = new TVectorD(mcindex);
+    
+    std::map<int, float> ccmap = toytiling.ccmap();
+    std::map<int, float> ccemap = toytiling.ccemap();
+    
+    for ( auto it = ccmap.begin(); it != ccmap.end(); it++){
+      if (scimap.find(it->first) != scimap.end()){
+	int index = scimap[it->first];
+	float charge = ccmap[it->first];
+	float charge_err = ccemap[it->first];
+	(*Wy)[index] =charge;
+	(*Vy)(index,index) = charge_err*charge_err/1e6;
+      }
+    }
+    
+    GeomWireSelection allmwire = mergetiling.get_allwire();
+    for (int j=0;j!=allmwire.size();j++){
+      if (mwimap.find(allmwire[j])!=mwimap.end()){
+	int index = mwimap[allmwire[j]];
+	//construct MA
+	for (int k=0; k!=mergetiling.cells(*allmwire[j]).size();k++){
+	  int index1 = mcimap[mergetiling.cells(*allmwire[j]).at(k)];
+	  (*MA)(index,index1) = 1;
+	}
+
+	//construct MB
+	for (int k=0;k!=((MergeGeomWire*)allmwire[j])->get_allwire().size();k++){
+	  int index1 = scimap[((MergeGeomWire*)allmwire[j])->get_allwire().at(k)->channel()];
+	  (*MB)(index,index1) = 1;
+	}
+      }
+    }
+
+    // construct the rest of matrix
+    MBT->Transpose(*MB);
+    MAT->Transpose(*MA);
+    
+    *VBy = (*MB) * (*Vy) * (*MBT);
+    *VBy_inv = *VBy;
+    VBy_inv->Invert();
+    
+    *MC = (*MAT) * (*VBy_inv) * (*MA);
+    solve_flag = 0;
+    
+    double det;
+    if (mcindex <= mwindex){
+      det = MC->Determinant();
+    }else{
+      det = 0;
+    }
+    if (det > 1e-5){
+      Solve();
+    }
+
+  }
+}
 
 WireCell2dToy::ToyMatrix::ToyMatrix(WireCell2dToy::ToyTiling& toytiling, WireCell2dToy::MergeToyTiling& mergetiling, int recon_t){
   solve_flag = -1;

@@ -246,8 +246,7 @@ int main(int argc, char* argv[])
     
     toytiling_th[i] = new WireCell2dToy::ToyTiling(slice_th,gds,0,0,0,threshold_ug,threshold_vg, threshold_wg);
     truthtiling_th[i] = new WireCell2dToy::TruthToyTiling(*toytiling_th[i],pvv,i,gds,frame_length/nrebin,unit_dis);
-    CellChargeMap ccmap = truthtiling[i]->ccmap();
-        
+    
     // for (int j=0;j!=allcell.size();j++){
     //   total_cells.push_back(allcell.at(j));
     // }

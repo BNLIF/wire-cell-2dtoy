@@ -15,6 +15,13 @@
 
 #include "WireCell2dToy/ToyEventDisplay.h"
 
+#include "WireCell2dToy/ToyMatrix.h"
+#include "WireCell2dToy/ToyMatrixExclusive.h"
+#include "WireCell2dToy/ToyMatrixKalman.h"
+#include "WireCell2dToy/ToyMatrixIterate.h"
+#include "WireCell2dToy/ToyMatrixMarkov.h"
+#include "WireCell2dToy/ToyMetric.h"
+
 #include "TApplication.h"
 #include "TCanvas.h"
 #include "TBenchmark.h"
@@ -153,8 +160,9 @@ int main(int argc, char* argv[])
    WireCell2dToy::ToyTiling **toytiling = new WireCell2dToy::ToyTiling*[2400];
    WireCell2dToy::MergeToyTiling **mergetiling = new WireCell2dToy::MergeToyTiling*[2400];
    WireCell2dToy::TruthToyTiling **truthtiling = new WireCell2dToy::TruthToyTiling*[2400];
-
-
+   WireCell2dToy::ToyMatrix **toymatrix = new WireCell2dToy::ToyMatrix*[2400];
+   WireCell2dToy::ToyMetric toymetric;
+   
    int start_num = 0 ;
   int end_num = sds.size()-1;
   
@@ -172,6 +180,23 @@ int main(int argc, char* argv[])
      
      truthtiling[i] = new WireCell2dToy::TruthToyTiling(*toytiling[i],pvv,i,gds,frame_length);
      mergetiling[i] = new WireCell2dToy::MergeToyTiling(gds,*toytiling[i],i); 
+     
+     toymatrix[i] = new WireCell2dToy::ToyMatrix(gds,*toytiling[i],*mergetiling[i]);
+     if (toymatrix[i]->Get_Solve_Flag()==0){
+       WireCell2dToy::ToyMatrixIterate toymatrix_it(*toymatrix[i],2000,1e5);
+     }
+     
+     cout << i << " chi2: " << toymatrix[i]->Get_Chi2() <<
+       " NDF: " << toymatrix[i]->Get_ndf() << endl;
+     
+     GeomCellSelection allmcell = mergetiling[i]->get_allcell();
+  
+     CellChargeMap ccmap = truthtiling[i]->ccmap();
+     if (toymatrix[i]->Get_Solve_Flag()!=0)
+       toymetric.Add(allmcell,*toymatrix[i],ccmap);
+     
+     toymetric.AddSolve(toymatrix[i]->Get_Solve_Flag());
+
      
        //}
      
@@ -210,7 +235,6 @@ int main(int argc, char* argv[])
     display.draw_slice(slice,"");
     display.draw_cells(toytiling[i]->get_allcell(),"*same");
 
-    CellChargeMap ccmap = truthtiling[i]->ccmap();
     
     //std::cout << ccmap.size() << std::endl;
     display.draw_truthcells(ccmap,"*same");
