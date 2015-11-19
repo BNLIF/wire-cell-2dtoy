@@ -132,7 +132,7 @@ int main(int argc, char* argv[])
   // WireCell::GenerativeFDS gfds(toydep,gds,2400,max_events,2.0*unit_dis*units::millimeter);
   // gfds.jump(eve_num);
 
-  // WireCellSst::ToyuBooNESliceDataSource sds(gfds,1500); //set threshold at 2000 electrons
+ 
 
   WireCell::ToyDepositor toydep(fds,0,unit_dis,frame_length);
   const PointValueVector& pvv = toydep.depositions(eve_num);
@@ -178,7 +178,8 @@ int main(int argc, char* argv[])
   // float threshold_v = 1000;
   // float threshold_w = 1000;
   
-
+   // WireCellSst::ToyuBooNESliceDataSource sds(gfds,1500); //set threshold at 2000 electrons
+  
   WireCellSst::ToyuBooNESliceDataSource sds(wien_fds,gaus_fds,threshold_u, 
   					    threshold_v, threshold_w, 
   					    threshold_ug, 

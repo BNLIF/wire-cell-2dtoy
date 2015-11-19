@@ -371,6 +371,7 @@ int WireCell2dToy::ToySignalWienFDS::jump(int frame_number){
 	t.charge.at(j) += htemp->GetBinContent(scale*j+k+1);
       }
     }
+    //std::cout << chid << " " << htemp->GetBinContent(1) << std::endl;
     frame.traces.push_back(t);
 
     

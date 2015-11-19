@@ -84,8 +84,8 @@ int main(int argc, char* argv[])
 
   
   int total_time_bin=9600;
-  //int frame_length = 3200;
-  int frame_length = 800;  // hack for now
+  int frame_length = 3200;
+  //int frame_length = 800;  // hack for now
   int nrebin = 4;
 
    float threshold_u = 5.87819e+02 * 4.0;
@@ -125,62 +125,60 @@ int main(int argc, char* argv[])
 
   std::cout << "Points deposited: " << pvv.size() << std::endl;
 
-  DetGenerativeFDS gfds(toydep,gds, 2400,max_events,2.0*1.6*units::millimeter);
-  // DetGenerativeFDS gfds(toydep,gds, total_time_bin,max_events,0.5*1.6*units::millimeter);
+  // DetGenerativeFDS gfds(toydep,gds, 2400,max_events,2.0*1.6*units::millimeter);
+  DetGenerativeFDS gfds(toydep,gds, total_time_bin,max_events,0.5*1.6*units::millimeter);
   gfds.jump(eve_num);
 
   tfile->Close("R");
   delete tfile;
 
-  WireCellSst::ToyuBooNESliceDataSource sds(gfds,1500); //set threshold at 2000 electrons
+  //WireCellSst::ToyuBooNESliceDataSource sds(gfds,1500); //set threshold at 2000 electrons
 
   
   
-  // cout << "Put in Truth " << endl; 
-  // WireCell2dToy::ToySignalSimuTrueFDS st_fds(gfds,gds,total_time_bin/nrebin,max_events,0); //truth
-  // st_fds.jump(eve_num);
+  cout << "Put in Truth " << endl; 
+  WireCell2dToy::ToySignalSimuTrueFDS st_fds(gfds,gds,total_time_bin/nrebin,max_events,0); //truth
+  st_fds.jump(eve_num);
   
-  // cout << "Simulate Raw WaveForm " << endl; 
-  // WireCell2dToy::ToySignalSimuFDS simu_fds(gfds,gds,total_time_bin,max_events,toffset_1,toffset_2,1); // time offset among different planes for the time electrons travel among different planes
-  // simu_fds.jump(eve_num);
-  // //simu_fds.Save();
+  cout << "Simulate Raw WaveForm " << endl; 
+  WireCell2dToy::ToySignalSimuFDS simu_fds(gfds,gds,total_time_bin,max_events,toffset_1,toffset_2,1); // time offset among different planes for the time electrons travel among different planes
+  simu_fds.jump(eve_num);
+  //simu_fds.Save();
   
-  // cout << "Deconvolution with Gaussian filter" << endl;
-  // WireCell2dToy::ToySignalGausFDS gaus_fds(simu_fds,gds,total_time_bin/nrebin,max_events,toffset_1,toffset_2); // gaussian smearing for charge estimation
-  // gaus_fds.jump(eve_num);
-  // //gaus_fds.Save();
+  cout << "Deconvolution with Gaussian filter" << endl;
+  WireCell2dToy::ToySignalGausFDS gaus_fds(simu_fds,gds,total_time_bin/nrebin,max_events,toffset_1,toffset_2); // gaussian smearing for charge estimation
+  gaus_fds.jump(eve_num);
+  //gaus_fds.Save();
 
-  // cout << "Deconvolution with Wiener filter" << endl;
-  // WireCell2dToy::ToySignalWienFDS wien_fds(simu_fds,gds,total_time_bin/nrebin,max_events,toffset_1,toffset_2); // weiner smearing for hit identification
-  // wien_fds.jump(eve_num);
-  // //wien_fds.Save();
+  cout << "Deconvolution with Wiener filter" << endl;
+  WireCell2dToy::ToySignalWienFDS wien_fds(simu_fds,gds,total_time_bin/nrebin,max_events,toffset_1,toffset_2); // weiner smearing for hit identification
+  wien_fds.jump(eve_num);
+  //wien_fds.Save();
   
   
-  // GeomWireSelection wires_u = gds.wires_in_plane(WirePlaneType_t(0));
-  // GeomWireSelection wires_v = gds.wires_in_plane(WirePlaneType_t(1));
-  // GeomWireSelection wires_w = gds.wires_in_plane(WirePlaneType_t(2));
+  
 
-  // int nwire_u = wires_u.size();
-  // int nwire_v = wires_v.size();
-  // int nwire_w = wires_w.size();
+  int nwire_u = gds.get_total_nwires(WirePlaneType_t(0));
+  int nwire_v = gds.get_total_nwires(WirePlaneType_t(1));
+  int nwire_w = gds.get_total_nwires(WirePlaneType_t(2));
   
  
   
   // cin >> abc;
 
-  // WireCellSst::ToyuBooNESliceDataSource *sds = new WireCellSst::ToyuBooNESliceDataSource(*wien_fds,*gaus_fds,threshold_u, 
-  // 					    threshold_v, threshold_w, 
-  // 					    threshold_ug, 
-  // 					    threshold_vg, threshold_wg, 
-  // 					    nwire_u, 
-  // 					    nwire_v, nwire_w); 
+  WireCellSst::ToyuBooNESliceDataSource sds(gds,wien_fds,gaus_fds,threshold_u, 
+  					    threshold_v, threshold_w, 
+  					    threshold_ug, 
+  					    threshold_vg, threshold_wg, 
+  					    nwire_u, 
+  					    nwire_v, nwire_w); 
 
-  // WireCellSst::ToyuBooNESliceDataSource *sds_th = new WireCellSst::ToyuBooNESliceDataSource(*st_fds,*st_fds,500, 
-  // 					    500, 500, 
-  // 					    threshold_ug, 
-  // 					    threshold_vg, threshold_wg, 
-  // 					    nwire_u, 
-  // 					    nwire_v, nwire_w); 
+  WireCellSst::ToyuBooNESliceDataSource sds_th(gds,st_fds,st_fds,500, 
+  					    500, 500, 
+  					    threshold_ug, 
+  					    threshold_vg, threshold_wg, 
+  					    nwire_u, 
+  					    nwire_v, nwire_w); 
   
 
    int ncount = 0;
@@ -194,6 +192,11 @@ int main(int argc, char* argv[])
    WireCell2dToy::MergeToyTiling **mergetiling = new WireCell2dToy::MergeToyTiling*[2400];
    WireCell2dToy::TruthToyTiling **truthtiling = new WireCell2dToy::TruthToyTiling*[2400];
    WireCell2dToy::ToyMatrix **toymatrix = new WireCell2dToy::ToyMatrix*[2400];
+   
+    //save truth ...
+   WireCell2dToy::ToyTiling **toytiling_th = new WireCell2dToy::ToyTiling*[2400];
+   WireCell2dToy::TruthToyTiling **truthtiling_th = new WireCell2dToy::TruthToyTiling*[2400];
+
    WireCell2dToy::ToyMetric toymetric;
    
 
@@ -211,16 +214,30 @@ int main(int argc, char* argv[])
   //int i = 317+800;{
    //int i = 292+800;
    for (int i=start_num;i!=end_num+1;i++){
-    sds.jump(i);
+     sds.jump(i);
+     sds_th.jump(i);
+     
      WireCell::Slice slice = sds.get();
-     
+     WireCell::Slice slice_th = sds_th.get();
+     cout << i << " " << slice.group().size() << " " << slice_th.group().size() << endl;
+
      // if ( slice.group().size() >0){
-     cout << i << " " << slice.group().size() << endl;
-     toytiling[i] = new WireCell2dToy::ToyTiling(slice,gds);
+     // cout << i << " " << slice.group().size() << endl;
+     toytiling[i] = new WireCell2dToy::ToyTiling(slice,gds,0,0,0,threshold_ug,threshold_vg, threshold_wg);
      //allcell = toytiling[i]->get_allcell();
-     
-     truthtiling[i] = new WireCell2dToy::TruthToyTiling(*toytiling[i],pvv,i,gds,frame_length);
+     GeomCellSelection allcell = toytiling[i]->get_allcell();
+     GeomWireSelection allwire = toytiling[i]->get_allwire();
+     cout << "Single Cell: " << i << " "  << allcell.size() << " " << allwire.size() << endl;
+
      mergetiling[i] = new WireCell2dToy::MergeToyTiling(gds,*toytiling[i],i); 
+     GeomCellSelection allmcell = mergetiling[i]->get_allcell();
+     GeomWireSelection allmwire = mergetiling[i]->get_allwire();
+     
+     cout <<"Blob: " << i << " " << allmcell.size() << " " << allmwire.size() << endl;
+     
+     
+     truthtiling[i] = new WireCell2dToy::TruthToyTiling(*toytiling[i],pvv,i,gds,frame_length/nrebin,unit_dis);
+     
      
      toymatrix[i] = new WireCell2dToy::ToyMatrix(gds,*toytiling[i],*mergetiling[i]);
      if (toymatrix[i]->Get_Solve_Flag()==0){
@@ -230,8 +247,9 @@ int main(int argc, char* argv[])
      cout << i << " chi2: " << toymatrix[i]->Get_Chi2() <<
        " NDF: " << toymatrix[i]->Get_ndf() << endl;
      
-     GeomCellSelection allmcell = mergetiling[i]->get_allcell();
-  
+     toytiling_th[i] = new WireCell2dToy::ToyTiling(slice_th,gds,0,0,0,threshold_ug,threshold_vg, threshold_wg);
+    truthtiling_th[i] = new WireCell2dToy::TruthToyTiling(*toytiling_th[i],pvv,i,gds,frame_length/nrebin,unit_dis);
+    
      CellChargeMap ccmap = truthtiling[i]->ccmap();
      if (toymatrix[i]->Get_Solve_Flag()!=0)
        toymetric.Add(allmcell,*toymatrix[i],ccmap);
@@ -522,9 +540,9 @@ int main(int argc, char* argv[])
       std::pair<double, double> xmm = apa_gds->minmax(0); 
       
       if (face == 1){
-	x_save = (i*nrebin/2.*unit_dis/10. - frame_length/2.*unit_dis/10.*4) + xmm.second/units::cm; // *4 is temporary
+	x_save = (i*nrebin/2.*unit_dis/10. - frame_length/2.*unit_dis/10.) + xmm.second/units::cm; // *4 is temporary
       }else if (face == 0){
-	x_save = xmm.first/units::cm - (i*nrebin/2.*unit_dis/10. - frame_length/2.*unit_dis/10.*4);
+	x_save = xmm.first/units::cm - (i*nrebin/2.*unit_dis/10. - frame_length/2.*unit_dis/10.);
       }
       y_save = p.y/units::cm;
       z_save = p.z/units::cm;
@@ -548,9 +566,9 @@ int main(int argc, char* argv[])
       std::pair<double, double> xmm = apa_gds->minmax(0); 
       
       if (face == 1){
-	x_save = (i*nrebin/2.*unit_dis/10. - frame_length/2.*unit_dis/10.*4) + xmm.second/units::cm; // *4 is temporary
+	x_save = (i*nrebin/2.*unit_dis/10. - frame_length/2.*unit_dis/10.) + xmm.second/units::cm; // *4 is temporary
       }else if (face == 0){
-	x_save = xmm.first/units::cm - (i*nrebin/2.*unit_dis/10. - frame_length/2.*unit_dis/10.*4);
+	x_save = xmm.first/units::cm - (i*nrebin/2.*unit_dis/10. - frame_length/2.*unit_dis/10.);
       }
 
       //      x_save = i*nrebin/2.*unit_dis/10. - frame_length/2.*unit_dis/10.*4;
@@ -586,9 +604,9 @@ int main(int argc, char* argv[])
 	  std::pair<double, double> xmm = apa_gds->minmax(0); 
 	  
 	  if (face == 1){
-	    x_save = (i*nrebin/2.*unit_dis/10. - frame_length/2.*unit_dis/10.*4) + xmm.second/units::cm; // *4 is temporary
+	    x_save = (i*nrebin/2.*unit_dis/10. - frame_length/2.*unit_dis/10.) + xmm.second/units::cm; // *4 is temporary
 	  }else if (face == 0){
-	    x_save = xmm.first/units::cm - (i*nrebin/2.*unit_dis/10. - frame_length/2.*unit_dis/10.*4);
+	    x_save = xmm.first/units::cm - (i*nrebin/2.*unit_dis/10. - frame_length/2.*unit_dis/10.);
 	  }
 	  
     	  y_save = p.y/units::cm;
@@ -623,9 +641,9 @@ int main(int argc, char* argv[])
 	  std::pair<double, double> xmm = apa_gds->minmax(0); 
 	  
 	  if (face == 1){
-	    x_save = (i*nrebin/2.*unit_dis/10. - frame_length/2.*unit_dis/10.*4) + xmm.second/units::cm; // *4 is temporary
+	    x_save = (i*nrebin/2.*unit_dis/10. - frame_length/2.*unit_dis/10.) + xmm.second/units::cm; // *4 is temporary
 	  }else if (face == 0){
-	    x_save = xmm.first/units::cm - (i*nrebin/2.*unit_dis/10. - frame_length/2.*unit_dis/10.*4);
+	    x_save = xmm.first/units::cm - (i*nrebin/2.*unit_dis/10. - frame_length/2.*unit_dis/10.);
 	  }
 
     	  
@@ -748,9 +766,9 @@ int main(int argc, char* argv[])
 	std::pair<double, double> xmm = apa_gds->minmax(0); 
 	
 	if (face == 1){
-	  xx = (i*nrebin/2.*unit_dis/10. - frame_length/2.*unit_dis/10.*4) + xmm.second/units::cm; // *4 is temporary
+	  xx = (i*nrebin/2.*unit_dis/10. - frame_length/2.*unit_dis/10.) + xmm.second/units::cm; // *4 is temporary
 	}else if (face == 0){
-	  xx = xmm.first/units::cm - (i*nrebin/2.*unit_dis/10. - frame_length/2.*unit_dis/10.*4);
+	  xx = xmm.first/units::cm - (i*nrebin/2.*unit_dis/10. - frame_length/2.*unit_dis/10.);
 	}
 	//xx = time_slice*nrebin/2.*unit_dis/10. - frame_length/2.*unit_dis/10.;
 	

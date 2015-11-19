@@ -331,6 +331,7 @@ int WireCell2dToy::ToySignalSimuFDS::jump(int frame_number){
     for (int j=0;j!=bins_per_frame;j++){
       t.charge.at(j) = htemp->GetBinContent(j+1);
     }
+    //std::cout << chid << " " << htemp->GetBinContent(1) << std::endl;
     frame.traces.push_back(t);
     //std::cout << chid << std::endl;
     // std::cout << nwire_u << " " << nwire_v << " " << nwire_w << std::endl;
