@@ -3,6 +3,8 @@
 #include "WireCellData/GeomWire.h"
 #include "WireCellData/MergeGeomCell.h"
 #include "WireCellData/MergeGeomWire.h"
+#include "WireCell2dToy/Singleton.h"
+#include "WireCell2dToy/TPCParams.h"
 
 #include <cmath>
 
@@ -358,7 +360,9 @@ WireCell2dToy::MergeToyTiling::MergeToyTiling(WireCell2dToy::ToyTiling& tiling, 
     while ((cell_all.size() > 2 * wire_all.size() && cell_all.size() - wire_all.size() > 50) || 
 	   (cell_all.size()>80 && cell_all.size() > 0.7 * wire_all.size()) ||
 	   (cell_all.size()>100)){
-      dis += 6*units::mm;
+      
+      // two wire pitch
+      dis += 2 * Singleton<WireCell2dToy::TPCParams>::Instance().get_pitch();//6*units::mm;
       
       
       //std::cout << " Start to remerge blob " << cell_all.size() << " " << wire_all.size() << std::endl; 
@@ -391,7 +395,8 @@ WireCell2dToy::MergeToyTiling::MergeToyTiling(WireCell2dToy::ToyTiling& tiling, 
   }else if (flag_remerge == 2){
     // merge things that are different by 1 wire gap ... 
     
-    double dis = (3.0 + 1.5)*units::mm; //slightly bigger than 1 wire pitch
+    //    double dis = (3.0 + 1.5)*units::mm; //slightly bigger than 1 wire pitch
+    double dis = Singleton<WireCell2dToy::TPCParams>::Instance().get_pitch() * 1.5;
     for (int i=0;i!=cell_all.size();i++){
       MergeGeomCell* mcell = (MergeGeomCell*)cell_all.at(i);
       //std::cout << "Before: " << mcell->boundary().size() << " " ; 
