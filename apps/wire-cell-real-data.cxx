@@ -126,7 +126,7 @@ int main(int argc, char* argv[])
   //final offset after time scan (70kV)
   float toffset_1=-(1.834-1.647) -0.1 - 0.5;
   float toffset_2=-(1.834+1.555-1.539-1.647) +0.1 - 0.5;
-  float toffset_3=-0.5;
+  float toffset_3=0.0;
   
 
   int total_time_bin=9592;
