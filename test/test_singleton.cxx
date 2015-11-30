@@ -1,4 +1,4 @@
-#include "WireCell2dToy/Singleton.h"
+#include "WireCellData/Singleton.h"
 //#include "WireCellUtil/Testing.h"
 
 #include <boost/assert.hpp>

@@ -32,8 +32,8 @@
 #include "WireCell2dToy/ToySignalSimuTrue.h"
 #include "WireCell2dToy/ToySignalGaus.h"
 #include "WireCell2dToy/ToySignalWien.h"
-#include "WireCell2dToy/TPCParams.h"
-#include "WireCell2dToy/Singleton.h"
+#include "WireCellData/TPCParams.h"
+#include "WireCellData/Singleton.h"
 
 
 #include "WireCellData/SpaceCell.h"
@@ -102,7 +102,7 @@ int main(int argc, char* argv[])
   int frame_length = 3200;
   int nrebin = 4;
   
-  WireCell2dToy::TPCParams& mp = Singleton<WireCell2dToy::TPCParams>::Instance();
+  TPCParams& mp = Singleton<TPCParams>::Instance();
   
   double pitch_u = gds.pitch(WirePlaneType_t(0));
   double pitch_v = gds.pitch(WirePlaneType_t(1));

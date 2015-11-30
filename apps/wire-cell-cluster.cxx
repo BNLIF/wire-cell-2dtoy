@@ -2,8 +2,8 @@
 #include "WireCell2dToy/ClusterDisplay.h"
 #include "WireCell2dToy/ToyCrawler.h"
 #include "WireCell2dToy/ToyTracking.h"
-#include "WireCell2dToy/TPCParams.h"
-#include "WireCell2dToy/Singleton.h"
+#include "WireCellData/TPCParams.h"
+#include "WireCellData/Singleton.h"
 
 #include "WireCellData/MergeGeomCell.h"
 #include "WireCellData/MergeGeomWire.h"
@@ -73,7 +73,7 @@ int main(int argc, char* argv[])
   // total_time_bin = 9600;
   // nrebin = 4;
 
-  WireCell2dToy::TPCParams& mp = Singleton<WireCell2dToy::TPCParams>::Instance();
+  TPCParams& mp = Singleton<TPCParams>::Instance();
   
   double pitch_u = gds.pitch(WirePlaneType_t(0));
   double pitch_v = gds.pitch(WirePlaneType_t(1));

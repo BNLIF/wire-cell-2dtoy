@@ -21,8 +21,8 @@
 #include "WireCell2dToy/ToyMatrixIterate.h"
 #include "WireCell2dToy/ToyMatrixMarkov.h"
 #include "WireCell2dToy/ToyMetric.h"
-#include "WireCell2dToy/TPCParams.h"
-#include "WireCell2dToy/Singleton.h"
+#include "WireCellData/TPCParams.h"
+#include "WireCellData/Singleton.h"
 
 #include "WireCellData/GeomCluster.h"
 
@@ -90,7 +90,7 @@ int main(int argc, char* argv[])
   //int frame_length = 800;  // hack for now
   int nrebin = 4;
 
-  WireCell2dToy::TPCParams& mp = Singleton<WireCell2dToy::TPCParams>::Instance();
+  TPCParams& mp = Singleton<TPCParams>::Instance();
   
   double pitch_u = gds.get_pitch(0,WirePlaneType_t(0));
   double pitch_v = gds.get_pitch(0,WirePlaneType_t(1));
