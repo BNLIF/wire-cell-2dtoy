@@ -9,7 +9,7 @@ namespace WireCell2dToy {
   TPCParams() : m_pitch_u(3*units::mm)
       , m_pitch_v(3*units::mm)
       , m_pitch_w(3*units::mm)
-      , m_ts_width(3.2*units::mm)
+      , m_ts_width(3.2*units::mm) 
       {};
     
     // set/get u pitches

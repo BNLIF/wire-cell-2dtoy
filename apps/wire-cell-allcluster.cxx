@@ -2,6 +2,9 @@
 #include "WireCell2dToy/ClusterDisplay.h"
 #include "WireCell2dToy/ToyCrawler.h"
 #include "WireCell2dToy/ToyTracking.h"
+#include "WireCell2dToy/TPCParams.h"
+#include "WireCell2dToy/Singleton.h"
+
 
 #include "WireCellData/MergeGeomCell.h"
 #include "WireCellData/MergeGeomWire.h"
@@ -64,6 +67,21 @@ int main(int argc, char* argv[])
   Trun->SetBranchAddress("unit_dis",&unit_dis);
   Trun->SetBranchAddress("total_time_bin",&total_time_bin);
   Trun->GetEntry(0);
+
+
+  WireCell2dToy::TPCParams& mp = Singleton<WireCell2dToy::TPCParams>::Instance();
+  
+  double pitch_u = gds.pitch(WirePlaneType_t(0));
+  double pitch_v = gds.pitch(WirePlaneType_t(1));
+  double pitch_w = gds.pitch(WirePlaneType_t(2));
+  double time_slice_width = nrebin * unit_dis * 0.5 * units::mm;
+  
+  mp.set_pitch_u(pitch_u);
+  mp.set_pitch_v(pitch_v);
+  mp.set_pitch_w(pitch_w);
+  mp.set_ts_width(time_slice_width);
+  
+  std::cout << "Singleton: " << mp.get_pitch_u() << " " << mp.get_pitch_v() << " " << mp.get_pitch_w() << " " << mp.get_ts_width() << std::endl;
 
 
 

@@ -15,6 +15,8 @@
 #include "WireCell2dToy/ToyMatrixMarkov.h"
 #include "WireCell2dToy/ToyMetric.h"
 #include "WireCell2dToy/BlobMetric.h"
+#include "WireCell2dToy/TPCParams.h"
+#include "WireCell2dToy/Singleton.h"
 
 #include "WireCellData/MergeGeomCell.h"
 #include "WireCellData/MergeGeomWire.h"
@@ -127,7 +129,20 @@ int main(int argc, char* argv[])
   int frame_length = 3200;
   int nrebin = 4;
   
+  WireCell2dToy::TPCParams& mp = Singleton<WireCell2dToy::TPCParams>::Instance();
+  
+  double pitch_u = gds.pitch(WirePlaneType_t(0));
+  double pitch_v = gds.pitch(WirePlaneType_t(1));
+  double pitch_w = gds.pitch(WirePlaneType_t(2));
+  double time_slice_width = nrebin * unit_dis * 0.5 * units::mm;
 
+  mp.set_pitch_u(pitch_u);
+  mp.set_pitch_v(pitch_v);
+  mp.set_pitch_w(pitch_w);
+  mp.set_ts_width(time_slice_width);
+  
+  std::cout << "Singleton: " << mp.get_pitch_u() << " " << mp.get_pitch_v() << " " << mp.get_pitch_w() << " " << mp.get_ts_width() << std::endl;
+  
   float threshold_u = 5.87819e+02 * 4.0;
   float threshold_v = 8.36644e+02 * 4.0;
   float threshold_w = 5.67974e+02 * 4.0;
