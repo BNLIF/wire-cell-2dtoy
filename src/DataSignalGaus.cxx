@@ -64,7 +64,9 @@ WireCell2dToy::DataSignalGausFDS::DataSignalGausFDS(WireCell::FrameDataSource& f
   
 
   //get in the response function ... 
-  #include "data.txt"
+  //#include "data.txt"  //58kV
+  #include "data_70.txt"  //70kV
+    
 
   gu = new TGraph(5000,xu,yu);
   gv = new TGraph(5000,xv,yv);
@@ -76,28 +78,44 @@ WireCell2dToy::DataSignalGausFDS::DataSignalGausFDS(WireCell::FrameDataSource& f
   
   for (int i=0; i!=nbin; i++){  
     double time = hur->GetBinCenter(i+1)/2.-50 ;
-    float scale = 0.86;
-    float scale_u = 1.51/1.16*0.91;
-    float scale_v = 1.251/1.074*0.91;
-    double x = scale*(time-overall_time_offset);
+  
+    //*** scale factors for 58kV ***//
+    //float scale = 0.86;
+    //float scale_u = 1.51/1.16*0.91;
+    //float scale_v = 1.251/1.074*0.91;
+    //double x = scale*(time-overall_time_offset);
+
+    //*** scale factors for 70kV ***//
+    float scale_u = 1.51/1.16*0.91*0.85;
+    float scale_v = 1.251/1.074*0.91*0.85;
+    double x = time;
+
     if (x > -35 && x  < 15){
       if (gu->Eval(x) > 0 && x < 0){
-	hur->SetBinContent(i+1,gu->Eval(x)*0.5/0.8/scale_u);
+	//hur->SetBinContent(i+1,gu->Eval(x)*0.5/0.8/scale_u); // 58kV
+	hur->SetBinContent(i+1,gu->Eval(x)*0.6/scale_u); //70kV
       }else{
-	hur->SetBinContent(i+1,gu->Eval(x)/0.8/scale_u);
+	//hur->SetBinContent(i+1,gu->Eval(x)/0.8/scale_u); //58kV
+	hur->SetBinContent(i+1,gu->Eval(x)/scale_u); //70kV
       }
     }
 
-    x = scale*(time-time_offset_uv-overall_time_offset);
+    //x = scale*(time-time_offset_uv-overall_time_offset); //58kV 
+    x = time-time_offset_uv;  //70kV
+
     if (x > -35 && x  < 15){
       if (gv->Eval(x) > 0 && x < 0){
-	hvr->SetBinContent(i+1,gv->Eval(x)*0.6/scale_v);
+	//hvr->SetBinContent(i+1,gv->Eval(x)*0.6/scale_v); //58kV
+	hvr->SetBinContent(i+1,gv->Eval(x)*0.7/scale_v); //70kV
       }else{
-	hvr->SetBinContent(i+1,gv->Eval(x)/scale_v);
+	//hvr->SetBinContent(i+1,gv->Eval(x)/scale_v); //58kV
+	hvr->SetBinContent(i+1,gv->Eval(x)/scale_v);  //70kV
       }
     }
     
-    x = scale*(time-time_offset_uw-overall_time_offset);
+    //x = scale*(time-time_offset_uw-overall_time_offset); //58kV
+    x = time-time_offset_uw;  //70kV
+
     if (x > -35 && x  < 15){
       hwr->SetBinContent(i+1,gw->Eval(x));
     } 
