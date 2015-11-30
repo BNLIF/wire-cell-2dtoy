@@ -124,6 +124,8 @@ void WireCell2dToy::ToyCrawler::PrepareTracking(){
 	
       }
 
+      // a small value than a time slice ...  at most 0.8 mm
+
       MergeSpaceCell *first_cell=0, *second_cell=0, *third_cell=0;
       if (fabs(all_mergeclustertrack.at(i)->Get_FirstMSCell()->Get_Center().x -min_x) < 0.5*units::mm ){
 	//std::cout << " a1 " << std::endl; 

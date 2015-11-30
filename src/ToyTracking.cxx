@@ -1,5 +1,8 @@
 #include "WireCell2dToy/ToyTracking.h"
 #include "WireCell2dToy/ToyWalking.h"
+#include "WireCell2dToy/Singleton.h"
+#include "WireCell2dToy/TPCParams.h"
+
 #include "TVector3.h"
 #include "WireCellData/Line.h"
 
@@ -939,11 +942,11 @@ bool  WireCell2dToy::ToyTracking::track_shower_reco(WireCell2dToy::ToyCrawler& t
 	    MergeSpaceCell *vertex1_mcell = vertex1->get_msc();
 	    
 	    int flag = 0;
-	    if (dis < 1*units::cm && dis1 < 0.35*units::cm && vertex2 != vertex1){ 
+	    if (dis < Singleton<WireCell2dToy::TPCParams>::Instance().get_pitch()*3.3 && dis1 < Singleton<WireCell2dToy::TPCParams>::Instance().get_ts_width()*1.1 && vertex2 != vertex1){ 
 	      flag = 1;
 	    }else if (vertex2->get_msc() == vertex1->get_msc() && vertex2 != vertex1){
 	      flag = 1;
-	    }else if (fabs(vertex2->get_msc()->Get_Center().x - vertex1->get_msc()->Get_Center().x) < 0.35*units::cm 		       
+	    }else if (fabs(vertex2->get_msc()->Get_Center().x - vertex1->get_msc()->Get_Center().x) < Singleton<WireCell2dToy::TPCParams>::Instance().get_ts_width()*1.1 
 		      && vertex_mcell->Overlap(*vertex1_mcell)
 		      && vertex2 != vertex1){
 	      flag = 1;
@@ -1415,9 +1418,10 @@ void WireCell2dToy::ToyTracking::form_parallel_tiny_tracks(WireCell2dToy::ToyCra
 	int flag1 = 0;
 
 	for (int k=0;k!=track_no.size();k++){
-	  double dist = good_tracks.at(track_no.at(k))->dist_proj(mcell,cell)/units::mm;
-	  double dist1 = good_tracks.at(track_no.at(k))->dist(mcell,cell)/units::mm;
-	  if (dist < 6.0 && dist1 <20){
+	  double dist = good_tracks.at(track_no.at(k))->dist_proj(mcell,cell);
+	  double dist1 = good_tracks.at(track_no.at(k))->dist(mcell,cell);
+	  if (dist < 2 * Singleton<WireCell2dToy::TPCParams>::Instance().get_pitch()
+	      && dist1 < 20 * units::mm){
 	    flag1 = 1;
 	    break;
 	  }
@@ -2256,7 +2260,8 @@ void WireCell2dToy::ToyTracking::deal_wiggle_tracks(){
 	  
 	  dis = sqrt(pow(end_p1.x - p.x,2) + pow(end_p1.y - p.y,2) + pow(end_p1.z - p.z,2));
 	  //	  std::cout << dis/units::cm << std::endl;
-	  if (dis < 2* units::cm && fabs(end_p1.x-p.x) < 0.65*units::cm ){
+	  if (dis < Singleton<WireCell2dToy::TPCParams>::Instance().get_pitch() * 6.7
+	      && fabs(end_p1.x-p.x) < Singleton<WireCell2dToy::TPCParams>::Instance().get_ts_width() * 2.1 ){
 	    vertex_cell1 = track->get_end_scells().at(0);
 	    vertex_cell2 = track->get_end_scells().at(1);
 	    flag = 1;
@@ -2265,7 +2270,8 @@ void WireCell2dToy::ToyTracking::deal_wiggle_tracks(){
 	  
 	  dis = sqrt(pow(end_p2.x - p.x,2) + pow(end_p2.y - p.y,2) + pow(end_p2.z - p.z,2));
 	  //std::cout << dis/units::cm << std::endl;
-	  if (dis < 2* units::cm && fabs(end_p2.x-p.x) < 0.65*units::cm){
+	  if (dis < Singleton<WireCell2dToy::TPCParams>::Instance().get_pitch() * 6.7
+	      && fabs(end_p2.x-p.x) < Singleton<WireCell2dToy::TPCParams>::Instance().get_ts_width() * 2.1){
 	    vertex_cell1 = track->get_end_scells().at(0);
 	    vertex_cell2 = track->get_end_scells().at(1);
 	    //vertex_cell = track->get_end_scells().at(1);
@@ -2739,7 +2745,7 @@ void WireCell2dToy::ToyTracking::fine_tracking(int flag){
 bool WireCell2dToy::ToyTracking::ExamineVertex(WCVertex* vertex, WireCell2dToy::ToyCrawler& toycrawler){
   Point vertex_location = vertex->Center();
   
-  if (fabs(vertex_location.x - vertex->get_msc()->Get_Center().x) < 0.32*5*units::cm){
+  if (fabs(vertex_location.x - vertex->get_msc()->Get_Center().x) < Singleton<WireCell2dToy::TPCParams>::Instance().get_ts_width() * 5 ){
   }else{
     vertex->reset_center();
     return false;
@@ -2817,8 +2823,8 @@ bool WireCell2dToy::ToyTracking::ExamineVertex(WCVertex* vertex, WireCell2dToy::
 	    double dy = cell3->get_dy();
 	    double dz = cell3->get_dz();
 	    
-	    if (dy == 0) dy = 0.3/2 * units::cm;
-	    if (dz == 0) dz = 0.3/2 * units::cm;
+	    if (dy == 0) dy = Singleton<WireCell2dToy::TPCParams>::Instance().get_pitch()/2.; 
+	    if (dz == 0) dz = Singleton<WireCell2dToy::TPCParams>::Instance().get_pitch()/2.; 
 	    
 	    double yp = y1 + ky * (cell3->Get_Center().x-x1);
 	    double zp = z1 + kz * (cell3->Get_Center().x-x1);
@@ -2929,8 +2935,8 @@ void WireCell2dToy::ToyTracking::CheckVertices(WireCell2dToy::ToyCrawler& toycra
 	    double dy = cell3->get_dy();
 	    double dz = cell3->get_dz();
 	    
-	    if (dy == 0) dy = 0.3/2 * units::cm;
-	    if (dz == 0) dz = 0.3/2 * units::cm;
+	    if (dy == 0) dy = Singleton<WireCell2dToy::TPCParams>::Instance().get_pitch()/2.;
+	    if (dz == 0) dz = Singleton<WireCell2dToy::TPCParams>::Instance().get_pitch()/2.;
 	    
 	    double yp = y1 + ky * (cell3->Get_Center().x-x1);
 	    double zp = z1 + kz * (cell3->Get_Center().x-x1);
