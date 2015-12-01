@@ -90,17 +90,13 @@ WireCell2dToy::ToyMatrixIterate::ToyMatrixIterate(WireCell2dToy::ToyMatrix &toyc
   }
 
   //std::cout << "Xin: " << no_need_remove.size() << " " << cells.size() << std::endl;
-
-  
-   for (int i=0;i!=allmcell_c.size();i++){
+  for (int i=0;i!=allmcell_c.size();i++){
     auto it = find(no_need_remove.begin(),no_need_remove.end(),i);
     if (it==no_need_remove.end())
       already_removed.push_back(i);
   }
   no_need_remove.clear();
-  
-
-  
+    
   
   toymatrixkalman = new WireCell2dToy::ToyMatrixKalman(already_removed, no_need_remove, toycur,1);
   std::cout << "With Time: " << toymatrixkalman->Get_numz() << " " << allmcell_c.size() << " " <<  already_removed.size() << std::endl;
