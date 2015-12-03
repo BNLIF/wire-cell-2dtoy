@@ -212,6 +212,7 @@ void WireCell2dToy::ToyMatrixKalman::init(WireCell2dToy::ToyMatrix& toymatrix){
 	chi2 += 10*pow(Cxt[i]/dCxt[i],2);
       }
     }
+    chi2 += chi2_penalty;
 
     // std::cout << numz << " " << chi2 << " ";
     // for (int i=0;i!=already_removed.size();i++){
@@ -243,8 +244,9 @@ void WireCell2dToy::ToyMatrixKalman::init(WireCell2dToy::ToyMatrix& toymatrix){
   
 }
 
-WireCell2dToy::ToyMatrixKalman::ToyMatrixKalman(WireCell2dToy::ToyMatrix& toymatrix, int flag_no_need)
+WireCell2dToy::ToyMatrixKalman::ToyMatrixKalman(WireCell2dToy::ToyMatrix& toymatrix, int flag_no_need, double chi2_penalty)
   : flag_no_need(flag_no_need)
+  , chi2_penalty(chi2_penalty)
 {
   check_flag = 0;
   init(toymatrix);
@@ -254,8 +256,9 @@ WireCell2dToy::ToyMatrixKalman::ToyMatrixKalman(WireCell2dToy::ToyMatrix& toymat
 }
 
 
-WireCell2dToy::ToyMatrixKalman::ToyMatrixKalman(std::vector<int>& already_removed1, std::vector<int>& no_need_remove1, WireCell2dToy::ToyMatrix& toymatrix, int check, int flag_no_need)
+WireCell2dToy::ToyMatrixKalman::ToyMatrixKalman(std::vector<int>& already_removed1, std::vector<int>& no_need_remove1, WireCell2dToy::ToyMatrix& toymatrix, int check, int flag_no_need, double chi2_penalty)
   : flag_no_need(flag_no_need)
+  , chi2_penalty(chi2_penalty)
 {
   already_removed = already_removed1;
   no_need_remove = no_need_remove1;
