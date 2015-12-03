@@ -320,7 +320,7 @@ int main(int argc, char* argv[])
     // theApp.Run();
    }
    
-
+   double penalty = 5;
 
    
    // figure out how to add chi^2 in the solving ... 
@@ -342,7 +342,7 @@ int main(int argc, char* argv[])
      for (int i=first_solve+1;i<=end_num-1;i++){
        if (toymatrix[i]->Get_Solve_Flag()==0 && toymatrix[i]->Get_mcindex()>0){ 
 	 if ((toymatrix[i-1]->Get_Solve_Flag() + toymatrix[i+1]->Get_Solve_Flag()) > 0){
-	   WireCell2dToy::ToyMatrixIterate toymatrix_it(toymatrix[i-1],toymatrix[i],toymatrix[i+1],mergetiling[i-1],mergetiling[i],mergetiling[i+1],2000,1e5,5);
+	   WireCell2dToy::ToyMatrixIterate toymatrix_it(toymatrix[i-1],toymatrix[i],toymatrix[i+1],mergetiling[i-1],mergetiling[i],mergetiling[i+1],2000,1e5,penalty);
 	   
 	   GeomCellSelection allmcell = mergetiling[i]->get_allcell();
 	   CellChargeMap ccmap = truthtiling[i]->ccmap();
@@ -361,7 +361,7 @@ int main(int argc, char* argv[])
      for (int i=first_solve-1;i>=start_num+1;i--){
        if (toymatrix[i]->Get_Solve_Flag()==0&& toymatrix[i]->Get_mcindex()>0){
 	 if ((toymatrix[i-1]->Get_Solve_Flag() + toymatrix[i+1]->Get_Solve_Flag()) > 0){
-	   WireCell2dToy::ToyMatrixIterate toymatrix_it(toymatrix[i-1],toymatrix[i],toymatrix[i+1],mergetiling[i-1],mergetiling[i],mergetiling[i+1],2000,1e5,5);
+	   WireCell2dToy::ToyMatrixIterate toymatrix_it(toymatrix[i-1],toymatrix[i],toymatrix[i+1],mergetiling[i-1],mergetiling[i],mergetiling[i+1],2000,1e5,penalty);
 	 
 	   GeomCellSelection allmcell = mergetiling[i]->get_allcell();
 	   CellChargeMap ccmap = truthtiling[i]->ccmap();
@@ -388,7 +388,7 @@ int main(int argc, char* argv[])
      if (curr_count == prev_count){
        int i = solve_list.front(); // pick the first element ... 
        if (toymatrix[i]->Get_Solve_Flag()==0&& toymatrix[i]->Get_mcindex()>0){
-	 WireCell2dToy::ToyMatrixIterate toymatrix_it(toymatrix[i-1],toymatrix[i],toymatrix[i+1],mergetiling[i-1],mergetiling[i],mergetiling[i+1],2000,1e5,5);
+	 WireCell2dToy::ToyMatrixIterate toymatrix_it(toymatrix[i-1],toymatrix[i],toymatrix[i+1],mergetiling[i-1],mergetiling[i],mergetiling[i+1],2000,1e5,penalty);
 	 GeomCellSelection allmcell = mergetiling[i]->get_allcell();
 	 CellChargeMap ccmap = truthtiling[i]->ccmap();
 	 if (toymatrix[i]->Get_Solve_Flag()!=0)
@@ -403,7 +403,7 @@ int main(int argc, char* argv[])
 	 int i = *it;
 	 if (toymatrix[i]->Get_Solve_Flag()==0&& toymatrix[i]->Get_mcindex()>0){
 	   if ((toymatrix[i-1]->Get_Solve_Flag() + toymatrix[i+1]->Get_Solve_Flag()) > 0){
-	     WireCell2dToy::ToyMatrixIterate toymatrix_it(toymatrix[i-1],toymatrix[i],toymatrix[i+1],mergetiling[i-1],mergetiling[i],mergetiling[i+1],2000,1e5,5);
+	     WireCell2dToy::ToyMatrixIterate toymatrix_it(toymatrix[i-1],toymatrix[i],toymatrix[i+1],mergetiling[i-1],mergetiling[i],mergetiling[i+1],2000,1e5,penalty);
 	     GeomCellSelection allmcell = mergetiling[i]->get_allcell();
 	     CellChargeMap ccmap = truthtiling[i]->ccmap();
 	     if (toymatrix[i]->Get_Solve_Flag()!=0)
@@ -424,7 +424,7 @@ int main(int argc, char* argv[])
    
    // by the end do the final two
    if (toymatrix[end_num]->Get_Solve_Flag()==0&& toymatrix[end_num]->Get_mcindex()>0){
-     WireCell2dToy::ToyMatrixIterate toymatrix_it(toymatrix[end_num-1],toymatrix[end_num],0,mergetiling[end_num-1],mergetiling[end_num],0,2000,1e5,5);
+     WireCell2dToy::ToyMatrixIterate toymatrix_it(toymatrix[end_num-1],toymatrix[end_num],0,mergetiling[end_num-1],mergetiling[end_num],0,2000,1e5,penalty);
      GeomCellSelection allmcell = mergetiling[end_num]->get_allcell();
      CellChargeMap ccmap = truthtiling[end_num]->ccmap();
      if (toymatrix[end_num]->Get_Solve_Flag()!=0)
@@ -436,7 +436,7 @@ int main(int argc, char* argv[])
    }
    
    if (toymatrix[start_num]->Get_Solve_Flag()==0){
-     WireCell2dToy::ToyMatrixIterate toymatrix_it(0,toymatrix[start_num],toymatrix[start_num+1],0,mergetiling[start_num],mergetiling[start_num+1],2000,1e5,5);
+     WireCell2dToy::ToyMatrixIterate toymatrix_it(0,toymatrix[start_num],toymatrix[start_num+1],0,mergetiling[start_num],mergetiling[start_num+1],2000,1e5,penalty);
      
      GeomCellSelection allmcell = mergetiling[start_num]->get_allcell();
      CellChargeMap ccmap = truthtiling[start_num]->ccmap();
@@ -485,7 +485,7 @@ int main(int argc, char* argv[])
        if (toymatrix[i]->Get_Solve_Flag()==0&& toymatrix[i]->Get_mcindex()>0){
 	 if ((toymatrix[i-1]->Get_Solve_Flag() + toymatrix[i+1]->Get_Solve_Flag()) > 0){
 	   GeomCellSelection allmcell = mergetiling[i]->get_allcell();
-	   WireCell2dToy::ToyMatrixMarkov toymatrix_markov(toymatrix[i-1],toymatrix[i],toymatrix[i+1],mergetiling[i-1],mergetiling[i],mergetiling[i+1],&allmcell,1500,2000,5);
+	   WireCell2dToy::ToyMatrixMarkov toymatrix_markov(toymatrix[i-1],toymatrix[i],toymatrix[i+1],mergetiling[i-1],mergetiling[i],mergetiling[i+1],&allmcell,1500,2000,penalty);
 	   CellChargeMap ccmap = truthtiling[i]->ccmap();
 	   if (toymatrix[i]->Get_Solve_Flag()!=0)
 	     toymetric.Add(allmcell,*toymatrix[i],ccmap);
@@ -505,7 +505,7 @@ int main(int argc, char* argv[])
        if (toymatrix[i]->Get_Solve_Flag()==0&& toymatrix[i]->Get_mcindex()>0){
 	 if ((toymatrix[i-1]->Get_Solve_Flag() + toymatrix[i+1]->Get_Solve_Flag()) > 0){
 	   GeomCellSelection allmcell = mergetiling[i]->get_allcell();
-	   WireCell2dToy::ToyMatrixMarkov toymatrix_markov(toymatrix[i-1],toymatrix[i],toymatrix[i+1],mergetiling[i-1],mergetiling[i],mergetiling[i+1],&allmcell,1500,2000,5);
+	   WireCell2dToy::ToyMatrixMarkov toymatrix_markov(toymatrix[i-1],toymatrix[i],toymatrix[i+1],mergetiling[i-1],mergetiling[i],mergetiling[i+1],&allmcell,1500,2000,penalty);
 	   
 	   CellChargeMap ccmap = truthtiling[i]->ccmap();
 	   if (toymatrix[i]->Get_Solve_Flag()!=0)
@@ -530,7 +530,7 @@ int main(int argc, char* argv[])
        int i = solve_list.front(); // pick the first element ... 
        if (toymatrix[i]->Get_Solve_Flag()==0&& toymatrix[i]->Get_mcindex()>0){
 	 GeomCellSelection allmcell = mergetiling[i]->get_allcell();
-	 WireCell2dToy::ToyMatrixMarkov toymatrix_markov(toymatrix[i-1],toymatrix[i],toymatrix[i+1],mergetiling[i-1],mergetiling[i],mergetiling[i+1],&allmcell,1500,2000,5);
+	 WireCell2dToy::ToyMatrixMarkov toymatrix_markov(toymatrix[i-1],toymatrix[i],toymatrix[i+1],mergetiling[i-1],mergetiling[i],mergetiling[i+1],&allmcell,1500,2000,penalty);
 	 
 	 CellChargeMap ccmap = truthtiling[i]->ccmap();
 	 if (toymatrix[i]->Get_Solve_Flag()!=0)
@@ -546,7 +546,7 @@ int main(int argc, char* argv[])
 	 if (toymatrix[i]->Get_Solve_Flag()==0&& toymatrix[i]->Get_mcindex()>0){
 	   if ((toymatrix[i-1]->Get_Solve_Flag() + toymatrix[i+1]->Get_Solve_Flag()) > 0){
 	     GeomCellSelection allmcell = mergetiling[i]->get_allcell();
-	     WireCell2dToy::ToyMatrixMarkov toymatrix_markov(toymatrix[i-1],toymatrix[i],toymatrix[i+1],mergetiling[i-1],mergetiling[i],mergetiling[i+1],&allmcell,1500,2000,5);
+	     WireCell2dToy::ToyMatrixMarkov toymatrix_markov(toymatrix[i-1],toymatrix[i],toymatrix[i+1],mergetiling[i-1],mergetiling[i],mergetiling[i+1],&allmcell,1500,2000,penalty);
 	     
 	     CellChargeMap ccmap = truthtiling[i]->ccmap();
 	     if (toymatrix[i]->Get_Solve_Flag()!=0)
@@ -567,7 +567,7 @@ int main(int argc, char* argv[])
      //deal with the start/end ones ... 
      if (toymatrix[end_num]->Get_Solve_Flag()==0&& toymatrix[end_num]->Get_mcindex()>0){
        GeomCellSelection allmcell = mergetiling[end_num]->get_allcell();
-       WireCell2dToy::ToyMatrixMarkov toymatrix_markov(toymatrix[end_num-1],toymatrix[end_num],0,mergetiling[end_num-1],mergetiling[end_num],0,&allmcell,1500,2000,5);
+       WireCell2dToy::ToyMatrixMarkov toymatrix_markov(toymatrix[end_num-1],toymatrix[end_num],0,mergetiling[end_num-1],mergetiling[end_num],0,&allmcell,1500,2000,penalty);
        
        
        CellChargeMap ccmap = truthtiling[end_num]->ccmap();
@@ -581,7 +581,7 @@ int main(int argc, char* argv[])
      
      if (toymatrix[start_num]->Get_Solve_Flag()==0&& toymatrix[start_num]->Get_mcindex()>0){
        GeomCellSelection allmcell = mergetiling[start_num]->get_allcell();
-       WireCell2dToy::ToyMatrixMarkov toymatrix_markov(0,toymatrix[start_num],toymatrix[start_num+1],0,mergetiling[start_num],mergetiling[start_num+1],&allmcell,1500,2000,5);
+       WireCell2dToy::ToyMatrixMarkov toymatrix_markov(0,toymatrix[start_num],toymatrix[start_num+1],0,mergetiling[start_num],mergetiling[start_num+1],&allmcell,1500,2000,penalty);
        
        
        CellChargeMap ccmap = truthtiling[start_num]->ccmap();
