@@ -242,13 +242,15 @@ WireCell2dToy::ToyMatrix::ToyMatrix(WireCell2dToy::ToyTiling& toytiling, WireCel
       }
       //Solve_SVD();
     }
+  }else{
+    //    solve_flag = 1;
   }
   //MA->Print();
   // MAT->Print();
   // MB->Print();
   // MBT->Print();
   // Vy->Print();
-
+  
   
 }
 
@@ -380,6 +382,8 @@ WireCell2dToy::ToyMatrix::ToyMatrix(const DetectorGDS& gds,WireCell2dToy::ToyTil
       Solve();
     }
 
+  }else{
+    //    solve_flag = 1;
   }
 }
 
@@ -494,6 +498,8 @@ WireCell2dToy::ToyMatrix::ToyMatrix(WireCell2dToy::ToyTiling& toytiling, WireCel
     if (det > 1e-5){
       Solve();
     }
+  }else{
+    //    solve_flag = 1;
   }
   //MA->Print();
   // MAT->Print();

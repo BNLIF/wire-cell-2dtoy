@@ -8,10 +8,14 @@ namespace WireCell2dToy {
   class ToyMatrixIterate {
   public:
     ToyMatrixIterate(WireCell2dToy::ToyMatrix &toymatrix, int recon_t = 2000, float limit = 1e6);
-    ToyMatrixIterate(WireCell2dToy::ToyMatrix &toymatrix, std::vector<int>& already_removed, int recon_t = 2000, int limit = 1e6);
     ToyMatrixIterate(WireCell2dToy::ToyMatrix &toymatrix, WireCell2dToy::MergeToyTiling &mergecur, WireCell::GeomCellSelection &cells, int recon_t = 2000);
+    ToyMatrixIterate(WireCell2dToy::ToyMatrix *toybefore, WireCell2dToy::ToyMatrix *toycur, WireCell2dToy::ToyMatrix *toyafter, WireCell2dToy::MergeToyTiling *mergebefore, WireCell2dToy::MergeToyTiling *mergecur, WireCell2dToy::MergeToyTiling *mergeafter, 
+		     int recon_t = 2000, float limit = 1e6, double penalty = 2);    
 
-    void UseTime(WireCell2dToy::ToyMatrix &toybefore, WireCell2dToy::ToyMatrix &toycur, WireCell2dToy::ToyMatrix &toyafter, WireCell2dToy::MergeToyTiling &mergebefore, WireCell2dToy::MergeToyTiling &mergecur, WireCell2dToy::MergeToyTiling &mergeafter);
+    ToyMatrixIterate(WireCell2dToy::ToyMatrix &toymatrix, std::vector<int>& already_removed, int recon_t = 2000, int limit = 1e6); // not very useful any way ... 
+
+    void UseTime(WireCell2dToy::ToyMatrix &toybefore, WireCell2dToy::ToyMatrix &toycur, WireCell2dToy::ToyMatrix &toyafter, WireCell2dToy::MergeToyTiling &mergebefore, WireCell2dToy::MergeToyTiling &mergecur, WireCell2dToy::MergeToyTiling &mergeafter); //previous use time, not popular now ... 
+
 
     virtual ~ToyMatrixIterate();
     int Get_ncount(){return ncount;};
@@ -29,6 +33,8 @@ namespace WireCell2dToy {
 
     int time_flag;
     int recon_threshold;
+
+    std::map<int,double> cell_penal;
     
     WireCell2dToy::ToyMatrixKalman *toymatrixkalman;
  };

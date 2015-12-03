@@ -12,6 +12,10 @@ WireCell2dToy::ToyMatrixIterate::ToyMatrixIterate(WireCell2dToy::ToyMatrix &toym
   
   std::vector<int> no_need_remove;
 
+  for (int i=0;i!=toymatrix.Get_mcindex();i++){
+    cell_penal[i] = 0;
+  }
+
   
   //std::cout << "Number of zeros: " << toymatrixkalman->Get_numz() << std::endl;
   //int numz = toymatrix.Get_mcindex() - toymatrix.Get_mwindex();
@@ -46,7 +50,9 @@ WireCell2dToy::ToyMatrixIterate::ToyMatrixIterate(WireCell2dToy::ToyMatrix &toym
   nlevel = 0;
   recon_threshold = recon_t;
 
- 
+  for (int i=0;i!=toymatrix.Get_mcindex();i++){
+    cell_penal[i] = 0;
+  }
   
   //std::cout << "Number of zeros: " << toymatrixkalman->Get_numz() << std::endl;
   //int numz = toymatrix.Get_mcindex() - toymatrix.Get_mwindex();
@@ -73,6 +79,92 @@ WireCell2dToy::ToyMatrixIterate::ToyMatrixIterate(WireCell2dToy::ToyMatrix &toym
   //if not use time information ... 
 }
 
+WireCell2dToy::ToyMatrixIterate::ToyMatrixIterate(WireCell2dToy::ToyMatrix *toybefore, WireCell2dToy::ToyMatrix *toycur, WireCell2dToy::ToyMatrix *toyafter, WireCell2dToy::MergeToyTiling *mergebefore, WireCell2dToy::MergeToyTiling *mergecur, WireCell2dToy::MergeToyTiling *mergeafter, int recon_t, float limit, double penalty){
+  // find the penalties for the current set ... 
+  GeomCellSelection allmcell_p; 
+  if (mergebefore !=0 ){
+    allmcell_p = mergebefore->get_allcell();
+  }
+  GeomCellSelection allmcell_c = mergecur->get_allcell();
+  GeomCellSelection allmcell_n; 
+  if (mergeafter != 0){
+    allmcell_n = mergeafter->get_allcell();
+  }
+
+  for (int i=0;i!=allmcell_c.size();i++){
+    MergeGeomCell *mcell_c = (MergeGeomCell*)allmcell_c[i];
+    int index_c = toycur->Get_mcindex(mcell_c);
+    cell_penal[index_c] = 0;
+
+    int flag_before =0;
+    if (toybefore!=0){
+      if (toybefore->Get_Solve_Flag()!=0){
+	 for (int j=0;j!=allmcell_p.size();j++){
+	   MergeGeomCell *mcell_p = (MergeGeomCell*)allmcell_p[j];
+	   double charge = toybefore->Get_Cell_Charge(mcell_p,1);
+	   if ( charge > recon_threshold && mcell_c->Overlap(*mcell_p)){
+	     flag_before = 1;
+	     break;
+	   }
+	 }
+      }
+    }
+    if (flag_before == 1){
+      cell_penal[index_c] += penalty;
+    }
+    
+    int flag_after = 0;
+    if (toyafter !=0){
+      if (toyafter->Get_Solve_Flag()!=0){
+	for (int j=0;j!=allmcell_n.size();j++){
+	  MergeGeomCell *mcell_n = (MergeGeomCell*)allmcell_n[j];
+	  double charge = toyafter->Get_Cell_Charge(mcell_n,1);
+	  if ( charge > recon_threshold && mcell_c->Overlap(*mcell_n)){
+	    flag_after = 1;
+	    break;
+	  }
+	}
+      }
+    }
+    if (flag_after == 1){
+      cell_penal[index_c] += penalty;
+    }
+  }
+  
+  // go through the rest of code ... 
+  prev_ncount = -1;
+  ncount = 0;
+  nlevel = 0;
+  recon_threshold = recon_t;
+  
+  //std::cout << "Number of zeros: " << toymatrixkalman->Get_numz() << std::endl;
+  //int numz = toymatrix.Get_mcindex() - toymatrix.Get_mwindex();
+  toymatrixkalman = new WireCell2dToy::ToyMatrixKalman(*toycur,0);  
+  // estimated_loop = TMath::Factorial(toymatrix.Get_mcindex())/TMath::Factorial(toymatrix.Get_mcindex()-numz)/TMath::Factorial(numz)/25.;
+  // std::cout << estimated_loop << std::endl;
+  estimated_loop = TMath::Binomial(toycur->Get_mcindex(),toymatrixkalman->Get_numz())/25.;//TMath::Factorial(toymatrix.Get_mcindex())/TMath::Factorial(toymatrix.Get_mcindex()-toymatrixkalman->Get_numz())/TMath::Factorial(toymatrixkalman->Get_numz())/25.;
+  
+  std::cout << estimated_loop << " " << toycur->Get_mcindex() << " " << toymatrixkalman->Get_numz() << std::endl;
+  
+  // if(toymatrixkalman->Get_numz()==toymatrix.Get_mcindex()){
+  //   delete toymatrixkalman;
+  //   toymatrixkalman = new WireCell2dToy::ToyMatrixKalman(toymatrix,1); 
+  // }
+  
+  if (estimated_loop < limit && toymatrixkalman->Get_numz()!=toycur->Get_mcindex() && toycur->Get_mcindex() - toymatrixkalman->Get_numz() > toymatrixkalman->Get_numz()){
+    time_flag = 0;
+    delete toymatrixkalman;
+    toymatrixkalman = new WireCell2dToy::ToyMatrixKalman(*toycur,1);  
+    //  std::cout << toymatrixkalman->Get_numz() << std::endl;
+    Iterate(*toymatrixkalman,*toycur);
+  }
+
+}
+
+
+
+
+
 
 WireCell2dToy::ToyMatrixIterate::ToyMatrixIterate(WireCell2dToy::ToyMatrix &toycur, WireCell2dToy::MergeToyTiling &mergecur, WireCell::GeomCellSelection &cells, int recon_t ){
   std::vector<int> already_removed; //dummy
@@ -82,7 +174,8 @@ WireCell2dToy::ToyMatrixIterate::ToyMatrixIterate(WireCell2dToy::ToyMatrix &toyc
   for (int i = 0;i!=allmcell_c.size();i++){
     MergeGeomCell *mcell_c = (MergeGeomCell*)allmcell_c[i];
     int index_c = toycur.Get_mcindex(mcell_c);
-    
+    cell_penal[index_c] = 0;
+
     auto it = find(cells.begin(),cells.end(),mcell_c);
     if (it != cells.end()){
       no_need_remove.push_back(index_c);
@@ -271,7 +364,13 @@ void WireCell2dToy::ToyMatrixIterate::Iterate(WireCell2dToy::ToyMatrixKalman &to
       if (it1 == toymatrix.Get_already_removed().end() && it2 == toymatrix.Get_no_need_remove().end()){
 	std::vector<int> already_removed = toymatrix.Get_already_removed();
 	already_removed.push_back(i);
-	WireCell2dToy::ToyMatrixKalman kalman(already_removed,toymatrix.Get_no_need_remove(),toymatrix1,0);
+
+	double chi2_p = 0;
+	for (int j = 0; j!=already_removed.size(); j++){
+	  chi2_p += cell_penal[already_removed.at(j)];
+	}
+
+	WireCell2dToy::ToyMatrixKalman kalman(already_removed,toymatrix.Get_no_need_remove(),toymatrix1,0,1,chi2_p);
 
 	
 
