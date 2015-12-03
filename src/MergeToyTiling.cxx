@@ -602,6 +602,42 @@ WireCell2dToy::MergeToyTiling::MergeToyTiling(const DetectorGDS& gds, WireCell2d
   
   form_wiremap(gds,tiling,time_slice);
   
+
+  // form a new mapping for merged cell to merged cell 
+  for (int i=0;i!=cell_all.size();i++){
+    const MergeGeomCell *mcell = (MergeGeomCell*)cell_all[i];
+    GeomCellSelection cells;
+    mcmcsmap[mcell] = cells;
+
+    for (int j=0;j!=cellmap[mcell].size();j++){
+      const MergeGeomWire *mwire = (MergeGeomWire*)cellmap[mcell].at(j);
+      for (int k=0;k!=wiremap[mwire].size();k++){
+	const MergeGeomCell *mcell1 = (MergeGeomCell*)wiremap[mwire].at(k);
+	if (mcell1 == mcell) continue;
+	
+	// judge if two cells share any wires and distance apart is 1 m
+	double dis = sqrt(pow(mcell->center().y - mcell1->center().y,2)
+			  + pow(mcell->center().z - mcell1->center().z,2));
+	
+	if (dis > 1 *units::m){
+	  int flag_common_wire = 0;
+	  for (int i1 = 0; i1!= cellmap1[mcell].size(); i1++){
+	    auto it = find( cellmap1[mcell1].begin(), cellmap1[mcell1].end(),cellmap1[mcell].at(i1));
+	    if (it != cellmap1[mcell1].end()){
+	      flag_common_wire = 1;
+	      break;
+	    }
+	  }
+	  if (flag_common_wire == 0){
+	    auto it = find(mcmcsmap[mcell].begin(),mcmcsmap[mcell].end(),mcell1);
+	    if (it == mcmcsmap[mcell].end())
+	      mcmcsmap[mcell].push_back(mcell1);
+	  }
+	}
+      }
+    }
+    // std::cout << "Check " <<  mcmcsmap[mcell].size() << std::endl;
+  }
 }
 
 

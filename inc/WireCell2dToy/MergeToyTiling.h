@@ -42,6 +42,8 @@ namespace WireCell2dToy{
     WireCell::GeomWireWireMap wwmap; // wire to merged wire
     WireCell::GeomWireWiresMap wwsmap; // merged wire to wires
     
+    WireCell::GeomCellCellsMap mcmcsmap; //merged cell to merged cell map;
+
     WireCell::GeomCellSelection single_wire_cells;
     WireCell::GeomCellSelection three_wires_cells;
     WireCell::GeomCellSelection two_wires_cells;
