@@ -18,7 +18,8 @@ namespace WireCell2dToy {
     int Get_mcindex(){return mcindex;};
     int Cal_numz(WireCell2dToy::ToyMatrix &toymatrix);
     void init(WireCell2dToy::ToyMatrix &toymatrix);
-    
+    void Set_penalty(double val){chi2_penalty = val;}
+
   protected:
     int flag_no_need;
     double chi2_penalty;

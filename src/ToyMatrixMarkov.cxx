@@ -209,34 +209,51 @@ WireCell2dToy::ToyMatrixMarkov::ToyMatrixMarkov(WireCell2dToy::ToyMatrix *toybef
     MergeGeomCell *mcell_c = (MergeGeomCell*)allmcell_c[i];
     int index_c = toycur->Get_mcindex(mcell_c);
     
-    
-    if (toybefore->Get_Solve_Flag()!=0 ){
-      for (int j=0;j!=allmcell_p.size();j++){
-	MergeGeomCell *mcell_p = (MergeGeomCell*)allmcell_p[j];
-	int index_p = toybefore->Get_mcindex(mcell_p);
-	double charge = toybefore->Get_Cell_Charge(mcell_p,1);
-	if ( charge > recon_threshold2 && mcell_c->Overlap(*mcell_p)){
-	  auto it = find(use_time.begin(),use_time.end(),index_c);
-	  if (it == use_time.end()){
-	    use_time.push_back(index_c);
+    int flag_before = 0;
+    if (toybefore != 0){
+      if (toybefore->Get_Solve_Flag()!=0 ){
+	for (int j=0;j!=allmcell_p.size();j++){
+	  MergeGeomCell *mcell_p = (MergeGeomCell*)allmcell_p[j];
+	  int index_p = toybefore->Get_mcindex(mcell_p);
+	  double charge = toybefore->Get_Cell_Charge(mcell_p,1);
+	  if ( charge > recon_threshold2 && mcell_c->Overlap(*mcell_p)){
+	    auto it = find(use_time.begin(),use_time.end(),index_c);
+	    if (it == use_time.end()){
+	      use_time.push_back(index_c);
+	    }
+	    flag_before = 1;
 	  }
 	}
       }
     }
-    if (toyafter->Get_Solve_Flag()!=0){
-      for (int j=0;j!=allmcell_n.size();j++){
-	MergeGeomCell *mcell_n = (MergeGeomCell*)allmcell_n[j];
-	int index_n = toyafter->Get_mcindex(mcell_n);
-	double charge = toyafter->Get_Cell_Charge(mcell_n,1);
-	if ( charge > recon_threshold2 && mcell_c->Overlap(*mcell_n)){
-	  auto it = find(use_time.begin(),use_time.end(),index_c);
-	  if (it == use_time.end()){
-	    use_time.push_back(index_c);
+
+    if (flag_before == 1){
+      cell_penal[index_c] += penalty;
+    }
+
+    int flag_after = 0;
+    if (toyafter !=0){
+      if (toyafter->Get_Solve_Flag()!=0){
+	for (int j=0;j!=allmcell_n.size();j++){
+	  MergeGeomCell *mcell_n = (MergeGeomCell*)allmcell_n[j];
+	  int index_n = toyafter->Get_mcindex(mcell_n);
+	  double charge = toyafter->Get_Cell_Charge(mcell_n,1);
+	  if ( charge > recon_threshold2 && mcell_c->Overlap(*mcell_n)){
+	    auto it = find(use_time.begin(),use_time.end(),index_c);
+	    if (it == use_time.end()){
+	      use_time.push_back(index_c);
+	    }
+	    flag_after = 1;
 	  }
 	}
       }
+    }
+
+    if (flag_after == 1){
+      cell_penal[index_c] += penalty;
     }
   }
+  
   
   for (int i=0;i!=allmcell_c.size();i++){
     auto it = find(use_time.begin(),use_time.end(),i);
@@ -247,7 +264,7 @@ WireCell2dToy::ToyMatrixMarkov::ToyMatrixMarkov(WireCell2dToy::ToyMatrix *toybef
   
   //initialize
   //toymatrixkalman = new WireCell2dToy::ToyMatrixKalman(*toymatrix);  // hold the current results 
-
+  
   toymatrixkalman = new WireCell2dToy::ToyMatrixKalman(already_removed, use_time, *toymatrix,1,0);
   std::cout << "With Time: " << toymatrixkalman->Get_numz() << " " << allmcell_c.size() << " " <<  already_removed.size() << std::endl;
   // Find a sub-set that is not degenerated
@@ -607,6 +624,11 @@ void WireCell2dToy::ToyMatrixMarkov::make_guess(){
   }
   toymatrixkalman->Get_no_need_remove().clear();
   
+  double chi2_p = 0;
+  for (int j = 0; j!=toymatrixkalman->Get_already_removed().size(); j++){
+    chi2_p += cell_penal[toymatrixkalman->Get_already_removed().at(j)];
+  }
+  toymatrixkalman->Set_penalty(chi2_p);
 
   //why initiate again???  //calculate chi2 ... 
   toymatrixkalman->init(*toymatrix);
@@ -621,7 +643,13 @@ void WireCell2dToy::ToyMatrixMarkov::Iterate(WireCell2dToy::ToyMatrixKalman &toy
       if (it1 == toykalman.Get_already_removed().end() && it2 == toykalman.Get_no_need_remove().end()){
 	std::vector<int> already_removed = toykalman.Get_already_removed();
 	already_removed.push_back(i);
-	WireCell2dToy::ToyMatrixKalman kalman(already_removed,toykalman.Get_no_need_remove(),*toymatrix,0);
+
+	double chi2_p = 0;
+	for (int j = 0; j!=already_removed.size(); j++){
+	  chi2_p += cell_penal[already_removed.at(j)];
+	}
+
+	WireCell2dToy::ToyMatrixKalman kalman(already_removed,toykalman.Get_no_need_remove(),*toymatrix,0,1,chi2_p);
 	// this part seems to be able to improve
 	// to get the first solution, one should not take too much time ...
 	// consider to improve in the future ...  i.e. add cut on the number of get_already_removed vs. what's left ... 
