@@ -16,7 +16,7 @@
 #include "WireCellData/MergeGeomWire.h"
 
 #include "WireCellData/GeomCluster.h"
-//#include "WireCellNav/SliceDataSource.h"
+#include "WireCellNav/SliceDataSource.h"
 
 
 #include "WireCellNav/FrameDataSource.h"

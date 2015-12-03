@@ -54,6 +54,8 @@ WireCell2dToy::ToyMatrixMarkov::ToyMatrixMarkov(WireCell2dToy::ToyMatrix &toycur
     MergeGeomCell *mcell_c = (MergeGeomCell*)allmcell_c[i];
     int index_c = toycur.Get_mcindex(mcell_c);
     
+    cell_penal[index_c] = 0;
+
     auto it = find(cells.begin(),cells.end(),mcell_c);
     if (it !=cells.end()){
       use_time.push_back(index_c);
@@ -175,11 +177,15 @@ WireCell2dToy::ToyMatrixMarkov::ToyMatrixMarkov(WireCell2dToy::ToyMatrix &toycur
   }
 }
 
+WireCell2dToy::ToyMatrixMarkov::ToyMatrixMarkov(WireCell2dToy::ToyMatrix &toybefore, WireCell2dToy::ToyMatrix &toycur, WireCell2dToy::ToyMatrix &toyafter, WireCell2dToy::MergeToyTiling &mergebefore, WireCell2dToy::MergeToyTiling &mergecur, WireCell2dToy::MergeToyTiling &mergeafter, WireCell::GeomCellSelection *allmcell1,int recon_t1, int recon_t2, double penalty){
+  ToyMatrixMarkov(&toybefore, &toycur, &toyafter, &mergebefore, &mergecur, &mergeafter, allmcell, recon_t1, recon_t2, penalty);
+}
 
-WireCell2dToy::ToyMatrixMarkov::ToyMatrixMarkov(WireCell2dToy::ToyMatrix &toybefore, WireCell2dToy::ToyMatrix &toycur, WireCell2dToy::ToyMatrix &toyafter, WireCell2dToy::MergeToyTiling &mergebefore, WireCell2dToy::MergeToyTiling &mergecur, WireCell2dToy::MergeToyTiling &mergeafter, WireCell::GeomCellSelection *allmcell1,int recon_t1, int recon_t2){
+
+WireCell2dToy::ToyMatrixMarkov::ToyMatrixMarkov(WireCell2dToy::ToyMatrix *toybefore, WireCell2dToy::ToyMatrix *toycur, WireCell2dToy::ToyMatrix *toyafter, WireCell2dToy::MergeToyTiling *mergebefore, WireCell2dToy::MergeToyTiling *mergecur, WireCell2dToy::MergeToyTiling *mergeafter, WireCell::GeomCellSelection *allmcell1,int recon_t1, int recon_t2, double penalty){
   ncount = 0;
   first_flag = 0;
-  toymatrix = &toycur;
+  toymatrix = toycur;
   allmcell = allmcell1;
   mcindex = toymatrix->Get_mcindex();
   recon_threshold1 = recon_t1;
@@ -188,22 +194,27 @@ WireCell2dToy::ToyMatrixMarkov::ToyMatrixMarkov(WireCell2dToy::ToyMatrix &toybef
   
    //find good cells with time information and then use them ... 
   
-   GeomCellSelection allmcell_p = mergebefore.get_allcell();
-  GeomCellSelection allmcell_c = mergecur.get_allcell();
-  GeomCellSelection allmcell_n = mergeafter.get_allcell();
+  GeomCellSelection allmcell_p;
+  if (mergebefore != 0)
+    allmcell_p = mergebefore->get_allcell();
+  GeomCellSelection allmcell_c = mergecur->get_allcell();
+  GeomCellSelection allmcell_n;
+  if (mergeafter != 0)
+    allmcell_n = mergeafter->get_allcell();
   
   //form two vectors 
   std::vector<int> already_removed; //dummy
  
   for (int i=0;i!=allmcell_c.size();i++){
     MergeGeomCell *mcell_c = (MergeGeomCell*)allmcell_c[i];
-    int index_c = toycur.Get_mcindex(mcell_c);
+    int index_c = toycur->Get_mcindex(mcell_c);
     
-    if (toybefore.Get_Solve_Flag()!=0 ){
+    
+    if (toybefore->Get_Solve_Flag()!=0 ){
       for (int j=0;j!=allmcell_p.size();j++){
 	MergeGeomCell *mcell_p = (MergeGeomCell*)allmcell_p[j];
-	int index_p = toybefore.Get_mcindex(mcell_p);
-	double charge = toybefore.Get_Cell_Charge(mcell_p,1);
+	int index_p = toybefore->Get_mcindex(mcell_p);
+	double charge = toybefore->Get_Cell_Charge(mcell_p,1);
 	if ( charge > recon_threshold2 && mcell_c->Overlap(*mcell_p)){
 	  auto it = find(use_time.begin(),use_time.end(),index_c);
 	  if (it == use_time.end()){
@@ -212,11 +223,11 @@ WireCell2dToy::ToyMatrixMarkov::ToyMatrixMarkov(WireCell2dToy::ToyMatrix &toybef
 	}
       }
     }
-    if (toyafter.Get_Solve_Flag()!=0){
+    if (toyafter->Get_Solve_Flag()!=0){
       for (int j=0;j!=allmcell_n.size();j++){
 	MergeGeomCell *mcell_n = (MergeGeomCell*)allmcell_n[j];
-	int index_n = toyafter.Get_mcindex(mcell_n);
-	double charge = toyafter.Get_Cell_Charge(mcell_n,1);
+	int index_n = toyafter->Get_mcindex(mcell_n);
+	double charge = toyafter->Get_Cell_Charge(mcell_n,1);
 	if ( charge > recon_threshold2 && mcell_c->Overlap(*mcell_n)){
 	  auto it = find(use_time.begin(),use_time.end(),index_c);
 	  if (it == use_time.end()){
@@ -241,13 +252,13 @@ WireCell2dToy::ToyMatrixMarkov::ToyMatrixMarkov(WireCell2dToy::ToyMatrix &toybef
   std::cout << "With Time: " << toymatrixkalman->Get_numz() << " " << allmcell_c.size() << " " <<  already_removed.size() << std::endl;
   // Find a sub-set that is not degenerated
   // put things into use_time
-  find_subset(*toymatrixkalman,toycur,use_time);
+  find_subset(*toymatrixkalman,*toycur,use_time);
   already_removed.clear();
   
   //std::cout << use_time.size() << std::endl;
   // recalculate
   delete toymatrixkalman;
-  toymatrixkalman = new WireCell2dToy::ToyMatrixKalman(already_removed, use_time, toycur,1,0);
+  toymatrixkalman = new WireCell2dToy::ToyMatrixKalman(already_removed, use_time, *toycur,1,0);
   toymatrix->Set_Solve_Flag(0);
   toymatrix->Set_chi2(-1);
 
@@ -352,6 +363,11 @@ WireCell2dToy::ToyMatrixMarkov::ToyMatrixMarkov(WireCell2dToy::ToyMatrix *toymat
   recon_threshold1 = recon_t1;
   recon_threshold2 = recon_t2;
   use_time_threshold = 0.75;
+
+  for (int i=0;i!=mcindex;i++){
+    cell_penal[i] = 0;
+  }
+
 
   toymatrixkalman = new WireCell2dToy::ToyMatrixKalman(*toymatrix,0);  // hold the current results 
   

@@ -403,7 +403,7 @@ int main(int argc, char* argv[])
     for (int i=first_solve+1;i<=end_num-1;i++){
       if (toymatrix[i]->Get_Solve_Flag()==0){
   	GeomCellSelection allmcell = mergetiling[i]->get_allcell();
-	WireCell2dToy::ToyMatrixMarkov toymatrix_markov(*toymatrix[i-1],*toymatrix[i],*toymatrix[i+1],*mergetiling[i-1],*mergetiling[i],*mergetiling[i+1],&allmcell);
+	WireCell2dToy::ToyMatrixMarkov toymatrix_markov(toymatrix[i-1],toymatrix[i],toymatrix[i+1],mergetiling[i-1],mergetiling[i],mergetiling[i+1],&allmcell);
   	CellChargeMap ccmap = truthtiling[i]->ccmap();
   	if (toymatrix[i]->Get_Solve_Flag()!=0)
   	  toymetric.Add(allmcell,*toymatrix[i],ccmap);
