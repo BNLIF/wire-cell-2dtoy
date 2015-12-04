@@ -4,7 +4,9 @@ using namespace WireCell;
 
 #include "TMath.h"
 
-WireCell2dToy::ToyMatrixIterate::ToyMatrixIterate(WireCell2dToy::ToyMatrix &toymatrix, std::vector<int>& already_removed, int recon_t, int limit){
+WireCell2dToy::ToyMatrixIterate::ToyMatrixIterate(WireCell2dToy::ToyMatrix &toymatrix, std::vector<int>& already_removed, int recon_t, int limit)
+  : penalty_ncpt(0)
+{
   prev_ncount = -1;
   ncount = 0;
   nlevel = 0;
@@ -44,7 +46,9 @@ WireCell2dToy::ToyMatrixIterate::ToyMatrixIterate(WireCell2dToy::ToyMatrix &toym
 
 }
 
-WireCell2dToy::ToyMatrixIterate::ToyMatrixIterate(WireCell2dToy::ToyMatrix &toymatrix, int recon_t, float limit){
+WireCell2dToy::ToyMatrixIterate::ToyMatrixIterate(WireCell2dToy::ToyMatrix &toymatrix, int recon_t, float limit)
+  : penalty_ncpt(0)
+{
   prev_ncount = -1;
   ncount = 0;
   nlevel = 0;
@@ -79,7 +83,9 @@ WireCell2dToy::ToyMatrixIterate::ToyMatrixIterate(WireCell2dToy::ToyMatrix &toym
   //if not use time information ... 
 }
 
-WireCell2dToy::ToyMatrixIterate::ToyMatrixIterate(WireCell2dToy::ToyMatrix *toybefore, WireCell2dToy::ToyMatrix *toycur, WireCell2dToy::ToyMatrix *toyafter, WireCell2dToy::MergeToyTiling *mergebefore, WireCell2dToy::MergeToyTiling *mergecur, WireCell2dToy::MergeToyTiling *mergeafter, int recon_t, float limit, double penalty){
+WireCell2dToy::ToyMatrixIterate::ToyMatrixIterate(WireCell2dToy::ToyMatrix *toybefore, WireCell2dToy::ToyMatrix *toycur, WireCell2dToy::ToyMatrix *toyafter, WireCell2dToy::MergeToyTiling *mergebefore, WireCell2dToy::MergeToyTiling *mergecur, WireCell2dToy::MergeToyTiling *mergeafter, int recon_t, float limit, double penalty, double penalty_ncpt)
+  : penalty_ncpt(penalty_ncpt)
+{
   // find the penalties for the current set ... 
   GeomCellSelection allmcell_p; 
   if (mergebefore !=0 ){
@@ -130,6 +136,25 @@ WireCell2dToy::ToyMatrixIterate::ToyMatrixIterate(WireCell2dToy::ToyMatrix *toyb
       cell_penal[index_c] += penalty;
     }
   }
+
+  // fill in the cell_connect map;
+  GeomCellCellsMap& cells_map = mergecur->get_not_compatible_cells_map();
+  GeomCellSelection cells = mergecur->get_allcell();
+  for (int i=0;i!=cells.size();i++){
+    MergeGeomCell *mcell = (MergeGeomCell*)cells.at(i);
+    int index = toycur->Get_mcindex(mcell);
+    if (cells_map[mcell].size() > 0){
+      std::vector<int> cells_indices;
+      for (int j=0;j!=cells_map[mcell].size();j++){
+	int index_c = toycur->Get_mcindex(cells_map[mcell].at(j));
+	cells_indices.push_back(index_c);
+      }
+      cells_ncpt[index] = cells_indices;
+    }
+  }
+  
+  //std::cout << "Check " << cells_ncpt.size() << std::endl;
+
   
   // go through the rest of code ... 
   prev_ncount = -1;
@@ -166,7 +191,9 @@ WireCell2dToy::ToyMatrixIterate::ToyMatrixIterate(WireCell2dToy::ToyMatrix *toyb
 
 
 
-WireCell2dToy::ToyMatrixIterate::ToyMatrixIterate(WireCell2dToy::ToyMatrix &toycur, WireCell2dToy::MergeToyTiling &mergecur, WireCell::GeomCellSelection &cells, int recon_t ){
+WireCell2dToy::ToyMatrixIterate::ToyMatrixIterate(WireCell2dToy::ToyMatrix &toycur, WireCell2dToy::MergeToyTiling &mergecur, WireCell::GeomCellSelection &cells, int recon_t )
+  : penalty_ncpt(0)
+{
   std::vector<int> already_removed; //dummy
   std::vector<int> no_need_remove; //to be added
  
@@ -369,6 +396,30 @@ void WireCell2dToy::ToyMatrixIterate::Iterate(WireCell2dToy::ToyMatrixKalman &to
 	for (int j = 0; j!=already_removed.size(); j++){
 	  chi2_p += cell_penal[already_removed.at(j)];
 	}
+	
+	if (penalty_ncpt>0){
+	  //add the penalty due to not compatible cells (ncpt)
+	  //int flag_test = 0;
+	  for (auto it = cells_ncpt.begin(); it!= cells_ncpt.end(); it++){
+	    int index1 = it->first;
+	    if (find(already_removed.begin(),already_removed.end(),index1) != already_removed.end()) continue;
+	    std::vector<int> indices = it->second;
+	    
+	    for (int j=0;j!=indices.size();j++){
+	      int index2 = indices.at(j);
+	      if (find(already_removed.begin(),already_removed.end(),index2) == already_removed.end()){
+		chi2_p += penalty_ncpt;
+		// flag_test = 1;
+		// break;
+	      }
+	    }
+	    // if (flag_test ==1) break;
+	  }
+	  // if (flag_test == 1){
+	  //   chi2_p += penalty_ncpt;
+	  // }
+	}
+	
 
 	WireCell2dToy::ToyMatrixKalman kalman(already_removed,toymatrix.Get_no_need_remove(),toymatrix1,0,1,chi2_p);
 

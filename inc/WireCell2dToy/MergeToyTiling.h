@@ -15,6 +15,8 @@ namespace WireCell2dToy{
     WireCell::GeomCellSelection& get_single_wire_cells(){return single_wire_cells;};
     WireCell::GeomCellSelection& get_three_wires_cells(){return three_wires_cells;};
     WireCell::GeomCellSelection& get_two_wires_cells(){return two_wires_cells;};
+    WireCell::GeomCellCellsMap& get_not_compatible_cells_map(){ return mcmcsmap;};
+    
 
     int further_merge(WireCell::GeomCellSelection &allcell, int ncell, int time_slice, double dis = 0.2 * units::mm);
     int further_mergewire(WireCell::GeomWireSelection &allwire, int nwire, int time_slice);

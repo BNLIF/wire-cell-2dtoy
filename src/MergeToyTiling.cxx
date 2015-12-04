@@ -630,8 +630,13 @@ WireCell2dToy::MergeToyTiling::MergeToyTiling(const DetectorGDS& gds, WireCell2d
 	  }
 	  if (flag_common_wire == 0){
 	    auto it = find(mcmcsmap[mcell].begin(),mcmcsmap[mcell].end(),mcell1);
-	    if (it == mcmcsmap[mcell].end())
+	    if (it == mcmcsmap[mcell].end()){
 	      mcmcsmap[mcell].push_back(mcell1);
+	      // std::cout << "Check " 
+	      // 		<< " " << mcell->center().y - mcell1->center().y
+	      // 		<< " " << mcell->center().z - mcell1->center().z
+	      // 		<< std::endl;
+	    }
 	  }
 	}
       }
@@ -812,6 +817,8 @@ void WireCell2dToy::MergeToyTiling::form_wiremap(const DetectorGDS& gds, WireCel
   // }
 
 }
+
+
 
 
 void WireCell2dToy::MergeToyTiling::deghost(){

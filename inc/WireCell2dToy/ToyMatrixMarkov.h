@@ -22,9 +22,9 @@ namespace WireCell2dToy{
     ToyMatrixMarkov(WireCell2dToy::ToyMatrix *toymatrix1, WireCell::GeomCellSelection *allmcell1, int recon_t1=1500, int recon_t2=2000);
     ToyMatrixMarkov(WireCell2dToy::ToyMatrix &toymatrix1, WireCell2dToy::MergeToyTiling &mergecur, WireCell::GeomCellSelection *allmcell1, WireCell::GeomCellSelection &cells, int recon_t1=1500, int recon_t2=2000);
     
-    ToyMatrixMarkov(WireCell2dToy::ToyMatrix *toybefore, WireCell2dToy::ToyMatrix *toycur, WireCell2dToy::ToyMatrix *toyafter, WireCell2dToy::MergeToyTiling *mergebefore, WireCell2dToy::MergeToyTiling *mergecur, WireCell2dToy::MergeToyTiling *mergeafter, WireCell::GeomCellSelection *allmcell1, int recon_t1=1500, int recon_t2=2000, double penalty = 2);
+    ToyMatrixMarkov(WireCell2dToy::ToyMatrix *toybefore, WireCell2dToy::ToyMatrix *toycur, WireCell2dToy::ToyMatrix *toyafter, WireCell2dToy::MergeToyTiling *mergebefore, WireCell2dToy::MergeToyTiling *mergecur, WireCell2dToy::MergeToyTiling *mergeafter, WireCell::GeomCellSelection *allmcell1, int recon_t1=1500, int recon_t2=2000, double penalty = 5, double penalty_ncpt = 0);
 
-    ToyMatrixMarkov(WireCell2dToy::ToyMatrix &toybefore, WireCell2dToy::ToyMatrix &toycur, WireCell2dToy::ToyMatrix &toyafter, WireCell2dToy::MergeToyTiling &mergebefore, WireCell2dToy::MergeToyTiling &mergecur, WireCell2dToy::MergeToyTiling &mergeafter, WireCell::GeomCellSelection *allmcell1, int recon_t1=1500, int recon_t2=2000, double penalty = 2);
+    ToyMatrixMarkov(WireCell2dToy::ToyMatrix &toybefore, WireCell2dToy::ToyMatrix &toycur, WireCell2dToy::ToyMatrix &toyafter, WireCell2dToy::MergeToyTiling &mergebefore, WireCell2dToy::MergeToyTiling &mergecur, WireCell2dToy::MergeToyTiling &mergeafter, WireCell::GeomCellSelection *allmcell1, int recon_t1=1500, int recon_t2=2000, double penalty = 5, double penalty_ncpt = 0);
 
     virtual ~ToyMatrixMarkov();
 
@@ -44,6 +44,8 @@ namespace WireCell2dToy{
     WireCell2dToy::ToyMatrixKalman *toymatrixkalman;
     WireCell::GeomCellSelection *allmcell;
     int ncount; // count the number of iterations
+
+    double penalty_ncpt;
 
     int first_flag;
     float  use_time_threshold;
@@ -72,7 +74,8 @@ namespace WireCell2dToy{
     double next_dof;
 
     std::map<int,double> cell_penal;
-
+    std::map<int,std::vector<int>> cells_ncpt;
+    
     int recon_threshold1;
     int recon_threshold2;
   };

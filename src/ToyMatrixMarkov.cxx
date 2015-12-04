@@ -35,7 +35,9 @@ void WireCell2dToy::ToyMatrixMarkov::find_subset(WireCell2dToy::ToyMatrixKalman 
   }
 }
 
-WireCell2dToy::ToyMatrixMarkov::ToyMatrixMarkov(WireCell2dToy::ToyMatrix &toycur,WireCell2dToy::MergeToyTiling &mergecur, WireCell::GeomCellSelection *allmcell1, WireCell::GeomCellSelection &cells, int recon_t1, int recon_t2){
+WireCell2dToy::ToyMatrixMarkov::ToyMatrixMarkov(WireCell2dToy::ToyMatrix &toycur,WireCell2dToy::MergeToyTiling &mergecur, WireCell::GeomCellSelection *allmcell1, WireCell::GeomCellSelection &cells, int recon_t1, int recon_t2)
+  : penalty_ncpt(0)
+{
   ncount = 0;
   first_flag = 0;
   toymatrix = &toycur;
@@ -177,12 +179,16 @@ WireCell2dToy::ToyMatrixMarkov::ToyMatrixMarkov(WireCell2dToy::ToyMatrix &toycur
   }
 }
 
-WireCell2dToy::ToyMatrixMarkov::ToyMatrixMarkov(WireCell2dToy::ToyMatrix &toybefore, WireCell2dToy::ToyMatrix &toycur, WireCell2dToy::ToyMatrix &toyafter, WireCell2dToy::MergeToyTiling &mergebefore, WireCell2dToy::MergeToyTiling &mergecur, WireCell2dToy::MergeToyTiling &mergeafter, WireCell::GeomCellSelection *allmcell1,int recon_t1, int recon_t2, double penalty){
-  ToyMatrixMarkov(&toybefore, &toycur, &toyafter, &mergebefore, &mergecur, &mergeafter, allmcell, recon_t1, recon_t2, penalty);
+WireCell2dToy::ToyMatrixMarkov::ToyMatrixMarkov(WireCell2dToy::ToyMatrix &toybefore, WireCell2dToy::ToyMatrix &toycur, WireCell2dToy::ToyMatrix &toyafter, WireCell2dToy::MergeToyTiling &mergebefore, WireCell2dToy::MergeToyTiling &mergecur, WireCell2dToy::MergeToyTiling &mergeafter, WireCell::GeomCellSelection *allmcell1,int recon_t1, int recon_t2, double penalty, double penalty_ncpt)
+  : penalty_ncpt(penalty_ncpt)
+{
+  ToyMatrixMarkov(&toybefore, &toycur, &toyafter, &mergebefore, &mergecur, &mergeafter, allmcell, recon_t1, recon_t2, penalty, penalty_ncpt);
 }
 
 
-WireCell2dToy::ToyMatrixMarkov::ToyMatrixMarkov(WireCell2dToy::ToyMatrix *toybefore, WireCell2dToy::ToyMatrix *toycur, WireCell2dToy::ToyMatrix *toyafter, WireCell2dToy::MergeToyTiling *mergebefore, WireCell2dToy::MergeToyTiling *mergecur, WireCell2dToy::MergeToyTiling *mergeafter, WireCell::GeomCellSelection *allmcell1,int recon_t1, int recon_t2, double penalty){
+WireCell2dToy::ToyMatrixMarkov::ToyMatrixMarkov(WireCell2dToy::ToyMatrix *toybefore, WireCell2dToy::ToyMatrix *toycur, WireCell2dToy::ToyMatrix *toyafter, WireCell2dToy::MergeToyTiling *mergebefore, WireCell2dToy::MergeToyTiling *mergecur, WireCell2dToy::MergeToyTiling *mergeafter, WireCell::GeomCellSelection *allmcell1,int recon_t1, int recon_t2, double penalty, double penalty_ncpt)
+  : penalty_ncpt(penalty_ncpt)
+{
   ncount = 0;
   first_flag = 0;
   toymatrix = toycur;
@@ -254,7 +260,24 @@ WireCell2dToy::ToyMatrixMarkov::ToyMatrixMarkov(WireCell2dToy::ToyMatrix *toybef
     }
   }
   
-  
+  // fill in the cell_connect map;
+  GeomCellCellsMap& cells_map = mergecur->get_not_compatible_cells_map();
+  GeomCellSelection cells = mergecur->get_allcell();
+  for (int i=0;i!=cells.size();i++){
+    MergeGeomCell *mcell = (MergeGeomCell*)cells.at(i);
+    int index = toycur->Get_mcindex(mcell);
+    if (cells_map[mcell].size() > 0){
+      std::vector<int> cells_indices;
+      for (int j=0;j!=cells_map[mcell].size();j++){
+	int index_c = toycur->Get_mcindex(cells_map[mcell].at(j));
+	cells_indices.push_back(index_c);
+      }
+      cells_ncpt[index] = cells_indices;
+    }
+  }
+
+
+
   for (int i=0;i!=allmcell_c.size();i++){
     auto it = find(use_time.begin(),use_time.end(),i);
     if (it==use_time.end())
@@ -371,7 +394,9 @@ WireCell2dToy::ToyMatrixMarkov::ToyMatrixMarkov(WireCell2dToy::ToyMatrix *toybef
 
 
 
-WireCell2dToy::ToyMatrixMarkov::ToyMatrixMarkov(WireCell2dToy::ToyMatrix *toymatrix1,WireCell::GeomCellSelection *allmcell1, int recon_t1, int recon_t2){
+WireCell2dToy::ToyMatrixMarkov::ToyMatrixMarkov(WireCell2dToy::ToyMatrix *toymatrix1,WireCell::GeomCellSelection *allmcell1, int recon_t1, int recon_t2)
+  : penalty_ncpt(0)
+{
   ncount = 0;
   first_flag = 0;
   toymatrix = toymatrix1; //save the matrix in here
@@ -628,6 +653,31 @@ void WireCell2dToy::ToyMatrixMarkov::make_guess(){
   for (int j = 0; j!=toymatrixkalman->Get_already_removed().size(); j++){
     chi2_p += cell_penal[toymatrixkalman->Get_already_removed().at(j)];
   }
+
+  if (penalty_ncpt>0){
+    //add the penalty due to not compatible cells (ncpt)
+    //int flag_test = 0;
+    for (auto it = cells_ncpt.begin(); it!= cells_ncpt.end(); it++){
+      int index1 = it->first;
+      if (find(toymatrixkalman->Get_already_removed().begin(),toymatrixkalman->Get_already_removed().end(),index1) != toymatrixkalman->Get_already_removed().end()) continue;
+      std::vector<int> indices = it->second;
+      
+      for (int j=0;j!=indices.size();j++){
+	int index2 = indices.at(j);
+	if (find(toymatrixkalman->Get_already_removed().begin(),toymatrixkalman->Get_already_removed().end(),index2) == toymatrixkalman->Get_already_removed().end()){
+	  chi2_p += penalty_ncpt;
+	  // flag_test = 1;
+	  // break;
+	}
+      }
+      // if (flag_test ==1) break;
+    }
+    // if (flag_test == 1){
+    //   chi2_p += penalty_ncpt;
+    // }
+  }
+
+
   toymatrixkalman->Set_penalty(chi2_p);
 
   //why initiate again???  //calculate chi2 ... 
@@ -648,6 +698,31 @@ void WireCell2dToy::ToyMatrixMarkov::Iterate(WireCell2dToy::ToyMatrixKalman &toy
 	for (int j = 0; j!=already_removed.size(); j++){
 	  chi2_p += cell_penal[already_removed.at(j)];
 	}
+
+	if (penalty_ncpt>0){
+	  //add the penalty due to not compatible cells (ncpt)
+	  //int flag_test = 0;
+	  for (auto it = cells_ncpt.begin(); it!= cells_ncpt.end(); it++){
+	    int index1 = it->first;
+	    if (find(already_removed.begin(),already_removed.end(),index1) != already_removed.end()) continue;
+	    std::vector<int> indices = it->second;
+	    
+	    for (int j=0;j!=indices.size();j++){
+	      int index2 = indices.at(j);
+	      if (find(already_removed.begin(),already_removed.end(),index2) == already_removed.end()){
+		chi2_p += penalty_ncpt;
+		// flag_test = 1;
+		// break;
+	      }
+	    }
+	    // if (flag_test ==1) break;
+	  }
+	  // if (flag_test == 1){
+	  //   chi2_p += penalty_ncpt;
+	  // }
+	}
+
+
 
 	WireCell2dToy::ToyMatrixKalman kalman(already_removed,toykalman.Get_no_need_remove(),*toymatrix,0,1,chi2_p);
 	// this part seems to be able to improve

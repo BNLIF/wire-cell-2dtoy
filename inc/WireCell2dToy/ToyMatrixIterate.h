@@ -10,7 +10,7 @@ namespace WireCell2dToy {
     ToyMatrixIterate(WireCell2dToy::ToyMatrix &toymatrix, int recon_t = 2000, float limit = 1e6);
     ToyMatrixIterate(WireCell2dToy::ToyMatrix &toymatrix, WireCell2dToy::MergeToyTiling &mergecur, WireCell::GeomCellSelection &cells, int recon_t = 2000);
     ToyMatrixIterate(WireCell2dToy::ToyMatrix *toybefore, WireCell2dToy::ToyMatrix *toycur, WireCell2dToy::ToyMatrix *toyafter, WireCell2dToy::MergeToyTiling *mergebefore, WireCell2dToy::MergeToyTiling *mergecur, WireCell2dToy::MergeToyTiling *mergeafter, 
-		     int recon_t = 2000, float limit = 1e6, double penalty = 2);    
+		     int recon_t = 2000, float limit = 1e6, double penalty = 5, double penalty_ncpt = 0);    
 
     ToyMatrixIterate(WireCell2dToy::ToyMatrix &toymatrix, std::vector<int>& already_removed, int recon_t = 2000, int limit = 1e6); // not very useful any way ... 
 
@@ -31,10 +31,13 @@ namespace WireCell2dToy {
     int nlevel;
     double estimated_loop;
 
+    double penalty_ncpt;
+
     int time_flag;
     int recon_threshold;
 
     std::map<int,double> cell_penal;
+    std::map<int,std::vector<int>> cells_ncpt;
     
     WireCell2dToy::ToyMatrixKalman *toymatrixkalman;
  };
