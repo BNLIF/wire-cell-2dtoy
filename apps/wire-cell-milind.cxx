@@ -437,16 +437,86 @@ int main(int argc, char* argv[])
   //   }
   // }
   
+   // form a map to illustrate connectivities 
+   GeomCellCellsMap cell_prev_map;
+   GeomCellCellsMap cell_next_map;
+   
+   for (int i=start_num;i!=end_num;i++){
+     GeomCellSelection curr_mcell = mergetiling[i]->get_allcell();
+     GeomCellSelection next_mcell = mergetiling[i+1]->get_allcell();
+     for (int j=0;j!=curr_mcell.size();j++){
+       const MergeGeomCell *curr_cell = (MergeGeomCell*)curr_mcell.at(j);
+       for (int k=0;k!=next_mcell.size();k++){
+	 const MergeGeomCell *next_cell = (MergeGeomCell*)next_mcell.at(k);
+	 if (curr_cell->Overlap(*next_cell)){
+
+	   if (cell_next_map.find(curr_cell)==cell_next_map.end()){
+	     GeomCellSelection cells;
+	     cell_next_map[curr_cell] = cells;
+	   }
+	   cell_next_map[curr_cell].push_back(next_cell);
+	   
+	   if (cell_prev_map.find(next_cell)==cell_prev_map.end()){
+	     GeomCellSelection cells;
+	     cell_prev_map[next_cell].push_back(curr_cell);
+	     cell_prev_map[next_cell] = cells;
+	   }
+	   cell_prev_map[next_cell].push_back(curr_cell);
+	 }
+       }
+     }
+   }
+   
+   // 
+
   //do clustering ... 
    for (int i=start_num;i!=end_num+1;i++){
      GeomCellSelection pallmcell = mergetiling[i]->get_allcell();
      GeomCellSelection allmcell;
      for (int j=0;j!=pallmcell.size();j++){
        const GeomCell* mcell = pallmcell[j];
-       if (toymatrix[i]->Get_Cell_Charge(mcell)> recon_threshold || toymatrix[i]->Get_Solve_Flag()==0){
-  	 allmcell.push_back(mcell);
-       }
+       
+       //   if (toymatrix[i]->Get_Cell_Charge(mcell)> recon_threshold || toymatrix[i]->Get_Solve_Flag()==0){
+       // allmcell.push_back(mcell);
+	 //  }
+       
+        int flag_save_cell = 0;
+
+      if (toymatrix[i]->Get_Solve_Flag()==0){
+     	flag_save_cell = 1;
+      }else{
+     	if (toymatrix[i]->Get_Cell_Charge(mcell)> recon_threshold){
+     	  flag_save_cell = 1;
+     	}else{
+     	  if (i == start_num || i == end_num + 1) continue;
+	  
+     	  // there are good cells from the prev and next
+     	  flag_save_cell = 0;
+	  //	  std::cout << "Xin: " << cell_next_map[mcell].size() <<  " " << cell_prev_map[mcell].size() << std::endl;
+
+     	  for (int k=0;k!=cell_next_map[mcell].size();k++){
+     	    if (toymatrix[i+1]->Get_Cell_Charge(cell_next_map[mcell].at(k)) > recon_threshold){
+     	      flag_save_cell = 1;
+     	      break;
+     	    }
+     	  }
+     	  if (flag_save_cell==1){
+     	    flag_save_cell = 0;
+     	    for (int k=0;k!=cell_prev_map[mcell].size();k++){
+     	      if (toymatrix[i-1]->Get_Cell_Charge(cell_prev_map[mcell].at(k)) > recon_threshold){
+     		flag_save_cell = 1;
+     		break;
+     	      }
+     	    }
+     	  }
+     	}
+      }
+      
+      
+      if (flag_save_cell == 1)
+     	allmcell.push_back(mcell);
      }
+     
      
      
      if (cluster_set.empty()){

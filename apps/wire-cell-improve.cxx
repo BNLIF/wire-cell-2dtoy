@@ -367,15 +367,15 @@ int main(int argc, char* argv[])
 	   if (cell_next_map.find(curr_cell)==cell_next_map.end()){
 	     GeomCellSelection cells;
 	     cell_next_map[curr_cell] = cells;
-	   }else{
-	     cell_next_map[curr_cell].push_back(next_cell);
 	   }
+	   cell_next_map[curr_cell].push_back(next_cell);
+	   
 	   if (cell_prev_map.find(next_cell)==cell_prev_map.end()){
 	     GeomCellSelection cells;
 	     cell_prev_map[next_cell] = cells;
-	   }else{
-	     cell_prev_map[next_cell].push_back(curr_cell);
 	   }
+	   cell_prev_map[next_cell].push_back(curr_cell);
+	   
 	 }
        }
      }
