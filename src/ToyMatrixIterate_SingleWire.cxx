@@ -2,11 +2,162 @@
 
 using namespace WireCell;
 
+WireCell2dToy::ToyMatrixIterate_SingleWire::ToyMatrixIterate_SingleWire(WireCell2dToy::ToyMatrix *toybefore, WireCell2dToy::ToyMatrix *toycur, WireCell2dToy::ToyMatrix *toyafter, WireCell2dToy::MergeToyTiling *mergebefore, WireCell2dToy::MergeToyTiling *mergecur, WireCell2dToy::MergeToyTiling *mergeafter, int recon_t, float limit, double penalty, double penalty_ncpt)
+  : toymatrix(*toycur)
+  , mergetiling(mergecur)
+  , limit(limit)
+  , penalty_ncpt(penalty_ncpt)
+{
+  int recon_threshold = recon_t;
+  
+  // find the penalties for the current set ... 
+  GeomCellSelection allmcell_p; 
+  if (mergebefore !=0 ){
+    allmcell_p = mergebefore->get_allcell();
+  }
+  GeomCellSelection allmcell_c = mergecur->get_allcell();
+  GeomCellSelection allmcell_n; 
+  if (mergeafter != 0){
+    allmcell_n = mergeafter->get_allcell();
+  }
+
+  for (int i=0;i!=allmcell_c.size();i++){
+    MergeGeomCell *mcell_c = (MergeGeomCell*)allmcell_c[i];
+    int index_c = toycur->Get_mcindex(mcell_c);
+    cell_penal[index_c] = 0;
+
+    int flag_before =0;
+    if (toybefore!=0){
+      if (toybefore->Get_Solve_Flag()!=0){
+	 for (int j=0;j!=allmcell_p.size();j++){
+	   MergeGeomCell *mcell_p = (MergeGeomCell*)allmcell_p[j];
+	   double charge = toybefore->Get_Cell_Charge(mcell_p,1);
+	   if ( charge > recon_threshold && mcell_c->Overlap(*mcell_p)){
+	     flag_before = 1;
+	     break;
+	   }
+	 }
+      }
+    }
+    if (flag_before == 1){
+      cell_penal[index_c] += penalty;
+    }
+    
+    int flag_after = 0;
+    if (toyafter !=0){
+      if (toyafter->Get_Solve_Flag()!=0){
+	for (int j=0;j!=allmcell_n.size();j++){
+	  MergeGeomCell *mcell_n = (MergeGeomCell*)allmcell_n[j];
+	  double charge = toyafter->Get_Cell_Charge(mcell_n,1);
+	  if ( charge > recon_threshold && mcell_c->Overlap(*mcell_n)){
+	    flag_after = 1;
+	    break;
+	  }
+	}
+      }
+    }
+    if (flag_after == 1){
+      cell_penal[index_c] += penalty;
+    }
+  }
+
+   // fill in the cell_connect map;
+  GeomCellCellsMap& cells_map = mergecur->get_not_compatible_cells_map();
+  GeomCellSelection cells = mergecur->get_allcell();
+  for (int i=0;i!=cells.size();i++){
+    MergeGeomCell *mcell = (MergeGeomCell*)cells.at(i);
+    int index = toycur->Get_mcindex(mcell);
+    if (cells_map[mcell].size() > 0){
+      std::vector<int> cells_indices;
+      for (int j=0;j!=cells_map[mcell].size();j++){
+	int index_c = toycur->Get_mcindex(cells_map[mcell].at(j));
+	cells_indices.push_back(index_c);
+      }
+      cells_ncpt[index] = cells_indices;
+    }
+  }
+  
+  //std::cout << "Check " << cells_ncpt.size() << std::endl;
+
+
+   // figure out single-wire cell, and no need to remove these
+  WireCell::GeomCellSelection all_cells = mergetiling->get_allcell();
+  WireCell::GeomCellSelection single_wire_cells = mergetiling->get_single_wire_cells();
+  
+  wirechargemap = mergetiling->wcmap();
+
+  cells.clear();
+  for (int i=0;i!=all_cells.size();i++){
+    auto it = find(single_wire_cells.begin(),single_wire_cells.end(),all_cells.at(i));
+    if (it == single_wire_cells.end())
+      cells.push_back(all_cells.at(i));
+  }
+  GeomCellMap cellmap = mergetiling->cmap();
+  GeomWireMap wiremap = mergetiling->wmap();
+  
+  //  std::cout << "Test: " << cells.size() << std::endl;
+  ncount = 0;
+  nlevel = 0;
+  if (cells.size() != 0){
+    GeomCellSelection tried_cell;
+    Iterate(cells,single_wire_cells, tried_cell, cellmap,wiremap);
+  }else{
+    std::vector<int> already_removed; 
+    std::vector<int> no_need_remove; 
+	
+    for (int i=0;i!=mergetiling->get_allcell().size();i++){
+      MergeGeomCell *mcell = (MergeGeomCell*)mergetiling->get_allcell().at(i);
+      int index = toymatrix.Get_mcindex(mcell);
+      no_need_remove.push_back(index);
+    }
+
+    double chi2_p = 0;
+    for (int j = 0; j!=already_removed.size(); j++){
+      chi2_p += cell_penal[already_removed.at(j)];
+    }
+    
+    if (penalty_ncpt>0){
+      //add the penalty due to not compatible cells (ncpt)
+      //int flag_test = 0;
+      for (auto it = cells_ncpt.begin(); it!= cells_ncpt.end(); it++){
+	int index1 = it->first;
+	if (find(already_removed.begin(),already_removed.end(),index1) != already_removed.end()) continue;
+	std::vector<int> indices = it->second;
+	
+	for (int j=0;j!=indices.size();j++){
+	  int index2 = indices.at(j);
+	  if (find(already_removed.begin(),already_removed.end(),index2) == already_removed.end()){
+	    chi2_p += penalty_ncpt;
+	    // flag_test = 1;
+	    // break;
+	  }
+	}
+	// if (flag_test ==1) break;
+      }
+      // if (flag_test == 1){
+      //   chi2_p += penalty_ncpt;
+      // }
+    }
+    
+    WireCell2dToy::ToyMatrixKalman toykalman(already_removed, no_need_remove, toymatrix,0,0,chi2_p);
+    //std::cout << "Test: " << cellmap.size() << " " << wiremap.size() << " " << toykalman.Get_numz() << " " << ncount << std::endl;
+  }
+
+
+
+}
+
 
 WireCell2dToy::ToyMatrixIterate_SingleWire::ToyMatrixIterate_SingleWire(WireCell2dToy::ToyMatrix &toymatrix, WireCell2dToy::MergeToyTiling* mergetiling)
   : toymatrix(toymatrix)
   , mergetiling(mergetiling)
+  , penalty_ncpt(0)
 {
+  for (int i=0;i!=toymatrix.Get_mcindex();i++){
+    cell_penal[i] = 0;
+  }
+  limit = 1e5;
+
   // figure out single-wire cell, and no need to remove these
   WireCell::GeomCellSelection all_cells = mergetiling->get_allcell();
   WireCell::GeomCellSelection single_wire_cells = mergetiling->get_single_wire_cells();
@@ -47,7 +198,7 @@ WireCell2dToy::ToyMatrixIterate_SingleWire::ToyMatrixIterate_SingleWire(WireCell
 }
 
 void WireCell2dToy::ToyMatrixIterate_SingleWire::Iterate(WireCell::GeomCellSelection cells, WireCell::GeomCellSelection single_cells, WireCell::GeomCellSelection tried_cell, WireCell::GeomCellMap cellmap, WireCell::GeomWireMap wiremap){
-  if (ncount > 1e5) return;
+  if (ncount > limit) return;
 
   
 
@@ -180,8 +331,38 @@ void WireCell2dToy::ToyMatrixIterate_SingleWire::Iterate(WireCell::GeomCellSelec
 	  }
 	}
 	
-	WireCell2dToy::ToyMatrixKalman toykalman(already_removed, no_need_remove, toymatrix,0,0);
-	if (ncount > 1e5) return;
+
+	double chi2_p = 0;
+	for (int j = 0; j!=already_removed.size(); j++){
+	  chi2_p += cell_penal[already_removed.at(j)];
+	}
+	
+	if (penalty_ncpt>0){
+	  //add the penalty due to not compatible cells (ncpt)
+	  //int flag_test = 0;
+	  for (auto it = cells_ncpt.begin(); it!= cells_ncpt.end(); it++){
+	    int index1 = it->first;
+	    if (find(already_removed.begin(),already_removed.end(),index1) != already_removed.end()) continue;
+	    std::vector<int> indices = it->second;
+	    
+	    for (int j=0;j!=indices.size();j++){
+	      int index2 = indices.at(j);
+	      if (find(already_removed.begin(),already_removed.end(),index2) == already_removed.end()){
+		chi2_p += penalty_ncpt;
+		// flag_test = 1;
+		// break;
+	      }
+	    }
+	    // if (flag_test ==1) break;
+	  }
+	  // if (flag_test == 1){
+	  //   chi2_p += penalty_ncpt;
+	  // }
+	}
+	
+	
+	WireCell2dToy::ToyMatrixKalman toykalman(already_removed, no_need_remove, toymatrix,0,0,chi2_p);
+	if (ncount > limit) return;
 	ncount ++;
 
 	//std::cout << "Test: " << cellmap.size() << " " << wiremap.size() << " " << toykalman.Get_numz() << " " << ncount << std::endl;
