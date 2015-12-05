@@ -802,8 +802,8 @@ int main(int argc, char* argv[])
       	  //	  std::cout << "Xin: " << cell_next_map[mcell].size() <<  " " << cell_prev_map[mcell].size() << std::endl;
 
       	  for (int k=0;k!=cell_next_map[mcell].size();k++){
-	    // if (find(good_cluster_cells.begin(),good_cluster_cells.end(),cell_next_map[mcell].at(k))!=good_cluster_cells.end()){
-	    if (toymatrix[i+1]->Get_Cell_Charge(cell_next_map[mcell].at(k))> recon_threshold){
+	    if (find(good_cluster_cells.begin(),good_cluster_cells.end(),cell_next_map[mcell].at(k))!=good_cluster_cells.end()){
+	      //if (toymatrix[i+1]->Get_Cell_Charge(cell_next_map[mcell].at(k))> recon_threshold){
       	      flag_save_cell = 1;
       	      break;
       	    }
@@ -811,8 +811,8 @@ int main(int argc, char* argv[])
       	  if (flag_save_cell==1){
       	    flag_save_cell = 0;
       	    for (int k=0;k!=cell_prev_map[mcell].size();k++){
-	      // if (find(good_cluster_cells.begin(),good_cluster_cells.end(),cell_prev_map[mcell].at(k))!=good_cluster_cells.end()){
-	      if (toymatrix[i-1]->Get_Cell_Charge(cell_prev_map[mcell].at(k))> recon_threshold){
+	      if (find(good_cluster_cells.begin(),good_cluster_cells.end(),cell_prev_map[mcell].at(k))!=good_cluster_cells.end()){
+		//if (toymatrix[i-1]->Get_Cell_Charge(cell_prev_map[mcell].at(k))> recon_threshold){
       		flag_save_cell = 1;
       		break;
       	      }
