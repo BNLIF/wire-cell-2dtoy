@@ -233,7 +233,7 @@ WireCell2dToy::ToyTracking::ToyTracking(WireCell2dToy::ToyCrawler& toycrawler, i
   	}
   	//std::cout << "Test Shower only" << std::endl; 
 	
-  	// // Judge vertex with multiple tracks ...
+  	// Judge vertex with multiple tracks ...
   	if (track_shower_reco(toycrawler)){
   	  std::cout << "Track + Shower " << std::endl; 
   	  Cleanup_showers();
@@ -878,8 +878,6 @@ void WireCell2dToy::ToyTracking::Cleanup_showers(){
 
 
 
-
-
 bool  WireCell2dToy::ToyTracking::track_shower_reco(WireCell2dToy::ToyCrawler& toycrawler){
   bool result = false;
 
@@ -912,8 +910,6 @@ bool  WireCell2dToy::ToyTracking::track_shower_reco(WireCell2dToy::ToyCrawler& t
   }
 
   
- 
-
 
 
   for (int i=0;i!=vertices.size();i++){
@@ -963,11 +959,10 @@ bool  WireCell2dToy::ToyTracking::track_shower_reco(WireCell2dToy::ToyCrawler& t
 	      break;
 	    }
 	  }
-	  
-	  
-
 	}
       }
+
+      // now save all the vertices that are close into temp 
 
 
       WCTrackSelection temp_tracks;
@@ -1022,7 +1017,8 @@ bool  WireCell2dToy::ToyTracking::track_shower_reco(WireCell2dToy::ToyCrawler& t
 
       
       // 
-      
+
+
       if (temp_tracks.size() == 2){
 	TVector3 *vec1 = temp_dirs.at(0);
 	TVector3 *vec2 = temp_dirs.at(1);
@@ -1146,12 +1142,14 @@ bool  WireCell2dToy::ToyTracking::track_shower_reco(WireCell2dToy::ToyCrawler& t
 
       
 
-      // std::cout << spec_vertex->Center().x/units::cm << " "
+      // std::cout << "Xin: " << spec_vertex->Center().x/units::cm << " "
       // 		<< spec_vertex->Center().y/units::cm << " " 
       // 		<< spec_vertex->Center().z/units::cm << " " 
-      // 		<< flag_shower << " " << good_cells.size() << " " << shower->get_all_cells().size()  << " " << nvertex_outside << std::endl;
+      // 		<< flag_shower << " " << good_cells.size() << " " << shower->get_all_cells().size()  << " " <<  std::endl;
       
-      if (flag_shower){
+      // flag_shower = false;
+
+      if (flag_shower&& shower->IsShower_CheckVertex()){
 	showers.push_back(shower);
 	// spec_track, spec_vertex, exclude_cells ... 
       }else{
@@ -1222,7 +1220,7 @@ bool  WireCell2dToy::ToyTracking::track_shower_reco(WireCell2dToy::ToyCrawler& t
 	WCShower *shower = new WCShower(spec_vertex,0,exclude_cells,toycrawler.Get_mcells_map());
 	bool flag_shower = shower->IsShower(good_cells);
 	
-	if (flag_shower ){
+	if (flag_shower && shower->IsShower_CheckVertex()){
 	  showers.push_back(shower);
 	  // spec_track, spec_vertex, exclude_cells ... 
 	}else{
