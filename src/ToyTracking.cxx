@@ -1537,23 +1537,45 @@ void WireCell2dToy::ToyTracking::form_parallel_tiny_tracks(WireCell2dToy::ToyCra
   
   // Need to judge if the cluster is around a vertex or not (what criteria?)
   for (int i=0;i!=cluster_msc.size();i++){
-    WCVertex *vertex;
+    WCVertex *vertex = vertices.at(0);
+    int vertex_ntrack = 0;
+    WCVertex *temp_vertex;
     int flag = 0;
+
     for (int k=0;k!=cluster_msc.at(i).size();k++){
       MergeSpaceCell *mcell1 = cluster_msc.at(i).at(k);
       MergeSpaceCell *mcell2 = new_mcells_map[mcell1];
       for (int j=0;j!=vertices.size();j++){
-	vertex = vertices.at(j);
-	MergeSpaceCell *vertex_cell = vertex->get_msc();
+	temp_vertex = vertices.at(j);
 	
-	if (fabs(vertex_cell->Get_Center().x - mcell2->Get_Center().x) < 2*vertex_cell->thickness() + 0.5*units::mm && vertex_cell->Overlap(*mcell2)){
-	  flag = 1;
-	  break;
+	// vertex must contain a good track to start with 
+	int flag1 = 0;
+	for (int i1 = 0;i1!=temp_vertex->get_ntracks();i1++){
+	  auto it = find(good_tracks.begin(),good_tracks.end(),temp_vertex->get_tracks().at(i1));
+	  if (it != good_tracks.end()){
+	    flag1 ++;
+	  }
+	}
+       
+	if (flag1 >0){
+	  MergeSpaceCell *vertex_cell = temp_vertex->get_msc();
+	  if (fabs(vertex_cell->Get_Center().x - mcell2->Get_Center().x) < 2*vertex_cell->thickness() + 0.5*units::mm && vertex_cell->Overlap(*mcell2)){
+
+	    if (flag1 > vertex_ntrack){
+	      flag = 1;
+	      vertex = temp_vertex;
+	      vertex_ntrack = flag1;
+	    }
+
+	  }
 	}
       }
-      if (flag == 1)
+      if (flag == 1 && vertex_ntrack>=2)
 	break;
     }
+    
+    //std::cout << "Xin: " << flag << " " << vertex->Center().x/units::cm << " "  << vertex->get_ntracks()<< std::endl;
+
     if (flag == 1){
       // if yes, do parallel track finder ... 
       //MergeSpaceCellSelection mcells = cluster_msc.at(i);
@@ -2420,7 +2442,7 @@ bool WireCell2dToy::ToyTracking::IsThisShower(WireCell2dToy::ToyCrawler& toycraw
   // }
 
 
-  std::cout << "Number of Tracks " << ntracks << " "  << time_mcells_set.size() << " " << track_cluster.size() << " " << time_mcells_set1.size() << " " << time_mcells_set2.size() << std::endl; 
+  // std::cout << "Number of Tracks " << ntracks << " "  << time_mcells_set.size() << " " << track_cluster.size() << " " << time_mcells_set1.size() << " " << time_mcells_set2.size() << std::endl; 
   
   
   //need better tuning .... 
