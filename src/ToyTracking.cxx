@@ -277,7 +277,10 @@ WireCell2dToy::ToyTracking::ToyTracking(WireCell2dToy::ToyCrawler& toycrawler, i
     }
   }else{
     // if no vertices are found ... 
-    
+    //  do another parallel track finding without vertex... 
+    form_parallel_tiny_tracks_wovertex(toycrawler);
+    update_maps(1);
+    fine_tracking(1);
   }
 
 
@@ -1371,6 +1374,160 @@ bool  WireCell2dToy::ToyTracking::track_shower_reco(WireCell2dToy::ToyCrawler& t
 }
 
 
+void WireCell2dToy::ToyTracking::form_parallel_tiny_tracks_wovertex(WireCell2dToy::ToyCrawler& toycrawler){
+  //form all the cells
+  MergeSpaceCellMap& mcells_map = toycrawler.Get_mcells_map();
+  MergeSpaceCellSelection mcells;
+  for (auto it = mcells_map.begin(); it != mcells_map.end(); it++){
+      mcells.push_back(it->first);
+  }
+  
+  //examine all the cells to find out outlier 
+  for (int i=0;i!=mcells.size();i++){
+    MergeSpaceCell *mcell = mcells.at(i);
+    new_mcells.push_back(mcell);
+    new_mcells_map[mcell] = mcell;
+  }
+
+  std::vector<MergeSpaceCellSelection> cluster_msc;
+  // Need to cluster these by whether they are connected ...
+  for (int i=0;i!=new_mcells.size();i++){
+    MergeSpaceCell *mcell = new_mcells.at(i);
+    //std::cout << mcell->Get_Center().x/units::cm << std::endl;
+    if (cluster_msc.size() == 0 ){
+      MergeSpaceCellSelection mscs;
+      mscs.push_back(mcell);
+      cluster_msc.push_back(mscs);
+    }else{
+      int flag = 0;
+      for (int j=0;j!=cluster_msc.size();j++){
+   	MergeSpaceCellSelection& mscs = cluster_msc.at(j);
+   	for (int k=0;k!=mscs.size();k++){
+   	  MergeSpaceCell *mcell1 = mscs.at(k);	  
+   	  if (fabs(mcell1->Get_Center().x - mcell->Get_Center().x) < mcell1->thickness() + 0.2*units::mm ){
+	    if (mcell1->Overlap(*mcell)){
+	      mscs.push_back(mcell);
+	      flag = 1;
+	      break;
+	    }
+   	  }
+   	}
+	if (flag == 1)
+	  break;
+      }
+      if (flag == 0){
+  	MergeSpaceCellSelection mscs;
+  	mscs.push_back(mcell);
+  	cluster_msc.push_back(mscs);
+      }
+    }
+  }
+
+  
+  int flag = 1;
+  while(flag){
+    flag = 0;
+    for (int i=0;i!=cluster_msc.size();i++){
+      MergeSpaceCellSelection& mscs_1 = cluster_msc.at(i);
+      for (int j=i+1;j< cluster_msc.size();j++){
+  	MergeSpaceCellSelection& mscs_2 = cluster_msc.at(j);
+  	for (int k1 = 0; k1 != mscs_1.size(); k1++){
+  	  MergeSpaceCell *mcell1 = mscs_1.at(k1);
+  	  for (int k2 = 0; k2!= mscs_2.size(); k2++){
+  	    MergeSpaceCell * mcell2 = mscs_2.at(k2);
+	    
+  	    if (fabs(mcell1->Get_Center().x - mcell2->Get_Center().x) < mcell1->thickness() + 0.2*units::mm){ 
+  	      if (mcell1->Overlap(*mcell2)){
+
+  		cluster_msc.at(i).insert(cluster_msc.at(i).end(),cluster_msc.at(j).begin(),cluster_msc.at(j).end());
+  		cluster_msc.erase(cluster_msc.begin() + j);
+		
+  		//std::cout << flag << std::endl;
+  		flag = 1;
+  		break;
+  	      }
+  	    }
+  	  }
+  	  if (flag == 1) break;
+  	}
+  	if (flag == 1) break;
+      }
+      if (flag == 1) break;
+    }
+  }
+  
+  flag = 1;
+  while (flag){
+    flag = 0;
+    for (int i=0;i!=cluster_msc.size();i++){
+      MergeSpaceCellSelection& mscs_1 = cluster_msc.at(i);
+      int sum = 0;
+      for (int j=0;j!=mscs_1.size();j++){
+  	sum += mscs_1.at(j)->Get_all_spacecell().size();
+      }
+      if (sum < 5){
+  	cluster_msc.erase(cluster_msc.begin() + i);
+  	flag = 1;
+  	break;
+      }
+    }
+  }
+
+  // std::cout << "Xin: " << cluster_msc.size() << " " << new_mcells.size() << std::endl;
+
+  for (int i=0;i!=cluster_msc.size();i++){
+    // Create a vertex which is furthest away from the center ... 
+    // find the center
+    MergeSpaceCellSelection& mscs_1 = cluster_msc.at(i);
+
+    float sum = 0;
+    Point center;
+    center.x = 0;
+    center.y = 0;
+    center.z = 0;
+
+    for (int j=0;j!=mscs_1.size();j++){
+      sum += mscs_1.at(j)->Get_all_spacecell().size();
+      center.x += mscs_1.at(j)->Get_Center().x*mscs_1.at(j)->Get_all_spacecell().size();
+      center.y += mscs_1.at(j)->Get_Center().y*mscs_1.at(j)->Get_all_spacecell().size();
+      center.z += mscs_1.at(j)->Get_Center().z*mscs_1.at(j)->Get_all_spacecell().size();
+    }
+    center.x /= sum;
+    center.y /= sum;
+    center.z /= sum;
+
+    // find the furthest mcell, and cell
+    float furthest_dist = 0;
+    MergeSpaceCell *furthest_mcell = 0;
+    SpaceCell *furthest_cell = 0;
+    
+    for (int j=0;j!=mscs_1.size();j++){
+      MergeSpaceCell *mcell = mscs_1.at(i);
+      for (int k=0;k!=mscs_1.at(j)->Get_all_spacecell().size();k++){
+	SpaceCell *cell = mscs_1.at(j)->Get_all_spacecell().at(k);
+	
+	float dist = sqrt(pow(cell->x() - center.x,2)
+			  +pow(cell->y() - center.y,2)
+			  +pow(cell->z() - center.z,2));
+	
+	if (dist > furthest_dist){
+	  furthest_dist = dist;
+	  furthest_mcell = mcell;
+	  furthest_cell = cell;
+	}
+      }
+    }
+    // create the vertex
+    WCVertex *vertex = new WCVertex(*furthest_mcell);
+    Point p(furthest_cell->x(),furthest_cell->y(),furthest_cell->z());
+    vertex->set_center(p);
+    vertices.push_back(vertex);
+
+    // do parallel tracking ... 
+    parallel_tracking(vertex,cluster_msc.at(i),toycrawler);
+  }
+
+}
 
 
 void WireCell2dToy::ToyTracking::form_parallel_tiny_tracks(WireCell2dToy::ToyCrawler& toycrawler){
@@ -1865,6 +2022,9 @@ void WireCell2dToy::ToyTracking::parallel_tracking(WCVertex *vertex, MergeSpaceC
       tracks.push_back(track);
       parallel_tracks.push_back(track);
       
+      // std::cout << vertex->Center().x/units::cm << " " << vertex->Center().y/units::cm << " " << vertex->Center().z/units::cm << " " << std::endl;
+      // std::cout << max_point.x/units::cm << " " << max_point.y/units::cm << " " << max_point.z/units::cm << std::endl;
+
       WCVertex *vertex1 = new WCVertex(*max_mcell);
       vertex1->set_center(max_point);
       vertex1->Add(track);
