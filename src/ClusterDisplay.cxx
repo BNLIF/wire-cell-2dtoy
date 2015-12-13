@@ -384,7 +384,9 @@ void WireCell2dToy::ClusterDisplay::DrawCluster(MergeSpaceCellSelection& mcells,
     std::vector<int> track_no;
     int flag = -1;
     for (int j=0;j!=tracks.size();j++){
-      if (tracks.at(j)->IsContained(mcell)){
+      if (find(toytracking.get_bad_tracks().begin(),toytracking.get_bad_tracks().end(),tracks.at(j)) != toytracking.get_bad_tracks().end()) continue;
+
+      if (tracks.at(j)->IsContained(mcell) ){
 	flag = 1;
 	track_no.push_back(j);
       }

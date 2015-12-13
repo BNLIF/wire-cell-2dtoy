@@ -70,6 +70,8 @@ namespace WireCell2dToy{
     std::map<WireCell::WCTrack*, std::vector<float>>& get_gt_pos_map(){return tracks_pos_map;};
     void fill_maps();
 
+    
+
   protected: 
     std::map<WireCell::WCTrack*, std::vector<float>> tracks_angle_map;
     std::map<WireCell::WCTrack*, std::vector<float>> tracks_pos_map;
@@ -93,7 +95,7 @@ namespace WireCell2dToy{
     
     //    WireCell::MergeSpaceCellSelection orig_mcells;
     WireCell::MergeSpaceCellSelection new_mcells;
-    WireCell::MergeSpaceCellMap1 new_mcells_map; 
+    WireCell::MergeSpaceCellMap1 new_mcells_map;  //map the new stuff ... 
 
     /* WireCell::MSC_WCV_Map msc_wcv_map; */
     /* WireCell::MCT_WCT_Map mct_wct_map; */
