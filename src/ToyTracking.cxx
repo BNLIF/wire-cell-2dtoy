@@ -121,6 +121,9 @@ void WireCell2dToy::ToyTracking::MergeTracks(){
     if (fabs(map_vertex_theta[vertex]) < 10./180.*3.1415926 && 
 	fabs(map_vertex_phi[vertex])<10./180.*3.1415926 &&
 	sqrt(pow(map_vertex_theta[vertex],2) + pow(map_vertex_phi[vertex],2)) < 12./180.*3.1415926){
+
+      std::cout << vertex << " " << vertex->Center().x/units::cm << " " << track1 << " " << track2 << std::endl;
+      
       if (merge_vertices.size()==0){
 	WCVertexSelection temp_vertices;
 	temp_vertices.push_back(vertex);
@@ -132,25 +135,50 @@ void WireCell2dToy::ToyTracking::MergeTracks(){
       }else{
 	// loop through exting stuff
 	int flag = 0;
-	// for (int i=0;i!=temp_vertices.size();i++){
+	for (int i=0;i!=merge_vertices.size();i++){
+	  WCVertexSelection& temp_vertices = merge_vertices.at(i);
+	  WCTrackSelection& temp_tracks = merge_tracks.at(i);
 	  
-	// }
-	// if (flag==0){
-	//   WCVertexSelection temp_vertices;
-	//   temp_vertices.push_back(vertex);
-	//   WCTrackSelection temp_tracks;
-	//   temp_tracks.push_back(track1);
-	//   temp_tracks.push_back(track2);
-	//   merge_vertices.push_back(temp_vertices);
-	//   merge_tracks.push_back(temp_tracks);
-	// }
+	  auto it1 = find(temp_tracks.begin(),temp_tracks.end(),track1);
+	  auto it2 = find(temp_tracks.begin(),temp_tracks.end(),track2);
+	  
+	  if (it1 != temp_tracks.end() || it2 != temp_tracks.end()){
+	    
+	    temp_vertices.push_back(vertex);
+	    if (it1 == temp_tracks.end())
+	      temp_tracks.push_back(track1);
+	    if (it2 == temp_tracks.end())
+	      temp_tracks.push_back(track2);
+
+	    flag = 1;
+	    break;
+	  }
+	  
+	}
+	if (flag == 0){
+	  WCVertexSelection temp_vertices;
+	  temp_vertices.push_back(vertex);
+	  WCTrackSelection temp_tracks;
+	  temp_tracks.push_back(track1);
+	  temp_tracks.push_back(track2);
+	  merge_vertices.push_back(temp_vertices);
+	  merge_tracks.push_back(temp_tracks);
+	}
       }
     }
     // std::cout << it->first->Center().x/units::cm << " " << it->first->Center().y/units::cm 
     // 	      << " " << it->first->Center().z/units::cm << " " << 
     //   it->second/3.1415926*180. << " " << map_vertex_phi[it->first]/3.1415926*180. << std::endl;
   }
-
+  
+  for (int i=0;i!=merge_tracks.size();i++){
+    std::cout <<i << " " << merge_tracks.at(i).size() << " " << merge_vertices.at(i).size() << std::endl;
+    for (int j=0;j!=merge_vertices.at(i).size();j++){
+      std::cout << "abc " << merge_vertices.at(i).at(j)->Center().x/units::cm << " " << merge_vertices.at(i).at(j)->Center().y/units::cm << " " << merge_vertices.at(i).at(j)->Center().z/units::cm << std::endl;
+    }
+  }
+  
+  //  std::cout << merge_vertices.size() << " " << merge_tracks.size() << std::endl;
 
   // creat a new track
   // do fine tracking for the new track
