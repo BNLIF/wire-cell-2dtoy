@@ -50,7 +50,7 @@
 using namespace WireCell;
 using namespace std;
 
-
+#define MAX_TRACKS 30000
 
 
 int main(int argc, char* argv[])
@@ -130,28 +130,28 @@ int main(int argc, char* argv[])
   sst->SetBranchAddress("subRunNo",&subrun_no);
 
   
-   // //save MC truth ...
-  // int mc_Ntrack;  // number of tracks in MC
-  // int mc_id[MAX_TRACKS];  // track id; size == mc_Ntrack
-  // int mc_pdg[MAX_TRACKS];  // track particle pdg; size == mc_Ntrack
-  // int mc_process[MAX_TRACKS];  // track generation process code; size == mc_Ntrack
-  // int mc_mother[MAX_TRACKS];  // mother id of this track; size == mc_Ntrack
-  // float mc_startXYZT[MAX_TRACKS][4];  // start position of this track; size == mc_Ntrack
-  // float mc_endXYZT[MAX_TRACKS][4];  // end position of this track; size == mc_Ntrack
-  // float mc_startMomentum[MAX_TRACKS][4];  // start momentum of this track; size == mc_Ntrack
-  // float mc_endMomentum[MAX_TRACKS][4];  // end momentum of this track; size == mc_Ntrack
-  // std::vector<std::vector<int> > mc_daughters;  // daughters id of this track; vector
+   //save MC truth ...
+  int mc_Ntrack;  // number of tracks in MC
+  int mc_id[MAX_TRACKS];  // track id; size == mc_Ntrack
+  int mc_pdg[MAX_TRACKS];  // track particle pdg; size == mc_Ntrack
+  int mc_process[MAX_TRACKS];  // track generation process code; size == mc_Ntrack
+  int mc_mother[MAX_TRACKS];  // mother id of this track; size == mc_Ntrack
+  float mc_startXYZT[MAX_TRACKS][4];  // start position of this track; size == mc_Ntrack
+  float mc_endXYZT[MAX_TRACKS][4];  // end position of this track; size == mc_Ntrack
+  float mc_startMomentum[MAX_TRACKS][4];  // start momentum of this track; size == mc_Ntrack
+  float mc_endMomentum[MAX_TRACKS][4];  // end momentum of this track; size == mc_Ntrack
+  std::vector<std::vector<int> > mc_daughters;  // daughters id of this track; vector
 
-  // sst->SetBranchAddress("mc_Ntrack", &mc_Ntrack);  // number of tracks in MC
-  // sst->SetBranchAddress("mc_id", &mc_id);  // track id; size == mc_Ntrack
-  // sst->SetBranchAddress("mc_pdg", &mc_pdg);  // track particle pdg; size == mc_Ntrack
-  // sst->SetBranchAddress("mc_process", &mc_process);  // track generation process code; size == mc_Ntrack
-  // sst->SetBranchAddress("mc_mother", &mc_mother);  // mother id of this track; size == mc_Ntrack
-  // sst->SetBranchAddress("mc_daughters", &mc_daughters);  // daughters id of this track; vector
-  // sst->SetBranchAddress("mc_startXYZT", &mc_startXYZT);  // start position of this track; size == mc_Ntrack
-  // sst->SetBranchAddress("mc_endXYZT", &mc_endXYZT);  // start position of this track; size == mc_Ntrack
-  // sst->SetBranchAddress("mc_startMomentum", &mc_startMomentum);  // start momentum of this track; size == mc_Ntrack
-  // sst->SetBranchAddress("mc_endMomentum", &mc_endMomentum);  // start momentum of this track; size == mc_Ntrack
+  sst->SetBranchAddress("mc_Ntrack", &mc_Ntrack);  // number of tracks in MC
+  sst->SetBranchAddress("mc_id", &mc_id);  // track id; size == mc_Ntrack
+  sst->SetBranchAddress("mc_pdg", &mc_pdg);  // track particle pdg; size == mc_Ntrack
+  sst->SetBranchAddress("mc_process", &mc_process);  // track generation process code; size == mc_Ntrack
+  sst->SetBranchAddress("mc_mother", &mc_mother);  // mother id of this track; size == mc_Ntrack
+  sst->SetBranchAddress("mc_daughters", &mc_daughters);  // daughters id of this track; vector
+  sst->SetBranchAddress("mc_startXYZT", &mc_startXYZT);  // start position of this track; size == mc_Ntrack
+  sst->SetBranchAddress("mc_endXYZT", &mc_endXYZT);  // start position of this track; size == mc_Ntrack
+  sst->SetBranchAddress("mc_startMomentum", &mc_startMomentum);  // start momentum of this track; size == mc_Ntrack
+  sst->SetBranchAddress("mc_endMomentum", &mc_endMomentum);  // start momentum of this track; size == mc_Ntrack
 
 
 
@@ -1242,23 +1242,23 @@ int main(int argc, char* argv[])
   Trun->Fill();
 
 
-    // TTree *TMC = new TTree("TMC","TMC");
-  // TMC->SetDirectory(file);
+    TTree *TMC = new TTree("TMC","TMC");
+  TMC->SetDirectory(file);
  
-  // TMC->Branch("mc_Ntrack", &mc_Ntrack);  // number of tracks in MC
-  // TMC->Branch("mc_id", &mc_id, "mc_id[mc_Ntrack]/I");  // track id; size == mc_Ntrack
-  // TMC->Branch("mc_pdg", &mc_pdg, "mc_id[mc_Ntrack]/I");  // track particle pdg; size == mc_Ntrack
-  // TMC->Branch("mc_process", &mc_process, "mc_process[mc_Ntrack]/I");  // track generation process code; size == mc_Ntrack
-  // TMC->Branch("mc_mother", &mc_mother, "mc_mother[mc_Ntrack]/I");  // mother id of this track; size == mc_Ntrack
-  // TMC->Branch("mc_daughters", &mc_daughters);  // daughters id of this track; vector
-  // TMC->Branch("mc_startXYZT", &mc_startXYZT, "mc_startXYZT[mc_Ntrack][4]/F");  // start position of this track; size == mc_Ntrack
-  // TMC->Branch("mc_endXYZT", &mc_endXYZT, "mc_endXYZT[mc_Ntrack][4]/F");  // start position of this track; size == mc_Ntrack
-  // TMC->Branch("mc_startMomentum", &mc_startMomentum, "mc_startMomentum[mc_Ntrack][4]/F");  // start momentum of this track; size == mc_Ntrack
-  // TMC->Branch("mc_endMomentum", &mc_endMomentum, "mc_endMomentum[mc_Ntrack][4]/F");  // start momentum of this track; size == mc_Ntrack
+  TMC->Branch("mc_Ntrack", &mc_Ntrack);  // number of tracks in MC
+  TMC->Branch("mc_id", &mc_id, "mc_id[mc_Ntrack]/I");  // track id; size == mc_Ntrack
+  TMC->Branch("mc_pdg", &mc_pdg, "mc_id[mc_Ntrack]/I");  // track particle pdg; size == mc_Ntrack
+  TMC->Branch("mc_process", &mc_process, "mc_process[mc_Ntrack]/I");  // track generation process code; size == mc_Ntrack
+  TMC->Branch("mc_mother", &mc_mother, "mc_mother[mc_Ntrack]/I");  // mother id of this track; size == mc_Ntrack
+  TMC->Branch("mc_daughters", &mc_daughters);  // daughters id of this track; vector
+  TMC->Branch("mc_startXYZT", &mc_startXYZT, "mc_startXYZT[mc_Ntrack][4]/F");  // start position of this track; size == mc_Ntrack
+  TMC->Branch("mc_endXYZT", &mc_endXYZT, "mc_endXYZT[mc_Ntrack][4]/F");  // start position of this track; size == mc_Ntrack
+  TMC->Branch("mc_startMomentum", &mc_startMomentum, "mc_startMomentum[mc_Ntrack][4]/F");  // start momentum of this track; size == mc_Ntrack
+  TMC->Branch("mc_endMomentum", &mc_endMomentum, "mc_endMomentum[mc_Ntrack][4]/F");  // start momentum of this track; size == mc_Ntrack
 
 
 
-  // TMC->Fill();
+  TMC->Fill();
 
   file->Write();
   file->Close();

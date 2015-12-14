@@ -4,6 +4,8 @@
 #pragma link off all functions;
 #pragma link C++ nestedclasses;
 
+#pragma link C++ class std::vector<std::vector<int>>+;
+
 #pragma link C++ namespace WireCell2dToy;
 
 // #pragma link C++ class WireCell2dToy::ToyEventDisplay;
