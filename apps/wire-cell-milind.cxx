@@ -140,7 +140,7 @@ int main(int argc, char* argv[])
   float mc_endXYZT[MAX_TRACKS][4];  // end position of this track; size == mc_Ntrack
   float mc_startMomentum[MAX_TRACKS][4];  // start momentum of this track; size == mc_Ntrack
   float mc_endMomentum[MAX_TRACKS][4];  // end momentum of this track; size == mc_Ntrack
-  std::vector<std::vector<int> > *mc_daughters=0;  // daughters id of this track; vector
+  std::vector<std::vector<int> > *mc_daughters= new std::vector<std::vector<int> >;  // daughters id of this track; vector
 
   sst->SetBranchAddress("mc_Ntrack", &mc_Ntrack);  // number of tracks in MC
   sst->SetBranchAddress("mc_id", &mc_id);  // track id; size == mc_Ntrack
