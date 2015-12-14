@@ -209,7 +209,7 @@ int main(int argc, char* argv[])
   std::cout << "Tracking " << std::endl;
   WireCell2dToy::ToyTracking toytracking(toycrawler);
   //WireCell2dToy::ToyTracking toytracking(toycrawler,1); //cosmic tune?
-  
+  toytracking.MergeTracks();
 
   std::cout << "Good Tracks:     " << toytracking.get_good_tracks().size() <<std::endl;
   std::cout << "Vertices:        " << toytracking.get_vertices().size() << std::endl;

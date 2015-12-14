@@ -9,6 +9,131 @@
 
 using namespace WireCell;
 
+void WireCell2dToy::ToyTracking::MergeTracks(){
+  std::cout << "Merge Tracks! " << std::endl;
+
+  WCTrackSelection all_tracks;
+  
+  // First merge tracks according to vertices and direction (2 or 3 tracks, and more tracks?)
+  for (int i=0;i!=vertices.size();i++){
+    WCVertex *vertex = vertices.at(i);
+    for (int j=0;j!=vertex->get_tracks().size();j++){
+      WCTrack *track = vertex->get_tracks().at(j);
+      auto it = find(all_tracks.begin(),all_tracks.end(),track);
+      if (it == all_tracks.end() && track->get_centerVP_cells().size()>0)
+	all_tracks.push_back(track);
+      // std::cout << i << " " << j << " " << vertex->Center().x/units::cm <<
+      // " " << vertex->Center().y/units::cm << " " << vertex->Center().z/units::cm << " " << 
+      // vertex->get_ky(track) << " " << vertex->get_kz(track) << std::endl;
+    }
+  }
+  
+  ClusterTrackSelection ct_tracks;
+  for (int i=0;i!=all_tracks.size();i++){
+    WCTrack *track = all_tracks.at(i);
+    MergeSpaceCellSelection& mcells = track->get_centerVP_cells();
+    //std::cout << i << " " << mcells.size() << std::endl;
+    ClusterTrack *ct = new ClusterTrack(mcells.at(0));
+    for (int j=1;j< mcells.size();j++){
+      ct->AddMSCell_anyway(mcells.at(j));
+    }
+    ct_tracks.push_back(ct);
+  }
+  
+  std::map<WCVertex*, float> map_vertex_theta;
+  std::map<WCVertex*, float> map_vertex_phi;
+  std::map<WCVertex*, WCTrackSelection> map_vertex_tracks;
+
+
+  for (int i=0;i!=vertices.size();i++){
+    WCVertex *vertex = vertices.at(i);
+
+    // std::cout << i << " " << vertex->get_tracks().size() << std::endl;
+    
+    Point center;
+    center.x = vertex->get_msc()->Get_Center().x;
+    center.y = vertex->get_msc()->Get_Center().y;
+    center.z = vertex->get_msc()->Get_Center().z;
+    
+    WCTrackSelection used_tracks;
+
+
+    
+    
+    
+    for (int j=0;j!=vertex->get_tracks().size();j++){
+      WCTrack *track1 = vertex->get_tracks().at(j);
+      if (track1->get_centerVP_cells().size()==0) continue;
+
+      auto it3 = find(used_tracks.begin(),used_tracks.end(),track1);
+      if (it3 != used_tracks.end()) continue;
+      used_tracks.push_back(track1);
+
+      auto it1 = find(all_tracks.begin(),all_tracks.end(),track1);
+      ct_tracks.at(it1 - all_tracks.begin())->SC_Hough(center);
+      double theta1 = ct_tracks.at(it1 - all_tracks.begin())->Get_Theta();
+      double phi1 = ct_tracks.at(it1 - all_tracks.begin())->Get_Phi();
+
+      for (int k=0;k!=vertex->get_tracks().size();k++){
+	WCTrack *track2 = vertex->get_tracks().at(k);
+	if (track2->get_centerVP_cells().size()==0) continue;
+	auto it4 = find(used_tracks.begin(),used_tracks.end(),track2);
+	if (it4 != used_tracks.end()) continue;
+	
+	 auto it2 = find(all_tracks.begin(),all_tracks.end(),track2);
+	 ct_tracks.at(it2 - all_tracks.begin())->SC_Hough(center);
+	 double theta2 = ct_tracks.at(it2 - all_tracks.begin())->Get_Theta();
+	 double phi2 = ct_tracks.at(it2 - all_tracks.begin())->Get_Phi();
+	 
+	 if (map_vertex_theta.find(vertex)==map_vertex_theta.end()){
+	   map_vertex_theta[vertex] = theta1+theta2-3.1415926;
+	   map_vertex_phi[vertex] = fabs(phi1-phi2)-3.1415926;
+	   WCTrackSelection temp_tracks;
+	   temp_tracks.push_back(track1);
+	   temp_tracks.push_back(track2);
+	   map_vertex_tracks[vertex] = temp_tracks;
+	 }else{
+	   if (pow(theta1+theta2-3.1415926,2) + pow(fabs(phi1-phi2)-3.1415926,2) < 
+	       pow(map_vertex_theta[vertex],2) + pow(map_vertex_phi[vertex],2)){
+	     map_vertex_theta[vertex] = theta1+theta2-3.1415926;
+	     map_vertex_phi[vertex] = fabs(phi1-phi2)-3.1415926;
+	     map_vertex_tracks[vertex].clear();
+	     map_vertex_tracks[vertex].push_back(track1);
+	     map_vertex_tracks[vertex].push_back(track2);
+	   }
+	 }
+	 
+	 // std::cout << i << " " << center.x/units::cm << " " << center.y/units::cm << " " << center.z/units::cm 
+	 // 	   << " " << theta1+theta2-3.1415926 << " " << fabs(phi1-phi2)-3.1415926 << std::endl;
+
+      }
+    }
+  }
+
+  for (auto it = map_vertex_theta.begin(); it!= map_vertex_theta.end(); it++){
+    WCVertex *vertex = it->first;
+    WCTrack *track1 = map_vertex_tracks[vertex].at(0);
+    WCTrack *track2 = map_vertex_tracks[vertex].at(1);
+    
+    if (fabs(map_vertex_theta[vertex]) < 10./180.*3.1415926 && 
+	fabs(map_vertex_phi[vertex])<10./180.*3.1415926 &&
+	sqrt(pow(map_vertex_theta[vertex],2) + pow(map_vertex_phi[vertex],2)) < 12./180.*3.1415926){
+      // creat a new track
+      // do fine tracking for the new track
+      // add new track to all vertices
+      // add new track to all maps
+      // delete old tracks
+      // delete old vertices if none tracks
+    }
+
+    // std::cout << it->first->Center().x/units::cm << " " << it->first->Center().y/units::cm 
+    // 	      << " " << it->first->Center().z/units::cm << " " << 
+    //   it->second/3.1415926*180. << " " << map_vertex_phi[it->first]/3.1415926*180. << std::endl;
+  }
+  
+  
+}
+
 void WireCell2dToy::ToyTracking::fill_maps(){
   if (tracks_angle_map.size()==0){
     for (int i = 0;i!=good_tracks.size();i++){
