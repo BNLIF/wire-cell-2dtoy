@@ -212,7 +212,7 @@ int main(int argc, char* argv[])
   toytracking.MergeTracks();
 
   std::cout << "Good Tracks:     " << toytracking.get_good_tracks().size() <<std::endl;
-  std::cout << "Vertices:        " << toytracking.get_vertices().size() << std::endl;
+  std::cout << "Good Vertices:        " << toytracking.get_good_vertices().size() << std::endl;
   std::cout << "Bad Tracks:      " << toytracking.get_bad_tracks().size() << std::endl;
   std::cout << "Parallel Tracks: " << toytracking.get_parallel_tracks().size() << std::endl;
   std::cout << "Showers:         " << toytracking.get_showers().size() << std::endl;
@@ -231,16 +231,16 @@ int main(int argc, char* argv[])
   //display.DrawCluster(mcells,toytracking);
   //display.DrawCrawler(toycrawler,"psame",1);
 
-  WCVertexSelection& vertices = toytracking.get_vertices();
+  WCVertexSelection& vertices = toytracking.get_good_vertices();
   display.DrawVertex(vertices,"psame");
   
 
 
   WCTrackSelection& bad_tracks = toytracking.get_bad_tracks();
-  display.DrawTracks(bad_tracks,"same",2);
+  // display.DrawTracks(bad_tracks,"same",2);
 
   WCTrackSelection& short_tracks = toytracking.get_short_tracks();
-  display.DrawTracks(short_tracks,"psame",4);
+  //display.DrawTracks(short_tracks,"psame",4);
 
   WCShowerSelection& showers =toytracking.get_showers();
   if (showers.size() > 0)
