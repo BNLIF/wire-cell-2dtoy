@@ -57,9 +57,6 @@ void WireCell2dToy::ToyTracking::MergeTracks(){
     
     WCTrackSelection used_tracks;
 
-
-    
-    
     
     for (int j=0;j!=vertex->get_tracks().size();j++){
       WCTrack *track1 = vertex->get_tracks().at(j);
@@ -110,52 +107,34 @@ void WireCell2dToy::ToyTracking::MergeTracks(){
     }
   }
   
+
+  for (int i=0;i!=ct_tracks.size();i++){
+    delete ct_tracks.at(i);
+  }
+
   std::vector<WCVertexSelection> merge_vertices;
   std::vector<WCTrackSelection> merge_tracks;
 
-  for (auto it = map_vertex_theta.begin(); it!= map_vertex_theta.end(); it++){
-    WCVertex *vertex = it->first;
-    WCTrack *track1 = map_vertex_tracks[vertex].at(0);
-    WCTrack *track2 = map_vertex_tracks[vertex].at(1);
-    
-    if (fabs(map_vertex_theta[vertex]) < 10./180.*3.1415926 && 
-	fabs(map_vertex_phi[vertex])<10./180.*3.1415926 &&
-	sqrt(pow(map_vertex_theta[vertex],2) + pow(map_vertex_phi[vertex],2)) < 12./180.*3.1415926){
+  WCVertexSelection used_vertices;
+  int prev_vertices = 0;
+  int flag = 1;
 
-      std::cout << vertex << " " << vertex->Center().x/units::cm << " " << track1 << " " << track2 << std::endl;
+  while(used_vertices.size() < map_vertex_theta.size()){
+    prev_vertices = used_vertices.size();
+
+
+    for (auto it = map_vertex_theta.begin(); it!= map_vertex_theta.end(); it++){
+      WCVertex *vertex = it->first;
+      WCTrack *track1 = map_vertex_tracks[vertex].at(0);
+      WCTrack *track2 = map_vertex_tracks[vertex].at(1);
       
-      if (merge_vertices.size()==0){
-	WCVertexSelection temp_vertices;
-	temp_vertices.push_back(vertex);
-	WCTrackSelection temp_tracks;
-	temp_tracks.push_back(track1);
-	temp_tracks.push_back(track2);
-	merge_vertices.push_back(temp_vertices);
-	merge_tracks.push_back(temp_tracks);
-      }else{
-	// loop through exting stuff
-	int flag = 0;
-	for (int i=0;i!=merge_vertices.size();i++){
-	  WCVertexSelection& temp_vertices = merge_vertices.at(i);
-	  WCTrackSelection& temp_tracks = merge_tracks.at(i);
-	  
-	  auto it1 = find(temp_tracks.begin(),temp_tracks.end(),track1);
-	  auto it2 = find(temp_tracks.begin(),temp_tracks.end(),track2);
-	  
-	  if (it1 != temp_tracks.end() || it2 != temp_tracks.end()){
-	    
-	    temp_vertices.push_back(vertex);
-	    if (it1 == temp_tracks.end())
-	      temp_tracks.push_back(track1);
-	    if (it2 == temp_tracks.end())
-	      temp_tracks.push_back(track2);
-
-	    flag = 1;
-	    break;
-	  }
-	  
-	}
-	if (flag == 0){
+      auto it1 = find(used_vertices.begin(),used_vertices.end(),vertex);
+      if (it1 != used_vertices.end()) continue;
+      
+      if (fabs(map_vertex_theta[vertex]) < 10./180.*3.1415926 && 
+	  fabs(map_vertex_phi[vertex])<10./180.*3.1415926 &&
+	  sqrt(pow(map_vertex_theta[vertex],2) + pow(map_vertex_phi[vertex],2)) < 12./180.*3.1415926){
+	if (merge_vertices.size()==0 || flag == 1){
 	  WCVertexSelection temp_vertices;
 	  temp_vertices.push_back(vertex);
 	  WCTrackSelection temp_tracks;
@@ -163,13 +142,43 @@ void WireCell2dToy::ToyTracking::MergeTracks(){
 	  temp_tracks.push_back(track2);
 	  merge_vertices.push_back(temp_vertices);
 	  merge_tracks.push_back(temp_tracks);
+	  used_vertices.push_back(vertex);
+	  flag = 0;
+	}else{
+	  // loop through exiting stuff
+	  for (int i=0;i!=merge_vertices.size();i++){
+	    WCVertexSelection& temp_vertices = merge_vertices.at(i);
+	    WCTrackSelection& temp_tracks = merge_tracks.at(i);
+	    auto it1 = find(temp_tracks.begin(),temp_tracks.end(),track1);
+	    auto it2 = find(temp_tracks.begin(),temp_tracks.end(),track2);
+	    if (it1 != temp_tracks.end() || it2 != temp_tracks.end()){
+	      temp_vertices.push_back(vertex);
+	      if (it1 == temp_tracks.end())
+		temp_tracks.push_back(track1);
+	      if (it2 == temp_tracks.end())
+		temp_tracks.push_back(track2);
+	      used_vertices.push_back(vertex);
+	      break;
+	    }
+	    
+	  }
 	}
+      }else{
+	used_vertices.push_back(vertex);
       }
+      
+     
+      // std::cout << it->first->Center().x/units::cm << " " << it->first->Center().y/units::cm 
+      // 	      << " " << it->first->Center().z/units::cm << " " << 
+      //   it->second/3.1415926*180. << " " << map_vertex_phi[it->first]/3.1415926*180. << std::endl;
     }
-    // std::cout << it->first->Center().x/units::cm << " " << it->first->Center().y/units::cm 
-    // 	      << " " << it->first->Center().z/units::cm << " " << 
-    //   it->second/3.1415926*180. << " " << map_vertex_phi[it->first]/3.1415926*180. << std::endl;
+    
+    if (prev_vertices == used_vertices.size()){
+      flag = 1;
+    }
+
   }
+  
   
   for (int i=0;i!=merge_tracks.size();i++){
     std::cout <<i << " " << merge_tracks.at(i).size() << " " << merge_vertices.at(i).size() << std::endl;
