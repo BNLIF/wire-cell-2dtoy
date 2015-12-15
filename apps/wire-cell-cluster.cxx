@@ -209,7 +209,9 @@ int main(int argc, char* argv[])
   std::cout << "Tracking " << std::endl;
   WireCell2dToy::ToyTracking toytracking(toycrawler);
   //WireCell2dToy::ToyTracking toytracking(toycrawler,1); //cosmic tune?
-  toytracking.MergeTracks();
+  toytracking.IterateMergeTracks();
+  // toytracking.MergeTracks();
+  
 
   std::cout << "Good Tracks:     " << toytracking.get_good_tracks().size() <<std::endl;
   std::cout << "Good Vertices:        " << toytracking.get_good_vertices().size() << std::endl;
@@ -232,6 +234,7 @@ int main(int argc, char* argv[])
   //display.DrawCrawler(toycrawler,"psame",1);
 
   WCVertexSelection& vertices = toytracking.get_good_vertices();
+  //WCVertexSelection& vertices = toytracking.get_vertices();
   display.DrawVertex(vertices,"psame");
   
 

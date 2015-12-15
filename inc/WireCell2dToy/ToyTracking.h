@@ -29,6 +29,7 @@ namespace WireCell2dToy{
     
     WireCell::WCShowerSelection& get_showers(){return showers;};
 
+    void IterateMergeTracks();
 
     void MergeTracks();
 
