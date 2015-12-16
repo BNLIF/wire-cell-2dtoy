@@ -141,6 +141,7 @@ int main(int argc, char* argv[])
   float mc_startMomentum[MAX_TRACKS][4];  // start momentum of this track; size == mc_Ntrack
   float mc_endMomentum[MAX_TRACKS][4];  // end momentum of this track; size == mc_Ntrack
   std::vector<std::vector<int> > *mc_daughters= new std::vector<std::vector<int> >;  // daughters id of this track; vector
+  TObjArray* mc_trackPosition = new TObjArray();
 
   sst->SetBranchAddress("mc_Ntrack", &mc_Ntrack);  // number of tracks in MC
   sst->SetBranchAddress("mc_id", &mc_id);  // track id; size == mc_Ntrack
@@ -152,7 +153,7 @@ int main(int argc, char* argv[])
   sst->SetBranchAddress("mc_endXYZT", &mc_endXYZT);  // start position of this track; size == mc_Ntrack
   sst->SetBranchAddress("mc_startMomentum", &mc_startMomentum);  // start momentum of this track; size == mc_Ntrack
   sst->SetBranchAddress("mc_endMomentum", &mc_endMomentum);  // start momentum of this track; size == mc_Ntrack
-
+  sst->SetBranchAddress("mc_trackPosition",&mc_trackPosition);
 
 
   sst->GetEntry(eve_num);
@@ -1255,7 +1256,7 @@ int main(int argc, char* argv[])
   TMC->Branch("mc_endXYZT", &mc_endXYZT, "mc_endXYZT[mc_Ntrack][4]/F");  // start position of this track; size == mc_Ntrack
   TMC->Branch("mc_startMomentum", &mc_startMomentum, "mc_startMomentum[mc_Ntrack][4]/F");  // start momentum of this track; size == mc_Ntrack
   TMC->Branch("mc_endMomentum", &mc_endMomentum, "mc_endMomentum[mc_Ntrack][4]/F");  // start momentum of this track; size == mc_Ntrack
-
+  TMC->Branch("mc_trackPosition",mc_trackPosition);
 
 
   TMC->Fill();
