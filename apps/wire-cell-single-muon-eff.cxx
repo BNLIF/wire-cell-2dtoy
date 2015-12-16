@@ -252,7 +252,10 @@ int main(int argc, char* argv[])
   int sum = 0 ;
   
   for (int i=0;i!=crawlers.size();i++){
-    WireCell2dToy::ToyTracking* toytracking = new WireCell2dToy::ToyTracking(*crawlers.at(i),1); // cosmic tune
+    WireCell2dToy::ToyTracking *toytracking = new WireCell2dToy::ToyTracking(*crawlers.at(i));
+    //WireCell2dToy::ToyTracking* toytracking = new WireCell2dToy::ToyTracking(*crawlers.at(i),1); // cosmic tune
+    toytracking->IterateMergeTracks();
+
     trackings.push_back(toytracking);
 
     std::cout << i << std::endl;
