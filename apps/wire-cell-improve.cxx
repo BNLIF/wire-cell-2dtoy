@@ -190,7 +190,7 @@ int main(int argc, char* argv[])
   delete tfile;
 
   
-  cout << "Put in Truth " << endl; 
+  cout << "Put in Truth " << pvv.size() << endl; 
   WireCell2dToy::ToySignalSimuTrueFDS *st_fds = new WireCell2dToy::ToySignalSimuTrueFDS(*gfds,gds,total_time_bin/nrebin,max_events,0); //truth
   st_fds->jump(eve_num);
   

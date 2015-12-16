@@ -390,20 +390,20 @@ WireCell2dToy::ToyTracking::ToyTracking(WireCell2dToy::ToyCrawler& toycrawler, i
   CreateVertices(toycrawler);
   RemoveSame(); // get rid of duplicated ones
   
-  // std::cout << "abc: " << std::endl;
+  //std::cout << "abc: " << std::endl;
 
   MergeVertices();   // merge things that are common ...
   OrganizeTracks();  // improve the end points nearby and break things
   Associate();    //associate the rest
 
-  //  std::cout << "abc: " << std::endl;
+  //std::cout << "abc: " << std::endl;
 
   MergeVertices(0); //merge things, but require the center must be at the end of common track
   //CheckVertices(toycrawler);
   OrganizeTracks(); //improve the end points nearby and break things
   Associate(); //associate the rest
   
-  //  std::cout << "abc: " << std::endl;
+  //std::cout << "abc: " << std::endl;
 
   MergeVertices(2);  // merge some vertices with distance cut only 
   CheckVertices(toycrawler);
@@ -413,7 +413,7 @@ WireCell2dToy::ToyTracking::ToyTracking(WireCell2dToy::ToyCrawler& toycrawler, i
 
   RemoveSameTrack();
 
-  // std::cout << "abc: " << std::endl;
+  //std::cout << "abc: " << std::endl;
     
   MergeVertices(2);  // merge some vertices together, allow single track
   // std::cout << "abc: " << std::endl;
@@ -515,7 +515,7 @@ WireCell2dToy::ToyTracking::ToyTracking(WireCell2dToy::ToyCrawler& toycrawler, i
   update_maps();
   
  
-  //  std::cout << wiggle_vertices.size() << std::endl;
+  //std::cout << wiggle_vertices.size() << std::endl;
 
   //  second round vertex fitting ... 
   for (int i=0;i!=vertices.size();i++){
@@ -536,7 +536,8 @@ WireCell2dToy::ToyTracking::ToyTracking(WireCell2dToy::ToyCrawler& toycrawler, i
     // }
   }
   CheckVertices(toycrawler); // redefine all the tracks ... 
-  
+
+ 
 
   if (vertices.size() > 0 ) {
     
@@ -625,9 +626,11 @@ WireCell2dToy::ToyTracking::ToyTracking(WireCell2dToy::ToyCrawler& toycrawler, i
   }else{
     // if no vertices are found ... 
     //  do another parallel track finding without vertex... 
+    //std::cout << "ABC: " << std::endl;
     form_parallel_tiny_tracks_wovertex(toycrawler);
     update_maps(1);
     fine_tracking(1);
+    //std::cout << "ABC: " << std::endl;
   }
 
 
@@ -1820,7 +1823,7 @@ void WireCell2dToy::ToyTracking::form_parallel_tiny_tracks_wovertex(WireCell2dTo
     }
   }
 
-  // std::cout << "Xin: " << cluster_msc.size() << " " << new_mcells.size() << std::endl;
+  //std::cout << "Xin: " << cluster_msc.size() << " " << new_mcells.size() << std::endl;
 
   for (int i=0;i!=cluster_msc.size();i++){
     // Create a vertex which is furthest away from the center ... 
@@ -1832,6 +1835,8 @@ void WireCell2dToy::ToyTracking::form_parallel_tiny_tracks_wovertex(WireCell2dTo
     center.x = 0;
     center.y = 0;
     center.z = 0;
+
+    
 
     for (int j=0;j!=mscs_1.size();j++){
       sum += mscs_1.at(j)->Get_all_spacecell().size();
@@ -1847,9 +1852,12 @@ void WireCell2dToy::ToyTracking::form_parallel_tiny_tracks_wovertex(WireCell2dTo
     float furthest_dist = 0;
     MergeSpaceCell *furthest_mcell = 0;
     SpaceCell *furthest_cell = 0;
+
+    //std::cout << i << " " << " " << mscs_1.size() << std::endl;
     
+
     for (int j=0;j!=mscs_1.size();j++){
-      MergeSpaceCell *mcell = mscs_1.at(i);
+      MergeSpaceCell *mcell = mscs_1.at(j);
       for (int k=0;k!=mscs_1.at(j)->Get_all_spacecell().size();k++){
 	SpaceCell *cell = mscs_1.at(j)->Get_all_spacecell().at(k);
 	

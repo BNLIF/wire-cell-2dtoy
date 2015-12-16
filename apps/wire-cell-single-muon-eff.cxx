@@ -169,7 +169,8 @@ int main(int argc, char* argv[])
     if (cluster_num != prev_cluster_num){
       if (prev_cluster_num!=-1){
 	mcells.push_back(mcell);  
-	WireCell2dToy::ToyCrawler* toycrawler = new WireCell2dToy::ToyCrawler(mcells,1,2); // cosmic tune
+	WireCell2dToy::ToyCrawler* toycrawler = new WireCell2dToy::ToyCrawler(mcells);
+	//WireCell2dToy::ToyCrawler* toycrawler = new WireCell2dToy::ToyCrawler(mcells,1,2); // cosmic tune
 	//toycrawler->FormGraph();
 
 	// if (cluster_num==3){
@@ -243,7 +244,7 @@ int main(int argc, char* argv[])
   toycrawler->FormGraph();
   crawlers.push_back(toycrawler);
 
-
+  
 
 
 
