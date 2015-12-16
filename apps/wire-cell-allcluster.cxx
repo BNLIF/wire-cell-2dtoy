@@ -149,7 +149,7 @@ int main(int argc, char* argv[])
   
   MergeSpaceCellSelection mcells; // save all the cells
   int flag = 0;
-  MergeSpaceCell *mcell;
+  MergeSpaceCell *mcell=0;
   SpaceCellSelection cells;
   
   for (int i=0;i!=TC->GetEntries();i++){
@@ -157,7 +157,8 @@ int main(int argc, char* argv[])
 
     if (cluster_num != prev_cluster_num){
       if (prev_cluster_num!=-1){
-	mcells.push_back(mcell);  
+	if (mcell->Get_all_spacecell().size()>0)
+	  mcells.push_back(mcell);  
 	WireCell2dToy::ToyCrawler* toycrawler = new WireCell2dToy::ToyCrawler(mcells,1,2); // cosmic tune
 	//toycrawler->FormGraph();
 
@@ -226,8 +227,10 @@ int main(int argc, char* argv[])
   //   cout << "Single Cell: " << i << " "  << allcell.size() << " " << allwire.size() << endl;
   // }
 
-
-  mcells.push_back(mcell);  
+  if (mcell!=0){
+    if (mcell->Get_all_spacecell().size()>0)
+      mcells.push_back(mcell);  
+  }
   WireCell2dToy::ToyCrawler* toycrawler = new WireCell2dToy::ToyCrawler(mcells);
   toycrawler->FormGraph();
   crawlers.push_back(toycrawler);

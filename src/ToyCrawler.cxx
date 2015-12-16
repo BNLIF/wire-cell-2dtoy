@@ -965,7 +965,7 @@ void WireCell2dToy::ToyCrawler::CreateClusterTrack(MergeSpaceCellSelection& mcel
   // form associations ...
   for (int i = 0; i!=mcells.size();i++){
     
-    //std::cout << i << " " << mcells.size() << std::endl;
+    //    std::cout << i << " " << " "   << mcells.size() << std::endl;
     
     MergeSpaceCell *mcell1 = mcells.at(i);
     Point m1center = mcell1->Get_Center();

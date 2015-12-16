@@ -388,6 +388,9 @@ WireCell2dToy::ToyTracking::ToyTracking(WireCell2dToy::ToyCrawler& toycrawler, i
 
   
   CreateVertices(toycrawler);
+
+  //std::cout << vertices.size() << " " << tracks.size() << std::endl;
+
   RemoveSame(); // get rid of duplicated ones
   
   //std::cout << "abc: " << std::endl;

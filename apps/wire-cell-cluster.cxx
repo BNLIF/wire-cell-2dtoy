@@ -154,7 +154,7 @@ int main(int argc, char* argv[])
   SpaceCellSelection cells;
 
 
-  MergeSpaceCell *mcell;
+  MergeSpaceCell *mcell=0;
   
   for (int i=0;i!=TC->GetEntries();i++){
     //std::cout << i << std::endl;
@@ -169,7 +169,8 @@ int main(int argc, char* argv[])
 	mcell = new MergeSpaceCell();
 	flag = 1;
       }else if (flag==1 && mcell_id!=prev_mcell_id){
-	mcells.push_back(mcell);
+	if (mcell->Get_all_spacecell().size()>0)
+	  mcells.push_back(mcell);
 	mcell = new MergeSpaceCell();
       }
 
@@ -188,8 +189,10 @@ int main(int argc, char* argv[])
     }
 
   }
-  mcells.push_back(mcell);
-  
+  if (mcell!=0){
+    if (mcell->Get_all_spacecell().size()>0)
+      mcells.push_back(mcell);
+  }
 
   // for (int i=0;i!=ntime;i++){
   //   GeomCellSelection allcell = toytiling[i]->get_allcell();
