@@ -102,8 +102,28 @@ void WireCell2dToy::ToyTracking::MergeTracks(){
       double theta1 = ct_tracks.at(it1 - all_tracks.begin())->Get_Theta();
       double phi1 = ct_tracks.at(it1 - all_tracks.begin())->Get_Phi();
 
+      
+      if (track1->get_range() < 7*units::cm){
+	WCVertexSelection t1_vertices = wct_wcv_map[track1];
+	WCVertex *new_vertex1 = 0;
+	for (int i1 = 0;i1!=t1_vertices.size();i1++){
+	  if (t1_vertices.at(i1) == vertex) continue;
+	  if (find(t1_vertices.at(i1)->get_tracks().begin(),
+		   t1_vertices.at(i1)->get_tracks().end(),track1)==t1_vertices.at(i1)->get_tracks().end()) continue;
+	  new_vertex1 = t1_vertices.at(i1);
+	  break;
+	}
+	TVector3 temp_abc1(new_vertex1->Center().x - vertex->Center().x,
+			   new_vertex1->Center().y - vertex->Center().y,
+			   new_vertex1->Center().z - vertex->Center().z);
+	theta1 = temp_abc1.Theta();
+	phi1 = temp_abc1.Phi();
+      }
+
       for (int k=0;k!=vertex->get_tracks().size();k++){
 	WCTrack *track2 = vertex->get_tracks().at(k);
+
+	//	std::cout << track1->get_range() << " " << track2->get_range() <<std::endl;
 	
 	auto itt2 = find(all_tracks.begin(),all_tracks.end(),track2);
 	if (itt2 == all_tracks.end()) continue;
@@ -115,8 +135,34 @@ void WireCell2dToy::ToyTracking::MergeTracks(){
 	 ct_tracks.at(it2 - all_tracks.begin())->SC_Hough(center);
 	 double theta2 = ct_tracks.at(it2 - all_tracks.begin())->Get_Theta();
 	 double phi2 = ct_tracks.at(it2 - all_tracks.begin())->Get_Phi();
+	 
+	 
+	 if (track2->get_range() < 7*units::cm){
+	   WCVertexSelection t2_vertices = wct_wcv_map[track2];
+	   WCVertex *new_vertex2 = 0;
+	   for (int i1 = 0;i1!=t2_vertices.size();i1++){
+	     if (t2_vertices.at(i1) == vertex) continue;
+	     if (find(t2_vertices.at(i1)->get_tracks().begin(),
+		      t2_vertices.at(i1)->get_tracks().end(),track2)==t2_vertices.at(i1)->get_tracks().end()) continue;
+	     new_vertex2 = t2_vertices.at(i1);
+	     break;
+	   }
+	   TVector3 temp_abc2(new_vertex2->Center().x - vertex->Center().x,
+			      new_vertex2->Center().y - vertex->Center().y,
+			      new_vertex2->Center().z - vertex->Center().z);
+	   theta2 = temp_abc2.Theta();
+	   phi2 = temp_abc2.Phi();
+	 }	 
+	 
+	 // TVector3 abc1(sin(theta1)*cos(phi1),sin(theta1)*sin(phi1),cos(theta1));
+	 // TVector3 abc2(sin(theta2)*cos(phi2),sin(theta2)*sin(phi2),cos(theta2));
+	 // double theta_abc = abc1.Angle(abc2);
+	 // std::cout << theta_abc/3.1415926*180 << std::endl;
+
 	 int flag_qx = 0;
 	 if (ngood_tracks==2){
+	   
+
 	   if (fabs(theta1+theta2-3.1415926) < 15./180.*3.1415926 && 
 	     fabs(fabs(phi1-phi2)-3.1415926)<15./180.*3.1415926 &&
 	     sqrt(pow(theta1+theta2-3.1415926,2) + pow(fabs(phi1-phi2)-3.1415926,2)) < 20./180.*3.1415926)
@@ -127,7 +173,7 @@ void WireCell2dToy::ToyTracking::MergeTracks(){
 	     sqrt(pow(theta1+theta2-3.1415926,2) + pow(fabs(phi1-phi2)-3.1415926,2)) < 14./180.*3.1415926)
 	     flag_qx = 1;
 	 }
-	 //std::cout << ngood_tracks << " " << fabs(theta1+theta2-3.1415926)/3.1415926*180. << " " << (fabs(phi1-phi2)-3.1415926)/3.1415926*180. << std::endl;
+	 // std::cout << ngood_tracks << " " << fabs(theta1+theta2-3.1415926)/3.1415926*180. << " " << (fabs(phi1-phi2)-3.1415926)/3.1415926*180. << std::endl;
 
 	 if (flag_qx == 1){
 

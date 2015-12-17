@@ -243,7 +243,7 @@ int main(int argc, char* argv[])
 
 
   WCTrackSelection& bad_tracks = toytracking.get_bad_tracks();
-  // display.DrawTracks(bad_tracks,"same",2);
+  //display.DrawTracks(bad_tracks,"same",2);
 
   WCTrackSelection& short_tracks = toytracking.get_short_tracks();
   //display.DrawTracks(short_tracks,"psame",4);
