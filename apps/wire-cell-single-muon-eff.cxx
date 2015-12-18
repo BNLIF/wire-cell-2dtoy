@@ -257,8 +257,9 @@ int main(int argc, char* argv[])
   
   for (int i=0;i!=crawlers.size();i++){
     WireCell2dToy::ToyTracking *toytracking = new WireCell2dToy::ToyTracking(*crawlers.at(i));
+    MergeSpaceCellMap& mcells_map = crawlers.at(i)->Get_mcells_map();
     //WireCell2dToy::ToyTracking* toytracking = new WireCell2dToy::ToyTracking(*crawlers.at(i),1); // cosmic tune
-    toytracking->IterateMergeTracks();
+    toytracking->IterateMergeTracks(mcells_map);
 
     trackings.push_back(toytracking);
 

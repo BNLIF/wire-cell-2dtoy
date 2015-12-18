@@ -211,9 +211,10 @@ int main(int argc, char* argv[])
   // test
   std::cout << "Tracking " << std::endl;
   WireCell2dToy::ToyTracking toytracking(toycrawler);
+  MergeSpaceCellMap& mcells_map = toycrawler.Get_mcells_map();
   //WireCell2dToy::ToyTracking toytracking(toycrawler,1); //cosmic tune?
-  toytracking.IterateMergeTracks();
-  // toytracking.MergeTracks();
+  toytracking.IterateMergeTracks(mcells_map);
+  
   
 
   std::cout << "Good Tracks:     " << toytracking.get_good_tracks().size() <<std::endl;

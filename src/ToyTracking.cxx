@@ -9,22 +9,22 @@
 
 using namespace WireCell;
 
-void WireCell2dToy::ToyTracking::IterateMergeTracks(){
+void WireCell2dToy::ToyTracking::IterateMergeTracks(WireCell::MergeSpaceCellMap& mcells_map){
   int flag = 1;
   std::cout << "Iterate Merge Tracks! " << std::endl;
   while(flag){
     int prev_ntracks = good_tracks.size();
     // std::cout << prev_ntracks << " a " << good_tracks.size() << std::endl;
-    MergeTracks();
+    MergeTracks(mcells_map);
     // std::cout << prev_ntracks << " b " << good_tracks.size() << std::endl;
     if (prev_ntracks == good_tracks.size()) flag = 0;
   }
 
-  MergeTracks_no_shared_vertex();
+  MergeTracks_no_shared_vertex(mcells_map);
   
 }
 
-void WireCell2dToy::ToyTracking::MergeTracks_no_shared_vertex(){
+void WireCell2dToy::ToyTracking::MergeTracks_no_shared_vertex(WireCell::MergeSpaceCellMap& mcells_map){
   std::cout << "Merge Tracks shared no vertex " << std::endl;
   
   WCTrackSelection all_tracks;
@@ -160,26 +160,6 @@ void WireCell2dToy::ToyTracking::MergeTracks_no_shared_vertex(){
   // merge and do fine tracking ... 
   //std::cout << merge_tracks_array.size() << std::endl;
   for (int i=0;i!=merge_tracks_array.size();i++){
-    //create a new track
-    MergeSpaceCellSet msc_set;
-    for (int j=0;j!=merge_tracks_array.at(i).size();j++){
-      WCTrack *track = merge_tracks_array.at(i).at(j);
-      for (int k=0;k!=track->get_centerVP_cells().size();k++){
-	msc_set.insert(track->get_centerVP_cells().at(k));
-      }
-    }
-    
-    
-
-    MergeSpaceCellSelection mcells;
-    for (auto it = msc_set.begin(); it!= msc_set.end(); it++){
-      mcells.push_back(*it);
-    }
-    //    std::cout << mcells.size() << std::endl;
-    if (mcells.size()==0) continue;
-    WCTrack *track = new WCTrack(mcells);
-    tracks.push_back(track);
-
     // add new track to all vertices
     WCVertexSelection good_vertices1;
     // figure out the good vertices
@@ -191,16 +171,54 @@ void WireCell2dToy::ToyTracking::MergeTracks_no_shared_vertex(){
 	auto it1 = find(merge_vertices_array.at(i).begin(),merge_vertices_array.at(i).end(),temp_vertex);
 	if (it1 == merge_vertices_array.at(i).end()){
 	  auto it2 = find(good_vertices1.begin(),good_vertices1.end(),temp_vertex);
-	  if (it2 == good_vertices1.end())
-	    good_vertices1.push_back(temp_vertex);
+	  if (it2 == good_vertices1.end()){
+	    for (int k1=0;k1!=temp_vertex->get_tracks().size();k1++){
+	      WCTrack *temp_track = temp_vertex->get_tracks().at(k1);
+	      auto it3 = find(merge_tracks_array.at(i).begin(),merge_tracks_array.at(i).end(),temp_track);
+	      if (it3 != merge_tracks_array.at(i).end()){
+		good_vertices1.push_back(temp_vertex);
+		break;
+	      }
+	    }
+	  }
 	}
       }
     }
+
+
+    MergeSpaceCellSelection mcells;
+    
+    
+    //create a new track
+    MergeSpaceCell* start_cell = good_vertices1.at(0)->get_msc();
+    Point start_point = good_vertices1.at(0)->Center();
+    MergeSpaceCell* end_cell = good_vertices1.at(1)->get_msc();
+    Point end_point = good_vertices1.at(1)->Center();
+    WireCell2dToy::ToyWalking walking(start_cell,start_point,end_cell,end_point,mcells_map);
+    mcells = walking.get_cells();
+    
+
+    // MergeSpaceCellSet msc_set;
+    // for (int j=0;j!=merge_tracks_array.at(i).size();j++){
+    //   WCTrack *track = merge_tracks_array.at(i).at(j);
+    //   for (int k=0;k!=track->get_centerVP_cells().size();k++){
+    // 	msc_set.insert(track->get_centerVP_cells().at(k));
+    //   }
+    // }
+    // for (auto it = msc_set.begin(); it!= msc_set.end(); it++){
+    //   mcells.push_back(*it);
+    // }
+    //    std::cout << mcells.size() << std::endl;
+    
+    if (mcells.size()==0) continue;
+    WCTrack *track = new WCTrack(mcells);
+    tracks.push_back(track);
+
+   
     //    std::cout << good_vertices1.size() << std::endl;
     if (good_vertices1.size()<=1){
       tracks.pop_back();
       delete track;
-      
     }else{
       
       // add new track to all maps
@@ -296,7 +314,7 @@ void WireCell2dToy::ToyTracking::MergeTracks_no_shared_vertex(){
 }
 
 
-void WireCell2dToy::ToyTracking::MergeTracks(){
+void WireCell2dToy::ToyTracking::MergeTracks(WireCell::MergeSpaceCellMap& mcells_map){
   std::cout << "Merge Tracks! " << std::endl;
 
   WCTrackSelection all_tracks;
@@ -461,7 +479,7 @@ void WireCell2dToy::ToyTracking::MergeTracks(){
 	     sqrt(pow(theta1+theta2-3.1415926,2) + pow(fabs(phi1-phi2)-3.1415926,2)) < 14./180.*3.1415926)
 	     flag_qx = 1;
 	 }
-	 //	 std::cout << ngood_tracks << " " << fabs(theta1+theta2-3.1415926)/3.1415926*180. << " " << (fabs(phi1-phi2)-3.1415926)/3.1415926*180. << std::endl;
+	 //std::cout << ngood_tracks << " " << fabs(theta1+theta2-3.1415926)/3.1415926*180. << " " << (fabs(phi1-phi2)-3.1415926)/3.1415926*180. << " " << track1->get_range() << " " << track2->get_range() << " " << vertex->Center().x/units::cm << std::endl;
 
 	 if (flag_qx == 1){
 
@@ -577,23 +595,7 @@ void WireCell2dToy::ToyTracking::MergeTracks(){
   
   // Now create a new track and remove the old tracks and vertices ... 
   for (int i=0;i!=merge_tracks.size();i++){
-    // creat a new track
-    MergeSpaceCellSet msc_set;
-    for (int j=0;j!=merge_tracks.at(i).size();j++){
-      WCTrack *track = merge_tracks.at(i).at(j);
-      for (int k=0;k!=track->get_centerVP_cells().size();k++){
-	msc_set.insert(track->get_centerVP_cells().at(k));
-      }
-    }
-    MergeSpaceCellSelection mcells;
-    for (auto it = msc_set.begin(); it!= msc_set.end(); it++){
-      mcells.push_back(*it);
-    }
-    WCTrack *track = new WCTrack(mcells);
-    tracks.push_back(track);
-    //std::cout << i << " " << merge_tracks.size() << " " << msc_set.size() << " " << mcells.size() << std::endl;
-
-    // add new track to all vertices
+     // add new track to all vertices
     WCVertexSelection good_vertices1;
     // figure out the good vertices
     for (int j=0;j!=merge_tracks.at(i).size();j++){
@@ -604,11 +606,54 @@ void WireCell2dToy::ToyTracking::MergeTracks(){
 	auto it1 = find(merge_vertices.at(i).begin(),merge_vertices.at(i).end(),temp_vertex);
 	if (it1 == merge_vertices.at(i).end()){
 	  auto it2 = find(good_vertices1.begin(),good_vertices1.end(),temp_vertex);
-	  if (it2 == good_vertices1.end())
-	    good_vertices1.push_back(temp_vertex);
+	  if (it2 == good_vertices1.end()){
+	    for (int k1=0;k1!=temp_vertex->get_tracks().size();k1++){
+	      WCTrack *temp_track = temp_vertex->get_tracks().at(k1);
+	      auto it3 = find(merge_tracks.at(i).begin(),merge_tracks.at(i).end(),temp_track);
+	      if (it3 != merge_tracks.at(i).end()){
+		good_vertices1.push_back(temp_vertex);
+		break;
+	      }
+	    }
+	  }
 	}
       }
     }
+    
+    
+
+
+
+    // creat a new track
+    
+    //
+    MergeSpaceCellSelection mcells;
+    
+    MergeSpaceCell* start_cell = good_vertices1.at(0)->get_msc();
+    Point start_point = good_vertices1.at(0)->Center();
+    MergeSpaceCell* end_cell = good_vertices1.at(1)->get_msc();
+    Point end_point = good_vertices1.at(1)->Center();
+    WireCell2dToy::ToyWalking walking(start_cell,start_point,end_cell,end_point,mcells_map);
+    mcells = walking.get_cells();
+
+    // MergeSpaceCellSet msc_set;
+    // for (int j=0;j!=merge_tracks.at(i).size();j++){
+    //   WCTrack *track = merge_tracks.at(i).at(j);
+    //   for (int k=0;k!=track->get_centerVP_cells().size();k++){
+    // 	msc_set.insert(track->get_centerVP_cells().at(k));
+    //   }
+    // }
+    // for (auto it = msc_set.begin(); it!= msc_set.end(); it++){
+    //   mcells.push_back(*it);
+    // }
+
+    WCTrack *track = new WCTrack(mcells);
+    tracks.push_back(track);
+    //std::cout << i << " " << merge_tracks.size() << " " << msc_set.size() << " " << mcells.size() << std::endl;
+
+
+
+   
     
     //std::cout << good_vertices1.size() << std::endl;
     // add new track to all maps
@@ -903,7 +948,7 @@ WireCell2dToy::ToyTracking::ToyTracking(WireCell2dToy::ToyCrawler& toycrawler, i
       // Now need to figure out how to judge whether this is a shower or track ... 
       // just from the number of tracks and the connectivities?
       bool shower_flag = IsThisShower(toycrawler);
-      
+      shower_flag = false;
       
       
       std::cout << "Shower? " << shower_flag << " Vertices " << vertices.size() << std::endl;
