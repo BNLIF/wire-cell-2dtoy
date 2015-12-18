@@ -29,12 +29,14 @@ void WireCell2dToy::ToyTracking::MergeTracks_no_shared_vertex(){
   
   WCTrackSelection all_tracks;
   for (int i=0;i!=good_tracks.size();i++){
-    all_tracks.push_back(good_tracks.at(i));
+    if (good_tracks.at(i)->get_centerVP_cells().size()>0)
+      all_tracks.push_back(good_tracks.at(i));
   }
   for (int i=0;i!=parallel_tracks.size();i++){
-    all_tracks.push_back(parallel_tracks.at(i));
+    if (parallel_tracks.at(i)->get_centerVP_cells().size()>0)
+      all_tracks.push_back(parallel_tracks.at(i));
   }
-  // std::cout << all_tracks.size() << std::endl;
+  //std::cout << all_tracks.size() << std::endl;
 
    ClusterTrackSelection ct_tracks;
   for (int i=0;i!=all_tracks.size();i++){
@@ -141,7 +143,7 @@ void WireCell2dToy::ToyTracking::MergeTracks_no_shared_vertex(){
 	      }
 	    }
 
-	    //std::cout << "abc " << track1->get_range() << " " << track2->get_range() << std::endl;
+	    // std::cout << "abc " << track1->get_range() << " " << track2->get_range() << std::endl;
 	  }
 	}
       }
@@ -152,6 +154,9 @@ void WireCell2dToy::ToyTracking::MergeTracks_no_shared_vertex(){
     delete ct_tracks.at(i);
   }
  
+  
+  
+
   // merge and do fine tracking ... 
   //std::cout << merge_tracks_array.size() << std::endl;
   for (int i=0;i!=merge_tracks_array.size();i++){
@@ -163,10 +168,15 @@ void WireCell2dToy::ToyTracking::MergeTracks_no_shared_vertex(){
 	msc_set.insert(track->get_centerVP_cells().at(k));
       }
     }
+    
+    
+
     MergeSpaceCellSelection mcells;
     for (auto it = msc_set.begin(); it!= msc_set.end(); it++){
       mcells.push_back(*it);
     }
+    //    std::cout << mcells.size() << std::endl;
+    if (mcells.size()==0) continue;
     WCTrack *track = new WCTrack(mcells);
     tracks.push_back(track);
 
@@ -186,62 +196,70 @@ void WireCell2dToy::ToyTracking::MergeTracks_no_shared_vertex(){
 	}
       }
     }
-    //std::cout << good_vertices1.size() << std::endl;
-    // add new track to all maps
-    std::vector<int> track_no;
-    for (int j=0;j!=good_vertices1.size();j++){
-      WCVertex* temp_vertex = good_vertices1.at(j);
-      temp_vertex->Add(track);
-      // figure out the original ky and kz ... 
-      for (int k=0;k!=temp_vertex->get_tracks().size();k++){
-  	WCTrack *temp_track = temp_vertex->get_tracks().at(k);
-  	auto it1 = find(merge_tracks_array.at(i).begin(),merge_tracks_array.at(i).end(),temp_track);
-  	if (it1 != merge_tracks_array.at(i).end()){
-  	  temp_vertex->set_ky(track,temp_vertex->get_ky(temp_track));
-  	  temp_vertex->set_kz(track,temp_vertex->get_kz(temp_track));
-  	  //std::cout << j<< " abc " << std::endl;
-  	  track_no.push_back(j);
-  	  break;
-  	}
+    //    std::cout << good_vertices1.size() << std::endl;
+    if (good_vertices1.size()<=1){
+      tracks.pop_back();
+      delete track;
+      
+    }else{
+      
+      // add new track to all maps
+      std::vector<int> track_no;
+      for (int j=0;j!=good_vertices1.size();j++){
+	WCVertex* temp_vertex = good_vertices1.at(j);
+	temp_vertex->Add(track);
+	// figure out the original ky and kz ... 
+	for (int k=0;k!=temp_vertex->get_tracks().size();k++){
+	  WCTrack *temp_track = temp_vertex->get_tracks().at(k);
+	  auto it1 = find(merge_tracks_array.at(i).begin(),merge_tracks_array.at(i).end(),temp_track);
+	  if (it1 != merge_tracks_array.at(i).end()){
+	    temp_vertex->set_ky(track,temp_vertex->get_ky(temp_track));
+	    temp_vertex->set_kz(track,temp_vertex->get_kz(temp_track));
+	    //std::cout << j<< " abc " << std::endl;
+	    track_no.push_back(j);
+	    break;
+	  }
+	}
+	wcv_wct_map[temp_vertex].push_back(track);
       }
-      wcv_wct_map[temp_vertex].push_back(track);
+      wct_wcv_map[track] = good_vertices1;
+      
+      // do fine tracking for the new track
+      Point p1 = good_vertices1.at(track_no.at(0))->Center();
+      Point p2 = good_vertices1.at(track_no.at(1))->Center();
+      int np1 = good_vertices1.at(track_no.at(0))->get_ntracks();
+      int np2 = good_vertices1.at(track_no.at(1))->get_ntracks();
+      
+      //std::cout << good_vertices1.size() << std::endl;
+      double ky1, kz1, ky2, kz2;
+      ky1 = good_vertices1.at(track_no.at(0))->get_ky(track);
+      kz1 = good_vertices1.at(track_no.at(0))->get_kz(track);
+      ky2 = good_vertices1.at(track_no.at(1))->get_ky(track);
+      kz2 = good_vertices1.at(track_no.at(1))->get_kz(track);
+      
+      
+      track->fine_tracking(np1,p1,ky1,kz1,np2,p2,ky2,kz2,1);
+      good_tracks.push_back(track);
+
+      // delete old tracks
+      for (int j=0;j!=merge_tracks_array.at(i).size();j++){
+	WCTrack *temp_track = merge_tracks_array.at(i).at(j);
+	temp_track->reset_fine_tracking();
+	auto it = find(good_tracks.begin(),good_tracks.end(),temp_track);
+	if (it != good_tracks.end())
+	  good_tracks.erase(it);
+	auto it1 = find(parallel_tracks.begin(),parallel_tracks.end(),temp_track);
+	if (it1 != parallel_tracks.end())
+	  parallel_tracks.erase(it1);
+	bad_tracks.push_back(temp_track);
+      }
+      
     }
-    wct_wcv_map[track] = good_vertices1;
-
-    // do fine tracking for the new track
-    Point p1 = good_vertices1.at(track_no.at(0))->Center();
-    Point p2 = good_vertices1.at(track_no.at(1))->Center();
-    int np1 = good_vertices1.at(track_no.at(0))->get_ntracks();
-    int np2 = good_vertices1.at(track_no.at(1))->get_ntracks();
-    
-    //std::cout << good_vertices1.size() << std::endl;
-    double ky1, kz1, ky2, kz2;
-    ky1 = good_vertices1.at(track_no.at(0))->get_ky(track);
-    kz1 = good_vertices1.at(track_no.at(0))->get_kz(track);
-    ky2 = good_vertices1.at(track_no.at(1))->get_ky(track);
-    kz2 = good_vertices1.at(track_no.at(1))->get_kz(track);
-    
-
-    track->fine_tracking(np1,p1,ky1,kz1,np2,p2,ky2,kz2,1);
-    good_tracks.push_back(track);
-
   }
+
   
-  for (int i=0;i!=merge_tracks_array.size();i++){
-    // delete old tracks
-    for (int j=0;j!=merge_tracks_array.at(i).size();j++){
-      WCTrack *temp_track = merge_tracks_array.at(i).at(j);
-      temp_track->reset_fine_tracking();
-      auto it = find(good_tracks.begin(),good_tracks.end(),temp_track);
-      if (it != good_tracks.end())
-      	good_tracks.erase(it);
-      auto it1 = find(parallel_tracks.begin(),parallel_tracks.end(),temp_track);
-      if (it1 != parallel_tracks.end())
-      	parallel_tracks.erase(it1);
-      bad_tracks.push_back(temp_track);
-    }
-  }
-
+  
+ 
 
   // delete old vertices if none tracks
   // save good vertices
