@@ -435,12 +435,26 @@ void WireCell2dToy::ToyTracking::MergeTracks(){
 
 	 int flag_qx = 0;
 	 if (ngood_tracks==2){
-	   
-
 	   if (fabs(theta1+theta2-3.1415926) < 15./180.*3.1415926 && 
-	     fabs(fabs(phi1-phi2)-3.1415926)<15./180.*3.1415926 &&
-	     sqrt(pow(theta1+theta2-3.1415926,2) + pow(fabs(phi1-phi2)-3.1415926,2)) < 20./180.*3.1415926)
+	       fabs(fabs(phi1-phi2)-3.1415926)<15./180.*3.1415926 &&
+	       sqrt(pow(theta1+theta2-3.1415926,2) + pow(fabs(phi1-phi2)-3.1415926,2)) < 20./180.*3.1415926){
 	     flag_qx = 1;
+	   }else{
+	     if (track1->get_range() > 7*units::cm){
+	       ct_tracks.at(it1 - all_tracks.begin())->SC_Hough(center,15*units::cm);
+	       theta1 = ct_tracks.at(it1 - all_tracks.begin())->Get_Theta();
+	       phi1 = ct_tracks.at(it1 - all_tracks.begin())->Get_Phi();
+	     }
+	     if (track2->get_range()>7*units::cm){
+	       ct_tracks.at(it2 - all_tracks.begin())->SC_Hough(center,15*units::cm);
+	       theta2 = ct_tracks.at(it2 - all_tracks.begin())->Get_Theta();
+	       phi2 = ct_tracks.at(it2 - all_tracks.begin())->Get_Phi();
+	     }
+	     if (fabs(theta1+theta2-3.1415926) < 15./180.*3.1415926 && 
+		 fabs(fabs(phi1-phi2)-3.1415926)<15./180.*3.1415926 &&
+		 sqrt(pow(theta1+theta2-3.1415926,2) + pow(fabs(phi1-phi2)-3.1415926,2)) < 20./180.*3.1415926)
+	       flag_qx = 1;
+	   }
 	 }else if (ngood_tracks>2){
 	   if (fabs(theta1+theta2-3.1415926) < 10./180.*3.1415926 && 
 	     fabs(fabs(phi1-phi2)-3.1415926)<10./180.*3.1415926 &&
