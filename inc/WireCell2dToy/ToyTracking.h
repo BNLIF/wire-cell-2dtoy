@@ -30,8 +30,9 @@ namespace WireCell2dToy{
     WireCell::WCShowerSelection& get_showers(){return showers;};
 
     void IterateMergeTracks();
-
     void MergeTracks();
+    void MergeTracks_no_shared_vertex();
+
 
     void CreateVertices(ToyCrawler& toycrawler);
     void RemoveSame();
