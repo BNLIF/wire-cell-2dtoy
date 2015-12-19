@@ -10,29 +10,44 @@
 using namespace WireCell;
 
 void WireCell2dToy::ToyTracking::IterateMergeTracks(WireCell::MergeSpaceCellMap& mcells_map){
-  int flag = 1;
-  std::cout << "Iterate Merge Tracks! " << std::endl;
-  while(flag){
-    int prev_ntracks = good_tracks.size()+parallel_tracks.size();
-    // std::cout << prev_ntracks << " a " << good_tracks.size() << std::endl;
-    MergeTracks(mcells_map);
-    // std::cout << prev_ntracks << " b " << good_tracks.size() << std::endl;
-    if (prev_ntracks == good_tracks.size()+parallel_tracks.size()) flag = 0;
-  }
-
-  flag = 1;
-  while(flag){
-    int prev_ntracks = good_tracks.size()+parallel_tracks.size();
-    MergeTracks_no_shared_vertex(mcells_map);
-    MergeTracks_no_shared_vertex(mcells_map,1);
-    if (prev_ntracks == good_tracks.size()+parallel_tracks.size()) flag = 0;
-  }
-
-  // for (int i=0;i!=good_tracks.size();i++){
-  //   WCTrack *track = good_tracks.at(i);
-  //   WCVertexSelection vertices = wct_wcv_map[track];
-  //   std::cout << vertices.at(0)->Center().x/units::cm << " " << vertices.at(1)->Center().x/units::cm << std::endl;
+  
+  
+  // int flag = 1;
+  // std::cout << "Iterate Merge Tracks! " << std::endl;
+  // while(flag){
+  //   int prev_ntracks = good_tracks.size()+parallel_tracks.size();
+  //   // std::cout << prev_ntracks << " a " << good_tracks.size() << std::endl;
+  //   MergeTracks(mcells_map);
+  //   // std::cout << prev_ntracks << " b " << good_tracks.size() << std::endl;
+  //   if (prev_ntracks == good_tracks.size()+parallel_tracks.size()) flag = 0;
   // }
+
+  MergeTracks(mcells_map);
+
+
+  //  flag = 1;
+  // while(flag){
+  //  int prev_ntracks = good_tracks.size()+parallel_tracks.size();
+  //MergeTracks_no_shared_vertex(mcells_map);
+    //MergeTracks_no_shared_vertex(mcells_map,1);
+    //   if (prev_ntracks == good_tracks.size()+parallel_tracks.size()) flag = 0;
+    //  }
+
+  for (int i=0;i!=good_tracks.size();i++){
+    WCTrack *track = good_tracks.at(i);
+    WCVertexSelection vertices = wct_wcv_map[track];
+    std::cout << "R: " << vertices.size() << " " << vertices.at(0)->Center().x/units::cm << " " << vertices.at(0)->Center().y/units::cm << " " << vertices.at(0)->Center().z/units::cm << " "
+	      << vertices.at(1)->Center().x/units::cm << " "  << vertices.at(1)->Center().y/units::cm << " "  << vertices.at(1)->Center().z/units::cm << " " << 
+      std::endl;
+  }
+
+  for (int i=0;i!=parallel_tracks.size();i++){
+    WCTrack *track = parallel_tracks.at(i);
+    WCVertexSelection vertices = wct_wcv_map[track];
+    std::cout << "P: " << vertices.size() << " " << vertices.at(0)->Center().x/units::cm << " " << vertices.at(0)->Center().y/units::cm << " " << vertices.at(0)->Center().z/units::cm << " "
+	      << vertices.at(1)->Center().x/units::cm << " "  << vertices.at(1)->Center().y/units::cm << " "  << vertices.at(1)->Center().z/units::cm << " " << 
+      std::endl;
+  }
 
   
 }
@@ -211,10 +226,12 @@ void WireCell2dToy::ToyTracking::MergeTracks_no_shared_vertex(WireCell::MergeSpa
     }
   }
 
+  
   for (int i=0;i!=ct_tracks.size();i++){
     delete ct_tracks.at(i);
   }
  
+  //std::cout << merge_tracks_array.size() << std::endl;
   
   
 
@@ -592,6 +609,14 @@ void WireCell2dToy::ToyTracking::MergeTracks(WireCell::MergeSpaceCellMap& mcells
     delete ct_tracks.at(i);
   }
 
+  // for (auto it = map_vertex_theta.begin(); it!= map_vertex_theta.end(); it++){
+  //     WCVertex *vertex = it->first;
+  //     WCTrack *track1 = map_vertex_tracks[vertex].at(0);
+  //     WCTrack *track2 = map_vertex_tracks[vertex].at(1);
+  //     std::cout << vertex << " " << track1 << " " << track2 << " " << wcv_wct_map[vertex].size() << std::endl;
+  // }
+  
+
   std::vector<WCVertexSelection> merge_vertices;
   std::vector<WCTrackSelection> merge_tracks;
 
@@ -688,18 +713,63 @@ void WireCell2dToy::ToyTracking::MergeTracks(WireCell::MergeSpaceCellMap& mcells
     }
     
     
+    std::vector<int> track_no;
+    for (int j=0;j!=good_vertices1.size();j++){
+      WCVertex* temp_vertex = good_vertices1.at(j);
+      for (int k=0;k!=temp_vertex->get_tracks().size();k++){
+	WCTrack *temp_track = temp_vertex->get_tracks().at(k);
+	auto it1 = find(merge_tracks.at(i).begin(),merge_tracks.at(i).end(),temp_track);
+	if (it1 != merge_tracks.at(i).end()){
+	  track_no.push_back(j);
+	  break;
+	}
+      }
+    }
+    
+    // need to pick up two vertices ...
+    if (track_no.size()>2){
+      int vertex_i1=track_no.at(0);
+      int vertex_i2=track_no.at(1);
+      float max_dis = sqrt(pow(good_vertices1.at(vertex_i1)->Center().x-good_vertices1.at(vertex_i2)->Center().x,2)+
+			   pow(good_vertices1.at(vertex_i1)->Center().y-good_vertices1.at(vertex_i2)->Center().y,2)+
+			   pow(good_vertices1.at(vertex_i1)->Center().z-good_vertices1.at(vertex_i2)->Center().z,2));
+      for (int i1 = 0; i1!=track_no.size();i1++){
+	for (int i2 = 0; i2!=track_no.size();i2++){
+	  if (i2==i1) continue;
+	  float dis = sqrt(pow(good_vertices1.at(track_no.at(i1))->Center().x-good_vertices1.at(track_no.at(i2))->Center().x,2)+
+			   pow(good_vertices1.at(track_no.at(i1))->Center().y-good_vertices1.at(track_no.at(i2))->Center().y,2)+
+			   pow(good_vertices1.at(track_no.at(i1))->Center().z-good_vertices1.at(track_no.at(i2))->Center().z,2));
+	  if (dis > max_dis){
+	    max_dis = dis;
+	    vertex_i1 = track_no.at(i1);
+	    vertex_i2 = track_no.at(i2);
+	  }
+	}
+      }
+      track_no.clear();
+      track_no.push_back(vertex_i1);
+      track_no.push_back(vertex_i2);
+    }
+    
+    
 
-
-
+    //    std::cout << "abc: "<<  good_vertices1.size() << " " << track_no.size() << " " << merge_tracks.at(i).size() << " " << merge_vertices.at(i).size() << std::endl;
+    // for (int i1 = 0;i1!=merge_vertices.at(i).size();i1++){
+    //   std::cout << merge_vertices.at(i).at(i1) << std::endl;
+    // }
+    // for (int i1 =0;i1!=merge_tracks.at(i).size();i1++){
+    //   std::cout << merge_tracks.at(i).at(i1) << " " << wct_wcv_map[merge_tracks.at(i).at(i1)].size() << " " << wct_wcv_map[merge_tracks.at(i).at(i1)].at(0) << " " << wct_wcv_map[merge_tracks.at(i).at(i1)].at(1) << std::endl;
+    // }
+    
     // creat a new track
     
     //
     MergeSpaceCellSelection mcells;
     
-    MergeSpaceCell* start_cell = good_vertices1.at(0)->get_msc();
-    Point start_point = good_vertices1.at(0)->Center();
-    MergeSpaceCell* end_cell = good_vertices1.at(1)->get_msc();
-    Point end_point = good_vertices1.at(1)->Center();
+    MergeSpaceCell* start_cell = good_vertices1.at(track_no.at(0))->get_msc();
+    Point start_point = good_vertices1.at(track_no.at(0))->Center();
+    MergeSpaceCell* end_cell = good_vertices1.at(track_no.at(1))->get_msc();
+    Point end_point = good_vertices1.at(track_no.at(1))->Center();
     WireCell2dToy::ToyWalking walking(start_cell,start_point,end_cell,end_point,mcells_map);
     mcells = walking.get_cells();
 
@@ -722,32 +792,48 @@ void WireCell2dToy::ToyTracking::MergeTracks(WireCell::MergeSpaceCellMap& mcells
     //std::cout << i << " " << merge_tracks.size() << " " << msc_set.size() << " " << mcells.size() << std::endl;
 
 
-
-   
-    
-    //std::cout << good_vertices1.size() << std::endl;
-    // add new track to all maps
-    std::vector<int> track_no;
-    for (int j=0;j!=good_vertices1.size();j++){
-      WCVertex* temp_vertex = good_vertices1.at(j);
+    WCVertexSelection good_vertices2;    
+    for (int j=0;j!=track_no.size();j++){
+      WCVertex* temp_vertex = good_vertices1.at(track_no.at(j));
+      good_vertices2.push_back(temp_vertex);
       temp_vertex->Add(track);
-      // figure out the original ky and kz ... 
+      //std::cout << temp_vertex << " " << temp_vertex->get_tracks().size() << std::endl;
       for (int k=0;k!=temp_vertex->get_tracks().size();k++){
 	WCTrack *temp_track = temp_vertex->get_tracks().at(k);
 	auto it1 = find(merge_tracks.at(i).begin(),merge_tracks.at(i).end(),temp_track);
 	if (it1 != merge_tracks.at(i).end()){
 	  temp_vertex->set_ky(track,temp_vertex->get_ky(temp_track));
 	  temp_vertex->set_kz(track,temp_vertex->get_kz(temp_track));
-	  //std::cout << j<< " abc " << std::endl;
-	  track_no.push_back(j);
 	  break;
 	}
       }
       wcv_wct_map[temp_vertex].push_back(track);
     }
-    wct_wcv_map[track] = good_vertices1;
+     wct_wcv_map[track] = good_vertices2;
+     
+    
+    // //std::cout << good_vertices1.size() << std::endl;
+    // // add new track to all maps
+    
+    // for (int j=0;j!=good_vertices1.size();j++){
+    //   WCVertex* temp_vertex = good_vertices1.at(j);
+    //   temp_vertex->Add(track);
+    //   // figure out the original ky and kz ... 
+    //   for (int k=0;k!=temp_vertex->get_tracks().size();k++){
+    // 	WCTrack *temp_track = temp_vertex->get_tracks().at(k);
+    // 	auto it1 = find(merge_tracks.at(i).begin(),merge_tracks.at(i).end(),temp_track);
+    // 	if (it1 != merge_tracks.at(i).end()){
+    // 	  temp_vertex->set_ky(track,temp_vertex->get_ky(temp_track));
+    // 	  temp_vertex->set_kz(track,temp_vertex->get_kz(temp_track));
+    // 	  //std::cout << j<< " abc " << std::endl;
+    // 	  break;
+    // 	}
+    //   }
+    //   wcv_wct_map[temp_vertex].push_back(track);
+    // }
+    // wct_wcv_map[track] = good_vertices1;
 
-    //std::cout << good_vertices1.size() << std::endl;
+    
 
     // do fine tracking for the new track
     Point p1 = good_vertices1.at(track_no.at(0))->Center();
