@@ -58,6 +58,8 @@ void WireCell2dToy::ClusterDisplay::DrawVertex(WCVertexSelection& vertices, TStr
 	//	if (j==0&&i==2){
 	WCTrack *track = tracks.at(j);
 
+	//if (track->get_range()<300) continue;
+
 	//temporary 
 	//if (track->IsBadTrack()) continue;
 	
@@ -347,9 +349,9 @@ void WireCell2dToy::ClusterDisplay::DrawCluster(MergeSpaceCellSelection& mcells,
   //g1->Draw("p0");
 
   //test 
-  // g1->GetXaxis()->SetRangeUser(50,80);
+  // g1->GetXaxis()->SetRangeUser(239,243);
   // g1->GetYaxis()->SetRangeUser(180,200);
-  //g1->GetZaxis()->SetRangeUser(1000,1050);
+  //g1->GetZaxis()->SetRangeUser(190,240);
 
   //  std::cout << mcells.size() << std::endl;
 

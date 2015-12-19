@@ -20,12 +20,25 @@ void WireCell2dToy::ToyTracking::IterateMergeTracks(WireCell::MergeSpaceCellMap&
     if (prev_ntracks == good_tracks.size()+parallel_tracks.size()) flag = 0;
   }
 
-  MergeTracks_no_shared_vertex(mcells_map);
+  flag = 1;
+  while(flag){
+    int prev_ntracks = good_tracks.size()+parallel_tracks.size();
+    MergeTracks_no_shared_vertex(mcells_map);
+    MergeTracks_no_shared_vertex(mcells_map,1);
+    if (prev_ntracks == good_tracks.size()+parallel_tracks.size()) flag = 0;
+  }
+
+  // for (int i=0;i!=good_tracks.size();i++){
+  //   WCTrack *track = good_tracks.at(i);
+  //   WCVertexSelection vertices = wct_wcv_map[track];
+  //   std::cout << vertices.at(0)->Center().x/units::cm << " " << vertices.at(1)->Center().x/units::cm << std::endl;
+  // }
+
   
 }
 
-void WireCell2dToy::ToyTracking::MergeTracks_no_shared_vertex(WireCell::MergeSpaceCellMap& mcells_map){
-  std::cout << "Merge Tracks shared no vertex " << std::endl;
+void WireCell2dToy::ToyTracking::MergeTracks_no_shared_vertex(WireCell::MergeSpaceCellMap& mcells_map, int type){
+  std::cout << "Merge Tracks shared no vertex " << type << std::endl;
   
   WCTrackSelection all_tracks;
   for (int i=0;i!=good_tracks.size();i++){
@@ -70,10 +83,52 @@ void WireCell2dToy::ToyTracking::MergeTracks_no_shared_vertex(WireCell::MergeSpa
 	WCVertex *vertex1 = vertices1.at(i1);
 	for (int j1 = 0; j1!=vertices2.size(); j1++){
 	  WCVertex *vertex2 = vertices2.at(j1);
-	  float dis = sqrt(pow(vertex1->Center().x-vertex2->Center().x,2) + 
-			   pow(vertex1->Center().y-vertex2->Center().y,2) + 
-			   pow(vertex1->Center().z-vertex2->Center().z,2)); 
-	  if (dis > 5*units::cm) continue;
+	  
+	  if (type == 0){
+	    float dis = sqrt(pow(vertex1->Center().x-vertex2->Center().x,2) + 
+			     pow(vertex1->Center().y-vertex2->Center().y,2) + 
+			     pow(vertex1->Center().z-vertex2->Center().z,2)); 
+	    if (dis > 5*units::cm) continue;
+	  }else if (type == 1){
+	    float dis = fabs(vertex1->Center().x - vertex2->Center().x);
+	    if (dis > 3*units::cm) continue;
+	    if (vertex1 == vertex2) continue;
+	    // find out the other vertex
+	    WCVertex *vertex1_other = 0;
+	    for (int i2 = 0;i2!=vertices1.size();i2++){
+	      vertex1_other = vertices1.at(i2);
+	      if (vertex1_other != vertex1) break;
+	    }
+	    WCVertex *vertex2_other = 0;
+	    for (int i3 = 0;i3!=vertices2.size();i3++){
+	      vertex2_other = vertices2.at(i3);
+	      if (vertex2_other != vertex2) break;
+	    }
+	    if (vertex1_other==0 || vertex2_other ==0) continue;
+	    
+	    TVector3 abc1(vertex1_other->Center().x - vertex1->Center().x,
+			  vertex1_other->Center().y - vertex1->Center().y,
+			  vertex1_other->Center().y - vertex1->Center().z);
+	    TVector3 abc2(vertex2->Center().x - vertex1->Center().x,
+			  vertex2->Center().y - vertex1->Center().y,
+			  vertex2->Center().y - vertex1->Center().z);
+
+	    TVector3 abc3(vertex2_other->Center().x - vertex2->Center().x,
+			  vertex2_other->Center().y - vertex2->Center().y,
+			  vertex2_other->Center().y - vertex2->Center().z);
+	    TVector3 abc4(vertex1->Center().x - vertex2->Center().x,
+			  vertex1->Center().y - vertex2->Center().y,
+			  vertex1->Center().y - vertex2->Center().z);
+
+	    // std::cout << vertex1->Center().x/units::cm << " " << vertex1_other->Center().x/units::cm << " " 
+	    // 	      << vertex2->Center().x/units::cm << " " << vertex2_other->Center().x/units::cm << " " 
+	    // 	      << abc1.Angle(abc2)/3.1415926*180. << " " << abc3.Angle(abc4)/3.1415926*180. << std::endl;
+	    
+	    if (abc1.Angle(abc2)/3.1415926*180.<15&& abc3.Angle(abc4)/3.1415926*180. < 15.){
+	    }else{
+	      continue;
+	    }
+	  }
 	  
 	  auto it1 = find(all_tracks.begin(),all_tracks.end(),track1);
 	  auto it2 = find(all_tracks.begin(),all_tracks.end(),track2);
@@ -458,7 +513,7 @@ void WireCell2dToy::ToyTracking::MergeTracks(WireCell::MergeSpaceCellMap& mcells
 	 double theta_abc = abc1.Angle(abc2);
 	 //std::cout << theta_abc/3.1415926*180 << std::endl;
 
-	 // std::cout << ngood_tracks << " " << theta_abc/3.1415926*180. << " " << fabs(theta1+theta2-3.1415926)/3.1415926*180. << " " << (fabs(phi1-phi2)-3.1415926)/3.1415926*180. << " " << track1->get_range() << " " << track2->get_range() << " " << vertex->Center().x/units::cm << " " <<  std::endl;
+	 //std::cout << ngood_tracks << " " << theta_abc/3.1415926*180. << " " << fabs(theta1+theta2-3.1415926)/3.1415926*180. << " " << (fabs(phi1-phi2)-3.1415926)/3.1415926*180. << " " << track1->get_range() << " " << track2->get_range() << " " << vertex->Center().x/units::cm << " " <<  std::endl;
 	 
 	 int flag_qx = 0;
 	 if (ngood_tracks==2){
@@ -3601,6 +3656,8 @@ bool WireCell2dToy::ToyTracking::IsThisShower(WireCell2dToy::ToyCrawler& toycraw
 
   // std::cout << "Number of Tracks " << ntracks << " "  << time_mcells_set.size() << " " << track_cluster.size() << " " << time_mcells_set1.size() << " " << time_mcells_set2.size() << " " << fabs(max_x-min_x)/sqrt(pow(max_y-min_y,2)+pow(max_z-min_z,2)) << std::endl; 
   
+
+
   
   //need better tuning .... 
   // no tracks 
@@ -3611,7 +3668,7 @@ bool WireCell2dToy::ToyTracking::IsThisShower(WireCell2dToy::ToyCrawler& toycraw
     if (time_mcells_set.size() >=10){
       // special deal with the parallel tracks
       if (fabs(max_x-min_x)/sqrt(pow(max_y-min_y,2)+pow(max_z-min_z,2))>0.1){
-	
+		
 	// find out the structure of the remaing stuff...
 	MergeSpaceCellSelection remaining_mcells;
 	for (auto it = mcells_map.begin(); it!= mcells_map.end();it ++ ){

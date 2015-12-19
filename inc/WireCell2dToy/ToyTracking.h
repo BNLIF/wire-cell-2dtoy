@@ -31,7 +31,7 @@ namespace WireCell2dToy{
 
     void IterateMergeTracks(WireCell::MergeSpaceCellMap& mcells_map);
     void MergeTracks(WireCell::MergeSpaceCellMap& mcells_map);
-    void MergeTracks_no_shared_vertex(WireCell::MergeSpaceCellMap& mcells_map);
+    void MergeTracks_no_shared_vertex(WireCell::MergeSpaceCellMap& mcells_map, int type = 0);
 
 
     void CreateVertices(ToyCrawler& toycrawler);
