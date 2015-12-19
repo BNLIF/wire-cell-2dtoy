@@ -33,6 +33,7 @@ namespace WireCell2dToy{
     void MergeTracks(WireCell::MergeSpaceCellMap& mcells_map);
     void MergeTracks_no_shared_vertex(WireCell::MergeSpaceCellMap& mcells_map, int type = 0);
 
+    void create_new_tracks_from_leftover(ToyCrawler& toycrawler);
 
     void CreateVertices(ToyCrawler& toycrawler);
     void RemoveSame();

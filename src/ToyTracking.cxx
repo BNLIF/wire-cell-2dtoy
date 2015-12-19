@@ -9,6 +9,124 @@
 
 using namespace WireCell;
 
+void WireCell2dToy::ToyTracking::create_new_tracks_from_leftover(WireCell2dToy::ToyCrawler& toycrawler){
+  // find out the mcells not in the current tracks ...
+
+  MergeSpaceCellSelection all_track_mscs;
+  for (int i=0;i!=tracks.size();i++){
+    auto it = find(good_tracks.begin(),good_tracks.end(),tracks.at(i));
+    auto it1 = find(parallel_tracks.begin(),parallel_tracks.end(),tracks.at(i));
+    if (it != good_tracks.end() || it1 != parallel_tracks.end()){
+    //    if (tracks.at(i)->get_centerVP().size() > 0 ){
+      all_track_mscs.insert(all_track_mscs.end(),tracks.at(i)->get_centerVP_cells().begin(),tracks.at(i)->get_centerVP_cells().end()) ; 
+    }
+  }
+  
+  MergeSpaceCellSelection leftover_mcells;
+  
+  MergeSpaceCellMap mcells_map = toycrawler.Get_mcells_map();
+  for (auto it = mcells_map.begin(); it!= mcells_map.end();it ++ ){
+    MergeSpaceCell *mscell = it->first;
+    auto it1 = find(all_track_mscs.begin(),all_track_mscs.end(),mscell);
+    if (it1 == all_track_mscs.end())
+      leftover_mcells.push_back(mscell);
+  }
+  
+  // std::cout << leftover_mcells.size() << std::endl;
+ 
+  // go through everything and form clusters ...
+  std::vector<MergeSpaceCellSelection> clusters;
+  while (leftover_mcells.size() > 0){
+    MergeSpaceCell *mcell = leftover_mcells.back();
+    leftover_mcells.pop_back();
+    
+    MergeSpaceCellSelection cluster;
+    
+    cluster.push_back(mcell);
+
+    MergeSpaceCellSelection to_be_searched;
+    to_be_searched.push_back(mcell);
+    
+    while(to_be_searched.size()>0){
+      MergeSpaceCell *mcell1 = to_be_searched.back();
+      to_be_searched.pop_back();
+
+      MergeSpaceCellSelection& mcells = mcells_map[mcell1];
+      for (int i1 = 0; i1!=mcells.size();i1++){
+	MergeSpaceCell *mcell2 = mcells.at(i1);
+	auto it = find(leftover_mcells.begin(),leftover_mcells.end(),mcell2);
+	auto it1 = find(cluster.begin(),cluster.end(),mcell2);
+	if (it != leftover_mcells.end() ){
+	  leftover_mcells.erase(it);
+	  cluster.push_back(mcell2);
+	  to_be_searched.push_back(mcell2);
+	}
+      }
+
+    }
+    clusters.push_back(cluster);
+    
+  }
+
+  // std::cout << leftover_mcells.size() << " " << clusters.size() << std::endl;
+  // int sum = 0;
+  // for (int i=0;i!=clusters.size();i++){
+  //   std::cout << i << " " << clusters.at(i).size() << std::endl;
+  //   sum += clusters.at(i).size();
+  // }
+  // std::cout << sum << std::endl;
+  // if cluster large than certain size, create tracks 
+  for (int i=0;i!=clusters.size();i++){
+    MergeSpaceCellSelection mcells = clusters.at(i);
+    int sum = 0;
+    Point center(0,0,0);
+    for (int j=0;j!=mcells.size();j++){
+      center.x += mcells.at(j)->Get_Center().x *mcells.at(j)->Get_all_spacecell().size();
+      center.y += mcells.at(j)->Get_Center().y *mcells.at(j)->Get_all_spacecell().size();
+      center.z += mcells.at(j)->Get_Center().z *mcells.at(j)->Get_all_spacecell().size();
+      sum += mcells.at(j)->Get_all_spacecell().size();
+    }
+    if (mcells.size()>=3&& sum > 50){
+      // form tracks ... 
+      // find the center
+      center.x /= sum;
+      center.y /= sum;
+      center.z /= sum;
+      // find the furthest mcell
+      float furthest_dist = 0;
+      MergeSpaceCell *furthest_mcell = 0;
+      SpaceCell *furthest_cell = 0;
+      
+      for (int j=0;j!=mcells.size();j++){
+	MergeSpaceCell *mcell = mcells.at(j);
+	for (int k=0;k!=mcell->Get_all_spacecell().size();k++){
+	  SpaceCell *cell = mcell->Get_all_spacecell().at(k);
+	  float dist = sqrt(pow(cell->x() - center.x,2)
+			    +pow(cell->y() - center.y,2)
+			    +pow(cell->z() - center.z,2));
+	
+	  if (dist > furthest_dist){
+	    furthest_dist = dist;
+	    furthest_mcell = mcell;
+	    furthest_cell = cell;
+	  }
+	}
+      }
+      // create the vertex
+      WCVertex *vertex = new WCVertex(*furthest_mcell);
+      Point p(furthest_cell->x(),furthest_cell->y(),furthest_cell->z());
+      vertex->set_center(p);
+      vertices.push_back(vertex);
+
+      // do parallel tracking ... 
+      parallel_tracking(vertex,mcells,toycrawler);
+      
+    }
+    //    std::cout << i << " " << sum << " " << mcells.size() << std::endl; 
+  }
+}
+
+
 void WireCell2dToy::ToyTracking::IterateMergeTracks(WireCell::MergeSpaceCellMap& mcells_map){
   int flag = 1;
   std::cout << "Iterate Merge Tracks! " << std::endl;
@@ -125,15 +243,18 @@ void WireCell2dToy::ToyTracking::MergeTracks_no_shared_vertex(WireCell::MergeSpa
 			      pow(vertex1_other->Center().z - vertex2_other->Center().z,2));
 
 	  if (dis_1 > dis_2 || dis_1 > dis_3 || dis_1 > dis_3) continue;
-
+	  if (vertex1 == vertex2) continue;
 
 	  if (type == 0){
 	    float dis = sqrt(pow(vertex1->Center().x-vertex2->Center().x,2) + 
 			     pow(vertex1->Center().y-vertex2->Center().y,2) + 
 			     pow(vertex1->Center().z-vertex2->Center().z,2)); 
+	    
+	    //std::cout << dis << " " << vertex1->Center().x/units::cm << " " << vertex2->Center().x/units::cm << " " << track1->get_range() << " " << track2->get_range() << " " << track1 << " " << track2 << std::endl;
+	    
 	    if (dis > 5*units::cm) continue;
 	  }else if (type == 1 || type==2){
-	    if (vertex1 == vertex2) continue;
+	    
 	    
 	    if (type == 1){
 	      float dis = fabs(vertex1->Center().x - vertex2->Center().x);
@@ -215,11 +336,25 @@ void WireCell2dToy::ToyTracking::MergeTracks_no_shared_vertex(WireCell::MergeSpa
 	  TVector3 abc2(sin(theta2)*cos(phi2),sin(theta2)*sin(phi2),cos(theta2));
 	  double theta_abc = abc1.Angle(abc2);
 
-
+	  // std::cout << theta_abc/3.1415926*180. << std::endl;
 	  //	  if (fabs(theta1+theta2-3.1415926) < 20./180.*3.1415926 && 
 	  //  fabs(fabs(phi1-phi2)-3.1415926)<20./180.*3.1415926 &&
 	  //   sqrt(pow(theta1+theta2-3.1415926,2) + pow(fabs(phi1-phi2)-3.1415926,2)) < 28./180.*3.1415926){
-	  if (fabs(theta_abc/3.1415926*180-180.)<25){
+	  if (fabs(theta_abc/3.1415926*180-180.)>15){
+	    ct_tracks.at(it1 - all_tracks.begin())->SC_Hough(center1,15*units::cm);
+	    ct_tracks.at(it2 - all_tracks.begin())->SC_Hough(center2,15*units::cm);
+	    theta1 = ct_tracks.at(it1 - all_tracks.begin())->Get_Theta();
+	    phi1 = ct_tracks.at(it1 - all_tracks.begin())->Get_Phi();
+
+	    theta2 = ct_tracks.at(it2 - all_tracks.begin())->Get_Theta();
+	    phi2 = ct_tracks.at(it2 - all_tracks.begin())->Get_Phi();
+	  
+	    abc1.SetXYZ(sin(theta1)*cos(phi1),sin(theta1)*sin(phi1),cos(theta1));
+	    abc2.SetXYZ(sin(theta2)*cos(phi2),sin(theta2)*sin(phi2),cos(theta2));
+	    theta_abc = abc1.Angle(abc2);
+	  }
+	  
+	  if (fabs(theta_abc/3.1415926*180-180.)<15){
 	    if (merge_tracks_array.size()==0){
 	      WCTrackSelection merge_tracks;
 	      merge_tracks.push_back(track1);
@@ -1214,13 +1349,10 @@ WireCell2dToy::ToyTracking::ToyTracking(WireCell2dToy::ToyCrawler& toycrawler, i
       bool shower_flag = IsThisShower(toycrawler);
       //shower_flag = false;
       //    return;
-
       std::cout << "Shower? " << shower_flag << " Vertices " << vertices.size() << std::endl;
-      
       // separate various issues ... 
-      
       if (!shower_flag){
-      	//not a shower
+	//not a shower
       	std::cout << "Grown single track " << std::endl;
       	if (grow_track_fill_gap(toycrawler)){
       	  std::cout << "FineTracking Again" << std::endl; 
@@ -1228,8 +1360,12 @@ WireCell2dToy::ToyTracking::ToyTracking(WireCell2dToy::ToyCrawler& toycrawler, i
       	  fine_tracking();
       	}
       	form_parallel_tiny_tracks(toycrawler);
+
       	update_maps(1);
       	fine_tracking(1);
+
+	// create new tracks ... 
+	create_new_tracks_from_leftover(toycrawler);
       }else{
       	//is a shower  
       	// std::cout << "Grown single track " << std::endl;
@@ -1272,11 +1408,6 @@ WireCell2dToy::ToyTracking::ToyTracking(WireCell2dToy::ToyCrawler& toycrawler, i
        	update_maps(1);
        	fine_tracking();
       }
-
-      
-
-
-      
       
       //std::cout << "Parallel Tracking " << std::endl; 
       // form_parallel_tiny_tracks(toycrawler);
