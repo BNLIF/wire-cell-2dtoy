@@ -458,7 +458,7 @@ void WireCell2dToy::ToyTracking::MergeTracks(WireCell::MergeSpaceCellMap& mcells
 	 double theta_abc = abc1.Angle(abc2);
 	 //std::cout << theta_abc/3.1415926*180 << std::endl;
 
-	 //std::cout << ngood_tracks << " " << fabs(theta1+theta2-3.1415926)/3.1415926*180. << " " << (fabs(phi1-phi2)-3.1415926)/3.1415926*180. << " " << track1->get_range() << " " << track2->get_range() << " " << vertex->Center().x/units::cm << " " <<  std::endl;
+	 // std::cout << ngood_tracks << " " << theta_abc/3.1415926*180. << " " << fabs(theta1+theta2-3.1415926)/3.1415926*180. << " " << (fabs(phi1-phi2)-3.1415926)/3.1415926*180. << " " << track1->get_range() << " " << track2->get_range() << " " << vertex->Center().x/units::cm << " " <<  std::endl;
 	 
 	 int flag_qx = 0;
 	 if (ngood_tracks==2){
@@ -963,8 +963,8 @@ WireCell2dToy::ToyTracking::ToyTracking(WireCell2dToy::ToyCrawler& toycrawler, i
       // Now need to figure out how to judge whether this is a shower or track ... 
       // just from the number of tracks and the connectivities?
       bool shower_flag = IsThisShower(toycrawler);
-      //      shower_flag = false;
-      
+      //shower_flag = false;
+      //return;
 
       std::cout << "Shower? " << shower_flag << " Vertices " << vertices.size() << std::endl;
       
@@ -3513,14 +3513,13 @@ bool WireCell2dToy::ToyTracking::IsThisShower(WireCell2dToy::ToyCrawler& toycraw
     MergeSpaceCell *mscell = it->first;
     if (min_x > mscell->Get_Center().x) min_x = mscell->Get_Center().x;
     if (max_x < mscell->Get_Center().x) max_x = mscell->Get_Center().x;
-
     if (min_y > mscell->Get_Center().y-mscell->get_dy()) min_y = mscell->Get_Center().y-mscell->get_dy();
     if (max_y < mscell->Get_Center().y+mscell->get_dy()) max_y = mscell->Get_Center().y+mscell->get_dy();
-
     if (min_z > mscell->Get_Center().z-mscell->get_dz()) min_z = mscell->Get_Center().z-mscell->get_dz();
     if (max_z < mscell->Get_Center().z+mscell->get_dz()) max_z = mscell->Get_Center().z+mscell->get_dz();
-    
   }
+
+  
 
   // std::cout << fabs(max_x-min_x) << " " << sqrt(pow(max_y-min_y,2)+pow(max_z-min_z,2)) << std::endl;
 
@@ -3600,7 +3599,7 @@ bool WireCell2dToy::ToyTracking::IsThisShower(WireCell2dToy::ToyCrawler& toycraw
   // }
 
 
-  //std::cout << "Number of Tracks " << ntracks << " "  << time_mcells_set.size() << " " << track_cluster.size() << " " << time_mcells_set1.size() << " " << time_mcells_set2.size() << std::endl; 
+  // std::cout << "Number of Tracks " << ntracks << " "  << time_mcells_set.size() << " " << track_cluster.size() << " " << time_mcells_set1.size() << " " << time_mcells_set2.size() << " " << fabs(max_x-min_x)/sqrt(pow(max_y-min_y,2)+pow(max_z-min_z,2)) << std::endl; 
   
   
   //need better tuning .... 
@@ -3610,7 +3609,68 @@ bool WireCell2dToy::ToyTracking::IsThisShower(WireCell2dToy::ToyCrawler& toycraw
   }else{
     //unacounted ones spam more than 10
     if (time_mcells_set.size() >=10){
-      return true; 
+      // special deal with the parallel tracks
+      if (fabs(max_x-min_x)/sqrt(pow(max_y-min_y,2)+pow(max_z-min_z,2))>0.1){
+	
+	// find out the structure of the remaing stuff...
+	MergeSpaceCellSelection remaining_mcells;
+	for (auto it = mcells_map.begin(); it!= mcells_map.end();it ++ ){
+	  MergeSpaceCell *mscell = it->first;
+	  auto it1 = find(all_track_mscs.begin(),all_track_mscs.end(),mscell);
+	  if (it1 == all_track_mscs.end()) 
+	    remaining_mcells.push_back(mscell);
+	}
+	// find center
+	Point p1(0,0,0);
+	int sum = 0;
+	for (int i =0;i!=remaining_mcells.size();i++){
+	  MergeSpaceCell *mcell = remaining_mcells.at(i);
+	  p1.x += mcell->Get_Center().x * mcell->Get_all_spacecell().size();
+	  p1.y += mcell->Get_Center().y * mcell->Get_all_spacecell().size();
+	  p1.z += mcell->Get_Center().z * mcell->Get_all_spacecell().size();
+	  sum += mcell->Get_all_spacecell().size();
+	}
+	p1.x /= sum;
+	p1.y /= sum;
+	p1.z /= sum;
+	
+	// find the furthest one, define the axis
+	float max_dis = 0;
+	Point max_point;
+	for (int i=0;i!=remaining_mcells.size();i++){
+	  MergeSpaceCell *mcell = remaining_mcells.at(i);
+	  float dis = sqrt(pow(mcell->Get_Center().x - p1.x,2) + 
+			   pow(mcell->Get_Center().y - p1.y,2) + 
+			   pow(mcell->Get_Center().z - p1.z,2));
+	  if (dis > max_dis){
+	    max_dis = dis;
+	    max_point = mcell->Get_Center();
+	  }
+	}
+	Line l1(max_point,p1);
+	TVector3 dir = l1.vec();
+	float transverse_dis=0;
+	float max_long_dis=-1e9;
+	float min_long_dis=1e9;
+	// find the maximum distance along it and transverse to it
+	for (int i=0; i!=remaining_mcells.size();i++){
+	  Point p2 = remaining_mcells.at(i)->Get_Center();
+	  if (l1.closest_dis(p2) > transverse_dis)
+	    transverse_dis = l1.closest_dis(p2);
+	  TVector3 v1(p2.x - p1.x, p2.y-p1.y,p2.z-p1.z);
+	  if (v1.Dot(dir)/dir.Mag() > max_long_dis)
+	    max_long_dis = v1.Dot(dir)/dir.Mag() ;
+	  if (v1.Dot(dir)/dir.Mag() < min_long_dis)
+	    min_long_dis = v1.Dot(dir)/dir.Mag() ;
+	}
+	
+	// form ratio and judge .. 
+	//std::cout << transverse_dis << " " << transverse_dis * 2/(max_long_dis - min_long_dis) << std::endl;
+
+	//std::cout << remaining_mcells.size() << std::endl;
+	if (transverse_dis * 2/(max_long_dis - min_long_dis) >0.1)
+	  return true;
+      } 
     }else{
       if (track_cluster.size() >=3 && time_mcells_set.size() >=4){
 	return true;
@@ -3618,12 +3678,14 @@ bool WireCell2dToy::ToyTracking::IsThisShower(WireCell2dToy::ToyCrawler& toycraw
 	return true;
       }else{
 	if (time_mcells_set1.size() > time_mcells_set2.size() * 0.75 && time_mcells_set1.size() > 5){
+	  
+	  //special deal with the parallel tracks 
 	  if (fabs(max_x-min_x)/sqrt(pow(max_y-min_y,2)+pow(max_z-min_z,2))>0.1)
 	    return true;
 	}
       }
     }
-  }
+    }
   
 
 
