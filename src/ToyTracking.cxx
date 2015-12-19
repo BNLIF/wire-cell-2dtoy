@@ -32,21 +32,21 @@ void WireCell2dToy::ToyTracking::IterateMergeTracks(WireCell::MergeSpaceCellMap&
     if (prev_ntracks == good_tracks.size()+parallel_tracks.size()) flag = 0;
   }
 
-  // for (int i=0;i!=good_tracks.size();i++){
-  //   WCTrack *track = good_tracks.at(i);
-  //   WCVertexSelection vertices = wct_wcv_map[track];
-  //   std::cout << "R: " << vertices.size() << " " << vertices.at(0)->Center().x/units::cm << " " << vertices.at(0)->Center().y/units::cm << " " << vertices.at(0)->Center().z/units::cm << " "
-  // 	      << vertices.at(1)->Center().x/units::cm << " "  << vertices.at(1)->Center().y/units::cm << " "  << vertices.at(1)->Center().z/units::cm << " " << 
-  //     std::endl;
-  // }
+  for (int i=0;i!=good_tracks.size();i++){
+    WCTrack *track = good_tracks.at(i);
+    WCVertexSelection vertices = wct_wcv_map[track];
+    std::cout << "R: " << vertices.size() << " " << vertices.at(0)->Center().x/units::cm << " " << vertices.at(0)->Center().y/units::cm << " " << vertices.at(0)->Center().z/units::cm << " "
+  	      << vertices.at(1)->Center().x/units::cm << " "  << vertices.at(1)->Center().y/units::cm << " "  << vertices.at(1)->Center().z/units::cm << " " << 
+      std::endl;
+  }
 
-  // for (int i=0;i!=parallel_tracks.size();i++){
-  //   WCTrack *track = parallel_tracks.at(i);
-  //   WCVertexSelection vertices = wct_wcv_map[track];
-  //   std::cout << "P: " << vertices.size() << " " << vertices.at(0)->Center().x/units::cm << " " << vertices.at(0)->Center().y/units::cm << " " << vertices.at(0)->Center().z/units::cm << " "
-  // 	      << vertices.at(1)->Center().x/units::cm << " "  << vertices.at(1)->Center().y/units::cm << " "  << vertices.at(1)->Center().z/units::cm << " " << 
-  //     std::endl;
-  // }
+  for (int i=0;i!=parallel_tracks.size();i++){
+    WCTrack *track = parallel_tracks.at(i);
+    WCVertexSelection vertices = wct_wcv_map[track];
+    std::cout << "P: " << vertices.size() << " " << vertices.at(0)->Center().x/units::cm << " " << vertices.at(0)->Center().y/units::cm << " " << vertices.at(0)->Center().z/units::cm << " "
+  	      << vertices.at(1)->Center().x/units::cm << " "  << vertices.at(1)->Center().y/units::cm << " "  << vertices.at(1)->Center().z/units::cm << " " << 
+      std::endl;
+  }
 
   
 }
@@ -98,6 +98,35 @@ void WireCell2dToy::ToyTracking::MergeTracks_no_shared_vertex(WireCell::MergeSpa
 	for (int j1 = 0; j1!=vertices2.size(); j1++){
 	  WCVertex *vertex2 = vertices2.at(j1);
 	  
+	  // find out the other vertex
+	  WCVertex *vertex1_other = 0;
+	  for (int i2 = 0;i2!=vertices1.size();i2++){
+	    vertex1_other = vertices1.at(i2);
+	    if (vertex1_other != vertex1) break;
+	    }
+	  WCVertex *vertex2_other = 0;
+	  for (int i3 = 0;i3!=vertices2.size();i3++){
+	    vertex2_other = vertices2.at(i3);
+	    if (vertex2_other != vertex2) break;
+	  }
+	  if (vertex1_other==0 || vertex2_other ==0) continue;
+	  
+	  float dis_1 = sqrt(pow(vertex1->Center().x - vertex2->Center().x,2)+
+			      pow(vertex1->Center().y - vertex2->Center().y,2)+
+			      pow(vertex1->Center().z - vertex2->Center().z,2));
+	  float dis_2 = sqrt(pow(vertex1->Center().x - vertex2_other->Center().x,2)+
+			      pow(vertex1->Center().y - vertex2_other->Center().y,2)+
+			      pow(vertex1->Center().z - vertex2_other->Center().z,2));
+	  float dis_3 = sqrt(pow(vertex1_other->Center().x - vertex2->Center().x,2)+
+			      pow(vertex1_other->Center().y - vertex2->Center().y,2)+
+			      pow(vertex1_other->Center().z - vertex2->Center().z,2));
+	  float dis_4 = sqrt(pow(vertex1_other->Center().x - vertex2_other->Center().x,2)+
+			      pow(vertex1_other->Center().y - vertex2_other->Center().y,2)+
+			      pow(vertex1_other->Center().z - vertex2_other->Center().z,2));
+
+	  if (dis_1 > dis_2 || dis_1 > dis_3 || dis_1 > dis_3) continue;
+
+
 	  if (type == 0){
 	    float dis = sqrt(pow(vertex1->Center().x-vertex2->Center().x,2) + 
 			     pow(vertex1->Center().y-vertex2->Center().y,2) + 
@@ -134,18 +163,7 @@ void WireCell2dToy::ToyTracking::MergeTracks_no_shared_vertex(WireCell::MergeSpa
 	    }
 	    
 	    
-	    // find out the other vertex
-	    WCVertex *vertex1_other = 0;
-	    for (int i2 = 0;i2!=vertices1.size();i2++){
-	      vertex1_other = vertices1.at(i2);
-	      if (vertex1_other != vertex1) break;
-	    }
-	    WCVertex *vertex2_other = 0;
-	    for (int i3 = 0;i3!=vertices2.size();i3++){
-	      vertex2_other = vertices2.at(i3);
-	      if (vertex2_other != vertex2) break;
-	    }
-	    if (vertex1_other==0 || vertex2_other ==0) continue;
+	   
 	    
 	    TVector3 abc1(vertex1_other->Center().x - vertex1->Center().x,
 			  vertex1_other->Center().y - vertex1->Center().y,
@@ -1195,7 +1213,7 @@ WireCell2dToy::ToyTracking::ToyTracking(WireCell2dToy::ToyCrawler& toycrawler, i
       // just from the number of tracks and the connectivities?
       bool shower_flag = IsThisShower(toycrawler);
       //shower_flag = false;
-      //return;
+      //    return;
 
       std::cout << "Shower? " << shower_flag << " Vertices " << vertices.size() << std::endl;
       
@@ -3830,7 +3848,7 @@ bool WireCell2dToy::ToyTracking::IsThisShower(WireCell2dToy::ToyCrawler& toycraw
   // }
 
 
-  // std::cout << "Number of Tracks " << ntracks << " "  << time_mcells_set.size() << " " << track_cluster.size() << " " << time_mcells_set1.size() << " " << time_mcells_set2.size() << " " << fabs(max_x-min_x)/sqrt(pow(max_y-min_y,2)+pow(max_z-min_z,2)) << std::endl; 
+  std::cout << "Number of Tracks " << ntracks << " "  << time_mcells_set.size() << " " << track_cluster.size() << " " << time_mcells_set1.size() << " " << time_mcells_set2.size() << " " << fabs(max_x-min_x)/sqrt(pow(max_y-min_y,2)+pow(max_z-min_z,2)) << std::endl; 
   
 
 
@@ -3906,9 +3924,11 @@ bool WireCell2dToy::ToyTracking::IsThisShower(WireCell2dToy::ToyCrawler& toycraw
       } 
     }else{
       if (track_cluster.size() >=3 && time_mcells_set.size() >=4){
-	return true;
+	if (fabs(max_x-min_x)/sqrt(pow(max_y-min_y,2)+pow(max_z-min_z,2))>0.1)
+	  return true;
       }else if (track_cluster.size()==2 && time_mcells_set.size() >=10){
-	return true;
+	if (fabs(max_x-min_x)/sqrt(pow(max_y-min_y,2)+pow(max_z-min_z,2))>0.1)
+	  return true;
       }else{
 	if (time_mcells_set1.size() > time_mcells_set2.size() * 0.75 && time_mcells_set1.size() > 5){
 	  
