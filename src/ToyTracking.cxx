@@ -324,9 +324,9 @@ void WireCell2dToy::ToyTracking::MergeTracks_no_shared_vertex(WireCell::MergeSpa
 			  vertex1->Center().y - vertex2->Center().y,
 			  vertex1->Center().y - vertex2->Center().z);
 
-	    // std::cout << vertex1->Center().x/units::cm << " " << vertex1_other->Center().x/units::cm << " " 
-	    // 	      << vertex2->Center().x/units::cm << " " << vertex2_other->Center().x/units::cm << " " 
-	    // 	      << abc1.Angle(abc2)/3.1415926*180. << " " << abc3.Angle(abc4)/3.1415926*180. << std::endl;
+	    std::cout << vertex1->Center().x/units::cm << " " << vertex1_other->Center().x/units::cm << " " 
+	    	      << vertex2->Center().x/units::cm << " " << vertex2_other->Center().x/units::cm << " " 
+	    	      << abc1.Angle(abc2)/3.1415926*180. << " " << abc3.Angle(abc4)/3.1415926*180. << std::endl;
 	    
 	    if (abc1.Angle(abc2)/3.1415926*180.<18&& abc3.Angle(abc4)/3.1415926*180. < 18.){
 	    }else{
@@ -605,12 +605,12 @@ void WireCell2dToy::ToyTracking::MergeTracks_no_shared_vertex(WireCell::MergeSpa
     // std::cout << start_point.x/units::cm << " " << start_point.y/units::cm << " " << start_point.z/units::cm << " " << std::endl;
     // std::cout << end_point.x/units::cm << " " << end_point.y/units::cm << " " << end_point.z/units::cm << " " << std::endl;
     //if (mcells_map.find(start_cell) == mcells_map.end()){
-    std::cout <<"xin:1 " << mcells_map[start_cell].size() << std::endl;
-      // }
-      // if (mcells_map.find(end_cell) == mcells_map.end()){
-    std::cout <<"xin:2 " << mcells_map[end_cell].size() << std::endl;
-      // }
-    std::cout << "xin: " << mcells.size() << " " << walking.get_counter() << " " << walking.get_global_counter() << std::endl;
+    // std::cout <<"xin:1 " << mcells_map[start_cell].size() << std::endl;
+    //   // }
+    //   // if (mcells_map.find(end_cell) == mcells_map.end()){
+    // std::cout <<"xin:2 " << mcells_map[end_cell].size() << std::endl;
+    //   // }
+    // std::cout << "xin: " << mcells.size() << " " << walking.get_counter() << " " << walking.get_global_counter() << std::endl;
 
     if (mcells.size()==0){
       MergeSpaceCellSet msc_set;
@@ -4021,12 +4021,12 @@ bool WireCell2dToy::ToyTracking::IsThisShower(WireCell2dToy::ToyCrawler& toycraw
   for (int i=0;i!=tracks.size();i++){
     auto it = find(good_tracks.begin(),good_tracks.end(),tracks.at(i));
     if (it != good_tracks.end()){
-    //    if (tracks.at(i)->get_centerVP().size() > 0 ){
+      //    if (tracks.at(i)->get_centerVP().size() > 0 ){
       all_track_mscs.insert(all_track_mscs.end(),tracks.at(i)->get_centerVP_cells().begin(),tracks.at(i)->get_centerVP_cells().end()) ; 
       ntracks ++;
     }
   }
-
+  
   // find out how many blobs are not contained in the tracks
   // 1. How many blobs are not accounted in tracks (need a cut on size)
   int nmcells = 0;
@@ -4064,17 +4064,17 @@ bool WireCell2dToy::ToyTracking::IsThisShower(WireCell2dToy::ToyCrawler& toycraw
     if (min_z > mscell->Get_Center().z-mscell->get_dz()) min_z = mscell->Get_Center().z-mscell->get_dz();
     if (max_z < mscell->Get_Center().z+mscell->get_dz()) max_z = mscell->Get_Center().z+mscell->get_dz();
   }
-
   
-
+  
+  
   // std::cout << fabs(max_x-min_x) << " " << sqrt(pow(max_y-min_y,2)+pow(max_z-min_z,2)) << std::endl;
-
-
+  
+  
   // 2. the connectivity of tracks  (how many big clusters)
   std::vector<WCTrackSelection> track_cluster;
   WCTrackSelection used_tracks;
   WCVertexSelection used_vertices;
-
+  
   for (auto it = wct_wcv_map.begin(); it!= wct_wcv_map.end(); it++){
     WCTrack *track = it->first;
     auto it1 = find(used_tracks.begin(),used_tracks.end(),track);
@@ -4082,7 +4082,7 @@ bool WireCell2dToy::ToyTracking::IsThisShower(WireCell2dToy::ToyCrawler& toycraw
       used_tracks.push_back(track);
       WCTrackSelection cur_tracks;
       cur_tracks.push_back(track);
-    
+      
       
       // fill in vertices
       WCVertexSelection vertices = it->second;
@@ -4090,7 +4090,7 @@ bool WireCell2dToy::ToyTracking::IsThisShower(WireCell2dToy::ToyCrawler& toycraw
       cur_vertices.insert(cur_vertices.begin(),vertices.begin(),vertices.end());
       
       //std::cout << vertices.size() << " " << used_tracks.size() << " " << used_vertices.size() << std::endl;
-
+      
       int flag = 1;
       while(flag){
   	flag = 0;
@@ -4100,7 +4100,7 @@ bool WireCell2dToy::ToyTracking::IsThisShower(WireCell2dToy::ToyCrawler& toycraw
   	  flag = 1;
 	  
 	  //std::cout << wcv_wct_map[vertex1].size() << " " << used_vertices.size() << std::endl;
-
+	  
   	  auto it2 = find(used_vertices.begin(),used_vertices.end(),vertex1);
   	  if (it2 == used_vertices.end()){
   	    used_vertices.push_back(vertex1);
@@ -4147,19 +4147,23 @@ bool WireCell2dToy::ToyTracking::IsThisShower(WireCell2dToy::ToyCrawler& toycraw
 
   std::cout << "Number of Tracks " << ntracks << " "  << time_mcells_set.size() << " " << track_cluster.size() << " " << time_mcells_set1.size() << " " << time_mcells_set2.size() << " " << fabs(max_x-min_x)/sqrt(pow(max_y-min_y,2)+pow(max_z-min_z,2)) << std::endl; 
   
-
-
+  
+  
   
   //need better tuning .... 
   // no tracks 
-  if (ntracks == 0 && time_mcells_set.size() >= 4){
-    return true;
+  if (ntracks == 0  ){
+    if (time_mcells_set.size() >= 4){
+      return true;
+    }else{
+      return false;
+    }
   }else{
     //unacounted ones spam more than 10
     if (time_mcells_set.size() >=10){
       // special deal with the parallel tracks
       if (fabs(max_x-min_x)/sqrt(pow(max_y-min_y,2)+pow(max_z-min_z,2))>0.1){
-		
+	
 	// find out the structure of the remaing stuff...
 	MergeSpaceCellSelection remaining_mcells;
 	for (auto it = mcells_map.begin(); it!= mcells_map.end();it ++ ){
@@ -4214,30 +4218,207 @@ bool WireCell2dToy::ToyTracking::IsThisShower(WireCell2dToy::ToyCrawler& toycraw
 	
 	// form ratio and judge .. 
 	//std::cout << transverse_dis << " " << transverse_dis * 2/(max_long_dis - min_long_dis) << std::endl;
-
+	
 	//std::cout << remaining_mcells.size() << std::endl;
 	if (transverse_dis * 2/(max_long_dis - min_long_dis) >0.1)
 	  return true;
       } 
     }else{
       if (track_cluster.size() >=3 && time_mcells_set.size() >=4){
-	if (fabs(max_x-min_x)/sqrt(pow(max_y-min_y,2)+pow(max_z-min_z,2))>0.1)
-	  return true;
+	if (fabs(max_x-min_x)/sqrt(pow(max_y-min_y,2)+pow(max_z-min_z,2))>0.1){
+	  // find out the structure of the remaing stuff...
+	  MergeSpaceCellSelection remaining_mcells;
+	  for (auto it = mcells_map.begin(); it!= mcells_map.end();it ++ ){
+	    MergeSpaceCell *mscell = it->first;
+	    auto it1 = find(all_track_mscs.begin(),all_track_mscs.end(),mscell);
+	    if (it1 == all_track_mscs.end()) 
+	      remaining_mcells.push_back(mscell);
+	  }
+	  // find center
+	  Point p1(0,0,0);
+	  int sum = 0;
+	  for (int i =0;i!=remaining_mcells.size();i++){
+	    MergeSpaceCell *mcell = remaining_mcells.at(i);
+	    p1.x += mcell->Get_Center().x * mcell->Get_all_spacecell().size();
+	    p1.y += mcell->Get_Center().y * mcell->Get_all_spacecell().size();
+	    p1.z += mcell->Get_Center().z * mcell->Get_all_spacecell().size();
+	    sum += mcell->Get_all_spacecell().size();
+	  }
+	  p1.x /= sum;
+	  p1.y /= sum;
+	  p1.z /= sum;
+	  
+	  // find the furthest one, define the axis
+	  float max_dis = 0;
+	  Point max_point;
+	  for (int i=0;i!=remaining_mcells.size();i++){
+	    MergeSpaceCell *mcell = remaining_mcells.at(i);
+	    float dis = sqrt(pow(mcell->Get_Center().x - p1.x,2) + 
+			     pow(mcell->Get_Center().y - p1.y,2) + 
+			     pow(mcell->Get_Center().z - p1.z,2));
+	    if (dis > max_dis){
+	      max_dis = dis;
+	      max_point = mcell->Get_Center();
+	    }
+	  }
+	  Line l1(max_point,p1);
+	  TVector3 dir = l1.vec();
+	  float transverse_dis=0;
+	  float max_long_dis=-1e9;
+	  float min_long_dis=1e9;
+	  // find the maximum distance along it and transverse to it
+	  for (int i=0; i!=remaining_mcells.size();i++){
+	    Point p2 = remaining_mcells.at(i)->Get_Center();
+	    if (l1.closest_dis(p2) > transverse_dis)
+	      transverse_dis = l1.closest_dis(p2);
+	    TVector3 v1(p2.x - p1.x, p2.y-p1.y,p2.z-p1.z);
+	    if (v1.Dot(dir)/dir.Mag() > max_long_dis)
+	      max_long_dis = v1.Dot(dir)/dir.Mag() ;
+	    if (v1.Dot(dir)/dir.Mag() < min_long_dis)
+	      min_long_dis = v1.Dot(dir)/dir.Mag() ;
+	  }
+	  
+	  // form ratio and judge .. 
+	  //std::cout << transverse_dis << " " << transverse_dis * 2/(max_long_dis - min_long_dis) << std::endl;
+	  
+	  //std::cout << remaining_mcells.size() << std::endl;
+	  if (transverse_dis * 2/(max_long_dis - min_long_dis) >0.1)
+	    return true;
+	  
+	}
       }else if (track_cluster.size()==2 && time_mcells_set.size() >=10){
-	if (fabs(max_x-min_x)/sqrt(pow(max_y-min_y,2)+pow(max_z-min_z,2))>0.1)
-	  return true;
+	if (fabs(max_x-min_x)/sqrt(pow(max_y-min_y,2)+pow(max_z-min_z,2))>0.1){
+	  // find out the structure of the remaing stuff...
+	  MergeSpaceCellSelection remaining_mcells;
+	  for (auto it = mcells_map.begin(); it!= mcells_map.end();it ++ ){
+	    MergeSpaceCell *mscell = it->first;
+	    auto it1 = find(all_track_mscs.begin(),all_track_mscs.end(),mscell);
+	    if (it1 == all_track_mscs.end()) 
+	      remaining_mcells.push_back(mscell);
+	  }
+	  // find center
+	  Point p1(0,0,0);
+	  int sum = 0;
+	  for (int i =0;i!=remaining_mcells.size();i++){
+	    MergeSpaceCell *mcell = remaining_mcells.at(i);
+	    p1.x += mcell->Get_Center().x * mcell->Get_all_spacecell().size();
+	    p1.y += mcell->Get_Center().y * mcell->Get_all_spacecell().size();
+	    p1.z += mcell->Get_Center().z * mcell->Get_all_spacecell().size();
+	    sum += mcell->Get_all_spacecell().size();
+	  }
+	  p1.x /= sum;
+	  p1.y /= sum;
+	  p1.z /= sum;
+	  
+	  // find the furthest one, define the axis
+	  float max_dis = 0;
+	  Point max_point;
+	  for (int i=0;i!=remaining_mcells.size();i++){
+	    MergeSpaceCell *mcell = remaining_mcells.at(i);
+	    float dis = sqrt(pow(mcell->Get_Center().x - p1.x,2) + 
+			     pow(mcell->Get_Center().y - p1.y,2) + 
+			     pow(mcell->Get_Center().z - p1.z,2));
+	    if (dis > max_dis){
+	      max_dis = dis;
+	      max_point = mcell->Get_Center();
+	    }
+	  }
+	  Line l1(max_point,p1);
+	  TVector3 dir = l1.vec();
+	  float transverse_dis=0;
+	  float max_long_dis=-1e9;
+	  float min_long_dis=1e9;
+	  // find the maximum distance along it and transverse to it
+	  for (int i=0; i!=remaining_mcells.size();i++){
+	    Point p2 = remaining_mcells.at(i)->Get_Center();
+	    if (l1.closest_dis(p2) > transverse_dis)
+	      transverse_dis = l1.closest_dis(p2);
+	    TVector3 v1(p2.x - p1.x, p2.y-p1.y,p2.z-p1.z);
+	    if (v1.Dot(dir)/dir.Mag() > max_long_dis)
+	      max_long_dis = v1.Dot(dir)/dir.Mag() ;
+	    if (v1.Dot(dir)/dir.Mag() < min_long_dis)
+	      min_long_dis = v1.Dot(dir)/dir.Mag() ;
+	  }
+	  
+	  // form ratio and judge .. 
+	  //std::cout << transverse_dis << " " << transverse_dis * 2/(max_long_dis - min_long_dis) << std::endl;
+	  
+	  //std::cout << remaining_mcells.size() << std::endl;
+	  if (transverse_dis * 2/(max_long_dis - min_long_dis) >0.1)
+	    return true;
+	  
+	}
       }else{
 	if (time_mcells_set1.size() > time_mcells_set2.size() * 0.75 && time_mcells_set1.size() > 5){
 	  
 	  //special deal with the parallel tracks 
-	  if (fabs(max_x-min_x)/sqrt(pow(max_y-min_y,2)+pow(max_z-min_z,2))>0.1)
-	    return true;
+	  if (fabs(max_x-min_x)/sqrt(pow(max_y-min_y,2)+pow(max_z-min_z,2))>0.1){
+	    // find out the structure of the remaing stuff...
+	    MergeSpaceCellSelection remaining_mcells;
+	    for (auto it = mcells_map.begin(); it!= mcells_map.end();it ++ ){
+	      MergeSpaceCell *mscell = it->first;
+	      auto it1 = find(all_track_mscs.begin(),all_track_mscs.end(),mscell);
+	      if (it1 == all_track_mscs.end()) 
+		remaining_mcells.push_back(mscell);
+	    }
+	    // find center
+	    Point p1(0,0,0);
+	    int sum = 0;
+	    for (int i =0;i!=remaining_mcells.size();i++){
+	      MergeSpaceCell *mcell = remaining_mcells.at(i);
+	      p1.x += mcell->Get_Center().x * mcell->Get_all_spacecell().size();
+	      p1.y += mcell->Get_Center().y * mcell->Get_all_spacecell().size();
+	      p1.z += mcell->Get_Center().z * mcell->Get_all_spacecell().size();
+	      sum += mcell->Get_all_spacecell().size();
+	    }
+	    p1.x /= sum;
+	    p1.y /= sum;
+	    p1.z /= sum;
+	    
+	    // find the furthest one, define the axis
+	    float max_dis = 0;
+	    Point max_point;
+	    for (int i=0;i!=remaining_mcells.size();i++){
+	      MergeSpaceCell *mcell = remaining_mcells.at(i);
+	      float dis = sqrt(pow(mcell->Get_Center().x - p1.x,2) + 
+			       pow(mcell->Get_Center().y - p1.y,2) + 
+			       pow(mcell->Get_Center().z - p1.z,2));
+	      if (dis > max_dis){
+		max_dis = dis;
+		max_point = mcell->Get_Center();
+	      }
+	    }
+	    Line l1(max_point,p1);
+	    TVector3 dir = l1.vec();
+	    float transverse_dis=0;
+	    float max_long_dis=-1e9;
+	    float min_long_dis=1e9;
+	    // find the maximum distance along it and transverse to it
+	    for (int i=0; i!=remaining_mcells.size();i++){
+	      Point p2 = remaining_mcells.at(i)->Get_Center();
+	      if (l1.closest_dis(p2) > transverse_dis)
+		transverse_dis = l1.closest_dis(p2);
+	      TVector3 v1(p2.x - p1.x, p2.y-p1.y,p2.z-p1.z);
+	      if (v1.Dot(dir)/dir.Mag() > max_long_dis)
+		max_long_dis = v1.Dot(dir)/dir.Mag() ;
+	      if (v1.Dot(dir)/dir.Mag() < min_long_dis)
+		min_long_dis = v1.Dot(dir)/dir.Mag() ;
+	    }
+	    
+	    // form ratio and judge .. 
+	    //std::cout << transverse_dis << " " << transverse_dis * 2/(max_long_dis - min_long_dis) << std::endl;
+	    
+	    //std::cout << remaining_mcells.size() << std::endl;
+	    if (transverse_dis * 2/(max_long_dis - min_long_dis) >0.1)
+	      return true;
+	    
+	  }
 	}
       }
     }
-    }
+  }
   
-
+  
 
   return false;
   
