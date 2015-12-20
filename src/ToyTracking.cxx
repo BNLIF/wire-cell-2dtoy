@@ -265,8 +265,16 @@ void WireCell2dToy::ToyTracking::MergeTracks_no_shared_vertex(WireCell::MergeSpa
 	  float dis_4 = sqrt(pow(vertex1_other->Center().x - vertex2_other->Center().x,2)+
 			      pow(vertex1_other->Center().y - vertex2_other->Center().y,2)+
 			      pow(vertex1_other->Center().z - vertex2_other->Center().z,2));
+	  TVector3 kk1(vertex1_other->Center().x-vertex1->Center().x,
+		       vertex1_other->Center().y-vertex1->Center().y,
+		       vertex1_other->Center().z-vertex1->Center().z);
+	  TVector3 kk2(vertex2_other->Center().x-vertex2->Center().x,
+		       vertex2_other->Center().y-vertex2->Center().y,
+		       vertex2_other->Center().z-vertex2->Center().z);
 
-	  if (dis_1 > dis_2 || dis_1 > dis_3 || dis_1 > dis_3) continue;
+	  //std::cout << dis << " " << vertex1->Center().x/units::cm << " " << vertex2->Center().x/units::cm << " " << track1->get_range() << " " << track2->get_range() << " " << vertex1_other->Center().x/units::cm << " " << vertex2_other->Center().x/units::cm << " " << track1 << " " << track2 << " " << std::endl;
+
+	  if (dis_1 > dis_4 || kk1.Angle(kk2) <3.1415926/2.) continue;
 	  if (vertex1 == vertex2) continue;
 
 	  if (type == 0){
@@ -281,17 +289,35 @@ void WireCell2dToy::ToyTracking::MergeTracks_no_shared_vertex(WireCell::MergeSpa
 	    
 	    
 	    if (type == 1){
+	      
 	      float dis = fabs(vertex1->Center().x - vertex2->Center().x);
 	      if (dis > 3*units::cm) continue;
+	      if (track1->get_range()<3*units::cm || track2->get_range()<3*units::cm) continue;
+	      //std::cout << dis << " " << vertex1->Center().x/units::cm << " " << vertex2->Center().x/units::cm << " " << track1->get_range() << " " << track2->get_range() << " " << vertex1_other->Center().x/units::cm << " " << vertex2_other->Center().x/units::cm << " " << track1 << " " << track2 << std::endl;
 	    }
 	    if (type==2){
 	      float dis =  sqrt(pow(vertex1->Center().x-vertex2->Center().x,2) + 
 			     pow(vertex1->Center().y-vertex2->Center().y,2) + 
 			     pow(vertex1->Center().z-vertex2->Center().z,2)); 
 	      
+	      //std::cout << dis << " " << track1->get_range() << " " << track2->get_range() << std::endl;
 	      if (dis > track1->get_range() || dis > track2->get_range()) continue;
 	      
 	      int flag_overlap = 0;
+	      float min_dis = 1e9;
+	      for (int i2 = 0;i2!=track1->get_centerVP_cells().size();i2++){
+		MergeSpaceCell *mcell1 = track1->get_centerVP_cells().at(i2);
+		for (int j2 = 0;j2!=track2->get_centerVP_cells().size();j2++){
+		  MergeSpaceCell *mcell2 = track2->get_centerVP_cells().at(j2);
+		  float dis10 = sqrt(pow(mcell1->Get_Center().x-mcell2->Get_Center().x,2)+
+				     pow(mcell1->Get_Center().y-mcell2->Get_Center().y,2)+
+				     pow(mcell1->Get_Center().z-mcell2->Get_Center().z,2));
+		  if (dis10 < min_dis){
+		    min_dis = dis10;
+		  }
+		}
+	      }
+
 	      for (int i2 = 0;i2!=track1->get_centerVP_cells().size();i2++){
 		MergeSpaceCell *mcell1 = track1->get_centerVP_cells().at(i2);
 		for (int j2 = 0;j2!=track2->get_centerVP_cells().size();j2++){
@@ -302,9 +328,16 @@ void WireCell2dToy::ToyTracking::MergeTracks_no_shared_vertex(WireCell::MergeSpa
 		  }
 		}
 	      }
-	      //	      std::cout << flag_overlap << " " << track1->get_range() << " " << track2->get_range() << std::endl;
-	      if (flag_overlap<=1) continue;
-	      // if (flag_overlap <5 ) continue;
+	      //std::cout << flag_overlap << " " << track1->get_range() << " " << track2->get_range() << " " << min_dis/units::cm << std::endl;
+	      
+	      if (flag_overlap<=1) {
+		if (min_dis < 1*units::cm && track1->get_range() > 5*units::cm && track2->get_range()>5*units::cm){
+		}else{
+		  continue;
+		}
+	      }
+		
+
 	    }
 	    
 	    
@@ -324,11 +357,12 @@ void WireCell2dToy::ToyTracking::MergeTracks_no_shared_vertex(WireCell::MergeSpa
 			  vertex1->Center().y - vertex2->Center().y,
 			  vertex1->Center().y - vertex2->Center().z);
 
-	    std::cout << vertex1->Center().x/units::cm << " " << vertex1_other->Center().x/units::cm << " " 
-	    	      << vertex2->Center().x/units::cm << " " << vertex2_other->Center().x/units::cm << " " 
-	    	      << abc1.Angle(abc2)/3.1415926*180. << " " << abc3.Angle(abc4)/3.1415926*180. << std::endl;
+	    // std::cout << vertex1->Center().x/units::cm << " " << vertex1_other->Center().x/units::cm << " " 
+	    // 	      << vertex2->Center().x/units::cm << " " << vertex2_other->Center().x/units::cm << " " 
+	    // 	      << abc1.Angle(abc2)/3.1415926*180. << " " << abc3.Angle(abc4)/3.1415926*180. << std::endl;
 	    
-	    if (abc1.Angle(abc2)/3.1415926*180.<18&& abc3.Angle(abc4)/3.1415926*180. < 18.){
+	    if ((abc1.Angle(abc2)/3.1415926*180.<15&& abc3.Angle(abc4)/3.1415926*180. < 15.)||
+		sqrt(pow(abc1.Angle(abc2)/3.1415926*180.,2)+pow(abc3.Angle(abc4)/3.1415926*180.,2))<20.){
 	    }else{
 	      continue;
 	    }
@@ -391,6 +425,9 @@ void WireCell2dToy::ToyTracking::MergeTracks_no_shared_vertex(WireCell::MergeSpa
 	  //	  if (fabs(theta1+theta2-3.1415926) < 20./180.*3.1415926 && 
 	  //  fabs(fabs(phi1-phi2)-3.1415926)<20./180.*3.1415926 &&
 	  //   sqrt(pow(theta1+theta2-3.1415926,2) + pow(fabs(phi1-phi2)-3.1415926,2)) < 28./180.*3.1415926){
+	  
+	  // std::cout << theta_abc/3.1415926*180. << " " << theta_abc1/3.1415926*180. << std::endl;
+
 	  if (fabs(theta_abc/3.1415926*180-180.)>15){
 	    ct_tracks.at(it1 - all_tracks.begin())->SC_Hough(center1,15*units::cm);
 	    ct_tracks.at(it2 - all_tracks.begin())->SC_Hough(center2,15*units::cm);
@@ -404,8 +441,10 @@ void WireCell2dToy::ToyTracking::MergeTracks_no_shared_vertex(WireCell::MergeSpa
 	    abc2.SetXYZ(sin(theta2)*cos(phi2),sin(theta2)*sin(phi2),cos(theta2));
 	    theta_abc = abc1.Angle(abc2);
 	  }
+	  //std::cout << theta_abc/3.1415926*180. << " " << theta_abc1/3.1415926*180. << std::endl;
 	  
-	  if (fabs(theta_abc/3.1415926*180-180.)<15 || fabs(theta_abc1/3.1415926*180-180.)<15){
+	  if ((fabs(theta_abc/3.1415926*180-180.)<15 || fabs(theta_abc1/3.1415926*180-180.)<15)||
+	      (fabs(theta_abc/3.1415926*180-180.)<25 && fabs(theta_abc1/3.1415926*180-180.)<25)){
 	    if (merge_tracks_array.size()==0){
 	      WCTrackSelection merge_tracks;
 	      merge_tracks.push_back(track1);
