@@ -344,14 +344,15 @@ void WireCell2dToy::ToyTracking::MergeTracks_no_shared_vertex(WireCell::MergeSpa
 	  
 	  TVector3 abc1(sin(theta1)*cos(phi1),sin(theta1)*sin(phi1),cos(theta1));
 	  TVector3 abc2(sin(theta2)*cos(phi2),sin(theta2)*sin(phi2),cos(theta2));
-	  // TVector3 abc1(vertex1_other->Center().x - vertex1->Center().x,
-	  // 		vertex1_other->Center().y - vertex1->Center().y,
-	  // 		vertex1_other->Center().z - vertex1->Center().z);
-	  // TVector3 abc2(vertex2_other->Center().x - vertex2->Center().x,
-	  // 		vertex2_other->Center().y - vertex2->Center().y,
-	  // 		vertex2_other->Center().z - vertex2->Center().z);
+	  TVector3 abc3(vertex1_other->Center().x - vertex1->Center().x,
+	  		vertex1_other->Center().y - vertex1->Center().y,
+	  		vertex1_other->Center().z - vertex1->Center().z);
+	  TVector3 abc4(vertex2_other->Center().x - vertex2->Center().x,
+	  		vertex2_other->Center().y - vertex2->Center().y,
+	  		vertex2_other->Center().z - vertex2->Center().z);
 
 	  double theta_abc = abc1.Angle(abc2);
+	  double theta_abc1 = abc3.Angle(abc4);
 	  //std::cout << ct_tracks.at(it1 - all_tracks.begin())->Get_allmcells().size() << " " << ct_tracks.at(it2 - all_tracks.begin())->Get_allmcells().size() << " " << center1.x/units::cm << " " << center2.x/units::cm << std::endl;
 	  
 	  // std::cout << vertex1->Center().x/units::cm << " " << vertex1->Center().y/units::cm << " " << vertex1->Center().z/units::cm << " " << 
@@ -390,7 +391,7 @@ void WireCell2dToy::ToyTracking::MergeTracks_no_shared_vertex(WireCell::MergeSpa
 	    theta_abc = abc1.Angle(abc2);
 	  }
 	  
-	  if (fabs(theta_abc/3.1415926*180-180.)<15){
+	  if (fabs(theta_abc/3.1415926*180-180.)<15 || fabs(theta_abc1/3.1415926*180-180.)<15){
 	    if (merge_tracks_array.size()==0){
 	      WCTrackSelection merge_tracks;
 	      merge_tracks.push_back(track1);
