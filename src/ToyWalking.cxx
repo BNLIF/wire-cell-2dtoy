@@ -113,7 +113,9 @@ void WireCell2dToy::ToyWalking::Iterate(MergeSpaceCell *curr_cell, MergeSpaceCel
     if (dis < dist && counter < counter_limit && global_counter < 25*counter_limit){
       // go in
       //rank everything according to size ... 
-      //std::cout << target_cell->Get_Center().x << " " << curr_cell->Get_Center().x << std::endl;
+
+      //std::cout << target_cell->Get_Center().x/units::cm << " " << curr_cell->Get_Center().x/units::cm  << " " << curr_cell->Get_Center().y/units::cm << " " << curr_cell->Get_Center().z/units::cm << " " << curr_cells.size() << std::endl;
+
       if (target_cell->Get_Center().x > curr_cell->Get_Center().x){
 	MergeSpaceCellSet1 msc_set;
 	for (int i=0;i!=mcells_map[curr_cell].size();i++){
@@ -130,11 +132,7 @@ void WireCell2dToy::ToyWalking::Iterate(MergeSpaceCell *curr_cell, MergeSpaceCel
 	  }
 	}
       }else{
-	
 	MergeSpaceCellSet msc_set;
-
-	
-
 	for (int i=0;i!=mcells_map[curr_cell].size();i++){
 	  msc_set.insert(mcells_map[curr_cell].at(i));
 	}

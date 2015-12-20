@@ -328,7 +328,7 @@ void WireCell2dToy::ToyTracking::MergeTracks_no_shared_vertex(WireCell::MergeSpa
 	    // 	      << vertex2->Center().x/units::cm << " " << vertex2_other->Center().x/units::cm << " " 
 	    // 	      << abc1.Angle(abc2)/3.1415926*180. << " " << abc3.Angle(abc4)/3.1415926*180. << std::endl;
 	    
-	    if (abc1.Angle(abc2)/3.1415926*180.<15&& abc3.Angle(abc4)/3.1415926*180. < 15.){
+	    if (abc1.Angle(abc2)/3.1415926*180.<18&& abc3.Angle(abc4)/3.1415926*180. < 18.){
 	    }else{
 	      continue;
 	    }
@@ -604,13 +604,13 @@ void WireCell2dToy::ToyTracking::MergeTracks_no_shared_vertex(WireCell::MergeSpa
     mcells = walking.get_cells();
     // std::cout << start_point.x/units::cm << " " << start_point.y/units::cm << " " << start_point.z/units::cm << " " << std::endl;
     // std::cout << end_point.x/units::cm << " " << end_point.y/units::cm << " " << end_point.z/units::cm << " " << std::endl;
-    // if (mcells_map.find(start_cell) == mcells_map.end()){
-    //   std::cout <<"xin:1 " << mcells_map[start_cell].size() << std::endl;
-    // }
-    // if (mcells_map.find(end_cell) == mcells_map.end()){
-    //   std::cout <<"xin:2 " << mcells_map[end_cell].size() << std::endl;
-    // }
-    // std::cout << "xin: " << mcells.size() << std::endl;
+    //if (mcells_map.find(start_cell) == mcells_map.end()){
+    std::cout <<"xin:1 " << mcells_map[start_cell].size() << std::endl;
+      // }
+      // if (mcells_map.find(end_cell) == mcells_map.end()){
+    std::cout <<"xin:2 " << mcells_map[end_cell].size() << std::endl;
+      // }
+    std::cout << "xin: " << mcells.size() << " " << walking.get_counter() << " " << walking.get_global_counter() << std::endl;
 
     if (mcells.size()==0){
       MergeSpaceCellSet msc_set;
@@ -901,7 +901,7 @@ void WireCell2dToy::ToyTracking::MergeTracks(WireCell::MergeSpaceCellMap& mcells
 	 double theta_abc1 = abc3.Angle(abc4);
 
 	 
-	 //std::cout << ngood_tracks << " " << theta_abc/3.1415926*180. << " " << fabs(theta1+theta2-3.1415926)/3.1415926*180. << " " << (fabs(phi1-phi2)-3.1415926)/3.1415926*180. << " " << track1->get_range() << " " << track2->get_range() << " " << vertex->Center().x/units::cm << " " <<  std::endl;
+	 //	 std::cout << ngood_tracks << " " << theta_abc/3.1415926*180. << " " << theta_abc1/3.1415926*180. << " " << fabs(theta1+theta2-3.1415926)/3.1415926*180. << " " << (fabs(phi1-phi2)-3.1415926)/3.1415926*180. << " " << track1->get_range() << " " << track2->get_range() << " " << vertex->Center().x/units::cm << " " <<  std::endl;
 	 
 	 int flag_qx = 0;
 	 if (ngood_tracks==2){
