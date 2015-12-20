@@ -806,17 +806,20 @@ void WireCell2dToy::ToyTracking::MergeTracks(WireCell::MergeSpaceCellMap& mcells
       double theta1 = ct_tracks.at(it1 - all_tracks.begin())->Get_Theta();
       double phi1 = ct_tracks.at(it1 - all_tracks.begin())->Get_Phi();
 
-      
+      WCVertexSelection t1_vertices = wct_wcv_map[track1];
+      WCVertex *new_vertex1 = 0;
+      for (int i1 = 0;i1!=t1_vertices.size();i1++){
+	if (t1_vertices.at(i1) == vertex) continue;
+	if (find(t1_vertices.at(i1)->get_tracks().begin(),
+		 t1_vertices.at(i1)->get_tracks().end(),track1)==t1_vertices.at(i1)->get_tracks().end()) continue;
+	new_vertex1 = t1_vertices.at(i1);
+	break;
+      }
+
+
       if (track1->get_range() < 7*units::cm){
-	WCVertexSelection t1_vertices = wct_wcv_map[track1];
-	WCVertex *new_vertex1 = 0;
-	for (int i1 = 0;i1!=t1_vertices.size();i1++){
-	  if (t1_vertices.at(i1) == vertex) continue;
-	  if (find(t1_vertices.at(i1)->get_tracks().begin(),
-		   t1_vertices.at(i1)->get_tracks().end(),track1)==t1_vertices.at(i1)->get_tracks().end()) continue;
-	  new_vertex1 = t1_vertices.at(i1);
-	  break;
-	}
+	
+	
 	TVector3 temp_abc1(new_vertex1->Center().x - vertex->Center().x,
 			   new_vertex1->Center().y - vertex->Center().y,
 			   new_vertex1->Center().z - vertex->Center().z);
@@ -840,17 +843,19 @@ void WireCell2dToy::ToyTracking::MergeTracks(WireCell::MergeSpaceCellMap& mcells
 	 double theta2 = ct_tracks.at(it2 - all_tracks.begin())->Get_Theta();
 	 double phi2 = ct_tracks.at(it2 - all_tracks.begin())->Get_Phi();
 	 
-	 
+	 WCVertexSelection t2_vertices = wct_wcv_map[track2];
+	 WCVertex *new_vertex2 = 0;
+	 for (int i1 = 0;i1!=t2_vertices.size();i1++){
+	   if (t2_vertices.at(i1) == vertex) continue;
+	   if (find(t2_vertices.at(i1)->get_tracks().begin(),
+		    t2_vertices.at(i1)->get_tracks().end(),track2)==t2_vertices.at(i1)->get_tracks().end()) continue;
+	   new_vertex2 = t2_vertices.at(i1);
+	   break;
+	 }
+
+
 	 if (track2->get_range() < 7*units::cm){
-	   WCVertexSelection t2_vertices = wct_wcv_map[track2];
-	   WCVertex *new_vertex2 = 0;
-	   for (int i1 = 0;i1!=t2_vertices.size();i1++){
-	     if (t2_vertices.at(i1) == vertex) continue;
-	     if (find(t2_vertices.at(i1)->get_tracks().begin(),
-		      t2_vertices.at(i1)->get_tracks().end(),track2)==t2_vertices.at(i1)->get_tracks().end()) continue;
-	     new_vertex2 = t2_vertices.at(i1);
-	     break;
-	   }
+	   
 	   TVector3 temp_abc2(new_vertex2->Center().x - vertex->Center().x,
 			      new_vertex2->Center().y - vertex->Center().y,
 			      new_vertex2->Center().z - vertex->Center().z);
@@ -862,13 +867,22 @@ void WireCell2dToy::ToyTracking::MergeTracks(WireCell::MergeSpaceCellMap& mcells
 	 TVector3 abc2(sin(theta2)*cos(phi2),sin(theta2)*sin(phi2),cos(theta2));
 	 double theta_abc = abc1.Angle(abc2);
 	 //std::cout << theta_abc/3.1415926*180 << std::endl;
+	 
+	 TVector3 abc3(new_vertex1->Center().x - vertex->Center().x,
+		       new_vertex1->Center().y - vertex->Center().y,
+		       new_vertex1->Center().z - vertex->Center().z);
+	 TVector3 abc4(new_vertex2->Center().x - vertex->Center().x,
+		       new_vertex2->Center().y - vertex->Center().y,
+		       new_vertex2->Center().z - vertex->Center().z);
+	 double theta_abc1 = abc3.Angle(abc4);
 
+	 
 	 //std::cout << ngood_tracks << " " << theta_abc/3.1415926*180. << " " << fabs(theta1+theta2-3.1415926)/3.1415926*180. << " " << (fabs(phi1-phi2)-3.1415926)/3.1415926*180. << " " << track1->get_range() << " " << track2->get_range() << " " << vertex->Center().x/units::cm << " " <<  std::endl;
 	 
 	 int flag_qx = 0;
 	 if (ngood_tracks==2){
 	   //if (sqrt(pow(theta1+theta2-3.1415926,2) + pow(fabs(phi1-phi2)-3.1415926,2)) < 28./180.*3.1415926){
-	   if (fabs(theta_abc/3.1415926*180-180.)<25.){
+	   if (fabs(theta_abc/3.1415926*180-180.)<25. || fabs(theta_abc1/3.1415926*180.-180.)<25.){
 	     flag_qx = 1;
 	   }else{
 	     if (track1->get_range() > 7*units::cm){
@@ -888,12 +902,15 @@ void WireCell2dToy::ToyTracking::MergeTracks(WireCell::MergeSpaceCellMap& mcells
 	     // if (sqrt(pow(theta1+theta2-3.1415926,2) + pow(fabs(phi1-phi2)-3.1415926,2)) < 28./180.*3.1415926)
 	     if (fabs(theta_abc/3.1415926*180.-180.)<25.)
 	       flag_qx = 1;
+	     
+	     
+
 	   }
 	 }else if (ngood_tracks>2){
 	   //  if (fabs(theta1+theta2-3.1415926) < 10./180.*3.1415926 && 
 	   //  fabs(fabs(phi1-phi2)-3.1415926)<10./180.*3.1415926 &&
 	   //  sqrt(pow(theta1+theta2-3.1415926,2) + pow(fabs(phi1-phi2)-3.1415926,2)) < 14./180.*3.1415926)
-	   if (fabs(theta_abc/3.1415926*180.-180)<15.)
+	   if (fabs(theta_abc/3.1415926*180.-180)<15.|| fabs(theta_abc1/3.1415926*180.-180.)<15.)
 	     flag_qx = 1;
 	 }
 	 //std::cout << ngood_tracks << " " << fabs(theta1+theta2-3.1415926)/3.1415926*180. << " " << (fabs(phi1-phi2)-3.1415926)/3.1415926*180. << " " << track1->get_range() << " " << track2->get_range() << " " << vertex->Center().x/units::cm << " " << flag_qx << std::endl;
