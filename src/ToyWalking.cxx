@@ -113,6 +113,7 @@ void WireCell2dToy::ToyWalking::Iterate(MergeSpaceCell *curr_cell, MergeSpaceCel
     if (dis < dist && counter < counter_limit && global_counter < 25*counter_limit){
       // go in
       //rank everything according to size ... 
+      //std::cout << target_cell->Get_Center().x << " " << curr_cell->Get_Center().x << std::endl;
       if (target_cell->Get_Center().x > curr_cell->Get_Center().x){
 	MergeSpaceCellSet1 msc_set;
 	for (int i=0;i!=mcells_map[curr_cell].size();i++){
@@ -122,21 +123,31 @@ void WireCell2dToy::ToyWalking::Iterate(MergeSpaceCell *curr_cell, MergeSpaceCel
 	for (auto it2 = msc_set.begin(); it2!= msc_set.end(); it2++){
 	  auto it = find(curr_cells.begin(),curr_cells.end(),*it2);
 	  auto it1 = find(must_cells.begin(),must_cells.end(),*it2);
-	  if (it == curr_cells.end() && (it1 != must_cells.end() || must_cells.size()==0)
-	      ) 
+	  if (it == curr_cells.end() && (it1 != must_cells.end() || must_cells.size()==0)){ 
+	    // std::cout << "abc1: " << (*it2)->Get_Center().x/units::cm << " " << (*it2)->Get_Center().y/units::cm << " " << (*it2)->Get_Center().z/units::cm << " " <<  std::endl;
 	    Iterate(*it2, curr_cells,dis);
+	  
+	  }
 	}
       }else{
+	
 	MergeSpaceCellSet msc_set;
+
+	
+
 	for (int i=0;i!=mcells_map[curr_cell].size();i++){
 	  msc_set.insert(mcells_map[curr_cell].at(i));
 	}
+
+	//std::cout << mcells_map[curr_cell].size() << " " << msc_set.size() << std::endl;
 	
 	for (auto it2 = msc_set.begin(); it2!= msc_set.end(); it2++){
 	  auto it = find(curr_cells.begin(),curr_cells.end(),*it2);
 	  auto it1 = find(must_cells.begin(),must_cells.end(),*it2);
-	  if (it == curr_cells.end() && (it1 != must_cells.end() || must_cells.size()==0))
+	  if (it == curr_cells.end() && (it1 != must_cells.end() || must_cells.size()==0)){
+	    //std::cout << "abc2: " << (*it2)->Get_Center().x/units::cm << " " << (*it2)->Get_Center().y/units::cm << " " << (*it2)->Get_Center().z/units::cm << " " <<  std::endl;
 	    Iterate(*it2, curr_cells,dis);
+	  }
 	}
       }
       

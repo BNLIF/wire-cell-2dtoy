@@ -215,7 +215,25 @@ int main(int argc, char* argv[])
   //WireCell2dToy::ToyTracking toytracking(toycrawler,1); //cosmic tune?
   toytracking.IterateMergeTracks(mcells_map);
   
-  
+ std:cout << mcells.size() << " " << mcells_map.size() << std::endl;
+  // for (int i=0;i!=mcells.size();i++){
+  //   if (mcells_map.find(mcells.at(i)) == mcells_map.end()){
+  //     std::cout << i << std::endl;
+  //   }else{
+  //     std::cout << i << " " << mcells_map[mcells.at(i)].size() << std::endl;
+  //   }
+  // }
+  // for (auto it = mcells_map.begin();it!=mcells_map.end();it++){
+  //   auto it1 = find(mcells.begin(),mcells.end(),it->first);
+  //   if (it1 == mcells.end()){
+  //     std::cout << it->first->Get_all_spacecell().size() << " " 
+  //   		<< it->first->Get_Center().x/units::cm << " " 
+  //   		<< it->first->Get_Center().y/units::cm << " " 
+  //   		<< it->first->Get_Center().z/units::cm << " " 
+  // 		<< it->second.size() << std::endl;
+  //   }
+  // }
+
 
   std::cout << "Good Tracks:     " << toytracking.get_good_tracks().size() <<std::endl;
   std::cout << "Good Vertices:        " << toytracking.get_good_vertices().size() << std::endl;
