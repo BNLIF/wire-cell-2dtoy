@@ -212,15 +212,33 @@ int main(int argc, char* argv[])
   TH1::AddDirectory(kFALSE);
   
   WireCell::ToyDepositor *toydep;
+
+  Double_t x_center = mctruth->mc_startXYZT[0][0];
+  Double_t y_center = mctruth->mc_startXYZT[0][1];
+  Double_t z_center = mctruth->mc_startXYZT[0][2];
+  Double_t x_shift = -mctruth->mc_startXYZT[0][0]+vertex.x;
+  Double_t y_shift = -mctruth->mc_startXYZT[0][1]+vertex.y;
+  Double_t z_shift = -mctruth->mc_startXYZT[0][2]+vertex.z;
+  
   if (rotate_90deg) {
-    toydep = new WireCell::ToyDepositor(fds,0,unit_dis,frame_length, mctruth->mc_startXYZT[0][0], mctruth->mc_startXYZT[0][1], mctruth->mc_startXYZT[0][2], TMath::Pi()/2.);
+    toydep = new WireCell::ToyDepositor(fds,0,unit_dis,frame_length, x_center, y_center, z_center, TMath::Pi()/2.);
   } else {
     toydep = new WireCell::ToyDepositor(fds,0,unit_dis,frame_length);
   }
   cout << "Primary vertex is (" << mctruth->mc_startXYZT[0][0] << "," << mctruth->mc_startXYZT[0][1] << "," << mctruth->mc_startXYZT[0][2] <<")" << endl;
   // if (random_vertices) {
-  toydep->translation(-mctruth->mc_startXYZT[0][0]+vertex.x,-mctruth->mc_startXYZT[0][1]+vertex.y,-mctruth->mc_startXYZT[0][2]+vertex.z);
+  toydep->translation(x_shift,y_shift,z_shift);
   //}
+
+  if (rotate_90deg){
+    
+    
+    mctruth->Rotate_Shift(x_center, y_center, z_center, TMath::Pi()/2.,
+			  x_shift,y_shift,z_shift);
+  }else{
+    mctruth->Rotate_Shift(0,0,0, 0,
+			  x_shift,y_shift,z_shift);
+  }
   
   const PointValueVector& pvv = toydep->depositions(eve_num);
 
