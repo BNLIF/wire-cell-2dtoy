@@ -57,10 +57,10 @@ int main(int argc, char* argv[])
     return 1;
   }
 
-  bool rotate_90deg;
-  bool is_3mm;
-  bool random_vertices;
-  int seed;
+  bool rotate_90deg=false;
+  bool is_3mm=false;
+  bool random_vertices=false;
+  int seed=0;
   for (Int_t i = 1; i != argc; i++){
      switch(argv[i][1]){
      case 'o':
@@ -112,7 +112,7 @@ int main(int argc, char* argv[])
   gds.set_apa(0, 3, 35.71*units::deg, 35.71*units::deg, 0.4667*units::cm, 0.4667*units::cm, 0.479*units::cm, center3, halves3);
   gds.buildGDS();
 
-  Vector vertex(0,0,230);
+  Vector vertex(200,300,100);
   if (random_vertices) {
     TRandom3 rnd(seed);
     vertex.x = rnd.Uniform(-300,300);
@@ -218,9 +218,9 @@ int main(int argc, char* argv[])
     toydep = new WireCell::ToyDepositor(fds,0,unit_dis,frame_length);
   }
   cout << "Primary vertex is (" << mctruth->mc_startXYZT[0][0] << "," << mctruth->mc_startXYZT[0][1] << "," << mctruth->mc_startXYZT[0][2] <<")" << endl;
-  if (random_vertices) {
-    toydep->translation(-mctruth->mc_startXYZT[0][0]+vertex.x,-mctruth->mc_startXYZT[0][1]+vertex.y,-mctruth->mc_startXYZT[0][2]+vertex.z);
-  }
+  // if (random_vertices) {
+  toydep->translation(-mctruth->mc_startXYZT[0][0]+vertex.x,-mctruth->mc_startXYZT[0][1]+vertex.y,-mctruth->mc_startXYZT[0][2]+vertex.z);
+  //}
   
   const PointValueVector& pvv = toydep->depositions(eve_num);
 
