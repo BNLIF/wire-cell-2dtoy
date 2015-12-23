@@ -23,8 +23,8 @@
 #include "WireCell2dToy/ToyMetric.h"
 #include "WireCellData/TPCParams.h"
 #include "WireCellData/Singleton.h"
-
 #include "WireCellData/GeomCluster.h"
+#include "WireCellSst/MCTruth.h"
 
 #include "TApplication.h"
 #include "TCanvas.h"
@@ -37,12 +37,14 @@
 #include "TGraph2D.h"
 #include "TColor.h"
 #include "TStyle.h"
+#include "TMath.h"
+#include "TRandom3.h"
 
 #include <iostream>
 #include <string>
 #include <vector>
 
-#define MAX_TRACKS 30000
+//#define MAX_TRACKS 10
 
 using namespace WireCell;
 using namespace std;
@@ -50,29 +52,74 @@ using namespace std;
 int main(int argc, char* argv[])
 {
 
-  if (argc < 3){
-    cerr << "usage: wire-cell-dune_work_space /path/to/celltree.root eve_num" << endl;
+  if (argc < 5){
+    cerr << "usage: wire-cell-dune_work_space /path/to/celltree.root eve_num -o[0,1](do_rotation) -p[0,1](is_3mm) -r[0,1](randomly place vertices) -s[int](seed)" << endl;
     return 1;
+  }
+
+  bool rotate_90deg;
+  bool is_3mm;
+  bool random_vertices;
+  int seed;
+  for (Int_t i = 1; i != argc; i++){
+     switch(argv[i][1]){
+     case 'o':
+       rotate_90deg = atoi(&argv[i][2]); 
+       break;
+     case 'p':
+       is_3mm = atoi(&argv[i][2]); 
+       break;
+     case 'r':
+       random_vertices = atoi(&argv[i][2]);
+       break;
+     case 's':
+       seed = atoi(&argv[i][2]);
+       break;
+     }
+  }
+
+  if (rotate_90deg) cout<<"Beam is perpendicular to wire planes. ";
+  else cout<<"Beam is parallel to wire planes (default). ";
+  if (is_3mm) cout<<"Wire pitch is 3 mm."<<endl;
+  else cout<<"Wire pitch is 5 mm (default)."<<endl;
+  
+  double pitchU, pitchV, pitchW;
+  if (!is_3mm) {
+    pitchU = 0.4667*units::cm;
+    pitchV = 0.4667*units::cm;
+    pitchW = 0.479*units::cm;
+  } else {
+    pitchU = 0.3*units::cm;
+    pitchV = 0.3*units::cm;
+    pitchW = 0.3*units::cm;
   }
   
   //build GDS ... 
   DetectorGDS gds;
   gds.set_ncryos(1);
   gds.set_napas(0,4);
-  Vector center0(-0*units::cm, -324.664375*units::cm, 9.805*units::cm);
-  Vector halves0(2.53305*units::cm, 303.914375*units::cm, 116.195*units::cm);
-  gds.set_apa(0, 0, 35.71*units::deg, 35.71*units::deg, 0.4923619*units::cm, 0.4923619*units::cm, 0.479*units::cm, center0, halves0);
-  Vector center1(-0*units::cm, 283.164375*units::cm, 9.805*units::cm);
-  Vector halves1(2.53305*units::cm, 303.914375*units::cm, 116.195*units::cm);
-  gds.set_apa(0, 1, 35.71*units::deg, 35.71*units::deg, 0.4923619*units::cm, 0.4923619*units::cm, 0.479*units::cm, center1, halves1);
-  Vector center2(-0*units::cm, -324.664375*units::cm, 242.195*units::cm);
-  Vector halves2(2.53305*units::cm, 303.914375*units::cm, 116.195*units::cm);
-  gds.set_apa(0, 2, 35.71*units::deg, 35.71*units::deg, 0.4923619*units::cm, 0.4923619*units::cm, 0.479*units::cm, center2, halves2);
-  Vector center3(-0*units::cm, 283.164375*units::cm, 242.195*units::cm);
-  Vector halves3(2.53305*units::cm, 303.914375*units::cm, 116.195*units::cm);
-  gds.set_apa(0, 3, 35.71*units::deg, 35.71*units::deg, 0.4923619*units::cm, 0.4923619*units::cm, 0.479*units::cm, center3, halves3);
+  Vector center0(-0*units::cm, -300.05*units::cm, 115.318875*units::cm);
+  Vector halves0(3.995355*units::cm, 299.5*units::cm, 115.318875*units::cm);
+  gds.set_apa(0, 0, 35.71*units::deg, 35.71*units::deg, 0.4667*units::cm, 0.4667*units::cm, 0.479*units::cm, center0, halves0);
+  Vector center1(-0*units::cm, 300.05*units::cm, 115.318875*units::cm);
+  Vector halves1(3.995355*units::cm, 299.5*units::cm, 115.318875*units::cm);
+  gds.set_apa(0, 1, 35.71*units::deg, 35.71*units::deg, 0.4667*units::cm, 0.4667*units::cm, 0.479*units::cm, center1, halves1);
+  Vector center2(-0*units::cm, -300.05*units::cm, 347.709*units::cm);
+  Vector halves2(3.995355*units::cm, 299.5*units::cm, 115.318875*units::cm);
+  gds.set_apa(0, 2, 35.71*units::deg, 35.71*units::deg, 0.4667*units::cm, 0.4667*units::cm, 0.479*units::cm, center2, halves2);
+  Vector center3(-0*units::cm, 300.05*units::cm, 347.709*units::cm);
+  Vector halves3(3.995355*units::cm, 299.5*units::cm, 115.318875*units::cm);
+  gds.set_apa(0, 3, 35.71*units::deg, 35.71*units::deg, 0.4667*units::cm, 0.4667*units::cm, 0.479*units::cm, center3, halves3);
   gds.buildGDS();
 
+  Vector vertex(0,0,230);
+  if (random_vertices) {
+    TRandom3 rnd(seed);
+    vertex.x = rnd.Uniform(-300,300);
+    vertex.y = rnd.Uniform(-550,550);
+    vertex.z = rnd.Uniform(50,410);
+    std::cout<<"new vertex is ("<<vertex.x<<","<<vertex.y<<","<<vertex.z<<")"<<std::endl;
+  }
   
   const char* root_file = argv[1];
   const char* tpath = "/Event/Sim";
@@ -103,9 +150,9 @@ int main(int argc, char* argv[])
   mp.set_pitch_w(pitch_w);
   mp.set_ts_width(time_slice_width);
   
-  std::cout << "Singleton: " << mp.get_pitch_u() << " " << mp.get_pitch_v() << " " << mp.get_pitch_w() << " " << mp.get_ts_width() << std::endl;
+  //std::cout << "Singleton: " << mp.get_pitch_u() << " " << mp.get_pitch_v() << " " << mp.get_pitch_w() << " " << mp.get_ts_width() << std::endl;
   
-   float threshold_u = 5.87819e+02 * 4.0;
+  float threshold_u = 5.87819e+02 * 4.0;
   float threshold_v = 8.36644e+02 * 4.0;
   float threshold_w = 5.67974e+02 * 4.0;
 
@@ -115,8 +162,7 @@ int main(int argc, char* argv[])
   
   int time_offset = 0;
 
-
-
+  
   TFile *tfile = TFile::Open(root_file);
   TTree* sst = dynamic_cast<TTree*>(tfile->Get(tpath));
 
@@ -126,6 +172,8 @@ int main(int argc, char* argv[])
   sst->SetBranchAddress("subRunNo",&subrun_no);
 
    //save MC truth ...
+  WireCellSst::MCTruth *mctruth = new WireCellSst::MCTruth(root_file);
+  /*
   int mc_Ntrack;  // number of tracks in MC
   int mc_id[MAX_TRACKS];  // track id; size == mc_Ntrack
   int mc_pdg[MAX_TRACKS];  // track particle pdg; size == mc_Ntrack
@@ -149,10 +197,10 @@ int main(int argc, char* argv[])
   sst->SetBranchAddress("mc_startMomentum", &mc_startMomentum);  // start momentum of this track; size == mc_Ntrack
   sst->SetBranchAddress("mc_endMomentum", &mc_endMomentum);  // start momentum of this track; size == mc_Ntrack
   sst->SetBranchAddress("mc_trackPosition",&mc_trackPosition);
-  
-  sst->GetEntry(eve_num);
-
-  cout << "Run No: " << run_no << " " << subrun_no << " " << eve_num << endl;
+  */
+  //sst->GetEntry(eve_num);
+  mctruth->GetEntry(eve_num);
+  cout << "Run No: " << mctruth->runNo << " " << mctruth->subrunNo << " " << mctruth->eventNo << endl;
   
   WireCell::FrameDataSource* fds = 0;
   fds = WireCellSst::make_fds(*tfile);
@@ -163,13 +211,23 @@ int main(int argc, char* argv[])
   
   TH1::AddDirectory(kFALSE);
   
-  WireCell::ToyDepositor toydep(fds,0,unit_dis,frame_length);
-  const PointValueVector& pvv = toydep.depositions(eve_num);
+  WireCell::ToyDepositor *toydep;
+  if (rotate_90deg) {
+    toydep = new WireCell::ToyDepositor(fds,0,unit_dis,frame_length, mctruth->mc_startXYZT[0][0], mctruth->mc_startXYZT[0][1], mctruth->mc_startXYZT[0][2], TMath::Pi()/2.);
+  } else {
+    toydep = new WireCell::ToyDepositor(fds,0,unit_dis,frame_length);
+  }
+  cout << "Primary vertex is (" << mctruth->mc_startXYZT[0][0] << "," << mctruth->mc_startXYZT[0][1] << "," << mctruth->mc_startXYZT[0][2] <<")" << endl;
+  if (random_vertices) {
+    toydep->translation(-mctruth->mc_startXYZT[0][0]+vertex.x,-mctruth->mc_startXYZT[0][1]+vertex.y,-mctruth->mc_startXYZT[0][2]+vertex.z);
+  }
+  
+  const PointValueVector& pvv = toydep->depositions(eve_num);
 
   std::cout << "Points deposited: " << pvv.size() << std::endl;
-
+  //return 0;
   // DetGenerativeFDS gfds(toydep,gds, 2400,max_events,2.0*1.6*units::millimeter);
-  DetGenerativeFDS gfds(toydep,gds, total_time_bin,max_events,0.5*1.6*units::millimeter);
+  DetGenerativeFDS gfds(*toydep, gds, total_time_bin,max_events,0.5*1.6*units::millimeter);
   gfds.jump(eve_num);
 
   tfile->Close("R");
@@ -179,8 +237,8 @@ int main(int argc, char* argv[])
 
   
   
+  WireCell2dToy::ToySignalSimuTrueFDS st_fds(gfds,gds,total_time_bin/nrebin,max_events,0); //truth  
   cout << "Put in Truth " << endl; 
-  WireCell2dToy::ToySignalSimuTrueFDS st_fds(gfds,gds,total_time_bin/nrebin,max_events,0); //truth
   st_fds.jump(eve_num);
   
   cout << "Simulate Raw WaveForm " << endl; 
@@ -1032,22 +1090,24 @@ int main(int argc, char* argv[])
 
   Trun->Fill();
 
-   TTree *TMC = new TTree("TMC","TMC");
+  TTree *TMC = new TTree("TMC","TMC");
   TMC->SetDirectory(file);
- 
-  TMC->Branch("mc_Ntrack", &mc_Ntrack);  // number of tracks in MC
-  TMC->Branch("mc_id", &mc_id, "mc_id[mc_Ntrack]/I");  // track id; size == mc_Ntrack
-  TMC->Branch("mc_pdg", &mc_pdg, "mc_id[mc_Ntrack]/I");  // track particle pdg; size == mc_Ntrack
-  TMC->Branch("mc_process", &mc_process, "mc_process[mc_Ntrack]/I");  // track generation process code; size == mc_Ntrack
-  TMC->Branch("mc_mother", &mc_mother, "mc_mother[mc_Ntrack]/I");  // mother id of this track; size == mc_Ntrack
-  TMC->Branch("mc_daughters", mc_daughters);  // daughters id of this track; vector
-  TMC->Branch("mc_startXYZT", &mc_startXYZT, "mc_startXYZT[mc_Ntrack][4]/F");  // start position of this track; size == mc_Ntrack
-  TMC->Branch("mc_endXYZT", &mc_endXYZT, "mc_endXYZT[mc_Ntrack][4]/F");  // start position of this track; size == mc_Ntrack
-  TMC->Branch("mc_startMomentum", &mc_startMomentum, "mc_startMomentum[mc_Ntrack][4]/F");  // start momentum of this track; size == mc_Ntrack
-  TMC->Branch("mc_endMomentum", &mc_endMomentum, "mc_endMomentum[mc_Ntrack][4]/F");  // start momentum of this track; size == mc_Ntrack
-  TMC->Branch("mc_trackPosition",mc_trackPosition);
-
-
+  Float_t mc_newVertex[3];
+  mc_newVertex[0] = vertex.x;
+  mc_newVertex[1] = vertex.y;
+  mc_newVertex[2] = vertex.z;
+  TMC->Branch("mc_Ntrack", &mctruth->mc_Ntrack);  // number of tracks in MC
+  TMC->Branch("mc_id", &mctruth->mc_id, "mc_id[mc_Ntrack]/I");  // track id; size == mc_Ntrack
+  TMC->Branch("mc_pdg", &mctruth->mc_pdg, "mc_id[mc_Ntrack]/I");  // track particle pdg; size == mc_Ntrack
+  TMC->Branch("mc_process", &mctruth->mc_process, "mc_process[mc_Ntrack]/I");  // track generation process code; size == mc_Ntrack
+  TMC->Branch("mc_mother", &mctruth->mc_mother, "mc_mother[mc_Ntrack]/I");  // mother id of this track; size == mc_Ntrack
+  TMC->Branch("mc_daughters", mctruth->mc_daughters);  // daughters id of this track; vector
+  TMC->Branch("mc_startXYZT", &mctruth->mc_startXYZT, "mc_startXYZT[mc_Ntrack][4]/F");  // start position of this track; size == mc_Ntrack
+  TMC->Branch("mc_endXYZT", &mctruth->mc_endXYZT, "mc_endXYZT[mc_Ntrack][4]/F");  // start position of this track; size == mc_Ntrack
+  TMC->Branch("mc_startMomentum", &mctruth->mc_startMomentum, "mc_startMomentum[mc_Ntrack][4]/F");  // start momentum of this track; size == mc_Ntrack
+  TMC->Branch("mc_endMomentum", &mctruth->mc_endMomentum, "mc_endMomentum[mc_Ntrack][4]/F");  // start momentum of this track; size == mc_Ntrack
+  if (mctruth->mc_trackPosition != NULL) TMC->Branch("mc_trackPosition",mctruth->mc_trackPosition);
+  TMC->Branch("mc_newVertex", &mc_newVertex, "mc_newVertex[3]/F");
   TMC->Fill();
 
 

@@ -12,7 +12,8 @@ namespace WireCell {
     virtual const PointValueVector& depositions(int frame_number) const;
     virtual std::vector<int>& timeoffset() const{return time_offset;};
     void clear(){mchits.clear();time_offset.clear();};
-
+    void translation(float x_shift = 0, float y_shift = 0, float z_shift = 0);
+    
   private:
     WireCell::FrameDataSource* fds;
     mutable PointValueVector mchits;
@@ -22,7 +23,10 @@ namespace WireCell {
     float y_center;
     float z_center;
     float rotate_angle;
-
+    float x_shift;
+    float y_shift;
+    float z_shift;
+    
     int flag;
     int toffset;
     float unit_dis;
