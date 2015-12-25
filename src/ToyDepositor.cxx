@@ -33,31 +33,34 @@ const PointValueVector& ToyDepositor::depositions(int frame_number) const{
   mchits.clear();
   time_offset.clear();
   for (size_t itruth = 0; itruth < sts.size(); ++itruth) {
-     const WireCell::SimTruth* st = sts[itruth];
-     PointValue p;
-     p.first.x = (st->x() * units::cm - x_center*units::cm)*cos(rotate_angle) - (st->z() * units::cm - z_center*units::cm)*sin(rotate_angle) + x_center*units::cm + x_shift*units::cm;
-     p.first.y = st->y() * units::cm + y_shift*units::cm;
-     p.first.z = (st->x() * units::cm - x_center*units::cm)*sin(rotate_angle) + (st->z() * units::cm - z_center*units::cm)*cos(rotate_angle) + z_center*units::cm + z_shift*units::cm;
-     p.second = st->charge()/3.;
-     //p.first.x /= units::cm;
-     //p.first.y /= units::cm;
-     //p.first.z /= units::cm;
-     //std::cout<< itruth <<": ("<<st->x()<<","<<st->y()<<","<<st->z()<<") --> ("<<p.first.x<<","<<p.first.y<<","<<p.first.z<<")"<<std::endl;
-     
-     //hack for test, to be removed
-     //   if (p.first.x > 0*units::cm && p.first.x < 5.*units::cm ) {
-	 // && p.first.y > -200 * units::cm && p.first.y < 0 *units::cm &&
-	 // p.first.z > 920 * units::cm && p.first.z < 1000*units::cm ){
-     
-       mchits.push_back(p);
-       
-       int offset = st->tdc() - toffset - (st->x() * units::cm)/(0.5*unit_dis*units::millimeter);
-       if (flag==0)
-	 offset = toffset;
-       //std::cout << offset << std::endl;
-       
-       time_offset.push_back(offset);
-       //  }
+    const WireCell::SimTruth* st = sts[itruth];
+    PointValue p;
+    p.first.x = (st->x() * units::cm - x_center*units::cm)*cos(rotate_angle) - (st->z() * units::cm - z_center*units::cm)*sin(rotate_angle) + x_center*units::cm + x_shift*units::cm;
+    p.first.y = st->y() * units::cm + y_shift*units::cm;
+    p.first.z = (st->x() * units::cm - x_center*units::cm)*sin(rotate_angle) + (st->z() * units::cm - z_center*units::cm)*cos(rotate_angle) + z_center*units::cm + z_shift*units::cm;
+
+    p.second = st->charge()/3.;
+
+    // p.second = 10000;
+    //p.first.x /= units::cm;
+    //p.first.y /= units::cm;
+    //p.first.z /= units::cm;
+    //std::cout<< itruth <<": ("<<st->x()<<","<<st->y()<<","<<st->z()<<") --> ("<<p.first.x<<","<<p.first.y<<","<<p.first.z<<")"<<std::endl;
+    
+    //hack for test, to be removed
+    //   if (p.first.x > 0*units::cm && p.first.x < 5.*units::cm ) {
+    // && p.first.y > -200 * units::cm && p.first.y < 0 *units::cm &&
+    // p.first.z > 920 * units::cm && p.first.z < 1000*units::cm ){
+    
+    mchits.push_back(p);
+    
+    int offset = st->tdc() - toffset - (st->x() * units::cm)/(0.5*unit_dis*units::millimeter);
+    if (flag==0)
+      offset = toffset;
+    //std::cout << offset << std::endl;
+    
+    time_offset.push_back(offset);
+    //  }
   }
 
   return mchits;

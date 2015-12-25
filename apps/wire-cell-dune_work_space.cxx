@@ -231,8 +231,6 @@ int main(int argc, char* argv[])
   //}
 
   if (rotate_90deg){
-    
-    
     mctruth->Rotate_Shift(x_center, y_center, z_center, TMath::Pi()/2.,
 			  x_shift,y_shift,z_shift);
   }else{
@@ -775,7 +773,7 @@ int main(int argc, char* argv[])
   TTree *t_true = new TTree("T_true","T_true");
   TTree *t_rec = new TTree("T_rec","T_rec");
   TTree *t_rec_charge = new TTree("T_rec_charge","T_rec_charge");
-  TTree *t_rec_charge_blob = new TTree("T_rec_charge_blob","T_rec_charge_blob");
+  // TTree *t_rec_charge_blob = new TTree("T_rec_charge_blob","T_rec_charge_blob");
 
   Double_t x_save, y_save, z_save;
   Double_t charge_save;
@@ -804,17 +802,17 @@ int main(int argc, char* argv[])
   t_rec_charge->Branch("ndf",&ndf_save,"ndf/D");
 
   //blob stuff
-  t_rec_charge_blob->SetDirectory(file);
-  t_rec_charge_blob->Branch("x",&x_save,"x/D");
-  t_rec_charge_blob->Branch("y",&y_save,"y/D");
-  t_rec_charge_blob->Branch("z",&z_save,"z/D");
-  t_rec_charge_blob->Branch("q",&charge_save,"q/D");
-  t_rec_charge_blob->Branch("nq",&ncharge_save,"nq/D");
+  // t_rec_charge_blob->SetDirectory(file);
+  // t_rec_charge_blob->Branch("x",&x_save,"x/D");
+  // t_rec_charge_blob->Branch("y",&y_save,"y/D");
+  // t_rec_charge_blob->Branch("z",&z_save,"z/D");
+  // t_rec_charge_blob->Branch("q",&charge_save,"q/D");
+  // t_rec_charge_blob->Branch("nq",&ncharge_save,"nq/D");
   
   TGraph2D *g = new TGraph2D();
   TGraph2D *gt = new TGraph2D();
   TGraph2D *g_rec = new TGraph2D();
-  TGraph2D *g_rec_blob = new TGraph2D();
+  //TGraph2D *g_rec_blob = new TGraph2D();
 
   
   
@@ -882,7 +880,7 @@ int main(int argc, char* argv[])
     for (int j=0;j!=allmcell.size();j++){
       MergeGeomCell *mcell = (MergeGeomCell*)allmcell[j];
       double charge = toymatrix[i]->Get_Cell_Charge(mcell,1);
-      //    if (charge> recon_threshold || toymatrix[i]->Get_Solve_Flag()==0){
+      //if (charge> recon_threshold || toymatrix[i]->Get_Solve_Flag()==0){
       if (charge> recon_threshold ){
 
     	if (toymatrix[i]->Get_Solve_Flag()==0)
@@ -920,48 +918,48 @@ int main(int argc, char* argv[])
       }
     }
     
-    for (int j=0;j!=allmcell.size();j++){
-      MergeGeomCell *mcell = (MergeGeomCell*)allmcell[j];
-      double charge = toymatrix[i]->Get_Cell_Charge(mcell,1);
-      if (charge> recon_threshold || toymatrix[i]->Get_Solve_Flag()==0){
-	if (toymatrix[i]->Get_Solve_Flag()==0)
-	  charge = toytiling[i]->get_ave_charge();
+    // for (int j=0;j!=allmcell.size();j++){
+    //   MergeGeomCell *mcell = (MergeGeomCell*)allmcell[j];
+    //   double charge = toymatrix[i]->Get_Cell_Charge(mcell,1);
+    //   if (charge> recon_threshold || toymatrix[i]->Get_Solve_Flag()==0){
+    // 	if (toymatrix[i]->Get_Solve_Flag()==0)
+    // 	  charge = toytiling[i]->get_ave_charge();
 
-    	for (int k=0;k!=mcell->get_allcell().size();k++){
-    	  Point p = mcell->get_allcell().at(k)->center();
+    // 	for (int k=0;k!=mcell->get_allcell().size();k++){
+    // 	  Point p = mcell->get_allcell().at(k)->center();
 
-	   int cryo = mcell->get_allcell().at(k)->get_cryo();
-	  int apa = mcell->get_allcell().at(k)->get_apa();
-	  int face = mcell->get_allcell().at(k)->get_face();
-	  const WrappedGDS *apa_gds = gds.get_apaGDS(cryo,apa);
-	  std::pair<double, double> xmm = apa_gds->minmax(0); 
+    // 	   int cryo = mcell->get_allcell().at(k)->get_cryo();
+    // 	  int apa = mcell->get_allcell().at(k)->get_apa();
+    // 	  int face = mcell->get_allcell().at(k)->get_face();
+    // 	  const WrappedGDS *apa_gds = gds.get_apaGDS(cryo,apa);
+    // 	  std::pair<double, double> xmm = apa_gds->minmax(0); 
 	  
-	  if (face == 1){
-	    x_save = (i*nrebin/2.*unit_dis/10. - frame_length/2.*unit_dis/10.) + xmm.second/units::cm; // *4 is temporary
-	  }else if (face == 0){
-	    x_save = xmm.first/units::cm - (i*nrebin/2.*unit_dis/10. - frame_length/2.*unit_dis/10.);
-	  }
+    // 	  if (face == 1){
+    // 	    x_save = (i*nrebin/2.*unit_dis/10. - frame_length/2.*unit_dis/10.) + xmm.second/units::cm; // *4 is temporary
+    // 	  }else if (face == 0){
+    // 	    x_save = xmm.first/units::cm - (i*nrebin/2.*unit_dis/10. - frame_length/2.*unit_dis/10.);
+    // 	  }
 
     	  
-    	  y_save = p.y/units::cm;
-    	  z_save = p.z/units::cm;
-    	  charge_save = charge/mcell->get_allcell().size();
-    	  ncharge_save = mcell->get_allcell().size();
+    // 	  y_save = p.y/units::cm;
+    // 	  z_save = p.z/units::cm;
+    // 	  charge_save = charge/mcell->get_allcell().size();
+    // 	  ncharge_save = mcell->get_allcell().size();
 	  
-    	  g_rec_blob->SetPoint(ncount2,x_save,y_save,z_save);
-    	  t_rec_charge_blob->Fill();
+    // 	  g_rec_blob->SetPoint(ncount2,x_save,y_save,z_save);
+    // 	  t_rec_charge_blob->Fill();
 	  
-    	  ncount2 ++;
-    	}
-      }
-    }
+    // 	  ncount2 ++;
+    // 	}
+    //   }
+    // }
 
   }
 
   g->Write("shower3D");
   gt->Write("shower3D_truth");
   g_rec->Write("shower3D_charge");
-  g_rec_blob->Write("shower3D_charge_blob");
+  // g_rec_blob->Write("shower3D_charge_blob");
 
   
    TTree *ttree1 = new TTree("TC","TC");
@@ -1110,10 +1108,11 @@ int main(int argc, char* argv[])
 
   TTree *TMC = new TTree("TMC","TMC");
   TMC->SetDirectory(file);
-  Float_t mc_newVertex[3];
-  mc_newVertex[0] = vertex.x;
-  mc_newVertex[1] = vertex.y;
-  mc_newVertex[2] = vertex.z;
+  Float_t mc_oldVertex[3];
+  mc_oldVertex[0] = vertex.x - x_shift;
+  mc_oldVertex[1] = vertex.y - y_shift;
+  mc_oldVertex[2] = vertex.z - z_shift;
+  
   TMC->Branch("mc_Ntrack", &mctruth->mc_Ntrack);  // number of tracks in MC
   TMC->Branch("mc_id", &mctruth->mc_id, "mc_id[mc_Ntrack]/I");  // track id; size == mc_Ntrack
   TMC->Branch("mc_pdg", &mctruth->mc_pdg, "mc_id[mc_Ntrack]/I");  // track particle pdg; size == mc_Ntrack
@@ -1125,7 +1124,29 @@ int main(int argc, char* argv[])
   TMC->Branch("mc_startMomentum", &mctruth->mc_startMomentum, "mc_startMomentum[mc_Ntrack][4]/F");  // start momentum of this track; size == mc_Ntrack
   TMC->Branch("mc_endMomentum", &mctruth->mc_endMomentum, "mc_endMomentum[mc_Ntrack][4]/F");  // start momentum of this track; size == mc_Ntrack
   if (mctruth->mc_trackPosition != NULL) TMC->Branch("mc_trackPosition",mctruth->mc_trackPosition);
-  TMC->Branch("mc_newVertex", &mc_newVertex, "mc_newVertex[3]/F");
+  
+  
+  TMC->Branch("mc_isnu", &mctruth->mc_isnu);
+  TMC->Branch("mc_nGeniePrimaries", &mctruth->mc_nGeniePrimaries);
+  TMC->Branch("mc_nu_pdg", &mctruth->mc_nu_pdg);
+  TMC->Branch("mc_nu_ccnc", &mctruth->mc_nu_ccnc);
+  TMC->Branch("mc_nu_mode", &mctruth->mc_nu_mode);
+  TMC->Branch("mc_nu_intType", &mctruth->mc_nu_intType);
+  TMC->Branch("mc_nu_target", &mctruth->mc_nu_target);
+  TMC->Branch("mc_hitnuc", &mctruth->mc_hitnuc);
+  TMC->Branch("mc_hitquark", &mctruth->mc_hitquark);
+  TMC->Branch("mc_nu_Q2", &mctruth->mc_nu_Q2);
+  TMC->Branch("mc_nu_W", &mctruth->mc_nu_W);
+  TMC->Branch("mc_nu_X", &mctruth->mc_nu_X);
+  TMC->Branch("mc_nu_Y", &mctruth->mc_nu_Y);
+  TMC->Branch("mc_nu_Pt", &mctruth->mc_nu_Pt);
+  TMC->Branch("mc_nu_Theta", &mctruth->mc_nu_Theta);
+  TMC->Branch("mc_nu_pos", &mctruth->mc_nu_pos, "mc_nu_pos[4]/F");
+  TMC->Branch("mc_nu_mom", &mctruth->mc_nu_mom, "mc_nu_mom[4]/F");
+
+
+
+  TMC->Branch("mc_oldVertex", &mc_oldVertex, "mc_oldVertex[3]/F");
   TMC->Fill();
 
 
