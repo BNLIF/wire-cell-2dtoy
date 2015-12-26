@@ -28,6 +28,11 @@ namespace WireCell2dToy {
 		   float u_charge, float v_charge, float w_charge,
 		   float u_charge_err, float v_charge_err, float w_charge_err);
 
+      void AddCell(WireCell::DetectorGDS& gds, int cryo, int apa, WireCell::GeomCell *cell, int u_index, int v_index, int w_index, 
+		   float u_charge, float v_charge, float w_charge,
+		   float u_charge_err, float v_charge_err, float w_charge_err);
+
+
       void CreateCell(float tolerance, const WireCell::GeomDataSource& gds, int face, int n_tpc, WireCell::GeomWireSelection& temp_uwire, 
 		      WireCell::GeomWireSelection& temp_vwire, 
 		      WireCell::GeomWireSelection& temp_wwire);
