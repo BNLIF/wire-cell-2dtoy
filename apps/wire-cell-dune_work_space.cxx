@@ -1095,8 +1095,10 @@ int main(int argc, char* argv[])
   double u_charge, v_charge, w_charge;
   double u_charge_err, v_charge_err, w_charge_err;
   
-  int tpc_no=0, cryostat_no=0;
-  ttree1->Branch("tpc_no",&tpc_no,"tpc_no/I");
+  int apa_no=0, cryostat_no=0;
+  int face = 0;
+  ttree1->Branch("face",&face,"face/I");
+  ttree1->Branch("apa_no",&apa_no,"apa_no/I");
   ttree1->Branch("cryostat_no",&cryostat_no,"cryostat_no/I");
 
   ttree1->Branch("u_index",&u_index,"u_index/I");
@@ -1156,15 +1158,15 @@ int main(int argc, char* argv[])
 	Point p = mcell->get_allcell().at(j)->center();
 
 	int cryo = mcell->get_allcell().at(j)->get_cryo();
-	int apa = mcell->get_allcell().at(j)->get_apa();
-	int face = mcell->get_allcell().at(j)->get_face();
-	const WrappedGDS *apa_gds = gds.get_apaGDS(cryo,apa);
+	apa_no = mcell->get_allcell().at(j)->get_apa();
+	face = mcell->get_allcell().at(j)->get_face();
+	const WrappedGDS *apa_gds = gds.get_apaGDS(cryo,apa_no);
 	std::pair<double, double> xmm = apa_gds->minmax(0); 
 	
 	if (face == 1){
-	  xx = (i*nrebin/2.*unit_dis/10. - frame_length/2.*unit_dis/10.) + xmm.second/units::cm; // *4 is temporary
+	  xx = (time_slice*nrebin/2.*unit_dis/10. - frame_length/2.*unit_dis/10.) + xmm.second/units::cm; // *4 is temporary
 	}else if (face == 0){
-	  xx = xmm.first/units::cm - (i*nrebin/2.*unit_dis/10. - frame_length/2.*unit_dis/10.);
+	  xx = xmm.first/units::cm - (time_slice*nrebin/2.*unit_dis/10. - frame_length/2.*unit_dis/10.);
 	}
 	//xx = time_slice*nrebin/2.*unit_dis/10. - frame_length/2.*unit_dis/10.;
 	

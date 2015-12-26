@@ -762,7 +762,7 @@ int main(int argc, char* argv[])
     	for (int k=0;k!=mcell->get_allcell().size();k++){
     	  Point p = mcell->get_allcell().at(k)->center();
 
-	   int cryo = mcell->get_allcell().at(k)->get_cryo();
+	  int cryo = mcell->get_allcell().at(k)->get_cryo();
 	  int apa = mcell->get_allcell().at(k)->get_apa();
 	  int face = mcell->get_allcell().at(k)->get_face();
 	  const WrappedGDS *apa_gds = gds.get_apaGDS(cryo,apa);
@@ -803,9 +803,9 @@ int main(int argc, char* argv[])
   // 3. charge
   // 4. cluster number
   const GeomCell* cell_save = 0;
-  int cluster_num = -1;
-  int mcell_id = -1;
-  int time_slice;
+  Int_t cluster_num = -1;
+  Int_t mcell_id = -1;
+  Int_t time_slice;
   
   ttree1->Branch("time_slice",&time_slice,"time_slice/I"); // done
   ttree1->Branch("cell",&cell_save);
@@ -813,7 +813,7 @@ int main(int argc, char* argv[])
   ttree1->Branch("mcell_id",&mcell_id,"mcell_id/I");
   ttree1->Branch("charge",&charge_save,"charge/D"); 
   
-  double xx,yy,zz;
+  Double_t xx,yy,zz;
 
   ttree1->Branch("xx",&xx,"xx/D");    //don
   ttree1->Branch("yy",&yy,"yy/D");    //don
@@ -823,14 +823,16 @@ int main(int argc, char* argv[])
   // ttree1->Branch("z",&z,"z/D");
 
   // save information to reconstruct the toytiling
-  int u_index, v_index, w_index;
-  double u_charge, v_charge, w_charge;
-  double u_charge_err, v_charge_err, w_charge_err;
+  Int_t u_index, v_index, w_index;
+  Double_t u_charge, v_charge, w_charge;
+  Double_t u_charge_err, v_charge_err, w_charge_err;
   
-  int tpc_no=0, cryostat_no=0;
-  ttree1->Branch("tpc_no",&tpc_no,"tpc_no/I");
+  Int_t apa_no=0, cryostat_no=0;
+  Int_t face;
+  ttree1->Branch("apa_no",&apa_no,"apa_no/I");
   ttree1->Branch("cryostat_no",&cryostat_no,"cryostat_no/I");
-
+  ttree1->Branch("face",&face,"face/I");
+  
   ttree1->Branch("u_index",&u_index,"u_index/I");
   ttree1->Branch("v_index",&v_index,"v_index/I");
   ttree1->Branch("w_index",&w_index,"w_index/I");
@@ -888,15 +890,17 @@ int main(int argc, char* argv[])
 	Point p = mcell->get_allcell().at(j)->center();
 
 	int cryo = mcell->get_allcell().at(j)->get_cryo();
-	int apa = mcell->get_allcell().at(j)->get_apa();
-	int face = mcell->get_allcell().at(j)->get_face();
-	const WrappedGDS *apa_gds = gds.get_apaGDS(cryo,apa);
+	apa_no = mcell->get_allcell().at(j)->get_apa();
+	face = mcell->get_allcell().at(j)->get_face();
+	const WrappedGDS *apa_gds = gds.get_apaGDS(cryo,apa_no);
 	std::pair<double, double> xmm = apa_gds->minmax(0); 
 	
+	//std::cout << "xin: " << xmm.first/units::cm << " " << xmm.second/units::cm << " " << nrebin << " " << unit_dis << " " << frame_length << std::endl;
+
 	if (face == 1){
-	  xx = (i*nrebin/2.*unit_dis/10. - frame_length/2.*unit_dis/10.) + xmm.second/units::cm; // *4 is temporary
+	  xx = (time_slice*nrebin/2.*unit_dis/10. - frame_length/2.*unit_dis/10.) + xmm.second/units::cm; // *4 is temporary
 	}else if (face == 0){
-	  xx = xmm.first/units::cm - (i*nrebin/2.*unit_dis/10. - frame_length/2.*unit_dis/10.);
+	  xx = xmm.first/units::cm - (time_slice*nrebin/2.*unit_dis/10. - frame_length/2.*unit_dis/10.);
 	}
 	//xx = time_slice*nrebin/2.*unit_dis/10. - frame_length/2.*unit_dis/10.;
 	
