@@ -737,7 +737,7 @@ int main(int argc, char* argv[])
      
        if (cell_next_map.find(curr_cell) != cell_next_map.end()){
 	 for (int k=0;k!=cell_next_map[curr_cell].size();k++){
-	   if (toymatrix[i+1]->Get_Cell_Charge(cell_next_map[curr_cell].at(k))> recon_threshold){
+	   if (toymatrix[i+1]->Get_Cell_Charge(cell_next_map[curr_cell].at(k))> recon_threshold || toymatrix[i+1]->Get_Solve_Flag()==0){
 	     flag_good_cluster_cell = 1;
 	     break;
 	   }
@@ -746,7 +746,7 @@ int main(int argc, char* argv[])
        if (flag_good_cluster_cell == 0){
 	 if (cell_prev_map.find(curr_cell) != cell_prev_map.end()){
 	   for (int k=0;k!=cell_prev_map[curr_cell].size();k++){
-	     if (toymatrix[i-1]->Get_Cell_Charge(cell_prev_map[curr_cell].at(k))> recon_threshold){
+	     if (toymatrix[i-1]->Get_Cell_Charge(cell_prev_map[curr_cell].at(k))> recon_threshold || toymatrix[i-1]->Get_Solve_Flag()==0 ){
 	       flag_good_cluster_cell = 1;
 	       break;
 	     }
