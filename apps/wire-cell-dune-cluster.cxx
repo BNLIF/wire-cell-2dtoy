@@ -80,16 +80,16 @@ int main(int argc, char* argv[])
   gds.set_napas(0,4);
   Vector center0(-0*units::cm, -300.05*units::cm, 115.318875*units::cm);
   Vector halves0(3.995355*units::cm, 299.5*units::cm, 115.318875*units::cm);
-  gds.set_apa(0, 0, 35.71*units::deg, 35.71*units::deg, 0.4667*units::cm, 0.4667*units::cm, 0.479*units::cm, center0, halves0);
+  gds.set_apa(0, 0, 35.71*units::deg, 35.71*units::deg, pitchU, pitchV, pitchW, center0, halves0);
   Vector center1(-0*units::cm, 300.05*units::cm, 115.318875*units::cm);
   Vector halves1(3.995355*units::cm, 299.5*units::cm, 115.318875*units::cm);
-  gds.set_apa(0, 1, 35.71*units::deg, 35.71*units::deg, 0.4667*units::cm, 0.4667*units::cm, 0.479*units::cm, center1, halves1);
+  gds.set_apa(0, 1, 35.71*units::deg, 35.71*units::deg, pitchU, pitchV, pitchW, center1, halves1);
   Vector center2(-0*units::cm, -300.05*units::cm, 347.709*units::cm);
   Vector halves2(3.995355*units::cm, 299.5*units::cm, 115.318875*units::cm);
-  gds.set_apa(0, 2, 35.71*units::deg, 35.71*units::deg, 0.4667*units::cm, 0.4667*units::cm, 0.479*units::cm, center2, halves2);
+  gds.set_apa(0, 2, 35.71*units::deg, 35.71*units::deg, pitchU, pitchV, pitchW, center2, halves2);
   Vector center3(-0*units::cm, 300.05*units::cm, 347.709*units::cm);
   Vector halves3(3.995355*units::cm, 299.5*units::cm, 115.318875*units::cm);
-  gds.set_apa(0, 3, 35.71*units::deg, 35.71*units::deg, 0.4667*units::cm, 0.4667*units::cm, 0.479*units::cm, center3, halves3);
+  gds.set_apa(0, 3, 35.71*units::deg, 35.71*units::deg, pitchU, pitchV, pitchW, center3, halves3);
   gds.buildGDS();
 
   
