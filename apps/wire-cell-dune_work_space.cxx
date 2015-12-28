@@ -9,6 +9,7 @@
 #include "WireCell2dToy/ToySignalWien.h"
 #include "WireCellSst/ToyuBooNESliceDataSource.h"
 #include "WireCell2dToy/ToyTiling.h"
+#include "WireCell2dToy/TotalTiling.h"
 #include "WireCell2dToy/MergeToyTiling.h"
 #include "WireCell2dToy/TruthToyTiling.h"
 #include "WireCellData/MergeGeomCell.h"
@@ -421,6 +422,15 @@ int main(int argc, char* argv[])
     // theApp.Run();
    }
    
+   // WireCell2dToy::TotalTiling& totaltiling = Singleton<WireCell2dToy::TotalTiling>::Instance();
+   // totaltiling.Clear();
+   // int qx_abc;
+   // std::cout << "Stop, check memory!" << std::endl;
+   // std::cin >> qx_abc;
+
+
+
+
    double penalty = 6;
    double penalty_ncpt = 0.1;
 
