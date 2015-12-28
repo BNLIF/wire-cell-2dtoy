@@ -174,6 +174,22 @@ int main(int argc, char* argv[])
 
    //save MC truth ...
   WireCellSst::MCTruth *mctruth = new WireCellSst::MCTruth(root_file);
+  mctruth->GetEntry(eve_num);
+  
+  std::cout << "Energy: " << mctruth->mc_nu_mom[3] << " CC/NC: " << mctruth->mc_nu_ccnc << " Neutrino: " << mctruth->mc_nu_pdg << std::endl;
+
+  //Now judge which event to replay 
+  int flag_replay = 0;
+  // replay all nue cc for energy < 10 GeV 
+  if (mctruth->mc_nu_mom[3]<10) flag_replay = 1;
+  // replay all nc events
+  if (mctruth->mc_nu_ccnc==1) flag_replay = 1;
+  // replay all nu_tau events 
+  if (fabs(mctruth->mc_nu_pdg)==16) flag_replay = 1;
+
+  if (flag_replay==0)
+    return 0;
+
   /*
   int mc_Ntrack;  // number of tracks in MC
   int mc_id[MAX_TRACKS];  // track id; size == mc_Ntrack
@@ -200,7 +216,7 @@ int main(int argc, char* argv[])
   sst->SetBranchAddress("mc_trackPosition",&mc_trackPosition);
   */
   //sst->GetEntry(eve_num);
-  mctruth->GetEntry(eve_num);
+  
   cout << "Run No: " << mctruth->runNo << " " << mctruth->subrunNo << " " << mctruth->eventNo << endl;
   
   WireCell::FrameDataSource* fds = 0;
