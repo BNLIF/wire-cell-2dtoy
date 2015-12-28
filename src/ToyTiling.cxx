@@ -618,28 +618,28 @@ WireCell2dToy::ToyTiling::ToyTiling(const WireCell::Slice& slice,WireCell::GeomD
 	    
 	    const GeomCell *cell = 0;
 	    
-	    // // old method
-	    // GeomCell *cell_t = new GeomCell(ncell,pcell);
-	    // cell_t->set_uwire(wire_u.at(i));
-	    // cell_t->set_vwire(wire_v.at(j));
-	    // cell_t->set_wwire(wire_w.at(k));
-	    // cell = cell_t;
+	    // old method
+	    GeomCell *cell_t = new GeomCell(ncell,pcell);
+	    cell_t->set_uwire(wire_u.at(i));
+	    cell_t->set_vwire(wire_v.at(j));
+	    cell_t->set_wwire(wire_w.at(k));
+	    cell = cell_t;
 
-	    // new method
-	    WireCell2dToy::TotalTiling& totaltiling = Singleton<WireCell2dToy::TotalTiling>::Instance();
-	    GeomWireSelection temp_wires;
-	    temp_wires.push_back(wire_u.at(i));
-	    temp_wires.push_back(wire_v.at(j));
-	    temp_wires.push_back(wire_w.at(k));
-	    cell = totaltiling.cell(temp_wires);
-	    if (cell == 0){
-	      GeomCell *cell_t = new GeomCell(ncell,pcell);
-	      cell_t->set_uwire(wire_u.at(i));
-	      cell_t->set_vwire(wire_v.at(j));
-	      cell_t->set_wwire(wire_w.at(k));
-	      totaltiling.AddCellWire(cell_t, wire_u.at(i), wire_v.at(j), wire_w.at(k));
-	      cell = cell_t;
-	    }
+	    // // new method
+	    // WireCell2dToy::TotalTiling& totaltiling = Singleton<WireCell2dToy::TotalTiling>::Instance();
+	    // GeomWireSelection temp_wires;
+	    // temp_wires.push_back(wire_u.at(i));
+	    // temp_wires.push_back(wire_v.at(j));
+	    // temp_wires.push_back(wire_w.at(k));
+	    // cell = totaltiling.cell(temp_wires);
+	    // if (cell == 0){
+	    //   GeomCell *cell_t = new GeomCell(ncell,pcell);
+	    //   cell_t->set_uwire(wire_u.at(i));
+	    //   cell_t->set_vwire(wire_v.at(j));
+	    //   cell_t->set_wwire(wire_w.at(k));
+	    //   totaltiling.AddCellWire(cell_t, wire_u.at(i), wire_v.at(j), wire_w.at(k));
+	    //   cell = cell_t;
+	    // }
 
 
 
@@ -941,28 +941,28 @@ void WireCell2dToy::ToyTiling::twoplane_tiling(int time, int nrebin, WireCell::G
 	      //	      std::cout << " Form Cell" << std::endl;
 	      const GeomCell *cell = 0;
 
-	      // //old 
-	      // GeomCell *cell_t = new GeomCell(ncell,pcell);
-	      // cell_t->set_uwire(wire_u[i]);
-	      // cell_t->set_vwire(wire_v[j]);
-	      // cell_t->set_wwire(n_wire);
-	      // cell = cell_t;
+	      //old 
+	      GeomCell *cell_t = new GeomCell(ncell,pcell);
+	      cell_t->set_uwire(wire_u[i]);
+	      cell_t->set_vwire(wire_v[j]);
+	      cell_t->set_wwire(n_wire);
+	      cell = cell_t;
 	      
-	      // new method
-	      WireCell2dToy::TotalTiling& totaltiling = Singleton<WireCell2dToy::TotalTiling>::Instance();
-	      GeomWireSelection temp_wires;
-	      temp_wires.push_back(wire_u.at(i));
-	      temp_wires.push_back(wire_v.at(j));
-	      temp_wires.push_back(n_wire);
-	      cell = totaltiling.cell(temp_wires);
-	      if (cell == 0){
-		GeomCell *cell_t = new GeomCell(ncell,pcell);
-		cell_t->set_uwire(wire_u.at(i));
-		cell_t->set_vwire(wire_v.at(j));
-		cell_t->set_wwire(n_wire);
-		totaltiling.AddCellWire(cell_t, wire_u.at(i), wire_v.at(j), n_wire);
-		cell = cell_t;
-	      }
+	      // // new method
+	      // WireCell2dToy::TotalTiling& totaltiling = Singleton<WireCell2dToy::TotalTiling>::Instance();
+	      // GeomWireSelection temp_wires;
+	      // temp_wires.push_back(wire_u.at(i));
+	      // temp_wires.push_back(wire_v.at(j));
+	      // temp_wires.push_back(n_wire);
+	      // cell = totaltiling.cell(temp_wires);
+	      // if (cell == 0){
+	      // 	GeomCell *cell_t = new GeomCell(ncell,pcell);
+	      // 	cell_t->set_uwire(wire_u.at(i));
+	      // 	cell_t->set_vwire(wire_v.at(j));
+	      // 	cell_t->set_wwire(n_wire);
+	      // 	totaltiling.AddCellWire(cell_t, wire_u.at(i), wire_v.at(j), n_wire);
+	      // 	cell = cell_t;
+	      // }
 
 
 
@@ -1148,28 +1148,28 @@ void WireCell2dToy::ToyTiling::twoplane_tiling(int time, int nrebin, WireCell::G
 
 	      const GeomCell *cell = 0;
 
-	      // // old 
-  	      // GeomCell *cell_t = new GeomCell(ncell,pcell);
-  	      // cell_t->set_uwire(wire_u[i]);
-	      // cell_t->set_vwire(n_wire);
-	      // cell_t->set_wwire(wire_w[j]);
-	      // cell = cell_t;
+	      // old 
+  	      GeomCell *cell_t = new GeomCell(ncell,pcell);
+  	      cell_t->set_uwire(wire_u[i]);
+	      cell_t->set_vwire(n_wire);
+	      cell_t->set_wwire(wire_w[j]);
+	      cell = cell_t;
 	      
-	      // new method
-	      WireCell2dToy::TotalTiling& totaltiling = Singleton<WireCell2dToy::TotalTiling>::Instance();
-	      GeomWireSelection temp_wires;
-	      temp_wires.push_back(wire_u.at(i));
-	      temp_wires.push_back(n_wire);
-	      temp_wires.push_back(wire_w.at(j));
-	      cell = totaltiling.cell(temp_wires);
-	      if (cell == 0){
-		GeomCell *cell_t = new GeomCell(ncell,pcell);
-		cell_t->set_uwire(wire_u.at(i));
-		cell_t->set_vwire(n_wire);
-		cell_t->set_wwire(wire_w.at(j));
-		totaltiling.AddCellWire(cell_t, wire_u.at(i), n_wire, wire_w.at(j));
-		cell = cell_t;
-	      }
+	      // // new method
+	      // WireCell2dToy::TotalTiling& totaltiling = Singleton<WireCell2dToy::TotalTiling>::Instance();
+	      // GeomWireSelection temp_wires;
+	      // temp_wires.push_back(wire_u.at(i));
+	      // temp_wires.push_back(n_wire);
+	      // temp_wires.push_back(wire_w.at(j));
+	      // cell = totaltiling.cell(temp_wires);
+	      // if (cell == 0){
+	      // 	GeomCell *cell_t = new GeomCell(ncell,pcell);
+	      // 	cell_t->set_uwire(wire_u.at(i));
+	      // 	cell_t->set_vwire(n_wire);
+	      // 	cell_t->set_wwire(wire_w.at(j));
+	      // 	totaltiling.AddCellWire(cell_t, wire_u.at(i), n_wire, wire_w.at(j));
+	      // 	cell = cell_t;
+	      // }
 
 
 
@@ -1344,28 +1344,28 @@ void WireCell2dToy::ToyTiling::twoplane_tiling(int time, int nrebin, WireCell::G
   	    if (pcell.size()>=3){
 	      
 	      const GeomCell *cell = 0;
-	      // //old
-  	      // GeomCell *cell_t = new GeomCell(ncell,pcell);
-  	      // cell_t->set_uwire(n_wire);
-	      // cell_t->set_vwire(wire_v[j]);
-	      // cell_t->set_wwire(wire_w[i]);
-	      // cell = cell_t;
+	      //old
+  	      GeomCell *cell_t = new GeomCell(ncell,pcell);
+  	      cell_t->set_uwire(n_wire);
+	      cell_t->set_vwire(wire_v[j]);
+	      cell_t->set_wwire(wire_w[i]);
+	      cell = cell_t;
 
-	      // new method
-	      WireCell2dToy::TotalTiling& totaltiling = Singleton<WireCell2dToy::TotalTiling>::Instance();
-	      GeomWireSelection temp_wires;
-	      temp_wires.push_back(n_wire);
-	      temp_wires.push_back(wire_v.at(j));
-	      temp_wires.push_back(wire_w.at(i));
-	      cell = totaltiling.cell(temp_wires);
-	      if (cell == 0){
-		GeomCell *cell_t = new GeomCell(ncell,pcell);
-		cell_t->set_uwire(n_wire);
-		cell_t->set_vwire(wire_v.at(j));
-		cell_t->set_wwire(wire_w.at(i));
-		totaltiling.AddCellWire(cell_t, n_wire, wire_v.at(j), wire_w.at(i));
-		cell = cell_t;
-	      }
+	      // // new method
+	      // WireCell2dToy::TotalTiling& totaltiling = Singleton<WireCell2dToy::TotalTiling>::Instance();
+	      // GeomWireSelection temp_wires;
+	      // temp_wires.push_back(n_wire);
+	      // temp_wires.push_back(wire_v.at(j));
+	      // temp_wires.push_back(wire_w.at(i));
+	      // cell = totaltiling.cell(temp_wires);
+	      // if (cell == 0){
+	      // 	GeomCell *cell_t = new GeomCell(ncell,pcell);
+	      // 	cell_t->set_uwire(n_wire);
+	      // 	cell_t->set_vwire(wire_v.at(j));
+	      // 	cell_t->set_wwire(wire_w.at(i));
+	      // 	totaltiling.AddCellWire(cell_t, n_wire, wire_v.at(j), wire_w.at(i));
+	      // 	cell = cell_t;
+	      // }
 	      
 	      Point cell_center = cell->center();
 
@@ -1746,30 +1746,30 @@ void WireCell2dToy::ToyTiling::CreateCell(float tolerance, const GeomDataSource&
 	    
 	    const GeomCell *cell = 0;
 	    
-	    // //old
- 	    // GeomCell *cell_t = new GeomCell(ncell,pcell);
- 	    // cell_t->set_uwire(temp_wire_u.at(i));
- 	    // cell_t->set_vwire(temp_wire_v.at(j));
- 	    // cell_t->set_wwire(temp_wire_w.at(k));
-	    // cell_t->set_tpc_no(n_tpc);
-	    // cell = cell_t;
+	    //old
+ 	    GeomCell *cell_t = new GeomCell(ncell,pcell);
+ 	    cell_t->set_uwire(temp_wire_u.at(i));
+ 	    cell_t->set_vwire(temp_wire_v.at(j));
+ 	    cell_t->set_wwire(temp_wire_w.at(k));
+	    cell_t->set_tpc_no(n_tpc);
+	    cell = cell_t;
 
-	     // new method
-	    WireCell2dToy::TotalTiling& totaltiling = Singleton<WireCell2dToy::TotalTiling>::Instance();
-	    GeomWireSelection temp_wires;
-	    temp_wires.push_back(temp_wire_u.at(i));
-	    temp_wires.push_back(temp_wire_v.at(j));
-	    temp_wires.push_back(temp_wire_w.at(k));
-	    cell = totaltiling.cell(temp_wires);
-	    if (cell == 0){
-	      GeomCell *cell_t = new GeomCell(ncell,pcell);
-	      cell_t->set_uwire(temp_wire_u.at(i));
-	      cell_t->set_vwire(temp_wire_v.at(j));
-	      cell_t->set_wwire(temp_wire_w.at(k));
-	      cell_t->set_tpc_no(n_tpc);
-	      totaltiling.AddCellWire(cell_t, temp_wire_u.at(i), temp_wire_v.at(j), temp_wire_w.at(k));
-	      cell = cell_t;
-	    }
+	    //  // new method
+	    // WireCell2dToy::TotalTiling& totaltiling = Singleton<WireCell2dToy::TotalTiling>::Instance();
+	    // GeomWireSelection temp_wires;
+	    // temp_wires.push_back(temp_wire_u.at(i));
+	    // temp_wires.push_back(temp_wire_v.at(j));
+	    // temp_wires.push_back(temp_wire_w.at(k));
+	    // cell = totaltiling.cell(temp_wires);
+	    // if (cell == 0){
+	    //   GeomCell *cell_t = new GeomCell(ncell,pcell);
+	    //   cell_t->set_uwire(temp_wire_u.at(i));
+	    //   cell_t->set_vwire(temp_wire_v.at(j));
+	    //   cell_t->set_wwire(temp_wire_w.at(k));
+	    //   cell_t->set_tpc_no(n_tpc);
+	    //   totaltiling.AddCellWire(cell_t, temp_wire_u.at(i), temp_wire_v.at(j), temp_wire_w.at(k));
+	    //   cell = cell_t;
+	    // }
 
 
 
