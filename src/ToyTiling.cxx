@@ -1746,30 +1746,30 @@ void WireCell2dToy::ToyTiling::CreateCell(float tolerance, const GeomDataSource&
 	    
 	    const GeomCell *cell = 0;
 	    
-	    //old
- 	    GeomCell *cell_t = new GeomCell(ncell,pcell);
- 	    cell_t->set_uwire(temp_wire_u.at(i));
- 	    cell_t->set_vwire(temp_wire_v.at(j));
- 	    cell_t->set_wwire(temp_wire_w.at(k));
-	    cell_t->set_tpc_no(n_tpc);
-	    cell = cell_t;
+	    // //old
+ 	    // GeomCell *cell_t = new GeomCell(ncell,pcell);
+ 	    // cell_t->set_uwire(temp_wire_u.at(i));
+ 	    // cell_t->set_vwire(temp_wire_v.at(j));
+ 	    // cell_t->set_wwire(temp_wire_w.at(k));
+	    // cell_t->set_tpc_no(n_tpc);
+	    // cell = cell_t;
 
-	    //  // new method
-	    // WireCell2dToy::TotalTiling& totaltiling = Singleton<WireCell2dToy::TotalTiling>::Instance();
-	    // GeomWireSelection temp_wires;
-	    // temp_wires.push_back(temp_wire_u.at(i));
-	    // temp_wires.push_back(temp_wire_v.at(j));
-	    // temp_wires.push_back(temp_wire_w.at(k));
-	    // cell = totaltiling.cell(temp_wires);
-	    // if (cell == 0){
-	    //   GeomCell *cell_t = new GeomCell(ncell,pcell);
-	    //   cell_t->set_uwire(temp_wire_u.at(i));
-	    //   cell_t->set_vwire(temp_wire_v.at(j));
-	    //   cell_t->set_wwire(temp_wire_w.at(k));
-	    //   cell_t->set_tpc_no(n_tpc);
-	    //   totaltiling.AddCellWire(cell_t, temp_wire_u.at(i), temp_wire_v.at(j), temp_wire_w.at(k));
-	    //   cell = cell_t;
-	    // }
+	     // new method
+	    WireCell2dToy::TotalTiling& totaltiling = Singleton<WireCell2dToy::TotalTiling>::Instance();
+	    GeomWireSelection temp_wires;
+	    temp_wires.push_back(temp_wire_u.at(i));
+	    temp_wires.push_back(temp_wire_v.at(j));
+	    temp_wires.push_back(temp_wire_w.at(k));
+	    cell = totaltiling.cell(temp_wires);
+	    if (cell == 0){
+	      GeomCell *cell_t = new GeomCell(ncell,pcell);
+	      cell_t->set_uwire(temp_wire_u.at(i));
+	      cell_t->set_vwire(temp_wire_v.at(j));
+	      cell_t->set_wwire(temp_wire_w.at(k));
+	      cell_t->set_tpc_no(n_tpc);
+	      totaltiling.AddCellWire(cell_t, temp_wire_u.at(i), temp_wire_v.at(j), temp_wire_w.at(k));
+	      cell = cell_t;
+	    }
 
 
 
