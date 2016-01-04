@@ -15,7 +15,8 @@ void WireCell2dToy::ToyMatrixMarkov::find_subset(WireCell2dToy::ToyMatrixKalman 
 	std::vector<int> already_removed = toymatrix.Get_already_removed();
 	already_removed.push_back(i);
 	WireCell2dToy::ToyMatrixKalman kalman(already_removed,toymatrix.Get_no_need_remove(),toymatrix1,0,0);
-	
+
+	//	std::cout << "abc: " << i << " " <<kalman.Get_numz() << " " << toymatrix.Get_numz() << std::endl;
 	if (kalman.Get_numz()==toymatrix.Get_numz()){
 	}else{
 	  find_subset(kalman,toymatrix1,vec);
@@ -25,6 +26,40 @@ void WireCell2dToy::ToyMatrixMarkov::find_subset(WireCell2dToy::ToyMatrixKalman 
 	}
       }
     }
+
+    if (vec.size() == 0){
+      for (int i=0;i!=toymatrix.Get_mcindex();i++){
+	auto it1 = find(toymatrix.Get_already_removed().begin(),toymatrix.Get_already_removed().end(),i);
+	auto it2 = find(toymatrix.Get_no_need_remove().begin(),toymatrix.Get_no_need_remove().end(),i);
+	if (it1 == toymatrix.Get_already_removed().end() && it2 == toymatrix.Get_no_need_remove().end()){
+	  for (int j=0;j!=toymatrix.Get_mcindex();j++){
+	    if (i==j) continue;
+	    auto it3 = find(toymatrix.Get_already_removed().begin(),toymatrix.Get_already_removed().end(),j);
+	    auto it4 = find(toymatrix.Get_no_need_remove().begin(),toymatrix.Get_no_need_remove().end(),j);
+	    if (it3 == toymatrix.Get_already_removed().end() && it4 == toymatrix.Get_no_need_remove().end()){
+	      std::vector<int> already_removed = toymatrix.Get_already_removed();
+	      already_removed.push_back(i);
+	      already_removed.push_back(j);
+	      WireCell2dToy::ToyMatrixKalman kalman(already_removed,toymatrix.Get_no_need_remove(),toymatrix1,0,0);
+	      
+	      // std::cout << "abc: " << i << " " << j << " " << kalman.Get_numz() << " " << toymatrix.Get_numz() << std::endl;
+
+	      if (kalman.Get_numz()==toymatrix.Get_numz()){
+	      }else{
+		find_subset(kalman,toymatrix1,vec);
+		//move to "no need to remove"??
+		// toymatrix.Get_no_need_remove().push_back(i);
+		// toymatrix.Get_no_need_remove().push_back(j);
+		if (vec.size()!=0) break;
+	      }
+	    }
+	  }
+	  if (vec.size()!=0) break;
+	}
+      }
+    }
+    
+
   }else{
     for (int i=0;i!=toymatrix.Get_mcindex();i++){
       auto it1 = find(toymatrix.Get_already_removed().begin(),toymatrix.Get_already_removed().end(),i);
@@ -451,7 +486,7 @@ WireCell2dToy::ToyMatrixMarkov::ToyMatrixMarkov(WireCell2dToy::ToyMatrix *toymat
 	   && (cur_chi2 > 2*(cur_dof+0.1) || ncount < 800) 
 	   && (cur_chi2 > (cur_dof+0.1) || ncount < 10) 
 	   ){
-      if (ncount == 1 || (ncount % 1000 ==0&&ncount >0) )
+      if (ncount ==1 || (ncount % 1000 ==0&&ncount >0) )
 	std::cout << "MCMC: " << ncount << " " << cur_chi2 << " " << cur_dof << std::endl;
       
       make_guess();
@@ -483,6 +518,8 @@ void WireCell2dToy::ToyMatrixMarkov::make_guess(){
   ncount ++; 
   
   if (first_flag ==0){
+    nlevel = 0;
+    //    std::cout << toymatrixkalman->Get_mcindex() << " " << toymatrixkalman->Get_numz() << std::endl;
     Iterate(*toymatrixkalman);
     first_flag = 1;
   }
@@ -686,6 +723,7 @@ void WireCell2dToy::ToyMatrixMarkov::make_guess(){
 }
 
 void WireCell2dToy::ToyMatrixMarkov::Iterate(WireCell2dToy::ToyMatrixKalman &toykalman){
+  nlevel++;
   if (toykalman.Get_numz()!=0&&toymatrix->Get_Chi2()<0){
     for (int i=0;i!=toykalman.Get_mcindex();i++){
       auto it1 = find(toykalman.Get_already_removed().begin(),toykalman.Get_already_removed().end(),i);
@@ -693,6 +731,53 @@ void WireCell2dToy::ToyMatrixMarkov::Iterate(WireCell2dToy::ToyMatrixKalman &toy
       if (it1 == toykalman.Get_already_removed().end() && it2 == toykalman.Get_no_need_remove().end()){
 	std::vector<int> already_removed = toykalman.Get_already_removed();
 	already_removed.push_back(i);
+
+	// test ... 
+	if (toykalman.Get_no_need_remove().size() + already_removed.size() >= toykalman.Get_mcindex()){
+	  //std::cout << already_removed.size() << " " << toykalman.Get_no_need_remove().size() << std::endl;
+
+	  //  for (int i=0;i!=allmcell_c.size();i++){
+	  //   auto it = find(use_time.begin(),use_time.end(),i);
+	  //   if (it==use_time.end())
+	  //     already_removed.push_back(i);
+	  // }
+	  // use_time.clear();
+	  
+	  // //initialize
+	  // //toymatrixkalman = new WireCell2dToy::ToyMatrixKalman(*toymatrix);  // hold the current results 
+	  
+	  // toymatrixkalman = new WireCell2dToy::ToyMatrixKalman(already_removed, use_time, *toymatrix,1,0);
+	  // std::cout << "With Time: " << toymatrixkalman->Get_numz() << " " << allmcell_c.size() << " " <<  already_removed.size() << std::endl;
+	  // // Find a sub-set that is not degenerated
+	  // // put things into use_time
+	  // find_subset(*toymatrixkalman,toycur,use_time);
+
+	  std::vector<int> temp_already_removed;
+	  std::vector<int> temp_no_need_remove;
+	  for (int k=0;k!=toykalman.Get_mcindex();k++){
+	    auto it4 = find(toykalman.Get_no_need_remove().begin(),toykalman.Get_no_need_remove().end(),k);
+	    if (it4 == toykalman.Get_no_need_remove().end())
+	      temp_already_removed.push_back(k);
+	  }
+	  
+
+	  //temp_no_need_remove.clear();
+	  //initialize
+	  WireCell2dToy::ToyMatrixKalman temp_tk(temp_already_removed, temp_no_need_remove, *toymatrix,0,0);
+	  //	  std::cout << temp_tk.Get_numz() << " " << temp_already_removed.size() << " " << temp_no_need_remove.size() << std::endl;
+	  // Find a sub-set that is not degenerated
+	  find_subset(temp_tk,*toymatrix,temp_no_need_remove);
+
+	  if (temp_no_need_remove.size()!=0){
+	    toykalman.Get_no_need_remove().clear();
+	    for (int k=0;k!=temp_no_need_remove.size();k++){
+	      toykalman.Get_no_need_remove().push_back(temp_no_need_remove.at(k));
+	    }
+	    already_removed.clear();
+	  }
+	  //std::cout << already_removed.size() << " " << toykalman.Get_no_need_remove().size() << " " << temp_no_need_remove.size() << std::endl;
+	}
+	
 
 	double chi2_p = 0;
 	for (int j = 0; j!=already_removed.size(); j++){
@@ -724,11 +809,16 @@ void WireCell2dToy::ToyMatrixMarkov::Iterate(WireCell2dToy::ToyMatrixKalman &toy
 
 
 
+
+	//std::cout << nlevel << " " << already_removed.size() << " " << toykalman.Get_no_need_remove().size() << " " << toykalman.Get_numz() << std::endl;
+
 	WireCell2dToy::ToyMatrixKalman kalman(already_removed,toykalman.Get_no_need_remove(),*toymatrix,0,1,chi2_p);
+	//std::cout << kalman.Get_numz() << std::endl;
 	// this part seems to be able to improve
 	// to get the first solution, one should not take too much time ...
 	// consider to improve in the future ...  i.e. add cut on the number of get_already_removed vs. what's left ... 
 	Iterate(kalman);
+	nlevel--;
 	
 	toykalman.Get_no_need_remove().push_back(i);
 	if (toymatrix->Get_Chi2()>0) break;

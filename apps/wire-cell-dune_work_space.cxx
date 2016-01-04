@@ -344,7 +344,9 @@ int main(int argc, char* argv[])
    int start_num = 0 ;
    int end_num = sds.size()-1;
    
-   
+   // start_num = 841;
+   // end_num = 842;
+
   //int i = 317+800;{
    //int i = 292+800;
    for (int i=start_num;i!=end_num+1;i++){
@@ -581,12 +583,12 @@ int main(int argc, char* argv[])
    std::cout << "Starting MCMC" << std::endl;
    solve_list.clear();
    
-   //without  time information
+   // //without  time information
    // for (int i=start_num;i!=end_num+1;i++){
    //   if (toymatrix[i]->Get_Solve_Flag()==0){
    //     GeomCellSelection allmcell = mergetiling[i]->get_allcell();
-   //     WireCell2dToy::ToyMatrixMarkov toymatrix_markov(*toymatrix[i],*mergetiling[i],&allmcell,Good_MCells.at(i-start_num));
-   //     //WireCell2dToy::ToyMatrixMarkov toymatrix_markov(toymatrix[i],&allmcell);
+   //     //WireCell2dToy::ToyMatrixMarkov toymatrix_markov(*toymatrix[i],*mergetiling[i],&allmcell,Good_MCells.at(i-start_num));
+   //     WireCell2dToy::ToyMatrixMarkov toymatrix_markov(toymatrix[i],&allmcell);
    //     CellChargeMap ccmap = truthtiling[i]->ccmap();
    //     if (toymatrix[i]->Get_Solve_Flag()!=0)
    // 	toymetric.Add(allmcell,*toymatrix[i],ccmap);

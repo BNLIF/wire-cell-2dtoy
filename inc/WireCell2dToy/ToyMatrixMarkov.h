@@ -78,6 +78,9 @@ namespace WireCell2dToy{
     
     int recon_threshold1;
     int recon_threshold2;
+
+
+    int nlevel;
   };
 }
 
