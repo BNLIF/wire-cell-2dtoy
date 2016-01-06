@@ -171,7 +171,8 @@ WireCell2dToy::ToyMatrixMarkov::ToyMatrixMarkov(WireCell2dToy::ToyMatrix &toycur
 	next_chi2 = toymatrix->Get_Chi2();
 	next_dof = toymatrix->Get_ndf();
       }
-    }else if (allmcell_c.size()<150){
+      //    }else if (allmcell_c.size()<150){
+    }else{
       for (int i=0;i!=200;i++){
 	make_guess();
 	next_chi2 = toymatrix->Get_Chi2();
@@ -385,7 +386,8 @@ WireCell2dToy::ToyMatrixMarkov::ToyMatrixMarkov(WireCell2dToy::ToyMatrix *toybef
 	next_chi2 = toymatrix->Get_Chi2();
 	next_dof = toymatrix->Get_ndf();
       }
-    }else if (allmcell_c.size()<150){
+    }else{
+      //    }else if (allmcell_c.size()<150){
       for (int i=0;i!=200;i++){
 	make_guess();
 	next_chi2 = toymatrix->Get_Chi2();
@@ -493,7 +495,8 @@ WireCell2dToy::ToyMatrixMarkov::ToyMatrixMarkov(WireCell2dToy::ToyMatrix *toymat
       next_chi2 = toymatrix->Get_Chi2();
       next_dof = toymatrix->Get_ndf();
     }
-  }else if (allmcell->size()<150){
+  }else{
+    //  }else if (allmcell->size()<150){
     for (int i=0;i!=200;i++){
       make_guess();
       next_chi2 = toymatrix->Get_Chi2();
