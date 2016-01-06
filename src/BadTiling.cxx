@@ -9,7 +9,7 @@ WireCell2dToy::BadTiling::BadTiling(int time, int scale, WireCell::ChirpMap& upl
   int num = 0;
   // do u wire
   for (int i=0;i!=gds.wires_in_plane(WirePlaneType_t(0)).size(); i++){
-    if (uplane_map.find(i) != uplane_map.end() && i >= uplane_map[i].first/scale && i <= uplane_map[i].second/scale){
+    if (uplane_map.find(i) != uplane_map.end() && time >= uplane_map[i].first/scale && time <= uplane_map[i].second/scale){
       const GeomWire* wire = gds.by_planeindex(WireCell::WirePlaneType_t(0),i);
       if (mwire == 0){
 	mwire = new MergeGeomWire(num, *wire);
@@ -36,7 +36,7 @@ WireCell2dToy::BadTiling::BadTiling(int time, int scale, WireCell::ChirpMap& upl
   mwire = 0;
   
   for (int i=0;i!=gds.wires_in_plane(WirePlaneType_t(1)).size(); i++){
-    if (vplane_map.find(i) != vplane_map.end() && i >= vplane_map[i].first/scale && i <= vplane_map[i].second/scale){
+    if (vplane_map.find(i) != vplane_map.end() && time >= vplane_map[i].first/scale && time <= vplane_map[i].second/scale){
       const GeomWire* wire = gds.by_planeindex(WireCell::WirePlaneType_t(1),i);
       if (mwire == 0){
 	mwire = new MergeGeomWire(num, *wire);
@@ -62,8 +62,15 @@ WireCell2dToy::BadTiling::BadTiling(int time, int scale, WireCell::ChirpMap& upl
   prev_wire = -1;
   mwire = 0;
   
+  // int kkk = 0;
+  // for (auto it = wplane_map.begin();it!= wplane_map.end();it++){
+  //   std::cout << it->first << " " << it->second.first << " " << it->second.second << " " << kkk << std::endl;
+  //   kkk++;
+  // }
+
   for (int i=0;i!=gds.wires_in_plane(WirePlaneType_t(2)).size(); i++){
-    if (wplane_map.find(i) != wplane_map.end() && i >= wplane_map[i].first/scale && i <= wplane_map[i].second/scale){
+    if (wplane_map.find(i) != wplane_map.end() && time >= wplane_map[i].first/scale && time <= wplane_map[i].second/scale){
+      //std::cout << i << " " << wplane_map.size() << " " << gds.wires_in_plane(WirePlaneType_t(2)).size() << std::endl;
       const GeomWire* wire = gds.by_planeindex(WireCell::WirePlaneType_t(2),i);
       if (mwire == 0){
 	mwire = new MergeGeomWire(num, *wire);
@@ -310,6 +317,8 @@ WireCell2dToy::BadTiling::BadTiling(int time, int scale, WireCell::ChirpMap& upl
       dis_w[0] = gds.wire_dist(*wwire_1) - w_pitch/2.;
       dis_w[1] = gds.wire_dist(*wwire_2) + w_pitch/2.;
 
+      //      std::cout << dis_u[0]/units::m << " " << dis_u[1]/units::m << " " << dis_w[0]/units::m << " " << dis_w[1]/units::m << std::endl;
+
       PointVector pcell;
       std::vector<Vector> pcross(4);
       
@@ -336,7 +345,7 @@ WireCell2dToy::BadTiling::BadTiling(int time, int scale, WireCell::ChirpMap& upl
 	    break;
 	  }
 	}
-	// scan v-wire
+	// scan w-wire
 	for (int k=0;k!=((MergeGeomWire*)wire_w.at(j))->get_allwire().size();k++){
 	  const GeomWire *wwire_3 = ((MergeGeomWire*)wire_w.at(j))->get_allwire().at(k);
 	  dis_w[2] = gds.wire_dist(*wwire_3) - w_pitch/2.;
@@ -378,7 +387,7 @@ WireCell2dToy::BadTiling::BadTiling(int time, int scale, WireCell::ChirpMap& upl
 	    break;
 	  }
 	}
-	// scan v-wire
+	// scan w-wire
 	for (int k=0;k!=((MergeGeomWire*)wire_w.at(j))->get_allwire().size();k++){
 	  const GeomWire *wwire_3 = ((MergeGeomWire*)wire_w.at(j))->get_allwire().at(((MergeGeomWire*)wire_w.at(j))->get_allwire().size()-1-k);
 	  dis_w[2] = gds.wire_dist(*wwire_3) + w_pitch/2.;
@@ -419,7 +428,7 @@ WireCell2dToy::BadTiling::BadTiling(int time, int scale, WireCell::ChirpMap& upl
 	    break;
 	  }
 	}
-	// scan v-wire
+	// scan w-wire
 	for (int k=0;k!=((MergeGeomWire*)wire_w.at(j))->get_allwire().size();k++){
 	  const GeomWire *wwire_3 = ((MergeGeomWire*)wire_w.at(j))->get_allwire().at(k);
 	  dis_w[2] = gds.wire_dist(*wwire_3) - w_pitch/2.;
@@ -459,7 +468,7 @@ WireCell2dToy::BadTiling::BadTiling(int time, int scale, WireCell::ChirpMap& upl
 	    break;
 	  }
 	}
-	// scan v-wire
+	// scan w-wire
 	for (int k=0;k!=((MergeGeomWire*)wire_w.at(j))->get_allwire().size();k++){
 	  const GeomWire *wwire_3 = ((MergeGeomWire*)wire_w.at(j))->get_allwire().at(((MergeGeomWire*)wire_w.at(j))->get_allwire().size()-1-k);
 	  dis_w[2] = gds.wire_dist(*wwire_3) + w_pitch/2.;
