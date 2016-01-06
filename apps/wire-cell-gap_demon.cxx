@@ -374,6 +374,12 @@ int main(int argc, char* argv[])
     // display.draw_bad_region(wplane_map,i,nrebin,2,"same");
     display.draw_bad_cell(badtiling[i]->get_cell_all());
   
+    double bad_area = 0;
+    for (int k = 0; k !=  badtiling[i]->get_cell_all().size(); k++){
+      bad_area += badtiling[i]->get_cell_all().at(k)->cross_section();
+    }
+    std::cout << "Bad Area: " << bad_area/units::m/units::m << std::endl;
+    
     display.draw_cells(toytiling[i]->get_allcell(),"*same");
     display.draw_mergecells(mergetiling[i]->get_allcell(),"*same",0); //0 is normal, 1 is only draw the ones containt the truth cell
     
