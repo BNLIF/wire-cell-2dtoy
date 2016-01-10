@@ -10,7 +10,7 @@
 #include "WireCellData/SpaceCell.h"
 #include "WireCellData/MergeSpaceCell.h"
 
-
+#include "WireCellSst/MCTruth.h"
 
 #include "TApplication.h"
 #include "TString.h"
@@ -101,6 +101,7 @@ int main(int argc, char* argv[])
   TTree *T = (TTree*)file->Get("T");
   TTree *TC = (TTree*)file->Get("TC");
   TTree *Trun = (TTree*)file->Get("Trun");
+  TTree *TMC = (TTree*)file->Get("TMC");
   
   TGraph2D *shower3D = (TGraph2D*)file->Get("shower3D");
 
@@ -255,7 +256,8 @@ int main(int argc, char* argv[])
 
   
   // deal with MC truth ... 
-  
+  WireCellSst::MCTruth *mctruth = new WireCellSst::MCTruth(TMC);
+  mctruth->GetEntry(0);
 
 
 
