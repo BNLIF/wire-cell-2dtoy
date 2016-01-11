@@ -257,11 +257,21 @@ int main(int argc, char* argv[])
   
   // deal with MC truth ... 
   WireCellSst::MCTruth *mctruth = new WireCellSst::MCTruth(TMC);
-  mctruth->GetEntry(0);
+  //mctruth->GetEntry(0);
 
   // Need the (original) primary vertex to be in the fiducial volume ...
-  
+  Point neutrino_vertex = mctruth->find_neutrino_vertex();
+  bool contained_flag = false;
+  if (fabs(neutrino_vertex[0]) < 360-50 && fabs(neutrino_vertex[1]) < 600-50 && neutrino_vertex[2]>50 && neutrino_vertex[2] < 360-150){
+    contained_flag = true;
+  }
+  std::cout << "neutrino Vertex: " << neutrino_vertex[0] << " " << neutrino_vertex[1] << " " << neutrino_vertex[2] << " " << contained_flag << std::endl;
+
   // Now need to find the primary electron trajectory ...
+  Point primary_vertex = mctruth->find_primary_vertex();
+  std::cout << "Primary Vertex: " << primary_vertex[0] << " " << primary_vertex[1] << " " << primary_vertex[2] << std::endl;
+  
+
   // save wire and cell directly? (in addition to the point)
   // use the vertex and the main point
   // use the direction of the electron
