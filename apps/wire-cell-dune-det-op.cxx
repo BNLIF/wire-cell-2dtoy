@@ -271,14 +271,20 @@ int main(int argc, char* argv[])
   Point primary_vertex = mctruth->find_primary_vertex();
   std::cout << "Primary Vertex: " << primary_vertex[0] << " " << primary_vertex[1] << " " << primary_vertex[2] << std::endl;
   
-
-  // save wire and cell directly? (in addition to the point)
   // use the vertex and the main point
   // use the direction of the electron
+  MCParticle* electron = mctruth->find_primary_electron();
+  if (electron != 0){
+    std::cout << electron->startMomentum[0] << " " << electron->startMomentum[1] << " " << electron->startMomentum[2] << std::endl;
+  }
 
   // Need to find all the seconary gammas' (energy deposition) starting point and trajectory... 
   // position, the energy of secondary electron etc
   // direction is just gamma's direction?
+  MCParticleSelection photons = mctruth->find_primary_photons();
+  std::cout << photons.size() << std::endl;
+  
+  // save wire and cell directly? (in addition to the point)
   // gap can be defined as a line between the position and vertex location 
 
   // Given a position, need to find the corresponding merged cells' location (through merged wire)... 
