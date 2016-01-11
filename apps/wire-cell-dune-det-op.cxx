@@ -262,7 +262,7 @@ int main(int argc, char* argv[])
   // Need the (original) primary vertex to be in the fiducial volume ...
   Point neutrino_vertex = mctruth->find_neutrino_vertex();
   bool contained_flag = false;
-  if (fabs(neutrino_vertex[0]) < 360-50 && fabs(neutrino_vertex[1]) < 600-50 && neutrino_vertex[2]>50 && neutrino_vertex[2] < 360-150){
+  if (fabs(neutrino_vertex[0]) < 360-10 && fabs(neutrino_vertex[1]) < 600-10 && neutrino_vertex[2]>10 && neutrino_vertex[2] < 360-20){
     contained_flag = true;
   }
   std::cout << "neutrino Vertex: " << neutrino_vertex[0] << " " << neutrino_vertex[1] << " " << neutrino_vertex[2] << " " << contained_flag << std::endl;
@@ -283,6 +283,8 @@ int main(int argc, char* argv[])
   // direction is just gamma's direction?
   MCParticleSelection photons = mctruth->find_primary_photons();
   std::cout << photons.size() << std::endl;
+  
+  std::cout << mctruth->find_neutrino_true_energy() << " " << mctruth->find_neutrino_visible_energy() << std::endl;
   
   // save wire and cell directly? (in addition to the point)
   // gap can be defined as a line between the position and vertex location 
