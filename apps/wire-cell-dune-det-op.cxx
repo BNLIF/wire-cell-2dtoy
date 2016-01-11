@@ -23,6 +23,7 @@
 #include "TColor.h"
 #include "TVectorD.h"
 #include "TMatrixD.h"
+#include "TVector3.h"
 #include <iostream>
 
 using namespace WireCell;
@@ -40,6 +41,11 @@ int main(int argc, char* argv[])
   bool is_3mm=false;
   bool random_vertices=false;
   int seed=0;
+  
+  int section_no=0;
+  int event_no=0;
+  int condition_no=0;
+
   for (Int_t i = 1; i != argc; i++){
      switch(argv[i][1]){
      case 'o':
@@ -51,9 +57,16 @@ int main(int argc, char* argv[])
      case 'r':
        random_vertices = atoi(&argv[i][2]);
        break;
-     case 's':
-       seed = atoi(&argv[i][2]);
+     case 'e':
+       event_no = atoi(&argv[i][2]);
        break;
+     case 's':
+       section_no = atoi(&argv[i][2]);
+       break;
+     case 'c':
+       condition_no = atoi(&argv[i][2]);
+       break;
+       
      }
   }
 
@@ -226,6 +239,36 @@ int main(int argc, char* argv[])
       mcells_all.push_back(mcell);
     }
   }
+  
+  std::vector<MergeSpaceCellSelection> mcells_time;
+  for (int i=0;i!=ntime;i++){
+    MergeSpaceCellSelection temp_mcells;
+    mcells_time.push_back(temp_mcells);
+  }
+  
+  const WrappedGDS *temp_apa_gds = gds.get_apaGDS(0,0);
+  std::pair<double, double> temp_xmm = temp_apa_gds->minmax(0); 
+  
+  for (int i=0;i!=mcells_all.size();i++){
+    MergeSpaceCell *mcell = mcells_all.at(i);
+    SpaceCell *cell = mcell->Get_all_spacecell().at(0);
+    
+    int face = 0;
+    float drift_dist;
+    if (cell->x()>temp_xmm.first && cell->x()<temp_xmm.second) {
+    }else{
+      if (TMath::Abs(cell->x()-temp_xmm.first) > TMath::Abs(cell->x()-temp_xmm.second)) {
+	drift_dist = TMath::Abs(cell->x()-temp_xmm.second);
+	face = 1; //"B face +x"
+      }else{
+	drift_dist = TMath::Abs(cell->x()-temp_xmm.first);
+      }
+      int time_slice = drift_dist / 2.0 / (1.6*units::mm)+800;
+      mcells_time.at(time_slice).push_back(mcell);
+    }
+  }
+  
+  
    
   
   // for (int i=0;i!=ntime;i++){
@@ -282,10 +325,16 @@ int main(int argc, char* argv[])
   // position, the energy of secondary electron etc
   // direction is just gamma's direction?
   MCParticleSelection photons = mctruth->find_primary_photons();
-  std::cout << photons.size() << std::endl;
+  std::cout << "Photons: " << photons.size() << std::endl;
   
-  std::cout << mctruth->find_neutrino_true_energy() << " " << mctruth->find_neutrino_visible_energy() << std::endl;
+  std::cout << "Energies: " << mctruth->find_neutrino_true_energy() << " " << mctruth->find_neutrino_visible_energy() << std::endl;
   
+  // find gap
+  // start from the vertex, and check along the photon direction 
+  // the first distance would be the length before a gap
+  // the second ditance would be the length after a gap
+
+
   // save wire and cell directly? (in addition to the point)
   // gap can be defined as a line between the position and vertex location 
 
@@ -295,15 +344,187 @@ int main(int argc, char* argv[])
   // Given a merged cell, need to find all the wires and then energy ... 
   // dE/dx through projection? 
   
+
+  TString new_file; 
+  if (section_no < 10){
+    new_file = Form("./out_rootfiles/000%d/%d_%d.root",section_no,event_no,condition_no);
+  }else if (section_no < 100){
+    new_file = Form("./out_rootfiles/00%d/%d_%d.root",section_no,event_no,condition_no);
+  }else if (section_no < 1000){
+    new_file = Form("./out_rootfiles/0%d/%d_%d.root",section_no,event_no,condition_no);
+  }else{
+    new_file = Form("./out_rootfiles/%d/%d_%d.root",section_no,event_no,condition_no);
+  }
+
+
+  if (contained_flag){
+    TFile *file1 = new TFile(new_file,"RECREATE");
+    TTree *t1 = new TTree("T","T");
+    t1->SetDirectory(file1);
+    Float_t Enu_true, Enu_reco;
+    Enu_true = mctruth->find_neutrino_true_energy() ;
+    Enu_reco = mctruth->find_neutrino_visible_energy();
+    
+    t1->Branch("Enu_true",&Enu_true,"Enu_true/F");
+    t1->Branch("Enu_reco",&Enu_reco,"Enu_reco/F");
+    
+    t1->Branch("section_no",&section_no,"section_no/I");
+    t1->Branch("event_no",&event_no,"event_no/I");
+    t1->Branch("condition_no",&condition_no,"condition_no/I");
+        
+    Int_t nphoton,nele;
+    nphoton =  photons.size();
+    if (electron == 0){
+      nele = 0;
+    }else{
+      nele = 1;
+    }
+    t1->Branch("nphoton",&nphoton,"nphoton/I");
+    t1->Branch("nele",&nele,"nele/I");
+    
+    //save gap related variables for photons
+    // save up to 20 photons
+    // 1 mm a point and 200 points = 20 cm
+    Int_t gap_time_slice[200][20];
+    Float_t gap_dis[200][20]; 
+    Float_t gap_charge[200][20];
+    Float_t gap_area[200][20];
+
+    Float_t E_photon[20];
+    Float_t Theta_photon[20];
+    Float_t Phi_photon[20];
+
+    t1->Branch("E_photon",E_photon,"E_photon[nphoton]/F");
+    t1->Branch("Theta_photon",Theta_photon,"Theta_photon[nphoton]/F");
+    t1->Branch("Phi_photon",Phi_photon,"Phi_photon[nphoton]/F");
+   
+    t1->Branch("gap_time_slice",gap_time_slice,"gap_time_slice[200][nphoton]/I");
+    t1->Branch("gap_dis",gap_dis,"gap_dis[200][nphoton]/F");
+    t1->Branch("gap_charge",gap_charge,"gap_charge[200][nphoton]/F");
+    t1->Branch("gap_area",gap_area,"gap_area[200][nphoton]/F");
+    
+    
+
+    for (int i=0;i!=nphoton;i++){
+      Point p;
+      TVector3 dir(photons.at(i)->startMomentum[0],photons.at(i)->startMomentum[1],photons.at(i)->startMomentum[2]);
+      
+      E_photon[i] = photons.at(i)->startMomentum[3];
+      Theta_photon[i] = dir.Theta();
+      Phi_photon[i] = dir.Phi();
+
+      for (int j=0;j!=200;j++){
+	p.x = primary_vertex.x*units::cm + j * units::mm * sin(Theta_photon[i])*cos(Phi_photon[i]);
+	p.y = primary_vertex.y*units::cm + j * units::mm * sin(Theta_photon[i])*sin(Phi_photon[i]);
+	p.z = primary_vertex.z*units::cm + j * units::mm * cos(Theta_photon[i]);
+	
+	//std::cout << p.x/units::cm << " " << p.y/units::cm << " " << p.z/units::cm << std::endl;
+	
+	int flag = 0;
+	short which_cryo = gds.in_which_cryo(p);
+	short which_apa = gds.in_which_apa(p);
+	const WrappedGDS *apa_gds = gds.get_apaGDS(which_cryo,which_apa);
+	if (apa_gds!=NULL) {
+	  std::pair<double, double> xmm = apa_gds->minmax(0); 
+	  int face = 0;
+	  float drift_dist;
+	  if (p.x>xmm.first && p.x<xmm.second) {
+	  }else{
+	    if (TMath::Abs(p.x-xmm.first) > TMath::Abs(p.x-xmm.second)) {
+	      drift_dist = TMath::Abs(p.x-xmm.second);
+	      face = 1; //"B face +x"
+	    }else{
+	      drift_dist = TMath::Abs(p.x-xmm.first);
+	    }
+	    flag = 1;
+	    gap_time_slice[j][i] = drift_dist / 2.0 / (1.6*units::mm)+800;
+	    //std::cout << gap_time_slice[j][i] << std::endl;
+
+	    const GeomWire* uwire = apa_gds->closest(p,(WirePlaneType_t)0,face);
+	    const GeomWire* vwire = apa_gds->closest(p,(WirePlaneType_t)1,face);
+	    const GeomWire* wwire = apa_gds->closest(p,(WirePlaneType_t)2,face);
+	    
+	    int time_slice = gap_time_slice[j][i];
+	    
+	    // check with merged cells
+	    //std::cout << i << " " << j << " " << mcells_time.at(time_slice).size() << std::endl;
+	    
+	    gap_dis[j][i] = 1e9;
+	    gap_area[j][i] = -1;
+	    gap_charge[j][i] = -1;
+
+	    for (int k=0;k!=mcells_time.at(time_slice).size();k++){
+	      MergeSpaceCell *mcell = mcells_time.at(time_slice).at(k);
+	      
+	      if (mcell->Get_all_spacecell().at(0)->get_cell()->get_face()!=face
+		  || mcell->Get_all_spacecell().at(0)->get_cell()->get_cryo() != which_cryo
+		  || mcell->Get_all_spacecell().at(0)->get_cell()->get_apa() != which_apa
+		  ) continue;
+
+	      // check with merged wires
+	      GeomWireSelection uwires = mcell->get_uwires();
+	      GeomWireSelection vwires = mcell->get_vwires();
+	      GeomWireSelection wwires = mcell->get_wwires();
+	      
+	      double closest_dist_u = 1e9;
+	      double closest_dist_v = 1e9;
+	      double closest_dist_w = 1e9;
+
+	      //find the closest wire for uplane
+	      for (int kk = 0;kk!=uwires.size();kk++){
+		if (fabs(apa_gds->wire_dist(*uwire) - apa_gds->wire_dist(*uwires.at(kk))) < closest_dist_u)
+		  closest_dist_u = fabs(apa_gds->wire_dist(*uwire) - apa_gds->wire_dist(*uwires.at(kk)));
+	      }
+	      //find the closest wire for vplane
+	      for (int kk = 0;kk!=vwires.size();kk++){
+		if (fabs(apa_gds->wire_dist(*vwire) - apa_gds->wire_dist(*vwires.at(kk))) < closest_dist_v)
+		  closest_dist_v = fabs(apa_gds->wire_dist(*vwire) - apa_gds->wire_dist(*vwires.at(kk)));
+	      }
+	      //find the closest wire for wplane
+	      for (int kk = 0;kk!=wwires.size();kk++){
+		if (fabs(apa_gds->wire_dist(*wwire) - apa_gds->wire_dist(*wwires.at(kk))) < closest_dist_w)
+		  closest_dist_w = fabs(apa_gds->wire_dist(*wwire) - apa_gds->wire_dist(*wwires.at(kk)));
+	      }
+	      if (closest_dist_u+closest_dist_v+closest_dist_w < gap_dis[j][i])
+		gap_dis[j][i] = closest_dist_u+closest_dist_v+closest_dist_w;
+	    }
+	    
+	    std::cout << i << " " << j << " " << gap_dis[j][i] << std::endl;
+	    
+	  }
+	}
+	
+	if (flag == 0){
+	  gap_time_slice[j][i] = -1;
+	  gap_dis[j][i] = -1;
+	  gap_charge[j][i] = -1;
+	  gap_area[j][i] = -1;
+	}
+
+      }
+    }
+
+    //save dE/dx for photons 
+    
+    //save dE/dx for electrons
+
+    
+
+    
+    t1->Fill();
+    file1->Write();
+    file1->Close();
+  }
+
   
-  TApplication theApp("theApp",&argc,argv);
-  TCanvas *c1 = new TCanvas("c1","c1",800,600);
-  shower3D->Draw("p");
-  grec->SetMarkerColor(2);
-  grec->Draw("psame");
-  grec->SetMarkerStyle(21);
-  grec->SetMarkerSize(0.5);
-  theApp.Run();
+  // TApplication theApp("theApp",&argc,argv);
+  // TCanvas *c1 = new TCanvas("c1","c1",800,600);
+  // shower3D->Draw("p");
+  // grec->SetMarkerColor(2);
+  // grec->Draw("psame");
+  // grec->SetMarkerStyle(21);
+  // grec->SetMarkerSize(0.5);
+  // theApp.Run();
 
 
   // //cout << mcells.size() << endl;
