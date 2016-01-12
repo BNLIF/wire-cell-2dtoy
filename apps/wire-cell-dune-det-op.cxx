@@ -219,7 +219,8 @@ int main(int argc, char* argv[])
       mcell = new MergeSpaceCell();
       mcell->set_id(mcell_id);
     }
-    GeomCell *cell1 = new GeomCell(cell);
+    GeomCell *cell1 = new GeomCell(cell );
+    cell1->set_tpc_no(face + cryostat_no*10000 + apa_no*10);
 
     toytiling[time_slice]->AddCell(gds,cryostat_no,apa_no,cell1,u_index,v_index,w_index,u_charge,v_charge,w_charge,u_charge_err,v_charge_err,w_charge_err);
 
@@ -455,10 +456,14 @@ int main(int argc, char* argv[])
 
 	    for (int k=0;k!=mcells_time.at(time_slice).size();k++){
 	      MergeSpaceCell *mcell = mcells_time.at(time_slice).at(k);
+
+	      std::cout << mcell->Get_all_spacecell().at(0)->get_cell()->get_face() << " " << face << " " << 
+		mcell->Get_all_spacecell().at(0)->get_cell()->get_cryo() << " " <<  (int)which_cryo << " " <<
+		mcell->Get_all_spacecell().at(0)->get_cell()->get_apa() << " " <<  (int)which_apa << std::endl;
 	      
 	      if (mcell->Get_all_spacecell().at(0)->get_cell()->get_face()!=face
-		  || mcell->Get_all_spacecell().at(0)->get_cell()->get_cryo() != which_cryo
-		  || mcell->Get_all_spacecell().at(0)->get_cell()->get_apa() != which_apa
+		  || mcell->Get_all_spacecell().at(0)->get_cell()->get_cryo() != (int)which_cryo
+		  || mcell->Get_all_spacecell().at(0)->get_cell()->get_apa() != (int)which_apa
 		  ) continue;
 
 	      // check with merged wires
