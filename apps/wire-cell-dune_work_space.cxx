@@ -62,6 +62,8 @@ int main(int argc, char* argv[])
   bool is_3mm=false;
   bool random_vertices=false;
   bool orig_vertex = false;
+  bool cut_events = true;
+
   int seed=0;
   for (Int_t i = 1; i != argc; i++){
      switch(argv[i][1]){
@@ -79,6 +81,9 @@ int main(int argc, char* argv[])
        break;
      case 'v':
        orig_vertex = atoi(&argv[i][2]);
+       break;
+     case 'c':
+       cut_events = atoi(&argv[i][2]);
        break;
      }
   }
@@ -183,18 +188,19 @@ int main(int argc, char* argv[])
   
   std::cout << "Energy: " << mctruth->mc_nu_mom[3] << " CC/NC: " << mctruth->mc_nu_ccnc << " Neutrino: " << mctruth->mc_nu_pdg << std::endl;
 
-  //Now judge which event to replay 
-  int flag_replay = 0;
-  // replay all nue cc for energy < 10 GeV 
-  if (mctruth->mc_nu_mom[3]<10) flag_replay = 1;
-  // replay all nc events
-  if (mctruth->mc_nu_ccnc==1) flag_replay = 1;
-  // replay all nu_tau events 
-  if (fabs(mctruth->mc_nu_pdg)==16) flag_replay = 1;
-
-  if (flag_replay==0)
-    return 0;
-
+  if (cut_events){
+    //Now judge which event to replay 
+    int flag_replay = 0;
+    // replay all nue cc for energy < 10 GeV 
+    if (mctruth->mc_nu_mom[3]<10) flag_replay = 1;
+    // replay all nc events
+    if (mctruth->mc_nu_ccnc==1) flag_replay = 1;
+    // replay all nu_tau events 
+    if (fabs(mctruth->mc_nu_pdg)==16) flag_replay = 1;
+    
+    if (flag_replay==0)
+      return 0;
+  }
   /*
   int mc_Ntrack;  // number of tracks in MC
   int mc_id[MAX_TRACKS];  // track id; size == mc_Ntrack
