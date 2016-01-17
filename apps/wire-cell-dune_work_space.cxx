@@ -54,13 +54,14 @@ int main(int argc, char* argv[])
 {
 
   if (argc < 5){
-    cerr << "usage: wire-cell-dune_work_space /path/to/celltree.root eve_num -o[0,1](do_rotation) -p[0,1](is_3mm) -r[0,1](randomly place vertices) -s[int](seed)" << endl;
+    cerr << "usage: wire-cell-dune_work_space /path/to/celltree.root eve_num -o[0,1](do_rotation) -p[0,1](is_3mm) -r[0,1](randomly place vertices) -s[int](seed) -v[0,1](original vertex?)" << endl;
     return 1;
   }
 
   bool rotate_90deg=false;
   bool is_3mm=false;
   bool random_vertices=false;
+  bool orig_vertex = false;
   int seed=0;
   for (Int_t i = 1; i != argc; i++){
      switch(argv[i][1]){
@@ -76,6 +77,9 @@ int main(int argc, char* argv[])
      case 's':
        seed = atoi(&argv[i][2]);
        break;
+     case 'v':
+       orig_vertex = atoi(&argv[i][2]);
+       break;
      }
   }
 
@@ -83,7 +87,8 @@ int main(int argc, char* argv[])
   else cout<<"Beam is parallel to wire planes (default). ";
   if (is_3mm) cout<<"Wire pitch is 3 mm."<<endl;
   else cout<<"Wire pitch is 5 mm (default)."<<endl;
-  
+  if (orig_vertex) cout << "Original Vertex " << endl;
+
   double pitchU, pitchV, pitchW;
   if (!is_3mm) {
     pitchU = 0.4667*units::cm;
@@ -237,6 +242,12 @@ int main(int argc, char* argv[])
   Double_t y_shift = -mctruth->mc_startXYZT[0][1]+vertex.y;
   Double_t z_shift = -mctruth->mc_startXYZT[0][2]+vertex.z;
   
+  if (orig_vertex){
+    x_shift = 0;
+    y_shift = 0;
+    z_shift = 0;
+  }
+
   if (rotate_90deg) {
     toydep = new WireCell::ToyDepositor(fds,0,unit_dis,frame_length, x_center, y_center, z_center, TMath::Pi()/2.);
   } else {
