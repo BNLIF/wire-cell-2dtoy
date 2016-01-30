@@ -154,17 +154,17 @@ int main(int argc, char* argv[])
   Int_t nwire_v = wires_v.size();
   Int_t nwire_w = wires_w.size();
 
-  TH2F *hu_raw = new TH2F("hu_raw","hu_raw",nwire_u,0.5,nwire_u+0.5,total_time_bin,0,total_time_bin);
-  TH2F *hv_raw = new TH2F("hv_raw","hv_raw",nwire_v,0.5,nwire_v+0.5,total_time_bin,0,total_time_bin);
-  TH2F *hw_raw = new TH2F("hw_raw","hw_raw",nwire_w,0.5,nwire_w+0.5,total_time_bin,0,total_time_bin);
+  TH2F *hu_raw = new TH2F("hu_raw","hu_raw",nwire_u,-0.5,nwire_u-0.5,total_time_bin,0,total_time_bin);
+  TH2F *hv_raw = new TH2F("hv_raw","hv_raw",nwire_v,-0.5+nwire_u,nwire_v-0.5+nwire_u,total_time_bin,0,total_time_bin);
+  TH2F *hw_raw = new TH2F("hw_raw","hw_raw",nwire_w,-0.5+nwire_u+nwire_v,nwire_w-0.5+nwire_u+nwire_v,total_time_bin,0,total_time_bin);
 
-  TH2I *hu_decon = new TH2I("hu_decon","hu_decon",nwire_u,0.5,nwire_u+0.5,total_time_bin/nrebin,0,total_time_bin/nrebin);
-  TH2I *hv_decon = new TH2I("hv_decon","hv_decon",nwire_v,0.5,nwire_v+0.5,total_time_bin/nrebin,0,total_time_bin/nrebin);
-  TH2I *hw_decon = new TH2I("hw_decon","hw_decon",nwire_w,0.5,nwire_w+0.5,total_time_bin/nrebin,0,total_time_bin/nrebin);
+  TH2F *hu_decon = new TH2F("hu_decon","hu_decon",nwire_u,-0.5,nwire_u-0.5,total_time_bin/nrebin,0,total_time_bin);
+  TH2F *hv_decon = new TH2F("hv_decon","hv_decon",nwire_v,-0.5+nwire_u,nwire_v-0.5+nwire_u,total_time_bin/nrebin,0,total_time_bin);
+  TH2F *hw_decon = new TH2F("hw_decon","hw_decon",nwire_w,-0.5+nwire_u+nwire_v,nwire_w-0.5+nwire_u+nwire_v,total_time_bin/nrebin,0,total_time_bin);
   
 
   TH2F *htemp;
-  TH2I *htemp1;
+  TH2F *htemp1;
   const Frame& frame = data_fds.get();
   size_t ntraces = frame.traces.size();
   for (size_t ind=0; ind<ntraces; ++ind) {
@@ -210,11 +210,11 @@ int main(int argc, char* argv[])
     }
      for (int i = tbin;i!=tbin+nbins;i++){
       int tt = i+1;
-      htemp1->SetBinContent(chid+1,tt,Int_t(trace.charge.at(i)));
+      htemp1->SetBinContent(chid+1,tt,trace.charge.at(i));
     }
   }
 
-   TTree *Trun = new TTree("Trun","Trun");
+  TTree *Trun = new TTree("Trun","Trun");
   Trun->SetDirectory(file);
 
   int detector = 0; // MicroBooNE
