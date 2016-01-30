@@ -3,13 +3,25 @@
 using namespace WireCell;
 
 WireCell2dToy::BadTiling::BadTiling(int time, int scale, WireCell::ChirpMap& uplane_map, 
-				    WireCell::ChirpMap& vplane_map, WireCell::ChirpMap& wplane_map, WireCell::GeomDataSource& gds){
+				    WireCell::ChirpMap& vplane_map, WireCell::ChirpMap& wplane_map, WireCell::GeomDataSource& gds, int flag_all){
   MergeGeomWire *mwire = 0;
   int prev_wire = -1;
   int num = 0;
   // do u wire
   for (int i=0;i!=gds.wires_in_plane(WirePlaneType_t(0)).size(); i++){
-    if (uplane_map.find(i) != uplane_map.end() && time >= uplane_map[i].first/scale && time <= uplane_map[i].second/scale){
+    int flag_temp = 0;
+
+    if (flag_all == 1){
+      if (uplane_map.find(i) != uplane_map.end()){
+	flag_temp = 1;
+      }
+    }else{
+      if (uplane_map.find(i) != uplane_map.end() && time >= uplane_map[i].first/scale && time <= uplane_map[i].second/scale){
+	flag_temp = 1;
+      }
+    }
+    
+    if (flag_temp == 1){
       const GeomWire* wire = gds.by_planeindex(WireCell::WirePlaneType_t(0),i);
       if (mwire == 0){
 	mwire = new MergeGeomWire(num, *wire);
@@ -36,7 +48,19 @@ WireCell2dToy::BadTiling::BadTiling(int time, int scale, WireCell::ChirpMap& upl
   mwire = 0;
   
   for (int i=0;i!=gds.wires_in_plane(WirePlaneType_t(1)).size(); i++){
-    if (vplane_map.find(i) != vplane_map.end() && time >= vplane_map[i].first/scale && time <= vplane_map[i].second/scale){
+    int flag_temp = 0;
+
+    if (flag_all == 1){
+      if (vplane_map.find(i) != vplane_map.end()){
+	flag_temp = 1;
+      }
+    }else{
+      if (vplane_map.find(i) != vplane_map.end() && time >= vplane_map[i].first/scale && time <= vplane_map[i].second/scale){
+	flag_temp = 1;
+      }
+    }
+    
+    if (flag_temp == 1){
       const GeomWire* wire = gds.by_planeindex(WireCell::WirePlaneType_t(1),i);
       if (mwire == 0){
 	mwire = new MergeGeomWire(num, *wire);
@@ -69,7 +93,19 @@ WireCell2dToy::BadTiling::BadTiling(int time, int scale, WireCell::ChirpMap& upl
   // }
 
   for (int i=0;i!=gds.wires_in_plane(WirePlaneType_t(2)).size(); i++){
-    if (wplane_map.find(i) != wplane_map.end() && time >= wplane_map[i].first/scale && time <= wplane_map[i].second/scale){
+    int flag_temp = 0;
+
+    if (flag_all == 1){
+      if (wplane_map.find(i) != wplane_map.end()){
+	flag_temp = 1;
+      }
+    }else{
+      if (wplane_map.find(i) != wplane_map.end() && time >= wplane_map[i].first/scale && time <= wplane_map[i].second/scale){
+	flag_temp = 1;
+      }
+    }
+
+    if (flag_temp==1){
       //std::cout << i << " " << wplane_map.size() << " " << gds.wires_in_plane(WirePlaneType_t(2)).size() << std::endl;
       const GeomWire* wire = gds.by_planeindex(WireCell::WirePlaneType_t(2),i);
       if (mwire == 0){

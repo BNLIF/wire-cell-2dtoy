@@ -396,7 +396,10 @@ int main(int argc, char* argv[])
     cout << "chi2: " << toymatrix[i]->Get_Chi2() << endl;
     cout << "NDF: " << toymatrix[i]->Get_ndf() << endl;
     
-    //    badtiling[i] = new WireCell2dToy::BadTiling(i,nrebin,uplane_map,vplane_map,wplane_map,gds);
+    if (i==0){
+      badtiling[i] = new WireCell2dToy::BadTiling(i,nrebin,uplane_map,vplane_map,wplane_map,gds,1);
+    }
+    //badtiling[i] = new WireCell2dToy::BadTiling(i,nrebin,uplane_map,vplane_map,wplane_map,gds);
 
     // // if (toymatrix[i]->Get_Solve_Flag()!=0){
     // //   toymatrix[i]->Update_pred();
@@ -910,6 +913,23 @@ int main(int argc, char* argv[])
   t_rec_charge->Branch("nq",&ncharge_save,"nq/D");
   t_rec_charge->Branch("chi2",&chi2_save,"chi2/D");
   t_rec_charge->Branch("ndf",&ndf_save,"ndf/D");
+
+  TTree *t_bad = new TTree("T_bad","T_bad");
+  Int_t bad_npoints;
+  Double_t bad_y[100],bad_z[100];
+  t_bad->Branch("bad_npoints",&bad_npoints,"bad_npoints/I");
+  t_bad->Branch("bad_y",bad_y,"bad_y[bad_npoints]/F");
+  t_bad->Branch("bad_z",bad_z,"bad_z[bad_npoints]/F");
+  
+  for (int i=0; i!=badtiling[0]->get_cell_all().size();i++){
+    const GeomCell *cell = badtiling[0]->get_cell_all().at(i);
+    PointVector ps = cell->boundary();
+    bad_npoints = ps.size();
+    for (int j=0;j!=bad_npoints;j++){
+      bad_y[j] = ps.at(j).y/units::cm;
+      bad_z[j] = ps.at(j).z/units::cm;
+    }
+  }
 
   // //blob stuff
   // t_rec_charge_blob->SetDirectory(file);
