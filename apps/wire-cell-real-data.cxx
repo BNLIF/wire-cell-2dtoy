@@ -915,6 +915,7 @@ int main(int argc, char* argv[])
   t_rec_charge->Branch("ndf",&ndf_save,"ndf/D");
 
   TTree *t_bad = new TTree("T_bad","T_bad");
+  t_bad->SetDirectory(file);
   Int_t bad_npoints;
   Double_t bad_y[100],bad_z[100];
   t_bad->Branch("bad_npoints",&bad_npoints,"bad_npoints/I");
@@ -929,6 +930,7 @@ int main(int argc, char* argv[])
       bad_y[j] = ps.at(j).y/units::cm;
       bad_z[j] = ps.at(j).z/units::cm;
     }
+    t_bad->Fill();
   }
 
   // //blob stuff
