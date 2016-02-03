@@ -154,6 +154,15 @@ int main(int argc, char* argv[])
   Int_t nwire_v = wires_v.size();
   Int_t nwire_w = wires_w.size();
 
+  TH2I *hu_orig = new TH2I("hu_orig","hu_orig",nwire_u,-0.5,nwire_u-0.5,total_time_bin,0,total_time_bin);
+  TH2I *hv_orig = new TH2I("hv_orig","hv_orig",nwire_v,-0.5+nwire_u,nwire_v-0.5+nwire_u,total_time_bin,0,total_time_bin);
+  TH2I *hw_orig = new TH2I("hw_orig","hw_orig",nwire_w,-0.5+nwire_u+nwire_v,nwire_w-0.5+nwire_u+nwire_v,total_time_bin,0,total_time_bin);
+
+  TH1I *hu_baseline = new TH1I("hu_baseline","hu_basline",nwire_u,-0.5,-0.5+nwire_u);
+  TH1I *hv_baseline = new TH1I("hv_baseline","hv_basline",nwire_v,-0.5+nwire_u,-0.5+nwire_u+nwire_v);
+  TH1I *hw_baseline = new TH1I("hw_baseline","hw_basline",nwire_w,-0.5+nwire_u+nwire_v,-0.5+nwire_u+nwire_v+nwire_w);
+  
+
   TH2F *hu_raw = new TH2F("hu_raw","hu_raw",nwire_u,-0.5,nwire_u-0.5,total_time_bin,0,total_time_bin);
   TH2F *hv_raw = new TH2F("hv_raw","hv_raw",nwire_v,-0.5+nwire_u,nwire_v-0.5+nwire_u,total_time_bin,0,total_time_bin);
   TH2F *hw_raw = new TH2F("hw_raw","hw_raw",nwire_w,-0.5+nwire_u+nwire_v,nwire_w-0.5+nwire_u+nwire_v,total_time_bin,0,total_time_bin);
@@ -165,6 +174,7 @@ int main(int argc, char* argv[])
 
   TH2F *htemp;
   TH2F *htemp1;
+  
   const Frame& frame = data_fds.get();
   size_t ntraces = frame.traces.size();
   for (size_t ind=0; ind<ntraces; ++ind) {
@@ -214,6 +224,55 @@ int main(int argc, char* argv[])
     }
   }
 
+  // save original data ... 
+  const char* tpath = "/Event/Sim";
+  TFile tfile(root_file,"read");
+  TTree* tree = dynamic_cast<TTree*>(tfile.Get(tpath));
+  tree->SetBranchStatus("*",0);
+  std::vector<int> *channelid = new std::vector<int>;
+  TClonesArray* esignal = new TClonesArray;
+  
+  tree->SetBranchStatus("raw_channelId",1);
+  tree->SetBranchAddress("raw_channelId", &channelid);
+  tree->SetBranchStatus("raw_wf",1);
+  tree->SetBranchAddress("raw_wf", &esignal);
+  tree->GetEntry(eve_num);
+  
+  int nchannels = channelid->size();
+  TH2I *htemp2;
+  TH1I *htemp3 = new TH1I("htemp3","htemp3",4096,0,4096); //12-bit ADC
+  TH1I *htemp4;
+
+  for (size_t ind=0; ind < nchannels; ++ind) {
+    TH1F* signal = dynamic_cast<TH1F*>(esignal->At(ind));
+    int chid = channelid->at(ind);
+     
+    WirePlaneType_t plane = gds.by_channel(chid).at(0)->plane();
+    if (plane == WirePlaneType_t(0)){
+      htemp2 = hu_orig;
+      htemp4 = hu_baseline;
+    }else if (plane == WirePlaneType_t(1)){
+      htemp2 = hv_orig;
+      htemp4 = hv_baseline;
+      chid -= nwire_u;
+    }else if (plane == WirePlaneType_t(2)){
+      htemp2 = hw_orig;
+      htemp4 = hw_baseline;
+      chid -= nwire_u + nwire_v;
+    }
+    
+    htemp3->Reset();
+    for (int ibin=0; ibin != total_time_bin; ibin++) {
+      int tt = ibin+1;
+      htemp2->SetBinContent(chid+1,tt,int(signal->GetBinContent(ibin+1)));
+      htemp3->Fill(int(signal->GetBinContent(ibin+1)));
+    }
+    htemp4->SetBinContent(chid+1,htemp3->GetMaximumBin()-1);
+  }
+
+  
+  // finish saving
+
   TTree *Trun = new TTree("Trun","Trun");
   Trun->SetDirectory(file);
 
@@ -258,14 +317,14 @@ int main(int argc, char* argv[])
     T_bad->Fill();
   }
   for (auto it = vplane_map.begin(); it!=vplane_map.end();it++){
-    chid = it->first;
+    chid = it->first + nwire_u;
     plane = 1;
     start_time = it->second.first;
     end_time = it->second.second;
     T_bad->Fill();
   }
   for (auto it = wplane_map.begin(); it!=wplane_map.end();it++){
-    chid = it->first;
+    chid = it->first + nwire_u + nwire_v;
     plane = 2;
     start_time = it->second.first;
     end_time = it->second.second;
