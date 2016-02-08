@@ -384,7 +384,128 @@ int main(int argc, char* argv[])
     }
     t1->Branch("nphoton",&nphoton,"nphoton/I");
     t1->Branch("nele",&nele,"nele/I");
-    
+    // save gap related variables for electron (to be added)
+    Int_t ele_gap_time_slice[200];
+    Float_t ele_gap_dis[200]; 
+    Float_t ele_gap_charge[200];
+    Float_t ele_gap_area[200];
+
+    Float_t E_ele;
+    Float_t Theta_ele;
+    Float_t Phi_ele;
+    t1->Branch("E_ele",&E_ele,"E_ele/F");
+    t1->Branch("Theta_ele",&Theta_ele,"Theta_ele/F");
+    t1->Branch("Phi_ele",&Phi_ele,"Phi_ele/F");
+   
+    t1->Branch("ele_gap_time_slice",ele_gap_time_slice,"ele_gap_time_slice[200]/I");
+    t1->Branch("ele_gap_dis",ele_gap_dis,"ele_gap_dis[200]/F");
+    // t1->Branch("ele_gap_charge",ele_gap_charge,"ele_gap_charge[200]/F");
+    // t1->Branch("ele_gap_area",ele_gap_area,"ele_gap_area[200]/F");
+
+    //std::cout << nele<< std::endl;
+    for (int i=0;i!=nele;i++){
+      Point p;
+      TVector3 dir(electron->startMomentum[0],electron->startMomentum[1],electron->startMomentum[2]);
+      
+      E_ele = electron->startMomentum[3];
+      Theta_ele = dir.Theta();
+      Phi_ele = dir.Phi();
+
+      for (int j=0;j!=200;j++){
+	p.x = primary_vertex.x*units::cm + j * units::mm * sin(Theta_ele)*cos(Phi_ele);
+	p.y = primary_vertex.y*units::cm + j * units::mm * sin(Theta_ele)*sin(Phi_ele);
+	p.z = primary_vertex.z*units::cm + j * units::mm * cos(Theta_ele);
+	
+	//std::cout << p.x/units::cm << " " << p.y/units::cm << " " << p.z/units::cm << std::endl;
+	
+	int flag = 0;
+	short which_cryo = gds.in_which_cryo(p);
+	short which_apa = gds.in_which_apa(p);
+	const WrappedGDS *apa_gds = gds.get_apaGDS(which_cryo,which_apa);
+	if (apa_gds!=NULL) {
+	  std::pair<double, double> xmm = apa_gds->minmax(0); 
+	  int face = 0;
+	  float drift_dist;
+	  if (p.x>xmm.first && p.x<xmm.second) {
+	  }else{
+	    if (TMath::Abs(p.x-xmm.first) > TMath::Abs(p.x-xmm.second)) {
+	      drift_dist = TMath::Abs(p.x-xmm.second);
+	      face = 1; //"B face +x"
+	    }else{
+	      drift_dist = TMath::Abs(p.x-xmm.first);
+	    }
+	    flag = 1;
+	    ele_gap_time_slice[j] = drift_dist / 2.0 / (1.6*units::mm)+800;
+	    
+	    const GeomWire* uwire = apa_gds->closest(p,(WirePlaneType_t)0,face);
+	    const GeomWire* vwire = apa_gds->closest(p,(WirePlaneType_t)1,face);
+	    const GeomWire* wwire = apa_gds->closest(p,(WirePlaneType_t)2,face);
+	    
+	    int time_slice = ele_gap_time_slice[j];
+	    
+	    // check with merged cells
+	    //std::cout << i << " " << j << " " << mcells_time.at(time_slice).size() << std::endl;
+	    
+	    ele_gap_dis[j] = 1e9;
+	    ele_gap_area[j] = -1;
+	    ele_gap_charge[j] = -1;
+
+	    for (int k=0;k!=mcells_time.at(time_slice).size();k++){
+	      MergeSpaceCell *mcell = mcells_time.at(time_slice).at(k);
+
+	      // std::cout << mcell->Get_all_spacecell().at(0)->get_cell()->get_face() << " " << face << " " << 
+	      // 	mcell->Get_all_spacecell().at(0)->get_cell()->get_cryo() << " " <<  (int)which_cryo << " " <<
+	      // 	mcell->Get_all_spacecell().at(0)->get_cell()->get_apa() << " " <<  (int)which_apa << std::endl;
+	      
+	      if (mcell->Get_all_spacecell().at(0)->get_cell()->get_face()!=face
+		  || mcell->Get_all_spacecell().at(0)->get_cell()->get_cryo() != (int)which_cryo
+		  || mcell->Get_all_spacecell().at(0)->get_cell()->get_apa() != (int)which_apa
+		  ) continue;
+
+	      // check with merged wires
+	      GeomWireSelection uwires = mcell->get_uwires();
+	      GeomWireSelection vwires = mcell->get_vwires();
+	      GeomWireSelection wwires = mcell->get_wwires();
+	      
+	      double closest_dist_u = 1e9;
+	      double closest_dist_v = 1e9;
+	      double closest_dist_w = 1e9;
+
+	      //find the closest wire for uplane
+	      for (int kk = 0;kk!=uwires.size();kk++){
+		if (fabs(apa_gds->wire_dist(*uwire) - apa_gds->wire_dist(*uwires.at(kk))) < closest_dist_u)
+		  closest_dist_u = fabs(apa_gds->wire_dist(*uwire) - apa_gds->wire_dist(*uwires.at(kk)));
+	      }
+	      //find the closest wire for vplane
+	      for (int kk = 0;kk!=vwires.size();kk++){
+		if (fabs(apa_gds->wire_dist(*vwire) - apa_gds->wire_dist(*vwires.at(kk))) < closest_dist_v)
+		  closest_dist_v = fabs(apa_gds->wire_dist(*vwire) - apa_gds->wire_dist(*vwires.at(kk)));
+	      }
+	      //find the closest wire for wplane
+	      for (int kk = 0;kk!=wwires.size();kk++){
+		if (fabs(apa_gds->wire_dist(*wwire) - apa_gds->wire_dist(*wwires.at(kk))) < closest_dist_w)
+		  closest_dist_w = fabs(apa_gds->wire_dist(*wwire) - apa_gds->wire_dist(*wwires.at(kk)));
+	      }
+	      if (closest_dist_u+closest_dist_v+closest_dist_w < ele_gap_dis[j])
+		ele_gap_dis[j] = (closest_dist_u+closest_dist_v+closest_dist_w)/units::cm;
+	    }
+	    
+	    std::cout << i << " " << j << " " << time_slice << " " << mcells_time.at(time_slice).size() << " " << ele_gap_dis[j] << std::endl;
+	    
+	  }
+	}
+	
+	if (flag == 0){
+	  ele_gap_time_slice[j] = -1;
+	  ele_gap_dis[j] = -1;
+	  ele_gap_charge[j] = -1;
+	  ele_gap_area[j] = -1;
+	}
+
+      }
+    }
+
+
     //save gap related variables for photons
     // save up to 20 photons
     // 1 mm a point and 200 points = 20 cm
@@ -403,8 +524,8 @@ int main(int argc, char* argv[])
    
     t1->Branch("gap_time_slice",gap_time_slice,"gap_time_slice[200][nphoton]/I");
     t1->Branch("gap_dis",gap_dis,"gap_dis[200][nphoton]/F");
-    t1->Branch("gap_charge",gap_charge,"gap_charge[200][nphoton]/F");
-    t1->Branch("gap_area",gap_area,"gap_area[200][nphoton]/F");
+    // t1->Branch("gap_charge",gap_charge,"gap_charge[200][nphoton]/F");
+    // t1->Branch("gap_area",gap_area,"gap_area[200][nphoton]/F");
     
     
 
@@ -493,7 +614,7 @@ int main(int argc, char* argv[])
 		  closest_dist_w = fabs(apa_gds->wire_dist(*wwire) - apa_gds->wire_dist(*wwires.at(kk)));
 	      }
 	      if (closest_dist_u+closest_dist_v+closest_dist_w < gap_dis[j][i])
-		gap_dis[j][i] = closest_dist_u+closest_dist_v+closest_dist_w;
+		gap_dis[j][i] = (closest_dist_u+closest_dist_v+closest_dist_w)/units::cm;
 	    }
 	    
 	    // std::cout << i << " " << j << " " << gap_dis[j][i] << std::endl;
