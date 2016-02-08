@@ -37,12 +37,26 @@ struct TC {
     double u_charge_err, v_charge_err, w_charge_err;    
 };
 
+uint64_t intpair(int first, int second)
+{
+    uint64_t f = first;
+    uint64_t s = second;
+    return (f<<32)|s;
+}
+std::pair<int,int> intunpair(uint64_t fs)
+{
+    int first = (fs>>32);
+    int second = (0xffffffff&fs);
+    return make_pair(first,second);
+}
+   
+
 // grungy reverse mapper from ident to object index in a vector.
 struct IdentMapper {
-    map<int,int> wire_id2ind;
-    map<int,int> cell_id2ind;
-    map<int,int> blob_id2ind;
-    map<int,int> deco_id2ind;	// id here is a wire index
+    map<uint64_t,int> wire_id2ind;
+    map<uint64_t,int> cell_id2ind;
+    map<uint64_t,int> blob_id2ind;
+    map<uint64_t,int> deco_id2ind; // id here is a wire index + timeslice
     
     Xdata::XdataFile& xdata;
     IdentMapper(Xdata::XdataFile& df) : xdata(df) {}
@@ -93,15 +107,17 @@ struct IdentMapper {
 	return ind;
     }
 	
-    int fill_deco(const GeomWire& gwire, int time_slice, const vector<float>& values) {
+    int fill_deco(const GeomWire& gwire, int time_slice,
+		  const vector<float>& values) {
 	int wind = fill_wire(gwire);
-	auto it = deco_id2ind.find(wind);
+	uint64_t decoid = intpair(wind, time_slice);
+	auto it = deco_id2ind.find(decoid);
 	if (it != deco_id2ind.end()) {
 	    return it->second;
 	}
 	int ind=-1;
 	Xdata::Deco* deco = xdata.image().new_deco(ind);
-	deco_id2ind[wind] = ind;
+	deco_id2ind[decoid] = ind;
 	deco->wireind = wind;
 	deco->slice = time_slice;
 	deco->values = values;
@@ -341,6 +357,7 @@ int main(int argc, const char* argv[])
 
     cerr << "Writing xdata:\n"
 	 << "\t" << xdatafile.geom().wires.size() <<  " wires\n"
+	 << "\t" << xdatafile.image().num_decos() <<  " decos\n"
 	 << "\t" << xdatafile.image().num_cells() <<  " cells\n"
 	 << "\t" << xdatafile.image().num_blobs() <<  " blobs\n"
 	 << "\t" << xdatafile.image().num_fields() <<  " fields\n";
@@ -367,6 +384,13 @@ int main(int argc, const char* argv[])
 	uint64_t subrun64 = (rs&0xFFFFFFFF);
 	cerr << "Run="  << run64 << " subrun:" << subrun64 << endl;
 	cerr << "Detector: " << ri.detector << endl;
+	cerr << "Read xdata:\n"
+	     << "\t" << readback.geom().wires.size() <<  " wires\n"
+	     << "\t" << readback.image().num_decos() <<  " decos\n"
+	     << "\t" << readback.image().num_cells() <<  " cells\n"
+	     << "\t" << readback.image().num_blobs() <<  " blobs\n"
+	     << "\t" << readback.image().num_fields() <<  " fields\n";
+
 	if (ri.detector == "") {
 	    cerr << "ERROR: failed to read back detector name" << endl;
 	}
