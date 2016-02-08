@@ -319,7 +319,9 @@ int main(int argc, char* argv[])
   // use the direction of the electron
   MCParticle* electron = mctruth->find_primary_electron();
   if (electron != 0){
-    std::cout << electron->startMomentum[0] << " " << electron->startMomentum[1] << " " << electron->startMomentum[2] << std::endl;
+    std::cout << "Electron's mom: " << electron->startMomentum[0] << " " << electron->startMomentum[1] << " " << electron->startMomentum[2] << std::endl;
+  }else{
+    std::cout << "No Electrons!" << std::endl;
   }
 
   // Need to find all the seconary gammas' (energy deposition) starting point and trajectory... 
@@ -328,7 +330,7 @@ int main(int argc, char* argv[])
   MCParticleSelection photons = mctruth->find_primary_photons();
   std::cout << "Photons: " << photons.size() << std::endl;
   
-  std::cout << "Energies: " << mctruth->find_neutrino_true_energy() << " " << mctruth->find_neutrino_visible_energy() << std::endl;
+  std::cout << "Neutrino Energies (true, visible): " << mctruth->find_neutrino_true_energy() << " " << mctruth->find_neutrino_visible_energy() << std::endl;
   
   // find gap
   // start from the vertex, and check along the photon direction 
