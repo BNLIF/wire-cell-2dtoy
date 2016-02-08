@@ -459,9 +459,9 @@ int main(int argc, char* argv[])
 	    for (int k=0;k!=mcells_time.at(time_slice).size();k++){
 	      MergeSpaceCell *mcell = mcells_time.at(time_slice).at(k);
 
-	      std::cout << mcell->Get_all_spacecell().at(0)->get_cell()->get_face() << " " << face << " " << 
-		mcell->Get_all_spacecell().at(0)->get_cell()->get_cryo() << " " <<  (int)which_cryo << " " <<
-		mcell->Get_all_spacecell().at(0)->get_cell()->get_apa() << " " <<  (int)which_apa << std::endl;
+	      // std::cout << mcell->Get_all_spacecell().at(0)->get_cell()->get_face() << " " << face << " " << 
+	      // 	mcell->Get_all_spacecell().at(0)->get_cell()->get_cryo() << " " <<  (int)which_cryo << " " <<
+	      // 	mcell->Get_all_spacecell().at(0)->get_cell()->get_apa() << " " <<  (int)which_apa << std::endl;
 	      
 	      if (mcell->Get_all_spacecell().at(0)->get_cell()->get_face()!=face
 		  || mcell->Get_all_spacecell().at(0)->get_cell()->get_cryo() != (int)which_cryo
@@ -496,7 +496,7 @@ int main(int argc, char* argv[])
 		gap_dis[j][i] = closest_dist_u+closest_dist_v+closest_dist_w;
 	    }
 	    
-	    std::cout << i << " " << j << " " << gap_dis[j][i] << std::endl;
+	    // std::cout << i << " " << j << " " << gap_dis[j][i] << std::endl;
 	    
 	  }
 	}
