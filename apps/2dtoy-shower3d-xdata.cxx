@@ -11,7 +11,6 @@
 #include <vector>
 #include <string>
 #include <iostream>
-
 #include <chrono>
 
 using namespace std;
@@ -144,9 +143,8 @@ struct IdentMapper {
 
 int main(int argc, const char* argv[])
 {
-    vector<string> detectors{"uknown","uknown","uknown","uboone"};
-	
-
+    // larsoft conventins
+    vector<string> detectors{"uboone","dune35t","protodune","dune10kt_workspace"};
     auto infile = TFile::Open(argv[1]);
 
     auto runtree = dynamic_cast<TTree*>(infile->Get("Trun"));
@@ -223,9 +221,15 @@ int main(int argc, const char* argv[])
 
     Xdata::XdataFile xdatafile;
 
-    auto ri = xdatafile.runinfo();
-    ri.ident = ((uint64_t)runobj.runNo)<<32 | runobj.subRunNo;
-    ri.detector = detectors[runobj.detector];
+    Xdata::RunInfo& ri = xdatafile.runinfo();
+    uint64_t run64 = runobj.runNo;
+    uint64_t subrun64 = runobj.subRunNo;
+    uint64_t pack = (run64<<32)|subrun64;
+
+    ri.ident = pack;
+    cerr << "Run="  << (pack>>32) << " subrun:" << (0xffffffff&pack) << endl;    
+    ri.detector = detectors[runobj.detector].c_str();
+    cerr << "Detector: " << ri.detector << endl;
 
 
     IdentMapper idmap(xdatafile);
@@ -342,10 +346,10 @@ int main(int argc, const char* argv[])
 	 << "\t" << xdatafile.image().num_fields() <<  " fields\n";
 
     clock1 = chrono::system_clock::now();
-    xdatafile.write(argv[2]);
+    auto siz = xdatafile.write(argv[2]);
     clock2 = chrono::system_clock::now();
     out_duration = clock2 - clock1;
-    cerr << "Write xdata in " << out_duration.count() << "s\n";
+    cerr << "Write "<<siz<<" bytes xdata in " << out_duration.count() << "s\n";
 
     
     {				// do a readback test....
@@ -356,7 +360,18 @@ int main(int argc, const char* argv[])
 	clock2 = chrono::system_clock::now();
 	in_duration = clock2 - clock1;
 	cerr << "... in " << in_duration.count() << "s\n";
+
+	Xdata::RunInfo& ri = readback.runinfo();
+	uint64_t rs = ri.ident;
+	uint64_t run64 = (rs>>32);
+	uint64_t subrun64 = (rs&0xFFFFFFFF);
+	cerr << "Run="  << run64 << " subrun:" << subrun64 << endl;
+	cerr << "Detector: " << ri.detector << endl;
+	if (ri.detector == "") {
+	    cerr << "ERROR: failed to read back detector name" << endl;
+	}
     }    
     return 0;
+
 }
     
