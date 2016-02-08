@@ -20,6 +20,8 @@
 #include "WireCell2dToy/ToyMatrixMarkov.h"
 #include "WireCell2dToy/ToyMetric.h"
 #include "WireCell2dToy/BlobMetric.h"
+#include "WireCellData/TPCParams.h"
+#include "WireCellData/Singleton.h"
 
 #include "WireCellData/MergeGeomCell.h"
 #include "WireCellData/MergeGeomWire.h"
@@ -135,6 +137,23 @@ int main(int argc, char* argv[])
   int max_events = 100;
   int eve_num  = atoi(argv[3]);
   int nrebin = 4;
+
+  TPCParams& mp = Singleton<TPCParams>::Instance();
+  
+  double pitch_u = gds.pitch(WirePlaneType_t(0));
+  double pitch_v = gds.pitch(WirePlaneType_t(1));
+  double pitch_w = gds.pitch(WirePlaneType_t(2));
+  double time_slice_width = nrebin * unit_dis * 0.5 * units::mm;
+
+  mp.set_pitch_u(pitch_u);
+  mp.set_pitch_v(pitch_v);
+  mp.set_pitch_w(pitch_w);
+  mp.set_ts_width(time_slice_width);
+  
+  std::cout << "Singleton: " << mp.get_pitch_u() << " " << mp.get_pitch_v() << " " << mp.get_pitch_w() << " " << mp.get_ts_width() << std::endl;
+  
+
+
   float threshold_u = 5.87819e+02 * 4.0;
   float threshold_v = 8.36644e+02 * 4.0;
   float threshold_w = 5.67974e+02 * 4.0;
@@ -1283,6 +1302,15 @@ int main(int argc, char* argv[])
   Trun->Branch("threshold_v",&threshold_v,"threshold_v/F");
   Trun->Branch("threshold_w",&threshold_w,"threshold_w/F");
   Trun->Branch("time_offset",&time_offset,"time_offset/I");
+
+   pitch_u = pitch_u/units::cm;
+  pitch_v = pitch_v/units::cm;
+  pitch_w = pitch_w/units::cm;
+  Trun->Branch("pitch_u",&pitch_u,"pitch_u/D");
+  Trun->Branch("pitch_v",&pitch_v,"pitch_v/D");
+  Trun->Branch("pitch_w",&pitch_w,"pitch_w/D");
+
+
 
   Trun->Fill();
 

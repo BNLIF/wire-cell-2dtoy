@@ -1251,6 +1251,12 @@ int main(int argc, char* argv[])
   Trun->Branch("threshold_w",&threshold_w,"threshold_w/F");
   Trun->Branch("time_offset",&time_offset,"time_offset/I");
 
+ pitch_u = pitch_u/units::cm;
+  pitch_v = pitch_v/units::cm;
+  pitch_w = pitch_w/units::cm;
+  Trun->Branch("pitch_u",&pitch_u,"pitch_u/D");
+  Trun->Branch("pitch_v",&pitch_v,"pitch_v/D");
+  Trun->Branch("pitch_w",&pitch_w,"pitch_w/D");
 
 
   Trun->Fill();
