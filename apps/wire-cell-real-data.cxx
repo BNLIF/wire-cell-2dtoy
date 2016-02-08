@@ -1188,8 +1188,10 @@ int main(int argc, char* argv[])
   double u_charge, v_charge, w_charge;
   double u_charge_err, v_charge_err, w_charge_err;
   
-  int tpc_no=0, cryostat_no=0;
-  ttree1->Branch("tpc_no",&tpc_no,"tpc_no/I");
+  int apa_no=0, cryostat_no=0;
+  ttree1->Branch("apa_no",&apa_no,"apa_no/I");
+  int face = 0;
+  ttree1->Branch("face",&face,"face/I");
   ttree1->Branch("cryostat_no",&cryostat_no,"cryostat_no/I");
 
   ttree1->Branch("u_index",&u_index,"u_index/I");
