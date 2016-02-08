@@ -50,16 +50,17 @@ std::pair<int,int> intunpair(uint64_t fs)
     return make_pair(first,second);
 }
    
-
 // grungy reverse mapper from ident to object index in a vector.
 struct IdentMapper {
     map<uint64_t,int> wire_id2ind;
-    map<uint64_t,int> cell_id2ind;
+    map<uint64_t,int> cell_id2ind; // id is packed wires indices + "context"
     map<uint64_t,int> blob_id2ind;
     map<uint64_t,int> deco_id2ind; // id here is a wire index + timeslice
     
     Xdata::XdataFile& xdata;
-    IdentMapper(Xdata::XdataFile& df) : xdata(df) {}
+    uint64_t context;
+    IdentMapper(Xdata::XdataFile& df, uint16_t detector)
+	: xdata(df), context(detector) {}
 
 
     int fill_wire(const GeomWire& gwire) {
@@ -88,8 +89,17 @@ struct IdentMapper {
 	return ind;
     }
 
+    // Some sugar to return the packed cell ID
+    uint64_t cell_ident(const GeomCell& gcell) {
+	return Xdata::Cell::ident_pack(fill_wire(*gcell.get_uwire()),
+				       fill_wire(*gcell.get_vwire()),
+				       fill_wire(*gcell.get_wwire()),
+				       context);
+    }
+
     int fill_cell(const GeomCell& gcell) {
-	int ident = gcell.ident();
+	//int ident = gcell.ident();
+	uint64_t ident = cell_ident(gcell);
 	auto it = cell_id2ind.find(ident);
 	if (it != cell_id2ind.end()) {
 	    return it->second;
@@ -98,9 +108,6 @@ struct IdentMapper {
 	Xdata::Cell* cell = xdata.image().new_cell(ind);
 	cell_id2ind[ident] = ind;
 	cell->ident = ident;
-	cell->uind = fill_wire(*gcell.get_uwire());
-	cell->vind = fill_wire(*gcell.get_vwire());
-	cell->wind = fill_wire(*gcell.get_wwire());
 	cell->area = gcell.cross_section();
 	Point p = gcell.center();
 	cell->center = Xdata::Point(p.x,p.y,p.z);
@@ -248,7 +255,7 @@ int main(int argc, const char* argv[])
     cerr << "Detector: " << ri.detector << endl;
 
 
-    IdentMapper idmap(xdatafile);
+    IdentMapper idmap(xdatafile, runobj.detector);
 
     Xdata::Image& img = xdatafile.image();
     img.ident = runobj.eve_num;
