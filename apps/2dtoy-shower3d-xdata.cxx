@@ -303,14 +303,13 @@ int main(int argc, const char* argv[])
     uint64_t subrun64 = runobj.subRunNo;
     uint64_t pack = (run64<<32)|subrun64;
     runinfo.ident = pack;
-    runinfo.geomid = geom.ident;
     xwriter.runinfo.fill();
     cerr << "Run="  << (pack>>32) << " subrun:" << (0xffffffff&pack) << endl;    
 
     // fixme: in general many triggers will be created.
     Xdata::Trigger& trigger = xwriter.trigger.obj();
     trigger.ident = runobj.eventNo;
-    trigger.trigger = 0;	//fixme: this is reason for trigger.
+    trigger.type = 0;		//fixme: this is reason for trigger.
     trigger.runid = runinfo.ident;
     trigger.second = 0;		// fixme: nothing real to set here
     trigger.nanosecond = 0;	// fixme: ibid
@@ -320,6 +319,7 @@ int main(int argc, const char* argv[])
     Xdata::Frame& frame = xwriter.frame.obj();
     frame.ident = 1;
     frame.trigid = trigger.ident;
+    frame.geomid = geom.ident;
     frame.toffset = 0;		// fixme: I think this needs to actually be set to something
     //frame.slicespan = ...;
     Xdata::CloneHelper<Xdata::Deco> frameca(*frame.decos);
@@ -365,6 +365,7 @@ int main(int argc, const char* argv[])
 
     field.ident=1;
     field.trigid = trigger.ident;
+    field.geomid = geom.ident;
     field.name = "true charge deposition";
     fieldca.clear();
     nentries = truetree->GetEntries();
@@ -440,7 +441,7 @@ int main(int argc, const char* argv[])
 	 << "\t" << fieldca.size() <<  " fields\n";
 
     clock1 = chrono::system_clock::now();
-//    auto siz = xdatafile.write(argv[2]);
+    xwriter.close();
     clock2 = chrono::system_clock::now();
     duration2 = clock2 - clock1;
     cerr << "Write xdata file in " << duration2.count() << "s\n";
