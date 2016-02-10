@@ -264,7 +264,7 @@ int main(int argc, char* argv[])
       }else{
 	drift_dist = TMath::Abs(cell->x()-temp_xmm.first);
       }
-      int time_slice = drift_dist / 2.0 / (1.6*units::mm)+800;
+      int time_slice = round(drift_dist / 2.0 / (1.6*units::mm))+800;
       mcells_time.at(time_slice).push_back(mcell);
     }
   }
@@ -435,7 +435,7 @@ int main(int argc, char* argv[])
 	      drift_dist = TMath::Abs(p.x-xmm.first);
 	    }
 	    flag = 1;
-	    ele_gap_time_slice[j] = drift_dist / 2.0 / (1.6*units::mm)+800;
+	    ele_gap_time_slice[j] = round(drift_dist / 2.0 / (1.6*units::mm))+800;
 	    
 	    const GeomWire* uwire = apa_gds->closest(p,(WirePlaneType_t)0,face);
 	    const GeomWire* vwire = apa_gds->closest(p,(WirePlaneType_t)1,face);
@@ -561,7 +561,7 @@ int main(int argc, char* argv[])
 	      drift_dist = TMath::Abs(p.x-xmm.first);
 	    }
 	    flag = 1;
-	    gap_time_slice[j][i] = drift_dist / 2.0 / (1.6*units::mm)+800;
+	    gap_time_slice[j][i] = round(drift_dist / 2.0 / (1.6*units::mm))+800;
 	    //std::cout << gap_time_slice[j][i] << std::endl;
 
 	    const GeomWire* uwire = apa_gds->closest(p,(WirePlaneType_t)0,face);
