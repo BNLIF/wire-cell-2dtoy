@@ -490,7 +490,7 @@ int main(int argc, char* argv[])
 		ele_gap_dis[j] = (closest_dist_u+closest_dist_v+closest_dist_w)/units::cm;
 	    }
 	    
-	    std::cout << i << " " << j << " " << time_slice << " " << mcells_time.at(time_slice).size() << " " << ele_gap_dis[j] << std::endl;
+	    // std::cout << i << " " << j << " " << time_slice << " " << mcells_time.at(time_slice).size() << " " << ele_gap_dis[j] << std::endl;
 	    
 	  }
 	}
@@ -509,10 +509,10 @@ int main(int argc, char* argv[])
     //save gap related variables for photons
     // save up to 20 photons
     // 1 mm a point and 200 points = 20 cm
-    Int_t gap_time_slice[200][20];
-    Float_t gap_dis[200][20]; 
-    Float_t gap_charge[200][20];
-    Float_t gap_area[200][20];
+    Int_t gap_time_slice[20][200];
+    Float_t gap_dis[20][200]; 
+    // Float_t gap_charge[200][20];
+    // Float_t gap_area[200][20];
 
     Float_t E_photon[20];
     Float_t Theta_photon[20];
@@ -522,8 +522,8 @@ int main(int argc, char* argv[])
     t1->Branch("Theta_photon",Theta_photon,"Theta_photon[nphoton]/F");
     t1->Branch("Phi_photon",Phi_photon,"Phi_photon[nphoton]/F");
    
-    t1->Branch("gap_time_slice",gap_time_slice,"gap_time_slice[200][nphoton]/I");
-    t1->Branch("gap_dis",gap_dis,"gap_dis[200][nphoton]/F");
+    t1->Branch("gap_time_slice",gap_time_slice,"gap_time_slice[nphoton][200]/I");
+    t1->Branch("gap_dis",gap_dis,"gap_dis[nphoton][200]/F");
     // t1->Branch("gap_charge",gap_charge,"gap_charge[200][nphoton]/F");
     // t1->Branch("gap_area",gap_area,"gap_area[200][nphoton]/F");
     
@@ -561,21 +561,21 @@ int main(int argc, char* argv[])
 	      drift_dist = TMath::Abs(p.x-xmm.first);
 	    }
 	    flag = 1;
-	    gap_time_slice[j][i] = round(drift_dist / 2.0 / (1.6*units::mm))+800;
+	    gap_time_slice[i][j] = round(drift_dist / 2.0 / (1.6*units::mm))+800;
 	    //std::cout << gap_time_slice[j][i] << std::endl;
 
 	    const GeomWire* uwire = apa_gds->closest(p,(WirePlaneType_t)0,face);
 	    const GeomWire* vwire = apa_gds->closest(p,(WirePlaneType_t)1,face);
 	    const GeomWire* wwire = apa_gds->closest(p,(WirePlaneType_t)2,face);
 	    
-	    int time_slice = gap_time_slice[j][i];
+	    int time_slice = gap_time_slice[i][j];
 	    
 	    // check with merged cells
 	    //std::cout << i << " " << j << " " << mcells_time.at(time_slice).size() << std::endl;
 	    
-	    gap_dis[j][i] = 1e9;
-	    gap_area[j][i] = -1;
-	    gap_charge[j][i] = -1;
+	    gap_dis[i][j] = 1e9;
+	    // gap_area[j][i] = -1;
+	    // gap_charge[j][i] = -1;
 
 	    for (int k=0;k!=mcells_time.at(time_slice).size();k++){
 	      MergeSpaceCell *mcell = mcells_time.at(time_slice).at(k);
@@ -613,20 +613,20 @@ int main(int argc, char* argv[])
 		if (fabs(apa_gds->wire_dist(*wwire) - apa_gds->wire_dist(*wwires.at(kk))) < closest_dist_w)
 		  closest_dist_w = fabs(apa_gds->wire_dist(*wwire) - apa_gds->wire_dist(*wwires.at(kk)));
 	      }
-	      if (closest_dist_u+closest_dist_v+closest_dist_w < gap_dis[j][i])
-		gap_dis[j][i] = (closest_dist_u+closest_dist_v+closest_dist_w)/units::cm;
+	      if (closest_dist_u+closest_dist_v+closest_dist_w < gap_dis[i][j])
+		gap_dis[i][j] = (closest_dist_u+closest_dist_v+closest_dist_w)/units::cm;
 	    }
 	    
-	    // std::cout << i << " " << j << " " << gap_dis[j][i] << std::endl;
+	    std::cout << i << " " << j << " " << gap_time_slice[i][j] << " " << gap_dis[i][j] << std::endl;
 	    
 	  }
 	}
 	
 	if (flag == 0){
-	  gap_time_slice[j][i] = -1;
-	  gap_dis[j][i] = -1;
-	  gap_charge[j][i] = -1;
-	  gap_area[j][i] = -1;
+	  gap_time_slice[i][j] = -1;
+	  gap_dis[i][j] = -1;
+	  // gap_charge[j][i] = -1;
+	  // gap_area[j][i] = -1;
 	}
 
       }
