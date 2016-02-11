@@ -3,7 +3,9 @@
 #include "WireCellData/GeomCell.h"
 
 #include "WireCellXdataRoot/Writer.h"
+#include "WireCellXdataRoot/Reader.h"
 #include "WireCellXdataRoot/CloneHelper.h"
+#include "WireCellXdataRoot/WireDB.h"
 
 #include "TFile.h"
 #include "TTree.h"
@@ -306,6 +308,7 @@ int main(int argc, const char* argv[])
     xwriter.runinfo.fill();
     cerr << "Run="  << (pack>>32) << " subrun:" << (0xffffffff&pack) << endl;    
 
+
     // fixme: in general many triggers will be created.
     Xdata::Trigger& trigger = xwriter.trigger.obj();
     trigger.ident = runobj.eventNo;
@@ -447,32 +450,29 @@ int main(int argc, const char* argv[])
     cerr << "Write xdata file in " << duration2.count() << "s\n";
 
     
-    // {				// do a readback test....
-    // 	cerr << "Test readback:" << endl;
-    // 	clock1 = chrono::system_clock::now();
-    // 	Xdata::XdataFile readback;
-    // 	readback.read(argv[2]);
-    // 	clock2 = chrono::system_clock::now();
-    // 	in_duration = clock2 - clock1;
-    // 	cerr << "... in " << in_duration.count() << "s\n";
 
-    // 	Xdata::RunInfo& ri = readback.runinfo();
-    // 	uint64_t rs = ri.ident;
-    // 	uint64_t run64 = (rs>>32);
-    // 	uint64_t subrun64 = (rs&0xFFFFFFFF);
-    // 	cerr << "Run="  << run64 << " subrun:" << subrun64 << endl;
-    // 	cerr << "Detector: " << ri.detector << endl;
-    // 	cerr << "Read xdata:\n"
-    // 	     << "\t" << readback.geom().wires.size() <<  " wires\n"
-    // 	     << "\t" << readback.image().num_decos() <<  " decos\n"
-    // 	     << "\t" << readback.image().num_cells() <<  " cells\n"
-    // 	     << "\t" << readback.image().num_blobs() <<  " blobs\n"
-    // 	     << "\t" << readback.image().num_fields() <<  " fields\n";
+    {				// do a readback test....
+    	cerr << "Test readback:" << endl;
+    	clock1 = chrono::system_clock::now();
+	Xdata::Reader xreader(argv[2]);
+	while (xreader.runinfo_reader.Next()) { }
+	Xdata::WireDB wdb;
+	while (xreader.geom_reader.Next()) {
+	    Xdata::Geom& g = *xreader.geom;
+	    Xdata::CloneHelper<Xdata::Wire> wireca(*g.wires);
+	    for (int ind=0; ind < wireca.size(); ++ind) {
+		wdb(wireca.get(ind));
+	    }
+	}
+	while (xreader.trigger_reader.Next()) {}
+	while (xreader.frame_reader.Next()) { }
+	while (xreader.image_reader.Next()) { }
+	while (xreader.field_reader.Next()) { }
 
-    // 	if (ri.detector == "") {
-    // 	    cerr << "ERROR: failed to read back detector name" << endl;
-    // 	}
-    // }    
+    	clock2 = chrono::system_clock::now();
+    	duration1 = clock2 - clock1;
+    	cerr << "... in " << duration1.count() << "s\n";
+    }    
     return 0;
 
 }
