@@ -112,29 +112,21 @@ struct CellMapper {
   
 
     Xdata::Cell* operator()(const GeomCell* gcell) {
-	// auto it = wc2xd.find(gcell->ident());
-	// if (it != wc2xd.end()) { // already have it
-	//     return it->second;
-	// }
-	Xdata::Cell* cell = helper.make();
-	// wc2xd[gcell->ident()] = cell;
-
 	Xdata::Wire* uwire = wiremapper(gcell->get_uwire());
 	Xdata::Wire* vwire = wiremapper(gcell->get_vwire());
 	Xdata::Wire* wwire = wiremapper(gcell->get_wwire());
-	cell->set(uwire->ident, vwire->ident, wwire->ident,tilingid);
+	Xdata::cellid_t cellid =  Xdata::cell_ident_pack(uwire->ident, vwire->ident, wwire->ident,tilingid);
+	auto it = wc2xd.find(cellid);
+	if (it != wc2xd.end()) { // already have it
+	    return it->second;
+	}
+	Xdata::Cell* cell = helper.make();
+	wc2xd[cellid] = cell;
+
+	cell->ident = cellid;
 	cell->area = gcell->cross_section();
 	Point p = gcell->center();
 	cell->center = Xdata::Point(p.x,p.y,p.z);
-
-	auto it = wc2xd.find(cell->ident);
-	if (it != wc2xd.end()) { // already have it
-	  //delete cell;
-	  helper.remove_last();
-	  return it->second;
-	}else{
-	  wc2xd[cell->ident] = cell;
-	}
 
 	return cell;
     }
