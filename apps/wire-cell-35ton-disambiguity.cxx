@@ -84,7 +84,9 @@ int main(int argc, char* argv[])
   float toffset_1=1.647;
   float toffset_2=1.539+1.647;
   float toffset_3=0;
-
+  
+  //  int pre_scale_ncells = 500;
+  int save_image_outline_flag = 1; // prescale flag 
   
   int total_time_bin=9600;
   int frame_length = 3200;
@@ -105,7 +107,7 @@ int main(int argc, char* argv[])
   
   std::cout << "Singleton: " << mp.get_pitch_u() << " " << mp.get_pitch_v() << " " << mp.get_pitch_w() << " " << mp.get_ts_width() << std::endl;
   
-   float threshold_u = 5.87819e+02 * 4.0;
+  float threshold_u = 5.87819e+02 * 4.0;
   float threshold_v = 8.36644e+02 * 4.0;
   float threshold_w = 5.67974e+02 * 4.0;
 
@@ -707,6 +709,7 @@ int main(int argc, char* argv[])
   Double_t ncharge_save;
   Double_t chi2_save;
   Double_t ndf_save;
+  Double_t type_save;
 
   t_true->SetDirectory(file);
   t_true->Branch("x",&x_save,"x/D");
@@ -719,6 +722,7 @@ int main(int argc, char* argv[])
   t_rec->Branch("y",&y_save,"y/D");
   t_rec->Branch("z",&z_save,"z/D");
   
+  
   t_rec_charge->SetDirectory(file);
   t_rec_charge->Branch("x",&x_save,"x/D");
   t_rec_charge->Branch("y",&y_save,"y/D");
@@ -728,6 +732,8 @@ int main(int argc, char* argv[])
   t_rec_charge->Branch("chi2",&chi2_save,"chi2/D");
   t_rec_charge->Branch("ndf",&ndf_save,"ndf/D");
 
+  
+
   //blob stuff
   t_rec_charge_blob->SetDirectory(file);
   t_rec_charge_blob->Branch("x",&x_save,"x/D");
@@ -735,6 +741,12 @@ int main(int argc, char* argv[])
   t_rec_charge_blob->Branch("z",&z_save,"z/D");
   t_rec_charge_blob->Branch("q",&charge_save,"q/D");
   t_rec_charge_blob->Branch("nq",&ncharge_save,"nq/D");
+
+  if (save_image_outline_flag==1){
+    t_rec->Branch("type",&type_save,"type/D");
+    t_rec_charge->Branch("type",&type_save,"type/D");
+    t_rec_charge_blob->Branch("type",&type_save,"type/D");
+  }
   
   TGraph2D *g = new TGraph2D();
   TGraph2D *gt = new TGraph2D();
@@ -775,35 +787,81 @@ int main(int argc, char* argv[])
     }
 
      //recon 1
-    GeomCellSelection allcell = toytiling[i]->get_allcell();
-    for (int j=0;j!=allcell.size();j++){
-      Point p = allcell[j]->center();
+    GeomCellSelection allmcell = mergetiling[i]->get_allcell();
+    for (int j=0;j!=allmcell.size();j++){
+      MergeGeomCell *mcell = (MergeGeomCell*)allmcell[j];
 
-      int cryo = allcell[j]->get_cryo();
-      int apa = allcell[j]->get_apa();
-      int face = allcell[j]->get_face();
-      const WrappedGDS *apa_gds = gds.get_apaGDS(cryo,apa);
-      std::pair<double, double> xmm = apa_gds->minmax(0); 
-      
-      if (face == 1){
-	x_save = (i*nrebin/2.*unit_dis/10. - frame_length/2.*unit_dis/10.) + xmm.second/units::cm; // *4 is temporary
-      }else if (face == 0){
-	x_save = xmm.first/units::cm - (i*nrebin/2.*unit_dis/10. - frame_length/2.*unit_dis/10.);
+      if (save_image_outline_flag==1){
+	mcell->FindEdges();
+	Point p = mcell->get_allcell().at(0)->center();
+	int cryo = mcell->get_allcell().at(0)->get_cryo();
+	int apa = mcell->get_allcell().at(0)->get_apa();
+	int face = mcell->get_allcell().at(0)->get_face();
+	const WrappedGDS *apa_gds = gds.get_apaGDS(cryo,apa);
+	std::pair<double, double> xmm = apa_gds->minmax(0); 
+	
+	if (face == 1){
+	  x_save = (i*nrebin/2.*unit_dis/10. - frame_length/2.*unit_dis/10.) + xmm.second/units::cm; // *4 is temporary
+	}else if (face == 0){
+	  x_save = xmm.first/units::cm - (i*nrebin/2.*unit_dis/10. - frame_length/2.*unit_dis/10.);
+	}
+	y_save = mcell->center().y/units::cm;
+	z_save = mcell->center().z/units::cm;
+	
+	g->SetPoint(ncount,x_save,y_save,z_save);
+	ncount ++;
+	type_save = 1; //center
+	t_rec->Fill();
+	
+	for (int k=0;k!=mcell->get_edgecells().size();k++){
+	  Point p = mcell->get_edgecells().at(k)->center();
+	  y_save = p.y/units::cm;
+    	  z_save = p.z/units::cm;
+	  g->SetPoint(ncount,x_save,y_save,z_save);
+	  ncount ++;
+	  type_save = 2; //center
+	  t_rec->Fill();
+	}
+	
+
+      }else{
+	for (int k=0;k!=mcell->get_allcell().size();k++){
+    	  Point p = mcell->get_allcell().at(k)->center();
+	  
+	  
+	  int cryo = mcell->get_allcell().at(k)->get_cryo();
+	  int apa = mcell->get_allcell().at(k)->get_apa();
+	  int face = mcell->get_allcell().at(k)->get_face();
+	  const WrappedGDS *apa_gds = gds.get_apaGDS(cryo,apa);
+	  std::pair<double, double> xmm = apa_gds->minmax(0); 
+	  
+	  if (face == 1){
+	    x_save = (i*nrebin/2.*unit_dis/10. - frame_length/2.*unit_dis/10.) + xmm.second/units::cm; // *4 is temporary
+	  }else if (face == 0){
+	    x_save = xmm.first/units::cm - (i*nrebin/2.*unit_dis/10. - frame_length/2.*unit_dis/10.);
+	  }
+	  
+    	  y_save = p.y/units::cm;
+    	  z_save = p.z/units::cm;
+	  
+	  // int fill_flag = 1;
+	  // if (pre_scale_flag ==1 ){
+	  //   if (mcell->get_allcell().size()>pre_scale_ncells){
+	  //     fill_flag = 0;
+	  //   }
+	  // }
+
+	  // if (fill_flag==1){
+	  g->SetPoint(ncount,x_save,y_save,z_save);
+	  ncount ++;
+	  t_rec->Fill();
+	  // }
+	}
       }
-
-      //      x_save = i*nrebin/2.*unit_dis/10. - frame_length/2.*unit_dis/10.*4;
-      y_save = p.y/units::cm;
-      z_save = p.z/units::cm;
-      
-
-      g->SetPoint(ncount,x_save,y_save,z_save);
-      t_rec->Fill();
-
-      ncount ++;
     }
 
-      //recon 2 with charge
-    GeomCellSelection allmcell = mergetiling[i]->get_allcell();
+    //recon 2 with charge
+    //GeomCellSelection allmcell = mergetiling[i]->get_allcell();
     for (int j=0;j!=allmcell.size();j++){
       MergeGeomCell *mcell = (MergeGeomCell*)allmcell[j];
       double charge = toymatrix[i]->Get_Cell_Charge(mcell,1);

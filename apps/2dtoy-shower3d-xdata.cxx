@@ -308,8 +308,9 @@ int main(int argc, const char* argv[])
     }
 
     Xdata::Writer xwriter(argv[2]);
-    xwriter.set_tree_mc(TMC);
-
+    // xwriter.set_tree_mc(TMC);
+    TMC->CloneTree()->Write();
+    
     Xdata::Geom& geom = xwriter.geom.obj();
     geom.ident = runobj.detector;
     geom.description = detectors[runobj.detector].c_str();
