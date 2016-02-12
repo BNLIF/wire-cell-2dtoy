@@ -181,7 +181,8 @@ int main(int argc, char* argv[])
   sst->SetBranchAddress("eventNo",&event_no);
   sst->SetBranchAddress("runNo",&run_no);
   sst->SetBranchAddress("subRunNo",&subrun_no);
-
+  sst->GetEntry(eve_num);
+  
    //save MC truth ...
   WireCellSst::MCTruth *mctruth = new WireCellSst::MCTruth(root_file);
   mctruth->GetEntry(eve_num);
