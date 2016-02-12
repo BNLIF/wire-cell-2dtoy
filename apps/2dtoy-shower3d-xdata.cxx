@@ -219,6 +219,8 @@ int main(int argc, const char* argv[])
     auto infile = TFile::Open(argv[1]);
 
     auto runtree = dynamic_cast<TTree*>(infile->Get("Trun"));
+    auto TMC = dynamic_cast<TTree*>(infile->Get("TMC"));
+    //
     Trun runobj;		// choo choo
     runtree->SetBranchAddress("detector", &runobj.detector);
     runtree->SetBranchAddress("eventNo", &runobj.eventNo);
@@ -291,6 +293,7 @@ int main(int argc, const char* argv[])
 
 
     Xdata::Writer xwriter(argv[2]);
+    xwriter.set_tree_mc(TMC);
 
     Xdata::Geom& geom = xwriter.geom.obj();
     geom.ident = runobj.detector;
