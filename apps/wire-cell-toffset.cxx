@@ -626,28 +626,28 @@ int main(int argc, char* argv[])
     // 	ncount2 ++;
     //   }
     // }else{
-    for (int j=0;j!=allmcell.size();j++){
-      MergeGeomCell *mcell = (MergeGeomCell*)allmcell[j];
-      double charge = toymatrix[i]->Get_Cell_Charge(mcell,1);
-      if (charge> recon_threshold || toymatrix[i]->Get_Solve_Flag()==0){
-	if (toymatrix[i]->Get_Solve_Flag()==0)
-	  charge = toytiling[i]->get_ave_charge();
+    // for (int j=0;j!=allmcell.size();j++){
+    //   MergeGeomCell *mcell = (MergeGeomCell*)allmcell[j];
+    //   double charge = toymatrix[i]->Get_Cell_Charge(mcell,1);
+    //   if (charge> recon_threshold || toymatrix[i]->Get_Solve_Flag()==0){
+    // 	if (toymatrix[i]->Get_Solve_Flag()==0)
+    // 	  charge = toytiling[i]->get_ave_charge();
 	
-	for (int k=0;k!=mcell->get_allcell().size();k++){
-	  Point p = mcell->get_allcell().at(k)->center();
-	  x_save = i*nrebin/2.*unit_dis/10. - frame_length/2.*unit_dis/10.;
-	  y_save = p.y/units::cm;
-	  z_save = p.z/units::cm;
-	  charge_save = charge/mcell->get_allcell().size();
-	  ncharge_save = mcell->get_allcell().size();
+    // 	for (int k=0;k!=mcell->get_allcell().size();k++){
+    // 	  Point p = mcell->get_allcell().at(k)->center();
+    // 	  x_save = i*nrebin/2.*unit_dis/10. - frame_length/2.*unit_dis/10.;
+    // 	  y_save = p.y/units::cm;
+    // 	  z_save = p.z/units::cm;
+    // 	  charge_save = charge/mcell->get_allcell().size();
+    // 	  ncharge_save = mcell->get_allcell().size();
 	  
-	  g_rec_blob->SetPoint(ncount2,x_save,y_save,z_save);
-	  t_rec_charge_blob->Fill();
+    // 	  g_rec_blob->SetPoint(ncount2,x_save,y_save,z_save);
+    // 	  t_rec_charge_blob->Fill();
 	  
-	  ncount2 ++;
-	}
-      }
-    }
+    // 	  ncount2 ++;
+    // 	}
+    //   }
+    // }
     // }
     
     
@@ -661,34 +661,32 @@ int main(int argc, char* argv[])
  
   
 
-  g->Write("shower3D");
-  gt->Write("shower3D_truth");
-  g_rec->Write("shower3D_charge");
-  g_rec_blob->Write("shower3D_charge_blob");
+ 
   
-  // const int N = 100000;
-  // Double_t x[N],y[N],z[N];
-  Double_t x,y,z;
-  //save cluster
-  int ncluster = 0;
-  for (auto it = cluster_set.begin();it!=cluster_set.end();it++){
-    ncount = 0;
-    TGraph2D *g1 = new TGraph2D();
-    for (int i=0; i!=(*it)->get_allcell().size();i++){
-      const MergeGeomCell *mcell = (const MergeGeomCell*)((*it)->get_allcell().at(i));
-      for (int j=0; j!=mcell->get_allcell().size();j++){
-  	Point p = mcell->get_allcell().at(j)->center();
-  	x = mcell->GetTimeSlice()*nrebin/2.*unit_dis/10. - frame_length/2.*unit_dis/10.;
-  	y = p.y/units::cm;
-  	z = p.z/units::cm;
-  	g1->SetPoint(ncount,x,y,z);
-  	ncount ++;
-      }
-    }
-    // cout << ncount << endl;
-    g1->Write(Form("cluster_%d",ncluster));
-    ncluster ++;
-  }
+  // // const int N = 100000;
+  // // Double_t x[N],y[N],z[N];
+  // Double_t x,y,z;
+  // //save cluster
+  // int ncluster = 0;
+  // for (auto it = cluster_set.begin();it!=cluster_set.end();it++){
+  //   ncount = 0;
+  //   TGraph2D *g1 = new TGraph2D();
+  //   for (int i=0; i!=(*it)->get_allcell().size();i++){
+  //     const MergeGeomCell *mcell = (const MergeGeomCell*)((*it)->get_allcell().at(i));
+  //     for (int j=0; j!=mcell->get_allcell().size();j++){
+  // 	Point p = mcell->get_allcell().at(j)->center();
+  // 	x = mcell->GetTimeSlice()*nrebin/2.*unit_dis/10. - frame_length/2.*unit_dis/10.;
+  // 	y = p.y/units::cm;
+  // 	z = p.z/units::cm;
+  // 	g1->SetPoint(ncount,x,y,z);
+  // 	ncount ++;
+  //     }
+  //   }
+  //   // cout << ncount << endl;
+  //   g1->Write(Form("cluster_%d",ncluster));
+  //   ncluster ++;
+  // }
+  Double_t x;
 
 
   // save all the toy tiling stuff
@@ -802,10 +800,22 @@ int main(int argc, char* argv[])
   	zz = p.z/units::cm;
 	ttree1->Fill();
 	
+	//save the g_rec_blob tree ... 
+	x_save = xx;
+	y_save = yy;
+	z_save = zz;
+	ncharge_save = mcell->get_allcell().size();
+	g_rec_blob->SetPoint(ncount2,x_save,y_save,z_save);
+	ncount2++;
+	t_rec_charge_blob->Fill();
       }
     }
   }
   ttree1->Write();
+  g->Write("shower3D");
+  gt->Write("shower3D_truth");
+  g_rec->Write("shower3D_charge");
+  g_rec_blob->Write("shower3D_charge_blob");
   
  
   TTree *Trun = new TTree("Trun","Trun");

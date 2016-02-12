@@ -921,7 +921,7 @@ int main(int argc, char* argv[])
   TTree *t_true = new TTree("T_true","T_true");
   TTree *t_rec = new TTree("T_rec","T_rec");
   TTree *t_rec_charge = new TTree("T_rec_charge","T_rec_charge");
-  // TTree *t_rec_charge_blob = new TTree("T_rec_charge_blob","T_rec_charge_blob");
+  TTree *t_rec_charge_blob = new TTree("T_rec_charge_blob","T_rec_charge_blob");
 
   Double_t x_save, y_save, z_save;
   Double_t charge_save;
@@ -950,17 +950,17 @@ int main(int argc, char* argv[])
   t_rec_charge->Branch("ndf",&ndf_save,"ndf/D");
 
   //blob stuff
-  // t_rec_charge_blob->SetDirectory(file);
-  // t_rec_charge_blob->Branch("x",&x_save,"x/D");
-  // t_rec_charge_blob->Branch("y",&y_save,"y/D");
-  // t_rec_charge_blob->Branch("z",&z_save,"z/D");
-  // t_rec_charge_blob->Branch("q",&charge_save,"q/D");
-  // t_rec_charge_blob->Branch("nq",&ncharge_save,"nq/D");
+  t_rec_charge_blob->SetDirectory(file);
+  t_rec_charge_blob->Branch("x",&x_save,"x/D");
+  t_rec_charge_blob->Branch("y",&y_save,"y/D");
+  t_rec_charge_blob->Branch("z",&z_save,"z/D");
+  t_rec_charge_blob->Branch("q",&charge_save,"q/D");
+  t_rec_charge_blob->Branch("nq",&ncharge_save,"nq/D");
   
   TGraph2D *g = new TGraph2D();
   TGraph2D *gt = new TGraph2D();
   TGraph2D *g_rec = new TGraph2D();
-  //TGraph2D *g_rec_blob = new TGraph2D();
+  TGraph2D *g_rec_blob = new TGraph2D();
 
   
   
@@ -1104,10 +1104,7 @@ int main(int argc, char* argv[])
 
   }
 
-  g->Write("shower3D");
-  gt->Write("shower3D_truth");
-  g_rec->Write("shower3D_charge");
-  // g_rec_blob->Write("shower3D_charge_blob");
+ 
 
   
    TTree *ttree1 = new TTree("TC","TC");
@@ -1221,11 +1218,23 @@ int main(int argc, char* argv[])
   	zz = p.z/units::cm;
 	ttree1->Fill();
 	
+	//save the g_rec_blob tree ... 
+	x_save = xx;
+	y_save = yy;
+	z_save = zz;
+	ncharge_save = mcell->get_allcell().size();
+	g_rec_blob->SetPoint(ncount2,x_save,y_save,z_save);
+	ncount2++;
+	t_rec_charge_blob->Fill();
+	
       }
     }
   }
   ttree1->Write();
-
+  g->Write("shower3D");
+  gt->Write("shower3D_truth");
+  g_rec->Write("shower3D_charge");
+  g_rec_blob->Write("shower3D_charge_blob");
 
   TTree *Trun = new TTree("Trun","Trun");
   Trun->SetDirectory(file);

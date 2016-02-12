@@ -845,48 +845,45 @@ int main(int argc, char* argv[])
       }
     }
     
-    for (int j=0;j!=allmcell.size();j++){
-      MergeGeomCell *mcell = (MergeGeomCell*)allmcell[j];
-      double charge = toymatrix[i]->Get_Cell_Charge(mcell,1);
-      if (charge> recon_threshold || toymatrix[i]->Get_Solve_Flag()==0){
-	if (toymatrix[i]->Get_Solve_Flag()==0)
-	  charge = toytiling[i]->get_ave_charge();
+    // for (int j=0;j!=allmcell.size();j++){
+    //   MergeGeomCell *mcell = (MergeGeomCell*)allmcell[j];
+    //   double charge = toymatrix[i]->Get_Cell_Charge(mcell,1);
+    //   if (charge> recon_threshold || toymatrix[i]->Get_Solve_Flag()==0){
+    // 	if (toymatrix[i]->Get_Solve_Flag()==0)
+    // 	  charge = toytiling[i]->get_ave_charge();
 
-    	for (int k=0;k!=mcell->get_allcell().size();k++){
-    	  Point p = mcell->get_allcell().at(k)->center();
+    // 	for (int k=0;k!=mcell->get_allcell().size();k++){
+    // 	  Point p = mcell->get_allcell().at(k)->center();
 
-	   int cryo = mcell->get_allcell().at(k)->get_cryo();
-	  int apa = mcell->get_allcell().at(k)->get_apa();
-	  int face = mcell->get_allcell().at(k)->get_face();
-	  const WrappedGDS *apa_gds = gds.get_apaGDS(cryo,apa);
-	  std::pair<double, double> xmm = apa_gds->minmax(0); 
+    // 	   int cryo = mcell->get_allcell().at(k)->get_cryo();
+    // 	  int apa = mcell->get_allcell().at(k)->get_apa();
+    // 	  int face = mcell->get_allcell().at(k)->get_face();
+    // 	  const WrappedGDS *apa_gds = gds.get_apaGDS(cryo,apa);
+    // 	  std::pair<double, double> xmm = apa_gds->minmax(0); 
 	  
-	  if (face == 1){
-	    x_save = (i*nrebin/2.*unit_dis/10. - frame_length/2.*unit_dis/10.) + xmm.second/units::cm; // *4 is temporary
-	  }else if (face == 0){
-	    x_save = xmm.first/units::cm - (i*nrebin/2.*unit_dis/10. - frame_length/2.*unit_dis/10.);
-	  }
+    // 	  if (face == 1){
+    // 	    x_save = (i*nrebin/2.*unit_dis/10. - frame_length/2.*unit_dis/10.) + xmm.second/units::cm; // *4 is temporary
+    // 	  }else if (face == 0){
+    // 	    x_save = xmm.first/units::cm - (i*nrebin/2.*unit_dis/10. - frame_length/2.*unit_dis/10.);
+    // 	  }
 
     	  
-    	  y_save = p.y/units::cm;
-    	  z_save = p.z/units::cm;
-    	  charge_save = charge/mcell->get_allcell().size();
-    	  ncharge_save = mcell->get_allcell().size();
+    // 	  y_save = p.y/units::cm;
+    // 	  z_save = p.z/units::cm;
+    // 	  charge_save = charge/mcell->get_allcell().size();
+    // 	  ncharge_save = mcell->get_allcell().size();
 	  
-    	  g_rec_blob->SetPoint(ncount2,x_save,y_save,z_save);
-    	  t_rec_charge_blob->Fill();
+    // 	  g_rec_blob->SetPoint(ncount2,x_save,y_save,z_save);
+    // 	  t_rec_charge_blob->Fill();
 	  
-    	  ncount2 ++;
-    	}
-      }
-    }
+    // 	  ncount2 ++;
+    // 	}
+    //   }
+    // }
 
   }
 
-  g->Write("shower3D");
-  gt->Write("shower3D_truth");
-  g_rec->Write("shower3D_charge");
-  g_rec_blob->Write("shower3D_charge_blob");
+ 
 
   
    TTree *ttree1 = new TTree("TC","TC");
@@ -989,9 +986,9 @@ int main(int argc, char* argv[])
 	std::pair<double, double> xmm = apa_gds->minmax(0); 
 	
 	if (face == 1){
-	  xx = (i*nrebin/2.*unit_dis/10. - frame_length/2.*unit_dis/10.) + xmm.second/units::cm; // *4 is temporary
+	  xx = (time_slice*nrebin/2.*unit_dis/10. - frame_length/2.*unit_dis/10.) + xmm.second/units::cm; // *4 is temporary
 	}else if (face == 0){
-	  xx = xmm.first/units::cm - (i*nrebin/2.*unit_dis/10. - frame_length/2.*unit_dis/10.);
+	  xx = xmm.first/units::cm - (time_slice*nrebin/2.*unit_dis/10. - frame_length/2.*unit_dis/10.);
 	}
 	//xx = time_slice*nrebin/2.*unit_dis/10. - frame_length/2.*unit_dis/10.;
 	
@@ -1000,12 +997,25 @@ int main(int argc, char* argv[])
   	zz = p.z/units::cm;
 	ttree1->Fill();
 	
+	//save the g_rec_blob tree ... 
+	x_save = xx;
+	y_save = yy;
+	z_save = zz;
+	ncharge_save = mcell->get_allcell().size();
+	g_rec_blob->SetPoint(ncount2,x_save,y_save,z_save);
+	ncount2++;
+	t_rec_charge_blob->Fill();
+
       }
     }
   }
   ttree1->Write();
-
-
+  
+  g->Write("shower3D");
+  gt->Write("shower3D_truth");
+  g_rec->Write("shower3D_charge");
+  g_rec_blob->Write("shower3D_charge_blob");
+  
   TTree *Trun = new TTree("Trun","Trun");
   Trun->SetDirectory(file);
 
