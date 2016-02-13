@@ -431,13 +431,27 @@ WireCell2dToy::MergeToyTiling::MergeToyTiling(WireCell2dToy::ToyTiling& tiling, 
     
   }
 
+
+  //find the edge cells ... 
+  
   for (int i=0;i!=cell_all.size();i++){
     MergeGeomCell *mcell = (MergeGeomCell*)cell_all.at(i);
-    mcell->FindEdges();
+    mcell->FindEdges(); // find ege wires
+    for (int j=0;j!=mcell->get_edge_wires().size();j++){
+      const GeomWire* edge_wire = mcell->get_edge_wires().at(j);
+      for (int k=0;k!=tiling.cells(*edge_wire).size();k++){
+	const GeomCell *tmp_cell = tiling.cells(*edge_wire).at(k);
+	GeomCellSelection allcells = mcell->get_allcell();
+	GeomCellSelection edgecells = mcell->get_edgecells();
+	auto it1 = find(allcells.begin(),allcells.end(), tmp_cell);
+	auto it2 = find(edgecells.begin(),edgecells.end(),tmp_cell);
+	if (it1 != allcells.end() && it2 == edgecells.end())
+	  mcell->get_edge_cells().push_back(tmp_cell);
+      }
+    }
+    //std::cout <<"xin: " << mcell->get_allcell().size() << " " << mcell->get_edge_cells().size() << " " << mcell->get_edgecells().size() << " " << mcell->get_edge_wires().size() << std::endl;
+    
   }
-
-
-
   //  deghost();
   
 }
@@ -643,6 +657,32 @@ WireCell2dToy::MergeToyTiling::MergeToyTiling(const DetectorGDS& gds, WireCell2d
     }
     // std::cout << "Check " <<  mcmcsmap[mcell].size() << std::endl;
   }
+
+
+  for (int i=0;i!=cell_all.size();i++){
+    MergeGeomCell *mcell = (MergeGeomCell*)cell_all.at(i);
+    mcell->FindEdges(); // find ege wires
+    // std::cout << "xin1: " << mcell->get_allcell().size() << " " << mcell->get_edge_cells().size() << " " << mcell->get_edgecells().size() << " " << mcell->get_edge_wires().size() << std::endl;
+
+    for (int j=0;j!=mcell->get_edge_wires().size();j++){
+      const GeomWire* edge_wire = mcell->get_edge_wires().at(j);
+      //std::cout << "xin1: " << j << " " << tiling.cells(*edge_wire).size() << std::endl;
+      for (int k=0;k!=tiling.cells(*edge_wire).size();k++){
+	const GeomCell *tmp_cell = tiling.cells(*edge_wire).at(k);
+	GeomCellSelection allcells = mcell->get_allcell();
+	GeomCellSelection edgecells = mcell->get_edgecells();
+	auto it1 = find(allcells.begin(),allcells.end(), tmp_cell);
+	auto it2 = find(edgecells.begin(),edgecells.end(),tmp_cell);
+	if (it1 != allcells.end() && it2 == edgecells.end())
+	  mcell->get_edge_cells().push_back(tmp_cell);
+      }
+      
+    }
+    //std::cout <<"xin: " << mcell->get_allcell().size() << " " << mcell->get_edge_cells().size() << " " << mcell->get_edgecells().size() << " " << mcell->get_edge_wires().size() << std::endl;
+    
+
+  }
+
 }
 
 
@@ -807,7 +847,9 @@ void WireCell2dToy::MergeToyTiling::form_wiremap(const DetectorGDS& gds, WireCel
     wirechargemap[mwire] = charge;
   }
 
-  
+  // 
+
+
   //check ... 
   // for (int i=0;i!=cell_all.size();i++){
   //   std::cout << i << " " << cellmap[cell_all.at(i)].size() << std::endl;
