@@ -277,15 +277,17 @@ int main(int argc, const char* argv[])
       truetree->SetBranchAddress("q",&trueobj.q);
     }
 
-    struct Trec {double x,y,z; } recobj;
+    struct Trec {double x,y,z, type; } recobj;
     auto rectree = dynamic_cast<TTree*>(infile->Get("T_rec"));
     if (rectree!=0){
       rectree->SetBranchAddress("x",&recobj.x);
       rectree->SetBranchAddress("y",&recobj.y);
       rectree->SetBranchAddress("z",&recobj.z);
+      if (rectree->GetBranch("type"))
+	rectree->SetBranchAddress("type",&recobj.type);
     }
     
-    struct Trecq {double x,y,z,q,nq,chi2,ndf; } recqobj;
+    struct Trecq {double x,y,z,q,nq,chi2,ndf,type; } recqobj;
     auto recqtree = dynamic_cast<TTree*>(infile->Get("T_rec_charge"));
     if (recqtree !=0){
       recqtree->SetBranchAddress("x",&recqobj.x);
@@ -295,9 +297,11 @@ int main(int argc, const char* argv[])
       recqtree->SetBranchAddress("nq",&recqobj.nq);
       recqtree->SetBranchAddress("chi2",&recqobj.chi2);
       recqtree->SetBranchAddress("ndf",&recqobj.ndf);
+      if (recqtree->GetBranch("type"))
+	recqtree->SetBranchAddress("type",&recqobj.type);
     }
 
-    struct Trecqb {double x,y,z,q,nq; } recqbobj;
+    struct Trecqb {double x,y,z,q,nq,type; } recqbobj;
     auto recqbtree = dynamic_cast<TTree*>(infile->Get("T_rec_charge_blob"));
     if (recqbtree !=0){
       recqbtree->SetBranchAddress("x",&recqbobj.x);
@@ -305,6 +309,8 @@ int main(int argc, const char* argv[])
       recqbtree->SetBranchAddress("z",&recqbobj.z);
       recqbtree->SetBranchAddress("q",&recqbobj.q);
       recqbtree->SetBranchAddress("nq",&recqbobj.nq);
+      if (recqbtree->GetBranch("type"))
+	recqbtree->SetBranchAddress("type",&recqbobj.type);
     }
 
     Xdata::Writer xwriter(argv[2]);
@@ -388,9 +394,10 @@ int main(int argc, const char* argv[])
 
     Xdata::Field& field = xwriter.field.obj();
     Xdata::CloneHelper<Xdata::FieldPoint> fieldca(*field.points);
-
+    int field_num = 1;
     if (truetree!=0){
-      field.ident=1;
+      field.ident=field_num;
+      field_num ++;
       field.trigid = trigger.ident;
       field.geomid = geom.ident;
       field.name = "true charge deposition";
@@ -415,80 +422,253 @@ int main(int argc, const char* argv[])
     }
 
     if (rectree!=0){
-      field.ident=2;
-      field.trigid = trigger.ident;
-      field.name = "no charge image";
-      fieldca.clear();
-      nentries = rectree->GetEntries();
-      cerr << "Loading " << nentries <<  " entries of T_rec" << endl;
-      for (auto entry=0; entry<nentries; ++entry) {
-	clock1 = chrono::system_clock::now();
-	rectree->GetEntry(entry);
-	clock2 = chrono::system_clock::now();
-	
-	Xdata::FieldPoint* fp = fieldca.make();
-	fp->point = Xdata::Point(recobj.x, recobj.y, recobj.z);
-	fp->values.clear();
-	//fp->values.push_back(...);//none...
-	
-	clock3 = chrono::system_clock::now();
-	duration1 += clock2 - clock1;
-	duration2 += clock3 - clock2;
+      if (rectree->GetBranch("type")){
+	field.ident=field_num;
+	field_num ++;
+	field.trigid = trigger.ident;
+	field.name = "no charge image center";
+	fieldca.clear();
+	nentries = rectree->GetEntries();
+	cerr << "Loading " << nentries <<  " entries of T_rec" << endl;
+	for (auto entry=0; entry<nentries; ++entry) {
+	  clock1 = chrono::system_clock::now();
+	  rectree->GetEntry(entry);
+	  clock2 = chrono::system_clock::now();
+	  
+	  if (recobj.type==1){
+	    Xdata::FieldPoint* fp = fieldca.make();
+	    fp->point = Xdata::Point(recobj.x, recobj.y, recobj.z);
+	    fp->values.clear();
+	    //fp->values.push_back(...);//none...
+	    
+	  }
+	  clock3 = chrono::system_clock::now();
+	    duration1 += clock2 - clock1;
+	    duration2 += clock3 - clock2;
+	}
+	xwriter.field.fill();
+
+	field.ident=field_num;
+	field_num ++;
+	field.trigid = trigger.ident;
+	field.name = "no charge image boundary";
+	fieldca.clear();
+	nentries = rectree->GetEntries();
+	cerr << "Loading " << nentries <<  " entries of T_rec" << endl;
+	for (auto entry=0; entry<nentries; ++entry) {
+	  clock1 = chrono::system_clock::now();
+	  rectree->GetEntry(entry);
+	  clock2 = chrono::system_clock::now();
+	  
+	  if (recobj.type==2){
+	    Xdata::FieldPoint* fp = fieldca.make();
+	    fp->point = Xdata::Point(recobj.x, recobj.y, recobj.z);
+	    fp->values.clear();
+	    //fp->values.push_back(...);//none...
+	    
+	  }
+	  clock3 = chrono::system_clock::now();
+	    duration1 += clock2 - clock1;
+	    duration2 += clock3 - clock2;
+	}
+	xwriter.field.fill();
+
+      }else{
+	field.ident=field_num;
+	field_num ++;
+	field.trigid = trigger.ident;
+	field.name = "no charge image";
+	fieldca.clear();
+	nentries = rectree->GetEntries();
+	cerr << "Loading " << nentries <<  " entries of T_rec" << endl;
+	for (auto entry=0; entry<nentries; ++entry) {
+	  clock1 = chrono::system_clock::now();
+	  rectree->GetEntry(entry);
+	  clock2 = chrono::system_clock::now();
+	  
+	  Xdata::FieldPoint* fp = fieldca.make();
+	  fp->point = Xdata::Point(recobj.x, recobj.y, recobj.z);
+	  fp->values.clear();
+	  //fp->values.push_back(...);//none...
+	  
+	  clock3 = chrono::system_clock::now();
+	  duration1 += clock2 - clock1;
+	  duration2 += clock3 - clock2;
+	}
+	xwriter.field.fill();
       }
-      xwriter.field.fill();
     }
     
     if (recqtree!=0){
-      field.ident=3;
-      field.trigid = trigger.ident;
-      field.name = "charge image";
-      fieldca.clear();
-      nentries = recqtree->GetEntries();
-      cerr << "Loading " << nentries <<  " entries of T_rec_charge" << endl;
-      for (auto entry=0; entry<nentries; ++entry) {
-	clock1 = chrono::system_clock::now();
-	recqtree->GetEntry(entry);
-	clock2 = chrono::system_clock::now();
+
+      if (recqtree->GetBranch("type")){
+	field.ident=field_num;
+	field_num ++;
+	field.trigid = trigger.ident;
+	field.name = "charge image center";
+	fieldca.clear();
+	nentries = recqtree->GetEntries();
+	cerr << "Loading " << nentries <<  " entries of T_rec_charge" << endl;
+	for (auto entry=0; entry<nentries; ++entry) {
+	  clock1 = chrono::system_clock::now();
+	  recqtree->GetEntry(entry);
+	  clock2 = chrono::system_clock::now();
+	  
+	  if (recqobj.type==1){
+	    Xdata::FieldPoint* fp = fieldca.make();
+	    fp->point = Xdata::Point(recqobj.x, recqobj.y, recqobj.z);
+	    fp->values.clear();
+	    fp->values.push_back(recqobj.q);
+	    fp->values.push_back(recqobj.nq);
+	    fp->values.push_back(recqobj.chi2);
+	    fp->values.push_back(recqobj.ndf);
+	    
+	    
+	  }
+	  clock3 = chrono::system_clock::now();
+	    duration1 += clock2 - clock1;
+	    duration2 += clock3 - clock2;
+	}
+	xwriter.field.fill();
 	
-	Xdata::FieldPoint* fp = fieldca.make();
-	fp->point = Xdata::Point(recqobj.x, recqobj.y, recqobj.z);
-	fp->values.clear();
-	fp->values.push_back(recqobj.q);
-	fp->values.push_back(recqobj.nq);
-	fp->values.push_back(recqobj.chi2);
-	fp->values.push_back(recqobj.ndf);
+	field.ident=field_num;
+	field_num ++;
+	field.trigid = trigger.ident;
+	field.name = "charge image boundary";
+	fieldca.clear();
+	nentries = recqtree->GetEntries();
+	cerr << "Loading " << nentries <<  " entries of T_rec_charge" << endl;
+	for (auto entry=0; entry<nentries; ++entry) {
+	  clock1 = chrono::system_clock::now();
+	  recqtree->GetEntry(entry);
+	  clock2 = chrono::system_clock::now();
+	  
+	  if (recqobj.type==2){
+	    Xdata::FieldPoint* fp = fieldca.make();
+	    fp->point = Xdata::Point(recqobj.x, recqobj.y, recqobj.z);
+	    fp->values.clear();
+	    
+	    
+	  }
+	  clock3 = chrono::system_clock::now();
+	    duration1 += clock2 - clock1;
+	    duration2 += clock3 - clock2;
+	}
+	xwriter.field.fill();
 	
-	clock3 = chrono::system_clock::now();
-	duration1 += clock2 - clock1;
-	duration2 += clock3 - clock2;
+      }else{
+	field.ident=field_num;
+	field_num ++;
+	field.trigid = trigger.ident;
+	field.name = "charge image";
+	fieldca.clear();
+	nentries = recqtree->GetEntries();
+	cerr << "Loading " << nentries <<  " entries of T_rec_charge" << endl;
+	for (auto entry=0; entry<nentries; ++entry) {
+	  clock1 = chrono::system_clock::now();
+	  recqtree->GetEntry(entry);
+	  clock2 = chrono::system_clock::now();
+	  
+	  Xdata::FieldPoint* fp = fieldca.make();
+	  fp->point = Xdata::Point(recqobj.x, recqobj.y, recqobj.z);
+	  fp->values.clear();
+	  fp->values.push_back(recqobj.q);
+	  fp->values.push_back(recqobj.nq);
+	  fp->values.push_back(recqobj.chi2);
+	  fp->values.push_back(recqobj.ndf);
+	  
+	  clock3 = chrono::system_clock::now();
+	  duration1 += clock2 - clock1;
+	  duration2 += clock3 - clock2;
+	}
+	xwriter.field.fill();
       }
-      xwriter.field.fill();
     }
+    
 
     if (recqbtree!=0){
-      field.ident=4;
-      field.trigid = trigger.ident;
-      field.name = "charge simple image";
-      fieldca.clear();
-      nentries = recqbtree->GetEntries();
-      cerr << "Loading " << nentries <<  " entries of T_rec_charge_blob" << endl;
-      for (auto entry=0; entry<nentries; ++entry) {
-	clock1 = chrono::system_clock::now();
-	recqbtree->GetEntry(entry);
-	clock2 = chrono::system_clock::now();
+      
+      if (recqbtree->GetBranch("type")){
+	field.ident=field_num;
+	field_num++;
+	field.trigid = trigger.ident;
+	field.name = "charge simple image center";
+	fieldca.clear();
+	nentries = recqbtree->GetEntries();
+	cerr << "Loading " << nentries <<  " entries of T_rec_charge_blob" << endl;
+	for (auto entry=0; entry<nentries; ++entry) {
+	  clock1 = chrono::system_clock::now();
+	  recqbtree->GetEntry(entry);
+	  clock2 = chrono::system_clock::now();
+	  
+	  if (recqbobj.type==1){
+	    Xdata::FieldPoint* fp = fieldca.make();
+	    fp->point = Xdata::Point(recqbobj.x, recqbobj.y, recqbobj.z);
+	    fp->values.clear();
+	    fp->values.push_back(recqbobj.q);
+	    fp->values.push_back(recqbobj.nq);
+	    
+	  
+	   
+	  }
+	   clock3 = chrono::system_clock::now();
+	    duration1 += clock2 - clock1;
+	    duration2 += clock3 - clock2;
+	}
+	xwriter.field.fill();
+
+
+	field.ident=field_num;
+	field_num++;
+	field.trigid = trigger.ident;
+	field.name = "charge simple image boundary";
+	fieldca.clear();
+	nentries = recqbtree->GetEntries();
+	cerr << "Loading " << nentries <<  " entries of T_rec_charge_blob" << endl;
+	for (auto entry=0; entry<nentries; ++entry) {
+	  clock1 = chrono::system_clock::now();
+	  recqbtree->GetEntry(entry);
+	  clock2 = chrono::system_clock::now();
+	  
+	  if (recqbobj.type==2){
+	    Xdata::FieldPoint* fp = fieldca.make();
+	    fp->point = Xdata::Point(recqbobj.x, recqbobj.y, recqbobj.z);
+	    fp->values.clear();
+	  }
+	  clock3 = chrono::system_clock::now();
+	  duration1 += clock2 - clock1;
+	  duration2 += clock3 - clock2;
+	}
+	xwriter.field.fill();
+
+
+      }else{
 	
-	Xdata::FieldPoint* fp = fieldca.make();
-	fp->point = Xdata::Point(recqbobj.x, recqbobj.y, recqbobj.z);
-	fp->values.clear();
-	fp->values.push_back(recqbobj.q);
-	fp->values.push_back(recqbobj.nq);
-	
-	
-	clock3 = chrono::system_clock::now();
-	duration1 += clock2 - clock1;
-	duration2 += clock3 - clock2;
+	field.ident=field_num;
+	field_num++;
+	field.trigid = trigger.ident;
+	field.name = "charge simple image";
+	fieldca.clear();
+	nentries = recqbtree->GetEntries();
+	cerr << "Loading " << nentries <<  " entries of T_rec_charge_blob" << endl;
+	for (auto entry=0; entry<nentries; ++entry) {
+	  clock1 = chrono::system_clock::now();
+	  recqbtree->GetEntry(entry);
+	  clock2 = chrono::system_clock::now();
+	  
+	  Xdata::FieldPoint* fp = fieldca.make();
+	  fp->point = Xdata::Point(recqbobj.x, recqbobj.y, recqbobj.z);
+	  fp->values.clear();
+	  fp->values.push_back(recqbobj.q);
+	  fp->values.push_back(recqbobj.nq);
+	  
+	  
+	  clock3 = chrono::system_clock::now();
+	  duration1 += clock2 - clock1;
+	  duration2 += clock3 - clock2;
+	}
+	xwriter.field.fill();
       }
-      xwriter.field.fill();
     }
 
     cerr << "shower3d read time: " << duration1.count() << "s\n";
