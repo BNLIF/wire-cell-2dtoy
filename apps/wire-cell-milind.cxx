@@ -89,6 +89,9 @@ int main(int argc, char* argv[])
   float toffset_2=1.539+1.647;
   float toffset_3=0;
 
+  int save_image_outline_flag = 1; // prescale flag 
+  
+
   int total_time_bin=9600;
   int frame_length = 3200;
   int nrebin = 4;
@@ -921,6 +924,7 @@ int main(int argc, char* argv[])
   Double_t ncharge_save;
   Double_t chi2_save;
   Double_t ndf_save;
+  Double_t type_save;
 
   t_true->SetDirectory(file);
   t_true->Branch("x",&x_save,"x/D");
@@ -950,6 +954,12 @@ int main(int argc, char* argv[])
   t_rec_charge_blob->Branch("q",&charge_save,"q/D");
   t_rec_charge_blob->Branch("nq",&ncharge_save,"nq/D");
   
+   if (save_image_outline_flag==1){
+    t_rec->Branch("type",&type_save,"type/D");
+    t_rec_charge->Branch("type",&type_save,"type/D");
+    t_rec_charge_blob->Branch("type",&type_save,"type/D");
+  }
+
   TGraph2D *g = new TGraph2D();
   TGraph2D *gt = new TGraph2D();
   TGraph2D *g_rec = new TGraph2D();
@@ -973,22 +983,60 @@ int main(int argc, char* argv[])
     }
     
     //recon 1
-    GeomCellSelection allcell = toytiling[i]->get_allcell();
-    for (int j=0;j!=allcell.size();j++){
-      Point p = allcell[j]->center();
-      x_save = i*nrebin/2.*unit_dis/10. - frame_length/2.*unit_dis/10.;
-      y_save = p.y/units::cm;
-      z_save = p.z/units::cm;
+    GeomCellSelection allmcell = mergetiling[i]->get_allcell();
+    for (int j=0;j!=allmcell.size();j++){
+      MergeGeomCell *mcell = (MergeGeomCell*)allmcell[j];
+
+      if (save_image_outline_flag==1){
+	Point p = mcell->get_allcell().at(0)->center();
+	x_save = i*nrebin/2.*unit_dis/10. - frame_length/2.*unit_dis/10.;
+	y_save = p.y/units::cm;
+	z_save = p.z/units::cm;
+	g->SetPoint(ncount,x_save,y_save,z_save);
+	ncount ++;
+	type_save = 1; //center
+	t_rec->Fill();
+	
+	for (int k=0;k!=mcell->get_edgecells().size();k++){
+	  Point p = mcell->get_edgecells().at(k)->center();
+	  y_save = p.y/units::cm;
+    	  z_save = p.z/units::cm;
+	  g->SetPoint(ncount,x_save,y_save,z_save);
+	  ncount ++;
+	  type_save = 2; //boundary ...
+	  t_rec->Fill();
+	}
+	
+
+      }else{
+	for (int k=0;k!=mcell->get_allcell().size();k++){
+    	  Point p = mcell->get_allcell().at(k)->center();
+	  x_save = i*nrebin/2.*unit_dis/10. - frame_length/2.*unit_dis/10.;
+	  y_save = p.y/units::cm;
+    	  z_save = p.z/units::cm;
+	  g->SetPoint(ncount,x_save,y_save,z_save);
+	  ncount ++;
+	  t_rec->Fill();
+	 
+	}
+      }
+    }
+    // GeomCellSelection allcell = toytiling[i]->get_allcell();
+    // for (int j=0;j!=allcell.size();j++){
+    //   Point p = allcell[j]->center();
+    //   x_save = i*nrebin/2.*unit_dis/10. - frame_length/2.*unit_dis/10.;
+    //   y_save = p.y/units::cm;
+    //   z_save = p.z/units::cm;
       
 
-      g->SetPoint(ncount,x_save,y_save,z_save);
-      t_rec->Fill();
+    //   g->SetPoint(ncount,x_save,y_save,z_save);
+    //   t_rec->Fill();
 
-      ncount ++;
-    }
+    //   ncount ++;
+    // }
 
     //recon 2 with charge
-    GeomCellSelection allmcell = mergetiling[i]->get_allcell();
+    //GeomCellSelection allmcell = mergetiling[i]->get_allcell();
     for (int j=0;j!=allmcell.size();j++){
       MergeGeomCell *mcell = (MergeGeomCell*)allmcell[j];
       double charge = toymatrix[i]->Get_Cell_Charge(mcell,1);
@@ -997,22 +1045,51 @@ int main(int argc, char* argv[])
 	if (toymatrix[i]->Get_Solve_Flag()==0)
 	  charge = toytiling[i]->get_ave_charge();
 	
-  	//truth
-  	for (int k=0;k!=mcell->get_allcell().size();k++){
-  	  Point p = mcell->get_allcell().at(k)->center();
-  	  x_save = i*nrebin/2.*unit_dis/10. - frame_length/2.*unit_dis/10.;
-  	  y_save = p.y/units::cm;
-  	  z_save = p.z/units::cm;
-  	  charge_save = charge/mcell->get_allcell().size();
-  	  ncharge_save = mcell->get_allcell().size();
-  	  chi2_save = toymatrix[i]->Get_Chi2();
-  	  ndf_save = toymatrix[i]->Get_ndf();
+	if (save_image_outline_flag==1){
+	  Point p = mcell->get_allcell().at(0)->center();
+	  x_save = i*nrebin/2.*unit_dis/10. - frame_length/2.*unit_dis/10.;
+	  y_save = p.y/units::cm;
+	  z_save = p.z/units::cm;
+	  charge_save = charge;
+	  ncharge_save = mcell->get_allcell().size();
+	  chi2_save = toymatrix[i]->Get_Chi2();
+	  ndf_save = toymatrix[i]->Get_ndf();
+	  g_rec->SetPoint(ncount1,x_save,y_save,z_save);
+	  ncount1 ++;
+	  type_save = 1; //center
+	  t_rec_charge->Fill();
 
-  	  g_rec->SetPoint(ncount1,x_save,y_save,z_save);
-  	  t_rec_charge->Fill();
-	  
-  	  ncount1 ++;
-  	}
+	  charge_save = 0;
+	  ncharge_save = 0;
+	  chi2_save= 0;
+	  ndf_save = 0;
+
+	  for (int k=0;k!=mcell->get_edgecells().size();k++){
+	    Point p = mcell->get_edgecells().at(k)->center();
+	    y_save = p.y/units::cm;
+	    z_save = p.z/units::cm;
+	    g_rec->SetPoint(ncount1,x_save,y_save,z_save);
+	    ncount1 ++;
+	    type_save = 2; //boundary ...
+	    t_rec_charge->Fill();
+	  }
+	}else{
+	  for (int k=0;k!=mcell->get_allcell().size();k++){
+	    Point p = mcell->get_allcell().at(k)->center();
+	    x_save = i*nrebin/2.*unit_dis/10. - frame_length/2.*unit_dis/10.;
+	    y_save = p.y/units::cm;
+	    z_save = p.z/units::cm;
+	    charge_save = charge/mcell->get_allcell().size();
+	    ncharge_save = mcell->get_allcell().size();
+	    chi2_save = toymatrix[i]->Get_Chi2();
+	    ndf_save = toymatrix[i]->Get_ndf();
+	    
+	    g_rec->SetPoint(ncount1,x_save,y_save,z_save);
+	    t_rec_charge->Fill();
+	    
+	    ncount1 ++;
+	  }
+	}
       }
     }
 
@@ -1206,16 +1283,44 @@ int main(int argc, char* argv[])
   	zz = p.z/units::cm;
 	ttree1->Fill();
 	
-	//save the g_rec_blob tree ... 
-	x_save = xx;
-	y_save = yy;
-	z_save = zz;
+	if (save_image_outline_flag==0){
+	  //save the g_rec_blob tree ... 
+	  x_save = xx;
+	  y_save = yy;
+	  z_save = zz;
+	  ncharge_save = mcell->get_allcell().size();
+	  g_rec_blob->SetPoint(ncount2,x_save,y_save,z_save);
+	  ncount2++;
+	  t_rec_charge_blob->Fill();
+	}
+      }
+
+      if (save_image_outline_flag==1){
+	Point p = mcell->get_allcell().at(0)->center();
+	x_save = time_slice *nrebin/2.*unit_dis/10. - frame_length/2.*unit_dis/10.;
+	y_save = mcell->center().y/units::cm;
+	z_save = mcell->center().z/units::cm;
+	charge_save = toymatrix[time_slice]->Get_Cell_Charge(mcell,1);
 	ncharge_save = mcell->get_allcell().size();
 	g_rec_blob->SetPoint(ncount2,x_save,y_save,z_save);
 	ncount2++;
+	type_save = 1;
 	t_rec_charge_blob->Fill();
-
+	
+	charge_save = 0;
+	ncharge_save = 0;
+	
+	for (int k=0;k!=mcell->get_edgecells().size();k++){
+	  Point p = mcell->get_edgecells().at(k)->center();
+	  y_save = p.y/units::cm;
+	  z_save = p.z/units::cm;
+	  g_rec_blob->SetPoint(ncount2,x_save,y_save,z_save);
+	  ncount2 ++;
+	  type_save = 2; //boundary ...
+	  t_rec_charge_blob->Fill();
+	}
       }
+
     }
   }
   ttree1->Write();
