@@ -992,6 +992,15 @@ int main(int argc, char* argv[])
 	  t_rec->Fill();
 	}
 	
+	for (int k=0;k!=mcell->get_allcell().size();k++){
+    	  Point p = mcell->get_allcell().at(k)->center();
+	  x_save = i*nrebin/2.*unit_dis/10. - frame_length/2.*unit_dis/10.;
+	  y_save = p.y/units::cm;
+    	  z_save = p.z/units::cm;
+	  type_save = 0; //original
+	  t_rec->Fill();
+	}
+
 
       }else{
 	for (int k=0;k!=mcell->get_allcell().size();k++){
@@ -1057,6 +1066,19 @@ int main(int argc, char* argv[])
 	    g_rec->SetPoint(ncount1,x_save,y_save,z_save);
 	    ncount1 ++;
 	    type_save = 2; //boundary ...
+	    t_rec_charge->Fill();
+	  }
+
+	  for (int k=0;k!=mcell->get_allcell().size();k++){
+	    Point p = mcell->get_allcell().at(k)->center();
+	    x_save = i*nrebin/2.*unit_dis/10. - frame_length/2.*unit_dis/10.;
+	    y_save = p.y/units::cm;
+	    z_save = p.z/units::cm;
+	    charge_save = charge/mcell->get_allcell().size();
+	    ncharge_save = mcell->get_allcell().size();
+	    chi2_save = toymatrix[i]->Get_Chi2();
+	    ndf_save = toymatrix[i]->Get_ndf();
+	    type_save = 0; // original
 	    t_rec_charge->Fill();
 	  }
 	}else{
@@ -1258,6 +1280,13 @@ int main(int argc, char* argv[])
 	  ncharge_save = mcell->get_allcell().size();
 	  g_rec_blob->SetPoint(ncount2,x_save,y_save,z_save);
 	  ncount2++;
+	  t_rec_charge_blob->Fill();
+	}else if (save_image_outline_flag==1){
+	  x_save = xx;
+	  y_save = yy;
+	  z_save = zz;
+	  type_save = 0;
+	  ncharge_save = mcell->get_allcell().size();
 	  t_rec_charge_blob->Fill();
 	}
       }
