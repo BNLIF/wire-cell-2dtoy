@@ -400,7 +400,7 @@ int main(int argc, const char* argv[])
       field_num ++;
       field.trigid = trigger.ident;
       field.geomid = geom.ident;
-      field.name = "true charge deposition";
+      field.name = "truth";
       fieldca.clear();
       nentries = truetree->GetEntries();
       cerr << "Loading " << nentries <<  " entries of T_true" << endl;
