@@ -134,7 +134,7 @@ int main(int argc, char* argv[])
   float toffset_2=-(1.834+1.555-1.539-1.647) +0.1 - 0.5;
   float toffset_3=0.0;
   
-  int save_image_outline_flag = 1; // prescale flag 
+  int save_image_outline_flag = 0; // prescale flag 
   
 
   int total_time_bin=9592;
@@ -987,7 +987,7 @@ int main(int argc, char* argv[])
 
       if (save_image_outline_flag==1){
 	Point p = mcell->get_allcell().at(0)->center();
-	x_save = i*nrebin/2.*unit_dis/10. - frame_length/2.*unit_dis/10.;
+	x_save = i*nrebin/2.*unit_dis/10. - frame_length/2.*unit_dis/10.- frame_length/2.*unit_dis/10.;
 	y_save = p.y/units::cm;
 	z_save = p.z/units::cm;
 	g->SetPoint(ncount,x_save,y_save,z_save);
@@ -1052,7 +1052,7 @@ int main(int argc, char* argv[])
 
 	if (save_image_outline_flag==1){
 	  Point p = mcell->get_allcell().at(0)->center();
-	  x_save = i*nrebin/2.*unit_dis/10. - frame_length/2.*unit_dis/10.;
+	  x_save = i*nrebin/2.*unit_dis/10. - frame_length/2.*unit_dis/10.-time_offset*unit_dis/10.;
 	  y_save = p.y/units::cm;
 	  z_save = p.z/units::cm;
 	  charge_save = charge;
