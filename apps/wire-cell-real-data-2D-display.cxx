@@ -158,10 +158,14 @@ int main(int argc, char* argv[])
   TH2I *hv_orig = new TH2I("hv_orig","hv_orig",nwire_v,-0.5+nwire_u,nwire_v-0.5+nwire_u,total_time_bin,0,total_time_bin);
   TH2I *hw_orig = new TH2I("hw_orig","hw_orig",nwire_w,-0.5+nwire_u+nwire_v,nwire_w-0.5+nwire_u+nwire_v,total_time_bin,0,total_time_bin);
 
-  TH1I *hu_baseline = new TH1I("hu_baseline","hu_basline",nwire_u,-0.5,-0.5+nwire_u);
-  TH1I *hv_baseline = new TH1I("hv_baseline","hv_basline",nwire_v,-0.5+nwire_u,-0.5+nwire_u+nwire_v);
-  TH1I *hw_baseline = new TH1I("hw_baseline","hw_basline",nwire_w,-0.5+nwire_u+nwire_v,-0.5+nwire_u+nwire_v+nwire_w);
+  TH1I *hu_baseline = new TH1I("hu_baseline","hu_threshold",nwire_u,-0.5,-0.5+nwire_u);
+  TH1I *hv_baseline = new TH1I("hv_baseline","hv_threshold",nwire_v,-0.5+nwire_u,-0.5+nwire_u+nwire_v);
+  TH1I *hw_baseline = new TH1I("hw_baseline","hw_threshold",nwire_w,-0.5+nwire_u+nwire_v,-0.5+nwire_u+nwire_v+nwire_w);
+
   
+  TH1I *hu_threshold = new TH1I("hu_threshold","hu_basline",nwire_u,-0.5,-0.5+nwire_u);
+  TH1I *hv_threshold = new TH1I("hv_threshold","hv_basline",nwire_v,-0.5+nwire_u,-0.5+nwire_u+nwire_v);
+  TH1I *hw_threshold = new TH1I("hw_threshold","hw_basline",nwire_w,-0.5+nwire_u+nwire_v,-0.5+nwire_u+nwire_v+nwire_w);
 
   TH2F *hu_raw = new TH2F("hu_raw","hu_raw",nwire_u,-0.5,nwire_u-0.5,total_time_bin,0,total_time_bin);
   TH2F *hv_raw = new TH2F("hv_raw","hv_raw",nwire_v,-0.5+nwire_u,nwire_v-0.5+nwire_u,total_time_bin,0,total_time_bin);
@@ -270,7 +274,19 @@ int main(int argc, char* argv[])
     htemp4->SetBinContent(chid+1,htemp3->GetMaximumBin()-1);
   }
 
-  
+  std::vector<float>& uplane_rms = wien_fds.get_uplane_rms();
+  std::vector<float>& vplane_rms = wien_fds.get_vplane_rms();
+  std::vector<float>& wplane_rms = wien_fds.get_wplane_rms();
+  for (Int_t i=0;i!=uplane_rms.size();i++){
+    hu_threshold->SetBinContent(i+1,uplane_rms.at(i)*3);
+  }
+  for (Int_t i=0;i!=vplane_rms.size();i++){
+    hv_threshold->SetBinContent(i+1,vplane_rms.at(i)*3);
+  }
+  for (Int_t i=0;i!=wplane_rms.size();i++){
+    hw_threshold->SetBinContent(i+1,wplane_rms.at(i)*3);
+  }
+
   // finish saving
 
   TTree *Trun = new TTree("Trun","Trun");
@@ -351,9 +367,7 @@ int main(int argc, char* argv[])
   
   // data_fds.Clear();
 
-  // std::vector<float>& uplane_rms = wien_fds.get_uplane_rms();
-  // std::vector<float>& vplane_rms = wien_fds.get_vplane_rms();
-  // std::vector<float>& wplane_rms = wien_fds.get_wplane_rms();
+  
   
   // GeomWireSelection wires_u = gds.wires_in_plane(WirePlaneType_t(0));
   // GeomWireSelection wires_v = gds.wires_in_plane(WirePlaneType_t(1));
