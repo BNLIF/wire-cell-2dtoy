@@ -60,7 +60,7 @@ using namespace std;
 int main(int argc, char* argv[])
 {
   if (argc < 2) {
-    cerr << "usage: wire-cell-uboone /path/to/ChannelWireGeometry.txt " << endl;
+    cerr << "usage: wire-cell-uboone /path/to/ChannelWireGeometry.txt -u[u channle #] -v[v channel #] -w[w channel #] -x[position cm] -y[position cm] -z[position cm]" << endl;
     return 1;
   }
 
@@ -94,15 +94,15 @@ int main(int argc, char* argv[])
       num_uvw++;
       break;
     case 'x':
-      x_pos = atof(&argv[i][2])*units::m; 
+      x_pos = atof(&argv[i][2])*units::cm; 
       num_xyz ++;
       break;
     case 'y':
-      y_pos = atof(&argv[i][2])*units::m; 
+      y_pos = atof(&argv[i][2])*units::cm; 
       num_xyz ++;
       break;
     case 'z':
-      z_pos = atof(&argv[i][2])*units::m; 
+      z_pos = atof(&argv[i][2])*units::cm; 
       num_xyz ++;
       break;
     }
@@ -138,8 +138,8 @@ int main(int argc, char* argv[])
       const GeomWire *v_wire = gds.closest(p,WirePlaneType_t(1));
       const GeomWire *w_wire = gds.closest(p,WirePlaneType_t(2));
       std::cout << "U: " << u_wire->index() << std::endl;
-      std::cout << "V: " << v_wire->index() << std::endl;
-      std::cout << "W: " << w_wire->index() << std::endl;
+      std::cout << "V: " << v_wire->index() + 2400 << std::endl;
+      std::cout << "W: " << w_wire->index() + 4800 << std::endl;
       std::cout << "T: " << (x_pos)/(unit_dis*units::mm)*2+3200<< std::endl;
     }else{
       std::cout << "Point is outside the boundary! " << std::endl;

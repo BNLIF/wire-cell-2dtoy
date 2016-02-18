@@ -70,6 +70,7 @@ int main(int argc, char* argv[])
   int save_file = 0;
   int nt_off1 = 0;
   int nt_off2 = 0;
+  int deghost = 1;
   for(Int_t i = 1; i != argc; i++){
      switch(argv[i][1]){
      case 't':
@@ -77,6 +78,9 @@ int main(int argc, char* argv[])
        break;
      case 's':
        save_file = atoi(&argv[i][2]); 
+       break;
+     case 'd':
+       deghost = atoi(&argv[i][2]); 
        break;
      case 'a':
        nt_off1 = atoi(&argv[i][2]);
@@ -331,7 +335,7 @@ int main(int argc, char* argv[])
 
     mergetiling[i] = new WireCell2dToy::MergeToyTiling(*toytiling[i],i,3);
     
-    if (two_plane) 
+    if (two_plane && deghost) 
       mergetiling[i]->deghost();
    
     GeomCellSelection allmcell = mergetiling[i]->get_allcell();
