@@ -1007,7 +1007,7 @@ int main(int argc, char* argv[])
 	
 	for (int k=0;k!=mcell->get_allcell().size();k++){
     	  Point p = mcell->get_allcell().at(k)->center();
-	  x_save = i*nrebin/2.*unit_dis/10. - frame_length/2.*unit_dis/10.;
+	  x_save = i*nrebin/2.*unit_dis/10. - frame_length/2.*unit_dis/10.-time_offset*unit_dis/10.;
 	  y_save = p.y/units::cm;
     	  z_save = p.z/units::cm;
 	  type_save = 0;
@@ -1017,7 +1017,7 @@ int main(int argc, char* argv[])
       }else{
 	for (int k=0;k!=mcell->get_allcell().size();k++){
     	  Point p = mcell->get_allcell().at(k)->center();
-	  x_save = i*nrebin/2.*unit_dis/10. - frame_length/2.*unit_dis/10.;
+	  x_save = i*nrebin/2.*unit_dis/10. - frame_length/2.*unit_dis/10.-time_offset*unit_dis/10.;
 	  y_save = p.y/units::cm;
     	  z_save = p.z/units::cm;
 	  g->SetPoint(ncount,x_save,y_save,z_save);
