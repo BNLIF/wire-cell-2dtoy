@@ -86,11 +86,11 @@ int main(int argc, char* argv[])
       num_uvw++;
       break;
     case 'v':
-      vwire = atoi(&argv[i][2]);
+      vwire = atoi(&argv[i][2])-2400;
       num_uvw++;
       break;
     case 'w':
-      wwire = atoi(&argv[i][2]);
+      wwire = atoi(&argv[i][2])-2400-2400;
       num_uvw++;
       break;
     case 'x':
@@ -108,7 +108,10 @@ int main(int argc, char* argv[])
     }
   }
 
+  
+
   if (num_uvw  > num_xyz){
+    
     // convert wire num into position
     Vector p;
     if (uwire >=0 && vwire >=0){
@@ -131,6 +134,9 @@ int main(int argc, char* argv[])
       std::cout << "VW (x,y,z): " << p.x/units::cm << ", " << p.y/units::cm << ", " << p.z/units::cm  << " cm" << std::endl;
     }
   }else{
+
+    std::cout << x_pos/units::cm << " " << y_pos/units::cm << " " << z_pos/units::cm << " cm" << std::endl;
+
     // convert position into wire number
     Point p(x_pos,y_pos,z_pos);
     if (gds.contained_yz(p)){
