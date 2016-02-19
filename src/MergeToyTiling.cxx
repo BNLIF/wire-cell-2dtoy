@@ -934,10 +934,9 @@ void WireCell2dToy::MergeToyTiling::deghost(){
     delete mcell;
   }
   
+  
   // first figure out how many cells are single wire cell
-  
   int flag1 = 1;
-  
   while(flag1==1){
     flag1 = 0;
     single_wire_cells.clear();
@@ -969,7 +968,9 @@ void WireCell2dToy::MergeToyTiling::deghost(){
   	for (int k=0;k!=cells.size();k++){
   	  auto it = find(single_wire_cells.begin(),single_wire_cells.end(),
   			 cells.at(k));
-  	  if (it == single_wire_cells.end()){
+	  auto it2 = find(two_wires_cells.begin(),two_wires_cells.end(),
+			  cells.at(k));
+  	  if (it == single_wire_cells.end() && it2!=two_wires_cells.end()){
   	    auto it1 = find(to_be_removed_cells.begin(), to_be_removed_cells.end(), cells.at(k));
 	    
   	    if (it1 == to_be_removed_cells.end())
