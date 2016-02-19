@@ -335,7 +335,7 @@ int main(int argc, char* argv[])
 
     mergetiling[i] = new WireCell2dToy::MergeToyTiling(*toytiling[i],i,3);
     
-    if (two_plane && deghost) 
+    if ( deghost) 
       mergetiling[i]->deghost();
    
     GeomCellSelection allmcell = mergetiling[i]->get_allcell();
@@ -480,7 +480,7 @@ int main(int argc, char* argv[])
   
 
   
-    double penalty = 6;
+  double penalty = 6;
   std::cout << "Starting to use connectivitiy" << std::endl;
    std::list<int> solve_list;
    

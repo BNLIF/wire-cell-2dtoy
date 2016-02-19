@@ -866,8 +866,6 @@ void WireCell2dToy::MergeToyTiling::form_wiremap(const DetectorGDS& gds, WireCel
 void WireCell2dToy::MergeToyTiling::deghost(){
   
 
-
-
   // fill the three-wires cells and two-wires cells 
   two_wires_cells.clear();
   three_wires_cells.clear();
@@ -880,8 +878,11 @@ void WireCell2dToy::MergeToyTiling::deghost(){
       MergeGeomWire *mwire = (MergeGeomWire*)wires.at(j);
       if (wirechargemap[mwire] > 10){
 	nwire ++;
+      }else{
+	//std::cout << "Xin1: " << wirechargemap[mwire] <<std::endl;
       }
     }
+    //std::cout << "Xin: " << wires.size() << " " << nwire << std::endl;
     if (nwire == 3){
       three_wires_cells.push_back(mcell);
     }else{

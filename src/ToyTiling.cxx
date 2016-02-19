@@ -196,6 +196,7 @@ WireCell2dToy::ToyTiling::ToyTiling(const WireCell::Slice& slice,WireCell::Detec
       const GeomWire *wire = wires.at(i1);
       int channel = group.at(i).first;
       float charge = group.at(i).second;
+      if (charge < 11) charge = 11;
       // sum += charge;
       if (wirechargemap.find(wire) == wirechargemap.end()){
 	//not found
@@ -317,6 +318,7 @@ WireCell2dToy::ToyTiling::ToyTiling(const WireCell::Slice& slice,WireCell::GeomD
     const WireCell::GeomWire *wire = gds.by_channel_segment(group.at(i).first,0);
     
     float charge = group.at(i).second;
+    if (charge < 11) charge = 11;
     // sum += charge;
 
     if (wirechargemap.find(wire) == wirechargemap.end()){
@@ -774,7 +776,7 @@ void WireCell2dToy::ToyTiling::twoplane_tiling(int time, int nrebin, WireCell::G
   GeomWireSelection nu_wires;
   GeomWireSelection nv_wires;
   GeomWireSelection nw_wires;
-  int cut_sigma = 4;
+  int cut_sigma = 0; // original 4 .. 
 
   GeomWireSelection threeplane_wires;
   for (int i=0;i!=cell_all.size();i++){
@@ -839,15 +841,15 @@ void WireCell2dToy::ToyTiling::twoplane_tiling(int time, int nrebin, WireCell::G
 
       int flag = 1;
       //check all the cells if contain both wires, go on
-      for (int k=0;k!=wiremap[wire1].size();k++){
-	const GeomCell *cell = wiremap[wire1].at(k);
-	GeomWireSelection temp_wires = cellmap[cell];
-	auto it = find(temp_wires.begin(),temp_wires.end(),wire2);
-	if (it != temp_wires.end()){
-	  flag = 0;
-	  break;
-	}
-      }
+      // for (int k=0;k!=wiremap[wire1].size();k++){
+      // 	const GeomCell *cell = wiremap[wire1].at(k);
+      // 	GeomWireSelection temp_wires = cellmap[cell];
+      // 	auto it = find(temp_wires.begin(),temp_wires.end(),wire2);
+      // 	if (it != temp_wires.end()){
+      // 	  flag = 0;
+      // 	  break;
+      // 	}
+      // }
 
       //      std::cout << i << " " << j << " " << flag << std::endl;
 
@@ -870,10 +872,11 @@ void WireCell2dToy::ToyTiling::twoplane_tiling(int time, int nrebin, WireCell::G
 
 	  	
 	  //if (it1 == nw_wires.end() && it2 == wplane_map.end()){
-	  if (it1 == nw_wires.end() && 
+	  if (
 	      (it2!=wplane_map.end() && (time <= wplane_map[n_wire->index()].second /nrebin && time >= wplane_map[n_wire->index()].first /nrebin ) )){
 	    
-	    nw_wires.push_back(n_wire);
+	    if (it1 == nw_wires.end())
+	      nw_wires.push_back(n_wire);
 	    dis_w[0] = gds.wire_dist(*n_wire) - w_pitch/2.;
 	    dis_w[1] = dis_w[0] + w_pitch;
 	    dis_w[2] = dis_w[0] + w_pitch/2.;
@@ -1051,15 +1054,15 @@ void WireCell2dToy::ToyTiling::twoplane_tiling(int time, int nrebin, WireCell::G
 
       int flag = 1;
       //check all the cells if contain both wires, go on
-      for (int k=0;k!=wiremap[wire1].size();k++){
-  	const GeomCell *cell = wiremap[wire1].at(k);
-  	GeomWireSelection temp_wires = cellmap[cell];
-  	auto it = find(temp_wires.begin(),temp_wires.end(),wire2);
-  	if (it != temp_wires.end()){
-  	  flag = 0;
-  	  break;
-  	}
-      }
+      // for (int k=0;k!=wiremap[wire1].size();k++){
+      // 	const GeomCell *cell = wiremap[wire1].at(k);
+      // 	GeomWireSelection temp_wires = cellmap[cell];
+      // 	auto it = find(temp_wires.begin(),temp_wires.end(),wire2);
+      // 	if (it != temp_wires.end()){
+      // 	  flag = 0;
+      // 	  break;
+      // 	}
+      // }
       
       
       if (flag == 1){
@@ -1080,11 +1083,12 @@ void WireCell2dToy::ToyTiling::twoplane_tiling(int time, int nrebin, WireCell::G
   	  auto it1 = find(nv_wires.begin(),nv_wires.end(),n_wire);
 	  auto it2 = vplane_map.find(n_wire->index());
 
-	   if (it1 == nv_wires.end() && 
+	   if (
 	       (it2!=vplane_map.end() && (time <= vplane_map[n_wire->index()].second /nrebin && time >= vplane_map[n_wire->index()].first /nrebin ) )){
 
 	     //  	  if (it1 == nv_wires.end() && it2 == vplane_map.end()){
-  	    nv_wires.push_back(n_wire);
+	     if (it1 == nv_wires.end())
+	       nv_wires.push_back(n_wire);
   	    dis_v[0] = gds.wire_dist(*n_wire) - v_pitch/2.;
   	    dis_v[1] = dis_v[0] + v_pitch;
   	    dis_v[2] = dis_v[0] + v_pitch/2.;
@@ -1229,7 +1233,7 @@ void WireCell2dToy::ToyTiling::twoplane_tiling(int time, int nrebin, WireCell::G
   }
 
 
-   // W-V plane first
+  // W-V plane first
   for (int i=0;i!=wire_w.size();i++){
     const GeomWire *wire1 = wire_w.at(i);
     int channel1 = wire1->index();
@@ -1251,16 +1255,16 @@ void WireCell2dToy::ToyTiling::twoplane_tiling(int time, int nrebin, WireCell::G
       auto qt2 = find(threeplane_wires.begin(),threeplane_wires.end(),wire2);
 
       int flag = 1;
-      //check all the cells if contain both wires, go on
-      for (int k=0;k!=wiremap[wire1].size();k++){
-  	const GeomCell *cell = wiremap[wire1].at(k);
-  	GeomWireSelection temp_wires = cellmap[cell];
-  	auto it = find(temp_wires.begin(),temp_wires.end(),wire2);
-  	if (it != temp_wires.end()){
-  	  flag = 0;
-  	  break;
-  	}
-      }
+      // //check all the cells if contain both wires, go on
+      // for (int k=0;k!=wiremap[wire1].size();k++){
+      // 	const GeomCell *cell = wiremap[wire1].at(k);
+      // 	GeomWireSelection temp_wires = cellmap[cell];
+      // 	auto it = find(temp_wires.begin(),temp_wires.end(),wire2);
+      // 	if (it != temp_wires.end()){
+      // 	  flag = 0;
+      // 	  break;
+      // 	}
+      // }
       
 
       if (flag == 1){
@@ -1280,9 +1284,10 @@ void WireCell2dToy::ToyTiling::twoplane_tiling(int time, int nrebin, WireCell::G
 	  if (n_wire ==0 ) continue;
   	  auto it1 = find(nu_wires.begin(),nu_wires.end(),n_wire);
 	  auto it2 = uplane_map.find(n_wire->index());
-  	  if (it1 == nu_wires.end() && 
-	      (it2!=uplane_map.end() && (time >= uplane_map[n_wire->index()].first /nrebin && time <= uplane_map[n_wire->index()].second /nrebin ) )){
-  	    nu_wires.push_back(n_wire);
+  	  if ((it2!=uplane_map.end() && (time >= uplane_map[n_wire->index()].first /nrebin && time <= uplane_map[n_wire->index()].second /nrebin ) )){
+  	    if (it1 == nu_wires.end())
+	      nu_wires.push_back(n_wire);
+
   	    dis_u[0] = gds.wire_dist(*n_wire) - u_pitch/2.;
   	    dis_u[1] = dis_u[0] + u_pitch;
   	    dis_u[2] = dis_u[0] + u_pitch/2.;
