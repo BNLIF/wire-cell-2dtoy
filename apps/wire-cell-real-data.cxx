@@ -395,11 +395,9 @@ int main(int argc, char* argv[])
     // theApp.Run();
   }
   
+
+
   //initial clustering ... 
-
-
-  
-
   // form a map to illustrate connectivities 
   GeomCellCellsMap cell_prev_map;
   GeomCellCellsMap cell_next_map;
@@ -482,16 +480,58 @@ int main(int argc, char* argv[])
     }
   }
   
-
   
 
+  // create a vector of array of merged cells
+  // identify the good cells, # of cells in cluster > ???
+  // also need to have previous and next merged cells
+  std::vector<GeomCellSelection> good_mcells;
+  for (int i=start_num;i!=end_num+1;i++){
+    GeomCellSelection mcells;
+    good_mcells.push_back(mcells);
+  }
+  for (auto it = cluster_set.begin();it!=cluster_set.end();it++){
+    int number_mcells = (*it)->get_allcell().size();
+    int number_time = (*it)->get_ordercell().size();
+
+    
+    // if very big cluster, then no need to be both side ...
+
+    if (number_time >=5 && number_mcells >=6){
+      int flag = 0;
+      // if cluster contains a three-wire cell?
+      for (int i=0;i!=(*it)->get_allcell().size();i++){
+	const MergeGeomCell* mcell = (MergeGeomCell*)((*it)->get_allcell().at(i));
+	int time_slice = mcell->GetTimeSlice();
+	GeomCellSelection& three_wires_cells = mergetiling[time_slice]->get_three_wires_cells();
+	auto it = find(three_wires_cells.begin(),three_wires_cells.end(),mcell);
+	if (it != three_wires_cells.end()){
+	  flag = 1;
+	  break;
+	}
+      }
+      
+      //two wire cluster, need longer ... 
+      if (flag == 0 && (number_time < 10 && number_mcells < 13)) continue;
+      
+      for (int i=0;i!=(*it)->get_allcell().size();i++){
+	const MergeGeomCell* mcell = (MergeGeomCell*)((*it)->get_allcell().at(i));
+	// see front or back
+	int time_slice = mcell->GetTimeSlice();
+	if (cell_prev_map[mcell].size()>0 && cell_next_map.size()>0){
+	  //std::cout << "Xin1: " << time_slice << std::endl;
+	  good_mcells.at(time_slice).push_back(mcell);
+	}
+      }
+    }
+  }
 
 
 
   //separate the deghosting ... 
   for (int i=start_num;i!=end_num+1;i++){
      if ( deghost) 
-      mergetiling[i]->deghost();
+       mergetiling[i]->deghost(good_mcells.at(i));
    
     GeomCellSelection allmcell = mergetiling[i]->get_allcell();
     GeomWireSelection allmwire = mergetiling[i]->get_allwire();
@@ -824,7 +864,6 @@ int main(int argc, char* argv[])
 
   //clear the previous cluster ... 
   for (auto it = cluster_set.begin();it!=cluster_set.end();it++){
-    // cluster_set.erase(*it);
     delete (*it);
   }
   cluster_set.clear();

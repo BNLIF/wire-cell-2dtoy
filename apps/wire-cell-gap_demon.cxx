@@ -307,8 +307,8 @@ int main(int argc, char* argv[])
 
     mergetiling[i] = new WireCell2dToy::MergeToyTiling(*toytiling[i],i,3);
     
-    if (two_plane) 
-      mergetiling[i]->deghost();
+    //    if (two_plane) 
+    // mergetiling[i]->deghost();
    
     GeomCellSelection allmcell = mergetiling[i]->get_allcell();
     GeomWireSelection allmwire = mergetiling[i]->get_allwire();

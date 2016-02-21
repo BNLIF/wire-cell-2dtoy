@@ -863,13 +863,11 @@ void WireCell2dToy::MergeToyTiling::form_wiremap(const DetectorGDS& gds, WireCel
 
 
 
-void WireCell2dToy::MergeToyTiling::deghost(){
+void WireCell2dToy::MergeToyTiling::deghost(GeomCellSelection &good_mcells){
   
-
   // fill the three-wires cells and two-wires cells 
   two_wires_cells.clear();
   three_wires_cells.clear();
-  
   for (int i=0;i!=cell_all.size();i++){
     MergeGeomCell *mcell = (MergeGeomCell*) cell_all.at(i);
     GeomWireSelection wires = cellmap[mcell];
@@ -883,13 +881,18 @@ void WireCell2dToy::MergeToyTiling::deghost(){
       }
     }
     //std::cout << "Xin: " << wires.size() << " " << nwire << std::endl;
-    if (nwire == 3){
+    auto it = find(good_mcells.begin(),good_mcells.end(),mcell);
+
+    // if (it != good_mcells.end()){
+    //   std::cout << "Xin2: " << std::endl;
+    // }
+
+    if (nwire == 3 || it != good_mcells.end()){
       three_wires_cells.push_back(mcell);
     }else{
       two_wires_cells.push_back(mcell);
     }
   }
-  
   // remove two_wires cells if they share anything with three_wires_cells
   GeomWireSelection used_wires;
   for (int i=0;i!=three_wires_cells.size();i++){
@@ -935,6 +938,9 @@ void WireCell2dToy::MergeToyTiling::deghost(){
   }
   
   
+
+  
+
   // first figure out how many cells are single wire cell
   int flag1 = 1;
   while(flag1==1){
@@ -1009,6 +1015,35 @@ void WireCell2dToy::MergeToyTiling::deghost(){
       //  std::cout << "All Cells " << cell_all.size() << " " << single_wire_cells.size() << " " << to_be_removed_cells.size() << std::endl;
     }
 
+  }
+
+  // find the remaining cells ...
+  single_wire_cells.clear();
+  for (int i=0;i!=cell_all.size();i++){
+    MergeGeomCell *mcell = (MergeGeomCell*) cell_all.at(i);
+    GeomWireSelection wires = cellmap[mcell];
+    int flag = 0;
+    for (int j=0;j!=wires.size();j++){
+      MergeGeomWire *mwire = (MergeGeomWire*)wires.at(j);
+      if (wirechargemap[mwire] > 10){
+	if (wiremap[mwire].size()==1){
+	  flag = 1;
+	  break;
+	}
+      }
+    }
+    if (flag==1)
+      single_wire_cells.push_back(mcell);
+  }
+
+  GeomCellSelection remaining_cells;
+  for (int i=0;i!=cell_all.size();i++){
+    MergeGeomCell *mcell = (MergeGeomCell*) cell_all.at(i);
+    auto it1 = find(single_wire_cells.begin(),single_wire_cells.end(),mcell);
+    auto it2 = find(three_wires_cells.begin(),three_wires_cells.end(),mcell);
+    if (it1==single_wire_cells.end() && it2 == three_wires_cells.end()){
+      remaining_cells.push_back(mcell);
+    }
   }
 
   //  std::cout << "Check: " << cell_all.size() << " " << three_wires_cells.size() << " " << two_wires_cells.size() << std::endl;
