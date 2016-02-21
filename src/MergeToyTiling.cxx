@@ -937,9 +937,7 @@ void WireCell2dToy::MergeToyTiling::deghost(GeomCellSelection &good_mcells){
     delete mcell;
   }
   
-  
-
-  
+    
 
   // first figure out how many cells are single wire cell
   int flag1 = 1;
@@ -1046,6 +1044,63 @@ void WireCell2dToy::MergeToyTiling::deghost(GeomCellSelection &good_mcells){
     }
   }
 
+  // std::cout << "Xin1: " << remaining_cells.size() << std::endl;
+
+  // remove some of the remaining cells? 
+  while(remaining_cells.size()>0){
+    // std::cout << "Xin2: " << remaining_cells.size() << std::endl;
+    // remove one cell
+    MergeGeomCell *mcell = (MergeGeomCell*)remaining_cells.back();
+    remaining_cells.pop_back();
+    
+    auto it = find(cell_all.begin(),cell_all.end(),mcell);
+    cell_all.erase(it);
+    delete mcell;
+
+    // reconstruct map
+    GeomCellMap cellmap_save = cellmap;
+    cellmap.clear();
+    wiremap.clear();
+    for (int i=0;i!=cell_all.size();i++){
+      cellmap[cell_all.at(i)] = cellmap_save[cell_all.at(i)];
+      for (int j=0;j!=cellmap[cell_all.at(i)].size();j++){
+  	if (wiremap.find(cellmap[cell_all.at(i)].at(j)) == wiremap.end()){
+  	  GeomCellSelection cells;
+  	  cells.push_back(cell_all.at(i));
+  	  wiremap[cellmap[cell_all.at(i)].at(j)] = cells;
+  	}else{
+  	  wiremap[cellmap[cell_all.at(i)].at(j)].push_back(cell_all.at(i));
+  	}
+      }
+    }
+    
+    GeomCellSelection to_be_removed_mcells;
+    // re-calculate single wire and move them out of remaining_cells
+    for (int i=0;i!=remaining_cells.size();i++){
+      MergeGeomCell *mcell1 = (MergeGeomCell*) remaining_cells.at(i);
+      GeomWireSelection wires = cellmap[mcell1];
+      int flag = 0;
+      for (int j=0;j!=wires.size();j++){
+  	MergeGeomWire *mwire = (MergeGeomWire*)wires.at(j);
+  	if (wirechargemap[mwire] > 10){
+  	  if (wiremap[mwire].size()==1){
+  	    flag = 1;
+  	    break;
+  	  }
+  	}
+      }
+      if (flag==1){
+	to_be_removed_mcells.push_back(mcell1); 
+      }
+    }
+    
+    for (int i=0;i!=to_be_removed_mcells.size();i++){
+      auto it3 = find(remaining_cells.begin(),remaining_cells.end(),to_be_removed_mcells.at(i));
+      remaining_cells.erase(it3);
+    }
+
+  }
+  
   //  std::cout << "Check: " << cell_all.size() << " " << three_wires_cells.size() << " " << two_wires_cells.size() << std::endl;
   
 }
