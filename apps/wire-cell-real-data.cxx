@@ -335,7 +335,162 @@ int main(int argc, char* argv[])
 
     mergetiling[i] = new WireCell2dToy::MergeToyTiling(*toytiling[i],i,3);
     
-    if ( deghost) 
+   
+    
+    if (i==0){
+      badtiling[i] = new WireCell2dToy::BadTiling(i,nrebin,uplane_map,vplane_map,wplane_map,gds,1);
+    }
+
+    //badtiling[i] = new WireCell2dToy::BadTiling(i,nrebin,uplane_map,vplane_map,wplane_map,gds);
+
+    // // if (toymatrix[i]->Get_Solve_Flag()!=0){
+    // //   toymatrix[i]->Update_pred();
+    // //   toymatrix[i]->Print();
+    // // }
+
+    // //draw ... 
+    // TApplication theApp("theApp",&argc,argv);
+    // theApp.SetReturnFromRun(true);
+    
+    // TCanvas c1("ToyMC","ToyMC",800,600);
+    // c1.Draw();
+    
+    // WireCell2dToy::ToyEventDisplay display(c1, gds);
+    // display.charge_min = 0;
+    // display.charge_max = 5e4;
+
+
+    // gStyle->SetOptStat(0);
+    
+    // const Int_t NRGBs = 5;
+    // const Int_t NCont = 255;
+    // Int_t MyPalette[NCont];
+    // Double_t stops[NRGBs] = {0.0, 0.34, 0.61, 0.84, 1.0};
+    // Double_t red[NRGBs] = {0.0, 0.0, 0.87 ,1.0, 0.51};
+    // Double_t green[NRGBs] = {0.0, 0.81, 1.0, 0.2 ,0.0};
+    // Double_t blue[NRGBs] = {0.51, 1.0, 0.12, 0.0, 0.0};
+    // Int_t FI = TColor::CreateGradientColorTable(NRGBs, stops, red, green, blue, NCont);
+    // gStyle->SetNumberContours(NCont);
+    // for (int kk=0;kk!=NCont;kk++) MyPalette[kk] = FI+kk;
+    // gStyle->SetPalette(NCont,MyPalette);
+
+    
+
+    // display.init(0,10.3698,-2.33/2.,2.33/2.);
+    // display.draw_mc(1,WireCell::PointValueVector(),"colz");
+    
+    // // display.draw_bad_region(uplane_map,i,nrebin,0,"same");
+    // // display.draw_bad_region(vplane_map,i,nrebin,1,"same");
+    // // display.draw_bad_region(wplane_map,i,nrebin,2,"same");
+    // display.draw_bad_cell(badtiling[i]->get_cell_all());
+  
+    // display.draw_cells(toytiling[i]->get_allcell(),"*same");
+    // display.draw_mergecells(mergetiling[i]->get_allcell(),"*same",0); //0 is normal, 1 is only draw the ones containt the truth cell
+    
+    // display.draw_wires_charge(toytiling[i]->wcmap(),"Fsame",FI);
+    // display.draw_cells_charge(toytiling[i]->get_allcell(),"Fsame");
+  
+    
+    
+    // theApp.Run();
+  }
+  
+  //initial clustering ... 
+
+
+  
+
+  // form a map to illustrate connectivities 
+  GeomCellCellsMap cell_prev_map;
+  GeomCellCellsMap cell_next_map;
+  
+  for (int i=start_num;i!=end_num;i++){
+    GeomCellSelection curr_mcell = mergetiling[i]->get_allcell();
+    GeomCellSelection next_mcell = mergetiling[i+1]->get_allcell();
+    for (int j=0;j!=curr_mcell.size();j++){
+      const MergeGeomCell *curr_cell = (MergeGeomCell*)curr_mcell.at(j);
+      for (int k=0;k!=next_mcell.size();k++){
+	const MergeGeomCell *next_cell = (MergeGeomCell*)next_mcell.at(k);
+	if (curr_cell->Overlap(*next_cell)){
+	  if (cell_next_map.find(curr_cell)==cell_next_map.end()){
+	    GeomCellSelection cells;
+	    cell_next_map[curr_cell] = cells;
+	  }
+	  cell_next_map[curr_cell].push_back(next_cell);
+	  
+	  if (cell_prev_map.find(next_cell)==cell_prev_map.end()){
+	    GeomCellSelection cells;
+	    cell_prev_map[next_cell].push_back(curr_cell);
+	    cell_prev_map[next_cell] = cells;
+	  }
+	  cell_prev_map[next_cell].push_back(curr_cell);
+	}
+      }
+    }
+  }
+    
+  //do clustering ... 
+  for (int i=start_num;i!=end_num+1;i++){
+    GeomCellSelection pallmcell = mergetiling[i]->get_allcell();
+    GeomCellSelection allmcell;
+    for (int j=0;j!=pallmcell.size();j++){
+      const GeomCell* mcell = pallmcell[j];
+      int flag_save_cell = 1;
+            
+      if (flag_save_cell == 1)
+      	allmcell.push_back(mcell);
+    }
+    
+    if (cluster_set.empty()){
+      // if cluster is empty, just insert all the mcell, each as a cluster
+      for (int j=0;j!=allmcell.size();j++){
+	GeomCluster *cluster = new GeomCluster(*((MergeGeomCell*)allmcell[j]));
+	cluster_set.insert(cluster);
+      }
+    }else{
+      for (int j=0;j!=allmcell.size();j++){
+	int flag = 0;
+	int flag_save = 0;
+	GeomCluster *cluster_save = 0;
+	cluster_delset.clear();
+	// loop through merged cell
+	for (auto it = cluster_set.begin();it!=cluster_set.end();it++){
+	  //loop through clusters
+	  
+	  flag += (*it)->AddCell(*((MergeGeomCell*)allmcell[j]));
+	  if (flag==1 && flag != flag_save){
+	    cluster_save = *it;
+	  }else if (flag>1 && flag != flag_save){
+	    cluster_save->MergeCluster(*(*it));
+	    cluster_delset.insert(*it);
+	  }
+	  flag_save = flag;
+  	  
+	}
+	
+	for (auto it = cluster_delset.begin();it!=cluster_delset.end();it++){
+	  cluster_set.erase(*it);
+	  delete (*it);
+	}
+	
+	if (flag==0){
+	  GeomCluster *cluster = new GeomCluster(*((MergeGeomCell*)allmcell[j]));
+	  cluster_set.insert(cluster);
+	}
+	
+      }
+    }
+  }
+  
+
+  
+
+
+
+
+  //separate the deghosting ... 
+  for (int i=start_num;i!=end_num+1;i++){
+     if ( deghost) 
       mergetiling[i]->deghost();
    
     GeomCellSelection allmcell = mergetiling[i]->get_allcell();
@@ -392,220 +547,152 @@ int main(int argc, char* argv[])
     //   //   // deal with two planes without any constraints, like to deal everything together
     //   // 	WireCell2dToy::ToyMatrixIterate_Only toymatrix_it_only(*toymatrix[i],mergetiling[i]);
     //   // }
-      
-            
-
     // }else{
     //   if (toymatrix[i]->Get_Solve_Flag()==0)
     // 	WireCell2dToy::ToyMatrixIterate toymatrix_it(*toymatrix[i],2000,1e5);
     // }
-
-    
-    
     // 
     //   // deal with three-planes cells, 
     //   // try iterative method first
     //   
-    
     // }
     // // deal with two-planes cells
     // if (two_wires_cells.size() > 0){
-    
     // }
-    
     //comebine them 
-    
-	
-    
     
     cout << "chi2: " << toymatrix[i]->Get_Chi2() << endl;
     cout << "NDF: " << toymatrix[i]->Get_ndf() << endl;
-    
-    if (i==0){
-      badtiling[i] = new WireCell2dToy::BadTiling(i,nrebin,uplane_map,vplane_map,wplane_map,gds,1);
-    }
-    //badtiling[i] = new WireCell2dToy::BadTiling(i,nrebin,uplane_map,vplane_map,wplane_map,gds);
-
-    // // if (toymatrix[i]->Get_Solve_Flag()!=0){
-    // //   toymatrix[i]->Update_pred();
-    // //   toymatrix[i]->Print();
-    // // }
-
-    // //draw ... 
-    // TApplication theApp("theApp",&argc,argv);
-    // theApp.SetReturnFromRun(true);
-    
-    // TCanvas c1("ToyMC","ToyMC",800,600);
-    // c1.Draw();
-    
-    // WireCell2dToy::ToyEventDisplay display(c1, gds);
-    // display.charge_min = 0;
-    // display.charge_max = 5e4;
-
-
-    // gStyle->SetOptStat(0);
-    
-    // const Int_t NRGBs = 5;
-    // const Int_t NCont = 255;
-    // Int_t MyPalette[NCont];
-    // Double_t stops[NRGBs] = {0.0, 0.34, 0.61, 0.84, 1.0};
-    // Double_t red[NRGBs] = {0.0, 0.0, 0.87 ,1.0, 0.51};
-    // Double_t green[NRGBs] = {0.0, 0.81, 1.0, 0.2 ,0.0};
-    // Double_t blue[NRGBs] = {0.51, 1.0, 0.12, 0.0, 0.0};
-    // Int_t FI = TColor::CreateGradientColorTable(NRGBs, stops, red, green, blue, NCont);
-    // gStyle->SetNumberContours(NCont);
-    // for (int kk=0;kk!=NCont;kk++) MyPalette[kk] = FI+kk;
-    // gStyle->SetPalette(NCont,MyPalette);
-
-    
-
-    // display.init(0,10.3698,-2.33/2.,2.33/2.);
-    // display.draw_mc(1,WireCell::PointValueVector(),"colz");
-    
-    // // display.draw_bad_region(uplane_map,i,nrebin,0,"same");
-    // // display.draw_bad_region(vplane_map,i,nrebin,1,"same");
-    // // display.draw_bad_region(wplane_map,i,nrebin,2,"same");
-    // display.draw_bad_cell(badtiling[i]->get_cell_all());
-  
-    // display.draw_cells(toytiling[i]->get_allcell(),"*same");
-    // display.draw_mergecells(mergetiling[i]->get_allcell(),"*same",0); //0 is normal, 1 is only draw the ones containt the truth cell
-    
-    // display.draw_wires_charge(toytiling[i]->wcmap(),"Fsame",FI);
-    // display.draw_cells_charge(toytiling[i]->get_allcell(),"Fsame");
-  
-    
-    
-    // theApp.Run();
   }
-  
+
 
   
-  double penalty = 6;
-  std::cout << "Starting to use connectivitiy" << std::endl;
-   std::list<int> solve_list;
+  // double penalty = 6;
+  // std::cout << "Starting to use connectivitiy" << std::endl;
+  //  std::list<int> solve_list;
    
-   if (start_num != end_num){
-     int first_solve=-1;
-     for (int i=start_num; i!=end_num+1;i++){
-       if (toymatrix[i]->Get_Solve_Flag()!=0){
-   	 first_solve = i;
-   	 break;
-       }
-     }
-     if (first_solve == -1) first_solve = start_num;
+  //  if (start_num != end_num){
+  //    int first_solve=-1;
+  //    for (int i=start_num; i!=end_num+1;i++){
+  //      if (toymatrix[i]->Get_Solve_Flag()!=0){
+  //  	 first_solve = i;
+  //  	 break;
+  //      }
+  //    }
+  //    if (first_solve == -1) first_solve = start_num;
 
     
-     for (int i=first_solve+1;i<=end_num-1;i++){
-       if (toymatrix[i]->Get_Solve_Flag()==0 && toymatrix[i]->Get_mcindex()>0){ 
-  	 if ((toymatrix[i-1]->Get_Solve_Flag() + toymatrix[i+1]->Get_Solve_Flag()) > 0){
-  	   if (two_plane){
-  	     WireCell2dToy::ToyMatrixIterate_SingleWire toymatrix_it(toymatrix[i-1],toymatrix[i],toymatrix[i+1],mergetiling[i-1],mergetiling[i],mergetiling[i+1],2000,1e5,penalty);
-  	   }else{
-  	     WireCell2dToy::ToyMatrixIterate toymatrix_it(toymatrix[i-1],toymatrix[i],toymatrix[i+1],mergetiling[i-1],mergetiling[i],mergetiling[i+1],2000,1e5,penalty);
-  	   }
-  	   GeomCellSelection allmcell = mergetiling[i]->get_allcell();
+  //    for (int i=first_solve+1;i<=end_num-1;i++){
+  //      if (toymatrix[i]->Get_Solve_Flag()==0 && toymatrix[i]->Get_mcindex()>0){ 
+  // 	 if ((toymatrix[i-1]->Get_Solve_Flag() + toymatrix[i+1]->Get_Solve_Flag()) > 0){
+  // 	   if (two_plane){
+  // 	     WireCell2dToy::ToyMatrixIterate_SingleWire toymatrix_it(toymatrix[i-1],toymatrix[i],toymatrix[i+1],mergetiling[i-1],mergetiling[i],mergetiling[i+1],2000,1e5,penalty);
+  // 	   }else{
+  // 	     WireCell2dToy::ToyMatrixIterate toymatrix_it(toymatrix[i-1],toymatrix[i],toymatrix[i+1],mergetiling[i-1],mergetiling[i],mergetiling[i+1],2000,1e5,penalty);
+  // 	   }
+  // 	   GeomCellSelection allmcell = mergetiling[i]->get_allcell();
 	 	   
-  	   cout << "chi2: " << i << " " << toymatrix[i]->Get_Chi2() << endl;
-  	   cout << "NDF: " << toymatrix[i]->Get_ndf() << endl;
-  	 }else{
-  	   solve_list.push_back(i); 
-  	 }
-       }
-     }
+  // 	   cout << "chi2: " << i << " " << toymatrix[i]->Get_Chi2() << endl;
+  // 	   cout << "NDF: " << toymatrix[i]->Get_ndf() << endl;
+  // 	 }else{
+  // 	   solve_list.push_back(i); 
+  // 	 }
+  //      }
+  //    }
      
-     for (int i=first_solve-1;i>=start_num+1;i--){
-       if (toymatrix[i]->Get_Solve_Flag()==0&& toymatrix[i]->Get_mcindex()>0){
-  	 if ((toymatrix[i-1]->Get_Solve_Flag() + toymatrix[i+1]->Get_Solve_Flag()) > 0){
-  	   if (two_plane){
-  	     WireCell2dToy::ToyMatrixIterate_SingleWire toymatrix_it(toymatrix[i-1],toymatrix[i],toymatrix[i+1],mergetiling[i-1],mergetiling[i],mergetiling[i+1],2000,1e5,penalty);
-  	   }else{
-  	     WireCell2dToy::ToyMatrixIterate toymatrix_it(toymatrix[i-1],toymatrix[i],toymatrix[i+1],mergetiling[i-1],mergetiling[i],mergetiling[i+1],2000,1e5,penalty);
-  	   }
+  //    for (int i=first_solve-1;i>=start_num+1;i--){
+  //      if (toymatrix[i]->Get_Solve_Flag()==0&& toymatrix[i]->Get_mcindex()>0){
+  // 	 if ((toymatrix[i-1]->Get_Solve_Flag() + toymatrix[i+1]->Get_Solve_Flag()) > 0){
+  // 	   if (two_plane){
+  // 	     WireCell2dToy::ToyMatrixIterate_SingleWire toymatrix_it(toymatrix[i-1],toymatrix[i],toymatrix[i+1],mergetiling[i-1],mergetiling[i],mergetiling[i+1],2000,1e5,penalty);
+  // 	   }else{
+  // 	     WireCell2dToy::ToyMatrixIterate toymatrix_it(toymatrix[i-1],toymatrix[i],toymatrix[i+1],mergetiling[i-1],mergetiling[i],mergetiling[i+1],2000,1e5,penalty);
+  // 	   }
 	   
-  	   GeomCellSelection allmcell = mergetiling[i]->get_allcell();
+  // 	   GeomCellSelection allmcell = mergetiling[i]->get_allcell();
 	   
 	 
-  	   cout << "chi2: " << i << " " << toymatrix[i]->Get_Chi2() << endl;
-  	   cout << "NDF: " << toymatrix[i]->Get_ndf() << endl;
-  	 }else{
-  	   solve_list.push_back(i);
-  	 }
-       }
-     }
-   }
+  // 	   cout << "chi2: " << i << " " << toymatrix[i]->Get_Chi2() << endl;
+  // 	   cout << "NDF: " << toymatrix[i]->Get_ndf() << endl;
+  // 	 }else{
+  // 	   solve_list.push_back(i);
+  // 	 }
+  //      }
+  //    }
+  //  }
    
-   // start second round ...
-   // std::cout << "Connectivitiy rest " << solve_list.size() << std::endl;
-   int prev_count = 0;
-   while (solve_list.size() >0){
-     int curr_count = solve_list.size();
-     std::cout << "Connectivitiy rest " << solve_list.size() << std::endl;
+  //  // start second round ...
+  //  // std::cout << "Connectivitiy rest " << solve_list.size() << std::endl;
+  //  int prev_count = 0;
+  //  while (solve_list.size() >0){
+  //    int curr_count = solve_list.size();
+  //    std::cout << "Connectivitiy rest " << solve_list.size() << std::endl;
 
-     if (curr_count == prev_count){
-       int i = solve_list.front(); // pick the first element ... 
-       if (toymatrix[i]->Get_Solve_Flag()==0&& toymatrix[i]->Get_mcindex()>0){
-  	 if (two_plane){
-  	   WireCell2dToy::ToyMatrixIterate_SingleWire toymatrix_it(toymatrix[i-1],toymatrix[i],toymatrix[i+1],mergetiling[i-1],mergetiling[i],mergetiling[i+1],2000,1e5,penalty);
-  	 }else{
-  	   WireCell2dToy::ToyMatrixIterate toymatrix_it(toymatrix[i-1],toymatrix[i],toymatrix[i+1],mergetiling[i-1],mergetiling[i],mergetiling[i+1],2000,1e5,penalty);
-  	 }
-  	 GeomCellSelection allmcell = mergetiling[i]->get_allcell();
+  //    if (curr_count == prev_count){
+  //      int i = solve_list.front(); // pick the first element ... 
+  //      if (toymatrix[i]->Get_Solve_Flag()==0&& toymatrix[i]->Get_mcindex()>0){
+  // 	 if (two_plane){
+  // 	   WireCell2dToy::ToyMatrixIterate_SingleWire toymatrix_it(toymatrix[i-1],toymatrix[i],toymatrix[i+1],mergetiling[i-1],mergetiling[i],mergetiling[i+1],2000,1e5,penalty);
+  // 	 }else{
+  // 	   WireCell2dToy::ToyMatrixIterate toymatrix_it(toymatrix[i-1],toymatrix[i],toymatrix[i+1],mergetiling[i-1],mergetiling[i],mergetiling[i+1],2000,1e5,penalty);
+  // 	 }
+  // 	 GeomCellSelection allmcell = mergetiling[i]->get_allcell();
 	 
-  	 cout << "chi2: " << i << " " << toymatrix[i]->Get_Chi2() << endl;
-  	 cout << "NDF: " << toymatrix[i]->Get_ndf() << endl;
-  	 solve_list.erase(solve_list.begin());
-       }
-     }else{
-       for (auto it = solve_list.begin(); it!= solve_list.end(); it++){
-  	 int i = *it;
-  	 if (toymatrix[i]->Get_Solve_Flag()==0&& toymatrix[i]->Get_mcindex()>0){
-  	   if ((toymatrix[i-1]->Get_Solve_Flag() + toymatrix[i+1]->Get_Solve_Flag()) > 0){
-  	     if (two_plane){
-  	       WireCell2dToy::ToyMatrixIterate_SingleWire toymatrix_it(toymatrix[i-1],toymatrix[i],toymatrix[i+1],mergetiling[i-1],mergetiling[i],mergetiling[i+1],2000,1e5,penalty);
-  	     }else{
-  	       WireCell2dToy::ToyMatrixIterate toymatrix_it(toymatrix[i-1],toymatrix[i],toymatrix[i+1],mergetiling[i-1],mergetiling[i],mergetiling[i+1],2000,1e5,penalty);
-  	     }
-  	     GeomCellSelection allmcell = mergetiling[i]->get_allcell();
-  	     cout << "chi2: " << i << " " << toymatrix[i]->Get_Chi2() << endl;
-  	     cout << "NDF: " << toymatrix[i]->Get_ndf() << endl;
-  	     it = solve_list.erase(it);
-  	   }
-  	 }
-       }
-     }
+  // 	 cout << "chi2: " << i << " " << toymatrix[i]->Get_Chi2() << endl;
+  // 	 cout << "NDF: " << toymatrix[i]->Get_ndf() << endl;
+  // 	 solve_list.erase(solve_list.begin());
+  //      }
+  //    }else{
+  //      for (auto it = solve_list.begin(); it!= solve_list.end(); it++){
+  // 	 int i = *it;
+  // 	 if (toymatrix[i]->Get_Solve_Flag()==0&& toymatrix[i]->Get_mcindex()>0){
+  // 	   if ((toymatrix[i-1]->Get_Solve_Flag() + toymatrix[i+1]->Get_Solve_Flag()) > 0){
+  // 	     if (two_plane){
+  // 	       WireCell2dToy::ToyMatrixIterate_SingleWire toymatrix_it(toymatrix[i-1],toymatrix[i],toymatrix[i+1],mergetiling[i-1],mergetiling[i],mergetiling[i+1],2000,1e5,penalty);
+  // 	     }else{
+  // 	       WireCell2dToy::ToyMatrixIterate toymatrix_it(toymatrix[i-1],toymatrix[i],toymatrix[i+1],mergetiling[i-1],mergetiling[i],mergetiling[i+1],2000,1e5,penalty);
+  // 	     }
+  // 	     GeomCellSelection allmcell = mergetiling[i]->get_allcell();
+  // 	     cout << "chi2: " << i << " " << toymatrix[i]->Get_Chi2() << endl;
+  // 	     cout << "NDF: " << toymatrix[i]->Get_ndf() << endl;
+  // 	     it = solve_list.erase(it);
+  // 	   }
+  // 	 }
+  //      }
+  //    }
      
-     prev_count = curr_count;
-   }
+  //    prev_count = curr_count;
+  //  }
 
 
    
-   // by the end do the final two
-   if (toymatrix[end_num]->Get_Solve_Flag()==0&& toymatrix[end_num]->Get_mcindex()>0){
-     if (two_plane){
-       WireCell2dToy::ToyMatrixIterate_SingleWire toymatrix_it(toymatrix[end_num-1],toymatrix[end_num],0,mergetiling[end_num-1],mergetiling[end_num],0,2000,1e5,penalty);
-     }else{
-       WireCell2dToy::ToyMatrixIterate toymatrix_it(toymatrix[end_num-1],toymatrix[end_num],0,mergetiling[end_num-1],mergetiling[end_num],0,2000,1e5,penalty);
-     }
+  //  // by the end do the final two
+  //  if (toymatrix[end_num]->Get_Solve_Flag()==0&& toymatrix[end_num]->Get_mcindex()>0){
+  //    if (two_plane){
+  //      WireCell2dToy::ToyMatrixIterate_SingleWire toymatrix_it(toymatrix[end_num-1],toymatrix[end_num],0,mergetiling[end_num-1],mergetiling[end_num],0,2000,1e5,penalty);
+  //    }else{
+  //      WireCell2dToy::ToyMatrixIterate toymatrix_it(toymatrix[end_num-1],toymatrix[end_num],0,mergetiling[end_num-1],mergetiling[end_num],0,2000,1e5,penalty);
+  //    }
      
-     GeomCellSelection allmcell = mergetiling[end_num]->get_allcell();
+  //    GeomCellSelection allmcell = mergetiling[end_num]->get_allcell();
           
-     cout << "chi2: " << end_num << " " << toymatrix[end_num]->Get_Chi2() << endl;
-     cout << "NDF: " << toymatrix[end_num]->Get_ndf() << endl;
-   }
+  //    cout << "chi2: " << end_num << " " << toymatrix[end_num]->Get_Chi2() << endl;
+  //    cout << "NDF: " << toymatrix[end_num]->Get_ndf() << endl;
+  //  }
    
-   if (toymatrix[start_num]->Get_Solve_Flag()==0){
-     if (two_plane){
-       WireCell2dToy::ToyMatrixIterate_SingleWire toymatrix_it(0,toymatrix[start_num],toymatrix[start_num+1],0,mergetiling[start_num],mergetiling[start_num+1],2000,1e5,penalty);
-     }else{
-       WireCell2dToy::ToyMatrixIterate toymatrix_it(0,toymatrix[start_num],toymatrix[start_num+1],0,mergetiling[start_num],mergetiling[start_num+1],2000,1e5,penalty);
-     }
+  //  if (toymatrix[start_num]->Get_Solve_Flag()==0){
+  //    if (two_plane){
+  //      WireCell2dToy::ToyMatrixIterate_SingleWire toymatrix_it(0,toymatrix[start_num],toymatrix[start_num+1],0,mergetiling[start_num],mergetiling[start_num+1],2000,1e5,penalty);
+  //    }else{
+  //      WireCell2dToy::ToyMatrixIterate toymatrix_it(0,toymatrix[start_num],toymatrix[start_num+1],0,mergetiling[start_num],mergetiling[start_num+1],2000,1e5,penalty);
+  //    }
      
      
-     GeomCellSelection allmcell = mergetiling[start_num]->get_allcell();
+  //    GeomCellSelection allmcell = mergetiling[start_num]->get_allcell();
           
-     cout << "chi2: " << start_num << " " << toymatrix[start_num]->Get_Chi2() << endl;
-     cout << "NDF: " << toymatrix[start_num]->Get_ndf() << endl;
-   }
+  //    cout << "chi2: " << start_num << " " << toymatrix[start_num]->Get_Chi2() << endl;
+  //    cout << "NDF: " << toymatrix[start_num]->Get_ndf() << endl;
+  //  }
 
    
    // std::cout << "Starting MCMC" << std::endl;
@@ -738,73 +825,68 @@ int main(int argc, char* argv[])
 
 
 
-     // form a map to illustrate connectivities 
-   GeomCellCellsMap cell_prev_map;
-   GeomCellCellsMap cell_next_map;
+  // form a map to illustrate connectivities 
+  cell_prev_map.clear();
+  cell_next_map.clear();
    
-   for (int i=start_num;i!=end_num;i++){
-     GeomCellSelection curr_mcell = mergetiling[i]->get_allcell();
-     GeomCellSelection next_mcell = mergetiling[i+1]->get_allcell();
-     for (int j=0;j!=curr_mcell.size();j++){
-       const MergeGeomCell *curr_cell = (MergeGeomCell*)curr_mcell.at(j);
-       for (int k=0;k!=next_mcell.size();k++){
-	 const MergeGeomCell *next_cell = (MergeGeomCell*)next_mcell.at(k);
-	 if (curr_cell->Overlap(*next_cell)){
-
-	   if (cell_next_map.find(curr_cell)==cell_next_map.end()){
-	     GeomCellSelection cells;
-	     cell_next_map[curr_cell] = cells;
-	   }
-	   cell_next_map[curr_cell].push_back(next_cell);
-	   
-	   if (cell_prev_map.find(next_cell)==cell_prev_map.end()){
-	     GeomCellSelection cells;
-	     cell_prev_map[next_cell].push_back(curr_cell);
-	     cell_prev_map[next_cell] = cells;
-	   }
-	   cell_prev_map[next_cell].push_back(curr_cell);
-	 }
-       }
-     }
-   }
-   // save good cluster_cells;
-   GeomCellSelection good_cluster_cells;
-   for (int i=start_num;i!=end_num+1;i++){
-     GeomCellSelection curr_mcell = mergetiling[i]->get_allcell();
-     for (int j=0;j!=curr_mcell.size();j++){
-       const MergeGeomCell *curr_cell = (MergeGeomCell*)curr_mcell.at(j);
-       int flag_good_cluster_cell = 0;
-     
-       if (cell_next_map.find(curr_cell) != cell_next_map.end()){
-	 for (int k=0;k!=cell_next_map[curr_cell].size();k++){
-	   if (toymatrix[i+1]->Get_Cell_Charge(cell_next_map[curr_cell].at(k))> recon_threshold){
-	     flag_good_cluster_cell = 1;
-	     break;
-	   }
-	 }
-       }
-       if (flag_good_cluster_cell == 0){
-	 if (cell_prev_map.find(curr_cell) != cell_prev_map.end()){
-	   for (int k=0;k!=cell_prev_map[curr_cell].size();k++){
-	     if (toymatrix[i-1]->Get_Cell_Charge(cell_prev_map[curr_cell].at(k))> recon_threshold){
-	       flag_good_cluster_cell = 1;
-	       break;
-	     }
-	   }
-	 }
-       }
-
-       if (flag_good_cluster_cell == 1)
-	 good_cluster_cells.push_back(curr_cell);
-     }
-   }
-
-
+  for (int i=start_num;i!=end_num;i++){
+    GeomCellSelection curr_mcell = mergetiling[i]->get_allcell();
+    GeomCellSelection next_mcell = mergetiling[i+1]->get_allcell();
+    for (int j=0;j!=curr_mcell.size();j++){
+      const MergeGeomCell *curr_cell = (MergeGeomCell*)curr_mcell.at(j);
+      for (int k=0;k!=next_mcell.size();k++){
+	const MergeGeomCell *next_cell = (MergeGeomCell*)next_mcell.at(k);
+	if (curr_cell->Overlap(*next_cell)){
+	  
+	  if (cell_next_map.find(curr_cell)==cell_next_map.end()){
+	    GeomCellSelection cells;
+	    cell_next_map[curr_cell] = cells;
+	  }
+	  cell_next_map[curr_cell].push_back(next_cell);
+	  
+	  if (cell_prev_map.find(next_cell)==cell_prev_map.end()){
+	    GeomCellSelection cells;
+	    cell_prev_map[next_cell].push_back(curr_cell);
+	    cell_prev_map[next_cell] = cells;
+	  }
+	  cell_prev_map[next_cell].push_back(curr_cell);
+	}
+      }
+    }
+  }
+  // save good cluster_cells;
+  GeomCellSelection good_cluster_cells;
+  for (int i=start_num;i!=end_num+1;i++){
+    GeomCellSelection curr_mcell = mergetiling[i]->get_allcell();
+    for (int j=0;j!=curr_mcell.size();j++){
+      const MergeGeomCell *curr_cell = (MergeGeomCell*)curr_mcell.at(j);
+      int flag_good_cluster_cell = 0;
+      
+      if (cell_next_map.find(curr_cell) != cell_next_map.end()){
+	for (int k=0;k!=cell_next_map[curr_cell].size();k++){
+	  if (toymatrix[i+1]->Get_Cell_Charge(cell_next_map[curr_cell].at(k))> recon_threshold){
+	    flag_good_cluster_cell = 1;
+	    break;
+	  }
+	}
+      }
+      if (flag_good_cluster_cell == 0){
+	if (cell_prev_map.find(curr_cell) != cell_prev_map.end()){
+	  for (int k=0;k!=cell_prev_map[curr_cell].size();k++){
+	    if (toymatrix[i-1]->Get_Cell_Charge(cell_prev_map[curr_cell].at(k))> recon_threshold){
+	      flag_good_cluster_cell = 1;
+	      break;
+	    }
+	  }
+	}
+      }
+      
+      if (flag_good_cluster_cell == 1)
+	good_cluster_cells.push_back(curr_cell);
+    }
+  }
   
-
-
- 
-  
+    
   //do clustering ... 
   for (int i=start_num;i!=end_num+1;i++){
     GeomCellSelection pallmcell = mergetiling[i]->get_allcell();
