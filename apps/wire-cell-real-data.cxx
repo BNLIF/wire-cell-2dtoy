@@ -493,10 +493,7 @@ int main(int argc, char* argv[])
   for (auto it = cluster_set.begin();it!=cluster_set.end();it++){
     int number_mcells = (*it)->get_allcell().size();
     int number_time = (*it)->get_ordercell().size();
-
     
-    // if very big cluster, then no need to be both side ...
-
     if (number_time >=5 && number_mcells >=6){
       int flag = 0;
       // if cluster contains a three-wire cell?
@@ -506,13 +503,16 @@ int main(int argc, char* argv[])
 	GeomCellSelection& three_wires_cells = mergetiling[time_slice]->get_three_wires_cells();
 	auto it = find(three_wires_cells.begin(),three_wires_cells.end(),mcell);
 	if (it != three_wires_cells.end()){
-	  flag = 1;
-	  break;
+	  flag ++;
 	}
+	if (flag >= number_mcells/3. || flag >=4) {
+	  flag = -1;
+	  break;
+	} 
       }
       
       //two wire cluster, need longer ... 
-      if (flag == 0 && (number_time < 10 && number_mcells < 13)) continue;
+      if (flag != -1) continue;
       
       for (int i=0;i!=(*it)->get_allcell().size();i++){
 	const MergeGeomCell* mcell = (MergeGeomCell*)((*it)->get_allcell().at(i));
