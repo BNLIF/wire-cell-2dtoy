@@ -822,7 +822,13 @@ int main(int argc, char* argv[])
 
 
 
-
+  //clear the previous cluster ... 
+  for (auto it = cluster_set.begin();it!=cluster_set.end();it++){
+    // cluster_set.erase(*it);
+    delete (*it);
+  }
+  cluster_set.clear();
+  cluster_delset.clear();
 
 
   // form a map to illustrate connectivities 
