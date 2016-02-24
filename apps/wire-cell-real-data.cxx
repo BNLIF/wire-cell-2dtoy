@@ -308,13 +308,12 @@ int main(int argc, char* argv[])
   
   int ncount_mcell = 0;
 
-  //  delete fds;
-
+ 
   int start_num = 0 ;
   int end_num = sds.size()-1;
 
-  // int start_num = 61 ;
-  // int end_num = 61;
+  // int start_num = 588 ;
+  // int end_num = 588;
 
   for (int i=start_num;i!=end_num+1;i++){
  
@@ -379,20 +378,20 @@ int main(int argc, char* argv[])
     // display.init(0,10.3698,-2.33/2.,2.33/2.);
     // display.draw_mc(1,WireCell::PointValueVector(),"colz");
     
-    // // display.draw_bad_region(uplane_map,i,nrebin,0,"same");
-    // // display.draw_bad_region(vplane_map,i,nrebin,1,"same");
-    // // display.draw_bad_region(wplane_map,i,nrebin,2,"same");
-    // display.draw_bad_cell(badtiling[i]->get_cell_all());
+    // // // display.draw_bad_region(uplane_map,i,nrebin,0,"same");
+    // // // display.draw_bad_region(vplane_map,i,nrebin,1,"same");
+    // // // display.draw_bad_region(wplane_map,i,nrebin,2,"same");
+    // // display.draw_bad_cell(badtiling[i]->get_cell_all());
   
     // display.draw_cells(toytiling[i]->get_allcell(),"*same");
     // display.draw_mergecells(mergetiling[i]->get_allcell(),"*same",0); //0 is normal, 1 is only draw the ones containt the truth cell
     
-    // display.draw_wires_charge(toytiling[i]->wcmap(),"Fsame",FI);
-    // display.draw_cells_charge(toytiling[i]->get_allcell(),"Fsame");
+    // // display.draw_wires_charge(toytiling[i]->wcmap(),"Fsame",FI);
+    // // display.draw_cells_charge(toytiling[i]->get_allcell(),"Fsame");
   
     
     
-    // theApp.Run();
+    //  theApp.Run();
   }
   
   //save the image before deghosting ... 

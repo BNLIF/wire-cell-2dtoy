@@ -108,7 +108,7 @@ int main(int argc, char* argv[])
     }
   }
 
-  
+  x_pos -= 52 * unit_dis/10.*units::cm;
 
   if (num_uvw  > num_xyz){
     
@@ -146,7 +146,7 @@ int main(int argc, char* argv[])
       std::cout << "U: " << u_wire->index() << std::endl;
       std::cout << "V: " << v_wire->index() + 2400 << std::endl;
       std::cout << "W: " << w_wire->index() + 4800 << std::endl;
-      std::cout << "T: " << (x_pos)/(unit_dis*units::mm)*2+3200<< std::endl;
+      std::cout << "T: " << (x_pos)/(unit_dis*units::mm)*2+3200 << " " << (x_pos)/(unit_dis*units::mm)*2/4.+800 << std::endl;
     }else{
       std::cout << "Point is outside the boundary! " << std::endl;
     }
