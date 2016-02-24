@@ -395,6 +395,125 @@ int main(int argc, char* argv[])
     // theApp.Run();
   }
   
+  //save the image before deghosting ... 
+
+  TFile *file = new TFile(Form("%d_%d.root",run_no,eve_num),"RECREATE");
+  TTree *t_rec = new TTree("T_rec","T_rec");
+  TTree *t_rec_charge = new TTree("T_rec_charge","T_rec_charge");
+  TTree *t_rec_charge_blob = new TTree("T_rec_charge_blob","T_rec_charge_blob");
+  TTree *t_2p = new TTree("T_2p","T_2p");
+
+  Double_t x_save, y_save, z_save;
+  Double_t charge_save;
+  Double_t ncharge_save;
+  Double_t chi2_save;
+  Double_t ndf_save;
+  Double_t type_save;
+ 
+  t_2p->SetDirectory(file);
+  t_2p->Branch("x",&x_save,"x/D");
+  t_2p->Branch("y",&y_save,"y/D");
+  t_2p->Branch("z",&z_save,"z/D");
+
+  t_rec->SetDirectory(file);
+  t_rec->Branch("x",&x_save,"x/D");
+  t_rec->Branch("y",&y_save,"y/D");
+  t_rec->Branch("z",&z_save,"z/D");
+  
+  t_rec_charge->SetDirectory(file);
+  t_rec_charge->Branch("x",&x_save,"x/D");
+  t_rec_charge->Branch("y",&y_save,"y/D");
+  t_rec_charge->Branch("z",&z_save,"z/D");
+  t_rec_charge->Branch("q",&charge_save,"q/D");
+  t_rec_charge->Branch("nq",&ncharge_save,"nq/D");
+  t_rec_charge->Branch("chi2",&chi2_save,"chi2/D");
+  t_rec_charge->Branch("ndf",&ndf_save,"ndf/D");
+
+  TTree *t_bad = new TTree("T_bad","T_bad");
+  t_bad->SetDirectory(file);
+  Int_t bad_npoints;
+  Double_t bad_y[100],bad_z[100];
+  t_bad->Branch("bad_npoints",&bad_npoints,"bad_npoints/I");
+  t_bad->Branch("bad_y",bad_y,"bad_y[bad_npoints]/D");
+  t_bad->Branch("bad_z",bad_z,"bad_z[bad_npoints]/D");
+  
+  for (int i=0; i!=badtiling[0]->get_cell_all().size();i++){
+    const GeomCell *cell = badtiling[0]->get_cell_all().at(i);
+    PointVector ps = cell->boundary();
+    bad_npoints = ps.size();
+    for (int j=0;j!=bad_npoints;j++){
+      bad_y[j] = ps.at(j).y/units::cm;
+      bad_z[j] = ps.at(j).z/units::cm;
+    }
+    t_bad->Fill();
+  }
+
+  //blob stuff
+  t_rec_charge_blob->SetDirectory(file);
+  t_rec_charge_blob->Branch("x",&x_save,"x/D");
+  t_rec_charge_blob->Branch("y",&y_save,"y/D");
+  t_rec_charge_blob->Branch("z",&z_save,"z/D");
+  t_rec_charge_blob->Branch("q",&charge_save,"q/D");
+  t_rec_charge_blob->Branch("nq",&ncharge_save,"nq/D");
+  
+  if (save_image_outline_flag==1){
+    t_rec->Branch("type",&type_save,"type/D");
+    t_rec_charge->Branch("type",&type_save,"type/D");
+    t_rec_charge_blob->Branch("type",&type_save,"type/D");
+  }
+
+
+  TGraph2D *g = new TGraph2D();
+  TGraph2D *g_rec = new TGraph2D();
+  TGraph2D *g_rec_blob = new TGraph2D();
+
+
+  //save results 
+  for (int i=start_num;i!=end_num+1;i++){
+    //recon 1
+    GeomCellSelection allmcell = mergetiling[i]->get_allcell();
+    for (int j=0;j!=allmcell.size();j++){
+      MergeGeomCell *mcell = (MergeGeomCell*)allmcell[j];
+
+      if (save_image_outline_flag==1){
+	Point p = mcell->get_allcell().at(0)->center();
+	x_save = i*nrebin/2.*unit_dis/10. - frame_length/2.*unit_dis/10.-time_offset*unit_dis/10.;
+	y_save = p.y/units::cm;
+	z_save = p.z/units::cm;
+	type_save = 1; //center
+	t_2p->Fill();
+	
+	for (int k=0;k!=mcell->get_edgecells().size();k++){
+	  Point p = mcell->get_edgecells().at(k)->center();
+	  y_save = p.y/units::cm;
+    	  z_save = p.z/units::cm;
+	  type_save = 2; //boundary ...
+	  t_2p->Fill();
+	}
+	
+	for (int k=0;k!=mcell->get_allcell().size();k++){
+    	  Point p = mcell->get_allcell().at(k)->center();
+	  x_save = i*nrebin/2.*unit_dis/10. - frame_length/2.*unit_dis/10.-time_offset*unit_dis/10.;
+	  y_save = p.y/units::cm;
+    	  z_save = p.z/units::cm;
+	  type_save = 0;
+	  t_2p->Fill();
+	 
+	}
+      }else{
+	for (int k=0;k!=mcell->get_allcell().size();k++){
+    	  Point p = mcell->get_allcell().at(k)->center();
+	  x_save = i*nrebin/2.*unit_dis/10. - frame_length/2.*unit_dis/10.-time_offset*unit_dis/10.;
+	  y_save = p.y/units::cm;
+    	  z_save = p.z/units::cm;
+	  t_2p->Fill();
+	 
+	}
+      }
+    }
+  }
+
+
 
 
   //initial clustering ... 
@@ -1040,69 +1159,15 @@ int main(int argc, char* argv[])
   cout << "Summary: " << ncount << " " << ncount_mcell << " " << ncount_mcell_cluster << endl;
   
 
-  TFile *file = new TFile(Form("%d_%d.root",run_no,eve_num),"RECREATE");
-  TTree *t_rec = new TTree("T_rec","T_rec");
-  TTree *t_rec_charge = new TTree("T_rec_charge","T_rec_charge");
-  TTree *t_rec_charge_blob = new TTree("T_rec_charge_blob","T_rec_charge_blob");
-
-  Double_t x_save, y_save, z_save;
-  Double_t charge_save;
-  Double_t ncharge_save;
-  Double_t chi2_save;
-  Double_t ndf_save;
-  Double_t type_save;
  
-  t_rec->SetDirectory(file);
-  t_rec->Branch("x",&x_save,"x/D");
-  t_rec->Branch("y",&y_save,"y/D");
-  t_rec->Branch("z",&z_save,"z/D");
-  
-  t_rec_charge->SetDirectory(file);
-  t_rec_charge->Branch("x",&x_save,"x/D");
-  t_rec_charge->Branch("y",&y_save,"y/D");
-  t_rec_charge->Branch("z",&z_save,"z/D");
-  t_rec_charge->Branch("q",&charge_save,"q/D");
-  t_rec_charge->Branch("nq",&ncharge_save,"nq/D");
-  t_rec_charge->Branch("chi2",&chi2_save,"chi2/D");
-  t_rec_charge->Branch("ndf",&ndf_save,"ndf/D");
-
-  TTree *t_bad = new TTree("T_bad","T_bad");
-  t_bad->SetDirectory(file);
-  Int_t bad_npoints;
-  Double_t bad_y[100],bad_z[100];
-  t_bad->Branch("bad_npoints",&bad_npoints,"bad_npoints/I");
-  t_bad->Branch("bad_y",bad_y,"bad_y[bad_npoints]/D");
-  t_bad->Branch("bad_z",bad_z,"bad_z[bad_npoints]/D");
-  
-  for (int i=0; i!=badtiling[0]->get_cell_all().size();i++){
-    const GeomCell *cell = badtiling[0]->get_cell_all().at(i);
-    PointVector ps = cell->boundary();
-    bad_npoints = ps.size();
-    for (int j=0;j!=bad_npoints;j++){
-      bad_y[j] = ps.at(j).y/units::cm;
-      bad_z[j] = ps.at(j).z/units::cm;
-    }
-    t_bad->Fill();
-  }
-
-  //blob stuff
-  t_rec_charge_blob->SetDirectory(file);
-  t_rec_charge_blob->Branch("x",&x_save,"x/D");
-  t_rec_charge_blob->Branch("y",&y_save,"y/D");
-  t_rec_charge_blob->Branch("z",&z_save,"z/D");
-  t_rec_charge_blob->Branch("q",&charge_save,"q/D");
-  t_rec_charge_blob->Branch("nq",&ncharge_save,"nq/D");
-  
-  if (save_image_outline_flag==1){
-    t_rec->Branch("type",&type_save,"type/D");
-    t_rec_charge->Branch("type",&type_save,"type/D");
-    t_rec_charge_blob->Branch("type",&type_save,"type/D");
-  }
 
 
-  TGraph2D *g = new TGraph2D();
-  TGraph2D *g_rec = new TGraph2D();
-  TGraph2D *g_rec_blob = new TGraph2D();
+
+
+
+
+
+
 
  
   //save results 

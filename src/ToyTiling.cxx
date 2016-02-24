@@ -1284,7 +1284,7 @@ void WireCell2dToy::ToyTiling::twoplane_tiling(int time, int nrebin, WireCell::G
 	  if (n_wire ==0 ) continue;
   	  auto it1 = find(nu_wires.begin(),nu_wires.end(),n_wire);
 	  auto it2 = uplane_map.find(n_wire->index());
-  	  if ((it2!=uplane_map.end() && (time >= uplane_map[n_wire->index()].first /nrebin && time <= uplane_map[n_wire->index()].second /nrebin ) )){
+  	  if ((it2!=uplane_map.end() && (time >= uplane_map[n_wire->index()].first /nrebin && time <= uplane_map[n_wire->index()].second /nrebin ))){
   	    if (it1 == nu_wires.end())
 	      nu_wires.push_back(n_wire);
 
