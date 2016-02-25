@@ -326,80 +326,80 @@ int WireCell2dToy::DataSignalWienFDS::jump(int frame_number){
       }
     }
         
-    // // old method to calculate RMS
-    // for (int i=0;i!=htemp->GetNbinsX();i++){
-    //   if (i < start || i > end){
-    //  	rms += pow(htemp->GetBinContent(i+1),2);
-    //  	rms2 ++;
-    //   }
-    // }
-    // if (rms2!=0){
-    //   rms = sqrt(rms/rms2);
-    // }else{
-    //   rms = 0;   
-    // }
+    // old method to calculate RMS
+    for (int i=0;i!=htemp->GetNbinsX();i++){
+      if (i < start || i > end){
+     	rms += pow(htemp->GetBinContent(i+1),2);
+     	rms2 ++;
+      }
+    }
+    if (rms2!=0){
+      rms = sqrt(rms/rms2);
+    }else{
+      rms = 0;   
+    }
 
-    // //try to exclude signal
-    // rms2 = 0;
-    //  for (int i=0;i!=htemp->GetNbinsX();i++){
-    //   if (i < start || i > end){
-    // 	if (fabs(htemp->GetBinContent(i+1)) < 6*rms){
-    // 	  rms1 += pow(htemp->GetBinContent(i+1),2);
-    // 	  rms2 ++;
-    // 	}
-    //   }
-    // }
-    // if (rms2!=0){
-    //   rms1 = sqrt(rms1/rms2);
-    // }else{
-    //   rms1 = 0;   
-    // }
-    
-    // new method to calculate RMS
-    int min1 =0,max1=0;
-    for (int i=0;i!=htemp->GetNbinsX();i++){
-      if (i < start || i > end){
-	if (htemp->GetBinContent(i+1)>max1)
-	  max1 = int(htemp->GetBinContent(i+1));
-	if (htemp->GetBinContent(i+1)<min1)
-	  min1 = int(htemp->GetBinContent(i+1));
-      }
-    }
-    TH1F *h6 = new TH1F("h6","h6",int(max1-min1+1),min1,max1+1);
-    for (int i=0;i!=htemp->GetNbinsX();i++){
-      if (i < start || i > end){
-	h6->Fill(int(htemp->GetBinContent(i+1)));
-      }
-    }
-    if (h6->GetSum()>0){
-      //calculate 0.16, 0.84 percentile ...  
-      double xq;
-      xq = 0.16;
-      double par[2];
-      h6->GetQuantiles(1,&par[0],&xq);
-      xq = 0.84;
-      h6->GetQuantiles(1,&par[1],&xq);
-      rms = (par[1]-par[0])/2.;
-      
-      //try to exclude signal
-      rms2 = 0;
+    //try to exclude signal
+    rms2 = 0;
      for (int i=0;i!=htemp->GetNbinsX();i++){
-       if (i < start || i > end){
-	 if (fabs(htemp->GetBinContent(i+1)) < 5.0*rms){
+      if (i < start || i > end){
+    	if (fabs(htemp->GetBinContent(i+1)) < 6*rms){
     	  rms1 += pow(htemp->GetBinContent(i+1),2);
     	  rms2 ++;
     	}
-       }
-     }
-     if (rms2!=0){
-       rms1 = sqrt(rms1/rms2);
-     }else{
-       rms1 = 0;   
-     }
-    }else{
-      rms1 =0;
+      }
     }
-    delete h6;
+    if (rms2!=0){
+      rms1 = sqrt(rms1/rms2);
+    }else{
+      rms1 = 0;   
+    }
+    
+    // // new method to calculate RMS
+    // int min1 =0,max1=0;
+    // for (int i=0;i!=htemp->GetNbinsX();i++){
+    //   if (i < start || i > end){
+    // 	if (htemp->GetBinContent(i+1)>max1)
+    // 	  max1 = int(htemp->GetBinContent(i+1));
+    // 	if (htemp->GetBinContent(i+1)<min1)
+    // 	  min1 = int(htemp->GetBinContent(i+1));
+    //   }
+    // }
+    // TH1F *h6 = new TH1F("h6","h6",int(max1-min1+1),min1,max1+1);
+    // for (int i=0;i!=htemp->GetNbinsX();i++){
+    //   if (i < start || i > end){
+    // 	h6->Fill(int(htemp->GetBinContent(i+1)));
+    //   }
+    // }
+    // if (h6->GetSum()>0){
+    //   //calculate 0.16, 0.84 percentile ...  
+    //   double xq;
+    //   xq = 0.16;
+    //   double par[2];
+    //   h6->GetQuantiles(1,&par[0],&xq);
+    //   xq = 0.84;
+    //   h6->GetQuantiles(1,&par[1],&xq);
+    //   rms = (par[1]-par[0])/2.;
+      
+    //   //try to exclude signal
+    //   rms2 = 0;
+    //  for (int i=0;i!=htemp->GetNbinsX();i++){
+    //    if (i < start || i > end){
+    // 	 if (fabs(htemp->GetBinContent(i+1)) < 5.0*rms){
+    // 	  rms1 += pow(htemp->GetBinContent(i+1),2);
+    // 	  rms2 ++;
+    // 	}
+    //    }
+    //  }
+    //  if (rms2!=0){
+    //    rms1 = sqrt(rms1/rms2);
+    //  }else{
+    //    rms1 = 0;   
+    //  }
+    // }else{
+    //   rms1 =0;
+    // }
+    // delete h6;
     
 
     if (chid < nwire_u){
