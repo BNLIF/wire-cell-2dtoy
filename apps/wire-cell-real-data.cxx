@@ -123,6 +123,7 @@ int main(int argc, char* argv[])
   
   //float unit_dis = 1.01483;  // 58KV @ 226.5 V/cm
   float unit_dis = 1.14753;  // 70 KV @ 226.5 V/cm
+  //float unit_dis = 1.6;  //test case
 
   //**** time offset for 58kV ****// 
   //float toffset_1=-(1.834-1.647) -0.1;//+ 0.1 + (nt_off1 * 0.1 - 0.5 );  // time offset between u/v 
@@ -312,8 +313,8 @@ int main(int argc, char* argv[])
   int start_num = 0 ;
   int end_num = sds.size()-1;
 
-  // int start_num = 588 ;
-  // int end_num = 588;
+  // int start_num = 599 ;
+  // int end_num = 599;
 
   for (int i=start_num;i!=end_num+1;i++){
  
@@ -377,7 +378,7 @@ int main(int argc, char* argv[])
 
     // display.init(0,10.3698,-2.33/2.,2.33/2.);
     // display.draw_mc(1,WireCell::PointValueVector(),"colz");
-    
+    // display.draw_slice(slice,""); // draw wire 
     // // // display.draw_bad_region(uplane_map,i,nrebin,0,"same");
     // // // display.draw_bad_region(vplane_map,i,nrebin,1,"same");
     // // // display.draw_bad_region(wplane_map,i,nrebin,2,"same");
