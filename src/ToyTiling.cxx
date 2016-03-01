@@ -875,11 +875,11 @@ void WireCell2dToy::ToyTiling::twoplane_tiling(int time, int nrebin, WireCell::G
 	  if (n_wire == 0) continue;
 	  auto it1 = find(nw_wires.begin(),nw_wires.end(),n_wire);
 	  auto it2 = wplane_map.find(n_wire->index());
+	  auto it3 = wplane_map.find(n_wire->index()-1);
+	  auto it4 = wplane_map.find(n_wire->index()+1);
 
-	  	
 	  //if (it1 == nw_wires.end() && it2 == wplane_map.end()){
-	  if (
-	      (it2!=wplane_map.end() && (time <= wplane_map[n_wire->index()].second /nrebin && time >= wplane_map[n_wire->index()].first /nrebin ) )){
+	  if ((it2!=wplane_map.end() && (time <= wplane_map[n_wire->index()].second /nrebin && time >= wplane_map[n_wire->index()].first /nrebin) || (it3!=wplane_map.end() && it4!=wplane_map.end()) )){
 	    
 	    if (it1 == nw_wires.end())
 	      nw_wires.push_back(n_wire);
@@ -1096,9 +1096,10 @@ void WireCell2dToy::ToyTiling::twoplane_tiling(int time, int nrebin, WireCell::G
 	  if (n_wire == 0 ) continue;
   	  auto it1 = find(nv_wires.begin(),nv_wires.end(),n_wire);
 	  auto it2 = vplane_map.find(n_wire->index());
+	  auto it3 = vplane_map.find(n_wire->index()-1);
+	  auto it4 = vplane_map.find(n_wire->index()+1);
 
-	   if (
-	       (it2!=vplane_map.end() && (time <= vplane_map[n_wire->index()].second /nrebin && time >= vplane_map[n_wire->index()].first /nrebin ) )){
+	  if ((it2!=vplane_map.end() && (time <= vplane_map[n_wire->index()].second /nrebin && time >= vplane_map[n_wire->index()].first /nrebin) || (it3!=vplane_map.end()&&it4!=vplane_map.end()) )){
 
 	     //  	  if (it1 == nv_wires.end() && it2 == vplane_map.end()){
 	     if (it1 == nv_wires.end())
@@ -1314,11 +1315,12 @@ void WireCell2dToy::ToyTiling::twoplane_tiling(int time, int nrebin, WireCell::G
 	  if (n_wire ==0 ) continue;
   	  auto it1 = find(nu_wires.begin(),nu_wires.end(),n_wire);
 	  auto it2 = uplane_map.find(n_wire->index());
-	  
+	  auto it3 = uplane_map.find(n_wire->index()-1);
+	  auto it4 = uplane_map.find(n_wire->index()+1);
 	  // if (pwv[a1].z/units::cm < 0.67*100 && pwv[a1].y/units::cm < -68)
 	     // std::cout << "Xin2: " << wire1->index() << " " << wire2->index() << " " << n_wire->index() << " " << (it2==uplane_map.end()) << " " << time << " " << uplane_map[n_wire->index()].first /nrebin << " " << uplane_map[n_wire->index()].second /nrebin << std::endl; 
 
-  	  if ((it2!=uplane_map.end() && (time >= uplane_map[n_wire->index()].first /nrebin && time <= uplane_map[n_wire->index()].second /nrebin ))){
+  	  if ((it2!=uplane_map.end() && (time >= uplane_map[n_wire->index()].first /nrebin && time <= uplane_map[n_wire->index()].second /nrebin) || (it3!=uplane_map.end() && it4!=uplane_map.end()))){
   	    if (it1 == nu_wires.end())
 	      nu_wires.push_back(n_wire);
 
