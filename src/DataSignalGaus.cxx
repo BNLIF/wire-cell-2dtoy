@@ -65,8 +65,8 @@ WireCell2dToy::DataSignalGausFDS::DataSignalGausFDS(WireCell::FrameDataSource& f
 
   //get in the response function ... 
   //#include "data.txt"  //58kV
-  #include "data_70.txt"  //70kV
-    
+  //  #include "data_70.txt"  //70kV
+   #include "data_70_1.txt"  //70kV with Xin's tune on V and Y
 
   gu = new TGraph(5000,xu,yu);
   gv = new TGraph(5000,xv,yv);
