@@ -43,15 +43,17 @@ namespace WireCell2dToy {
     /* TH1F **hv; */
     /* TH1F **hw; */
 
-    TH1F *hu;
+    TH1F *hu; //good 
+    TGraph **gu; //Now an array 
+    TH1F *hur; // good
+    TH1 *hmr_u, *hpr_u; //good?
+
     TH1F *hv;
     TH1F *hw;
-
-    TGraph *gu, *gv, *gw;
-
-    TH1F *hur, *hvr, *hwr;
+    TGraph *gv, *gw;    
+    TH1F *hvr, *hwr;
     
-    TH1 *hmr_u, *hpr_u;
+    
     TH1 *hmr_v, *hpr_v;
     TH1 *hmr_w, *hpr_w;
     
