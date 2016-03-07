@@ -105,7 +105,7 @@ int WireCell2dToy::DataSignalWien2DFDS::jump(int frame_number){
       double x = time;
       if (x > -35 && x  < 15){
 	if (gtemp->Eval(x)>0 && x<0){
-	  hur->SetBinContent(i+1,gtemp->Eval(x)/scale_u*0.75); //70kV
+	  hur->SetBinContent(i+1,gtemp->Eval(x)/scale_u*1.0); //70kV
 	}else{
 	  hur->SetBinContent(i+1,gtemp->Eval(x)/scale_u); //70kV
 	}
@@ -133,7 +133,7 @@ int WireCell2dToy::DataSignalWien2DFDS::jump(int frame_number){
     x = time-time_offset_uv;  //70kV
     if (x > -35 && x  < 15){
       if (gv->Eval(x)>0 && x<0){
-	hvr->SetBinContent(i+1,gv->Eval(x)/scale_v*0.75);  //70kV
+	hvr->SetBinContent(i+1,gv->Eval(x)/scale_v*1.0);  //70kV
       }else{
 	hvr->SetBinContent(i+1,gv->Eval(x)/scale_v);  //70kV
       }
