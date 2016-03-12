@@ -54,8 +54,8 @@ WireCell2dToy::DataSignalWienFDS::DataSignalWienFDS(WireCell::FrameDataSource& f
   hw = new TH1F("W4","W4",nbin,0,nbin);
 
   //#include "data.txt"   //58kV
-  //#include "data_70.txt"  //70kV
-  #include "data_70_1.txt"  //70kV with Xin's tune on V and Y
+  #include "data_70.txt"  //70kV
+  //#include "data_70_1.txt"  //70kV with Xin's tune on V and Y
   
   gu = new TGraph(5000,xu,yu);
   gv = new TGraph(5000,xv,yv);
