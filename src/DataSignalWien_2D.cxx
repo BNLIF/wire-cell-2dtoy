@@ -244,6 +244,7 @@ int WireCell2dToy::DataSignalWien2DFDS::jump(int frame_number){
   	}
 	
   	double rho = hm->GetBinContent(i+1)/hmr->GetBinContent(i+1)*filter->Eval(freq);
+	//	if (freq < 0.0045) rho = 0;
   	double phi = hp->GetBinContent(i+1) - hpr->GetBinContent(i+1);
 	
   	if (i==0) rho = 0;
@@ -439,8 +440,14 @@ int WireCell2dToy::DataSignalWien2DFDS::jump(int frame_number){
     for (Int_t j=0;j!=nchannels;j++){
       Int_t shift = j - 3;
       if (shift <0) shift += nchannels;
-      result_re[j][i] = temp3_re[shift]/nticks*filter_u->Eval(freq); // filter out the high frequency in time ... 
+
+      //     if (freq > 0.0045){
+      result_re[j][i] = temp3_re[shift]/nticks*filter_u->Eval(freq); //filter out the high frequency in time ... 
       result_im[j][i] = temp3_im[shift]/nticks*filter_u->Eval(freq);
+      // }else{
+    //   	result_re[j][i] = 0.;
+    //   	result_im[j][i] = 0.;
+    // }
     }
     
     delete ifft;
