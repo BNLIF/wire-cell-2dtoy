@@ -176,16 +176,16 @@ int WireCell2dToy::DataSignalWienFDS::jump(int frame_number){
   
   // do FFT again to remove response function and apply filter
 
-  TF1 *filter_u = new TF1("filter_u","(x>0.0)*gaus*exp(-0.5*pow(x/[3],[4]))");
-  double par[5]={1.73/0.959301, 1.69, 1.55, 0.19, 3.75};
+  TF1 *filter_u = new TF1("filter_u","(x>0.0)*exp(-0.5*pow(x/[0],[1]))");
+  double par[2]={1.22781e+01/200.*2.,4.96159e+00};
   filter_u->SetParameters(par);
 
-  TF1 *filter_v = new TF1("filter_v","(x>0.0)*gaus*exp(-0.5*pow(x/[3],[4]))");
-  double par1[5]={1.74/0.941034, 1.46, 1.33, 0.23, 4.89};
+  TF1 *filter_v = new TF1("filter_v","(x>0.0)*exp(-0.5*pow(x/[0],[1]))");
+  double par1[2]={1.31649e+01/200.*2.,4.67294e+00};
   filter_v->SetParameters(par1);
 
-  TF1 *filter_w = new TF1("filter_y","(x>0.0)*[0]*exp(-0.5*pow(pow((x-[1])/[2],2),[3]))");
-  double par2[4]={1.03/0.995635, 0.08, 0.15, 2.17};
+  TF1 *filter_w = new TF1("filter_y","(x>0.0)*exp(-0.5*pow(x/[0],[1]))");
+  double par2[2]={1.26250e+01/200.*2.,4.48298e+00};
   filter_w->SetParameters(par2);
 
 
