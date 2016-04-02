@@ -96,12 +96,12 @@ int main(int argc, char* argv[])
   float toffset_3=0.0;
   
 
-  int total_time_bin=9592;
+  int total_time_bin=9590;
   int recon_threshold = 2000;
   int frame_length = 3200;
   int max_events = 100;
   int eve_num  = atoi(argv[3]);
-  int nrebin = 4;
+  int nrebin = 7;
   float threshold_u = 5.87819e+02 * 4.0;
   float threshold_v = 8.36644e+02 * 4.0;
   float threshold_w = 5.67974e+02 * 4.0;
@@ -278,13 +278,13 @@ int main(int argc, char* argv[])
   std::vector<float>& vplane_rms = wien_fds.get_vplane_rms();
   std::vector<float>& wplane_rms = wien_fds.get_wplane_rms();
   for (Int_t i=0;i!=uplane_rms.size();i++){
-    hu_threshold->SetBinContent(i+1,uplane_rms.at(i)*3);
+    hu_threshold->SetBinContent(i+1,uplane_rms.at(i)*3.6);
   }
   for (Int_t i=0;i!=vplane_rms.size();i++){
-    hv_threshold->SetBinContent(i+1,vplane_rms.at(i)*3);
+    hv_threshold->SetBinContent(i+1,vplane_rms.at(i)*3.6);
   }
   for (Int_t i=0;i!=wplane_rms.size();i++){
-    hw_threshold->SetBinContent(i+1,wplane_rms.at(i)*3);
+    hw_threshold->SetBinContent(i+1,wplane_rms.at(i)*3.6);
   }
 
   // finish saving

@@ -138,12 +138,12 @@ int main(int argc, char* argv[])
   int save_image_outline_flag = 0; // prescale flag 
   
 
-  int total_time_bin=9592;
+  int total_time_bin=9590;
   int recon_threshold = 2000;
   int frame_length = 3200;
   int max_events = 100;
   int eve_num  = atoi(argv[3]);
-  int nrebin = 4;
+  int nrebin = 7;
 
   TPCParams& mp = Singleton<TPCParams>::Instance();
   
