@@ -96,12 +96,12 @@ int main(int argc, char* argv[])
   float toffset_3=0.0;
   
 
-  int total_time_bin=9590;
+  int total_time_bin=9594;
   int recon_threshold = 2000;
   int frame_length = 3200;
   int max_events = 100;
   int eve_num  = atoi(argv[3]);
-  int nrebin = 7;
+  int nrebin = 6;
   float threshold_u = 5.87819e+02 * 4.0;
   float threshold_v = 8.36644e+02 * 4.0;
   float threshold_w = 5.67974e+02 * 4.0;
