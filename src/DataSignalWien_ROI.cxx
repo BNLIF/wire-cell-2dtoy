@@ -103,17 +103,21 @@ void WireCell2dToy::DataSignalWienROIFDS::Save(){
 }
 
 int WireCell2dToy::DataSignalWienROIFDS::jump(int frame_number){
-  // // fill the frame data ... 
-  // if (frame.index == frame_number) {
-  //   return frame_number;
-  // }
-  // frame.clear();
-  // int scale = nbin/bins_per_frame;
+  // fill the frame data ... 
+  if (frame.index == frame_number) {
+    return frame_number;
+  }
+  frame.clear();
+    
+  fds.jump(frame_number);
 
-  
-  // fds.jump(frame_number);
-  // const Frame& frame1 = fds.get();
-  // size_t ntraces = frame1.traces.size();
+
+
+  int scale = nbin/bins_per_frame;
+  const Frame& frame1 = fds.get();
+  size_t ntraces = frame1.traces.size();
+
+
 
   // TVirtualFFT::SetTransform(0);
   // hur = new TH1F("hur1","hur1",nbin,0,nbin); // half us tick

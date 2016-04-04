@@ -49,6 +49,13 @@ namespace WireCell2dToy {
     std::vector<float> vplane_rms_g;
     std::vector<float> wplane_rms_g;
 
+    void Deconvolute_U_1D_c();
+    void Deconvolute_V_1D_c();
+    void Deconvolute_W_1D_g();
+
+    void Deconvolute_U_2D_g(); // both with filter and without filter 
+    void Deconvolute_V_1D_g(); // both with filter and without filter 
+
     // U plane  1D-U-c
     TH2F *hu_1D_c;
     TGraph *gu_1D_c;
