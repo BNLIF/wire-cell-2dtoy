@@ -5,6 +5,7 @@
 #include "WireCellNav/GeomDataSource.h"
 #include "WireCellData/GeomWire.h"
 #include "TH1F.h"
+#include "TH2F.h"
 #include "TGraph.h"
 
 namespace WireCell2dToy {
@@ -16,6 +17,7 @@ namespace WireCell2dToy {
 
     virtual int size() const;
     virtual int jump(int frame_number);
+
     //fixed it ...
     std::vector <float>& get_uplane_rms(){return uplane_rms;};
     std::vector <float>& get_vplane_rms(){return vplane_rms;};
@@ -39,31 +41,39 @@ namespace WireCell2dToy {
     
     int nwire_u, nwire_v, nwire_w;
 
-    /* TH1F **hu; */
-    /* TH1F **hv; */
-    /* TH1F **hw; */
+    std::vector<float> uplane_rms; // calibrated field response
+    std::vector<float> vplane_rms; // calibrated field response
+    std::vector<float> wplane_rms; // calibrated field response
 
-    TH1F *hu; //good 
-    TGraph **gu; //Now an array 
-    TH1F *hur; // good
-    TH1 *hmr_u, *hpr_u; //good?
+    std::vector<float> uplane_rms_g;
+    std::vector<float> vplane_rms_g;
+    std::vector<float> wplane_rms_g;
 
-    TH1F *hv;
-    TH1F *hw;
-    TGraph *gv, *gw;    
-    TH1F *hvr, *hwr;
+    // U plane  1D-U-c
+    TH2F *hu_1D_c;
+    TGraph *gu_1D_c;
 
-    /* TGraph *wiener_filter_u; */
-    /* TGraph *wiener_filter_v; */
+    // 2D-U-g-f, 2D-U-g
+    TH2F *hu_2D_g_f;
+    TH2F *hu_2D_g;
+    TGraph **gu_2D_g;
     
+          
+    //V plane 1-D-V-c
+    TH2F *hv_1D_c;
+    TGraph *gv_1D_c;
+
+    //1-D-V-g-f, 1-D-V-g
+    TH2F *hv_1D_g_f;
+    TH2F *hv_1D_g;
+    TGraph *gv_1D_g;
+
+    //W-plane  1-D-W-g
+    TH2F *hw_1D_g;
+    TGraph *gw_1D_g;
+
     
-    
-    TH1 *hmr_v, *hpr_v;
-    TH1 *hmr_w, *hpr_w;
-    
-    std::vector<float> uplane_rms;
-    std::vector<float> vplane_rms;
-    std::vector<float> wplane_rms;
+ 
 
   };
 }
