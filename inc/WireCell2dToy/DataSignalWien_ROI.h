@@ -71,6 +71,7 @@ namespace WireCell2dToy {
     //W-plane  1-D-W-g
     TH2F *hw_1D_g;
     TGraph *gw_1D_g;
+    TGraph *gw_1D_c;
 
     
  

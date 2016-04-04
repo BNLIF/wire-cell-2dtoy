@@ -49,22 +49,23 @@ WireCell2dToy::DataSignalWienROIFDS::DataSignalWienROIFDS(WireCell::FrameDataSou
 
   hw_1D_g = new TH2F("hw_1D_g","hw_1D_g",nwire_w,0,nwire_w,bins_per_frame,0,bins_per_frame);
 
+  #include "data_70_ROI.txt"  //70kV 2D deconvolution for U
 
-  // hu = new TH1F("U4","U4",nbin,0,nbin);
-  // hv = new TH1F("V4","V4",nbin,0,nbin);
-  // hw = new TH1F("W4","W4",nbin,0,nbin);
-
-  // #include "data_70_2.txt"  //70kV 2D deconvolution for U
-  
-  // gu = new TGraph*[4];
-  // gu[0] = new TGraph(5000,xu,yu0);
-  // gu[1] = new TGraph(5000,xu,yu1);
-  // gu[2] = new TGraph(5000,xu,yu2);
-  // gu[3] = new TGraph(5000,xu,yu3);
+  gu_1D_c = new TGraph(5000,u_1D_c_x, u_1D_c_y);
+  gv_1D_c = new TGraph(5000,v_1D_c_x, v_1D_c_y);
+  gw_1D_c = new TGraph(5000,w_1D_c_x, w_1D_c_y);
   
 
-  // gv = new TGraph(5000,xv,yv);
-  // gw = new TGraph(5000,xw,yw);
+  gu_2D_g = new TGraph*[4];
+  gu_2D_g[0] = new TGraph(5000,u_2D_g_0_x,u_2D_g_0_y);
+  gu_2D_g[1] = new TGraph(5000,u_2D_g_1_x,u_2D_g_1_y);
+  gu_2D_g[2] = new TGraph(5000,u_2D_g_2_x,u_2D_g_2_y);
+  gu_2D_g[3] = new TGraph(5000,u_2D_g_3_x,u_2D_g_3_y);
+
+  gv_1D_g = new TGraph(5000,v_1D_g_x,v_1D_g_y);
+  gw_1D_g = new TGraph(5000,w_1D_g_x,w_1D_g_y);
+
+  
 }
 
 WireCell2dToy::DataSignalWienROIFDS::~DataSignalWienROIFDS(){
@@ -77,7 +78,19 @@ WireCell2dToy::DataSignalWienROIFDS::~DataSignalWienROIFDS(){
   delete hv_1D_g;
   
   delete hw_1D_g;
+
+  delete gu_1D_c;
+  delete gv_1D_c;
+  delete gw_1D_c;
+ 
+  delete gv_1D_g;
+  delete gw_1D_g;
   
+  for (int i=0;i!=4;i++){
+    delete gu_2D_g[i];
+  }
+  
+  delete [] gu_2D_g;
 }
 
 
