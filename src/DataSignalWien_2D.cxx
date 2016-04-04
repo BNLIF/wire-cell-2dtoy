@@ -173,7 +173,17 @@ int WireCell2dToy::DataSignalWien2DFDS::jump(int frame_number){
   TF1 *filter_w = new TF1("filter_y","(x>0.0)*exp(-0.5*pow(x/[0],[1]))");
   double par2[2]={1.45874e+01/200.*2.,5.02219e+00};
   filter_w->SetParameters(par2);
+
+  TF1 *filter_low = new TF1("filter_low","1-exp(-pow(x/0.0045,2))");
   
+
+  // #include "filter_wiener_70.txt"
+  
+  // wiener_filter_u = new TGraph(150,wiener_filter_x,wiener_filter_u_y);
+  // wiener_filter_v = new TGraph(150,wiener_filter_x,wiener_filter_v_y);
+  
+
+
   std::vector<std::vector<double>> rho_u, phi_u,result_re,result_im;
   //double result_re[nchannels][nticks],result_im[nchannels][nticks];
   //float rho_u[nchannels][nticks],phi_u[nchannels][nticks];
@@ -199,17 +209,20 @@ int WireCell2dToy::DataSignalWien2DFDS::jump(int frame_number){
     TH1F *htemp;
     TF1 *filter;
     int flag_2d = 0; // do 2-D deconvolution?
+    int flag_ind = 0;
     if (chid < nwire_u){
       htemp = hu;
       hmr = hmr_u;
       hpr = hpr_u;
       filter = filter_u;
       flag_2d = 1;
+      flag_ind = 1;
     }else if (chid < nwire_u + nwire_v){
       htemp = hv;
       hmr = hmr_v;
       hpr = hpr_v;
       filter = filter_v;
+      flag_ind = 1;
     }else{
       htemp = hw;
       hmr = hmr_w;
@@ -243,8 +256,12 @@ int WireCell2dToy::DataSignalWien2DFDS::jump(int frame_number){
   	  freq = (nbin - i)/(1.*nbin)*2.;
   	}
 	
-  	double rho = hm->GetBinContent(i+1)/hmr->GetBinContent(i+1)*filter->Eval(freq);
-	//	if (freq < 0.0045) rho = 0;
+  	double rho;
+	rho = hm->GetBinContent(i+1)/hmr->GetBinContent(i+1)*filter->Eval(freq);
+	
+	if (flag_ind == 1)
+	  rho *= filter_low->Eval(freq);
+	
   	double phi = hp->GetBinContent(i+1) - hpr->GetBinContent(i+1);
 	
   	if (i==0) rho = 0;
@@ -441,13 +458,13 @@ int WireCell2dToy::DataSignalWien2DFDS::jump(int frame_number){
       Int_t shift = j - 3;
       if (shift <0) shift += nchannels;
 
-      //     if (freq > 0.0045){
-      result_re[j][i] = temp3_re[shift]/nticks*filter_u->Eval(freq); //filter out the high frequency in time ... 
-      result_im[j][i] = temp3_im[shift]/nticks*filter_u->Eval(freq);
+      //      if (freq > 0.0045){
+      result_re[j][i] = temp3_re[shift]/nticks*filter_u->Eval(freq) * filter_low->Eval(freq); //filter out the high frequency in time ... 
+      result_im[j][i] = temp3_im[shift]/nticks*filter_u->Eval(freq) * filter_low->Eval(freq);
       // }else{
-    //   	result_re[j][i] = 0.;
-    //   	result_im[j][i] = 0.;
-    // }
+      // 	result_re[j][i] = 0.;
+      // 	result_im[j][i] = 0.;
+      // }
     }
     
     delete ifft;

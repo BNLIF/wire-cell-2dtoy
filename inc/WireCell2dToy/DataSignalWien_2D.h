@@ -52,6 +52,10 @@ namespace WireCell2dToy {
     TH1F *hw;
     TGraph *gv, *gw;    
     TH1F *hvr, *hwr;
+
+    /* TGraph *wiener_filter_u; */
+    /* TGraph *wiener_filter_v; */
+    
     
     
     TH1 *hmr_v, *hpr_v;
