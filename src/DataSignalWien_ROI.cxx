@@ -102,6 +102,213 @@ int WireCell2dToy::DataSignalWienROIFDS::size() const{
 void WireCell2dToy::DataSignalWienROIFDS::Save(){
 }
 
+void WireCell2dToy::DataSignalWienROIFDS::Deconvolute_V_1D_c(){
+  
+}
+
+
+void WireCell2dToy::DataSignalWienROIFDS::Deconvolute_U_1D_c(){
+  
+  const Frame& frame1 = fds.get();
+  size_t ntraces = frame1.traces.size();
+
+  const int nticks = nbin;
+  double value_re[9600];
+  double value_im[9600];
+  int scale = nbin/bins_per_frame;
+
+  // wiener filter for U-plane
+  TF1 *filter_u = new TF1("filter_u","(x>0.0)*exp(-0.5*pow(x/[0],[1]))");
+  double par[2]={1.22781e+01/200.*2.,4.96159e+00};
+  filter_u->SetParameters(par);
+  
+  //response function ...
+  TH1F *hur = new TH1F("hur1","hur1",nbin,0,nbin); // half us tick
+  float scale_u = 1.51/1.16*0.91*0.85;
+  for (int i=0;i!=nbin;i++){
+    double time  = hur->GetBinCenter(i+1)/2.-50;
+    double x = time;
+    if (x > -35 && x  < 15){
+      hur->SetBinContent(i+1,gu_1D_c->Eval(x)/scale_u);
+    }
+  }
+  TH1 *hmr_u = hur->FFT(0,"MAG");
+  TH1 *hpr_u = hur->FFT(0,"PH");
+  
+  for (size_t ind=0; ind<ntraces; ++ind) {
+    const Trace& trace = frame1.traces[ind];
+    int tbin = trace.tbin;
+    int chid = trace.chid;
+    int nbins = trace.charge.size();
+    if (chid >=2400) continue;
+    
+    TH1F *htemp = new TH1F("htemp","htemp",nbin,0,nbin);
+    for (int i = tbin;i!=tbin+nbins;i++){
+      int tt = i+1;
+      htemp->SetBinContent(tt,trace.charge.at(i));
+    }
+    
+    TH1 *hm = htemp->FFT(0,"MAG");
+    TH1 *hp = htemp->FFT(0,"PH");
+
+    for (int i=0;i!=nbin;i++){
+      double freq;
+      if (i< nbin/2.){
+	freq = i/(1.*nbin)*2.;
+      }else{
+	freq = (nbin - i)/(1.*nbin)*2.;
+      }
+      double rho = hm->GetBinContent(i+1)/hmr_u->GetBinContent(i+1)*filter_u->Eval(freq);
+      double phi = hp->GetBinContent(i+1) - hpr_u->GetBinContent(i+1);
+      if (i==0) rho = 0;
+      
+      value_re[i] = rho*cos(phi)/nbin;
+      value_im[i] = rho*sin(phi)/nbin;
+    }
+
+    TVirtualFFT *ifft = TVirtualFFT::FFT(1,&nbin,"C2R M K");
+    ifft->SetPointsComplex(value_re,value_im);
+    ifft->Transform();
+    TH1 *fb = TH1::TransformHisto(ifft,0,"Re");
+    
+    // put results back
+    for (int i=0;i!=nbin;i++){
+      htemp->SetBinContent(i+1,fb->GetBinContent(i+1)/( 14.*4096./2000.));
+    }
+    delete ifft;
+    delete fb;
+
+    // correct baseline 
+    restore_baseline(htemp);
+
+    // calculate RMS 
+    double rms = cal_rms(htemp,chid);
+    uplane_rms[chid] = rms*scale;
+    
+    // put results back into the 2-D histogram
+    for (int i=0;i!=bins_per_frame;i++){
+      double sum = 0;
+      for (int k=0;k!=scale;k++){
+	sum += htemp->GetBinContent(scale*i+k+1);
+      }
+      hu_1D_c->SetBinContent(chid+1,i+1,sum);
+    }
+
+
+    delete htemp;
+    delete hm;
+    delete hp;
+    
+  }
+  
+
+  delete hur;
+  delete hmr_u;
+  delete hpr_u;
+  delete filter_u;
+}
+
+double WireCell2dToy::DataSignalWienROIFDS::cal_rms(TH1F *htemp, int chid){
+  //calculate rms, this is to be used for threshold purpose
+  float rms = 0, rms1 = 0,rms2 = 0;
+  int start=-1, end=-1;
+  if (chid < nwire_u){
+    if (umap.find(chid)!=umap.end()){
+      start = umap[chid].first;
+      end = umap[chid].second;
+    }
+  }else if (chid < nwire_u + nwire_v){
+    if (vmap.find(chid-nwire_u)!=vmap.end()){
+      start = vmap[chid-nwire_u].first;
+      end = vmap[chid-nwire_u].second;
+    }
+  }else{
+    if (wmap.find(chid-nwire_u-nwire_v)!=wmap.end()){
+      start = wmap[chid-nwire_u-nwire_v].first;
+      end = wmap[chid-nwire_u-nwire_v].second;
+    }
+  }
+  
+   // new method to calculate RMS
+    int min1 =0,max1=0;
+    for (int i=0;i!=htemp->GetNbinsX();i++){
+      if (i < start || i > end){
+    	if (htemp->GetBinContent(i+1)>max1)
+    	  max1 = int(htemp->GetBinContent(i+1));
+    	if (htemp->GetBinContent(i+1)<min1)
+    	  min1 = int(htemp->GetBinContent(i+1));
+      }
+    }
+    TH1F *h6 = new TH1F("h6","h6",int(max1-min1+1),min1,max1+1);
+    for (int i=0;i!=htemp->GetNbinsX();i++){
+      if (i < start || i > end){
+    	h6->Fill(int(htemp->GetBinContent(i+1)));
+      }
+    }
+    if (h6->GetSum()>0){
+      //calculate 0.16, 0.84 percentile ...  
+      double xq;
+      xq = 0.16;
+      double par[2];
+      h6->GetQuantiles(1,&par[0],&xq);
+      xq = 0.84;
+      h6->GetQuantiles(1,&par[1],&xq);
+      rms = (par[1]-par[0])/2.;
+      
+      //try to exclude signal
+      rms2 = 0;
+     for (int i=0;i!=htemp->GetNbinsX();i++){
+       if (i < start || i > end){
+    	 if (fabs(htemp->GetBinContent(i+1)) < 5.0*rms){
+    	  rms1 += pow(htemp->GetBinContent(i+1),2);
+    	  rms2 ++;
+    	}
+       }
+     }
+     if (rms2!=0){
+       rms1 = sqrt(rms1/rms2);
+     }else{
+       rms1 = 0;   
+     }
+    }else{
+      rms1 =0;
+    }
+    delete h6;
+
+    return rms1;
+}
+
+
+void WireCell2dToy::DataSignalWienROIFDS::restore_baseline(TH1F *htemp){
+  //correct baseline 
+  double max = htemp->GetMaximum();
+  double min = htemp->GetMinimum();
+  int nbin_b = max - min;
+  if (nbin_b ==0) nbin_b = 1;
+  TH1F *h1 = new TH1F("h1","h1",nbin_b,min,max);
+  for (int j=0;j!=nbin;j++){
+    h1->Fill(htemp->GetBinContent(j+1));
+  }
+  float ped = h1->GetMaximumBin()*(max-min)/(nbin_b*1.) + min;
+  float ave=0,ncount = 0;
+  for (int j=0;j!=nbin;j++){
+    if (fabs(htemp->GetBinContent(j+1)-ped)<400){
+      ave +=htemp->GetBinContent(j+1);
+      ncount ++;
+      }
+    }
+    if (ncount==0) ncount=1;
+    ave = ave/ncount;
+    
+    for (int j=0;j!=nbin;j++){
+      double content = htemp->GetBinContent(j+1);
+      content -= ave;
+      htemp->SetBinContent(j+1,content);
+    }
+    delete h1;
+}
+
+
 int WireCell2dToy::DataSignalWienROIFDS::jump(int frame_number){
   // fill the frame data ... 
   if (frame.index == frame_number) {
@@ -111,24 +318,21 @@ int WireCell2dToy::DataSignalWienROIFDS::jump(int frame_number){
     
   fds.jump(frame_number);
 
+  TVirtualFFT::SetTransform(0);
+  Deconvolute_U_1D_c();
+
+  
 
 
-  int scale = nbin/bins_per_frame;
-  const Frame& frame1 = fds.get();
-  size_t ntraces = frame1.traces.size();
 
-
-
-  // TVirtualFFT::SetTransform(0);
-  // hur = new TH1F("hur1","hur1",nbin,0,nbin); // half us tick
   // hvr = new TH1F("hvr1","hvr1",nbin,0,nbin); // half us tick
   // hwr = new TH1F("hwr1","hwr1",nbin,0,nbin); // half us tick
   
   // const int nchannels = nwire_u;
-  // const int nticks = nbin;
+  // 
   
   // // do U-plane
-  // float scale_u = 1.51/1.16*0.91*0.85;
+  // 
   // float scale_v = 1.251/1.074*0.91*0.85;
   // double rho_res[7][nticks], phi_res[7][nticks];
 

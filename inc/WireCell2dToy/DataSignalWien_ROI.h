@@ -49,6 +49,9 @@ namespace WireCell2dToy {
     std::vector<float> vplane_rms_g;
     std::vector<float> wplane_rms_g;
 
+    void restore_baseline(TH1F *h1);
+    double cal_rms(TH1F *h1, int chid);
+
     void Deconvolute_U_1D_c();
     void Deconvolute_V_1D_c();
     void Deconvolute_W_1D_g();
