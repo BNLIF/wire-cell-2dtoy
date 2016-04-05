@@ -37,17 +37,16 @@ WireCell2dToy::DataSignalWienROIFDS::DataSignalWienROIFDS(WireCell::FrameDataSou
 
   uplane_rms_g.resize(nwire_u,0);
   vplane_rms_g.resize(nwire_v,0);
-  wplane_rms_g.resize(nwire_w,0);
-
-  hu_1D_c = new TH2F("hu_1D_c","hu_1D_c",nwire_u,0,nwire_u,bins_per_frame,0,bins_per_frame);
-  hu_2D_g_f = new TH2F("hu_2D_g_f","hu_2D_g_f",nwire_u,0,nwire_u,bins_per_frame,0,bins_per_frame);
-  hu_2D_g = new TH2F("hu_2D_g","hu_2D_g",nwire_u,0,nwire_u,bins_per_frame,0,bins_per_frame);
   
-  hv_1D_c = new TH2F("hv_1D_c","hv_1D_c",nwire_v,0,nwire_v,bins_per_frame,0,bins_per_frame);
-  hv_1D_g_f = new TH2F("hv_1D_g_f","hv_1D_g_f",nwire_v,0,nwire_v,bins_per_frame,0,bins_per_frame);
-  hv_1D_g = new TH2F("hv_1D_g","hv_1D_g",nwire_v,0,nwire_v,bins_per_frame,0,bins_per_frame);
+  hu_1D_c = new TH2I("hu_1D_c","hu_1D_c",nwire_u,0,nwire_u,bins_per_frame,0,bins_per_frame);
+  hu_2D_g_f = new TH2I("hu_2D_g_f","hu_2D_g_f",nwire_u,0,nwire_u,bins_per_frame,0,bins_per_frame);
+  hu_2D_g = new TH2I("hu_2D_g","hu_2D_g",nwire_u,0,nwire_u,bins_per_frame,0,bins_per_frame);
+  
+  hv_1D_c = new TH2I("hv_1D_c","hv_1D_c",nwire_v,0,nwire_v,bins_per_frame,0,bins_per_frame);
+  hv_1D_g_f = new TH2I("hv_1D_g_f","hv_1D_g_f",nwire_v,0,nwire_v,bins_per_frame,0,bins_per_frame);
+  hv_1D_g = new TH2I("hv_1D_g","hv_1D_g",nwire_v,0,nwire_v,bins_per_frame,0,bins_per_frame);
 
-  hw_1D_g = new TH2F("hw_1D_g","hw_1D_g",nwire_w,0,nwire_w,bins_per_frame,0,bins_per_frame);
+  hw_1D_g = new TH2I("hw_1D_g","hw_1D_g",nwire_w,0,nwire_w,bins_per_frame,0,bins_per_frame);
 
   #include "data_70_ROI.txt"  //70kV 2D deconvolution for U
 
@@ -120,13 +119,503 @@ void WireCell2dToy::DataSignalWienROIFDS::Deconvolute_U_2D_g(){
 
   TF1 *filter_low = new TF1("filter_low","1-exp(-pow(x/0.0045,2))");
 
-  //response function ... 
+  
+
+  // response function ... 
+  TH1F *hur = new TH1F("hur1","hur1",nbin,0,nbin); // half us tick
+  const int nchannels = nwire_u;
+  float scale_u = 1.51/1.16*0.91*0.85;
+  double rho_res[7][nticks], phi_res[7][nticks];
+
+  for (int j=0;j!=7;j++){
+    TGraph *gtemp;
+    if (j==0 || j==6){
+      gtemp = gu_2D_g[3];
+    }else if (j==1 || j==5){
+      gtemp = gu_2D_g[2];
+    }else if (j==2 || j==4){
+      gtemp = gu_2D_g[1];
+    }else if (j==3){
+      gtemp = gu_2D_g[0];
+    }
+    for (int i=0; i!=nbin; i++){  
+      double time = hur->GetBinCenter(i+1)/2.-50 ;
+      //*** scale factors for 70kV ***//
+      double x = time - time_offset_uv;
+      if (x > -35 && x  < 15){
+	if (gtemp->Eval(x)>0 && x<0){
+	  hur->SetBinContent(i+1,gtemp->Eval(x)/scale_u); //70kV
+	}else{
+	  hur->SetBinContent(i+1,gtemp->Eval(x)/scale_u); //70kV
+	}
+      }else{
+	hur->SetBinContent(i+1,0);
+      }
+    }
+    TH1 *hmr_u = hur->FFT(0,"MAG");
+    TH1 *hpr_u = hur->FFT(0,"PH");
+    
+    for (Int_t i=0;i!=nticks;i++){
+      rho_res[j][i] = hmr_u->GetBinContent(i+1);
+      phi_res[j][i] = hpr_u->GetBinContent(i+1);
+    }
+
+    // std::cout << "abc " << j << std::endl;
+    delete hmr_u;
+    delete hpr_u;
+  }
+
 
   // deconvolution ... 
+  std::vector<std::vector<double>> rho_u, phi_u,result_re,result_im;
+  for (int i=0;i!=nchannels;i++){
+    std::vector<double> temp,temp1,temp2,temp3;
+    temp.resize(nticks,0);
+    rho_u.push_back(temp);
+    temp1.resize(nticks,0);
+    phi_u.push_back(temp1);
+    temp2.resize(nticks,0);
+    result_re.push_back(temp2);
+    temp3.resize(nticks,0);
+    result_im.push_back(temp3);
+  }
+  int tbin_save[nchannels];
 
+  for (size_t ind=0; ind<ntraces; ++ind) {
+    const Trace& trace = frame1.traces[ind];
+    int tbin = trace.tbin;
+    int chid = trace.chid;
+    int nbins = trace.charge.size();
+    if (chid >=nwire_u) continue;
+    
+    TH1F *htemp = new TH1F("htemp","htemp",nbin,0,nbin);
+    for (int i = tbin;i!=tbin+nbins;i++){
+      int tt = i+1;
+      htemp->SetBinContent(tt,trace.charge.at(i));
+    }
+    
+    TH1 *hm = htemp->FFT(0,"MAG");
+    TH1 *hp = htemp->FFT(0,"PH");
+
+    for (Int_t j=0;j!=nticks;j++){
+      rho_u[chid][j] = hm->GetBinContent(j+1);
+      phi_u[chid][j] = hp->GetBinContent(j+1);
+    }
+    tbin_save[chid] = tbin;
+    
+    delete hm;
+    delete hp;
+    delete htemp;
+  }
+
+  double resp_re[nchannels], resp_im[nchannels];
+  for (Int_t i=0;i!=nticks;i++){
+    Double_t freq;
+    if (i < nticks/2.){
+      freq = i/(1.*nticks)*2.;
+    }else{
+      freq = (nticks - i)/(1.*nticks)*2.;
+    }
+    
+    for (Int_t j=0;j!=nchannels;j++){
+      value_re[j] = rho_u[j][i]*cos(phi_u[j][i]);
+      value_im[j] = rho_u[j][i]*sin(phi_u[j][i]);
+      if (j<7){
+  	resp_re[j] = rho_res[j][i]*cos(phi_res[j][i]);
+  	resp_im[j] = rho_res[j][i]*sin(phi_res[j][i]);
+      }else{
+  	resp_re[j] = 0.;
+  	resp_im[j] = 0.;
+      }
+    }
+
+    Int_t m=nchannels;
+    
+    TVirtualFFT *ifft = TVirtualFFT::FFT(1,&m,"C2CFORWARD M K");
+    ifft->SetPointsComplex(value_re,value_im);
+    ifft->Transform();
+    Double_t temp_re[nchannels],temp_im[nchannels];
+    ifft->GetPointsComplex(temp_re,temp_im);
+    
+    ifft->SetPointsComplex(resp_re,resp_im);
+    ifft->Transform();
+    Double_t temp1_re[nchannels],temp1_im[nchannels];
+    ifft->GetPointsComplex(temp1_re,temp1_im);
+    
+    Double_t temp2_re[nchannels],temp2_im[nchannels];
+    for (Int_t j=0;j!=nchannels;j++){
+      if (temp1_im[j]*temp1_im[j]+temp1_re[j]*temp1_re[j]>0){
+  	temp2_re[j] = (temp_re[j]*temp1_re[j]+temp_im[j]*temp1_im[j])/m/
+  	  (temp1_im[j]*temp1_im[j]+temp1_re[j]*temp1_re[j]);
+  	temp2_im[j] = (temp_im[j]*temp1_re[j]-temp_re[j]*temp1_im[j])
+  	  /m/(temp1_im[j]*temp1_im[j]+temp1_re[j]*temp1_re[j]);
+      }else{
+  	temp2_re[j] = 0;
+  	temp2_im[j] = 0;
+      }
+    }
+    
+    TVirtualFFT *ifft3 = TVirtualFFT::FFT(1,&m,"C2CBACKWARD M K");
+    ifft3->SetPointsComplex(temp2_re,temp2_im);
+    ifft3->Transform();
+    Double_t temp3_re[nchannels],temp3_im[nchannels];
+    ifft3->GetPointsComplex(temp3_re,temp3_im);
+
+
+    for (Int_t j=0;j!=nchannels;j++){
+      Int_t shift = j - 3;
+      if (shift <0) shift += nchannels;
+      result_re[j][i] = temp3_re[shift]/nticks*filter_u->Eval(freq);// * filter_low->Eval(freq); 
+      result_im[j][i] = temp3_im[shift]/nticks*filter_u->Eval(freq);// * filter_low->Eval(freq);
+    }
+
+    delete ifft;
+    delete ifft3;
+  }
+  
+  for (Int_t chid=0;chid!=nchannels;chid++){
+    int n = nticks;
+    TVirtualFFT *ifft2 = TVirtualFFT::FFT(1,&n,"C2R M K");
+    double temp_re[nticks],temp_im[nticks];
+    for (int j=0;j!=nticks;j++){
+      temp_re[j] = result_re[chid][j];
+      temp_im[j] = result_im[chid][j];
+    }
+    ifft2->SetPointsComplex(temp_re,temp_im);
+    ifft2->Transform();
+    TH1 *fb = 0;
+    fb = TH1::TransformHisto(ifft2,fb,"Re");
+    
+    TH1F *htemp = new TH1F("htemp","htemp",nbin,0,nbin);
+    for (int i=0;i!=nbin;i++){
+      htemp->SetBinContent(i+1,fb->GetBinContent(i+1)/( 14.*1.1*4096./2000.));
+    }
+    delete ifft2;
+    delete fb;
+    
+    // correct baseline 
+    restore_baseline(htemp);
+    
+    int start = -1, end = -1;
+    if (umap.find(chid)!=umap.end()){
+      start = umap[chid].first;
+      end = umap[chid].second;
+    }
+
+    // put results back into the 2-D histogram
+    for (int j=0;j!=bins_per_frame;j++){
+      double sum = 0;
+      for (int k=0;k!=scale;k++){
+	sum += htemp->GetBinContent(scale*j+k+1);
+      }
+      int bin = j+100;
+      if (bin >=start && bin <=end){
+      }else{
+	hu_2D_g->SetBinContent(chid+1,j+1,int(sum));
+      }
+    }
+    
+    
+    TVirtualFFT *ifft4 = TVirtualFFT::FFT(1,&n,"C2R M K");
+    for (int j=0;j!=nticks;j++){
+      Double_t freq;
+      if (j < nticks/2.){
+	freq = j/(1.*nticks)*2.;
+      }else{
+	freq = (nticks - j)/(1.*nticks)*2.;
+      }
+
+      temp_re[j] = result_re[chid][j]* filter_low->Eval(freq); 
+      temp_im[j] = result_im[chid][j]* filter_low->Eval(freq); 
+    }
+    ifft4->SetPointsComplex(temp_re,temp_im);
+    ifft4->Transform();
+    TH1 *fb1 = 0;
+    fb1 = TH1::TransformHisto(ifft4,fb1,"Re");
+    
+    for (int i=0;i!=nbin;i++){
+      htemp->SetBinContent(i+1,fb1->GetBinContent(i+1)/( 14.*1.1*4096./2000.));
+    }
+    delete ifft4;
+    delete fb1;
+    
+    // correct baseline 
+    restore_baseline(htemp);
+    
+    // calculate RMS 
+    double rms = cal_rms(htemp,chid);
+    uplane_rms_g[chid] = rms*scale;
+
+    // put results back into the 2-D histogram
+    for (int j=0;j!=bins_per_frame;j++){
+      double sum = 0;
+      for (int k=0;k!=scale;k++){
+	sum += htemp->GetBinContent(scale*j+k+1);
+      }
+      int bin = j+100;
+      if (bin >=start && bin <=end){
+      }else{
+	hu_2D_g_f->SetBinContent(chid+1,j+1,int(sum));
+      }
+    }
+
+
+    delete htemp;    
+  }
+
+
+
+
+  delete hur;
   delete filter_u;
   delete filter_low;
 }
+
+
+void WireCell2dToy::DataSignalWienROIFDS::ROI_cal(TH1F *h1_1, TH1F *h2_1, TH1F *h3_1, Double_t threshold0,Double_t threshold2, TH1F *hresult){
+  
+    Double_t th = threshold2*2.0; // do 2 sigma
+    Double_t th1 = threshold0*3.6; // do 3.6 sigma
+    Double_t th2 = threshold2*4.0; // do four sigma ... 
+
+    //std::cout << th << " " << th1 << " " << th2 << std::endl;
+
+    std::vector<std::pair <Int_t,Int_t> > ROIs;
+
+    for (Int_t i=0;i<h3_1->GetNbinsX();i++){
+      Double_t content = h3_1->GetBinContent(i+1);
+      Double_t next_content;
+      
+      if (i!=h3_1->GetNbinsX()-1){
+  	next_content = h3_1->GetBinContent(i+2);
+      }else{
+  	next_content = h3_1->GetBinContent(1);
+      }
+      
+      if ((content > th )){
+  	// go to find the beginning of ROI
+  	Int_t begin;
+  	begin = find_ROI_begin(h3_1,i, th*0.8) ;
+	
+  	Int_t end;
+  	// go to find the end of ROI 
+  	end = find_ROI_end(h3_1,i, th*0.8) ;
+	
+  	// save ROI 
+  	ROIs.push_back(std::make_pair(begin,end));
+  	//    std::cout << begin << " " << end << endl;
+	
+  	// reset the beginning of the search for next ROI
+  	if (end <h3_1->GetNbinsX()){
+  	  i = end;
+  	}else{
+  	  i=h3_1->GetNbinsX();
+  	}
+      }
+    }
+    
+    // std::cout << ROIs.size() << std::endl;
+
+    std::vector<std::pair <Int_t,Int_t> > ROIs_1;
+    for (Int_t i=0;i<h1_1->GetNbinsX();i++){
+      Double_t content = h1_1->GetBinContent(i+1);
+      
+      if ((content > th1 )){
+  	// go to find the beginning of ROI
+  	Int_t begin;
+  	begin = find_ROI_begin(h1_1,i, th*0.25) ;
+	
+  	Int_t end;
+  	// go to find the end of ROI 
+  	end = find_ROI_end(h1_1,i, th*0.25) ;
+	
+  	// save ROI 
+  	ROIs_1.push_back(std::make_pair(begin,end));
+  	//    std::cout << begin << " " << end << endl;
+	
+  	// reset the beginning of the search for next ROI
+  	if (end <h1_1->GetNbinsX()){
+  	  i = end;
+  	}else{
+  	  i=h1_1->GetNbinsX();
+  	}
+      }
+    }
+    
+    //std::cout << ROIs_1.size() << std::endl;
+
+
+    TH1F *h2_3 = (TH1F*)h2_1->Clone("h2_3");
+    h2_3->Reset();
+        
+    for (Int_t i=0;i!=ROIs_1.size();i++){
+      Int_t begin = ROIs_1.at(i).first;
+      Int_t end = ROIs_1.at(i).second;
+      
+      Double_t content_begin;
+      Double_t content_end;
+      
+      if (begin <0){
+  	content_begin = h2_1->GetBinContent(begin+1+h2_1->GetNbinsX());
+      }else{
+  	content_begin = h2_1->GetBinContent(begin+1);
+      }
+      
+      if (end >= h2_1->GetNbinsX()){
+  	content_end = h2_1->GetBinContent(end+1-h2_1->GetNbinsX());
+      }else{
+  	content_end = h2_1->GetBinContent(end+1);
+      }
+      
+      for (Int_t j=begin;j<=end;j++){
+  	Double_t content_current;
+  	if (j <0){
+  	  content_current = h2_1->GetBinContent(j+1+h2_1->GetNbinsX());
+  	}else if (j >= h2_1->GetNbinsX()){
+  	  content_current = h2_1->GetBinContent(j+1 - h2_1->GetNbinsX());
+  	}else{
+  	  content_current = h2_1->GetBinContent(j+1);
+  	}
+	
+  	content_current -=  content_begin + (content_end-content_begin) * (j-begin)/(end-begin);
+	
+	if (content_current < h1_1->GetBinContent(j+1))
+	  content_current = h1_1->GetBinContent(j+1);
+
+  	h2_3->SetBinContent(j+1,content_current);
+      }
+    }
+    
+    
+    TH1F *h2_2 = (TH1F*)h2_1->Clone("h2_2");
+    h2_2->Reset();
+    
+    
+    for (Int_t i=0;i!=ROIs.size();i++){
+      Int_t begin = ROIs.at(i).first;
+      Int_t end = ROIs.at(i).second;
+      
+      Double_t content_begin;
+      Double_t content_end;
+      
+      if (begin <0){
+  	content_begin = h2_1->GetBinContent(begin+1+h2_1->GetNbinsX());
+      }else{
+  	content_begin = h2_1->GetBinContent(begin+1);
+      }
+      
+      if (end >= h2_1->GetNbinsX()){
+  	content_end = h2_1->GetBinContent(end+1-h2_1->GetNbinsX());
+      }else{
+  	content_end = h2_1->GetBinContent(end+1);
+      }
+      
+      for (Int_t j=begin;j<=end;j++){
+  	Double_t content_current;
+  	if (j <0){
+  	  content_current = h2_1->GetBinContent(j+1+h2_1->GetNbinsX());
+  	}else if (j >= h2_1->GetNbinsX()){
+  	  content_current = h2_1->GetBinContent(j+1 - h2_1->GetNbinsX());
+  	}else{
+  	  content_current = h2_1->GetBinContent(j+1);
+  	}
+	
+  	content_current -=  content_begin + (content_end-content_begin) * (j-begin)/(end-begin);
+  	if(content_current > th2)
+  	  h2_2->SetBinContent(j+1,content_current);
+      }
+    }
+    
+    for (Int_t i=0;i!=h2_2->GetNbinsX();i++){
+      Double_t content1 = h2_2->GetBinContent(i+1);
+      Double_t content2 = h2_3->GetBinContent(i+1);
+    
+      if (content1 > content2){
+   	hresult->SetBinContent(i+1,content1);
+      }else{
+   	hresult->SetBinContent(i+1,content2);
+      }
+    }
+
+
+    
+ 
+
+    delete h2_3;
+    delete h2_2;
+
+}
+
+
+Int_t WireCell2dToy::DataSignalWienROIFDS::find_ROI_end(TH1F *h1, Int_t bin, Double_t th=0){
+  Int_t end = bin;
+  Double_t content = h1->GetBinContent(end+1);
+  while(content>th){
+    end ++;
+    
+    if (end >=h1->GetNbinsX()){
+      content = h1->GetBinContent(end - h1->GetNbinsX()+1);
+    }else{
+      content = h1->GetBinContent(end+1);
+    }
+  }
+
+  while(local_ave(h1,end+1,1) < local_ave(h1,end,1)){
+    end++;
+  } 
+  return end;
+}
+
+Int_t WireCell2dToy::DataSignalWienROIFDS::find_ROI_begin(TH1F *h1, Int_t bin, Double_t th=0){
+  // find the first one before bin and is below threshold ... 
+  Int_t begin = bin;
+  Double_t content = h1->GetBinContent(begin+1);
+  while(content > th){
+    begin --;
+
+    if (begin <0){
+      content = h1->GetBinContent(begin+h1->GetNbinsX()+1);
+    }else{
+      content = h1->GetBinContent(begin+1);
+    }
+
+  }
+  
+  // calculate the local average
+  // keep going and find the minimum
+  while( local_ave(h1,begin-1,1) < local_ave(h1,begin,1)){
+    //cout << "X " << begin << " " <<local_ave(h1,begin,1)  << " " << local_ave(h1,begin-1,1)  << endl;
+    begin --;
+  }
+  //  Double_t current_ave = local_ave(h1, begin, 1);
+  //  cout << bin << " " << begin << " " << content << " " << current_ave << endl;
+  
+  return begin;
+}
+
+Double_t WireCell2dToy::DataSignalWienROIFDS::local_ave(TH1F *h1, Int_t bin, Int_t width){
+  Double_t sum1 = 0;
+  Double_t sum2 = 0;
+  
+  for (Int_t i=-width;i<width+1;i++){
+    Int_t current_bin = bin + i;
+
+    while (current_bin <0)
+      current_bin += h1->GetNbinsX();
+    while (current_bin >= h1->GetNbinsX())
+      current_bin -= h1->GetNbinsX();
+    
+    sum1 += h1->GetBinContent(current_bin+1);
+    sum2 ++;
+  }
+
+  if (sum2>0){
+    return sum1/sum2;
+  }else{
+    return 0;
+  }
+}
+
 
 void WireCell2dToy::DataSignalWienROIFDS::Deconvolute_V_1D_g(){
   const Frame& frame1 = fds.get();
@@ -212,13 +701,22 @@ void WireCell2dToy::DataSignalWienROIFDS::Deconvolute_V_1D_g(){
     // correct baseline 
     restore_baseline(htemp);
 
+    int start=-1, end=-1;
+    if (vmap.find(chid-nwire_u)!=vmap.end()){
+      start = vmap[chid-nwire_u].first;
+      end = vmap[chid-nwire_u].second;
+    }
     // put results back into the 2-D histogram
     for (int i=0;i!=bins_per_frame;i++){
       double sum = 0;
       for (int k=0;k!=scale;k++){
 	sum += htemp->GetBinContent(scale*i+k+1);
       }
-      hv_1D_g->SetBinContent(chid+1-nwire_u,i+1,sum);
+      int bin = i+100;
+      if (bin >=start && bin <=end){
+      }else{
+	hv_1D_g->SetBinContent(chid+1-nwire_u,i+1,int(sum));
+      }
     }
 
 
@@ -248,7 +746,11 @@ void WireCell2dToy::DataSignalWienROIFDS::Deconvolute_V_1D_g(){
       for (int k=0;k!=scale;k++){
 	sum += htemp->GetBinContent(scale*i+k+1);
       }
-      hv_1D_g_f->SetBinContent(chid+1-nwire_u,i+1,sum);
+      int bin = i+100;
+      if (bin >=start && bin <=end){
+      }else{
+	hv_1D_g_f->SetBinContent(chid+1-nwire_u,i+1,int(sum));
+      }
     }
 
     
@@ -345,13 +847,23 @@ void WireCell2dToy::DataSignalWienROIFDS::Deconvolute_W_1D_g(){
     double rms = cal_rms(htemp,chid);
     wplane_rms[chid-nwire_u-nwire_v] = rms*scale;
     
+    int start=-1, end=-1;
+    if (wmap.find(chid-nwire_u-nwire_v)!=wmap.end()){
+      start = wmap[chid-nwire_u-nwire_v].first;
+      end = wmap[chid-nwire_u-nwire_v].second;
+    }
+    
     // put results back into the 2-D histogram
     for (int i=0;i!=bins_per_frame;i++){
       double sum = 0;
       for (int k=0;k!=scale;k++){
 	sum += htemp->GetBinContent(scale*i+k+1);
       }
-      hw_1D_g->SetBinContent(chid+1-nwire_u-nwire_v,i+1,sum);
+      int bin = i+100;
+      if (bin >=start && bin <=end){
+      }else{
+	hw_1D_g->SetBinContent(chid+1-nwire_u-nwire_v,i+1,int(sum));
+      }
     }
     delete htemp;
     delete hm;
@@ -445,13 +957,23 @@ void WireCell2dToy::DataSignalWienROIFDS::Deconvolute_V_1D_c(){
     double rms = cal_rms(htemp,chid);
     vplane_rms[chid-nwire_u] = rms*scale;
     
+    int start=-1, end=-1;
+    if (vmap.find(chid-nwire_u)!=vmap.end()){
+      start = vmap[chid-nwire_u].first;
+      end = vmap[chid-nwire_u].second;
+    }
+    
     // put results back into the 2-D histogram
     for (int i=0;i!=bins_per_frame;i++){
       double sum = 0;
       for (int k=0;k!=scale;k++){
 	sum += htemp->GetBinContent(scale*i+k+1);
       }
-      hv_1D_c->SetBinContent(chid+1-nwire_u,i+1,sum);
+      int bin = i+100;
+      if (bin >=start && bin <=end){
+      }else{
+	hv_1D_c->SetBinContent(chid+1-nwire_u,i+1,int(sum));
+      }
     }
     delete htemp;
     delete hm;
@@ -544,13 +1066,23 @@ void WireCell2dToy::DataSignalWienROIFDS::Deconvolute_U_1D_c(){
     double rms = cal_rms(htemp,chid);
     uplane_rms[chid] = rms*scale;
     
+    int start=-1, end=-1;
+    if (umap.find(chid)!=umap.end()){
+      start = umap[chid].first;
+      end = umap[chid].second;
+    }
+
     // put results back into the 2-D histogram
     for (int i=0;i!=bins_per_frame;i++){
       double sum = 0;
       for (int k=0;k!=scale;k++){
 	sum += htemp->GetBinContent(scale*i+k+1);
       }
-      hu_1D_c->SetBinContent(chid+1,i+1,sum);
+      int bin = i+100;
+      if (bin >=start && bin <=end){
+      }else{
+	hu_1D_c->SetBinContent(chid+1,i+1,int(sum));
+      }
     }
 
 
@@ -691,7 +1223,13 @@ int WireCell2dToy::DataSignalWienROIFDS::jump(int frame_number){
  
   std::cout << "Deconvolution with garfield field response for 1-D V Plane" << std::endl;
   Deconvolute_V_1D_g();
+
+  std::cout << "Deconvolution with garfield field response for 2-D U Plane" << std::endl;
+  Deconvolute_U_2D_g();
  
+
+  
+  
   std::cout << "Load results back into frame" << std::endl;
   // load the results back into the frame ... 
   for (int i=0;i!=nwire_u;i++){
@@ -699,10 +1237,38 @@ int WireCell2dToy::DataSignalWienROIFDS::jump(int frame_number){
     t.chid = i;
     t.tbin = 0;
     t.charge.resize(bins_per_frame, 0.0);
+    int nticks = bins_per_frame;
+    
+    TH1F *h1_1 = new TH1F("h1_1","h1_1",nticks,0,nticks);
+    TH1F *h2_1 = new TH1F("h2_1","h2_1",nticks,0,nticks);
+    TH1F *h3_1 = new TH1F("h3_1","h3_1",nticks,0,nticks);
+    TH1F *hresult = new TH1F("hresult","hresult",nticks,0,nticks);
+
+    Double_t th1 = uplane_rms.at(i);
+    Double_t th2 = uplane_rms_g.at(i);
+
+    for (Int_t j=0;j!=nticks;j++){
+      Double_t content = hu_1D_c->GetBinContent(i+1,j+1);
+      h1_1->SetBinContent(j+1,content);
+    
+      content = hu_2D_g->GetBinContent(i+1,j+1);
+      h2_1->SetBinContent(j+1,content);
+      
+      content = hu_2D_g_f->GetBinContent(i+1,j+1);
+      h3_1->SetBinContent(j+1,content);
+    }
+    
+    ROI_cal(h1_1,h2_1,h3_1,th1,th2,hresult);
+
     for (int j=0;j!= bins_per_frame; j++){
-      t.charge.at(j) = hv_1D_g->GetBinContent(i+1,j+1);
+      t.charge.at(j) = hresult->GetBinContent(j+1);//hu_2D_g_f->GetBinContent(i+1,j+1);
     }
     frame.traces.push_back(t);
+
+    delete h1_1;
+    delete h2_1;
+    delete h3_1;
+    delete hresult;
   }
 
   for (int i=0;i!=nwire_v;i++){
@@ -710,10 +1276,40 @@ int WireCell2dToy::DataSignalWienROIFDS::jump(int frame_number){
     t.chid = i+nwire_u;
     t.tbin = 0;
     t.charge.resize(bins_per_frame, 0.0);
+
+    int nticks = bins_per_frame;
+    
+    TH1F *h1_1 = new TH1F("h1_1","h1_1",nticks,0,nticks);
+    TH1F *h2_1 = new TH1F("h2_1","h2_1",nticks,0,nticks);
+    TH1F *h3_1 = new TH1F("h3_1","h3_1",nticks,0,nticks);
+    TH1F *hresult = new TH1F("hresult","hresult",nticks,0,nticks);
+
+    Double_t th1 = vplane_rms.at(i);
+    Double_t th2 = vplane_rms_g.at(i);
+
+    for (Int_t j=0;j!=nticks;j++){
+      Double_t content = hv_1D_c->GetBinContent(i+1,j+1);
+      h1_1->SetBinContent(j+1,content);
+    
+      content = hv_1D_g->GetBinContent(i+1,j+1);
+      h2_1->SetBinContent(j+1,content);
+      
+      content = hv_1D_g_f->GetBinContent(i+1,j+1);
+      h3_1->SetBinContent(j+1,content);
+    }
+    
+    ROI_cal(h1_1,h2_1,h3_1,th1,th2,hresult);
+
+
     for (int j=0;j!= bins_per_frame; j++){
-      t.charge.at(j) = hv_1D_g_f->GetBinContent(i+1,j+1);
+      t.charge.at(j) = hresult->GetBinContent(j+1);//hu_2D_g->GetBinContent(i+1,j+1);
     }
     frame.traces.push_back(t);
+
+    delete h1_1;
+    delete h2_1;
+    delete h3_1;
+    delete hresult;
   }
 
   for (int i=0;i!=nwire_w;i++){
