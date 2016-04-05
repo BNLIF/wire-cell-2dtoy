@@ -102,8 +102,201 @@ int WireCell2dToy::DataSignalWienROIFDS::size() const{
 void WireCell2dToy::DataSignalWienROIFDS::Save(){
 }
 
-void WireCell2dToy::DataSignalWienROIFDS::Deconvolute_V_1D_c(){
+void WireCell2dToy::DataSignalWienROIFDS::Deconvolute_W_1D_g(){
+  const Frame& frame1 = fds.get();
+  size_t ntraces = frame1.traces.size();
+
+  const int nticks = nbin;
+  double value_re[9600];
+  double value_im[9600];
+  int scale = nbin/bins_per_frame;
+
+  // wiener filter for the W-plane Gaussian ... 
+  TF1 *filter_w = new TF1("filter_y","(x>0.0)*exp(-0.5*pow(x/[0],[1]))");
+  double par2[2]={1.45874e+01/200.*2.,5.02219e+00};
+  filter_w->SetParameters(par2);
   
+  //response function
+  TH1F *hwr = new TH1F("hwr1","hwr1",nbin,0,nbin); // half us tick
+  for (int i=0;i!=nbin;i++){
+    double time  = hwr->GetBinCenter(i+1)/2.-50;
+    double x = time-time_offset_uw;
+    if (x > -35 && x  < 15){
+      hwr->SetBinContent(i+1,gw_1D_g->Eval(x));
+    }
+  }
+  
+  TH1 *hmr_w = hwr->FFT(0,"MAG");
+  TH1 *hpr_w = hwr->FFT(0,"PH");
+
+   for (size_t ind=0; ind<ntraces; ++ind) {
+    const Trace& trace = frame1.traces[ind];
+    int tbin = trace.tbin;
+    int chid = trace.chid;
+    int nbins = trace.charge.size();
+    if (chid < 4800) continue;
+    
+    TH1F *htemp = new TH1F("htemp","htemp",nbin,0,nbin);
+    for (int i = tbin;i!=tbin+nbins;i++){
+      int tt = i+1;
+      htemp->SetBinContent(tt,trace.charge.at(i));
+    }
+    
+    TH1 *hm = htemp->FFT(0,"MAG");
+    TH1 *hp = htemp->FFT(0,"PH");
+
+    for (int i=0;i!=nbin;i++){
+      double freq;
+      if (i< nbin/2.){
+	freq = i/(1.*nbin)*2.;
+      }else{
+	freq = (nbin - i)/(1.*nbin)*2.;
+      }
+      double rho = hm->GetBinContent(i+1)/hmr_w->GetBinContent(i+1)*filter_w->Eval(freq);
+      double phi = hp->GetBinContent(i+1) - hpr_w->GetBinContent(i+1);
+      if (i==0) rho = 0;
+      
+      value_re[i] = rho*cos(phi)/nbin;
+      value_im[i] = rho*sin(phi)/nbin;
+    }
+
+    TVirtualFFT *ifft = TVirtualFFT::FFT(1,&nbin,"C2R M K");
+    ifft->SetPointsComplex(value_re,value_im);
+    ifft->Transform();
+    TH1 *fb = TH1::TransformHisto(ifft,0,"Re");
+    
+    // put results back
+    for (int i=0;i!=nbin;i++){
+      htemp->SetBinContent(i+1,fb->GetBinContent(i+1)/( 14.*1.1*4096./2000.));
+    }
+    delete ifft;
+    delete fb;
+
+    // correct baseline 
+    restore_baseline(htemp);
+
+    // calculate RMS 
+    double rms = cal_rms(htemp,chid);
+    wplane_rms[chid-4800] = rms*scale;
+    
+    // put results back into the 2-D histogram
+    for (int i=0;i!=bins_per_frame;i++){
+      double sum = 0;
+      for (int k=0;k!=scale;k++){
+	sum += htemp->GetBinContent(scale*i+k+1);
+      }
+      hw_1D_g->SetBinContent(chid+1-4800,i+1,sum);
+    }
+    delete htemp;
+    delete hm;
+    delete hp;
+    
+  }
+
+
+  delete filter_w;
+  delete hmr_w;
+  delete hpr_w;
+  delete hwr;
+}
+
+
+void WireCell2dToy::DataSignalWienROIFDS::Deconvolute_V_1D_c(){
+  const Frame& frame1 = fds.get();
+  size_t ntraces = frame1.traces.size();
+
+  const int nticks = nbin;
+  double value_re[9600];
+  double value_im[9600];
+  int scale = nbin/bins_per_frame;
+
+  // wiener filter for V-plane
+  TF1 *filter_v = new TF1("filter_v","(x>0.0)*exp(-0.5*pow(x/[0],[1]))");
+  double par1[2]={1.31649e+01/200.*2.,4.67294e+00};
+  filter_v->SetParameters(par1);
+
+  //response function
+  TH1F *hvr = new TH1F("hvr1","hvr1",nbin,0,nbin); // half us tick
+  float scale_v = 1.251/1.074*0.91*0.85;
+  for (int i=0;i!=nbin;i++){
+    double time  = hvr->GetBinCenter(i+1)/2.-50;
+    double x = time-time_offset_uv;
+    if (x > -35 && x  < 15){
+      hvr->SetBinContent(i+1,gv_1D_c->Eval(x)/scale_v);
+    }
+  }
+  
+  TH1 *hmr_v = hvr->FFT(0,"MAG");
+  TH1 *hpr_v = hvr->FFT(0,"PH");
+
+  for (size_t ind=0; ind<ntraces; ++ind) {
+    const Trace& trace = frame1.traces[ind];
+    int tbin = trace.tbin;
+    int chid = trace.chid;
+    int nbins = trace.charge.size();
+    if (chid <2400 || chid >=4800) continue;
+    
+    TH1F *htemp = new TH1F("htemp","htemp",nbin,0,nbin);
+    for (int i = tbin;i!=tbin+nbins;i++){
+      int tt = i+1;
+      htemp->SetBinContent(tt,trace.charge.at(i));
+    }
+    
+    TH1 *hm = htemp->FFT(0,"MAG");
+    TH1 *hp = htemp->FFT(0,"PH");
+
+    for (int i=0;i!=nbin;i++){
+      double freq;
+      if (i< nbin/2.){
+	freq = i/(1.*nbin)*2.;
+      }else{
+	freq = (nbin - i)/(1.*nbin)*2.;
+      }
+      double rho = hm->GetBinContent(i+1)/hmr_v->GetBinContent(i+1)*filter_v->Eval(freq);
+      double phi = hp->GetBinContent(i+1) - hpr_v->GetBinContent(i+1);
+      if (i==0) rho = 0;
+      
+      value_re[i] = rho*cos(phi)/nbin;
+      value_im[i] = rho*sin(phi)/nbin;
+    }
+
+    TVirtualFFT *ifft = TVirtualFFT::FFT(1,&nbin,"C2R M K");
+    ifft->SetPointsComplex(value_re,value_im);
+    ifft->Transform();
+    TH1 *fb = TH1::TransformHisto(ifft,0,"Re");
+    
+    // put results back
+    for (int i=0;i!=nbin;i++){
+      htemp->SetBinContent(i+1,fb->GetBinContent(i+1)/( 14.*1.1*4096./2000.));
+    }
+    delete ifft;
+    delete fb;
+
+    // correct baseline 
+    restore_baseline(htemp);
+
+    // calculate RMS 
+    double rms = cal_rms(htemp,chid);
+    vplane_rms[chid-2400] = rms*scale;
+    
+    // put results back into the 2-D histogram
+    for (int i=0;i!=bins_per_frame;i++){
+      double sum = 0;
+      for (int k=0;k!=scale;k++){
+	sum += htemp->GetBinContent(scale*i+k+1);
+      }
+      hv_1D_c->SetBinContent(chid+1-2400,i+1,sum);
+    }
+    delete htemp;
+    delete hm;
+    delete hp;
+    
+  }
+
+  delete hvr;
+  delete hmr_v;
+  delete hpr_v;
+  delete filter_v;
 }
 
 
@@ -173,7 +366,7 @@ void WireCell2dToy::DataSignalWienROIFDS::Deconvolute_U_1D_c(){
     
     // put results back
     for (int i=0;i!=nbin;i++){
-      htemp->SetBinContent(i+1,fb->GetBinContent(i+1)/( 14.*4096./2000.));
+      htemp->SetBinContent(i+1,fb->GetBinContent(i+1)/( 14.*1.1*4096./2000.));
     }
     delete ifft;
     delete fb;
