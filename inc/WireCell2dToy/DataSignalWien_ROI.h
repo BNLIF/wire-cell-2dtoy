@@ -23,6 +23,11 @@ namespace WireCell2dToy {
     std::vector <float>& get_vplane_rms(){return vplane_rms;};
     std::vector <float>& get_wplane_rms(){return wplane_rms;};
 
+    TH2I *Get_hu_gaus(){return hu_2D_g_gaus;};
+    TH2I *Get_hv_gaus(){return hv_1D_g_gaus;};
+    TH2I *Get_hw_gaus(){return hw_1D_g;};
+
+
     void Save();
     
   private:

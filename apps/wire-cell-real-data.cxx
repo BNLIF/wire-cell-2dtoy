@@ -39,8 +39,8 @@
 #include "WireCellNav/GenerativeFDS.h"
 #include "WireCell2dToy/ToySignalSimu.h"
 #include "WireCell2dToy/ToySignalSimuTrue.h"
-#include "WireCell2dToy/DataSignalGaus.h"
-#include "WireCell2dToy/DataSignalWien.h"
+#include "WireCell2dToy/DataSignalGaus_ROI.h"
+#include "WireCell2dToy/DataSignalWien_ROI.h"
 
 #include "TApplication.h"
 #include "TCanvas.h"
@@ -207,18 +207,12 @@ int main(int argc, char* argv[])
 
   // std::cout << uplane_map.size() << " " << vplane_map.size() << " " << wplane_map.size() << std::endl;
     
-  cout << "Deconvolution with Gaussian filter" << endl;
-  WireCell2dToy::DataSignalGausFDS gaus_fds(data_fds,gds,total_time_bin/nrebin,max_events,toffset_1,toffset_2,toffset_3); // gaussian smearing for charge estimation
-  if (save_file != 2){
-    gaus_fds.jump(eve_num);
-    if (save_file == 1)
-      gaus_fds.Save();
-  }else{
+  // cout << "Deconvolution with Gaussian filter" << endl;
+  // WireCell2dToy::DataSignalGausFDS gaus_fds(data_fds,gds,total_time_bin/nrebin,max_events,toffset_1,toffset_2,toffset_3); // gaussian smearing for charge estimation
   
-  }
 
   cout << "Deconvolution with Wiener filter" << endl; 
-  WireCell2dToy::DataSignalWienFDS wien_fds(data_fds,gds,uplane_map, vplane_map, wplane_map, total_time_bin/nrebin,max_events,toffset_1,toffset_2,toffset_3); // weiner smearing for hit identification
+  WireCell2dToy::DataSignalWienROIFDS wien_fds(data_fds,gds,uplane_map, vplane_map, wplane_map, total_time_bin/nrebin,max_events,toffset_1,toffset_2,toffset_3); // weiner smearing for hit identification
   if (save_file !=2 ){
     wien_fds.jump(eve_num);
     if (save_file == 1)
@@ -226,6 +220,10 @@ int main(int argc, char* argv[])
   }else{
     
   }
+
+
+  cout << "Deconvolution with Gaussian filter" << endl;
+  WireCell2dToy::DataSignalGausROIFDS gaus_fds(wien_fds,max_events); // gaussian smearing for charge estimation
 
 
   data_fds.Clear();
