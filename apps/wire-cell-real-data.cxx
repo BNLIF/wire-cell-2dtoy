@@ -224,7 +224,7 @@ int main(int argc, char* argv[])
 
   cout << "Deconvolution with Gaussian filter" << endl;
   WireCell2dToy::DataSignalGausROIFDS gaus_fds(wien_fds,max_events); // gaussian smearing for charge estimation
-
+  gaus_fds.jump(eve_num);
 
   data_fds.Clear();
 
