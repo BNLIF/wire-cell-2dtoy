@@ -207,8 +207,7 @@ int main(int argc, char* argv[])
 
   // std::cout << uplane_map.size() << " " << vplane_map.size() << " " << wplane_map.size() << std::endl;
     
-  // cout << "Deconvolution with Gaussian filter" << endl;
-  // WireCell2dToy::DataSignalGausFDS gaus_fds(data_fds,gds,total_time_bin/nrebin,max_events,toffset_1,toffset_2,toffset_3); // gaussian smearing for charge estimation
+  
   
 
   cout << "Deconvolution with Wiener filter" << endl; 
@@ -221,6 +220,15 @@ int main(int argc, char* argv[])
     
   }
 
+  // cout << "Deconvolution with Gaussian filter" << endl;
+  // WireCell2dToy::DataSignalGausFDS gaus_fds(data_fds,gds,total_time_bin/nrebin,max_events,toffset_1,toffset_2,toffset_3); // gaussian smearing for charge estimation
+  // if (save_file !=2 ){
+  //   gaus_fds.jump(eve_num);
+  //   if (save_file == 1)
+  //     gaus_fds.Save();
+  // }else{
+    
+  // }
 
   cout << "Deconvolution with Gaussian filter" << endl;
   WireCell2dToy::DataSignalGausROIFDS gaus_fds(wien_fds,max_events); // gaussian smearing for charge estimation

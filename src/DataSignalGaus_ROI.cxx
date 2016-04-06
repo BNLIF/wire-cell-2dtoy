@@ -37,7 +37,7 @@ int WireCell2dToy::DataSignalGausROIFDS::jump(int frame_number){
     t.tbin = 0;
     t.charge.resize(nticks, 0.0);
     for (int j=0;j!= nticks; j++){
-      t.charge.at(j) = hu_gaus->GetBinContent(j+1);
+      t.charge.at(j) = hu_gaus->GetBinContent(i+1,j+1);
     }
     frame.traces.push_back(t);
   }
@@ -48,7 +48,7 @@ int WireCell2dToy::DataSignalGausROIFDS::jump(int frame_number){
     t.tbin = 0;
     t.charge.resize(nticks, 0.0);
     for (int j=0;j!= nticks; j++){
-      t.charge.at(j) = hv_gaus->GetBinContent(j+1);
+      t.charge.at(j) = hv_gaus->GetBinContent(i+1,j+1);
     }
     frame.traces.push_back(t);
   }
@@ -59,7 +59,7 @@ int WireCell2dToy::DataSignalGausROIFDS::jump(int frame_number){
     t.tbin = 0;
     t.charge.resize(nticks, 0.0);
     for (int j=0;j!= nticks; j++){
-      t.charge.at(j) = hw_gaus->GetBinContent(j+1);
+      t.charge.at(j) = hw_gaus->GetBinContent(i+1,j+1);
     }
     frame.traces.push_back(t);
   }

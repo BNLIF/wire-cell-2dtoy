@@ -1155,7 +1155,7 @@ void WireCell2dToy::MergeToyTiling::form_wiremap(WireCell2dToy::ToyTiling& tilin
     for (int j=0;j!=wires.size();j++){
       charge += wcmap[wires.at(j)];
     }
-    // std::cout << i << " " << charge << std::endl;
+    //    std::cout << i << " " << charge << std::endl;
     wirechargemap[mwire] = charge;
   }
   //
