@@ -58,32 +58,37 @@ namespace WireCell2dToy {
     void Deconvolute_U_2D_g(); // both with filter and without filter 
     void Deconvolute_V_1D_g(); // both with filter and without filter 
 
-    void ROI_cal(TH1F *h1_1, TH1F *h2_1, TH1F *h3_1, Double_t threshold0,Double_t threshold2, TH1F *hresult);
+    void ROI_cal(TH1F *h1_1, TH1F *h2_1, TH1F *h3_1, TH1F *h4_1, TH1F *h5_1, Double_t threshold0,Double_t threshold2, TH1F *hresult, TH1F *hresult1, int flag_u);
     Double_t local_ave(TH1F *h1, Int_t bin, Int_t width);
     Int_t find_ROI_begin(TH1F *h1, Int_t bin, Double_t th);
     Int_t find_ROI_end(TH1F *h1, Int_t bin, Double_t th);
 
     // U plane  1D-U-c
     TH2I *hu_1D_c;
+    TH2I *hu_1D_c_gaus;
     TGraph *gu_1D_c;
 
     // 2D-U-g-f, 2D-U-g
     TH2I *hu_2D_g_f;
     TH2I *hu_2D_g;
+    TH2I *hu_2D_g_gaus;
     TGraph **gu_2D_g;
     
           
     //V plane 1-D-V-c
     TH2I *hv_1D_c;
+    TH2I *hv_1D_c_gaus;
     TGraph *gv_1D_c;
 
     //1-D-V-g-f, 1-D-V-g
     TH2I *hv_1D_g_f;
     TH2I *hv_1D_g;
+    TH2I *hv_1D_g_gaus;
     TGraph *gv_1D_g;
 
     //W-plane  1-D-W-g
     TH2I *hw_1D_g;
+    TH2I *hw_1D_g_gaus;
     TGraph *gw_1D_g;
     TGraph *gw_1D_c;
 
