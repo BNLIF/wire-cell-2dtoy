@@ -24,7 +24,7 @@ namespace WireCell2dToy {
     std::vector <float>& get_wplane_rms(){return wplane_rms;};
 
     TH2I *Get_hu_gaus(){return hu_2D_g_gaus;};
-    TH2I *Get_hv_gaus(){return hv_1D_g_gaus;};
+    TH2I *Get_hv_gaus(){return hv_2D_g_gaus;};
     TH2I *Get_hw_gaus(){return hw_1D_g;};
 
 
@@ -61,7 +61,8 @@ namespace WireCell2dToy {
     void Deconvolute_W_1D_g();
 
     void Deconvolute_U_2D_g(); // both with filter and without filter 
-    void Deconvolute_V_1D_g(); // both with filter and without filter 
+    // void Deconvolute_V_1D_g(); // both with filter and without filter 
+    void Deconvolute_V_2D_g(); // both with filter and without filter 
 
     void ROI_cal(TH1F *h1_1, TH1F *h2_1, TH1F *h3_1, TH1F *h4_1, TH1F *h5_1, Double_t threshold0,Double_t threshold2, TH1F *hresult, TH1F *hresult1, int flag_u);
     Double_t local_ave(TH1F *h1, Int_t bin, Int_t width);
@@ -86,10 +87,16 @@ namespace WireCell2dToy {
     TGraph *gv_1D_c;
 
     //1-D-V-g-f, 1-D-V-g
-    TH2I *hv_1D_g_f;
-    TH2I *hv_1D_g;
-    TH2I *hv_1D_g_gaus;
-    TGraph *gv_1D_g;
+    /* TH2I *hv_1D_g_f; */
+    /* TH2I *hv_1D_g; */
+    /* TH2I *hv_1D_g_gaus; */
+    /* TGraph *gv_1D_g; */
+
+    TH2I *hv_2D_g_f; 
+    TH2I *hv_2D_g;
+    TH2I *hv_2D_g_gaus;
+    TGraph **gv_2D_g;
+
 
     //W-plane  1-D-W-g
     TH2I *hw_1D_g;
