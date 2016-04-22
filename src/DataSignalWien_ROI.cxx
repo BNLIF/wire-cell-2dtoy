@@ -170,7 +170,7 @@ void WireCell2dToy::DataSignalWienROIFDS::Deconvolute_U_2D_g(){
       //*** scale factors for 70kV ***//
       double x = time - time_offset_uv;
       if (x > -35 && x  < 15){
-	if (gtemp->Eval(x)>0 && x<0){
+	if (gtemp->Eval(x)>0 ){
 	  hur->SetBinContent(i+1,gtemp->Eval(x)/scale_u); //70kV
 	}else{
 	  hur->SetBinContent(i+1,gtemp->Eval(x)/scale_u); //70kV
@@ -550,6 +550,8 @@ void WireCell2dToy::DataSignalWienROIFDS::ROI_cal(TH1F *h1_1, TH1F *h2_1, TH1F *
 	
   	content_current -=  content_begin + (content_end-content_begin) * (j-begin)/(end-begin);
 	
+	if (content_current <= th2) content_current = 0;
+
 	if (content_current < h1_1->GetBinContent(j+1))
 	  content_current = h1_1->GetBinContent(j+1);
 
@@ -824,7 +826,11 @@ void WireCell2dToy::DataSignalWienROIFDS::Deconvolute_V_1D_g(){
     double time  = hvr->GetBinCenter(i+1)/2.-50;
     double x = time-time_offset_uv;
     if (x > -35 && x  < 15){
-      hvr->SetBinContent(i+1,gv_1D_g->Eval(x)/scale_v);
+      if (gv_1D_g->Eval(x)>0){
+	hvr->SetBinContent(i+1,gv_1D_g->Eval(x)/scale_v);
+      }else{
+	hvr->SetBinContent(i+1,gv_1D_g->Eval(x)/scale_v);
+      }
     }
   }
   

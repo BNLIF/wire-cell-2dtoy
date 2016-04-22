@@ -90,13 +90,18 @@ int WireCell2dToy::DataSignalWien2DFDS::jump(int frame_number){
 
   for (int j=0;j!=7;j++){
     TGraph *gtemp;
+    Double_t scale_positive;
     if (j==0 || j==6){
       gtemp = gu[3];
+      scale_positive = 1;
     }else if (j==1 || j==5){
       gtemp = gu[2];
+      scale_positive = 1.;
     }else if (j==2 || j==4){
       gtemp = gu[1];
+      scale_positive = 1.;
     }else if (j==3){
+      scale_positive = 1.0;
       gtemp = gu[0];
     }
     for (int i=0; i!=nbin; i++){  
@@ -105,7 +110,7 @@ int WireCell2dToy::DataSignalWien2DFDS::jump(int frame_number){
       double x = time;
       if (x > -35 && x  < 15){
 	if (gtemp->Eval(x)>0 && x<0){
-	  hur->SetBinContent(i+1,gtemp->Eval(x)/scale_u*1.0); //70kV
+	  hur->SetBinContent(i+1,gtemp->Eval(x)/scale_u*scale_positive); //70kV
 	}else{
 	  hur->SetBinContent(i+1,gtemp->Eval(x)/scale_u); //70kV
 	}
@@ -133,7 +138,7 @@ int WireCell2dToy::DataSignalWien2DFDS::jump(int frame_number){
     x = time-time_offset_uv;  //70kV
     if (x > -35 && x  < 15){
       if (gv->Eval(x)>0 && x<0){
-	hvr->SetBinContent(i+1,gv->Eval(x)/scale_v*1.0);  //70kV
+	hvr->SetBinContent(i+1,gv->Eval(x)/scale_v);  //70kV
       }else{
 	hvr->SetBinContent(i+1,gv->Eval(x)/scale_v);  //70kV
       }
