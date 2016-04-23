@@ -1016,7 +1016,8 @@ void WireCell2dToy::DataSignalWienROIFDS::ROI_cal(TH1F *h1_1, TH1F *h2_1, TH1F *
 	   //flag  = 1;
 	   h2_3->SetBinContent(j+begin+1,htemp->GetBinContent(j+1));
 	 }else{
-	   h2_3->SetBinContent(j+begin+1,h1_1->GetBinContent(j+begin+1));
+	   if (h1_1->GetBinContent(j+begin+1) > th1)
+	     h2_3->SetBinContent(j+begin+1,h1_1->GetBinContent(j+begin+1));
 	 }
        }
        // if (flag == 0){
