@@ -5,6 +5,10 @@
 #include "TVirtualFFT.h"
 #include "TRandom.h"
 #include "TF1.h"
+#include "TSpectrum.h"
+
+#include <set>
+#include <algorithm>
 
 using namespace WireCell;
 
@@ -880,6 +884,8 @@ void WireCell2dToy::DataSignalWienROIFDS::ROI_cal(TH1F *h1_1, TH1F *h2_1, TH1F *
   	content_end = h2_1->GetBinContent(end+1);
       }
       
+      TH1F *htemp = new TH1F("htemp","htemp",end-begin+1,begin,end+1);
+
       for (Int_t j=begin;j<=end;j++){
   	Double_t content_current;
   	if (j <0){
@@ -892,13 +898,137 @@ void WireCell2dToy::DataSignalWienROIFDS::ROI_cal(TH1F *h1_1, TH1F *h2_1, TH1F *
 	
   	content_current -=  content_begin + (content_end-content_begin) * (j-begin)/(end-begin);
 	
-	if (content_current <= th2) content_current = 0;
+	// if (content_current <= th2) content_current = 0;
 
-	if (content_current < h1_1->GetBinContent(j+1))
-	  content_current = h1_1->GetBinContent(j+1);
+	// if (content_current < h1_1->GetBinContent(j+1))
+	//   content_current = h1_1->GetBinContent(j+1);
 
-  	h2_3->SetBinContent(j+1,content_current);
+  	// h2_3->SetBinContent(j+1,content_current);
+
+	htemp->SetBinContent(j-begin+1,content_current);
       }
+
+       TSpectrum *s = new TSpectrum(100);
+       Int_t nfound = s->Search(htemp,2,"nobackground new",0.1);
+       
+       if (nfound >1){
+	 //cout << htemp->GetNbinsX() << " " << nfound << " " << begin << " " << end << endl;
+	 Int_t npeaks = s->GetNPeaks();
+	 Double_t *peak_pos = s->GetPositionX();
+	 
+	 // const int size = npeaks;
+	 // const int size_1 = npeaks+1;
+	 int order_peak_pos[105];
+	 
+	 for (Int_t j=0;j!=npeaks;j++){
+	   order_peak_pos[j] = *(peak_pos+j);
+	 }
+	 std::sort(order_peak_pos,order_peak_pos + npeaks);
+	 
+	 // for (Int_t j=0;j!=npeaks;j++){
+	 // 	std::cout << order_peak_pos[j] << std::endl;
+	 // }
+	 
+	 Float_t valley_pos[25];
+	 valley_pos[0] = begin;
+	 
+	 for (Int_t j=0;j!=npeaks-1;j++){
+	   Float_t min = 1e9;
+	   for (Int_t k = order_peak_pos[j]-begin; k< order_peak_pos[j+1]-begin;k++){
+	     
+	     if (htemp->GetBinContent(k+1) < min){
+	       min = htemp->GetBinContent(k+1);
+	       valley_pos[j+1] = k+begin;
+	     }
+	   }
+	   //	std::cout << valley_pos[j+1] << std::endl;
+	   //std::cout << *(peak_pos+j) << std::endl;
+	 }
+	 valley_pos[npeaks] = end;
+	 
+	 std::set<int> saved_boundaries;
+	 
+	 for (Int_t j=0;j!=npeaks;j++){
+	   int flag = 0;
+	   Int_t start_pos = valley_pos[j];
+	   Double_t start_content = htemp->GetBinContent(valley_pos[j]-begin+1);
+	   Int_t end_pos = valley_pos[j+1];
+	   Double_t end_content = htemp->GetBinContent(valley_pos[j+1]-begin+1);
+	   Int_t Peak_pos = order_peak_pos[j];
+	   Double_t peak_content = htemp->GetBinContent(order_peak_pos[j]-begin+1);
+	   
+	   
+	   // std::cout << start_pos << " " << start_content << " " << Peak_pos << " " << peak_content
+	   // 	  << " " << end_pos << " " << peak_content << std::endl;
+	   
+	   if ((start_content > th || end_content > th) &&
+	       start_content < peak_content /2. && end_content < peak_content/2.) flag = 1;
+	   
+	   // deal with the small peaks ... 
+	   if (peak_content > th2 && peak_content < th2 * 1.5) flag =1;
+	   
+	   if (flag==1){
+	     saved_boundaries.insert(start_pos);
+	     saved_boundaries.insert(end_pos);
+	     //	  std::cout << start_pos << " " << start_content << " " << end_pos << 
+	     //  " " << end_content << std::endl;
+	   }
+	   //	std::cout << valley_pos[j] << " " << *(peak_pos+j) << " " << valley_pos[j+1] <<std::endl;
+	 }
+	 
+	 //   std::cout << saved_boundaries.size() << std::endl;
+	 for (Int_t j=0;j!=npeaks;j++){
+	   int flag = 0;
+	   Int_t start_pos = valley_pos[j];
+	   Double_t start_content = htemp->GetBinContent(valley_pos[j]-begin+1);
+	   Int_t end_pos = valley_pos[j+1];
+	   Double_t end_content = htemp->GetBinContent(valley_pos[j+1]-begin+1);
+	   Int_t Peak_pos = order_peak_pos[j];
+	   Double_t peak_content = htemp->GetBinContent(order_peak_pos[j]-begin+1);
+	   
+	   if (saved_boundaries.find(start_pos) != saved_boundaries.end() ||
+	       saved_boundaries.find(end_pos) != saved_boundaries.end()){
+	     
+	     for (Int_t k = start_pos; k!=end_pos+1;k++){
+	       Double_t temp_content = htemp->GetBinContent(k-begin+1) - (start_content + (end_content-start_content) * (k-start_pos) / (end_pos - start_pos));
+	       htemp->SetBinContent(k-begin+1,temp_content);
+	     }
+	     //std::cout << "Adaptive Baseline " << start_pos << " " << end_pos << std::endl;
+	   }
+	 }
+	 //htemp->Draw();
+	 //TH1 *hb = s->Background(htemp,20,"same");
+	 //for (Int_t j=0;j!=hb->GetNbinsX();j++){
+	 //h2_5->SetBinContent(j+begin+1,hb->GetBinContent(j+1));
+	 //}
+	 //l3->Draw("same");
+	 //hb->Draw("same");
+      //hb->SetLineColor(4);
+      // c1->Update();
+      // int abc;
+      // cin >> abc;
+      //delete hb;
+       }
+       
+       //int flag = 0;
+       for (Int_t j=0;j!=htemp->GetNbinsX();j++){
+	 if (htemp->GetBinContent(j+1) >= th2){
+	   //flag  = 1;
+	   h2_3->SetBinContent(j+begin+1,htemp->GetBinContent(j+1));
+	 }else{
+	   h2_3->SetBinContent(j+begin+1,h1_1->GetBinContent(j+begin+1));
+	 }
+       }
+       // if (flag == 0){
+       // 	 for (Int_t j=0;j!=htemp->GetNbinsX();j++){
+       // 	    h2_3->SetBinContent(j+begin+1,h1_1->GetBinContent(j+begin+1));
+       // 	 }
+       // }
+       
+       
+       delete htemp;
+       delete s;
+
     }
     
     
@@ -925,6 +1055,8 @@ void WireCell2dToy::DataSignalWienROIFDS::ROI_cal(TH1F *h1_1, TH1F *h2_1, TH1F *
   	content_end = h2_1->GetBinContent(end+1);
       }
       
+      TH1F *htemp = new TH1F("htemp","htemp",end-begin+1,begin,end+1);
+
       for (Int_t j=begin;j<=end;j++){
   	Double_t content_current;
   	if (j <0){
@@ -936,9 +1068,121 @@ void WireCell2dToy::DataSignalWienROIFDS::ROI_cal(TH1F *h1_1, TH1F *h2_1, TH1F *
   	}
 	
   	content_current -=  content_begin + (content_end-content_begin) * (j-begin)/(end-begin);
-  	if(content_current > th2)
-  	  h2_2->SetBinContent(j+1,content_current);
+  	// if(content_current > th2)
+  	//   h2_2->SetBinContent(j+1,content_current);
+
+	htemp->SetBinContent(j-begin+1,content_current);
       }
+
+      TSpectrum *s = new TSpectrum(100);
+      Int_t nfound = s->Search(htemp,2,"nobackground new",0.1);
+      
+      if (nfound >1){
+	//cout << htemp->GetNbinsX() << " " << nfound << " " << begin << " " << end << endl;
+	Int_t npeaks = s->GetNPeaks();
+	Double_t *peak_pos = s->GetPositionX();
+	
+	// const int size = npeaks;
+	// const int size_1 = npeaks+1;
+	int order_peak_pos[105];
+	
+	for (Int_t j=0;j!=npeaks;j++){
+	  order_peak_pos[j] = *(peak_pos+j);
+	}
+	std::sort(order_peak_pos,order_peak_pos + npeaks);
+	
+	// for (Int_t j=0;j!=npeaks;j++){
+	// 	std::cout << order_peak_pos[j] << std::endl;
+	// }
+	
+	Float_t valley_pos[25];
+	valley_pos[0] = begin;
+	
+	for (Int_t j=0;j!=npeaks-1;j++){
+	  Float_t min = 1e9;
+	  for (Int_t k = order_peak_pos[j]-begin; k< order_peak_pos[j+1]-begin;k++){
+	    
+	    if (htemp->GetBinContent(k+1) < min){
+	      min = htemp->GetBinContent(k+1);
+	      valley_pos[j+1] = k+begin;
+	    }
+	  }
+	  //	std::cout << valley_pos[j+1] << std::endl;
+	  //std::cout << *(peak_pos+j) << std::endl;
+	}
+	valley_pos[npeaks] = end;
+	
+	std::set<int> saved_boundaries;
+	
+	for (Int_t j=0;j!=npeaks;j++){
+	  int flag = 0;
+	  Int_t start_pos = valley_pos[j];
+	  Double_t start_content = htemp->GetBinContent(valley_pos[j]-begin+1);
+	  Int_t end_pos = valley_pos[j+1];
+	  Double_t end_content = htemp->GetBinContent(valley_pos[j+1]-begin+1);
+	  Int_t Peak_pos = order_peak_pos[j];
+	  Double_t peak_content = htemp->GetBinContent(order_peak_pos[j]-begin+1);
+	  
+	  
+	  if ((start_content >= th2 || end_content >= th2) &&
+	      start_content < peak_content /2. && end_content < peak_content/2.) flag = 1;
+	  
+	  // deal with the small peaks ... 
+	  if (peak_content > th2 && peak_content < th2 * 1.5) flag =1;
+	  
+	  if (flag==1){
+	    saved_boundaries.insert(start_pos);
+	    saved_boundaries.insert(end_pos);
+	    //	  std::cout << start_pos << " " << start_content << " " << end_pos << 
+	    //  " " << end_content << std::endl;
+	  }
+	  //	std::cout << valley_pos[j] << " " << *(peak_pos+j) << " " << valley_pos[j+1] <<std::endl;
+	}
+	
+	//  std::cout << saved_boundaries.size() << std::endl;
+	for (Int_t j=0;j!=npeaks;j++){
+	  int flag = 0;
+	  Int_t start_pos = valley_pos[j];
+	  Double_t start_content = htemp->GetBinContent(valley_pos[j]-begin+1);
+	  Int_t end_pos = valley_pos[j+1];
+	  Double_t end_content = htemp->GetBinContent(valley_pos[j+1]-begin+1);
+	  Int_t Peak_pos = order_peak_pos[j];
+	  Double_t peak_content = htemp->GetBinContent(order_peak_pos[j]-begin+1);
+	  
+	  if (saved_boundaries.find(start_pos) != saved_boundaries.end() ||
+	      saved_boundaries.find(end_pos) != saved_boundaries.end()){
+	    
+	    for (Int_t k = start_pos; k!=end_pos+1;k++){
+	      Double_t temp_content = htemp->GetBinContent(k-begin+1) - (start_content + (end_content-start_content) * (k-start_pos) / (end_pos - start_pos));
+	      htemp->SetBinContent(k-begin+1,temp_content);
+	    }
+	    //std::cout << "Adaptive Baseline " << start_pos << " " << end_pos << std::endl;
+	  }
+	}
+	//htemp->Draw();
+	//TH1 *hb = s->Background(htemp,20,"same");
+	//for (Int_t j=0;j!=hb->GetNbinsX();j++){
+	//h2_5->SetBinContent(j+begin+1,hb->GetBinContent(j+1));
+	//}
+	//l3->Draw("same");
+	//hb->Draw("same");
+	//hb->SetLineColor(4);
+	// c1->Update();
+	// int abc;
+	// cin >> abc;
+	//delete hb;
+      }
+      
+      
+      for (Int_t j=0;j!=htemp->GetNbinsX();j++){
+	if (htemp->GetBinContent(j+1) > th2)
+	  h2_2->SetBinContent(j+begin+1,htemp->GetBinContent(j+1));
+      }
+      
+      
+      delete htemp;
+      delete s;
+      
     }
     
     for (Int_t i=0;i!=h2_2->GetNbinsX();i++){
