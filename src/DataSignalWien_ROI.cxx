@@ -182,13 +182,13 @@ void  WireCell2dToy::DataSignalWienROIFDS::Deconvolute_V_2D_g(){
       //*** scale factors for 70kV ***//
       double x = time - time_offset_uv;
       if (x > -35 && x  < 15){
-	//	if (j==3){
-	if (gtemp->Eval(x)>0 ){
-	  hvr->SetBinContent(i+1,gtemp->Eval(x)/scale_v); //70kV
-	}else{
-	  hvr->SetBinContent(i+1,gtemp->Eval(x)/scale_v); //70kV
+	if (j!=6 && j!=0 ){
+	  if (gtemp->Eval(x)>0 ){
+	    hvr->SetBinContent(i+1,gtemp->Eval(x)/scale_v); //70kV
+	  }else{
+	    hvr->SetBinContent(i+1,gtemp->Eval(x)/scale_v); //70kV
+	  }
 	}
-	  //	}
       }else{
 	hvr->SetBinContent(i+1,0);
       }
