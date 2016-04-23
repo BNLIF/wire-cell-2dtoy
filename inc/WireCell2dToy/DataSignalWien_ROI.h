@@ -61,7 +61,7 @@ namespace WireCell2dToy {
     void Deconvolute_W_1D_g();
 
     void Deconvolute_U_2D_g(); // both with filter and without filter 
-    // void Deconvolute_V_1D_g(); // both with filter and without filter 
+    void Deconvolute_V_1D_g(); // both with filter and without filter 
     void Deconvolute_V_2D_g(); // both with filter and without filter 
 
     void ROI_cal(TH1F *h1_1, TH1F *h2_1, TH1F *h3_1, TH1F *h4_1, TH1F *h5_1, Double_t threshold0,Double_t threshold2, TH1F *hresult, TH1F *hresult1, int flag_u);
