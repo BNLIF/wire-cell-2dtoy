@@ -91,8 +91,8 @@ int main(int argc, char* argv[])
   float unit_dis = 1.14753;  // 70 KV @ 226.5 V/cm
 
   //final offset after time scan (70kV)
-  float toffset_1=-(1.834-1.647) -0.1 - 0.5;
-  float toffset_2=-(1.834+1.555-1.539-1.647) +0.1 - 0.5;
+  float toffset_1=-0.787;
+  float toffset_2=-0.603;
   float toffset_3=0.0;
   
 

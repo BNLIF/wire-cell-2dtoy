@@ -822,6 +822,18 @@ void WireCell2dToy::DataSignalWienROIFDS::ROI_cal(TH1F *h1_1, TH1F *h2_1, TH1F *
 
     //std::cout << th << " " << th1 << " " << th2 << std::endl;
 
+    //h1_1 1D_c
+    //h2_1 2D_g
+    //h3_1 2D_g_f
+    //h4_1 1D gaussian filter
+    //h5_1 2D gaussian filter 
+
+    //calibrate the 1D histogram (temp fix)
+    h2_1->Reset();
+    h3_1->Reset();
+    h5_1->Reset();
+    //
+
     std::vector<std::pair <Int_t,Int_t> > ROIs;
 
     for (Int_t i=0;i<h3_1->GetNbinsX();i++){

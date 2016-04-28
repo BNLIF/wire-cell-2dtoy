@@ -126,13 +126,13 @@ int main(int argc, char* argv[])
   //float unit_dis = 1.6;  //test case
 
   //**** time offset for 58kV ****// 
-  //float toffset_1=-(1.834-1.647) -0.1;//+ 0.1 + (nt_off1 * 0.1 - 0.5 );  // time offset between u/v 
-  //float toffset_2=-(1.834+1.555-1.539-1.647) +0.1;//+ 0.3 + (nt_off2*0.2 - 1); // time offset between u/w
+  //float toffset_1=-(1.834-1.647) -0.1;//
+  //float toffset_2=-(1.834+1.555-1.539-1.647) +0.1;//+ 0.3 
   //float toffset_3=-0.5; //overall time shift
 
   //final offset after time scan (70kV)
-  float toffset_1=-(1.834-1.647) -0.1 - 0.5;
-  float toffset_2=-(1.834+1.555-1.539-1.647) +0.1 - 0.5;
+  float toffset_1=-0.787 + (nt_off1 * 0.1 - 0.5 );  // time offset between u/v 
+  float toffset_2=-0.603 + (nt_off2*0.2 - 1); // time offset between u/w
   float toffset_3=0.0;
   
   int save_image_outline_flag = 0; // prescale flag 
@@ -403,7 +403,8 @@ int main(int argc, char* argv[])
   
   //save the image before deghosting ... 
 
-  TFile *file = new TFile(Form("%d_%d.root",run_no,eve_num),"RECREATE");
+  //  TFile *file = new TFile(Form("%d_%d.root",run_no,eve_num),"RECREATE");
+  TFile *file = new TFile(Form("./%d_%d_%d_%d.root",run_no,eve_num,nt_off1,nt_off2),"RECREATE");
   TTree *t_rec = new TTree("T_rec","T_rec");
   TTree *t_rec_charge = new TTree("T_rec_charge","T_rec_charge");
   TTree *t_rec_charge_blob = new TTree("T_rec_charge_blob","T_rec_charge_blob");
