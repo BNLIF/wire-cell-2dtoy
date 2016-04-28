@@ -147,6 +147,10 @@ void  WireCell2dToy::DataSignalWienROIFDS::Deconvolute_V_2D_g(){
 
   TF1 *filter_low = new TF1("filter_low","1-exp(-pow(x/0.0045,2))");
 
+  TF1 *filter_wire = new TF1("filter_wire","exp(-0.5*pow(x/[0],2))");
+  double par4[1] = {1.0/sqrt(3.1415926)*1.4};
+  filter_wire->SetParameters(par4);
+  //filter_wire->Draw();
   
   TF1 *filter_g = new TF1("filger_g","1./sqrt(2.*3.1415926)/[0]*exp(-x*x/2./[0]/[0])");
   double par3[1] = {3./2.1};
@@ -289,11 +293,17 @@ void  WireCell2dToy::DataSignalWienROIFDS::Deconvolute_V_2D_g(){
     
     Double_t temp2_re[nchannels],temp2_im[nchannels];
     for (Int_t j=0;j!=nchannels;j++){
+      Double_t freq_wire;
+      if (j < nchannels/2.){
+	freq_wire = j/(1.*nchannels)*2.;
+      }else{
+	freq_wire = (nchannels -j)/(1.*nchannels)*2.;
+      }
       if (temp1_im[j]*temp1_im[j]+temp1_re[j]*temp1_re[j]>0){
   	temp2_re[j] = (temp_re[j]*temp1_re[j]+temp_im[j]*temp1_im[j])/m/
-  	  (temp1_im[j]*temp1_im[j]+temp1_re[j]*temp1_re[j]);
+  	  (temp1_im[j]*temp1_im[j]+temp1_re[j]*temp1_re[j]) * filter_wire->Eval(freq_wire);
   	temp2_im[j] = (temp_im[j]*temp1_re[j]-temp_re[j]*temp1_im[j])
-  	  /m/(temp1_im[j]*temp1_im[j]+temp1_re[j]*temp1_re[j]);
+  	  /m/(temp1_im[j]*temp1_im[j]+temp1_re[j]*temp1_re[j]) * filter_wire->Eval(freq_wire);
       }else{
   	temp2_re[j] = 0;
   	temp2_im[j] = 0;
@@ -479,7 +489,13 @@ void WireCell2dToy::DataSignalWienROIFDS::Deconvolute_U_2D_g(){
 
   TF1 *filter_low = new TF1("filter_low","1-exp(-pow(x/0.0045,2))");
 
+  TF1 *filter_wire = new TF1("filter_wire","exp(-0.5*pow(x/[0],2))");
+  double par4[1] = {1.0/sqrt(3.1415926)*1.4};
+  filter_wire->SetParameters(par4);
+  // filter_wire->Draw();
   
+  
+
   TF1 *filter_g = new TF1("filger_g","1./sqrt(2.*3.1415926)/[0]*exp(-x*x/2./[0]/[0])");
   double par3[1] = {3./2.1};
   filter_g->SetParameters(par3);
@@ -617,11 +633,19 @@ void WireCell2dToy::DataSignalWienROIFDS::Deconvolute_U_2D_g(){
     
     Double_t temp2_re[nchannels],temp2_im[nchannels];
     for (Int_t j=0;j!=nchannels;j++){
+      Double_t freq_wire;
+      if (j < nchannels/2.){
+	freq_wire = j/(1.*nchannels)*2.;
+      }else{
+	freq_wire = (nchannels -j)/(1.*nchannels)*2.;
+      }
+
+
       if (temp1_im[j]*temp1_im[j]+temp1_re[j]*temp1_re[j]>0){
   	temp2_re[j] = (temp_re[j]*temp1_re[j]+temp_im[j]*temp1_im[j])/m/
-  	  (temp1_im[j]*temp1_im[j]+temp1_re[j]*temp1_re[j]);
+  	  (temp1_im[j]*temp1_im[j]+temp1_re[j]*temp1_re[j])*filter_wire->Eval(freq_wire);
   	temp2_im[j] = (temp_im[j]*temp1_re[j]-temp_re[j]*temp1_im[j])
-  	  /m/(temp1_im[j]*temp1_im[j]+temp1_re[j]*temp1_re[j]);
+  	  /m/(temp1_im[j]*temp1_im[j]+temp1_re[j]*temp1_re[j])*filter_wire->Eval(freq_wire);
       }else{
   	temp2_re[j] = 0;
   	temp2_im[j] = 0;
@@ -794,7 +818,7 @@ void WireCell2dToy::DataSignalWienROIFDS::ROI_cal(TH1F *h1_1, TH1F *h2_1, TH1F *
   
     Double_t th = threshold2*2.0; // do 2 sigma
     Double_t th1 = threshold0*3.6; // do 3.6 sigma
-    Double_t th2 = threshold2*4.0; // do four sigma ... 
+    Double_t th2 = threshold2*4.0; // do three sigma ... 
 
     //std::cout << th << " " << th1 << " " << th2 << std::endl;
 
@@ -1078,7 +1102,7 @@ void WireCell2dToy::DataSignalWienROIFDS::ROI_cal(TH1F *h1_1, TH1F *h2_1, TH1F *
       TSpectrum *s = new TSpectrum(100);
       Int_t nfound = s->Search(htemp,2,"nobackground new",0.1);
       
-      if (nfound >1){
+      if (nfound >1 ){
 	//cout << htemp->GetNbinsX() << " " << nfound << " " << begin << " " << end << endl;
 	Int_t npeaks = s->GetNPeaks();
 	Double_t *peak_pos = s->GetPositionX();
