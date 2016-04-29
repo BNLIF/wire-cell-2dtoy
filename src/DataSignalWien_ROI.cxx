@@ -821,7 +821,6 @@ void WireCell2dToy::DataSignalWienROIFDS::ROI_cal(TH1F *h1_1, TH1F *h2_1, TH1F *
     Double_t th2 = threshold2*4.0; // do three sigma ... 
 
     //std::cout << th << " " << th1 << " " << th2 << std::endl;
-
     //h1_1 1D_c
     //h2_1 2D_g
     //h3_1 2D_g_f
@@ -829,10 +828,13 @@ void WireCell2dToy::DataSignalWienROIFDS::ROI_cal(TH1F *h1_1, TH1F *h2_1, TH1F *
     //h5_1 2D gaussian filter 
 
     //calibrate the 1D histogram (temp fix)
-    h2_1->Reset();
-    h3_1->Reset();
-    h5_1->Reset();
-    //
+    //h2_1->Reset();
+    //h3_1->Reset();
+    //h5_1->Reset();
+    
+    //calibrate the 2D histgraom (temp fix)
+    h1_1->Reset();
+    h4_1->Reset();
 
     std::vector<std::pair <Int_t,Int_t> > ROIs;
 
