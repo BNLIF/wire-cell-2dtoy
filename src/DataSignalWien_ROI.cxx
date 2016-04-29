@@ -188,7 +188,7 @@ void  WireCell2dToy::DataSignalWienROIFDS::Deconvolute_V_2D_g(){
     for (int i=0; i!=nbin; i++){  
       double time = hvr->GetBinCenter(i+1)/2.-50 ;
       //*** scale factors for 70kV ***//
-      double x = time - time_offset_uv;
+      double x = time - time_offset_uv -0.113; // 0.113 is the calibration number ... 
       if (x > -35 && x  < 15){
 	if (j!=6 && j!=0 ){
 	  if (gtemp->Eval(x)>0 ){
@@ -833,8 +833,8 @@ void WireCell2dToy::DataSignalWienROIFDS::ROI_cal(TH1F *h1_1, TH1F *h2_1, TH1F *
     //h5_1->Reset();
     
     //calibrate the 2D histgraom (temp fix)
-    h1_1->Reset();
-    h4_1->Reset();
+    // h1_1->Reset();
+    // h4_1->Reset();
 
     std::vector<std::pair <Int_t,Int_t> > ROIs;
 
@@ -1449,7 +1449,7 @@ void WireCell2dToy::DataSignalWienROIFDS::Deconvolute_V_1D_g(){
   float scale_v = 1.251/1.074*0.91*0.85;
   for (int i=0;i!=nbin;i++){
     double time  = hvr->GetBinCenter(i+1)/2.-50;
-    double x = time-time_offset_uv;
+    double x = time-time_offset_uv-0.113;
     if (x > -35 && x  < 15){
       if (gv_2D_g[0]->Eval(x)>0){
 	hvr->SetBinContent(i+1,gv_2D_g[0]->Eval(x)/scale_v);
@@ -1656,7 +1656,7 @@ void WireCell2dToy::DataSignalWienROIFDS::Deconvolute_W_1D_g(){
   TH1F *hwr = new TH1F("hwr1","hwr1",nbin,0,nbin); // half us tick
   for (int i=0;i!=nbin;i++){
     double time  = hwr->GetBinCenter(i+1)/2.-50;
-    double x = time-time_offset_uw;
+    double x = time-time_offset_uw + 0.803;
     if (x > -35 && x  < 15){
       hwr->SetBinContent(i+1,gw_1D_g->Eval(x));
     }
@@ -1825,7 +1825,7 @@ void WireCell2dToy::DataSignalWienROIFDS::Deconvolute_V_1D_c(){
   float scale_v = 1.251/1.074*0.91*0.85;
   for (int i=0;i!=nbin;i++){
     double time  = hvr->GetBinCenter(i+1)/2.-50;
-    double x = time-time_offset_uv;
+    double x = time-time_offset_uv + 0.887;
     if (x > -35 && x  < 15){
       hvr->SetBinContent(i+1,gv_1D_c->Eval(x)/scale_v);
     }
@@ -1997,7 +1997,7 @@ void WireCell2dToy::DataSignalWienROIFDS::Deconvolute_U_1D_c(){
   float scale_u = 1.51/1.16*0.91*0.85;
   for (int i=0;i!=nbin;i++){
     double time  = hur->GetBinCenter(i+1)/2.-50;
-    double x = time;
+    double x = time + 0.1;
     if (x > -35 && x  < 15){
       hur->SetBinContent(i+1,gu_1D_c->Eval(x)/scale_u);
     }
