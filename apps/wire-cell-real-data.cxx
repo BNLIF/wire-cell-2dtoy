@@ -130,10 +130,16 @@ int main(int argc, char* argv[])
   //float toffset_2=-(1.834+1.555-1.539-1.647) +0.1;//+ 0.3 
   //float toffset_3=-0.5; //overall time shift
 
-  //final offset after time scan (70kV)
-  float toffset_1=-0.787 + (nt_off1 * 0.1 - 0.5 );  // time offset between u/v 
-  float toffset_2=-0.603 + (nt_off2*0.2 - 1); // time offset between u/w
+  // //final offset after time scan (70kV)
+  // float toffset_1=-0.787 + (nt_off1 * 0.1 - 0.5 );  // time offset between u/v 
+  // float toffset_2=-0.603 + (nt_off2*0.2 - 1); // time offset between u/w
+  // float toffset_3=0.0;
+
+  float toffset_1=-0.787 + 0.8 + (nt_off1 * 0.1 - 0.5 );  // time offset between u/v 
+  float toffset_2=-0.603 + (nt_off2 * 0.1 - 0.5); // time offset between u/w
   float toffset_3=0.0;
+  
+
   
   int save_image_outline_flag = 0; // prescale flag 
   
