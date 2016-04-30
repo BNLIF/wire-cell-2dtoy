@@ -828,9 +828,9 @@ void WireCell2dToy::DataSignalWienROIFDS::ROI_cal(TH1F *h1_1, TH1F *h2_1, TH1F *
     //h5_1 2D gaussian filter 
 
     //calibrate the 1D histogram (temp fix)
-    // h2_1->Reset();
-    // h3_1->Reset();
-    // h5_1->Reset();
+    h2_1->Reset();
+    h3_1->Reset();
+    h5_1->Reset();
     
     //calibrate the 2D histgraom (temp fix)
     // h1_1->Reset();
