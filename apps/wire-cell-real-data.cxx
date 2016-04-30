@@ -200,7 +200,7 @@ int main(int argc, char* argv[])
   subrun_no = data_fds.get_subrun_no();
   event_no = data_fds.get_event_no();
   
-  cout << "Run No: " << run_no << " " << subrun_no << " " << eve_num << endl;
+  cout << "Run No: " << run_no << " " << subrun_no << " " << event_no << endl;
 
 
   // WireMap& uplane_map = data_fds.get_u_map();
@@ -409,8 +409,8 @@ int main(int argc, char* argv[])
   
   //save the image before deghosting ... 
 
-  //  TFile *file = new TFile(Form("%d_%d.root",run_no,eve_num),"RECREATE");
-  TFile *file = new TFile(Form("./%d_%d_%d_%d.root",run_no,eve_num,nt_off1,nt_off2),"RECREATE");
+  TFile *file = new TFile(Form("result_%d_%d_%d.root",run_no,subrun_no,event_no),"RECREATE");
+  //TFile *file = new TFile(Form("./%d_%d_%d_%d.root",run_no,eve_num,nt_off1,nt_off2),"RECREATE");
   TTree *t_rec = new TTree("T_rec","T_rec");
   TTree *t_rec_charge = new TTree("T_rec_charge","T_rec_charge");
   TTree *t_rec_charge_blob = new TTree("T_rec_charge_blob","T_rec_charge_blob");
