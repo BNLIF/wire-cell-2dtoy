@@ -1001,7 +1001,6 @@ void WireCell2dToy::DataSignalWienROIFDS::ROI_cal(TH1F *h1_1, TH1F *h2_1, TH1F *
 	   
 	   if ((start_content > th || end_content > th) &&
 	       start_content < peak_content /2. && end_content < peak_content/2.) flag = 1;
-	   
 	   // deal with the small peaks ... 
 	   if (peak_content > th2 && peak_content < th2 * 1.5) flag =1;
 	   
@@ -1161,7 +1160,6 @@ void WireCell2dToy::DataSignalWienROIFDS::ROI_cal(TH1F *h1_1, TH1F *h2_1, TH1F *
 	  Double_t end_content = htemp->GetBinContent(valley_pos[j+1]-begin+1);
 	  Int_t Peak_pos = order_peak_pos[j];
 	  Double_t peak_content = htemp->GetBinContent(order_peak_pos[j]-begin+1);
-	  
 	  
 	  if ((start_content >= th2 || end_content >= th2) &&
 	      start_content < peak_content /2. && end_content < peak_content/2.) flag = 1;
@@ -2259,7 +2257,8 @@ int WireCell2dToy::DataSignalWienROIFDS::jump(int frame_number){
   std::cout << "Deconvolution with garfield field response for 2-D U Plane" << std::endl;
   Deconvolute_U_2D_g();
  
-
+  // 1: 1D_c, 2: 2D_g, 3: 2D_g_filter, 0: ROI
+  int flag_save = 0;
   
   
   std::cout << "Load results back into frame" << std::endl;
@@ -2281,6 +2280,8 @@ int WireCell2dToy::DataSignalWienROIFDS::jump(int frame_number){
 
     Double_t th1 = uplane_rms.at(i);
     Double_t th2 = uplane_rms_g.at(i);
+
+    
 
     for (Int_t j=0;j!=nticks;j++){
       Double_t content = hu_1D_c->GetBinContent(i+1,j+1);
@@ -2307,7 +2308,25 @@ int WireCell2dToy::DataSignalWienROIFDS::jump(int frame_number){
 
 
     for (int j=0;j!= bins_per_frame; j++){
-      t.charge.at(j) = hresult->GetBinContent(j+1);//hu_2D_g_f->GetBinContent(i+1,j+1);
+      if (flag_save == 1){
+	// save 1D_c result
+	t.charge.at(j) = h1_1->GetBinContent(j+1);
+      }else if (flag_save == 2){
+	// save 2D_g result
+	t.charge.at(j) = h2_1->GetBinContent(j+1);
+      }else if (flag_save == 3){
+	// save 2D_g_filter result
+	t.charge.at(j) = h3_1->GetBinContent(j+1);
+      }else if (flag_save == 0){
+	//normal result
+	t.charge.at(j) = hresult->GetBinContent(j+1);//hu_2D_g_f->GetBinContent(i+1,j+1);
+      }else if (flag_save ==4){
+	t.charge.at(j) = h4_1->GetBinContent(j+1);
+      }else if (flag_save ==5){
+	t.charge.at(j) = h5_1->GetBinContent(j+1);
+      }else if (flag_save ==6){
+	t.charge.at(j) = hresult1->GetBinContent(j+1);
+      }
     }
     frame.traces.push_back(t);
 
@@ -2356,14 +2375,28 @@ int WireCell2dToy::DataSignalWienROIFDS::jump(int frame_number){
       h5_1->SetBinContent(j+1,content);
     }
     
-    ROI_cal(h1_1,h2_1,h3_1,h4_1,h5_1,th1,th2,hresult,hresult1);
+    ROI_cal(h1_1,h2_1,h3_1,h4_1,h5_1,th1,th2,hresult,hresult1,1);
 
     for (Int_t j=0;j!=nticks;j++){
       hv_2D_g_gaus->SetBinContent(i+1,j+1,hresult1->GetBinContent(j+1));
     }
 
     for (int j=0;j!= bins_per_frame; j++){
-      t.charge.at(j) = hresult->GetBinContent(j+1);//hu_2D_g->GetBinContent(i+1,j+1);
+      if (flag_save == 1){
+	t.charge.at(j) = h1_1->GetBinContent(j+1);
+      }else if (flag_save == 2){
+	t.charge.at(j) = h2_1->GetBinContent(j+1);
+      }else if (flag_save == 3){
+	t.charge.at(j) = h3_1->GetBinContent(j+1);
+      }else if (flag_save == 0){
+	t.charge.at(j) = hresult->GetBinContent(j+1);//hu_2D_g->GetBinContent(i+1,j+1);
+      }else if (flag_save ==4){
+	t.charge.at(j) = h4_1->GetBinContent(j+1);
+      }else if (flag_save ==5){
+	t.charge.at(j) = h5_1->GetBinContent(j+1);
+      }else if (flag_save ==6){
+	t.charge.at(j) = hresult1->GetBinContent(j+1);
+      }
     }
     frame.traces.push_back(t);
 
