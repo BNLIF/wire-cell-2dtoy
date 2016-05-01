@@ -36,6 +36,9 @@ namespace WireCell2dToy {
     int  max_frames;
     int nbin;
 
+    float scale_u_1d, scale_v_1d;
+    float scale_u_2d, scale_v_2d;
+
     WireCell::ChirpMap& umap;
     WireCell::ChirpMap& vmap;
     WireCell::ChirpMap& wmap;

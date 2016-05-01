@@ -83,7 +83,11 @@ WireCell2dToy::DataSignalWienROIFDS::DataSignalWienROIFDS(WireCell::FrameDataSou
 
   gw_1D_g = new TGraph(5000,w_1D_g_x,w_1D_g_y);
 
+  scale_u_1d = 1.007/0.9992*1.0213;
+  scale_v_1d = 0.90097/0.9605*1.0213;
   
+  scale_u_2d = 1.0;
+  scale_v_2d = 1.0;
 }
 
 WireCell2dToy::DataSignalWienROIFDS::~DataSignalWienROIFDS(){
@@ -170,7 +174,7 @@ void  WireCell2dToy::DataSignalWienROIFDS::Deconvolute_V_2D_g(){
   TH1F *hvr = new TH1F("hvr1","hvr1",nbin,0,nbin); // half us tick
   const int nchannels = nwire_v;
   
-  float scale_v = 0.901/(1./0.9605*1.0213);
+  float scale_v = scale_v_2d;//0.901/(1./0.9605*1.0213);
   double rho_res[7][nticks], phi_res[7][nticks];
 
   for (int j=0;j!=7;j++){
@@ -513,7 +517,7 @@ void WireCell2dToy::DataSignalWienROIFDS::Deconvolute_U_2D_g(){
   // response function ... 
   TH1F *hur = new TH1F("hur1","hur1",nbin,0,nbin); // half us tick
   const int nchannels = nwire_u;
-  float scale_u = 1.007 / (1./0.9992 * 1.0213);
+  float scale_u = scale_u_2d;
   double rho_res[7][nticks], phi_res[7][nticks];
 
   for (int j=0;j!=7;j++){
@@ -1444,7 +1448,7 @@ void WireCell2dToy::DataSignalWienROIFDS::Deconvolute_V_1D_g(){
 
   //response function 
   TH1F *hvr = new TH1F("hvr1","hvr1",nbin,0,nbin); // half us tick
-  float scale_v = 0.901 / (1./0.9605 * 1.0213);
+  float scale_v = scale_v_2d;//_0.901 / (1./0.9605 * 1.0213);
   for (int i=0;i!=nbin;i++){
     double time  = hvr->GetBinCenter(i+1)/2.-50;
     double x = time-time_offset_uv-0.113;
@@ -1820,7 +1824,7 @@ void WireCell2dToy::DataSignalWienROIFDS::Deconvolute_V_1D_c(){
 
   //response function
   TH1F *hvr = new TH1F("hvr1","hvr1",nbin,0,nbin); // half us tick
-  float scale_v = 0.90097/(1./0.9605*1.0213);
+  float scale_v = scale_v_1d;
   for (int i=0;i!=nbin;i++){
     double time  = hvr->GetBinCenter(i+1)/2.-50;
     double x = time-time_offset_uv + 0.887;
@@ -1992,7 +1996,7 @@ void WireCell2dToy::DataSignalWienROIFDS::Deconvolute_U_1D_c(){
 
   //response function ...
   TH1F *hur = new TH1F("hur1","hur1",nbin,0,nbin); // half us tick
-  float scale_u = 1.007/(1./0.9992*1.0213);
+  float scale_u = scale_u_1d;
   for (int i=0;i!=nbin;i++){
     double time  = hur->GetBinCenter(i+1)/2.-50;
     double x = time + 0.1;
