@@ -83,8 +83,8 @@ WireCell2dToy::DataSignalWienROIFDS::DataSignalWienROIFDS(WireCell::FrameDataSou
 
   gw_1D_g = new TGraph(5000,w_1D_g_x,w_1D_g_y);
 
-  scale_u_1d = 1.029273/0.993117*1.03649;
-  scale_v_1d = 0.958/0.975797*1.03649;
+  scale_u_1d = 1.074225; // 1.029273/0.993117*1.03649;
+  scale_v_1d = 1.017586; //0.958/0.975797*1.03649;
   
   scale_u_2d = 1.0;
   scale_v_2d = 1.0;
@@ -832,13 +832,13 @@ void WireCell2dToy::DataSignalWienROIFDS::ROI_cal(TH1F *h1_1, TH1F *h2_1, TH1F *
     //h5_1 2D gaussian filter 
 
     //calibrate the 1D histogram (temp fix)
-    h2_1->Reset();
-    h3_1->Reset();
-    h5_1->Reset();
+    // h2_1->Reset();
+    // h3_1->Reset();
+    // h5_1->Reset();
     
     //calibrate the 2D histgraom (temp fix)
-    // h1_1->Reset();
-    // h4_1->Reset();
+    h1_1->Reset();
+    h4_1->Reset();
 
     std::vector<std::pair <Int_t,Int_t> > ROIs;
 
