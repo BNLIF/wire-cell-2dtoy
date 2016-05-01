@@ -21,6 +21,9 @@ namespace WireCell2dToy {
     //fixed it ...
     std::vector <float>& get_uplane_rms(){return uplane_rms;};
     std::vector <float>& get_vplane_rms(){return vplane_rms;};
+    /* std::vector <float>& get_uplane_rms(){return uplane_rms_g;}; */
+    /* std::vector <float>& get_vplane_rms(){return vplane_rms_g;}; */
+    
     std::vector <float>& get_wplane_rms(){return wplane_rms;};
 
     TH2I *Get_hu_gaus(){return hu_2D_g_gaus;};
