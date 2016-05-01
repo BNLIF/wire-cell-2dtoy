@@ -86,8 +86,8 @@ WireCell2dToy::DataSignalWienROIFDS::DataSignalWienROIFDS(WireCell::FrameDataSou
   scale_u_1d = 1.074225; // 1.029273/0.993117*1.03649;
   scale_v_1d = 1.017586; //0.958/0.975797*1.03649;
   
-  scale_u_2d = 1.0/0.915563 *1.31381;
-  scale_v_2d = 1.0/0.877179 *1.31381;
+  scale_u_2d = 1.434975/1.01721 * 1.05209;//1.0/0.915563 *1.31381;
+  scale_v_2d = 1.497767/1.01877 * 1.05209; //1.0/0.877179 *1.31381;
 }
 
 WireCell2dToy::DataSignalWienROIFDS::~DataSignalWienROIFDS(){
