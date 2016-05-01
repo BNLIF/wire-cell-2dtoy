@@ -83,8 +83,8 @@ WireCell2dToy::DataSignalWienROIFDS::DataSignalWienROIFDS(WireCell::FrameDataSou
 
   gw_1D_g = new TGraph(5000,w_1D_g_x,w_1D_g_y);
 
-  scale_u_1d = 1.007/0.9992*1.0213;
-  scale_v_1d = 0.90097/0.9605*1.0213;
+  scale_u_1d = 1.029273/0.993117*1.03649;
+  scale_v_1d = 0.958/0.975797*1.03649;
   
   scale_u_2d = 1.0;
   scale_v_2d = 1.0;
