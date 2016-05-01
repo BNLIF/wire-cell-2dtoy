@@ -170,7 +170,7 @@ void  WireCell2dToy::DataSignalWienROIFDS::Deconvolute_V_2D_g(){
   TH1F *hvr = new TH1F("hvr1","hvr1",nbin,0,nbin); // half us tick
   const int nchannels = nwire_v;
   
-  float scale_v = 1.251/1.074*0.91*0.85;
+  float scale_v = 0.901/(1./0.9605*1.0213);
   double rho_res[7][nticks], phi_res[7][nticks];
 
   for (int j=0;j!=7;j++){
@@ -513,7 +513,7 @@ void WireCell2dToy::DataSignalWienROIFDS::Deconvolute_U_2D_g(){
   // response function ... 
   TH1F *hur = new TH1F("hur1","hur1",nbin,0,nbin); // half us tick
   const int nchannels = nwire_u;
-  float scale_u = 1.51/1.16*0.91*0.85;
+  float scale_u = 1.007 / (1./0.9992 * 1.0213);
   double rho_res[7][nticks], phi_res[7][nticks];
 
   for (int j=0;j!=7;j++){
@@ -1444,7 +1444,7 @@ void WireCell2dToy::DataSignalWienROIFDS::Deconvolute_V_1D_g(){
 
   //response function 
   TH1F *hvr = new TH1F("hvr1","hvr1",nbin,0,nbin); // half us tick
-  float scale_v = 1.251/1.074*0.91*0.85;
+  float scale_v = 0.901 / (1./0.9605 * 1.0213);
   for (int i=0;i!=nbin;i++){
     double time  = hvr->GetBinCenter(i+1)/2.-50;
     double x = time-time_offset_uv-0.113;
@@ -1820,7 +1820,7 @@ void WireCell2dToy::DataSignalWienROIFDS::Deconvolute_V_1D_c(){
 
   //response function
   TH1F *hvr = new TH1F("hvr1","hvr1",nbin,0,nbin); // half us tick
-  float scale_v = 1.251/1.074*0.91*0.85;
+  float scale_v = 0.90097/(1./0.9605*1.0213);
   for (int i=0;i!=nbin;i++){
     double time  = hvr->GetBinCenter(i+1)/2.-50;
     double x = time-time_offset_uv + 0.887;
@@ -1992,7 +1992,7 @@ void WireCell2dToy::DataSignalWienROIFDS::Deconvolute_U_1D_c(){
 
   //response function ...
   TH1F *hur = new TH1F("hur1","hur1",nbin,0,nbin); // half us tick
-  float scale_u = 1.51/1.16*0.91*0.85;
+  float scale_u = 1.007/(1./0.9992*1.0213);
   for (int i=0;i!=nbin;i++){
     double time  = hur->GetBinCenter(i+1)/2.-50;
     double x = time + 0.1;
