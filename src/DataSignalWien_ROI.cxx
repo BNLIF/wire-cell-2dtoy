@@ -837,8 +837,8 @@ void WireCell2dToy::DataSignalWienROIFDS::ROI_cal(TH1F *h1_1, TH1F *h2_1, TH1F *
     // h5_1->Reset();
     
     //calibrate the 2D histgraom (temp fix)
-    h1_1->Reset();
-    h4_1->Reset();
+    // h1_1->Reset();
+    // h4_1->Reset();
 
     std::vector<std::pair <Int_t,Int_t> > ROIs;
 
