@@ -825,9 +825,10 @@ void WireCell2dToy::DataSignalWienROIFDS::ROI_cal(TH1F *h1_1, TH1F *h2_1, TH1F *
     Double_t th2 = threshold2*4.0; // do three sigma ... 
 
 
-    float tail_th = 2.0;
+    float tail_th = 2.5;
     float th_1d = 3.0;
     float th_2d = 2.0;
+    float th_peak = 3.0;
     //std::cout << th << " " << th1 << " " << th2 << std::endl;
     //h1_1 1D_c
     //h2_1 2D_g
@@ -982,7 +983,7 @@ void WireCell2dToy::DataSignalWienROIFDS::ROI_cal(TH1F *h1_1, TH1F *h2_1, TH1F *
 	int npeaks_threshold = 0;
 	for (Int_t j=0;j!=npeaks;j++){
 	  order_peak_pos[j] = *(peak_pos+j);
-	  if (*(peak_height+j)>2*th1){
+	  if (*(peak_height+j)>th_peak*th1){
 	    npeaks_threshold ++;
 	  }
 	}
@@ -1203,7 +1204,7 @@ void WireCell2dToy::DataSignalWienROIFDS::ROI_cal(TH1F *h1_1, TH1F *h2_1, TH1F *
 	 int npeaks_threshold = 0;
 	 for (Int_t j=0;j!=npeaks;j++){
 	   order_peak_pos[j] = *(peak_pos+j);
-	   if (*(peak_height+j) > 2*th2){
+	   if (*(peak_height+j) > th_peak*th2){
 	     npeaks_threshold ++;
 	   }
 	 }
@@ -1246,7 +1247,7 @@ void WireCell2dToy::DataSignalWienROIFDS::ROI_cal(TH1F *h1_1, TH1F *h2_1, TH1F *
 	     // std::cout << start_pos << " " << start_content << " " << Peak_pos << " " << peak_content
 	     // 	  << " " << end_pos << " " << peak_content << std::endl;
 	     
-	     if ((start_content >= th2 || end_content >= th2) &&
+	     if ((start_content >= th || end_content >= th) &&
 		 start_content < peak_content /2. && end_content < peak_content/2.) flag = 1;
 	     // deal with the small peaks ... 
 	     if (peak_content > th2 && peak_content < th2 * 1.5) flag =1;
@@ -1435,7 +1436,7 @@ void WireCell2dToy::DataSignalWienROIFDS::ROI_cal(TH1F *h1_1, TH1F *h2_1, TH1F *
 	int npeaks_threshold = 0;
 	for (Int_t j=0;j!=npeaks;j++){
 	  order_peak_pos[j] = *(peak_pos+j);
-	  if (*(peak_height+j) > 2*th2){
+	  if (*(peak_height+j) > th_peak*th2){
 	    //std::cout << *(peak_pos+j) << " " << *(peak_height+j) << " " << th2 << std::endl;
 	    npeaks_threshold ++;
 	  }
@@ -1476,7 +1477,7 @@ void WireCell2dToy::DataSignalWienROIFDS::ROI_cal(TH1F *h1_1, TH1F *h2_1, TH1F *
 	    Int_t Peak_pos = order_peak_pos[j];
 	    Double_t peak_content = htemp->GetBinContent(order_peak_pos[j]-begin+1);
 	    
-	    if ((start_content >= th2 || end_content >= th2) &&
+	    if ((start_content >= th || end_content >= th) &&
 		start_content < peak_content /2. && end_content < peak_content/2.) flag = 1;
 	    
 	    // deal with the small peaks ... 
