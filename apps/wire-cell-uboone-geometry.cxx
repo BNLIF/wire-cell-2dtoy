@@ -74,7 +74,8 @@ int main(int argc, char* argv[])
   double y_pos = -100*units::m;
   double z_pos = -100*units::m;
 
-  float unit_dis = 1.14753;  // 70 KV @ 226.5 V/cm
+  //  float unit_dis = 1.14753;  // 70 KV @ 226.5 V/cm
+  float unit_dis = 1.119;  // 70 KV @ 273 V/cm
   //float unit_dis = 1.6;  // test
 
   int num_uvw=0;
