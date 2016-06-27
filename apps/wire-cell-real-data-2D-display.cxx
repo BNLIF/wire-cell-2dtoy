@@ -298,7 +298,7 @@ int main(int argc, char* argv[])
 
   Trun->Branch("eventNo",&event_no,"eventNo/I");
   Trun->Branch("runNo",&run_no,"runNo/I");
-  Trun->Branch("subRunNo",&subrun_no,"runRunNo/I");
+  Trun->Branch("subRunNo",&subrun_no,"subRunNo/I");
   
   Trun->Branch("unit_dis",&unit_dis,"unit_dis/F");
   Trun->Branch("toffset_uv",&toffset_1,"toffset_uv/F");

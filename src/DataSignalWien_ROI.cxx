@@ -971,7 +971,7 @@ void WireCell2dToy::DataSignalWienROIFDS::ROI_cal(TH1F *h1_1, TH1F *h2_1, TH1F *
       Int_t nfound = s->Search(htemp,2,"nobackground new",0.1);
       Int_t flag_single_peak = 0;
 
-      if (nfound >1){
+      if (nfound >1 && 1){
 	//cout << htemp->GetNbinsX() << " " << nfound << " " << begin << " " << end << endl;
 	Int_t npeaks = s->GetNPeaks();
 	Double_t *peak_pos = s->GetPositionX();
@@ -1192,7 +1192,7 @@ void WireCell2dToy::DataSignalWienROIFDS::ROI_cal(TH1F *h1_1, TH1F *h2_1, TH1F *
        Int_t flag_single_peak = 0;
 
 
-       if (nfound >1){
+       if (nfound >1 && 1){
 	 //cout << htemp->GetNbinsX() << " " << nfound << " " << begin << " " << end << endl;
 	 Int_t npeaks = s->GetNPeaks();
 	 Double_t *peak_pos = s->GetPositionX();
@@ -1424,7 +1424,7 @@ void WireCell2dToy::DataSignalWienROIFDS::ROI_cal(TH1F *h1_1, TH1F *h2_1, TH1F *
       Int_t nfound = s->Search(htemp,2,"nobackground new",0.1);
       Int_t flag_single_peak = 0;
 
-      if (nfound >1 ){
+      if (nfound >1 && 1){
 	//cout << htemp->GetNbinsX() << " " << nfound << " " << begin << " " << end << endl;
 	Int_t npeaks = s->GetNPeaks();
 	Double_t *peak_pos = s->GetPositionX();
