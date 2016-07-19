@@ -145,7 +145,7 @@ int main(int argc, char* argv[])
 
 
 
-  TFile *file = new TFile(Form("scan_%d_%d_%d.root",run_no,subrun_no,eve_num),"RECREATE");
+  TFile *file = new TFile(Form("scan_%d_%d_%d.root",run_no,subrun_no,event_no),"RECREATE");
 
   GeomWireSelection wires_u = gds.wires_in_plane(WirePlaneType_t(0));
   GeomWireSelection wires_v = gds.wires_in_plane(WirePlaneType_t(1));
