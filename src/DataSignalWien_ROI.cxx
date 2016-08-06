@@ -59,27 +59,39 @@ WireCell2dToy::DataSignalWienROIFDS::DataSignalWienROIFDS(WireCell::FrameDataSou
   hw_1D_g = new TH2I("hw_1D_g","hw_1D_g",nwire_w,0,nwire_w,bins_per_frame,0,bins_per_frame);
   hw_1D_g_gaus = new TH2I("hw_1D_g_gaus","hw_1D_g_gaus",nwire_w,0,nwire_w,bins_per_frame,0,bins_per_frame);
 
-  #include "data_70_ROI.txt"  //70kV 2D deconvolution for U
+  #include "data_70_ROI_11.txt"  //70kV 2D deconvolution for U
 
   gu_1D_c = new TGraph(5000,u_1D_c_x, u_1D_c_y);
   gv_1D_c = new TGraph(5000,v_1D_c_x, v_1D_c_y);
   gw_1D_c = new TGraph(5000,w_1D_c_x, w_1D_c_y);
   
 
-  gu_2D_g = new TGraph*[4];
+  gu_2D_g = new TGraph*[11];
   gu_2D_g[0] = new TGraph(5000,u_2D_g_0_x,u_2D_g_0_y);
   gu_2D_g[1] = new TGraph(5000,u_2D_g_1_x,u_2D_g_1_y);
   gu_2D_g[2] = new TGraph(5000,u_2D_g_2_x,u_2D_g_2_y);
   gu_2D_g[3] = new TGraph(5000,u_2D_g_3_x,u_2D_g_3_y);
+  gu_2D_g[4] = new TGraph(5000,u_2D_g_4_x,u_2D_g_4_y);
+  gu_2D_g[5] = new TGraph(5000,u_2D_g_5_x,u_2D_g_5_y);
+  gu_2D_g[6] = new TGraph(5000,u_2D_g_6_x,u_2D_g_6_y);
+  gu_2D_g[7] = new TGraph(5000,u_2D_g_7_x,u_2D_g_7_y);
+  gu_2D_g[8] = new TGraph(5000,u_2D_g_8_x,u_2D_g_8_y);
+  gu_2D_g[9] = new TGraph(5000,u_2D_g_9_x,u_2D_g_9_y);
+  gu_2D_g[10] = new TGraph(5000,u_2D_g_10_x,u_2D_g_10_y);
 
-  gv_2D_g = new TGraph*[4];
+  gv_2D_g = new TGraph*[11];
   gv_2D_g[0] = new TGraph(5000,v_2D_g_0_x,v_2D_g_0_y);
   gv_2D_g[1] = new TGraph(5000,v_2D_g_1_x,v_2D_g_1_y);
   gv_2D_g[2] = new TGraph(5000,v_2D_g_2_x,v_2D_g_2_y);
   gv_2D_g[3] = new TGraph(5000,v_2D_g_3_x,v_2D_g_3_y);
+  gv_2D_g[4] = new TGraph(5000,v_2D_g_4_x,v_2D_g_4_y);
+  gv_2D_g[5] = new TGraph(5000,v_2D_g_5_x,v_2D_g_5_y);
+  gv_2D_g[6] = new TGraph(5000,v_2D_g_6_x,v_2D_g_6_y);
+  gv_2D_g[7] = new TGraph(5000,v_2D_g_7_x,v_2D_g_7_y);
+  gv_2D_g[8] = new TGraph(5000,v_2D_g_8_x,v_2D_g_8_y);
+  gv_2D_g[9] = new TGraph(5000,v_2D_g_9_x,v_2D_g_9_y);
+  gv_2D_g[10] = new TGraph(5000,v_2D_g_10_x,v_2D_g_10_y);
 
-  // gv_1D_g = new TGraph(5000,v_1D_g_x,v_1D_g_y);
-  
 
   gw_1D_g = new TGraph(5000,w_1D_g_x,w_1D_g_y);
 
@@ -88,6 +100,9 @@ WireCell2dToy::DataSignalWienROIFDS::DataSignalWienROIFDS(WireCell::FrameDataSou
   
   scale_u_2d = 1.5098;//1.434975/1.01721 * 1.05209/1.02978 * 1.04755;//1.0/0.915563 *1.31381;
   scale_v_2d = 1.5786;//1.497767/1.01877 * 1.05209/1.02644 * 1.04755; //1.0/0.877179 *1.31381;
+
+  scale_u_2d = 1.0;
+  scale_v_2d = 1.0;
 }
 
 WireCell2dToy::DataSignalWienROIFDS::~DataSignalWienROIFDS(){
@@ -115,7 +130,7 @@ WireCell2dToy::DataSignalWienROIFDS::~DataSignalWienROIFDS(){
   //delete gv_1D_g;
   delete gw_1D_g;
   
-  for (int i=0;i!=4;i++){
+  for (int i=0;i!=11;i++){
     delete gu_2D_g[i];
     delete gv_2D_g[i];
   }
@@ -143,12 +158,12 @@ void  WireCell2dToy::DataSignalWienROIFDS::Deconvolute_V_2D_g(){
   double value_im[9600];
 
   int scale = nbin/bins_per_frame;
-
+  
   // filter 
   TF1 *filter_v = new TF1("filter_v","(x>0.0)*exp(-0.5*pow(x/[0],[1]))");
   double par[2]={1.47404e+01/200.*2.,4.97667e+00};
   filter_v->SetParameters(par);
-
+  
   TF1 *filter_low = new TF1("filter_low","1-exp(-pow(x/0.0045,2))");
 
   TF1 *filter_wire = new TF1("filter_wire","exp(-0.5*pow(x/[0],2))");
@@ -168,39 +183,48 @@ void  WireCell2dToy::DataSignalWienROIFDS::Deconvolute_V_2D_g(){
   hfilter_time_gaus->Scale(1./hfilter_time_gaus->GetSum());
   TH1 *hfilter_gaus = 0;
   hfilter_gaus = hfilter_time_gaus->FFT(hfilter_gaus,"MAG");
-
-
+  
+  
   // response function ... 
   TH1F *hvr = new TH1F("hvr1","hvr1",nbin,0,nbin); // half us tick
   const int nchannels = nwire_v;
   
   float scale_v = scale_v_2d;//0.901/(1./0.9605*1.0213);
-  double rho_res[7][nticks], phi_res[7][nticks];
+  double rho_res[21][nticks], phi_res[21][nticks];
 
-  for (int j=0;j!=7;j++){
+  for (int j=0;j!=21;j++){
+    //for (int j=7;j!=14;j++){
     TGraph *gtemp;
-    if (j==0 || j==6){
+    if (j==0 || j==20){
+      gtemp = gv_2D_g[10];
+    }else if (j==1 || j==19){
+      gtemp = gv_2D_g[9];
+    }else if (j==2 || j==18){
+      gtemp = gv_2D_g[8];
+    }else if (j==3 || j==17){
+      gtemp = gv_2D_g[7];
+    }else if (j==4 || j==16){
+      gtemp = gv_2D_g[6];
+    }else if (j==5 || j==15){
+      gtemp = gv_2D_g[5];
+    }else if (j==6 || j==14){
+      gtemp = gv_2D_g[4];
+    }else if (j==7 || j==13){
       gtemp = gv_2D_g[3];
-    }else if (j==1 || j==5){
+    }else if (j==8 || j==12){
       gtemp = gv_2D_g[2];
-    }else if (j==2 || j==4){
+    }else if (j==9 || j==11){
       gtemp = gv_2D_g[1];
-    }else if (j==3){
+    }else if (j==10){
       gtemp = gv_2D_g[0];
     }
     hvr->Reset();
     for (int i=0; i!=nbin; i++){  
-      double time = hvr->GetBinCenter(i+1)/2.-50 ;
+      double time = hvr->GetBinCenter(i+1)/2.- 90 ;
       //*** scale factors for 70kV ***//
       double x = time - time_offset_uv -0.113; // 0.113 is the calibration number ... 
-      if (x > -35 && x  < 15){
-	if (j!=6 && j!=0 ){
-	  if (gtemp->Eval(x)>0 ){
-	    hvr->SetBinContent(i+1,gtemp->Eval(x)/scale_v); //70kV
-	  }else{
-	    hvr->SetBinContent(i+1,gtemp->Eval(x)/scale_v); //70kV
-	  }
-	}
+      if (x > -84 && x  < 15.8){
+	hvr->SetBinContent(i+1,gtemp->Eval(x)/scale_v); //70kV
       }else{
 	hvr->SetBinContent(i+1,0);
       }
@@ -233,7 +257,7 @@ void  WireCell2dToy::DataSignalWienROIFDS::Deconvolute_V_2D_g(){
     result_im.push_back(temp3);
   }
   int tbin_save[nchannels];
-
+  
   for (size_t ind=0; ind<ntraces; ++ind) {
     const Trace& trace = frame1.traces[ind];
     int tbin = trace.tbin;
@@ -273,7 +297,7 @@ void  WireCell2dToy::DataSignalWienROIFDS::Deconvolute_V_2D_g(){
     for (Int_t j=0;j!=nchannels;j++){
       value_re[j] = rho_v[j][i]*cos(phi_v[j][i]);
       value_im[j] = rho_v[j][i]*sin(phi_v[j][i]);
-      if (j<7){
+      if (j<21){
   	resp_re[j] = rho_res[j][i]*cos(phi_res[j][i]);
   	resp_im[j] = rho_res[j][i]*sin(phi_res[j][i]);
       }else{
@@ -322,7 +346,7 @@ void  WireCell2dToy::DataSignalWienROIFDS::Deconvolute_V_2D_g(){
 
 
     for (Int_t j=0;j!=nchannels;j++){
-      Int_t shift = j - 3;
+      Int_t shift = j - 10;
       if (shift <0) shift += nchannels;
       result_re[j][i] = temp3_re[shift]/nticks;//*filter_v->Eval(freq);
       result_im[j][i] = temp3_im[shift]/nticks;//*filter_v->Eval(freq);
@@ -518,29 +542,40 @@ void WireCell2dToy::DataSignalWienROIFDS::Deconvolute_U_2D_g(){
   TH1F *hur = new TH1F("hur1","hur1",nbin,0,nbin); // half us tick
   const int nchannels = nwire_u;
   float scale_u = scale_u_2d;
-  double rho_res[7][nticks], phi_res[7][nticks];
+  double rho_res[21][nticks], phi_res[21][nticks];
 
-  for (int j=0;j!=7;j++){
+  for (int j=0;j!=21;j++){ 
     TGraph *gtemp;
-    if (j==0 || j==6){
+    if (j==0 || j==20){
+      gtemp = gu_2D_g[10];
+    }else if (j==1 || j==19){
+      gtemp = gu_2D_g[9];
+    }else if (j==2 || j==18){
+      gtemp = gu_2D_g[8];
+    }else if (j==3 || j==17){
+      gtemp = gu_2D_g[7];
+    }else if (j==4 || j==16){
+      gtemp = gu_2D_g[6];
+    }else if (j==5 || j==15){
+      gtemp = gu_2D_g[5];
+    }else if (j==6 || j==14){
+      gtemp = gu_2D_g[4];
+    }else if (j==7 || j==13){
       gtemp = gu_2D_g[3];
-    }else if (j==1 || j==5){
+    }else if (j==8 || j==12){
       gtemp = gu_2D_g[2];
-    }else if (j==2 || j==4){
+    }else if (j==9 || j==11){
       gtemp = gu_2D_g[1];
-    }else if (j==3){
+    }else if (j==10){
       gtemp = gu_2D_g[0];
     }
+
     for (int i=0; i!=nbin; i++){  
-      double time = hur->GetBinCenter(i+1)/2.-50 ;
+      double time = hur->GetBinCenter(i+1)/2.-90 ;
       //*** scale factors for 70kV ***//
       double x = time ;
-      if (x > -35 && x  < 15){
-	if (gtemp->Eval(x)>0 ){
-	  hur->SetBinContent(i+1,gtemp->Eval(x)/scale_u); //70kV
-	}else{
-	  hur->SetBinContent(i+1,gtemp->Eval(x)/scale_u); //70kV
-	}
+      if (x > -84 && x  < 15.8){
+	hur->SetBinContent(i+1,gtemp->Eval(x)/scale_u); //70kV
       }else{
 	hur->SetBinContent(i+1,0);
       }
@@ -613,7 +648,7 @@ void WireCell2dToy::DataSignalWienROIFDS::Deconvolute_U_2D_g(){
     for (Int_t j=0;j!=nchannels;j++){
       value_re[j] = rho_u[j][i]*cos(phi_u[j][i]);
       value_im[j] = rho_u[j][i]*sin(phi_u[j][i]);
-      if (j<7){
+      if (j<21){
   	resp_re[j] = rho_res[j][i]*cos(phi_res[j][i]);
   	resp_im[j] = rho_res[j][i]*sin(phi_res[j][i]);
       }else{
@@ -664,7 +699,7 @@ void WireCell2dToy::DataSignalWienROIFDS::Deconvolute_U_2D_g(){
 
 
     for (Int_t j=0;j!=nchannels;j++){
-      Int_t shift = j - 3;
+      Int_t shift = j - 10;
       if (shift <0) shift += nchannels;
       result_re[j][i] = temp3_re[shift]/nticks;//*filter_u->Eval(freq);
       result_im[j][i] = temp3_im[shift]/nticks;//*filter_u->Eval(freq);
@@ -1825,7 +1860,7 @@ void WireCell2dToy::DataSignalWienROIFDS::Deconvolute_V_1D_g(){
   TH1F *hvr = new TH1F("hvr1","hvr1",nbin,0,nbin); // half us tick
   float scale_v = scale_v_2d;//_0.901 / (1./0.9605 * 1.0213);
   for (int i=0;i!=nbin;i++){
-    double time  = hvr->GetBinCenter(i+1)/2.-50;
+    double time  = hvr->GetBinCenter(i+1)/2.-90;
     double x = time-time_offset_uv-0.113;
     if (x > -35 && x  < 15){
       if (gv_2D_g[0]->Eval(x)>0){
@@ -2032,7 +2067,7 @@ void WireCell2dToy::DataSignalWienROIFDS::Deconvolute_W_1D_g(){
   //response function
   TH1F *hwr = new TH1F("hwr1","hwr1",nbin,0,nbin); // half us tick
   for (int i=0;i!=nbin;i++){
-    double time  = hwr->GetBinCenter(i+1)/2.-50;
+    double time  = hwr->GetBinCenter(i+1)/2.-90;
     double x = time-time_offset_uw + 0.803;
     if (x > -35 && x  < 15){
       hwr->SetBinContent(i+1,gw_1D_g->Eval(x));
@@ -2201,7 +2236,7 @@ void WireCell2dToy::DataSignalWienROIFDS::Deconvolute_V_1D_c(){
   TH1F *hvr = new TH1F("hvr1","hvr1",nbin,0,nbin); // half us tick
   float scale_v = scale_v_1d;
   for (int i=0;i!=nbin;i++){
-    double time  = hvr->GetBinCenter(i+1)/2.-50;
+    double time  = hvr->GetBinCenter(i+1)/2.-90;
     double x = time-time_offset_uv + 0.887;
     if (x > -35 && x  < 15){
       hvr->SetBinContent(i+1,gv_1D_c->Eval(x)/scale_v);
@@ -2373,7 +2408,7 @@ void WireCell2dToy::DataSignalWienROIFDS::Deconvolute_U_1D_c(){
   TH1F *hur = new TH1F("hur1","hur1",nbin,0,nbin); // half us tick
   float scale_u = scale_u_1d;
   for (int i=0;i!=nbin;i++){
-    double time  = hur->GetBinCenter(i+1)/2.-50;
+    double time  = hur->GetBinCenter(i+1)/2.-90;
     double x = time + 0.1;
     if (x > -35 && x  < 15){
       hur->SetBinContent(i+1,gu_1D_c->Eval(x)/scale_u);
@@ -2621,10 +2656,10 @@ int WireCell2dToy::DataSignalWienROIFDS::jump(int frame_number){
 
   TVirtualFFT::SetTransform(0);
 
-  std::cout << "Deconvolution with calibrated field response for 1-D U Plane" << std::endl;
-  Deconvolute_U_1D_c();
-  std::cout << "Deconvolution with calibrated field response for 1-D V Plane" << std::endl;
-  Deconvolute_V_1D_c();
+  // std::cout << "Deconvolution with calibrated field response for 1-D U Plane" << std::endl;
+  // Deconvolute_U_1D_c();
+  // std::cout << "Deconvolution with calibrated field response for 1-D V Plane" << std::endl;
+  // Deconvolute_V_1D_c();
   
   std::cout << "Deconvolution with garfield field response for 1-D W Plane" << std::endl;
   Deconvolute_W_1D_g();
@@ -2679,6 +2714,9 @@ int WireCell2dToy::DataSignalWienROIFDS::jump(int frame_number){
       h5_1->SetBinContent(j+1,content);
     }
     
+    h1_1->Reset();
+    h4_1->Reset();
+
     ROI_cal(h1_1,h2_1,h3_1,h4_1,h5_1,th1,th2,hresult,hresult1,1);
 
     for (Int_t j=0;j!=nticks;j++){
@@ -2753,6 +2791,10 @@ int WireCell2dToy::DataSignalWienROIFDS::jump(int frame_number){
       content = hv_2D_g_gaus->GetBinContent(i+1,j+1);
       h5_1->SetBinContent(j+1,content);
     }
+
+    h1_1->Reset();
+    h4_1->Reset();
+
     
     ROI_cal(h1_1,h2_1,h3_1,h4_1,h5_1,th1,th2,hresult,hresult1,1);
 
