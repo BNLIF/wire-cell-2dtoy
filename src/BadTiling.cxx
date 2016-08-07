@@ -2,10 +2,10 @@
 
 using namespace WireCell;
 
-WireCell2dToy::BadTiling::BadTiling(int flag_1plane, int time, int scale, WireCell::ChirpMap& uplane_map, 
-				    WireCell::ChirpMap& vplane_map, WireCell::ChirpMap& wplane_map, WireCell::GeomDataSource& gds, int flag_all){
+WireCell2dToy::BadTiling::BadTiling(int time, int scale, WireCell::ChirpMap& uplane_map, 
+				    WireCell::ChirpMap& vplane_map, WireCell::ChirpMap& wplane_map, WireCell::GeomDataSource& gds, int flag_1plane, int flag_all){
   if (flag_1plane==0){
-    BadTiling(time,scale,uplane_map,vplane_map,wplane_map,gds,flag_all);
+    BadTiling1(time,scale,uplane_map,vplane_map,wplane_map,gds,flag_all);
   }else{
     
     // find all the merge wires
@@ -201,8 +201,7 @@ WireCell2dToy::BadTiling::BadTiling(int flag_1plane, int time, int scale, WireCe
 
 }
 
-WireCell2dToy::BadTiling::BadTiling(int time, int scale, WireCell::ChirpMap& uplane_map, 
-				    WireCell::ChirpMap& vplane_map, WireCell::ChirpMap& wplane_map, WireCell::GeomDataSource& gds, int flag_all){
+void WireCell2dToy::BadTiling::BadTiling1(int time, int scale, WireCell::ChirpMap& uplane_map, WireCell::ChirpMap& vplane_map, WireCell::ChirpMap& wplane_map, WireCell::GeomDataSource& gds, int flag_all){
   MergeGeomWire *mwire = 0;
   int prev_wire = -1;
   int num = 0;

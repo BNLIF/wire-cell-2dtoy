@@ -11,9 +11,8 @@ namespace WireCell2dToy {
   class BadTiling {
   public :
     BadTiling(int time, int scale, WireCell::ChirpMap& uplane_map, 
-	      WireCell::ChirpMap& vplane_map, WireCell::ChirpMap& wplane_map, WireCell::GeomDataSource& gds, int flag_all = 0);
-    BadTiling(int flag_1plane, int time, int scale, WireCell::ChirpMap& uplane_map, 
-	      WireCell::ChirpMap& vplane_map, WireCell::ChirpMap& wplane_map, WireCell::GeomDataSource& gds, int flag_all = 0);
+	      WireCell::ChirpMap& vplane_map, WireCell::ChirpMap& wplane_map, WireCell::GeomDataSource& gds, int flag_1plane = 0, int flag_all = 0);
+    void BadTiling1(int time, int scale, WireCell::ChirpMap& uplane_map, WireCell::ChirpMap& vplane_map, WireCell::ChirpMap& wplane_map, WireCell::GeomDataSource& gds, int flag_all = 0);
 
     WireCell::GeomCellMap& cmap(){return cellmap;};
     ~BadTiling();
