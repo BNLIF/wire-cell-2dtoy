@@ -352,7 +352,7 @@ int main(int argc, char* argv[])
    
     
     if (i==0){
-      badtiling[i] = new WireCell2dToy::BadTiling(i,nrebin,uplane_map,vplane_map,wplane_map,gds,1); // 2 plane bad tiling
+      badtiling[i] = new WireCell2dToy::BadTiling(0,i,nrebin,uplane_map,vplane_map,wplane_map,gds,1); // 2 plane bad tiling
       // badtiling[i] = new WireCell2dToy::BadTiling(1,i,nrebin,uplane_map,vplane_map,wplane_map,gds,1); // 1 plane bad tiling
     }
 
