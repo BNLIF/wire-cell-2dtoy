@@ -2,6 +2,144 @@
 
 using namespace WireCell;
 
+WireCell2dToy::BadTiling::BadTiling(int flag_1plane, int time, int scale, WireCell::ChirpMap& uplane_map, 
+				    WireCell::ChirpMap& vplane_map, WireCell::ChirpMap& wplane_map, WireCell::GeomDataSource& gds, int flag_all){
+  if (flag_1plane==0){
+    BadTiling(time,scale,uplane_map,vplane_map,wplane_map,gds,flag_all);
+  }else{
+  
+    // find all the merge wires
+    MergeGeomWire *mwire = 0;
+  int prev_wire = -1;
+  int num = 0;
+  // do u wire
+  for (int i=0;i!=gds.wires_in_plane(WirePlaneType_t(0)).size(); i++){
+    int flag_temp = 0;
+
+    if (flag_all == 1){
+      if (uplane_map.find(i) != uplane_map.end()){
+	flag_temp = 1;
+      }
+    }else{
+      if (uplane_map.find(i) != uplane_map.end() && time >= uplane_map[i].first/scale && time <= uplane_map[i].second/scale){
+	flag_temp = 1;
+      }
+    }
+    
+    if (flag_temp == 1){
+      const GeomWire* wire = gds.by_planeindex(WireCell::WirePlaneType_t(0),i);
+      if (mwire == 0){
+	mwire = new MergeGeomWire(num, *wire);
+	wire_u.push_back(mwire);
+	prev_wire = i;
+	num++;
+      }else{
+	if ( i - prev_wire == 1){
+	  mwire->AddWire(*wire);
+	  prev_wire = i;
+	}else{
+	  mwire = new MergeGeomWire(num, *wire);
+	  wire_u.push_back(mwire);
+	  prev_wire = i;
+	  num++;
+	}
+      }
+    }
+  }
+
+
+  // do v wire
+  prev_wire = -1;
+  mwire = 0;
+  
+  for (int i=0;i!=gds.wires_in_plane(WirePlaneType_t(1)).size(); i++){
+    int flag_temp = 0;
+
+    if (flag_all == 1){
+      if (vplane_map.find(i) != vplane_map.end()){
+	flag_temp = 1;
+      }
+    }else{
+      if (vplane_map.find(i) != vplane_map.end() && time >= vplane_map[i].first/scale && time <= vplane_map[i].second/scale){
+	flag_temp = 1;
+      }
+    }
+    
+    if (flag_temp == 1){
+      const GeomWire* wire = gds.by_planeindex(WireCell::WirePlaneType_t(1),i);
+      if (mwire == 0){
+	mwire = new MergeGeomWire(num, *wire);
+	wire_v.push_back(mwire);
+	prev_wire = i;
+	num++;
+      }else{
+	if ( i - prev_wire == 1){
+	  mwire->AddWire(*wire);
+	  prev_wire = i;
+	}else{
+	  mwire = new MergeGeomWire(num, *wire);
+	  wire_v.push_back(mwire);
+	  prev_wire = i;
+	  num++;
+	}
+      }
+    }
+  }
+  
+
+  // do w wire
+  prev_wire = -1;
+  mwire = 0;
+  
+  // int kkk = 0;
+  // for (auto it = wplane_map.begin();it!= wplane_map.end();it++){
+  //   std::cout << it->first << " " << it->second.first << " " << it->second.second << " " << kkk << std::endl;
+  //   kkk++;
+  // }
+
+  for (int i=0;i!=gds.wires_in_plane(WirePlaneType_t(2)).size(); i++){
+    int flag_temp = 0;
+
+    if (flag_all == 1){
+      if (wplane_map.find(i) != wplane_map.end()){
+	flag_temp = 1;
+      }
+    }else{
+      if (wplane_map.find(i) != wplane_map.end() && time >= wplane_map[i].first/scale && time <= wplane_map[i].second/scale){
+	flag_temp = 1;
+      }
+    }
+
+    if (flag_temp==1){
+      //std::cout << i << " " << wplane_map.size() << " " << gds.wires_in_plane(WirePlaneType_t(2)).size() << std::endl;
+      const GeomWire* wire = gds.by_planeindex(WireCell::WirePlaneType_t(2),i);
+      if (mwire == 0){
+	mwire = new MergeGeomWire(num, *wire);
+	wire_w.push_back(mwire);
+	prev_wire = i;
+	num++;
+      }else{
+	if ( i - prev_wire == 1){
+	  mwire->AddWire(*wire);
+	  prev_wire = i;
+	}else{
+	  mwire = new MergeGeomWire(num, *wire);
+	  wire_w.push_back(mwire);
+	  prev_wire = i;
+	  num++;
+	}
+      }
+    }
+  }
+
+  // for each merge wire, find the first and last wire, save the boundary points
+  
+    
+
+  }
+
+}
+
 WireCell2dToy::BadTiling::BadTiling(int time, int scale, WireCell::ChirpMap& uplane_map, 
 				    WireCell::ChirpMap& vplane_map, WireCell::ChirpMap& wplane_map, WireCell::GeomDataSource& gds, int flag_all){
   MergeGeomWire *mwire = 0;
