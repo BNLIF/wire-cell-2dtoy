@@ -2591,24 +2591,24 @@ double WireCell2dToy::DataSignalWienROIFDS::cal_rms(TH1F *htemp, int chid){
       
       //try to exclude signal
       rms2 = 0;
-     for (int i=0;i!=htemp->GetNbinsX();i++){
-       if (i < start || i > end){
-    	 if (fabs(htemp->GetBinContent(i+1)) < 5.0*rms){
-    	  rms1 += pow(htemp->GetBinContent(i+1),2);
-    	  rms2 ++;
-    	}
-       }
-     }
-     if (rms2!=0){
-       rms1 = sqrt(rms1/rms2);
-     }else{
-       rms1 = 0;   
-     }
+      for (int i=0;i!=htemp->GetNbinsX();i++){
+	if (i < start || i > end){
+	  if (fabs(htemp->GetBinContent(i+1)) < 5.0*rms){
+	    rms1 += pow(htemp->GetBinContent(i+1),2);
+	    rms2 ++;
+	  }
+	}
+      }
+      if (rms2!=0){
+	rms1 = sqrt(rms1/rms2);
+      }else{
+	rms1 = 0;   
+      }
     }else{
       rms1 =0;
     }
     delete h6;
-
+    
     return rms1;
 }
 
