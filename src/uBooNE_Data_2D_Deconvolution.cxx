@@ -110,6 +110,7 @@ int WireCell2dToy::uBooNEData2DDeconvolutionFDS::jump(int frame_number){
 
   TVirtualFFT::SetTransform(0);
 
+
   std::cout << "Deconvolution with garfield field response for 2-D W Plane" << std::endl;
   Deconvolute_W();
  
@@ -119,9 +120,40 @@ int WireCell2dToy::uBooNEData2DDeconvolutionFDS::jump(int frame_number){
   std::cout << "Deconvolution with garfield field response for 2-D U Plane" << std::endl;
   Deconvolute_U();
 
-  // load data to be added ... 
-  
 
+  // load data to be added ... 
+  for (int i=0;i!=nwire_u;i++){
+    Trace t;
+    t.chid = i;
+    t.tbin = 0;
+    t.charge.resize(bins_per_frame, 0.0);
+    for (int j=0;j!= bins_per_frame; j++){
+      t.charge.at(j) = hu_2D_g->GetBinContent(i+1,j+1);
+    }
+    frame.traces.push_back(t);
+  }
+
+  for (int i=0;i!=nwire_v;i++){
+    Trace t;
+    t.chid = i+nwire_u;
+    t.tbin = 0;
+    t.charge.resize(bins_per_frame, 0.0);
+    for (int j=0;j!= bins_per_frame; j++){
+      t.charge.at(j) = hv_2D_g->GetBinContent(i+1,j+1);
+    }
+    frame.traces.push_back(t);
+  }
+
+  for (int i=0;i!=nwire_w;i++){
+    Trace t;
+    t.chid = i + nwire_u + nwire_v;
+    t.tbin = 0;
+    t.charge.resize(bins_per_frame, 0.0);
+    for (int j=0;j!= bins_per_frame; j++){
+      t.charge.at(j) = hw_2D_g->GetBinContent(i+1,j+1);
+    }
+    frame.traces.push_back(t);
+  }
   
 
   frame.index = frame_number;

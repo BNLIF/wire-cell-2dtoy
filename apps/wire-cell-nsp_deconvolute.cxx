@@ -84,9 +84,20 @@ int main(int argc, char* argv[])
   TFile *file = new TFile(filename);
   TTree *Trun = (TTree*)file->Get("Trun");
   TTree *T_bad = (TTree*)file->Get("T_bad");
+
+  TTree *Trun1 = Trun->CloneTree();
+  TTree *T_bad1 = T_bad->CloneTree();
+
   TH2F *hu_raw = (TH2F*)file->Get("hu_raw");
   TH2F *hv_raw = (TH2F*)file->Get("hv_raw");
   TH2F *hw_raw = (TH2F*)file->Get("hw_raw");
+
+  
+
+ 
+  
+
+  
   
   WireCellSst::DatauBooNEFrameDataSource data_fds(hu_raw,hv_raw,hw_raw,T_bad,Trun,gds);
 
@@ -98,6 +109,10 @@ int main(int argc, char* argv[])
   int event_no = data_fds.get_event_no();
   cout << "Run No: " << run_no << " " << subrun_no << " " << event_no << endl;
   
+ 
+  
+
+
   ChirpMap& uplane_map = data_fds.get_u_cmap();
   ChirpMap& vplane_map = data_fds.get_v_cmap();
   ChirpMap& wplane_map = data_fds.get_w_cmap();
@@ -112,6 +127,59 @@ int main(int argc, char* argv[])
   WireCell2dToy::uBooNEData2DDeconvolutionFDS wien_fds(data_fds,gds,uplane_map, vplane_map, wplane_map,100,0.,0.,0.);
   wien_fds.jump(0);
   
+  GeomWireSelection wires_u = gds.wires_in_plane(WirePlaneType_t(0));
+  GeomWireSelection wires_v = gds.wires_in_plane(WirePlaneType_t(1));
+  GeomWireSelection wires_w = gds.wires_in_plane(WirePlaneType_t(2));
+
+  Int_t nwire_u = wires_u.size();
+  Int_t nwire_v = wires_v.size();
+  Int_t nwire_w = wires_w.size();
+
+
+  
+  
+  
+  TFile *file1 = new TFile(Form("nsp2_%d_%d_%d.root",run_no,subrun_no,event_no),"RECREATE");
+  Trun1->SetDirectory(file1);
+  T_bad1->SetDirectory(file1);
+  Trun1->Write();
+  T_bad1->Write();
+  
+  int total_time_bin = wien_fds.Get_Bins_Per_Frame();
+
+  
+  TH2I *hu_decon = new TH2I("hu_decon","hu_decon",nwire_u,-0.5,nwire_u-0.5,total_time_bin,0,total_time_bin);
+  TH2I *hv_decon = new TH2I("hv_decon","hv_decon",nwire_v,-0.5+nwire_u,nwire_v-0.5+nwire_u,total_time_bin,0,total_time_bin);
+  TH2I *hw_decon = new TH2I("hw_decon","hw_decon",nwire_w,-0.5+nwire_u+nwire_v,nwire_w-0.5+nwire_u+nwire_v,total_time_bin,0,total_time_bin);
+
+  //save histograms ... 
+  TH2I *htemp1;
+  const Frame& frame1 = wien_fds.get();
+  int ntraces = frame1.traces.size();
+  for (size_t ind=0; ind<ntraces; ++ind) {
+    const Trace& trace = frame1.traces[ind];
+    int tbin = trace.tbin;
+    int chid = trace.chid;
+    int nbins = trace.charge.size();
+    WirePlaneType_t plane = gds.by_channel(chid).at(0)->plane();
+    if (plane == WirePlaneType_t(0)){
+      htemp1 = hu_decon;
+    }else if (plane == WirePlaneType_t(1)){
+      htemp1 = hv_decon;
+      chid -= nwire_u;
+    }else if (plane == WirePlaneType_t(2)){
+      htemp1 = hw_decon;
+      chid -= nwire_u + nwire_v;
+    }
+     for (int i = tbin;i!=tbin+nbins;i++){
+      int tt = i+1;
+      htemp1->SetBinContent(chid+1,tt,trace.charge.at(i));
+    }
+  }
+
+    
+  file1->Write();
+  file1->Close();
 
 
 }
