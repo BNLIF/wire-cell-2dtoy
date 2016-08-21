@@ -101,5 +101,17 @@ int main(int argc, char* argv[])
   ChirpMap& wplane_map = data_fds.get_w_cmap();
   cout << "Bad Channels: " << uplane_map.size() << " " << vplane_map.size() << " " << wplane_map.size() << endl;
 
+  // const Frame& frame1 = data_fds.get();
+  // size_t ntraces = frame1.traces.size();
+  // cout << ntraces << endl;
+
+  
+
+
+  //  cout << "Deconvolution with Wiener filter" << endl; 
+  //WireCell2dToy::DataSignalWienROIFDS wien_fds(data_fds,gds,uplane_map, vplane_map, wplane_map,9594/6.,100,0.,0.,0.);
+  //wien_fds.jump(0);
+  
+
 
 }
