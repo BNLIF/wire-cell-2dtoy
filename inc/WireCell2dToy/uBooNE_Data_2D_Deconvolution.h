@@ -45,9 +45,8 @@ namespace WireCell2dToy{
 
     float scale_u_2d, scale_v_2d;
     
-    void Deconvolute_U();
-    void Deconvolute_V();
-    void Deconvolute_W();
+   
+    void Deconvolute_2D(int plane);
 
     void restore_baseline(TH1F *h1);
     

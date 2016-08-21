@@ -112,13 +112,13 @@ int WireCell2dToy::uBooNEData2DDeconvolutionFDS::jump(int frame_number){
 
 
   std::cout << "Deconvolution with garfield field response for 2-D W Plane" << std::endl;
-  Deconvolute_W();
+  Deconvolute_2D(2);
  
   std::cout << "Deconvolution with garfield field response for 2-D V Plane" << std::endl;
-  Deconvolute_V();
+  Deconvolute_2D(1);
 
   std::cout << "Deconvolution with garfield field response for 2-D U Plane" << std::endl;
-  Deconvolute_U();
+  Deconvolute_2D(0);
 
 
   // load data to be added ... 
@@ -164,7 +164,7 @@ int WireCell2dToy::uBooNEData2DDeconvolutionFDS::size() const{
   return max_frames;
 }
 
-void  WireCell2dToy::uBooNEData2DDeconvolutionFDS::Deconvolute_U(){
+void WireCell2dToy::uBooNEData2DDeconvolutionFDS::Deconvolute_2D(int plane){
   const Frame& frame1 = fds.get();
   size_t ntraces = frame1.traces.size();
 
@@ -172,60 +172,81 @@ void  WireCell2dToy::uBooNEData2DDeconvolutionFDS::Deconvolute_U(){
   int nbin = nticks;
   double value_re[nticks];
   double value_im[nticks];
-
-  TF1 *filter_u = new TF1("filter_u","(x>0.0)*exp(-0.5*pow(x/[0],[1]))");
-  double par[2]={1.43555e+01/200.*2.,4.95096e+00};
-  filter_u->SetParameters(par);
-
+  
+  TF1 *filter_time = new TF1("filter_time","(x>0.0)*exp(-0.5*pow(x/[0],[1]))");
+  int nwires;
+  float scale = 1;
+  TGraph **gfield;
+  double time_offset = 0;
+  if (plane == 0){
+    double par[2]={1.43555e+01/200.*2.,4.95096e+00};
+    filter_time->SetParameters(par);
+    nwires = nwire_u;
+    scale = scale_u_2d;
+    gfield = gu_2D_g;
+  }else if (plane == 1){
+    double par[2]={1.47404e+01/200.*2.,4.97667e+00};
+    filter_time->SetParameters(par);
+    nwires = nwire_v;
+    scale = scale_v_2d;
+    gfield = gv_2D_g;
+    time_offset = - time_offset_uv -0.113;
+  }else if (plane == 2){
+    double par2[2]={1.45874e+01/200.*2.,5.02219e+00};
+    filter_time->SetParameters(par2);
+    nwires = nwire_w;
+    gfield = gw_2D_g;
+    time_offset = -time_offset_uw + 0.803;
+  }
   TF1 *filter_wire = new TF1("filter_wire","exp(-0.5*pow(x/[0],2))");
   double par4[1] = {1.0/sqrt(3.1415926)*1.4};
   filter_wire->SetParameters(par4);
-
+  
   TF1 *filter_low = new TF1("filter_low","1-exp(-pow(x/0.02,2))");
 
-  TH1F *hur = new TH1F("hur1","hur1",nbin,0,nbin); // half us tick
-  const int nchannels = nwire_u;
-  float scale_u = scale_u_2d;
+  TH1F *hr = new TH1F("hr1","hr1",nbin,0,nbin); // half us tick
+  const int nchannels = nwires;
+  
   double rho_res[21][nticks], phi_res[21][nticks];
-
-   for (int j=0;j!=21;j++){ 
+  
+  for (int j=0;j!=21;j++){ 
     TGraph *gtemp;
     if (j==0 || j==20){
-      gtemp = gu_2D_g[10];
+      gtemp = gfield[10];
     }else if (j==1 || j==19){
-      gtemp = gu_2D_g[9];
+      gtemp = gfield[9];
     }else if (j==2 || j==18){
-      gtemp = gu_2D_g[8];
+      gtemp = gfield[8];
     }else if (j==3 || j==17){
-      gtemp = gu_2D_g[7];
+      gtemp = gfield[7];
     }else if (j==4 || j==16){
-      gtemp = gu_2D_g[6];
+      gtemp = gfield[6];
     }else if (j==5 || j==15){
-      gtemp = gu_2D_g[5];
+      gtemp = gfield[5];
     }else if (j==6 || j==14){
-      gtemp = gu_2D_g[4];
+      gtemp = gfield[4];
     }else if (j==7 || j==13){
-      gtemp = gu_2D_g[3];
+      gtemp = gfield[3];
     }else if (j==8 || j==12){
-      gtemp = gu_2D_g[2];
+      gtemp = gfield[2];
     }else if (j==9 || j==11){
-      gtemp = gu_2D_g[1];
+      gtemp = gfield[1];
     }else if (j==10){
-      gtemp = gu_2D_g[0];
+      gtemp = gfield[0];
     }
 
     for (int i=0; i!=nbin; i++){  
-      double time = hur->GetBinCenter(i+1)/2.-90 ;
+      double time = hr->GetBinCenter(i+1)/2.-90 ;
       //*** scale factors for 70kV ***//
-      double x = time ;
+      double x = time + time_offset;
       if (x > -84 && x  < 15.8){
-	hur->SetBinContent(i+1,gtemp->Eval(x)/scale_u); //70kV
+	hr->SetBinContent(i+1,gtemp->Eval(x)/scale); //70kV
       }else{
-	hur->SetBinContent(i+1,0);
+	hr->SetBinContent(i+1,0);
       }
     }
-    TH1 *hmr_u = hur->FFT(0,"MAG");
-    TH1 *hpr_u = hur->FFT(0,"PH");
+    TH1 *hmr_u = hr->FFT(0,"MAG");
+    TH1 *hpr_u = hr->FFT(0,"PH");
     
     for (Int_t i=0;i!=nticks;i++){
       rho_res[j][i] = hmr_u->GetBinContent(i+1);
@@ -237,8 +258,7 @@ void  WireCell2dToy::uBooNEData2DDeconvolutionFDS::Deconvolute_U(){
     delete hpr_u;
   }
 
-
-   // deconvolution ... 
+    // deconvolution ... 
    std::vector<std::vector<double>> rho_u, phi_u,result_re,result_im;
    for (int i=0;i!=nchannels;i++){
      std::vector<double> temp,temp1,temp2,temp3;
@@ -252,35 +272,51 @@ void  WireCell2dToy::uBooNEData2DDeconvolutionFDS::Deconvolute_U(){
      result_im.push_back(temp3);
    }
    int tbin_save[nchannels];
-
+   
    for (size_t ind=0; ind<ntraces; ++ind) {
      const Trace& trace = frame1.traces[ind];
      int tbin = trace.tbin;
      int chid = trace.chid;
      int nbins = trace.charge.size();
-     if (chid >=nwire_u) continue;
-     
+     if (chid >=nwire_u && plane == 0) continue;
+     if (plane == 1 && (chid >=nwire_u+nwire_v || chid < nwire_u)) continue;
+     if (plane == 2 && chid < nwire_u+nwire_v) continue;
+
      TH1F *htemp = new TH1F("htemp","htemp",nbin,0,nbin);
      for (int i = tbin;i!=tbin+nbins;i++){
        int tt = i+1;
        htemp->SetBinContent(tt,trace.charge.at(i));
      }
-     
      TH1 *hm = htemp->FFT(0,"MAG");
      TH1 *hp = htemp->FFT(0,"PH");
      
-     for (Int_t j=0;j!=nticks;j++){
-       rho_u[chid][j] = hm->GetBinContent(j+1);
-       phi_u[chid][j] = hp->GetBinContent(j+1);
+     if (plane == 0){
+       for (Int_t j=0;j!=nticks;j++){
+	 rho_u[chid][j] = hm->GetBinContent(j+1);
+	 phi_u[chid][j] = hp->GetBinContent(j+1);
+       }
+       tbin_save[chid] = tbin;
+     }else if (plane == 1){
+       for (Int_t j=0;j!=nticks;j++){
+	 rho_u[chid-nwire_u][j] = hm->GetBinContent(j+1);
+	 phi_u[chid-nwire_u][j] = hp->GetBinContent(j+1);
+       }
+       tbin_save[chid-nwire_u] = tbin;
+     }else if (plane == 2){
+       for (Int_t j=0;j!=nticks;j++){
+	 rho_u[chid-nwire_u-nwire_v][j] = hm->GetBinContent(j+1);
+	 phi_u[chid-nwire_u-nwire_v][j] = hp->GetBinContent(j+1);
+       }
+       tbin_save[chid-nwire_u-nwire_v] = tbin;
      }
-     tbin_save[chid] = tbin;
-     
+
+
      delete hm;
      delete hp;
      delete htemp;
    }
-   
-   double resp_re[nchannels], resp_im[nchannels];
+
+ double resp_re[nchannels], resp_im[nchannels];
    for (Int_t i=0;i!=nticks;i++){
      Double_t freq;
      if (i < nticks/2.){
@@ -293,17 +329,18 @@ void  WireCell2dToy::uBooNEData2DDeconvolutionFDS::Deconvolute_U(){
        value_re[j] = rho_u[j][i]*cos(phi_u[j][i]);
        value_im[j] = rho_u[j][i]*sin(phi_u[j][i]);
        if (j<21){
-	 resp_re[j] = rho_res[j][i]*cos(phi_res[j][i]);
-	 resp_im[j] = rho_res[j][i]*sin(phi_res[j][i]);
+   	 resp_re[j] = rho_res[j][i]*cos(phi_res[j][i]);
+   	 resp_im[j] = rho_res[j][i]*sin(phi_res[j][i]);
        }else{
-	 resp_re[j] = 0.;
-	 resp_im[j] = 0.;
+   	 resp_re[j] = 0.;
+   	 resp_im[j] = 0.;
        }
      }
      
      Int_t m=nchannels;
-     
-     TVirtualFFT *ifft = TVirtualFFT::FFT(1,&m,"C2CFORWARD M K");
+
+
+   TVirtualFFT *ifft = TVirtualFFT::FFT(1,&m,"C2CFORWARD M K");
      ifft->SetPointsComplex(value_re,value_im);
      ifft->Transform();
      Double_t temp_re[nchannels],temp_im[nchannels];
@@ -318,20 +355,20 @@ void  WireCell2dToy::uBooNEData2DDeconvolutionFDS::Deconvolute_U(){
      for (Int_t j=0;j!=nchannels;j++){
        Double_t freq_wire;
        if (j < nchannels/2.){
-	 freq_wire = j/(1.*nchannels)*2.;
+   	 freq_wire = j/(1.*nchannels)*2.;
        }else{
-	 freq_wire = (nchannels -j)/(1.*nchannels)*2.;
+   	 freq_wire = (nchannels -j)/(1.*nchannels)*2.;
        }
        
        
        if (temp1_im[j]*temp1_im[j]+temp1_re[j]*temp1_re[j]>0){
-	 temp2_re[j] = (temp_re[j]*temp1_re[j]+temp_im[j]*temp1_im[j])/m/
-	   (temp1_im[j]*temp1_im[j]+temp1_re[j]*temp1_re[j])*filter_wire->Eval(freq_wire);
-	 temp2_im[j] = (temp_im[j]*temp1_re[j]-temp_re[j]*temp1_im[j])
-	   /m/(temp1_im[j]*temp1_im[j]+temp1_re[j]*temp1_re[j])*filter_wire->Eval(freq_wire);
+   	 temp2_re[j] = (temp_re[j]*temp1_re[j]+temp_im[j]*temp1_im[j])/m/
+   	   (temp1_im[j]*temp1_im[j]+temp1_re[j]*temp1_re[j])*filter_wire->Eval(freq_wire);
+   	 temp2_im[j] = (temp_im[j]*temp1_re[j]-temp_re[j]*temp1_im[j])
+   	   /m/(temp1_im[j]*temp1_im[j]+temp1_re[j]*temp1_re[j])*filter_wire->Eval(freq_wire);
        }else{
-	 temp2_re[j] = 0;
-	 temp2_im[j] = 0;
+   	 temp2_re[j] = 0;
+   	 temp2_im[j] = 0;
        }
      }
      
@@ -359,12 +396,12 @@ void  WireCell2dToy::uBooNEData2DDeconvolutionFDS::Deconvolute_U(){
      for (int j=0;j!=nticks;j++){
        Double_t freq;
        if (j < nticks/2.){
-	 freq = j/(1.*nticks)*2.;
+   	 freq = j/(1.*nticks)*2.;
        }else{
-	 freq = (nticks - j)/(1.*nticks)*2.;
+   	 freq = (nticks - j)/(1.*nticks)*2.;
        }
-       temp_re[j] = result_re[chid][j]*filter_u->Eval(freq) * filter_low->Eval(freq);
-       temp_im[j] = result_im[chid][j]*filter_u->Eval(freq) * filter_low->Eval(freq);
+       temp_re[j] = result_re[chid][j]*filter_time->Eval(freq) ;
+       temp_im[j] = result_im[chid][j]*filter_time->Eval(freq) ;
      }
      ifft2->SetPointsComplex(temp_re,temp_im);
      ifft2->Transform();
@@ -382,9 +419,21 @@ void  WireCell2dToy::uBooNEData2DDeconvolutionFDS::Deconvolute_U(){
      restore_baseline(htemp);
      
      int start = -1, end = -1;
-     if (umap.find(chid)!=umap.end()){
-       start = umap[chid].first;
-       end = umap[chid].second;
+     if (plane == 0){
+       if (umap.find(chid)!=umap.end()){
+	 start = umap[chid].first;
+	 end = umap[chid].second;
+       }
+     }else if (plane == 1){
+       if (vmap.find(chid)!=vmap.end()){
+	 start = vmap[chid].first;
+	 end = vmap[chid].second;
+       }
+     }else if (plane == 2){
+       if (wmap.find(chid)!=wmap.end()){
+	 start = wmap[chid].first;
+	 end = wmap[chid].second;
+       }
      }
      
      // put results back into the 2-D histogram
@@ -393,28 +442,25 @@ void  WireCell2dToy::uBooNEData2DDeconvolutionFDS::Deconvolute_U(){
        if (bin >= bins_per_frame) bin -= bins_per_frame;
        if (bin >=start && bin <=end){
        }else{
-	 hu_2D_g->SetBinContent(chid+1,bin+1,int(htemp->GetBinContent(j+1)));
+	 if (plane == 0){
+	   hu_2D_g->SetBinContent(chid+1,bin+1,int(htemp->GetBinContent(j+1)));
+	 }else if (plane == 1){
+	   hv_2D_g->SetBinContent(chid+1,bin+1,int(htemp->GetBinContent(j+1)));
+	 }else if (plane == 2){
+	   hw_2D_g->SetBinContent(chid+1,bin+1,int(htemp->GetBinContent(j+1)));
+	 }
        }
      }
-     
      delete htemp;
    }
-     
    
-   delete hur;
-   delete filter_u;
-   delete filter_low;
-   delete filter_wire;
-   
-}
-
-void  WireCell2dToy::uBooNEData2DDeconvolutionFDS::Deconvolute_V(){
+  delete filter_low;
+  delete filter_wire;
+  delete filter_time;
+  delete hr;
   
 }
 
-void  WireCell2dToy::uBooNEData2DDeconvolutionFDS::Deconvolute_W(){
-  
-}
 
 
 
