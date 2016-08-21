@@ -37,8 +37,10 @@
 #include "WireCell2dToy/ToySignalSimu.h"
 #include "WireCell2dToy/ToySignalSimuTrue.h"
 
-#include "WireCell2dToy/DataSignalGaus.h"
-#include "WireCell2dToy/DataSignalWien_ROI.h"
+//#include "WireCell2dToy/DataSignalGaus.h"
+//#include "WireCell2dToy/DataSignalWien_ROI.h"
+
+#include "WireCell2dToy/uBooNE_Data_2D_Deconvolution.h"
 
 #include "TApplication.h"
 #include "TCanvas.h"
@@ -106,11 +108,9 @@ int main(int argc, char* argv[])
   // cout << ntraces << endl;
 
   
-
-
-  //  cout << "Deconvolution with Wiener filter" << endl; 
-  //WireCell2dToy::DataSignalWienROIFDS wien_fds(data_fds,gds,uplane_map, vplane_map, wplane_map,9594/6.,100,0.,0.,0.);
-  //wien_fds.jump(0);
+  cout << "Deconvolution with Wiener filter" << endl; 
+  WireCell2dToy::uBooNEData2DDeconvolutionFDS wien_fds(data_fds,gds,uplane_map, vplane_map, wplane_map,100,0.,0.,0.);
+  wien_fds.jump(0);
   
 
 
