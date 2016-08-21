@@ -400,8 +400,8 @@ void WireCell2dToy::uBooNEData2DDeconvolutionFDS::Deconvolute_2D(int plane){
        }else{
    	 freq = (nticks - j)/(1.*nticks)*2.;
        }
-       temp_re[j] = result_re[chid][j]*filter_time->Eval(freq) ;
-       temp_im[j] = result_im[chid][j]*filter_time->Eval(freq) ;
+       temp_re[j] = result_re[chid][j]*filter_time->Eval(freq);// *filter_low->Eval(freq);
+       temp_im[j] = result_im[chid][j]*filter_time->Eval(freq);// *filter_low->Eval(freq);
      }
      ifft2->SetPointsComplex(temp_re,temp_im);
      ifft2->Transform();
