@@ -97,7 +97,7 @@ int main(int argc, char* argv[])
   ChirpMap& vplane_map = wien_fds.get_v_cmap();
   ChirpMap& wplane_map = wien_fds.get_w_cmap();
   
-  // std::cout << uplane_map.size() << " " << vplane_map.size() << " " << wplane_map.size() <<  " " << wplane_map[7500].first << " " << wplane_map[7500].second << std::endl;
+  //std::cout << uplane_map.size() << " " << vplane_map.size() << " " << wplane_map.size() <<  " " << uplane_map[880].first << " " << uplane_map[880].second << std::endl;
 
   WireCell2dToy::uBooNEDataROI uboone_rois(wien_fds,gds,uplane_map,vplane_map,wplane_map);
 

@@ -21,7 +21,7 @@ WireCell2dToy::uBooNEDataROI::uBooNEDataROI(WireCell::FrameDataSource& fds, cons
   nwire_v = wires_v.size();
   nwire_w = wires_w.size();
 
-  // std::cout << umap.size() << " " << vmap.size() << " " << wmap.size() <<  " " << wmap[7500].first << " " << wmap[7500].second << std::endl;
+  // std::cout << umap.size() << " " << vmap.size() << " " << wmap.size() <<  " " << umap[880].first << " " << umap[880].second << std::endl;
 
   self_rois_u.resize(nwire_u);
   self_rois_v.resize(nwire_v);
@@ -49,6 +49,8 @@ void WireCell2dToy::uBooNEDataROI::find_ROI_by_others(){
   u_pitch = gds.pitch(kUwire);
   v_pitch = gds.pitch(kVwire);
   w_pitch = gds.pitch(kYwire);
+
+  int flag_dead = 1;
   
   std::vector<float> udis,vdis,wdis;
   for (int i=0; i!=self_rois_u.size();i++){
@@ -158,9 +160,11 @@ void WireCell2dToy::uBooNEDataROI::find_ROI_by_others(){
   //   }
   // }
   
+
+
   // Tiling the U and W
   
-   for (int i = 0; i!= self_rois_u.size(); i++){
+  for (int i = 0; i!= self_rois_u.size(); i++){
     const GeomWire *wire1 = gds.by_planeindex(WirePlaneType_t(0),i);
     for (int j = 0;j!=self_rois_w.size(); j++){
       const GeomWire *wire2 = gds.by_planeindex(WirePlaneType_t(2),j);
@@ -171,14 +175,14 @@ void WireCell2dToy::uBooNEDataROI::find_ROI_by_others(){
 	for (int j1 = 0; j1 != self_rois_w.at(j).size(); j1++){
 	  
 	  if (flag_wires == 1 && wires.size()==0) continue;
-
+	  
 	  int start_1 = self_rois_u.at(i).at(i1).first;
 	  int end_1 = self_rois_u.at(i).at(i1).second;
 	  int start_2 = self_rois_w.at(j).at(j1).first;
 	  int end_2 = self_rois_w.at(j).at(j1).second;
 	  int start = start_1;
 	  int end = end_1;
-
+	  
 	  if (start_1 < start_2 ) start = start_2;
 	  if (end_1 > end_2) end = end_2; 
 	  
@@ -186,7 +190,7 @@ void WireCell2dToy::uBooNEDataROI::find_ROI_by_others(){
 	    // find wires ... 
 	    if (flag_wires == 0){
 	      flag_wires = 1;
-
+	      
 	      dis_u[0] = udis.at(i) - u_pitch/2.;
 	      dis_u[1] = dis_u[0] + u_pitch;
 	      dis_u[2] = udis.at(i);
@@ -194,7 +198,7 @@ void WireCell2dToy::uBooNEDataROI::find_ROI_by_others(){
 	      dis_w[0] = wdis.at(j) - w_pitch/2.;
 	      dis_w[1] = dis_w[0] + w_pitch;
 	      dis_w[2] = wdis.at(j);
-
+	      
 	      std::vector<Vector> puv(5);
 	      
 	      if(!gds.crossing_point(dis_u[2],dis_w[2],kUwire,kYwire, puv[4])) continue;
@@ -225,6 +229,153 @@ void WireCell2dToy::uBooNEDataROI::find_ROI_by_others(){
     }
   }
   
+  //std::cout << others_rois_v1.at(3500-2400).size() << std::endl;
+
+
+  if (flag_dead == 1){
+    // Add U dead + W live
+    
+    for (int i = 0; i!= self_rois_u.size(); i++){
+      if (umap.find(i) == umap.end()) continue;
+      const GeomWire *wire1 = gds.by_planeindex(WirePlaneType_t(0),i);
+      for (int j = 0;j!=self_rois_w.size(); j++){
+	const GeomWire *wire2 = gds.by_planeindex(WirePlaneType_t(2),j);
+	GeomWireSelection wires;
+	int flag_wires = 0;
+	
+	{
+	  for (int j1 = 0; j1 != self_rois_w.at(j).size(); j1++){
+	    
+	    if (flag_wires == 1 && wires.size()==0) continue;
+	    
+	    int start_1 = umap[i].first;
+	    int end_1 = umap[i].second;
+	    int start_2 = self_rois_w.at(j).at(j1).first;
+	    int end_2 = self_rois_w.at(j).at(j1).second;
+	    int start = start_1;
+	    int end = end_1;
+	    
+	    if (start_1 < start_2 ) start = start_2;
+	    if (end_1 > end_2) end = end_2; 
+	    
+	    if ( end - start > 4){ // current cut ... 
+	      // find wires ... 
+	      if (flag_wires == 0){
+		flag_wires = 1;
+		
+		dis_u[0] = udis.at(i) - u_pitch/2.;
+		dis_u[1] = dis_u[0] + u_pitch;
+		dis_u[2] = udis.at(i);
+		
+		dis_w[0] = wdis.at(j) - w_pitch/2.;
+		dis_w[1] = dis_w[0] + w_pitch;
+		dis_w[2] = wdis.at(j);
+		
+		std::vector<Vector> puv(5);
+		
+		if(!gds.crossing_point(dis_u[2],dis_w[2],kUwire,kYwire, puv[4])) continue;
+		gds.crossing_point(dis_u[0],dis_w[0],kUwire,kYwire, puv[0]);
+		gds.crossing_point(dis_u[0],dis_w[1],kUwire,kYwire, puv[1]);
+		gds.crossing_point(dis_u[1],dis_w[1],kUwire,kYwire, puv[2]);
+		gds.crossing_point(dis_u[1],dis_w[0],kUwire,kYwire, puv[3]);
+		
+		puv[0] = 0.9*(puv[0]-puv[4])+puv[4];
+		puv[1] = 0.9*(puv[1]-puv[4])+puv[4];	    
+		puv[2] = 0.9*(puv[2]-puv[4])+puv[4];
+		puv[3] = 0.9*(puv[3]-puv[4])+puv[4];
+		
+		for (int a1=0;a1!=5;a1++){
+		  const GeomWire *n_wire = gds.closest(puv[a1],kVwire);
+		  if (n_wire == 0) continue;
+		  if (find(wires.begin(),wires.end(),n_wire) == wires.end())
+		    wires.push_back(n_wire);
+		}
+	      }
+	      // find the index ... 
+	      for (int k=0;k!=wires.size();k++){
+		others_rois_v1.at(wires.at(k)->index()).push_back(std::make_pair(start,end));
+	      }
+	    }
+	  }
+	}
+      }
+    }
+    
+    
+    // std::cout << others_rois_v1.at(3500-2400).size() << std::endl;
+    
+    // Add W dead + U live
+    
+    for (int i = 0; i!= self_rois_u.size(); i++){
+      const GeomWire *wire1 = gds.by_planeindex(WirePlaneType_t(0),i);
+      for (int j = 0;j!=self_rois_w.size(); j++){
+	if (wmap.find(j) == wmap.end()) continue;
+	const GeomWire *wire2 = gds.by_planeindex(WirePlaneType_t(2),j);
+	GeomWireSelection wires;
+	int flag_wires = 0;
+	
+	for (int i1 = 0; i1 != self_rois_u.at(i).size(); i1++){
+	  {
+	    
+	    if (flag_wires == 1 && wires.size()==0) continue;
+	    
+	    int start_1 = self_rois_u.at(i).at(i1).first;
+	    int end_1 = self_rois_u.at(i).at(i1).second;
+	    int start_2 = wmap[j].first;
+	    int end_2 = wmap[j].second;
+	    int start = start_1;
+	    int end = end_1;
+	    
+	    if (start_1 < start_2 ) start = start_2;
+	    if (end_1 > end_2) end = end_2; 
+	    
+	    if ( end - start > 4){ // current cut ... 
+	      // find wires ... 
+	      if (flag_wires == 0){
+		flag_wires = 1;
+		
+		dis_u[0] = udis.at(i) - u_pitch/2.;
+		dis_u[1] = dis_u[0] + u_pitch;
+		dis_u[2] = udis.at(i);
+		
+		dis_w[0] = wdis.at(j) - w_pitch/2.;
+		dis_w[1] = dis_w[0] + w_pitch;
+		dis_w[2] = wdis.at(j);
+		
+		std::vector<Vector> puv(5);
+		
+		if(!gds.crossing_point(dis_u[2],dis_w[2],kUwire,kYwire, puv[4])) continue;
+		gds.crossing_point(dis_u[0],dis_w[0],kUwire,kYwire, puv[0]);
+		gds.crossing_point(dis_u[0],dis_w[1],kUwire,kYwire, puv[1]);
+		gds.crossing_point(dis_u[1],dis_w[1],kUwire,kYwire, puv[2]);
+		gds.crossing_point(dis_u[1],dis_w[0],kUwire,kYwire, puv[3]);
+		
+		puv[0] = 0.9*(puv[0]-puv[4])+puv[4];
+		puv[1] = 0.9*(puv[1]-puv[4])+puv[4];	    
+		puv[2] = 0.9*(puv[2]-puv[4])+puv[4];
+		puv[3] = 0.9*(puv[3]-puv[4])+puv[4];
+		
+		for (int a1=0;a1!=5;a1++){
+		  const GeomWire *n_wire = gds.closest(puv[a1],kVwire);
+		  if (n_wire == 0) continue;
+		  if (find(wires.begin(),wires.end(),n_wire) == wires.end())
+		    wires.push_back(n_wire);
+		}
+	      }
+	      // find the index ... 
+	      for (int k=0;k!=wires.size();k++){
+		others_rois_v1.at(wires.at(k)->index()).push_back(std::make_pair(start,end));
+	      }
+	    }
+	  }
+	}
+      }
+    }
+  }
+
+   // std::cout << others_rois_v1.at(3500-2400).size() << std::endl;
+
+
 
   for (int i=0;i!=others_rois_v1.size();i++){
     if (others_rois_v1.at(i).size()==0) continue;
@@ -308,7 +459,146 @@ void WireCell2dToy::uBooNEDataROI::find_ROI_by_others(){
       }
     }
   }
-  
+
+
+   if (flag_dead == 1){
+     // V dead
+     
+     for (int i = 0; i!= self_rois_v.size(); i++){
+       if (vmap.find(i) == vmap.end()) continue;
+       const GeomWire *wire1 = gds.by_planeindex(WirePlaneType_t(1),i);
+       for (int j = 0;j!=self_rois_w.size(); j++){
+	 const GeomWire *wire2 = gds.by_planeindex(WirePlaneType_t(2),j);
+	 GeomWireSelection wires;
+	 int flag_wires = 0;
+	 
+	 {
+	   for (int j1 = 0; j1 != self_rois_w.at(j).size(); j1++){
+	     
+	     if (flag_wires == 1 && wires.size()==0) continue;
+	     
+	     int start_1 = vmap[i].first;
+	     int end_1 = vmap[i].second;
+	     int start_2 = self_rois_w.at(j).at(j1).first;
+	     int end_2 = self_rois_w.at(j).at(j1).second;
+	     int start = start_1;
+	     int end = end_1;
+	     if (start_1 < start_2 ) start = start_2;
+	     if (end_1 > end_2) end = end_2; 
+	     
+	     if ( end - start > 4){ // current cut ... 
+	       // find wires ... 
+	       if (flag_wires == 0){
+		 flag_wires = 1;
+		 
+		 dis_v[0] = vdis.at(i) - v_pitch/2.;
+		 dis_v[1] = dis_v[0] + v_pitch;
+		 dis_v[2] = vdis.at(i);
+		 
+		 dis_w[0] = wdis.at(j) - w_pitch/2.;
+		 dis_w[1] = dis_w[0] + w_pitch;
+		 dis_w[2] = wdis.at(j);
+		 
+		 std::vector<Vector> puv(5);
+		 
+		 if(!gds.crossing_point(dis_v[2],dis_w[2],kVwire,kYwire, puv[4])) continue;
+		 gds.crossing_point(dis_v[0],dis_w[0],kVwire,kYwire, puv[0]);
+		 gds.crossing_point(dis_v[0],dis_w[1],kVwire,kYwire, puv[1]);
+		 gds.crossing_point(dis_v[1],dis_w[1],kVwire,kYwire, puv[2]);
+		 gds.crossing_point(dis_v[1],dis_w[0],kVwire,kYwire, puv[3]);
+		 
+		 puv[0] = 0.9*(puv[0]-puv[4])+puv[4];
+		 puv[1] = 0.9*(puv[1]-puv[4])+puv[4];	    
+		 puv[2] = 0.9*(puv[2]-puv[4])+puv[4];
+		 puv[3] = 0.9*(puv[3]-puv[4])+puv[4];
+		 
+		 for (int a1=0;a1!=5;a1++){
+		   const GeomWire *n_wire = gds.closest(puv[a1],kUwire);
+		   if (n_wire == 0) continue;
+		   if (find(wires.begin(),wires.end(),n_wire) == wires.end())
+		     wires.push_back(n_wire);
+		 }
+	       }
+	       // find the index ... 
+	       for (int k=0;k!=wires.size();k++){
+		 others_rois_u1.at(wires.at(k)->index()).push_back(std::make_pair(start,end));
+	       }
+	     }
+	   }
+	 }
+       }
+     }
+     
+     // W dead
+     
+     for (int i = 0; i!= self_rois_v.size(); i++){
+       const GeomWire *wire1 = gds.by_planeindex(WirePlaneType_t(1),i);
+       for (int j = 0;j!=self_rois_w.size(); j++){
+	 if (wmap.find(j) == wmap.end()) continue;
+	 const GeomWire *wire2 = gds.by_planeindex(WirePlaneType_t(2),j);
+	 GeomWireSelection wires;
+	 int flag_wires = 0;
+	 
+	 for (int i1 = 0; i1 != self_rois_v.at(i).size(); i1++){
+	   {
+	     
+	     if (flag_wires == 1 && wires.size()==0) continue;
+	     
+	     int start_1 = self_rois_v.at(i).at(i1).first;
+	     int end_1 = self_rois_v.at(i).at(i1).second;
+	     int start_2 = wmap[j].first;
+	     int end_2 = wmap[j].second;
+	     int start = start_1;
+	     int end = end_1;
+	     if (start_1 < start_2 ) start = start_2;
+	     if (end_1 > end_2) end = end_2; 
+	     
+	     if ( end - start > 4){ // current cut ... 
+	       // find wires ... 
+	       if (flag_wires == 0){
+		 flag_wires = 1;
+		 
+		 dis_v[0] = vdis.at(i) - v_pitch/2.;
+		 dis_v[1] = dis_v[0] + v_pitch;
+		 dis_v[2] = vdis.at(i);
+		 
+		 dis_w[0] = wdis.at(j) - w_pitch/2.;
+		 dis_w[1] = dis_w[0] + w_pitch;
+		 dis_w[2] = wdis.at(j);
+		 
+		 std::vector<Vector> puv(5);
+		 
+		 if(!gds.crossing_point(dis_v[2],dis_w[2],kVwire,kYwire, puv[4])) continue;
+		 gds.crossing_point(dis_v[0],dis_w[0],kVwire,kYwire, puv[0]);
+		 gds.crossing_point(dis_v[0],dis_w[1],kVwire,kYwire, puv[1]);
+		 gds.crossing_point(dis_v[1],dis_w[1],kVwire,kYwire, puv[2]);
+		 gds.crossing_point(dis_v[1],dis_w[0],kVwire,kYwire, puv[3]);
+		 
+		 puv[0] = 0.9*(puv[0]-puv[4])+puv[4];
+		 puv[1] = 0.9*(puv[1]-puv[4])+puv[4];	    
+		 puv[2] = 0.9*(puv[2]-puv[4])+puv[4];
+		 puv[3] = 0.9*(puv[3]-puv[4])+puv[4];
+		 
+		 for (int a1=0;a1!=5;a1++){
+		   const GeomWire *n_wire = gds.closest(puv[a1],kUwire);
+		   if (n_wire == 0) continue;
+		   if (find(wires.begin(),wires.end(),n_wire) == wires.end())
+		     wires.push_back(n_wire);
+		 }
+	       }
+	       // find the index ... 
+	       for (int k=0;k!=wires.size();k++){
+		 others_rois_u1.at(wires.at(k)->index()).push_back(std::make_pair(start,end));
+	       }
+	     }
+	   }
+	 }
+       }
+     }
+   }
+
+
+
   for (int i=0;i!=others_rois_u1.size();i++){
     if (others_rois_u1.at(i).size()==0) continue;
     std::sort(others_rois_u1.at(i).begin(),others_rois_u1.at(i).end());
