@@ -21,8 +21,12 @@ namespace WireCell2dToy{
     WireCell::ChirpMap& vmap;
     WireCell::ChirpMap& wmap;
 
+    int nwire_u;
+    int nwire_v;
+    int nwire_w;
 
     void restore_baseline(TH1F *h1);
+    double cal_rms(TH1F *h1, int chid);
     void find_ROI_by_itself();
   };
 }

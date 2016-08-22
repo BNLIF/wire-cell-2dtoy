@@ -18,6 +18,14 @@ WireCell2dToy::uBooNEData2DDeconvolutionFDS::uBooNEData2DDeconvolutionFDS(TH2I *
 {
   load_results_from_file = true;
 
+  GeomWireSelection wires_u = gds.wires_in_plane(WirePlaneType_t(0));
+  GeomWireSelection wires_v = gds.wires_in_plane(WirePlaneType_t(1));
+  GeomWireSelection wires_w = gds.wires_in_plane(WirePlaneType_t(2));
+
+  nwire_u = wires_u.size();
+  nwire_v = wires_v.size();
+  nwire_w = wires_w.size();
+
   Int_t chid, plane;
   Int_t start_time, end_time;
   T_bad->SetBranchAddress("chid",&chid);
