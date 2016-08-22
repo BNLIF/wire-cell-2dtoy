@@ -7,6 +7,7 @@
 #include "TH1F.h"
 #include "TH2F.h"
 #include "TGraph.h"
+#include "TTree.h"
 
 
 namespace WireCell2dToy{
@@ -14,20 +15,23 @@ namespace WireCell2dToy{
   {
   public:
     uBooNEData2DDeconvolutionFDS(WireCell::FrameDataSource& fds, const WireCell::GeomDataSource& gds, WireCell::ChirpMap& umap, WireCell::ChirpMap& vmap, WireCell::ChirpMap& wmap, int nframes_total = -1, float time_offset_uv = 0, float time_offset_uw = 0, float overall_time_offset = 0);
+    
+    uBooNEData2DDeconvolutionFDS(TH2I *hu_decon, TH2I *hv_decon, TH2I *hw_decon, TTree *T_bad, const WireCell::GeomDataSource& gds);
+
     ~uBooNEData2DDeconvolutionFDS();
 
     virtual int size() const;
     virtual int jump(int frame_number);
     
   private:
-    WireCell::FrameDataSource& fds;
+    WireCell::FrameDataSource *fds;
     const WireCell::GeomDataSource& gds;
     int  max_frames;
     int nbin;
 
-    WireCell::ChirpMap& umap;
-    WireCell::ChirpMap& vmap;
-    WireCell::ChirpMap& wmap;
+    WireCell::ChirpMap umap;
+    WireCell::ChirpMap vmap;
+    WireCell::ChirpMap wmap;
 
     float time_offset_uv;
     float time_offset_uw;
@@ -45,6 +49,7 @@ namespace WireCell2dToy{
 
     float scale_u_2d, scale_v_2d;
     
+    bool load_results_from_file;
    
     void Deconvolute_2D(int plane);
 

@@ -12,9 +12,37 @@
 
 using namespace WireCell;
 
+WireCell2dToy::uBooNEData2DDeconvolutionFDS::uBooNEData2DDeconvolutionFDS(TH2I *hu_decon, TH2I *hv_decon, TH2I *hw_decon, TTree *T_bad, const WireCell::GeomDataSource& gds)
+  : fds (0)
+  , gds (gds)
+{
+  load_results_from_file = true;
 
-WireCell2dToy::uBooNEData2DDeconvolutionFDS::uBooNEData2DDeconvolutionFDS(WireCell::FrameDataSource& fds, const WireCell::GeomDataSource& gds,WireCell::ChirpMap& umap, WireCell::ChirpMap& vmap, WireCell::ChirpMap& wmap, int nframes_total, float time_offset_uv, float time_offset_uw, float overall_time_offset)
-  : fds(fds)
+  Int_t chid, plane;
+  Int_t start_time, end_time;
+  T_bad->SetBranchAddress("chid",&chid);
+  T_bad->SetBranchAddress("plane",&plane);
+  T_bad->SetBranchAddress("start_time",&start_time);
+  T_bad->SetBranchAddress("end_time",&end_time);
+  for (Int_t i=0;i!=T_bad->GetEntries();i++){
+    T_bad->GetEntry(i);
+    
+    std::pair<int,int> abc(start_time,end_time);
+    if (plane == 0){
+      umap[chid] = abc;
+    }else if (plane == 1){
+      vmap[chid] = abc;
+    }else if (plane == 2){
+      wmap[chid] = abc;
+    }
+  }
+  
+
+}
+
+
+WireCell2dToy::uBooNEData2DDeconvolutionFDS::uBooNEData2DDeconvolutionFDS(WireCell::FrameDataSource& fds1, const WireCell::GeomDataSource& gds,WireCell::ChirpMap& umap, WireCell::ChirpMap& vmap, WireCell::ChirpMap& wmap, int nframes_total, float time_offset_uv, float time_offset_uw, float overall_time_offset)
+  : fds(&fds1)
   , gds(gds)
   , max_frames(nframes_total)
   , time_offset_uv(time_offset_uv)
@@ -24,7 +52,10 @@ WireCell2dToy::uBooNEData2DDeconvolutionFDS::uBooNEData2DDeconvolutionFDS(WireCe
   , vmap(vmap)
   , wmap(wmap)
 {  
-  bins_per_frame = fds.Get_Bins_Per_Frame();
+
+  load_results_from_file = false;
+
+  bins_per_frame = fds->Get_Bins_Per_Frame();
   
   GeomWireSelection wires_u = gds.wires_in_plane(WirePlaneType_t(0));
   GeomWireSelection wires_v = gds.wires_in_plane(WirePlaneType_t(1));
@@ -106,7 +137,7 @@ int WireCell2dToy::uBooNEData2DDeconvolutionFDS::jump(int frame_number){
     return frame_number;
   }
   frame.clear();
-  fds.jump(frame_number);
+  fds->jump(frame_number);
 
   TVirtualFFT::SetTransform(0);
 
@@ -165,7 +196,7 @@ int WireCell2dToy::uBooNEData2DDeconvolutionFDS::size() const{
 }
 
 void WireCell2dToy::uBooNEData2DDeconvolutionFDS::Deconvolute_2D(int plane){
-  const Frame& frame1 = fds.get();
+  const Frame& frame1 = fds->get();
   size_t ntraces = frame1.traces.size();
 
   const int nticks = bins_per_frame;
