@@ -39,9 +39,9 @@ WireCell2dToy::uBooNEData2DDeconvolutionFDS::uBooNEData2DDeconvolutionFDS(TH2I *
     if (plane == 0){
       umap[chid] = abc;
     }else if (plane == 1){
-      vmap[chid] = abc;
+      vmap[chid-nwire_u] = abc;
     }else if (plane == 2){
-      wmap[chid] = abc;
+      wmap[chid-nwire_u-nwire_v] = abc;
     }
   }
   

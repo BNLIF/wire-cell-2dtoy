@@ -21,7 +21,14 @@ WireCell2dToy::uBooNEDataROI::uBooNEDataROI(WireCell::FrameDataSource& fds, cons
   nwire_v = wires_v.size();
   nwire_w = wires_w.size();
 
+  // std::cout << umap.size() << " " << vmap.size() << " " << wmap.size() <<  " " << wmap[7500].first << " " << wmap[7500].second << std::endl;
+
+  self_rois_u.resize(nwire_u);
+  self_rois_v.resize(nwire_v);
+  self_rois_w.resize(nwire_w);
   find_ROI_by_itself();
+
+  
 }
 
 WireCell2dToy::uBooNEDataROI::~uBooNEDataROI()
@@ -51,8 +58,35 @@ void WireCell2dToy::uBooNEDataROI::find_ROI_by_itself(){
     int chid = trace.chid;
     int nticks = trace.charge.size();
     hresult->Reset();
+
+    
+    int dead_start = -1;
+    int dead_end = -1;
+    
+    if (chid < nwire_u){
+      if (umap.find(chid) != umap.end()){
+	
+	dead_start = umap[chid].first;
+	dead_end = umap[chid].second;
+      }
+    }else if (chid < nwire_u + nwire_v){
+      if (vmap.find(chid-nwire_u) != vmap.end()){
+	
+	dead_start = vmap[chid-nwire_u].first;
+	dead_end = vmap[chid-nwire_v].second;
+      }
+    }else{
+      if (wmap.find(chid-nwire_u-nwire_v) != wmap.end()){
+	dead_start = wmap[chid-nwire_u-nwire_v].first;
+	dead_end = wmap[chid-nwire_u-nwire_v].second;
+      }
+    }
+    
+    //if (chid == 7500) std::cout << 7500 << " " << dead_start << " " << dead_end << std::endl;
+
     for (int j=0;j!=nticks;j++){
-      hresult->SetBinContent(j+1,trace.charge.at(j));
+      if (j < dead_start || j > dead_end)
+	hresult->SetBinContent(j+1,trace.charge.at(j));
     }
     
     if (chid < nwire_u + nwire_v){
@@ -78,7 +112,8 @@ void WireCell2dToy::uBooNEDataROI::find_ROI_by_itself(){
       fb = TH1::TransformHisto(ifft2,fb,"Re");
       
       for (int j=0;j!=nticks;j++){
-	hresult->SetBinContent(j+1,fb->GetBinContent(j+1));
+	if (j < dead_start || j > dead_end)
+	  hresult->SetBinContent(j+1,fb->GetBinContent(j+1));
       }
 
       delete fb;
@@ -87,12 +122,52 @@ void WireCell2dToy::uBooNEDataROI::find_ROI_by_itself(){
       delete ifft2;
     }
     restore_baseline(hresult);
-    
     //std::cout << chid << " " << cal_rms(hresult,chid) << std::endl;
+    float threshold = 5 * cal_rms(hresult,chid) + 1;
+    int pad = 5;
 
-    // now find ROI ... 
-
-
+    int roi_begin=-1;
+    int roi_end=-1;
+    
+    std::vector<std::pair<int,int>> temp_rois;
+    // now find ROI, above five sigma, and pad with +- six time ticks
+    for (int j=0;j<hresult->GetNbinsX()-1;j++){
+      double content = hresult->GetBinContent(j+1);
+      if (content > threshold){
+	roi_begin = j;
+	roi_end = j;
+	for (int k=j+1;k<hresult->GetNbinsX();k++){
+	  if (hresult->GetBinContent(k+1) > threshold){
+	    roi_end = k;
+	  }else{
+	    break;
+	  }
+	}
+	int temp_roi_begin = roi_begin - pad;
+	if (temp_roi_begin <0 ) temp_roi_begin = 0;
+	int temp_roi_end = roi_end + pad;
+	if (temp_roi_end >hresult->GetNbinsX()-1) temp_roi_end = hresult->GetNbinsX()-1;
+	
+	if (temp_rois.size() == 0){
+	  temp_rois.push_back(std::make_pair(temp_roi_begin,temp_roi_end));
+	}else{
+	  if (temp_roi_begin <= temp_rois.back().second){
+	    temp_rois.back().second = temp_roi_end;
+	  }else{
+	    temp_rois.push_back(std::make_pair(temp_roi_begin,temp_roi_end));
+	  }
+	}
+	j = roi_end + 1;
+      }
+    }
+    if (chid < nwire_u){
+      self_rois_u.at(chid) = temp_rois;
+    }else if (chid < nwire_u + nwire_v){
+      self_rois_v.at(chid-nwire_u) = temp_rois;
+    }else{
+      self_rois_w.at(chid-nwire_u-nwire_v) = temp_rois;
+    }
+    //    std::cout << chid << " " << temp_rois.size() << std::endl;
   }
 
   

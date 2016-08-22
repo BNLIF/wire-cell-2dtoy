@@ -97,6 +97,27 @@ int main(int argc, char* argv[])
   ChirpMap& vplane_map = wien_fds.get_v_cmap();
   ChirpMap& wplane_map = wien_fds.get_w_cmap();
   
+  // std::cout << uplane_map.size() << " " << vplane_map.size() << " " << wplane_map.size() <<  " " << wplane_map[7500].first << " " << wplane_map[7500].second << std::endl;
+
   WireCell2dToy::uBooNEDataROI uboone_rois(wien_fds,gds,uplane_map,vplane_map,wplane_map);
 
+  std::vector<std::pair<int,int>>& rois = uboone_rois.get_self_rois(500);
+  std::cout << rois.size() << std::endl;
+  for (int i=0;i!=rois.size();i++){
+    std::cout << i << " " << rois.at(i).first << " " << rois.at(i).second << std::endl;
+  }
+
+
+  rois = uboone_rois.get_self_rois(3500);
+  std::cout << rois.size() << std::endl;
+  for (int i=0;i!=rois.size();i++){
+    std::cout << i << " " << rois.at(i).first << " " << rois.at(i).second << std::endl;
+  }
+
+  rois = uboone_rois.get_self_rois(7500);
+  std::cout << rois.size() << std::endl;
+  for (int i=0;i!=rois.size();i++){
+    std::cout << i << " " << rois.at(i).first << " " << rois.at(i).second << std::endl;
+  }
+  
 }
