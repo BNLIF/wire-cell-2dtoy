@@ -36,6 +36,10 @@ WireCell2dToy::uBooNEDataROI::~uBooNEDataROI()
   
 }
 
+void WireCell2dToy::uBooNEDataROI::find_ROI_by_others(){
+  
+}
+
 void WireCell2dToy::uBooNEDataROI::find_ROI_by_itself(){
   
 

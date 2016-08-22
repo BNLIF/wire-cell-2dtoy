@@ -19,8 +19,18 @@ namespace WireCell2dToy{
 	return self_rois_u.at(chid);
       }else if (chid < nwire_u + nwire_v){
 	return self_rois_v.at(chid - nwire_u);
-      }else if (chid < nwire_u + nwire_v + nwire_w){
+      }else{
       	return self_rois_w.at(chid - nwire_u - nwire_v);
+      }
+    }
+
+    std::vector<std::pair<int,int>>& get_others_rois(int chid) {
+      if (chid < nwire_u){
+	return others_rois_u.at(chid);
+      }else if (chid < nwire_u + nwire_v){
+	return others_rois_v.at(chid - nwire_u);
+      }else{
+      	return others_rois_w.at(chid - nwire_u - nwire_v);
       }
     }
 
@@ -39,9 +49,17 @@ namespace WireCell2dToy{
     std::vector<std::vector<std::pair<int,int>>> self_rois_v;
     std::vector<std::vector<std::pair<int,int>>> self_rois_w;
 
+    std::vector<std::vector<std::pair<int,int>>> others_rois_u;
+    std::vector<std::vector<std::pair<int,int>>> others_rois_v;
+    std::vector<std::vector<std::pair<int,int>>> others_rois_w;
+
+    
+
     void restore_baseline(TH1F *h1);
     double cal_rms(TH1F *h1, int chid);
     void find_ROI_by_itself();
+    void find_ROI_by_others();
+
   };
 }
 
