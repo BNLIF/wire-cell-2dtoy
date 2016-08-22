@@ -20,6 +20,10 @@ namespace WireCell2dToy{
 
     ~uBooNEData2DDeconvolutionFDS();
 
+    WireCell::ChirpMap& get_u_cmap(){return umap;};
+    WireCell::ChirpMap& get_v_cmap(){return vmap;};
+    WireCell::ChirpMap& get_w_cmap(){return wmap;};
+    
     virtual int size() const;
     virtual int jump(int frame_number);
     

@@ -41,6 +41,7 @@
 //#include "WireCell2dToy/DataSignalWien_ROI.h"
 
 #include "WireCell2dToy/uBooNE_Data_2D_Deconvolution.h"
+#include "WireCell2dToy/uBooNE_Data_ROI.h"
 
 #include "TApplication.h"
 #include "TCanvas.h"
@@ -91,6 +92,11 @@ int main(int argc, char* argv[])
   
  
   WireCell2dToy::uBooNEData2DDeconvolutionFDS wien_fds(hu_decon,hv_decon,hw_decon,T_bad, gds);
+
+  ChirpMap& uplane_map = wien_fds.get_u_cmap();
+  ChirpMap& vplane_map = wien_fds.get_v_cmap();
+  ChirpMap& wplane_map = wien_fds.get_w_cmap();
   
+  WireCell2dToy::uBooNEDataROI uboone_rois(wien_fds,gds,uplane_map,vplane_map,wplane_map);
 
 }
