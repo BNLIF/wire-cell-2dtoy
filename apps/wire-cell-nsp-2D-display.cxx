@@ -37,8 +37,10 @@
 #include "WireCellNav/GenerativeFDS.h"
 #include "WireCell2dToy/ToySignalSimu.h"
 #include "WireCell2dToy/ToySignalSimuTrue.h"
-#include "WireCell2dToy/DataSignalGaus.h"
-#include "WireCell2dToy/DataSignalWien_ROI.h"
+
+#include "WireCell2dToy/uBooNE_Data_2D_Deconvolution.h"
+#include "WireCell2dToy/uBooNE_Data_ROI.h"
+#include "WireCell2dToy/uBooNE_Data_After_ROI.h"
 
 #include "TApplication.h"
 #include "TCanvas.h"
@@ -64,11 +66,6 @@ int main(int argc, char* argv[])
     return 1;
   }
 
-  int two_plane = 0;
-  int save_file = 0;
-  int nt_off1 = 0;
-  int nt_off2 = 0;
-      
   WireCellSst::GeomDataSource gds(argv[1]);
   std::vector<double> ex = gds.extent();
   cerr << "Extent: "
@@ -86,66 +83,44 @@ int main(int argc, char* argv[])
        << " " << gds.angle(WirePlaneType_t(2))
        << endl;
   
-  
-  //float unit_dis = 1.01483;  // 58KV @ 226.5 V/cm
-  //float unit_dis = 1.14753;  // 70 KV @ 226.5 V/cm
   float unit_dis = 1.119;  // 70 KV @ 273 V/cm
-
   //final offset after time scan (70kV)
   float toffset_1=-0.787;
   float toffset_2=-0.603;
   float toffset_3=0.0;
-  
-
   int total_time_bin=9594;
-  int recon_threshold = 2000;
   int frame_length = 3200;
-  int max_events = 100;
-  int eve_num  = atoi(argv[3]);
   int nrebin = 6;
-  float threshold_u = 5.87819e+02 * 4.0;
-  float threshold_v = 8.36644e+02 * 4.0;
-  float threshold_w = 5.67974e+02 * 4.0;
-
-  float threshold_ug = 755.96;
-  float threshold_vg = 822.81;
-  float threshold_wg = 510.84;
-  
-  int time_offset = -52.;
+  int eve_num  = atoi(argv[3]);
+  int time_offset = -92.;
   
   const char* root_file = argv[2];
-   
   int run_no, subrun_no, event_no;
   
   WireCellSst::DatauBooNEFrameDataSource data_fds(root_file,gds,total_time_bin);
-  if (save_file != 2){
-    data_fds.jump(eve_num);
-    if (save_file == 1)
-      data_fds.Save();
-  }
-  
+  data_fds.jump(eve_num);
+
   run_no = data_fds.get_run_no();
   subrun_no = data_fds.get_subrun_no();
   event_no = data_fds.get_event_no();
   
-  cout << "Run No: " << run_no << " " << subrun_no << " " << eve_num << endl;
-  
+  cout << "Run No: " << run_no << " " << subrun_no << " " << event_no << endl;
   ChirpMap& uplane_map = data_fds.get_u_cmap();
   ChirpMap& vplane_map = data_fds.get_v_cmap();
   ChirpMap& wplane_map = data_fds.get_w_cmap();
   
+   cout << "Bad Channels: " << uplane_map.size() << " " << vplane_map.size() << " " << wplane_map.size() << endl;
+   
   cout << "Deconvolution with Wiener filter" << endl; 
-  WireCell2dToy::DataSignalWienROIFDS wien_fds(data_fds,gds,uplane_map, vplane_map, wplane_map, total_time_bin/nrebin,max_events,toffset_1,toffset_2,toffset_3); // weiner smearing for hit identification
-  if (save_file !=2 ){
-    wien_fds.jump(eve_num);
-    if (save_file == 1)
-      wien_fds.Save();
-  }else{
-  }
+  WireCell2dToy::uBooNEData2DDeconvolutionFDS wien_fds(data_fds,gds,uplane_map, vplane_map, wplane_map,100,toffset_1,toffset_2,toffset_3);
+  wien_fds.jump(eve_num);
+
+  WireCell2dToy::uBooNEDataROI uboone_rois(wien_fds,gds,uplane_map,vplane_map,wplane_map);
+  WireCell2dToy::uBooNEDataAfterROI roi_fds(wien_fds,gds,uboone_rois,nrebin);
+  roi_fds.jump(eve_num);
 
 
-
-  TFile *file = new TFile(Form("2D_display_%d_%d_%d.root",run_no,subrun_no,eve_num),"RECREATE");
+  TFile *file = new TFile(Form("nsp_2D_display_%d_%d_%d.root",run_no,subrun_no,event_no),"RECREATE");
 
   GeomWireSelection wires_u = gds.wires_in_plane(WirePlaneType_t(0));
   GeomWireSelection wires_v = gds.wires_in_plane(WirePlaneType_t(1));
@@ -163,7 +138,6 @@ int main(int argc, char* argv[])
   TH1I *hv_baseline = new TH1I("hv_baseline","hv_threshold",nwire_v,-0.5+nwire_u,-0.5+nwire_u+nwire_v);
   TH1I *hw_baseline = new TH1I("hw_baseline","hw_threshold",nwire_w,-0.5+nwire_u+nwire_v,-0.5+nwire_u+nwire_v+nwire_w);
 
-  
   TH1I *hu_threshold = new TH1I("hu_threshold","hu_basline",nwire_u,-0.5,-0.5+nwire_u);
   TH1I *hv_threshold = new TH1I("hv_threshold","hv_basline",nwire_v,-0.5+nwire_u,-0.5+nwire_u+nwire_v);
   TH1I *hw_threshold = new TH1I("hw_threshold","hw_basline",nwire_w,-0.5+nwire_u+nwire_v,-0.5+nwire_u+nwire_v+nwire_w);
@@ -180,7 +154,7 @@ int main(int argc, char* argv[])
   TH2F *htemp;
   TH2F *htemp1;
   
-  const Frame& frame = data_fds.get();
+   const Frame& frame = data_fds.get();
   size_t ntraces = frame.traces.size();
   for (size_t ind=0; ind<ntraces; ++ind) {
     const Trace& trace = frame.traces[ind];
@@ -205,8 +179,9 @@ int main(int argc, char* argv[])
       htemp->SetBinContent(chid+1,tt,trace.charge.at(i));
     }
   }
+
   
-  const Frame& frame1 = wien_fds.get();
+  const Frame& frame1 = roi_fds.get();
   ntraces = frame1.traces.size();
   for (size_t ind=0; ind<ntraces; ++ind) {
     const Trace& trace = frame1.traces[ind];
@@ -228,6 +203,22 @@ int main(int argc, char* argv[])
       htemp1->SetBinContent(chid+1,tt,trace.charge.at(i));
     }
   }
+
+  
+
+  std::vector<float>& uplane_rms = uboone_rois.get_uplane_rms();
+  std::vector<float>& vplane_rms = uboone_rois.get_vplane_rms();
+  std::vector<float>& wplane_rms = uboone_rois.get_wplane_rms();
+  for (Int_t i=0;i!=uplane_rms.size();i++){
+    hu_threshold->SetBinContent(i+1,uplane_rms.at(i)*3.0 * nrebin);
+  }
+  for (Int_t i=0;i!=vplane_rms.size();i++){
+    hv_threshold->SetBinContent(i+1,vplane_rms.at(i)*3.0 * nrebin);
+  }
+  for (Int_t i=0;i!=wplane_rms.size();i++){
+    hw_threshold->SetBinContent(i+1,wplane_rms.at(i)*3.0 * nrebin);
+  }
+
 
   // save original data ... 
   const char* tpath = "/Event/Sim";
@@ -275,47 +266,32 @@ int main(int argc, char* argv[])
     htemp4->SetBinContent(chid+1,htemp3->GetMaximumBin()-1);
   }
 
-  std::vector<float>& uplane_rms = wien_fds.get_uplane_rms();
-  std::vector<float>& vplane_rms = wien_fds.get_vplane_rms();
-  std::vector<float>& wplane_rms = wien_fds.get_wplane_rms();
-  for (Int_t i=0;i!=uplane_rms.size();i++){
-    hu_threshold->SetBinContent(i+1,uplane_rms.at(i)*3.6 );
-  }
-  for (Int_t i=0;i!=vplane_rms.size();i++){
-    hv_threshold->SetBinContent(i+1,vplane_rms.at(i)*3.6 );
-  }
-  for (Int_t i=0;i!=wplane_rms.size();i++){
-    hw_threshold->SetBinContent(i+1,wplane_rms.at(i)*3.6 );
-  }
 
-  // finish saving
 
   TTree *Trun = new TTree("Trun","Trun");
   Trun->SetDirectory(file);
 
   int detector = 0; // MicroBooNE
   Trun->Branch("detector",&detector,"detector/I");
-
   Trun->Branch("eventNo",&event_no,"eventNo/I");
   Trun->Branch("runNo",&run_no,"runNo/I");
   Trun->Branch("subRunNo",&subrun_no,"subRunNo/I");
-  
   Trun->Branch("unit_dis",&unit_dis,"unit_dis/F");
   Trun->Branch("toffset_uv",&toffset_1,"toffset_uv/F");
   Trun->Branch("toffset_uw",&toffset_2,"toffset_uw/F");
   Trun->Branch("toffset_u",&toffset_3,"toffset_u/F");
   Trun->Branch("total_time_bin",&total_time_bin,"total_time_bin/I");
-  Trun->Branch("recon_threshold",&recon_threshold,"recon_threshold/I");
+  //Trun->Branch("recon_threshold",&recon_threshold,"recon_threshold/I");
   Trun->Branch("frame_length",&frame_length,"frame_length/I");
-  Trun->Branch("max_events",&max_events,"max_events/I");
+  //Trun->Branch("max_events",&max_events,"max_events/I");
   Trun->Branch("eve_num",&eve_num,"eve_num/I");
   Trun->Branch("nrebin",&nrebin,"nrebin/I");
-  Trun->Branch("threshold_u",&threshold_u,"threshold_u/F");
-  Trun->Branch("threshold_v",&threshold_v,"threshold_v/F");
-  Trun->Branch("threshold_w",&threshold_w,"threshold_w/F");
+  //Trun->Branch("threshold_u",&threshold_u,"threshold_u/F");
+  //Trun->Branch("threshold_v",&threshold_v,"threshold_v/F");
+  //Trun->Branch("threshold_w",&threshold_w,"threshold_w/F");
   Trun->Branch("time_offset",&time_offset,"time_offset/I");
-
   Trun->Fill();
+
 
 
   TTree *T_bad = new TTree("T_bad","T_bad");
@@ -347,35 +323,10 @@ int main(int argc, char* argv[])
     end_time = it->second.second;
     T_bad->Fill();
   }
-  
-
 
 
   file->Write();
   file->Close();
   
   
-  
-  // cout << "Deconvolution with Gaussian filter" << endl;
-  // WireCell2dToy::DataSignalGausFDS gaus_fds(data_fds,gds,total_time_bin/nrebin,max_events,toffset_1,toffset_2,toffset_3); // gaussian smearing for charge estimation
-  // if (save_file != 2){
-  //   gaus_fds.jump(eve_num);
-  //   if (save_file == 1)
-  //     gaus_fds.Save();
-  // }else{
-  
-  // }
-  
-  // data_fds.Clear();
-
-  
-  
-  // GeomWireSelection wires_u = gds.wires_in_plane(WirePlaneType_t(0));
-  // GeomWireSelection wires_v = gds.wires_in_plane(WirePlaneType_t(1));
-  // GeomWireSelection wires_w = gds.wires_in_plane(WirePlaneType_t(2));
-
-  // int nwire_u = wires_u.size();
-  // int nwire_v = wires_v.size();
-  // int nwire_w = wires_w.size();
-
 }
