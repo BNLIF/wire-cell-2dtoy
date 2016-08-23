@@ -42,6 +42,7 @@
 
 #include "WireCell2dToy/uBooNE_Data_2D_Deconvolution.h"
 #include "WireCell2dToy/uBooNE_Data_ROI.h"
+#include "WireCell2dToy/uBooNE_Data_After_ROI.h"
 
 #include "TApplication.h"
 #include "TCanvas.h"
@@ -92,16 +93,70 @@ int main(int argc, char* argv[])
   
  
   WireCell2dToy::uBooNEData2DDeconvolutionFDS wien_fds(hu_decon,hv_decon,hw_decon,T_bad, gds);
-
   ChirpMap& uplane_map = wien_fds.get_u_cmap();
   ChirpMap& vplane_map = wien_fds.get_v_cmap();
   ChirpMap& wplane_map = wien_fds.get_w_cmap();
   
-  //std::cout << uplane_map.size() << " " << vplane_map.size() << " " << wplane_map.size() <<  " " << uplane_map[880].first << " " << uplane_map[880].second << std::endl;
+  int run_no;
+  int subrun_no;
+  int event_no;
+ 
+  Trun->SetBranchAddress("eventNo",&event_no);
+  Trun->SetBranchAddress("runNo",&run_no);
+  Trun->SetBranchAddress("subRunNo",&subrun_no);
+  Trun->GetEntry(0);
 
+
+  //std::cout << uplane_map.size() << " " << vplane_map.size() << " " << wplane_map.size() <<  " " << uplane_map[880].first << " " << uplane_map[880].second << std::endl;
+  int rebin = 6;
   WireCell2dToy::uBooNEDataROI uboone_rois(wien_fds,gds,uplane_map,vplane_map,wplane_map);
+  WireCell2dToy::uBooNEDataAfterROI roi_fds(wien_fds,gds,uboone_rois,rebin);
+  roi_fds.jump(0);
   
+  GeomWireSelection wires_u = gds.wires_in_plane(WirePlaneType_t(0));
+  GeomWireSelection wires_v = gds.wires_in_plane(WirePlaneType_t(1));
+  GeomWireSelection wires_w = gds.wires_in_plane(WirePlaneType_t(2));
+
+  Int_t nwire_u = wires_u.size();
+  Int_t nwire_v = wires_v.size();
+  Int_t nwire_w = wires_w.size();
+
+  int  total_time_bin = hu_decon->GetNbinsY();
+
+  TFile *file1 = new TFile(Form("nsp3_%d_%d_%d.root",run_no,subrun_no,event_no),"RECREATE");
+
+  TH2F *hu_roi = new TH2F("hu_roi","hu_roi",nwire_u,-0.5,nwire_u-0.5,total_time_bin/rebin,0,total_time_bin);
+  TH2F *hv_roi = new TH2F("hv_roi","hv_roi",nwire_v,-0.5+nwire_u,nwire_v-0.5+nwire_u,total_time_bin/rebin,0,total_time_bin);
+  TH2F *hw_roi = new TH2F("hw_roi","hw_roi",nwire_w,-0.5+nwire_u+nwire_v,nwire_w-0.5+nwire_u+nwire_v,total_time_bin/rebin,0,total_time_bin);
+  TH2F *htemp1;
   
+  const Frame& frame1 = roi_fds.get();
+  int ntraces = frame1.traces.size();
+  for (size_t ind=0; ind<ntraces; ++ind) {
+    const Trace& trace = frame1.traces[ind];
+    int tbin = trace.tbin;
+    int chid = trace.chid;
+    int nbins = trace.charge.size();
+    WirePlaneType_t plane = gds.by_channel(chid).at(0)->plane();
+    if (plane == WirePlaneType_t(0)){
+      htemp1 = hu_roi;
+    }else if (plane == WirePlaneType_t(1)){
+      htemp1 = hv_roi;
+      chid -= nwire_u;
+    }else if (plane == WirePlaneType_t(2)){
+      htemp1 = hw_roi;
+      chid -= nwire_u + nwire_v;
+    }
+     for (int i = tbin;i!=tbin+nbins;i++){
+      int tt = i+1;
+      htemp1->SetBinContent(chid+1,tt,trace.charge.at(i));
+    }
+  }
+  
+  file1->Write();
+  file1->Close();
+  
+
 
   // std::vector<std::pair<int,int>>& rois = uboone_rois.get_self_rois(500);
   // std::cout << rois.size() << std::endl;

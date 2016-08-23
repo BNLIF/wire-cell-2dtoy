@@ -189,9 +189,14 @@ WireCell2dToy::uBooNEData2DDeconvolutionFDS::~uBooNEData2DDeconvolutionFDS()
 }
 
 int WireCell2dToy::uBooNEData2DDeconvolutionFDS::jump(int frame_number){
+  
+  if (load_results_from_file) return frame_number;
+
   if (frame.index == frame_number) {
     return frame_number;
   }
+  
+  
   frame.clear();
   fds->jump(frame_number);
 

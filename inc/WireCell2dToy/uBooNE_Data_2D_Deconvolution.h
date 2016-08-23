@@ -20,6 +20,10 @@ namespace WireCell2dToy{
 
     ~uBooNEData2DDeconvolutionFDS();
 
+    /* int get_run_no(){return run_no;}; */
+    /* int get_subrun_no(){return subrun_no;}; */
+    /* int get_event_no(){return event_no;}; */
+
     WireCell::ChirpMap& get_u_cmap(){return umap;};
     WireCell::ChirpMap& get_v_cmap(){return vmap;};
     WireCell::ChirpMap& get_w_cmap(){return wmap;};
@@ -32,6 +36,9 @@ namespace WireCell2dToy{
     const WireCell::GeomDataSource& gds;
     int  max_frames;
     int nbin;
+
+    /* int run_no, subrun_no, event_no; */
+
 
     WireCell::ChirpMap umap;
     WireCell::ChirpMap vmap;

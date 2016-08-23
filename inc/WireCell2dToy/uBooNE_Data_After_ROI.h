@@ -1,0 +1,30 @@
+#ifndef WIRECELL2dToy_uBOONE_Data_After_ROI_H
+#define WIRECELL2dToy_uBOONE_Data_After_ROI_H
+
+#include "WireCellNav/FrameDataSource.h"
+#include "WireCellNav/GeomDataSource.h"
+#include "WireCell2dToy/uBooNE_Data_ROI.h"
+#include "TH1F.h"
+
+namespace WireCell2dToy{
+  class uBooNEDataAfterROI : public WireCell::FrameDataSource
+  {
+  public:
+    uBooNEDataAfterROI(WireCell::FrameDataSource& fds, const WireCell::GeomDataSource& gds, WireCell2dToy::uBooNEDataROI& rois, int rebin=6);
+    ~uBooNEDataAfterROI();
+
+    virtual int jump(int frame_number);
+    virtual int size() const;
+  private:
+    WireCell::FrameDataSource& fds;
+    const WireCell::GeomDataSource& gds;
+    WireCell2dToy::uBooNEDataROI& rois;
+    int nwire_u;
+    int nwire_v;
+    int nwire_w;
+    
+    int rebin; 
+  };
+}
+
+#endif
