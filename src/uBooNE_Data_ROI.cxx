@@ -35,6 +35,11 @@ WireCell2dToy::uBooNEDataROI::uBooNEDataROI(WireCell::FrameDataSource& fds, cons
   combined_rois_v.resize(nwire_v);
   combined_rois_w.resize(nwire_w);
 
+  uplane_rms.resize(nwire_u);
+  vplane_rms.resize(nwire_v);
+  wplane_rms.resize(nwire_w);
+    
+
   std::cout << "Finding ROI based on itself " << std::endl;
   find_ROI_by_itself();
   std::cout << "Finding ROI based on other two planes " << std::endl;
@@ -767,8 +772,17 @@ void WireCell2dToy::uBooNEDataROI::find_ROI_by_itself(){
     }
     restore_baseline(hresult);
     //std::cout << chid << " " << cal_rms(hresult,chid) << std::endl;
-    float threshold = 5 * cal_rms(hresult,chid) + 1;
+    float th = cal_rms(hresult,chid);
+    float threshold = 5 * th + 1;
     int pad = 5;
+
+    if (chid < nwire_u){
+      uplane_rms.at(chid) = th;
+    }else if (chid < nwire_u + nwire_v){
+      vplane_rms.at(chid-nwire_u) = th;
+    }else{
+      wplane_rms.at(chid-nwire_u-nwire_v) = th;
+    }
 
     int roi_begin=-1;
     int roi_end=-1;

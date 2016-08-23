@@ -100,45 +100,47 @@ int main(int argc, char* argv[])
   //std::cout << uplane_map.size() << " " << vplane_map.size() << " " << wplane_map.size() <<  " " << uplane_map[880].first << " " << uplane_map[880].second << std::endl;
 
   WireCell2dToy::uBooNEDataROI uboone_rois(wien_fds,gds,uplane_map,vplane_map,wplane_map);
+  
+  
 
-  std::vector<std::pair<int,int>>& rois = uboone_rois.get_self_rois(500);
-  std::cout << rois.size() << std::endl;
-  for (int i=0;i!=rois.size();i++){
-    std::cout << i << " S " << rois.at(i).first << " " << rois.at(i).second << std::endl;
-  }
-  rois = uboone_rois.get_others_rois(500);
-  std::cout << rois.size() << std::endl;
-  for (int i=0;i!=rois.size();i++){
-    std::cout << i << " O " << rois.at(i).first << " " << rois.at(i).second << std::endl;
-  }
-  rois = uboone_rois.get_combined_rois(500);
-  std::cout << rois.size() << std::endl;
-  for (int i=0;i!=rois.size();i++){
-    std::cout << i << " C " << rois.at(i).first << " " << rois.at(i).second << std::endl;
-  }
+  // std::vector<std::pair<int,int>>& rois = uboone_rois.get_self_rois(500);
+  // std::cout << rois.size() << std::endl;
+  // for (int i=0;i!=rois.size();i++){
+  //   std::cout << i << " S " << rois.at(i).first << " " << rois.at(i).second << std::endl;
+  // }
+  // rois = uboone_rois.get_others_rois(500);
+  // std::cout << rois.size() << std::endl;
+  // for (int i=0;i!=rois.size();i++){
+  //   std::cout << i << " O " << rois.at(i).first << " " << rois.at(i).second << std::endl;
+  // }
+  // rois = uboone_rois.get_combined_rois(500);
+  // std::cout << rois.size() << std::endl;
+  // for (int i=0;i!=rois.size();i++){
+  //   std::cout << i << " C " << rois.at(i).first << " " << rois.at(i).second << std::endl;
+  // }
 
-  rois = uboone_rois.get_self_rois(3500);
-  std::cout << rois.size() << std::endl;
-  for (int i=0;i!=rois.size();i++){
-    std::cout << i << " S " << rois.at(i).first << " " << rois.at(i).second << std::endl;
-  }
-  rois = uboone_rois.get_others_rois(3500);
-  std::cout << rois.size() << std::endl;
-  for (int i=0;i!=rois.size();i++){
-    std::cout << i << " O " << rois.at(i).first << " " << rois.at(i).second << std::endl;
-  }
-  rois = uboone_rois.get_combined_rois(3500);
-  std::cout << rois.size() << std::endl;
-  for (int i=0;i!=rois.size();i++){
-    std::cout << i << " C " << rois.at(i).first << " " << rois.at(i).second << std::endl;
-  }
+  // rois = uboone_rois.get_self_rois(3500);
+  // std::cout << rois.size() << std::endl;
+  // for (int i=0;i!=rois.size();i++){
+  //   std::cout << i << " S " << rois.at(i).first << " " << rois.at(i).second << std::endl;
+  // }
+  // rois = uboone_rois.get_others_rois(3500);
+  // std::cout << rois.size() << std::endl;
+  // for (int i=0;i!=rois.size();i++){
+  //   std::cout << i << " O " << rois.at(i).first << " " << rois.at(i).second << std::endl;
+  // }
+  // rois = uboone_rois.get_combined_rois(3500);
+  // std::cout << rois.size() << std::endl;
+  // for (int i=0;i!=rois.size();i++){
+  //   std::cout << i << " C " << rois.at(i).first << " " << rois.at(i).second << std::endl;
+  // }
 
 
-  rois = uboone_rois.get_combined_rois(7000);
-  std::cout << rois.size() << std::endl;
-  for (int i=0;i!=rois.size();i++){
-    std::cout << i << " C " << rois.at(i).first << " " << rois.at(i).second << std::endl;
-  }
+  // rois = uboone_rois.get_combined_rois(7000);
+  // std::cout << rois.size() << std::endl;
+  // for (int i=0;i!=rois.size();i++){
+  //   std::cout << i << " C " << rois.at(i).first << " " << rois.at(i).second << std::endl;
+  // }
 
 
   
