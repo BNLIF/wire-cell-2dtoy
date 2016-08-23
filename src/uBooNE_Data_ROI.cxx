@@ -30,11 +30,17 @@ WireCell2dToy::uBooNEDataROI::uBooNEDataROI(WireCell::FrameDataSource& fds, cons
   others_rois_u.resize(nwire_u);
   others_rois_v.resize(nwire_v);
   others_rois_w.resize(nwire_w);
+  
+  combined_rois_u.resize(nwire_u);
+  combined_rois_v.resize(nwire_v);
+  combined_rois_w.resize(nwire_w);
 
   std::cout << "Finding ROI based on itself " << std::endl;
   find_ROI_by_itself();
   std::cout << "Finding ROI based on other two planes " << std::endl;
   find_ROI_by_others();
+  std::cout << "Merge ROIs " << std::endl;
+  merge_ROIs();
 }
 
 WireCell2dToy::uBooNEDataROI::~uBooNEDataROI()
@@ -42,6 +48,59 @@ WireCell2dToy::uBooNEDataROI::~uBooNEDataROI()
   
 }
 
+void WireCell2dToy::uBooNEDataROI::merge_ROIs(){
+
+  std::vector<std::vector<std::pair<int,int>>> others_rois_u1;
+  std::vector<std::vector<std::pair<int,int>>> others_rois_v1;
+  others_rois_u1.resize(nwire_u);
+  others_rois_v1.resize(nwire_v);
+  
+  for (int i=0;i!=self_rois_u.size();i++){
+    others_rois_u1.at(i).insert(others_rois_u1.at(i).end(),self_rois_u.at(i).begin(),self_rois_u.at(i).end());
+    others_rois_u1.at(i).insert(others_rois_u1.at(i).end(),others_rois_u.at(i).begin(),others_rois_u.at(i).end());
+    std::sort(others_rois_u1.at(i).begin(),others_rois_u1.at(i).end());
+    for (int j=0;j!=others_rois_u1.at(i).size();j++){
+      if (combined_rois_u.at(i).size() == 0){
+   	combined_rois_u.at(i).push_back(others_rois_u1.at(i).at(j));
+      }else{
+   	if (others_rois_u1.at(i).at(j).first < combined_rois_u.at(i).back().second){
+   	  if (others_rois_u1.at(i).at(j).second > combined_rois_u.at(i).back().second)
+   	    combined_rois_u.at(i).back().second = others_rois_u1.at(i).at(j).second;
+   	}else{
+   	  combined_rois_u.at(i).push_back(others_rois_u1.at(i).at(j));
+   	}
+      }
+    }
+
+  }
+  
+
+
+  for (int i=0;i!=self_rois_v.size();i++){
+    others_rois_v1.at(i).insert(others_rois_v1.at(i).end(),self_rois_v.at(i).begin(),self_rois_v.at(i).end());
+    others_rois_v1.at(i).insert(others_rois_v1.at(i).end(),others_rois_v.at(i).begin(),others_rois_v.at(i).end());
+    std::sort(others_rois_v1.at(i).begin(),others_rois_v1.at(i).end());
+    for (int j=0;j!=others_rois_v1.at(i).size();j++){
+      if (combined_rois_v.at(i).size() == 0){
+   	combined_rois_v.at(i).push_back(others_rois_v1.at(i).at(j));
+      }else{
+   	if (others_rois_v1.at(i).at(j).first < combined_rois_v.at(i).back().second){
+   	  if (others_rois_v1.at(i).at(j).second > combined_rois_v.at(i).back().second)
+   	    combined_rois_v.at(i).back().second = others_rois_v1.at(i).at(j).second;
+   	}else{
+   	  combined_rois_v.at(i).push_back(others_rois_v1.at(i).at(j));
+   	}
+      }
+    }
+  }
+  
+
+  for (int i=0;i!=self_rois_w.size();i++){
+    combined_rois_w.at(i).insert(combined_rois_w.at(i).end(),self_rois_w.at(i).begin(),self_rois_w.at(i).end());
+  }
+  
+  
+}
 
 
 void WireCell2dToy::uBooNEDataROI::find_ROI_by_others(){
@@ -50,7 +109,7 @@ void WireCell2dToy::uBooNEDataROI::find_ROI_by_others(){
   v_pitch = gds.pitch(kVwire);
   w_pitch = gds.pitch(kYwire);
 
-  int flag_dead = 1;
+  int flag_dead = 0;
   
   std::vector<float> udis,vdis,wdis;
   for (int i=0; i!=self_rois_u.size();i++){
@@ -229,7 +288,7 @@ void WireCell2dToy::uBooNEDataROI::find_ROI_by_others(){
     }
   }
   
-  //std::cout << others_rois_v1.at(3500-2400).size() << std::endl;
+  //  std::cout << others_rois_v1.at(3500-2400).size() << std::endl;
 
 
   if (flag_dead == 1){
@@ -382,14 +441,14 @@ void WireCell2dToy::uBooNEDataROI::find_ROI_by_others(){
     std::sort(others_rois_v1.at(i).begin(),others_rois_v1.at(i).end());
     for (int j=0;j!=others_rois_v1.at(i).size();j++){
       if (others_rois_v.at(i).size() == 0){
-	others_rois_v.at(i).push_back(others_rois_v1.at(i).at(j));
+      others_rois_v.at(i).push_back(others_rois_v1.at(i).at(j));
       }else{
-	if (others_rois_v1.at(i).at(j).first < others_rois_v.at(i).back().second){
-	  if (others_rois_v1.at(i).at(j).second > others_rois_v.at(i).back().second)
-	    others_rois_v.at(i).back().second = others_rois_v.at(i).back().second;
-	}else{
-	  others_rois_v.at(i).push_back(others_rois_v1.at(i).at(j));
-	}
+     	if (others_rois_v1.at(i).at(j).first < others_rois_v.at(i).back().second){
+     	  if (others_rois_v1.at(i).at(j).second > others_rois_v.at(i).back().second)
+     	    others_rois_v.at(i).back().second = others_rois_v1.at(i).at(j).second;
+     	}else{
+     	  others_rois_v.at(i).push_back(others_rois_v1.at(i).at(j));
+     	}
       }
     }
   }
@@ -604,14 +663,14 @@ void WireCell2dToy::uBooNEDataROI::find_ROI_by_others(){
     std::sort(others_rois_u1.at(i).begin(),others_rois_u1.at(i).end());
     for (int j=0;j!=others_rois_u1.at(i).size();j++){
       if (others_rois_u.at(i).size() == 0){
-	others_rois_u.at(i).push_back(others_rois_u1.at(i).at(j));
+      others_rois_u.at(i).push_back(others_rois_u1.at(i).at(j));
       }else{
-	if (others_rois_u1.at(i).at(j).first < others_rois_u.at(i).back().second){
-	  if (others_rois_u1.at(i).at(j).second > others_rois_u.at(i).back().second)
-	    others_rois_u.at(i).back().second = others_rois_u.at(i).back().second;
-	}else{
-	  others_rois_u.at(i).push_back(others_rois_u1.at(i).at(j));
-	}
+     	if (others_rois_u1.at(i).at(j).first < others_rois_u.at(i).back().second){
+     	  if (others_rois_u1.at(i).at(j).second > others_rois_u.at(i).back().second)
+     	    others_rois_u.at(i).back().second = others_rois_u1.at(i).at(j).second;
+     	}else{
+     	  others_rois_u.at(i).push_back(others_rois_u1.at(i).at(j));
+     	}
       }
     }
   }

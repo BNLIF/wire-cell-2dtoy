@@ -34,6 +34,16 @@ namespace WireCell2dToy{
       }
     }
 
+    std::vector<std::pair<int,int>>& get_combined_rois(int chid) {
+      if (chid < nwire_u){
+	return combined_rois_u.at(chid);
+      }else if (chid < nwire_u + nwire_v){
+	return combined_rois_v.at(chid - nwire_u);
+      }else{
+      	return combined_rois_w.at(chid - nwire_u - nwire_v);
+      }
+    }
+
   private:
     WireCell::FrameDataSource& fds;
     const WireCell::GeomDataSource& gds;
@@ -53,12 +63,15 @@ namespace WireCell2dToy{
     std::vector<std::vector<std::pair<int,int>>> others_rois_v;
     std::vector<std::vector<std::pair<int,int>>> others_rois_w;
 
-    
+    std::vector<std::vector<std::pair<int,int>>> combined_rois_u;
+    std::vector<std::vector<std::pair<int,int>>> combined_rois_v;
+    std::vector<std::vector<std::pair<int,int>>> combined_rois_w;
 
     void restore_baseline(TH1F *h1);
     double cal_rms(TH1F *h1, int chid);
     void find_ROI_by_itself();
     void find_ROI_by_others();
+    void merge_ROIs();
 
     
 

@@ -111,7 +111,11 @@ int main(int argc, char* argv[])
   for (int i=0;i!=rois.size();i++){
     std::cout << i << " O " << rois.at(i).first << " " << rois.at(i).second << std::endl;
   }
-
+  rois = uboone_rois.get_combined_rois(500);
+  std::cout << rois.size() << std::endl;
+  for (int i=0;i!=rois.size();i++){
+    std::cout << i << " C " << rois.at(i).first << " " << rois.at(i).second << std::endl;
+  }
 
   rois = uboone_rois.get_self_rois(3500);
   std::cout << rois.size() << std::endl;
@@ -123,11 +127,17 @@ int main(int argc, char* argv[])
   for (int i=0;i!=rois.size();i++){
     std::cout << i << " O " << rois.at(i).first << " " << rois.at(i).second << std::endl;
   }
-
-  rois = uboone_rois.get_self_rois(7000);
+  rois = uboone_rois.get_combined_rois(3500);
   std::cout << rois.size() << std::endl;
   for (int i=0;i!=rois.size();i++){
-    std::cout << i << " S " << rois.at(i).first << " " << rois.at(i).second << std::endl;
+    std::cout << i << " C " << rois.at(i).first << " " << rois.at(i).second << std::endl;
+  }
+
+
+  rois = uboone_rois.get_combined_rois(7000);
+  std::cout << rois.size() << std::endl;
+  for (int i=0;i!=rois.size();i++){
+    std::cout << i << " C " << rois.at(i).first << " " << rois.at(i).second << std::endl;
   }
 
 
