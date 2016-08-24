@@ -61,8 +61,8 @@ using namespace std;
 
 int main(int argc, char* argv[])
 {
-  if (argc < 3) {
-    cerr << "usage: wire-cell-uboone /path/to/ChannelWireGeometry.txt /path/to/celltree.root " << endl;
+  if (argc < 4) {
+    cerr << "usage: wire-cell-uboone /path/to/ChannelWireGeometry.txt decon.root raw.root" << endl;
     return 1;
   }
   
@@ -91,7 +91,14 @@ int main(int argc, char* argv[])
   TH2I *hv_decon = (TH2I*)file->Get("hv_decon");
   TH2I *hw_decon = (TH2I*)file->Get("hw_decon");
   
+  filename = argv[3];
+  TFile *file2 = new TFile(filename);
+  TH2F *hu_raw = (TH2F*)file2->Get("hu_raw");
+  TH2F *hv_raw = (TH2F*)file2->Get("hv_raw");
+  TH2F *hw_raw = (TH2F*)file2->Get("hw_raw");
  
+  WireCellSst::DatauBooNEFrameDataSource data_fds(hu_raw,hv_raw,hw_raw,T_bad,Trun,gds);
+
   WireCell2dToy::uBooNEData2DDeconvolutionFDS wien_fds(hu_decon,hv_decon,hw_decon,T_bad, gds);
   ChirpMap& uplane_map = wien_fds.get_u_cmap();
   ChirpMap& vplane_map = wien_fds.get_v_cmap();
@@ -109,7 +116,7 @@ int main(int argc, char* argv[])
 
   //std::cout << uplane_map.size() << " " << vplane_map.size() << " " << wplane_map.size() <<  " " << uplane_map[880].first << " " << uplane_map[880].second << std::endl;
   int rebin = 6;
-  WireCell2dToy::uBooNEDataROI uboone_rois(wien_fds,gds,uplane_map,vplane_map,wplane_map);
+  WireCell2dToy::uBooNEDataROI uboone_rois(data_fds,wien_fds,gds,uplane_map,vplane_map,wplane_map);
   WireCell2dToy::uBooNEDataAfterROI roi_fds(wien_fds,gds,uboone_rois,rebin);
   roi_fds.jump(0);
   

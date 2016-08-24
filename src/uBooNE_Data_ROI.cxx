@@ -6,8 +6,9 @@
 
 using namespace WireCell;
 
-WireCell2dToy::uBooNEDataROI::uBooNEDataROI(WireCell::FrameDataSource& fds, const WireCell::GeomDataSource& gds, WireCell::ChirpMap& umap, WireCell::ChirpMap& vmap, WireCell::ChirpMap& wmap)
+WireCell2dToy::uBooNEDataROI::uBooNEDataROI(WireCell::FrameDataSource& raw_fds,WireCell::FrameDataSource& fds, const WireCell::GeomDataSource& gds, WireCell::ChirpMap& umap, WireCell::ChirpMap& vmap, WireCell::ChirpMap& wmap)
   : fds(fds)
+  , raw_fds(raw_fds)
   , gds(gds)
   , umap(umap)
   , vmap(vmap)
@@ -43,7 +44,7 @@ WireCell2dToy::uBooNEDataROI::uBooNEDataROI(WireCell::FrameDataSource& fds, cons
   std::cout << "Finding ROI based on itself " << std::endl;
   find_ROI_by_itself();
   std::cout << "Finding ROI based on other two planes " << std::endl;
-  find_ROI_by_others();
+  //  find_ROI_by_others();
   std::cout << "Merge ROIs " << std::endl;
   merge_ROIs();
 }
@@ -773,7 +774,7 @@ void WireCell2dToy::uBooNEDataROI::find_ROI_by_itself(){
     restore_baseline(hresult);
     //std::cout << chid << " " << cal_rms(hresult,chid) << std::endl;
     float th = cal_rms(hresult,chid);
-    float threshold = 5 * th + 1;
+    float threshold = 3.6 * th + 1;
     int pad = 5;
 
     if (chid < nwire_u){
