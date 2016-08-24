@@ -43,9 +43,10 @@ WireCell2dToy::uBooNEDataROI::uBooNEDataROI(WireCell::FrameDataSource& raw_fds,W
 
   std::cout << "Finding ROI based on decon itself " << std::endl;
   find_ROI_by_decon_itself();
-  
+  std::cout << "Fidning ROI based on raw itself " << std::endl;
+  find_ROI_by_raw_itself();
 
-  std::cout << "Finding ROI based on other two planes " << std::endl;
+  //  std::cout << "Finding ROI based on other two planes " << std::endl;
   //  find_ROI_by_others();
   std::cout << "Merge ROIs " << std::endl;
   merge_ROIs();
@@ -701,7 +702,9 @@ void WireCell2dToy::uBooNEDataROI::find_ROI_by_raw_itself(int th_factor , int pa
     hresult->Reset();
     int dead_start = -1;
     int dead_end = -1;
-    
+
+    if (chid >= nwire_u + nwire_v) continue;
+
     if (chid < nwire_u){
       if (umap.find(chid) != umap.end()){
 	
@@ -730,7 +733,79 @@ void WireCell2dToy::uBooNEDataROI::find_ROI_by_raw_itself(int th_factor , int pa
     float th = cal_rms(hresult,chid);
     float threshold = th_factor * th + 1e-6;
     
+    int roi_begin = -1;
+    int roi_end = -1;
+    std::vector<std::pair<int,int>> temp_rois;
 
+    // search the things above threshold (positive) add pad after it 
+    // search the things below -threshold (negative) add pad before it
+    for (int j=0;j!=hresult->GetNbinsX()-1;j++){
+      double content = hresult->GetBinContent(j+1);
+      if (content > threshold){
+	roi_begin = j;
+	roi_end = j;
+	for (int k=j+1;k<hresult->GetNbinsX();k++){
+	  if (hresult->GetBinContent(k+1) > threshold){
+	    roi_end = k;
+	  }else{
+	    break;
+	  }
+	}
+	if (roi_end - roi_begin >=2){
+	  int temp_roi_end = roi_end + pad;
+	  if (temp_roi_end >= hresult->GetNbinsX())
+	    temp_roi_end = hresult->GetNbinsX()-1;
+	  temp_rois.push_back(std::make_pair(roi_begin,temp_roi_end));
+	}
+      }else if (content < -threshold){
+	roi_begin = j;
+	roi_end = j;
+	for (int k=j+1;k<hresult->GetNbinsX();k++){
+	  if (hresult->GetBinContent(k+1) < -threshold){
+	    roi_end = k;
+	  }else{
+	    break;
+	  }
+	}
+	if (roi_end - roi_begin >=2){
+	  int temp_roi_begin = roi_begin - pad;
+	  if (temp_roi_begin < 0)
+	    temp_roi_begin = 0;
+	  temp_rois.push_back(std::make_pair(temp_roi_begin,roi_end));
+	}
+      }
+      j = roi_end + 1;
+    }
+
+    // load the ROIs from the self in
+    if (chid < nwire_u){
+      temp_rois.insert(temp_rois.end(),self_rois_u.at(chid).begin(), self_rois_u.at(chid).end());
+    }else if (chid < nwire_u + nwire_v){
+      temp_rois.insert(temp_rois.end(),self_rois_v.at(chid - nwire_u).begin(), self_rois_v.at(chid - nwire_u).end());
+    }
+    // sort them ...
+    std::sort(temp_rois.begin(),temp_rois.end());
+    // merge them ...
+    std::vector<std::pair<int,int>> temp_rois1 ; // to store 
+    
+    for (int j=0;j!=temp_rois.size();j++){
+      if (temp_rois1.size() == 0){
+   	temp_rois1.push_back(temp_rois.at(j));
+      }else{
+   	if (temp_rois.at(j).first < temp_rois1.back().second){
+   	  if (temp_rois.at(j).second > temp_rois1.back().second)
+   	    temp_rois1.back().second = temp_rois.at(j).second;
+   	}else{
+   	  temp_rois1.push_back(temp_rois.at(j));
+   	}
+      }
+    }
+    // copy them back
+    if (chid < nwire_u){
+      self_rois_u.at(chid) = temp_rois1;
+    }else if (chid < nwire_u + nwire_v){
+      self_rois_v.at(chid - nwire_u) = temp_rois1;
+    }
 
   }
 
