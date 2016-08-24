@@ -42,15 +42,157 @@ WireCell2dToy::uBooNEDataROI::uBooNEDataROI(WireCell::FrameDataSource& raw_fds,W
     
 
   std::cout << "Finding ROI based on decon itself " << std::endl;
-  find_ROI_by_decon_itself();
+  find_ROI_by_decon_itself(3.6,0); // 5 sigma, with zero padding
   std::cout << "Fidning ROI based on raw itself " << std::endl;
-  find_ROI_by_raw_itself();
+  find_ROI_by_raw_itself(3.0,5); // 3 sigma with 5 (half) padding
+  // std::cout << "Finding ROI based on other two planes " << std::endl;
+  // find_ROI_by_others();
+  std::cout << "Extend Self ROIs" << std::endl;
+  extend_ROI_self(5);
+  // std::cout << "Extend Two-plane ROIs" << std::endl;
+  // extend_ROI_others(5);
+  // two plane tiling is not working for  this configuration ... 
 
-  //  std::cout << "Finding ROI based on other two planes " << std::endl;
-  //  find_ROI_by_others();
   std::cout << "Merge ROIs " << std::endl;
+
+
   merge_ROIs();
 }
+
+void WireCell2dToy::uBooNEDataROI::extend_ROI_others(int pad){
+  const int nbins = raw_fds.Get_Bins_Per_Frame();
+
+  for (int i=0;i!=others_rois_u.size();i++){
+    std::vector<std::pair<int,int>> temp_rois;
+    int temp_begin, temp_end;
+    for (int j=0;j!=others_rois_u.at(i).size();j++){
+      temp_begin = others_rois_u.at(i).at(j).first - pad;
+      if (temp_begin < 0 ) temp_begin = 0;
+      temp_end = others_rois_u.at(i).at(j).second + pad;
+      if (temp_end >= nbins) temp_end = nbins - 1;
+      // merge 
+      if (temp_rois.size() == 0){
+	temp_rois.push_back(std::make_pair(temp_begin,temp_end));
+      }else{
+	if (temp_begin < temp_rois.back().second){
+	  if (temp_end > temp_rois.back().second){
+	    temp_rois.back().second = temp_end;
+	  }
+	}else{
+	  temp_rois.push_back(std::make_pair(temp_begin,temp_end));
+	}
+      }
+    }
+    others_rois_u.at(i) = temp_rois;
+  }
+
+  for (int i=0;i!=others_rois_v.size();i++){
+    std::vector<std::pair<int,int>> temp_rois;
+    int temp_begin, temp_end;
+    for (int j=0;j!=others_rois_v.at(i).size();j++){
+      temp_begin = others_rois_v.at(i).at(j).first - pad;
+      if (temp_begin < 0 ) temp_begin = 0;
+      temp_end = others_rois_v.at(i).at(j).second + pad;
+      if (temp_end >= nbins) temp_end = nbins - 1;
+      // merge 
+      if (temp_rois.size() == 0){
+	temp_rois.push_back(std::make_pair(temp_begin,temp_end));
+      }else{
+	if (temp_begin < temp_rois.back().second){
+	  if (temp_end > temp_rois.back().second){
+	    temp_rois.back().second = temp_end;
+	  }
+	}else{
+	  temp_rois.push_back(std::make_pair(temp_begin,temp_end));
+	}
+      }
+    }
+    others_rois_v.at(i) = temp_rois;
+  }
+
+
+
+}
+
+
+void WireCell2dToy::uBooNEDataROI::extend_ROI_self(int pad){
+  const int nbins = raw_fds.Get_Bins_Per_Frame();
+
+  for (int i=0;i!=self_rois_u.size();i++){
+    std::vector<std::pair<int,int>> temp_rois;
+    int temp_begin, temp_end;
+    for (int j=0;j!=self_rois_u.at(i).size();j++){
+      temp_begin = self_rois_u.at(i).at(j).first - pad;
+      if (temp_begin < 0 ) temp_begin = 0;
+      temp_end = self_rois_u.at(i).at(j).second + pad;
+      if (temp_end >= nbins) temp_end = nbins - 1;
+      // merge 
+      if (temp_rois.size() == 0){
+	temp_rois.push_back(std::make_pair(temp_begin,temp_end));
+      }else{
+	if (temp_begin < temp_rois.back().second){
+	  if (temp_end > temp_rois.back().second){
+	    temp_rois.back().second = temp_end;
+	  }
+	}else{
+	  temp_rois.push_back(std::make_pair(temp_begin,temp_end));
+	}
+      }
+    }
+    self_rois_u.at(i) = temp_rois;
+  }
+
+  for (int i=0;i!=self_rois_v.size();i++){
+    std::vector<std::pair<int,int>> temp_rois;
+    int temp_begin, temp_end;
+    for (int j=0;j!=self_rois_v.at(i).size();j++){
+      temp_begin = self_rois_v.at(i).at(j).first - pad;
+      if (temp_begin < 0 ) temp_begin = 0;
+      temp_end = self_rois_v.at(i).at(j).second + pad;
+      if (temp_end >= nbins) temp_end = nbins - 1;
+      // merge 
+      if (temp_rois.size() == 0){
+	temp_rois.push_back(std::make_pair(temp_begin,temp_end));
+      }else{
+	if (temp_begin < temp_rois.back().second){
+	  if (temp_end > temp_rois.back().second){
+	    temp_rois.back().second = temp_end;
+	  }
+	}else{
+	  temp_rois.push_back(std::make_pair(temp_begin,temp_end));
+	}
+      }
+    }
+    self_rois_v.at(i) = temp_rois;
+  }
+
+  for (int i=0;i!=self_rois_w.size();i++){
+    std::vector<std::pair<int,int>> temp_rois;
+    int temp_begin, temp_end;
+    for (int j=0;j!=self_rois_w.at(i).size();j++){
+      temp_begin = self_rois_w.at(i).at(j).first - pad;
+      if (temp_begin < 0 ) temp_begin = 0;
+      temp_end = self_rois_w.at(i).at(j).second + pad;
+      if (temp_end >= nbins) temp_end = nbins - 1;
+      // merge 
+      if (temp_rois.size() == 0){
+	temp_rois.push_back(std::make_pair(temp_begin,temp_end));
+      }else{
+	if (temp_begin < temp_rois.back().second){
+	  if (temp_end > temp_rois.back().second){
+	    temp_rois.back().second = temp_end;
+	  }
+	}else{
+	  temp_rois.push_back(std::make_pair(temp_begin,temp_end));
+	}
+      }
+    }
+    self_rois_w.at(i) = temp_rois;
+  }
+
+
+}
+
 
 WireCell2dToy::uBooNEDataROI::~uBooNEDataROI()
 {
@@ -270,17 +412,17 @@ void WireCell2dToy::uBooNEDataROI::find_ROI_by_others(){
 	      std::vector<Vector> puv(5);
 	      
 	      if(!gds.crossing_point(dis_u[2],dis_w[2],kUwire,kYwire, puv[4])) continue;
-	      gds.crossing_point(dis_u[0],dis_w[0],kUwire,kYwire, puv[0]);
-	      gds.crossing_point(dis_u[0],dis_w[1],kUwire,kYwire, puv[1]);
-	      gds.crossing_point(dis_u[1],dis_w[1],kUwire,kYwire, puv[2]);
-	      gds.crossing_point(dis_u[1],dis_w[0],kUwire,kYwire, puv[3]);
+	      // gds.crossing_point(dis_u[0],dis_w[0],kUwire,kYwire, puv[0]);
+	      // gds.crossing_point(dis_u[0],dis_w[1],kUwire,kYwire, puv[1]);
+	      // gds.crossing_point(dis_u[1],dis_w[1],kUwire,kYwire, puv[2]);
+	      // gds.crossing_point(dis_u[1],dis_w[0],kUwire,kYwire, puv[3]);
 	      
-	      puv[0] = 0.9*(puv[0]-puv[4])+puv[4];
-	      puv[1] = 0.9*(puv[1]-puv[4])+puv[4];	    
-	      puv[2] = 0.9*(puv[2]-puv[4])+puv[4];
-	      puv[3] = 0.9*(puv[3]-puv[4])+puv[4];
+	      // puv[0] = 0.9*(puv[0]-puv[4])+puv[4];
+	      // puv[1] = 0.9*(puv[1]-puv[4])+puv[4];	    
+	      // puv[2] = 0.9*(puv[2]-puv[4])+puv[4];
+	      // puv[3] = 0.9*(puv[3]-puv[4])+puv[4];
 	      
-	      for (int a1=0;a1!=5;a1++){
+	      for (int a1=4;a1!=5;a1++){
 		const GeomWire *n_wire = gds.closest(puv[a1],kVwire);
 		if (n_wire == 0) continue;
 		if (find(wires.begin(),wires.end(),n_wire) == wires.end())
@@ -501,17 +643,17 @@ void WireCell2dToy::uBooNEDataROI::find_ROI_by_others(){
 	      std::vector<Vector> puv(5);
 	      
 	      if(!gds.crossing_point(dis_v[2],dis_w[2],kVwire,kYwire, puv[4])) continue;
-	      gds.crossing_point(dis_v[0],dis_w[0],kVwire,kYwire, puv[0]);
-	      gds.crossing_point(dis_v[0],dis_w[1],kVwire,kYwire, puv[1]);
-	      gds.crossing_point(dis_v[1],dis_w[1],kVwire,kYwire, puv[2]);
-	      gds.crossing_point(dis_v[1],dis_w[0],kVwire,kYwire, puv[3]);
+	      // gds.crossing_point(dis_v[0],dis_w[0],kVwire,kYwire, puv[0]);
+	      // gds.crossing_point(dis_v[0],dis_w[1],kVwire,kYwire, puv[1]);
+	      // gds.crossing_point(dis_v[1],dis_w[1],kVwire,kYwire, puv[2]);
+	      // gds.crossing_point(dis_v[1],dis_w[0],kVwire,kYwire, puv[3]);
 	      
-	      puv[0] = 0.9*(puv[0]-puv[4])+puv[4];
-	      puv[1] = 0.9*(puv[1]-puv[4])+puv[4];	    
-	      puv[2] = 0.9*(puv[2]-puv[4])+puv[4];
-	      puv[3] = 0.9*(puv[3]-puv[4])+puv[4];
+	      // puv[0] = 0.9*(puv[0]-puv[4])+puv[4];
+	      // puv[1] = 0.9*(puv[1]-puv[4])+puv[4];	    
+	      // puv[2] = 0.9*(puv[2]-puv[4])+puv[4];
+	      // puv[3] = 0.9*(puv[3]-puv[4])+puv[4];
 	      
-	      for (int a1=0;a1!=5;a1++){
+	      for (int a1=4;a1!=5;a1++){
 		const GeomWire *n_wire = gds.closest(puv[a1],kUwire);
 		if (n_wire == 0) continue;
 		if (find(wires.begin(),wires.end(),n_wire) == wires.end())
@@ -693,6 +835,7 @@ void WireCell2dToy::uBooNEDataROI::find_ROI_by_raw_itself(int th_factor , int pa
   TH1F *hresult = new TH1F("hresult","hresult",nbins,0,nbins);
   const Frame& frame1 = raw_fds.get();
   size_t ntraces = frame1.traces.size();
+  
 
   for (int i=0;i!=ntraces;i++){
     const Trace& trace = frame1.traces[i];
@@ -703,7 +846,9 @@ void WireCell2dToy::uBooNEDataROI::find_ROI_by_raw_itself(int th_factor , int pa
     int dead_start = -1;
     int dead_end = -1;
 
-    if (chid >= nwire_u + nwire_v) continue;
+
+
+    if (chid >= nwire_u + nwire_v) continue; // no need for the collection plane ... 
 
     if (chid < nwire_u){
       if (umap.find(chid) != umap.end()){
@@ -730,6 +875,9 @@ void WireCell2dToy::uBooNEDataROI::find_ROI_by_raw_itself(int th_factor , int pa
       if (j < dead_start || j > dead_end)
 	hresult->SetBinContent(j+1,trace.charge.at(j));
     }
+    
+    //std::cout << i << " " << ntraces << " " << nticks << std::endl;
+
     float th = cal_rms(hresult,chid);
     float threshold = th_factor * th + 1e-6;
     
@@ -739,7 +887,7 @@ void WireCell2dToy::uBooNEDataROI::find_ROI_by_raw_itself(int th_factor , int pa
 
     // search the things above threshold (positive) add pad after it 
     // search the things below -threshold (negative) add pad before it
-    for (int j=0;j!=hresult->GetNbinsX()-1;j++){
+    for (int j=0;j<hresult->GetNbinsX()-1;j++){
       double content = hresult->GetBinContent(j+1);
       if (content > threshold){
 	roi_begin = j;
@@ -757,6 +905,7 @@ void WireCell2dToy::uBooNEDataROI::find_ROI_by_raw_itself(int th_factor , int pa
 	    temp_roi_end = hresult->GetNbinsX()-1;
 	  temp_rois.push_back(std::make_pair(roi_begin,temp_roi_end));
 	}
+	j = roi_end + 1;
       }else if (content < -threshold){
 	roi_begin = j;
 	roi_end = j;
@@ -773,8 +922,9 @@ void WireCell2dToy::uBooNEDataROI::find_ROI_by_raw_itself(int th_factor , int pa
 	    temp_roi_begin = 0;
 	  temp_rois.push_back(std::make_pair(temp_roi_begin,roi_end));
 	}
+	j = roi_end + 1;
       }
-      j = roi_end + 1;
+      
     }
 
     // load the ROIs from the self in
