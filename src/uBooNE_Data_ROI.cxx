@@ -41,8 +41,10 @@ WireCell2dToy::uBooNEDataROI::uBooNEDataROI(WireCell::FrameDataSource& raw_fds,W
   wplane_rms.resize(nwire_w);
     
 
-  std::cout << "Finding ROI based on itself " << std::endl;
-  find_ROI_by_itself();
+  std::cout << "Finding ROI based on decon itself " << std::endl;
+  find_ROI_by_decon_itself();
+  
+
   std::cout << "Finding ROI based on other two planes " << std::endl;
   //  find_ROI_by_others();
   std::cout << "Merge ROIs " << std::endl;
@@ -685,10 +687,59 @@ void WireCell2dToy::uBooNEDataROI::find_ROI_by_others(){
 }
 
 
+void WireCell2dToy::uBooNEDataROI::find_ROI_by_raw_itself(int th_factor , int pad ){
+  const int nbins = raw_fds.Get_Bins_Per_Frame();
+  TH1F *hresult = new TH1F("hresult","hresult",nbins,0,nbins);
+  const Frame& frame1 = raw_fds.get();
+  size_t ntraces = frame1.traces.size();
 
-void WireCell2dToy::uBooNEDataROI::find_ROI_by_itself(){
+  for (int i=0;i!=ntraces;i++){
+    const Trace& trace = frame1.traces[i];
+    int tbin = trace.tbin;
+    int chid = trace.chid;
+    int nticks = trace.charge.size();
+    hresult->Reset();
+    int dead_start = -1;
+    int dead_end = -1;
+    
+    if (chid < nwire_u){
+      if (umap.find(chid) != umap.end()){
+	
+	dead_start = umap[chid].first;
+	dead_end = umap[chid].second;
+      }
+    }else if (chid < nwire_u + nwire_v){
+      if (vmap.find(chid-nwire_u) != vmap.end()){
+	
+	dead_start = vmap[chid-nwire_u].first;
+	dead_end = vmap[chid-nwire_v].second;
+      }
+    }else{
+      if (wmap.find(chid-nwire_u-nwire_v) != wmap.end()){
+	dead_start = wmap[chid-nwire_u-nwire_v].first;
+	dead_end = wmap[chid-nwire_u-nwire_v].second;
+      }
+    }
+    
+    //if (chid == 7500) std::cout << 7500 << " " << dead_start << " " << dead_end << std::endl;
+
+    for (int j=0;j!=nticks;j++){
+      if (j < dead_start || j > dead_end)
+	hresult->SetBinContent(j+1,trace.charge.at(j));
+    }
+    float th = cal_rms(hresult,chid);
+    float threshold = th_factor * th + 1e-6;
+    
+
+
+  }
+
+  delete hresult;
+}
+
+
+void WireCell2dToy::uBooNEDataROI::find_ROI_by_decon_itself(int th_factor , int pad ){
   
-
   const int nbins = fds.Get_Bins_Per_Frame();
 
   // make a histogram for induction planes and fold it with a low-frequency stuff
@@ -774,8 +825,8 @@ void WireCell2dToy::uBooNEDataROI::find_ROI_by_itself(){
     restore_baseline(hresult);
     //std::cout << chid << " " << cal_rms(hresult,chid) << std::endl;
     float th = cal_rms(hresult,chid);
-    float threshold = 3.6 * th + 1;
-    int pad = 5;
+    float threshold = th_factor * th + 1;
+    //int pad = 5;
 
     if (chid < nwire_u){
       uplane_rms.at(chid) = th;

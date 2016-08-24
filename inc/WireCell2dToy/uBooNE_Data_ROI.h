@@ -78,7 +78,8 @@ namespace WireCell2dToy{
 
     void restore_baseline(TH1F *h1);
     double cal_rms(TH1F *h1, int chid);
-    void find_ROI_by_itself();
+    void find_ROI_by_decon_itself(int th_factor = 5, int pad = 0);
+    void find_ROI_by_raw_itself(int th_factor = 5, int pad = 0);
     void find_ROI_by_others();
     void merge_ROIs();
 
