@@ -42,7 +42,7 @@ WireCell2dToy::uBooNEDataROI::uBooNEDataROI(WireCell::FrameDataSource& raw_fds,W
     
 
   std::cout << "Finding ROI based on decon itself " << std::endl;
-  find_ROI_by_decon_itself(5,0); // 5 sigma, with zero padding
+  find_ROI_by_decon_itself(3.6,0); // 5 sigma, with zero padding
   //std::cout << "Fidning ROI based on raw itself " << std::endl;
   //find_ROI_by_raw_itself(3.6,5); // 3 sigma with 5 (half) padding
   //std::cout << "Finding ROI based on other two planes " << std::endl;
@@ -985,7 +985,7 @@ void WireCell2dToy::uBooNEDataROI::find_ROI_by_decon_itself(int th_factor , int 
   TH1F *hresult_roi = new TH1F("hresult_roi","hresult_roi",nbins,0,nbins);
 
   TF1 *filter_low = new TF1("filter_low","1-exp(-pow(x/0.02,2))");
-  int filter_pad = 60 * 2; //ticks
+  int filter_pad = 60; //ticks
 
   // load the data and do the convolution ... 
   const Frame& frame1 = fds.get();
@@ -1082,22 +1082,22 @@ void WireCell2dToy::uBooNEDataROI::find_ROI_by_decon_itself(int th_factor , int 
     
     std::vector<std::pair<int,int>> temp_rois;
     // now find ROI, above five sigma, and pad with +- six time ticks
-    for (int j=0;j<hresult->GetNbinsX()-1;j++){
-      double content = hresult->GetBinContent(j+1);
+    for (int j=0;j<hresult_filter->GetNbinsX()-1;j++){
+      double content = hresult_filter->GetBinContent(j+1);
       if (content > threshold){
 	roi_begin = j;
 	roi_end = j;
-	for (int k=j+1;k<hresult->GetNbinsX();k++){
-	  if (hresult->GetBinContent(k+1) > threshold){
+	for (int k=j+1;k<hresult_filter->GetNbinsX();k++){
+	  if (hresult_filter->GetBinContent(k+1) > threshold){
 	    roi_end = k;
 	  }else{
 	    break;
 	  }
 	}
-	int temp_roi_begin = roi_begin - pad;
+	int temp_roi_begin = roi_begin - pad ; // filter_pad;
 	if (temp_roi_begin <0 ) temp_roi_begin = 0;
-	int temp_roi_end = roi_end + pad;
-	if (temp_roi_end >hresult->GetNbinsX()-1) temp_roi_end = hresult->GetNbinsX()-1;
+	int temp_roi_end = roi_end + pad; // filter_pad;
+	if (temp_roi_end >hresult_filter->GetNbinsX()-1) temp_roi_end = hresult_filter->GetNbinsX()-1;
 	
 	if (temp_rois.size() == 0){
 	  temp_rois.push_back(std::make_pair(temp_roi_begin,temp_roi_end));
@@ -1111,6 +1111,59 @@ void WireCell2dToy::uBooNEDataROI::find_ROI_by_decon_itself(int th_factor , int 
 	j = roi_end + 1;
       }
     }
+
+    // // fill the new roi histogram
+    // for (int j=0;j!=temp_rois.size();j++){
+    //   int start  = temp_rois.at(j).first;
+    //   int end = temp_rois.at(j).second;
+    //   float content_start = hresult->GetBinContent(start+1);
+    //   float content_end = hresult->GetBinContent(end+1);
+      
+    //   for (int k=start;k<=end;k++){
+    // 	float content = (hresult->GetBinContent(k+1) - content_start)*(k-start)*1.0/(end-start) + content_start;
+    // 	hresult_roi->SetBinContent(k+1,hresult->GetBinContent(k+1) - content);
+    //   }
+    // }
+
+    
+    // roi_begin=-1;
+    // roi_end=-1;
+    // temp_rois.clear();
+    
+    // // now find ROI, above five sigma, and pad with +- six time ticks
+    // for (int j=0;j<hresult_roi->GetNbinsX()-1;j++){
+    //   double content = hresult_roi->GetBinContent(j+1);
+    //   if (content > threshold){
+    // 	roi_begin = j;
+    // 	roi_end = j;
+    // 	for (int k=j+1;k<hresult_roi->GetNbinsX();k++){
+    // 	  if (hresult_roi->GetBinContent(k+1) > threshold){
+    // 	    roi_end = k;
+    // 	  }else{
+    // 	    break;
+    // 	  }
+    // 	}
+    // 	int temp_roi_begin = roi_begin - pad;
+    // 	if (temp_roi_begin <0 ) temp_roi_begin = 0;
+    // 	int temp_roi_end = roi_end + pad;
+    // 	if (temp_roi_end >hresult_roi->GetNbinsX()-1) temp_roi_end = hresult_roi->GetNbinsX()-1;
+	
+    // 	if (temp_rois.size() == 0){
+    // 	  temp_rois.push_back(std::make_pair(temp_roi_begin,temp_roi_end));
+    // 	}else{
+    // 	  if (temp_roi_begin <= temp_rois.back().second){
+    // 	    temp_rois.back().second = temp_roi_end;
+    // 	  }else{
+    // 	    temp_rois.push_back(std::make_pair(temp_roi_begin,temp_roi_end));
+    // 	  }
+    // 	}
+    // 	j = roi_end + 1;
+    //   }
+    // }
+
+    
+
+
     if (chid < nwire_u){
       self_rois_u.at(chid) = temp_rois;
     }else if (chid < nwire_u + nwire_v){
