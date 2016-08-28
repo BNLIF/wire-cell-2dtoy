@@ -42,15 +42,15 @@ WireCell2dToy::uBooNEDataROI::uBooNEDataROI(WireCell::FrameDataSource& raw_fds,W
     
 
   std::cout << "Finding ROI based on decon itself " << std::endl;
-  find_ROI_by_decon_itself(3.6,0); // 5 sigma, with zero padding
-  std::cout << "Fidning ROI based on raw itself " << std::endl;
-  find_ROI_by_raw_itself(3.0,5); // 3 sigma with 5 (half) padding
-  // std::cout << "Finding ROI based on other two planes " << std::endl;
-  // find_ROI_by_others();
+  find_ROI_by_decon_itself(5,0); // 5 sigma, with zero padding
+  //std::cout << "Fidning ROI based on raw itself " << std::endl;
+  //find_ROI_by_raw_itself(3.6,5); // 3 sigma with 5 (half) padding
+  //std::cout << "Finding ROI based on other two planes " << std::endl;
+  //find_ROI_by_others();
   std::cout << "Extend Self ROIs" << std::endl;
   extend_ROI_self(5);
-  // std::cout << "Extend Two-plane ROIs" << std::endl;
-  // extend_ROI_others(5);
+  //std::cout << "Extend Two-plane ROIs" << std::endl;
+  //extend_ROI_others(5);
   // two plane tiling is not working for  this configuration ... 
 
   std::cout << "Merge ROIs " << std::endl;
@@ -833,6 +833,7 @@ void WireCell2dToy::uBooNEDataROI::find_ROI_by_others(){
 void WireCell2dToy::uBooNEDataROI::find_ROI_by_raw_itself(int th_factor , int pad ){
   const int nbins = raw_fds.Get_Bins_Per_Frame();
   TH1F *hresult = new TH1F("hresult","hresult",nbins,0,nbins);
+    
   const Frame& frame1 = raw_fds.get();
   size_t ntraces = frame1.traces.size();
   
@@ -843,6 +844,7 @@ void WireCell2dToy::uBooNEDataROI::find_ROI_by_raw_itself(int th_factor , int pa
     int chid = trace.chid;
     int nticks = trace.charge.size();
     hresult->Reset();
+        
     int dead_start = -1;
     int dead_end = -1;
 
@@ -889,7 +891,7 @@ void WireCell2dToy::uBooNEDataROI::find_ROI_by_raw_itself(int th_factor , int pa
     // search the things below -threshold (negative) add pad before it
     for (int j=0;j<hresult->GetNbinsX()-1;j++){
       double content = hresult->GetBinContent(j+1);
-      if (content > threshold){
+      if (content > threshold && chid >= nwire_u){ // not u plane, look at the positive
 	roi_begin = j;
 	roi_end = j;
 	for (int k=j+1;k<hresult->GetNbinsX();k++){
@@ -906,7 +908,9 @@ void WireCell2dToy::uBooNEDataROI::find_ROI_by_raw_itself(int th_factor , int pa
 	  temp_rois.push_back(std::make_pair(roi_begin,temp_roi_end));
 	}
 	j = roi_end + 1;
-      }else if (content < -threshold){
+      }
+
+      if (content < -threshold){
 	roi_begin = j;
 	roi_end = j;
 	for (int k=j+1;k<hresult->GetNbinsX();k++){
@@ -917,7 +921,13 @@ void WireCell2dToy::uBooNEDataROI::find_ROI_by_raw_itself(int th_factor , int pa
 	  }
 	}
 	if (roi_end - roi_begin >=2){
-	  int temp_roi_begin = roi_begin - pad;
+	  int temp_roi_begin;
+	  if (chid <nwire_u){
+	    temp_roi_begin = roi_begin - pad;
+	  }else{
+	    temp_roi_begin = roi_begin - pad * 2;
+	  }
+
 	  if (temp_roi_begin < 0)
 	    temp_roi_begin = 0;
 	  temp_rois.push_back(std::make_pair(temp_roi_begin,roi_end));
@@ -960,6 +970,7 @@ void WireCell2dToy::uBooNEDataROI::find_ROI_by_raw_itself(int th_factor , int pa
   }
 
   delete hresult;
+  
 }
 
 
@@ -970,7 +981,11 @@ void WireCell2dToy::uBooNEDataROI::find_ROI_by_decon_itself(int th_factor , int 
   // make a histogram for induction planes and fold it with a low-frequency stuff
   // if collection, just fill the histogram ... 
   TH1F *hresult = new TH1F("hresult","hresult",nbins,0,nbins);
+  TH1F *hresult_filter = new TH1F("hresult_filter","hresult_filter",nbins,0,nbins);
+  TH1F *hresult_roi = new TH1F("hresult_roi","hresult_roi",nbins,0,nbins);
+
   TF1 *filter_low = new TF1("filter_low","1-exp(-pow(x/0.02,2))");
+  int filter_pad = 60 * 2; //ticks
 
   // load the data and do the convolution ... 
   const Frame& frame1 = fds.get();
@@ -1039,7 +1054,7 @@ void WireCell2dToy::uBooNEDataROI::find_ROI_by_decon_itself(int th_factor , int 
       
       for (int j=0;j!=nticks;j++){
 	if (j < dead_start || j > dead_end)
-	  hresult->SetBinContent(j+1,fb->GetBinContent(j+1));
+	  hresult_filter->SetBinContent(j+1,fb->GetBinContent(j+1));
       }
 
       delete fb;
@@ -1047,9 +1062,9 @@ void WireCell2dToy::uBooNEDataROI::find_ROI_by_decon_itself(int th_factor , int 
       delete hp;
       delete ifft2;
     }
-    restore_baseline(hresult);
+    restore_baseline(hresult_filter);
     //std::cout << chid << " " << cal_rms(hresult,chid) << std::endl;
-    float th = cal_rms(hresult,chid);
+    float th = cal_rms(hresult_filter,chid);
     float threshold = th_factor * th + 1;
     //int pad = 5;
 
@@ -1061,6 +1076,7 @@ void WireCell2dToy::uBooNEDataROI::find_ROI_by_decon_itself(int th_factor , int 
       wplane_rms.at(chid-nwire_u-nwire_v) = th;
     }
 
+    
     int roi_begin=-1;
     int roi_end=-1;
     
@@ -1107,6 +1123,8 @@ void WireCell2dToy::uBooNEDataROI::find_ROI_by_decon_itself(int th_factor , int 
 
   
   delete hresult;
+  delete hresult_filter;
+  delete hresult_roi;
   delete filter_low;
 }
 
