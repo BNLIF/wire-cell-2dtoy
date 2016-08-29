@@ -41,7 +41,7 @@ int WireCell2dToy::uBooNEDataAfterROI::jump(int frame_number){
   size_t ntraces = frame1.traces.size();
   int nticks = fds.Get_Bins_Per_Frame();
 
-  std::vector<std::pair<int,int>>& uboone_rois = rois.get_self_rois(0);
+  std::vector<std::pair<int,int>>& uboone_rois = rois.get_loose_rois(0);
 
   TH1F *htemp_signal = new TH1F("htemp_signal","htemp_signal",nticks,0,nticks);
   TH1F *htemp_flag = new TH1F("htemp_flag","htemp_flag",nticks,0,nticks);
@@ -62,7 +62,7 @@ int WireCell2dToy::uBooNEDataAfterROI::jump(int frame_number){
     }
     
     //set ROIs
-    uboone_rois = rois.get_self_rois(chid);
+    uboone_rois = rois.get_loose_rois(chid);
    
 
     // std::cout << htemp_signal->GetBinContent(100) << " " << uboone_rois.size() << std::endl;

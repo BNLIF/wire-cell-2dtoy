@@ -6,6 +6,76 @@
 
 using namespace WireCell;
 
+Double_t WireCell2dToy::uBooNEDataROI::local_ave(TH1F *h1, Int_t bin, Int_t width){
+  Double_t sum1 = 0;
+  Double_t sum2 = 0;
+  
+  for (Int_t i=-width;i<width+1;i++){
+    Int_t current_bin = bin + i;
+
+    while (current_bin <0)
+      current_bin += h1->GetNbinsX();
+    while (current_bin >= h1->GetNbinsX())
+      current_bin -= h1->GetNbinsX();
+    
+    sum1 += h1->GetBinContent(current_bin+1);
+    sum2 ++;
+  }
+
+  if (sum2>0){
+    return sum1/sum2;
+  }else{
+    return 0;
+  }
+}
+
+
+Int_t WireCell2dToy::uBooNEDataROI::find_ROI_end(TH1F *h1, Int_t bin, Double_t th){
+  Int_t end = bin;
+  Double_t content = h1->GetBinContent(end+1);
+  while(content>th){
+    end ++;
+    if (end >=h1->GetNbinsX()){
+      content = h1->GetBinContent(end - h1->GetNbinsX()+1);
+    }else{
+      content = h1->GetBinContent(end+1);
+    }
+    if (end == h1->GetNbinsX()) break;
+  }
+
+  while(local_ave(h1,end+1,1) < local_ave(h1,end,1)){
+    end++;
+    if (end == h1->GetNbinsX()) break;
+  } 
+  return end;
+}
+
+Int_t WireCell2dToy::uBooNEDataROI::find_ROI_begin(TH1F *h1, Int_t bin, Double_t th){
+  // find the first one before bin and is below threshold ... 
+  Int_t begin = bin;
+  Double_t content = h1->GetBinContent(begin+1);
+  while(content > th){
+    begin --;
+    if (begin <0){
+      content = h1->GetBinContent(begin+h1->GetNbinsX()+1);
+    }else{
+      content = h1->GetBinContent(begin+1);
+    }
+    if (begin == 0) break;
+  }
+  
+  // calculate the local average
+  // keep going and find the minimum
+  while( local_ave(h1,begin-1,1) < local_ave(h1,begin,1)){
+    begin --;
+    if (begin == 0) break;
+  }
+  
+  return begin;
+}
+
+
+
 WireCell2dToy::uBooNEDataROI::uBooNEDataROI(WireCell::FrameDataSource& raw_fds,WireCell::FrameDataSource& fds, const WireCell::GeomDataSource& gds, WireCell::ChirpMap& umap, WireCell::ChirpMap& vmap, WireCell::ChirpMap& wmap)
   : fds(fds)
   , raw_fds(raw_fds)
@@ -27,6 +97,11 @@ WireCell2dToy::uBooNEDataROI::uBooNEDataROI(WireCell::FrameDataSource& raw_fds,W
   self_rois_u.resize(nwire_u);
   self_rois_v.resize(nwire_v);
   self_rois_w.resize(nwire_w);
+
+  loose_rois_u.resize(nwire_u);
+  loose_rois_v.resize(nwire_v);
+  loose_rois_w.resize(nwire_w);
+
 
   // others_rois_u.resize(nwire_u);
   // others_rois_v.resize(nwire_v);
@@ -50,6 +125,8 @@ WireCell2dToy::uBooNEDataROI::uBooNEDataROI(WireCell::FrameDataSource& raw_fds,W
   std::cout << "Extend Self ROIs" << std::endl;
   extend_ROI_self(5);
 
+  std::cout << "Finding Loose ROI" << std::endl;
+  find_ROI_loose();
   
 
   //std::cout << "Fidning ROI based on raw itself " << std::endl;
@@ -118,6 +195,259 @@ WireCell2dToy::uBooNEDataROI::uBooNEDataROI(WireCell::FrameDataSource& raw_fds,W
 
 
 // }
+
+
+void WireCell2dToy::uBooNEDataROI::find_ROI_loose(int rebin){
+  
+  // some example thresholds
+  Double_t factor = 3.5; // regular threshold
+  Double_t max_th = 10000; // maximum threshold
+  Double_t factor1 = 0.7; //special threshold
+  Int_t short_length = 3; // short length
+  Double_t fixed_threshold = 4000;
+
+
+
+  // deconvolute with low-frequency filter 
+  const int nbins = fds.Get_Bins_Per_Frame();
+
+  // make a histogram for induction planes and fold it with a low-frequency stuff
+  // if collection, just fill the histogram ... 
+  TH1F *hresult = new TH1F("hresult","hresult",nbins,0,nbins);
+  TH1F *hresult_filter = new TH1F("hresult_filter","hresult_filter",int(nbins/rebin),0,int(nbins/rebin));
+  TF1 *filter_low = new TF1("filter_low","1-exp(-pow(x/0.0025,2))");
+  
+  // load the data and do the convolution ... 
+  const Frame& frame1 = fds.get();
+  size_t ntraces = frame1.traces.size();
+  double value_re[nbins];
+  double value_im[nbins];
+  
+  for (int i=0;i!=ntraces;i++){
+    const Trace& trace = frame1.traces[i];
+    int tbin = trace.tbin;
+    int chid = trace.chid;
+    int nticks = trace.charge.size();
+    hresult->Reset();
+    hresult_filter->Reset();
+    
+    int dead_start = -1;
+    int dead_end = -1;
+    
+    if (chid < nwire_u){
+      if (umap.find(chid) != umap.end()){
+	dead_start = umap[chid].first;
+	dead_end = umap[chid].second;
+      }
+    }else if (chid < nwire_u + nwire_v){
+      if (vmap.find(chid-nwire_u) != vmap.end()){
+	
+	dead_start = vmap[chid-nwire_u].first;
+	dead_end = vmap[chid-nwire_v].second;
+      }
+    }else{
+      if (wmap.find(chid-nwire_u-nwire_v) != wmap.end()){
+	dead_start = wmap[chid-nwire_u-nwire_v].first;
+	dead_end = wmap[chid-nwire_u-nwire_v].second;
+      }
+    }
+    
+    // if (chid == 7500) std::cout << 7500 << " " << dead_start << " " << dead_end << std::endl;
+
+    for (int j=0;j!=nticks;j++){
+      if (j < dead_start || j > dead_end)
+	hresult->SetBinContent(j+1,trace.charge.at(j));
+    }
+    
+    if (chid < nwire_u + nwire_v){
+      // induction planes fold with low frequench stuff
+      TH1 *hm = hresult->FFT(0,"MAG");
+      TH1 *hp = hresult->FFT(0,"PH");
+      TVirtualFFT *ifft2 = TVirtualFFT::FFT(1,&nticks,"C2R M K");
+
+      for (int j=0;j!=nticks;j++){
+	Double_t freq;
+	if (j < nticks/2.){
+	  freq = j/(1.*nticks)*2.;
+	}else{
+	  freq = (nticks - j)/(1.*nticks)*2.;
+	}
+	
+	value_re[j] = hm->GetBinContent(j+1) * cos(hp->GetBinContent(j+1)) / nticks * filter_low->Eval(freq);
+	value_im[j] = hm->GetBinContent(j+1) * sin(hp->GetBinContent(j+1)) / nticks * filter_low->Eval(freq);
+      }
+      ifft2->SetPointsComplex(value_re,value_im);
+      ifft2->Transform();
+      TH1 *fb = 0;
+      fb = TH1::TransformHisto(ifft2,fb,"Re");
+      
+      for (int j=0;j!=nticks;j++){
+	if (j<dead_start || j > dead_end)
+	  hresult->SetBinContent(j+1,fb->GetBinContent(j+1));
+      }
+      restore_baseline(hresult);
+      
+      for (int j=0;j!=int(nticks/rebin);j++){
+	int sum = 0;
+	for (int k=0;k!=rebin;k++){
+	  int binno = j*rebin+k;
+	  if (binno < dead_start || binno > dead_end)
+	    sum += hresult->GetBinContent(binno+1);
+	}
+	hresult_filter->SetBinContent(j+1,sum);
+      }
+
+      delete fb;
+      delete hm;
+      delete hp;
+      delete ifft2;
+    }
+    
+    
+    float th = cal_rms(hresult_filter,chid) * factor;
+    if (th > max_th) th = max_th;
+    
+    std::vector<std::pair <int,int> > ROIs_1;
+    std::vector<Int_t> max_bins_1;
+    int ntime = hresult_filter->GetNbinsX();
+    
+    for (Int_t j=1; j<ntime-1;j++){
+      Double_t content = hresult_filter->GetBinContent(j+1);
+      Double_t prev_content = hresult_filter->GetBinContent(j);
+      Double_t next_content = hresult_filter->GetBinContent(j+2);
+      Int_t flag_ROI = 0;
+      Int_t begin;
+      Int_t end;
+      Int_t max_bin;
+      if (content > th){
+	begin = find_ROI_begin(hresult_filter,j, th*factor1) ;
+	end = find_ROI_end(hresult_filter,j, th*factor1) ;
+	max_bin = begin;
+	for (Int_t k=begin;k<=end;k++){
+	  if (hresult_filter->GetBinContent(k+1) > hresult_filter->GetBinContent(max_bin+1)){
+	    max_bin = k;
+	  }
+	}
+	flag_ROI = 1;
+      }else{
+	if (content > prev_content && content > next_content){
+	  begin = find_ROI_begin(hresult_filter,j, prev_content);
+	  end = find_ROI_end(hresult_filter,j, next_content );
+	  max_bin = begin;
+	  for (Int_t k=begin;k<=end;k++){
+	    if (hresult_filter->GetBinContent(k+1) > hresult_filter->GetBinContent(max_bin+1)){
+	      max_bin = k;
+	    }
+	  }
+	  if (hresult_filter->GetBinContent(max_bin+1) - hresult_filter->GetBinContent(begin+1) +
+	      hresult_filter->GetBinContent(max_bin+1) - hresult_filter->GetBinContent(end+1) > th*2){
+	    flag_ROI = 1;
+	  }
+	  Int_t temp_begin = max_bin-short_length;
+	  if (temp_begin < begin) temp_begin = begin;
+	  Int_t temp_end = max_bin + short_length;
+	  if (temp_end > end) temp_end = end;
+	  if ((hresult_filter->GetBinContent(max_bin+1) - hresult_filter->GetBinContent(temp_begin+1) > th *factor1 &&
+	       hresult_filter->GetBinContent(max_bin+1) - hresult_filter->GetBinContent(temp_end+1) > th*factor1) ){
+	    flag_ROI = 1;
+	  }
+	  
+	}
+      }
+
+       if (flag_ROI == 1){
+      	if (ROIs_1.size()>0){
+      	  if (begin <= ROIs_1.back().second){
+      	    ROIs_1.back().second = end;
+      	    if (hresult_filter->GetBinContent(max_bin+1) > hresult_filter->GetBinContent(max_bins_1.back()+1))
+      	      max_bins_1.back() = max_bin;
+      	  }else{
+      	    ROIs_1.push_back(std::make_pair(begin,end));
+      	    max_bins_1.push_back(max_bin);
+      	  }
+      	}else{
+      	  ROIs_1.push_back(std::make_pair(begin,end));
+      	  max_bins_1.push_back(max_bin);
+      	}
+	
+      	if (end <hresult_filter->GetNbinsX()){
+      	  j = end;
+      	}else{
+      	  j=hresult_filter->GetNbinsX();
+      	}
+      }
+    }
+    
+    
+    if (ROIs_1.size()==1){
+    }else if (ROIs_1.size()>1){
+      Int_t flag_repeat = 0;
+      //  cout << "Xin1: " << ROIs_1.size() << endl;;
+      while(flag_repeat){
+    	flag_repeat = 1;
+    	for (Int_t k=0;k<ROIs_1.size()-1;k++){
+    	  Int_t begin = ROIs_1.at(k).first;
+    	  Int_t end = ROIs_1.at(k+1).second;
+	  
+    	  Double_t begin_content = hresult_filter->GetBinContent(begin+1);
+    	  Double_t end_content = hresult_filter->GetBinContent(end+1);
+	  
+    	  Int_t begin_1 = ROIs_1.at(k).second;
+    	  Int_t end_1 = ROIs_1.at(k+1).first;	
+	  
+    	  Int_t flag_merge = 1;
+    	  //Double_t sum1 = 0, sum2 = 0;
+    	  for (Int_t j=begin_1; j<=end_1;j++){
+    	    Double_t current_content = hresult_filter->GetBinContent(j+1);
+    	    Double_t content = current_content - ((end_content - begin_content)*(j*1.-begin)/(end-begin*1.) + begin_content);
+	    
+    	    if (content < th*factor1){
+    	      flag_merge = 0;
+    	      break;
+    	    }
+    	    // sum1 += content;
+    	    // sum2 ++;
+    	    // cout << j << " " << content << endl;
+    	  }
+    	  // if (sum2 >0){
+    	  //   if (sum1/sum2 < th*factor1) flag_merge = 0;
+    	  // }
+	  
+    	  if (flag_merge == 1){
+    	    ROIs_1.at(k).second = ROIs_1.at(k+1).second;
+    	    ROIs_1.erase(ROIs_1.begin()+k+1);
+    	    flag_repeat = 1;
+    	    break;
+    	  }
+    	}
+    	//	cout << "Xin2: " << ROIs_1.size() << endl;
+
+      }
+    }
+    
+    // scale back ... 
+    for (int j = 0; j!=ROIs_1.size();j++){
+      int begin = ROIs_1.at(j).first * rebin;
+      int end = ROIs_1.at(j).second *rebin + (rebin-1);
+      ROIs_1.at(j).first = begin;
+      ROIs_1.at(j).second = end;
+    }
+
+
+    if (chid < nwire_u){
+      loose_rois_u.at(chid) = ROIs_1;
+    }else if (chid < nwire_u + nwire_v){
+      loose_rois_v.at(chid-nwire_u) = ROIs_1;
+    }else{
+      loose_rois_w.at(chid-nwire_u-nwire_v) = ROIs_1;
+    }
+  }
+
+  
+  delete hresult;
+  delete hresult_filter;
+  delete filter_low;
+}
 
 
 void WireCell2dToy::uBooNEDataROI::extend_ROI_self(int pad){
