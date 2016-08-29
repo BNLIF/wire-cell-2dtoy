@@ -17,6 +17,15 @@ WireCell2dToy::uBooNEDataAfterROI::uBooNEDataAfterROI(WireCell::FrameDataSource&
   nwire_v = wires_v.size();
   nwire_w = wires_w.size();
 
+  rois_u_tight.resize(nwire_u);
+  rois_v_tight.resize(nwire_v);
+  rois_w_tight.resize(nwire_w);
+
+  rois_u_loose.resize(nwire_u);
+  rois_v_loose.resize(nwire_v);
+  rois_w_loose.resize(nwire_w);
+  
+
   bins_per_frame = int(fds.Get_Bins_Per_Frame()/rebin);
 }
 
@@ -41,10 +50,54 @@ int WireCell2dToy::uBooNEDataAfterROI::jump(int frame_number){
   size_t ntraces = frame1.traces.size();
   int nticks = fds.Get_Bins_Per_Frame();
 
-  std::vector<std::pair<int,int>>& uboone_rois = rois.get_loose_rois(0);
-
   TH1F *htemp_signal = new TH1F("htemp_signal","htemp_signal",nticks,0,nticks);
   TH1F *htemp_flag = new TH1F("htemp_flag","htemp_flag",nticks,0,nticks);
+  
+  for (size_t ind =0; ind<ntraces; ++ind) {
+    htemp_signal->Reset();
+    const Trace& trace = frame1.traces[ind];
+    int tbin = trace.tbin;
+    int chid = trace.chid;
+    int nbins = trace.charge.size();
+
+    //copy signal
+    for (int i = tbin;i!=tbin+nbins;i++){
+      int tt = i+1;
+      htemp_signal->SetBinContent(tt,trace.charge.at(i));
+    }
+    
+    std::vector<std::pair<int,int>>& uboone_rois = rois.get_self_rois(chid);
+    for (int i=0;i!=uboone_rois.size();i++){
+      SignalROI *tight_roi = new SignalROI(chid,uboone_rois.at(i).first,uboone_rois.at(i).second, htemp_signal);
+      if (chid < nwire_u){
+	rois_u_tight[chid].push_back(tight_roi);
+      }else if (chid < nwire_u + nwire_v){
+	rois_v_tight[chid-nwire_u].push_back(tight_roi);
+      }else{
+	rois_w_tight[chid-nwire_u-nwire_v].push_back(tight_roi);
+      }
+    }
+    
+    uboone_rois = rois.get_loose_rois(chid);
+    for (int i = 0; i!=uboone_rois.size();i++){
+      SignalROI *loose_roi = new SignalROI(chid,uboone_rois.at(i).first,uboone_rois.at(i).second,htemp_signal);
+      if (chid < nwire_u){
+	rois_u_loose[chid].push_back(loose_roi);
+      }else if (chid < nwire_u + nwire_v){
+	rois_v_loose[chid-nwire_u].push_back(loose_roi);
+      }else{
+	rois_w_loose[chid-nwire_u-nwire_v].push_back(loose_roi);
+      }
+    }
+
+    
+  }
+
+
+
+  std::vector<std::pair<int,int>>& uboone_rois = rois.get_loose_rois(0);
+
+  
   
   for (size_t ind=0; ind<ntraces; ++ind) {
     htemp_signal->Reset();
