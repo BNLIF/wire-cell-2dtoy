@@ -71,10 +71,79 @@ int WireCell2dToy::uBooNEDataAfterROI::jump(int frame_number){
       SignalROI *tight_roi = new SignalROI(chid,uboone_rois.at(i).first,uboone_rois.at(i).second, htemp_signal);
       if (chid < nwire_u){
 	rois_u_tight[chid].push_back(tight_roi);
+	if (chid>0){
+	  //form connectivity map
+	  for (int j=0;j!=rois_u_tight[chid-1].size();j++){
+	    SignalROI *prev_roi = rois_u_tight[chid-1].at(j);
+	    if (tight_roi->overlap(prev_roi)){
+	      if (front_rois.find(prev_roi) == front_rois.end()){
+		SignalROISelection temp_rois;
+		temp_rois.push_back(tight_roi);
+		front_rois[prev_roi] = temp_rois;
+	      }else{
+		front_rois[prev_roi].push_back(tight_roi);
+	      }
+	      if (back_rois.find(tight_roi) == back_rois.end()){
+		SignalROISelection temp_rois;
+		temp_rois.push_back(prev_roi);
+		back_rois[tight_roi] = temp_rois;
+	      }else{
+		back_rois[tight_roi].push_back(prev_roi);
+	      }
+	    }
+	  }
+	}
       }else if (chid < nwire_u + nwire_v){
 	rois_v_tight[chid-nwire_u].push_back(tight_roi);
+
+	if (chid>nwire_u){
+	  //form connectivity map
+	  for (int j=0;j!=rois_v_tight[chid-nwire_u-1].size();j++){
+	    SignalROI *prev_roi = rois_v_tight[chid-nwire_u-1].at(j);
+	    if (tight_roi->overlap(prev_roi)){
+	      if (front_rois.find(prev_roi) == front_rois.end()){
+		SignalROISelection temp_rois;
+		temp_rois.push_back(tight_roi);
+		front_rois[prev_roi] = temp_rois;
+	      }else{
+		front_rois[prev_roi].push_back(tight_roi);
+	      }
+	      if (back_rois.find(tight_roi) == back_rois.end()){
+		SignalROISelection temp_rois;
+		temp_rois.push_back(prev_roi);
+		back_rois[tight_roi] = temp_rois;
+	      }else{
+		back_rois[tight_roi].push_back(prev_roi);
+	      }
+	    }
+	  }
+	}
+
       }else{
 	rois_w_tight[chid-nwire_u-nwire_v].push_back(tight_roi);
+
+	if (chid>nwire_u+nwire_v){
+	  //form connectivity map
+	  for (int j=0;j!=rois_w_tight[chid-nwire_u-nwire_v-1].size();j++){
+	    SignalROI *prev_roi = rois_w_tight[chid-nwire_u-nwire_v-1].at(j);
+	    if (tight_roi->overlap(prev_roi)){
+	      if (front_rois.find(prev_roi) == front_rois.end()){
+		SignalROISelection temp_rois;
+		temp_rois.push_back(tight_roi);
+		front_rois[prev_roi] = temp_rois;
+	      }else{
+		front_rois[prev_roi].push_back(tight_roi);
+	      }
+	      if (back_rois.find(tight_roi) == back_rois.end()){
+		SignalROISelection temp_rois;
+		temp_rois.push_back(prev_roi);
+		back_rois[tight_roi] = temp_rois;
+	      }else{
+		back_rois[tight_roi].push_back(prev_roi);
+	      }
+	    }
+	  }
+	}
       }
     }
     
@@ -83,10 +152,82 @@ int WireCell2dToy::uBooNEDataAfterROI::jump(int frame_number){
       SignalROI *loose_roi = new SignalROI(chid,uboone_rois.at(i).first,uboone_rois.at(i).second,htemp_signal);
       if (chid < nwire_u){
 	rois_u_loose[chid].push_back(loose_roi);
+
+	if (chid>0){
+	  //form connectivity map
+	  for (int j=0;j!=rois_u_loose[chid-1].size();j++){
+	    SignalROI *prev_roi = rois_u_loose[chid-1].at(j);
+	    if (loose_roi->overlap(prev_roi)){
+	      if (front_rois.find(prev_roi) == front_rois.end()){
+		SignalROISelection temp_rois;
+		temp_rois.push_back(loose_roi);
+		front_rois[prev_roi] = temp_rois;
+	      }else{
+		front_rois[prev_roi].push_back(loose_roi);
+	      }
+	      if (back_rois.find(loose_roi) == back_rois.end()){
+		SignalROISelection temp_rois;
+		temp_rois.push_back(prev_roi);
+		back_rois[loose_roi] = temp_rois;
+	      }else{
+		back_rois[loose_roi].push_back(prev_roi);
+	      }
+	    }
+	  }
+	}
+
       }else if (chid < nwire_u + nwire_v){
 	rois_v_loose[chid-nwire_u].push_back(loose_roi);
+
+	if (chid>nwire_u){
+	  //form connectivity map
+	  for (int j=0;j!=rois_v_loose[chid-nwire_u-1].size();j++){
+	    SignalROI *prev_roi = rois_v_loose[chid-nwire_u-1].at(j);
+	    if (loose_roi->overlap(prev_roi)){
+	      if (front_rois.find(prev_roi) == front_rois.end()){
+		SignalROISelection temp_rois;
+		temp_rois.push_back(loose_roi);
+		front_rois[prev_roi] = temp_rois;
+	      }else{
+		front_rois[prev_roi].push_back(loose_roi);
+	      }
+	      if (back_rois.find(loose_roi) == back_rois.end()){
+		SignalROISelection temp_rois;
+		temp_rois.push_back(prev_roi);
+		back_rois[loose_roi] = temp_rois;
+	      }else{
+		back_rois[loose_roi].push_back(prev_roi);
+	      }
+	    }
+	  }
+	}
+
       }else{
 	rois_w_loose[chid-nwire_u-nwire_v].push_back(loose_roi);
+
+	if (chid>nwire_u+nwire_v){
+	  //form connectivity map
+	  for (int j=0;j!=rois_w_loose[chid-nwire_u-nwire_v-1].size();j++){
+	    SignalROI *prev_roi = rois_w_loose[chid-nwire_u-nwire_v-1].at(j);
+	    if (loose_roi->overlap(prev_roi)){
+	      if (front_rois.find(prev_roi) == front_rois.end()){
+		SignalROISelection temp_rois;
+		temp_rois.push_back(loose_roi);
+		front_rois[prev_roi] = temp_rois;
+	      }else{
+		front_rois[prev_roi].push_back(loose_roi);
+	      }
+	      if (back_rois.find(loose_roi) == back_rois.end()){
+		SignalROISelection temp_rois;
+		temp_rois.push_back(prev_roi);
+		back_rois[loose_roi] = temp_rois;
+	      }else{
+		back_rois[loose_roi].push_back(prev_roi);
+	      }
+	    }
+	  }
+	}
+
       }
     }
 
