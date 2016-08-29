@@ -4,6 +4,7 @@
 #include "WireCellNav/FrameDataSource.h"
 #include "WireCellNav/GeomDataSource.h"
 #include "WireCell2dToy/uBooNE_Data_ROI.h"
+#include "WireCellData/SignalROI.h"
 #include "TH1F.h"
 
 namespace WireCell2dToy{
@@ -23,6 +24,18 @@ namespace WireCell2dToy{
     int nwire_v;
     int nwire_w;
     
+    WireCell::SignalROIChSelection rois_u_tight;
+    WireCell::SignalROIChSelection rois_v_tight;
+    WireCell::SignalROIChSelection rois_w_tight;
+    
+    WireCell::SignalROIChSelection rois_u_loose;
+    WireCell::SignalROIChSelection rois_v_loose;
+    WireCell::SignalROIChSelection rois_w_loose;
+    
+    WireCell::SignalROIMap front_rois;
+    WireCell::SignalROIMap back_rois;
+    WireCell::SignalROIMap contained_rois;
+
     int rebin; 
   };
 }
