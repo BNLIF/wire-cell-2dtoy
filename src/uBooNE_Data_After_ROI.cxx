@@ -64,8 +64,51 @@ int WireCell2dToy::uBooNEDataAfterROI::size() const{
   return 1;
 }
 
+void WireCell2dToy::uBooNEDataAfterROI::Clear(){
+  for (int i=0;i!=nwire_u;i++){
+    for (auto it = rois_u_tight.at(i).begin(); it!=rois_u_tight.at(i).end();it++){
+      delete *it;
+    }
+    rois_u_tight.clear();
+    for (auto it = rois_u_loose.at(i).begin(); it!=rois_u_loose.at(i).end();it++){
+      delete *it;
+    }
+    rois_u_loose.clear();
+  }
+
+  for (int i=0;i!=nwire_v;i++){
+    for (auto it = rois_v_tight.at(i).begin(); it!=rois_v_tight.at(i).end();it++){
+      delete *it;
+    }
+    rois_v_tight.clear();
+    for (auto it = rois_v_loose.at(i).begin(); it!=rois_v_loose.at(i).end();it++){
+      delete *it;
+    }
+    rois_v_loose.clear();
+  }
+
+  for (int i=0;i!=nwire_w;i++){
+    for (auto it = rois_w_tight.at(i).begin(); it!=rois_w_tight.at(i).end();it++){
+      delete *it;
+    }
+    rois_w_tight.clear();
+    for (auto it = rois_w_loose.at(i).begin(); it!=rois_w_loose.at(i).end();it++){
+      delete *it;
+    }
+    rois_w_loose.clear();
+  }
+   
+   front_rois.clear();
+   back_rois.clear();
+   contained_rois.clear();
+   
+
+
+}
+
 
 int WireCell2dToy::uBooNEDataAfterROI::jump(int frame_number){
+  Clear();
   if (frame.index == frame_number) {
     return frame_number;
   }

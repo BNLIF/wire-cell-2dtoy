@@ -16,6 +16,8 @@ namespace WireCell2dToy{
 
     virtual int jump(int frame_number);
     virtual int size() const;
+
+    void Clear();
   private:
     WireCell::FrameDataSource& fds;
     const WireCell::GeomDataSource& gds;
