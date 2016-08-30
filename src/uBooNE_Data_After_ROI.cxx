@@ -26,28 +26,28 @@ WireCell2dToy::uBooNEDataAfterROI::uBooNEDataAfterROI(WireCell::FrameDataSource&
   // rois_w_loose.resize(nwire_w);
   
   for (Int_t i=0;i!=nwire_u;i++){
-    SignalROISelection temp_rois;
+    SignalROIList temp_rois;
     rois_u_tight.push_back(temp_rois);
   }
   for (Int_t i=0;i!=nwire_v;i++){
-    SignalROISelection temp_rois;
+    SignalROIList temp_rois;
     rois_v_tight.push_back(temp_rois);
   }
   for (Int_t i=0;i!=nwire_w;i++){
-    SignalROISelection temp_rois;
+    SignalROIList temp_rois;
     rois_w_tight.push_back(temp_rois);
   }
   
   for (Int_t i=0;i!=nwire_u;i++){
-    SignalROISelection temp_rois;
+    SignalROIList temp_rois;
     rois_u_loose.push_back(temp_rois);
   }
   for (Int_t i=0;i!=nwire_v;i++){
-    SignalROISelection temp_rois;
+    SignalROIList temp_rois;
     rois_v_loose.push_back(temp_rois);
   }
   for (Int_t i=0;i!=nwire_w;i++){
-    SignalROISelection temp_rois;
+    SignalROIList temp_rois;
     rois_w_loose.push_back(temp_rois);
   }
   
@@ -99,11 +99,11 @@ int WireCell2dToy::uBooNEDataAfterROI::jump(int frame_number){
       // std::cout << i << std::endl;
 
       if (chid < nwire_u){
-       	rois_u_tight[chid].push_back(tight_roi);
-      	if (chid>0){
-      	  //form connectivity map
-      	  for (int j=0;j!=rois_u_tight[chid-1].size();j++){
-      	    SignalROI *prev_roi = rois_u_tight[chid-1].at(j);
+	rois_u_tight[chid].push_back(tight_roi);
+       	if (chid>0){
+       	  //form connectivity map
+       	  for (auto it = rois_u_tight[chid-1].begin();it!=rois_u_tight[chid-1].end();it++){
+       	    SignalROI *prev_roi = *it;
       	    if (tight_roi->overlap(prev_roi)){
       	      if (front_rois.find(prev_roi) == front_rois.end()){
       		SignalROISelection temp_rois;
@@ -120,17 +120,41 @@ int WireCell2dToy::uBooNEDataAfterROI::jump(int frame_number){
       		back_rois[tight_roi].push_back(prev_roi);
       	      }
       	    }
-      	  }
-      	}
+       	  }
+     	}
 
+	if (chid < nwire_u-1){
+	  // add the code for the next one to be completed
+	  for (auto it = rois_u_tight[chid+1].begin();it!=rois_u_tight[chid+1].end();it++){
+	    SignalROI *next_roi = *it;
+	    if (tight_roi->overlap(next_roi)){
+	      if (back_rois.find(next_roi) == back_rois.end()){
+		SignalROISelection temp_rois;
+		temp_rois.push_back(tight_roi);
+		back_rois[next_roi] = temp_rois;
+	      }else{
+		back_rois[next_roi].push_back(tight_roi);
+	      }
+	      
+	      if (front_rois.find(tight_roi) == front_rois.end()){
+		SignalROISelection temp_rois;
+		temp_rois.push_back(next_roi);
+		front_rois[tight_roi] = temp_rois;
+	      }else{
+	      front_rois[tight_roi].push_back(next_roi);
+	      }
+	    }
+	  }
+	}
+	
 	
       }else if (chid < nwire_u + nwire_v){
        	rois_v_tight[chid-nwire_u].push_back(tight_roi);
 
       	if (chid>nwire_u){
       	  //form connectivity map
-      	  for (int j=0;j!=rois_v_tight[chid-nwire_u-1].size();j++){
-      	    SignalROI *prev_roi = rois_v_tight[chid-nwire_u-1].at(j);
+      	  for (auto it = rois_v_tight[chid - nwire_u-1].begin();it!=rois_v_tight[chid-nwire_u-1].end();it++){
+      	    SignalROI *prev_roi = *it;
       	    if (tight_roi->overlap(prev_roi)){
       	      if (front_rois.find(prev_roi) == front_rois.end()){
       		SignalROISelection temp_rois;
@@ -149,14 +173,39 @@ int WireCell2dToy::uBooNEDataAfterROI::jump(int frame_number){
       	    }
       	  }
       	}
+
+	if (chid<nwire_u+nwire_v-1){
+      	  //form connectivity map
+      	  for (auto it = rois_v_tight[chid - nwire_u+1].begin();it!=rois_v_tight[chid-nwire_u+1].end();it++){
+      	    SignalROI *next_roi = *it;
+      	    if (tight_roi->overlap(next_roi)){
+      	      if (back_rois.find(next_roi) == back_rois.end()){
+      		SignalROISelection temp_rois;
+      		temp_rois.push_back(tight_roi);
+      		back_rois[next_roi] = temp_rois;
+      	      }else{
+      		back_rois[next_roi].push_back(tight_roi);
+      	      }
+      	      if (front_rois.find(tight_roi) == front_rois.end()){
+      		SignalROISelection temp_rois;
+      		temp_rois.push_back(next_roi);
+      		front_rois[tight_roi] = temp_rois;
+      	      }else{
+      		front_rois[tight_roi].push_back(next_roi);
+      	      }
+      	    }
+      	  }
+      	}
+
+	
 
       }else{
        	rois_w_tight[chid-nwire_u-nwire_v].push_back(tight_roi);
 
       	if (chid>nwire_u+nwire_v){
       	  //form connectivity map
-      	  for (int j=0;j!=rois_w_tight[chid-nwire_u-nwire_v-1].size();j++){
-      	    SignalROI *prev_roi = rois_w_tight[chid-nwire_u-nwire_v-1].at(j);
+      	  for (auto it = rois_w_tight[chid-nwire_u-nwire_v-1].begin();it!=rois_w_tight[chid-nwire_u-nwire_v-1].end();it++){
+      	    SignalROI *prev_roi = *it;
       	    if (tight_roi->overlap(prev_roi)){
       	      if (front_rois.find(prev_roi) == front_rois.end()){
       		SignalROISelection temp_rois;
@@ -175,6 +224,31 @@ int WireCell2dToy::uBooNEDataAfterROI::jump(int frame_number){
       	    }
       	  }
       	}
+
+
+	if (chid<nwire_u+nwire_v+nwire_w-1){
+      	  //form connectivity map
+      	  for (auto it = rois_w_tight[chid-nwire_u-nwire_v+1].begin();it!=rois_w_tight[chid-nwire_u-nwire_v+1].end();it++){
+      	    SignalROI *next_roi = *it;
+      	    if (tight_roi->overlap(next_roi)){
+      	      if (back_rois.find(next_roi) == back_rois.end()){
+      		SignalROISelection temp_rois;
+      		temp_rois.push_back(tight_roi);
+      		back_rois[next_roi] = temp_rois;
+      	      }else{
+      		back_rois[next_roi].push_back(tight_roi);
+      	      }
+      	      if (front_rois.find(tight_roi) == front_rois.end()){
+      		SignalROISelection temp_rois;
+      		temp_rois.push_back(next_roi);
+      		front_rois[tight_roi] = temp_rois;
+      	      }else{
+      		front_rois[tight_roi].push_back(next_roi);
+      	      }
+      	    }
+      	  }
+      	}
+
 
       }
     }
@@ -188,8 +262,8 @@ int WireCell2dToy::uBooNEDataAfterROI::jump(int frame_number){
 
     	if (chid>0){
     	  //form connectivity map
-    	  for (int j=0;j!=rois_u_loose[chid-1].size();j++){
-    	    SignalROI *prev_roi = rois_u_loose[chid-1].at(j);
+    	  for (auto it=rois_u_loose[chid-1].begin();it!=rois_u_loose[chid-1].end();it++){
+    	    SignalROI *prev_roi = *it;
     	    if (loose_roi->overlap(prev_roi)){
     	      if (front_rois.find(prev_roi) == front_rois.end()){
     		SignalROISelection temp_rois;
@@ -209,9 +283,33 @@ int WireCell2dToy::uBooNEDataAfterROI::jump(int frame_number){
     	  }
     	}
 
+	if (chid<nwire_u-1){
+    	  //form connectivity map
+    	  for (auto it=rois_u_loose[chid+1].begin();it!=rois_u_loose[chid+1].end();it++){
+    	    SignalROI *next_roi = *it;
+    	    if (loose_roi->overlap(next_roi)){
+    	      if (back_rois.find(next_roi) == back_rois.end()){
+    		SignalROISelection temp_rois;
+    		temp_rois.push_back(loose_roi);
+    		back_rois[next_roi] = temp_rois;
+    	      }else{
+    		back_rois[next_roi].push_back(loose_roi);
+    	      }
+    	      if (front_rois.find(loose_roi) == front_rois.end()){
+    		SignalROISelection temp_rois;
+    		temp_rois.push_back(next_roi);
+    		front_rois[loose_roi] = temp_rois;
+    	      }else{
+    		front_rois[loose_roi].push_back(next_roi);
+    	      }
+    	    }
+    	  }
+    	}
+	
+
     	//form contained map ... 
-    	for (Int_t j=0;j!=rois_u_tight[chid].size();j++){
-    	  SignalROI *tight_roi = rois_u_tight[chid].at(j);
+    	for (auto it=rois_u_tight[chid].begin();it!=rois_u_tight[chid].end();it++){
+    	  SignalROI *tight_roi = *it;
     	  if (tight_roi->overlap(loose_roi)){
     	    if (contained_rois.find(loose_roi)==contained_rois.end()){
     	      SignalROISelection temp_rois;
@@ -228,8 +326,8 @@ int WireCell2dToy::uBooNEDataAfterROI::jump(int frame_number){
 
     	if (chid>nwire_u){
     	  //form connectivity map
-    	  for (int j=0;j!=rois_v_loose[chid-nwire_u-1].size();j++){
-    	    SignalROI *prev_roi = rois_v_loose[chid-nwire_u-1].at(j);
+    	  for (auto it = rois_v_loose[chid-nwire_u-1].begin();it!=rois_v_loose[chid-nwire_u-1].end();it++){
+    	    SignalROI *prev_roi = *it;
     	    if (loose_roi->overlap(prev_roi)){
     	      if (front_rois.find(prev_roi) == front_rois.end()){
     		SignalROISelection temp_rois;
@@ -249,9 +347,32 @@ int WireCell2dToy::uBooNEDataAfterROI::jump(int frame_number){
     	  }
     	}
 
+	if (chid<nwire_u+nwire_v-1){
+    	  //form connectivity map
+    	  for (auto it = rois_v_loose[chid-nwire_u+1].begin();it!=rois_v_loose[chid-nwire_u+1].end();it++){
+    	    SignalROI *next_roi = *it;
+    	    if (loose_roi->overlap(next_roi)){
+    	      if (back_rois.find(next_roi) == back_rois.end()){
+    		SignalROISelection temp_rois;
+    		temp_rois.push_back(loose_roi);
+    		back_rois[next_roi] = temp_rois;
+    	      }else{
+    		back_rois[next_roi].push_back(loose_roi);
+    	      }
+    	      if (front_rois.find(loose_roi) == front_rois.end()){
+    		SignalROISelection temp_rois;
+    		temp_rois.push_back(next_roi);
+    		front_rois[loose_roi] = temp_rois;
+    	      }else{
+    		front_rois[loose_roi].push_back(next_roi);
+    	      }
+    	    }
+    	  }
+    	}
+
     	//form contained map ... 
-    	for (Int_t j=0;j!=rois_v_tight[chid-nwire_u].size();j++){
-    	  SignalROI *tight_roi = rois_v_tight[chid-nwire_u].at(j);
+    	for (auto it = rois_v_tight[chid-nwire_u].begin();it!=rois_v_tight[chid-nwire_u].end();it++){
+    	  SignalROI *tight_roi = *it;
     	  if (tight_roi->overlap(loose_roi)){
     	    if (contained_rois.find(loose_roi)==contained_rois.end()){
     	      SignalROISelection temp_rois;
@@ -268,8 +389,8 @@ int WireCell2dToy::uBooNEDataAfterROI::jump(int frame_number){
 
     	if (chid>nwire_u+nwire_v){
     	  //form connectivity map
-    	  for (int j=0;j!=rois_w_loose[chid-nwire_u-nwire_v-1].size();j++){
-    	    SignalROI *prev_roi = rois_w_loose[chid-nwire_u-nwire_v-1].at(j);
+    	  for (auto it=rois_w_loose[chid-nwire_u-nwire_v-1].begin();it!=rois_w_loose[chid-nwire_u-nwire_v-1].end();it++){
+    	    SignalROI *prev_roi = *it;
     	    if (loose_roi->overlap(prev_roi)){
     	      if (front_rois.find(prev_roi) == front_rois.end()){
     		SignalROISelection temp_rois;
@@ -288,10 +409,33 @@ int WireCell2dToy::uBooNEDataAfterROI::jump(int frame_number){
     	    }
     	  }
     	}
+
+	if (chid<nwire_u+nwire_v+nwire_w-1){
+    	  //form connectivity map
+    	  for (auto it=rois_w_loose[chid-nwire_u-nwire_v+1].begin();it!=rois_w_loose[chid-nwire_u-nwire_v+1].end();it++){
+    	    SignalROI *next_roi = *it;
+    	    if (loose_roi->overlap(next_roi)){
+    	      if (back_rois.find(next_roi) == back_rois.end()){
+    		SignalROISelection temp_rois;
+    		temp_rois.push_back(loose_roi);
+    		back_rois[next_roi] = temp_rois;
+    	      }else{
+    		back_rois[next_roi].push_back(loose_roi);
+    	      }
+    	      if (front_rois.find(loose_roi) == front_rois.end()){
+    		SignalROISelection temp_rois;
+    		temp_rois.push_back(next_roi);
+    		front_rois[loose_roi] = temp_rois;
+    	      }else{
+    		front_rois[loose_roi].push_back(next_roi);
+    	      }
+    	    }
+    	  }
+    	}
 	
     	//form contained map ... 
-    	for (Int_t j=0;j!=rois_w_tight[chid-nwire_u-nwire_v].size();j++){
-    	  SignalROI *tight_roi = rois_w_tight[chid-nwire_u-nwire_v].at(j);
+    	for (auto it=rois_w_tight[chid-nwire_u-nwire_v].begin();it!=rois_w_tight[chid-nwire_u-nwire_v].end();it++){
+    	  SignalROI *tight_roi = *it;
     	  if (tight_roi->overlap(loose_roi)){
     	    if (contained_rois.find(loose_roi)==contained_rois.end()){
     	      SignalROISelection temp_rois;
@@ -311,6 +455,8 @@ int WireCell2dToy::uBooNEDataAfterROI::jump(int frame_number){
 
 
   std::cout << rois_u_tight.size() << " " << rois_v_tight.size() << " " << rois_w_tight.size() << " " << rois_u_loose.size() << " " << rois_v_loose.size() << " " << rois_w_loose.size() << " " << front_rois.size() << " " << back_rois.size() << " " << contained_rois.size() << std::endl;
+
+  
 
 
   std::vector<std::pair<int,int>>& uboone_rois = rois.get_loose_rois(0);

@@ -24,13 +24,13 @@ namespace WireCell2dToy{
     int nwire_v;
     int nwire_w;
     
-    WireCell::SignalROIChSelection rois_u_tight;
-    WireCell::SignalROIChSelection rois_v_tight;
-    WireCell::SignalROIChSelection rois_w_tight;
+    WireCell::SignalROIChList rois_u_tight;
+    WireCell::SignalROIChList rois_v_tight;
+    WireCell::SignalROIChList rois_w_tight;
     
-    WireCell::SignalROIChSelection rois_u_loose;
-    WireCell::SignalROIChSelection rois_v_loose;
-    WireCell::SignalROIChSelection rois_w_loose;
+    WireCell::SignalROIChList rois_u_loose;
+    WireCell::SignalROIChList rois_v_loose;
+    WireCell::SignalROIChList rois_w_loose;
     
     WireCell::SignalROIMap front_rois;
     WireCell::SignalROIMap back_rois;
