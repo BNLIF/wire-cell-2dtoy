@@ -95,7 +95,14 @@ int WireCell2dToy::uBooNEDataAfterROI::jump(int frame_number){
     std::vector<std::pair<int,int>>& uboone_rois = rois.get_self_rois(chid);
     for (int i=0;i!=uboone_rois.size();i++){
       //std::cout << nbins << " " << i << " " << uboone_rois.size() << " " << chid << " " << uboone_rois.at(i).first << " " << uboone_rois.at(i).second << std::endl;
-      SignalROI *tight_roi = new SignalROI(chid,uboone_rois.at(i).first,uboone_rois.at(i).second, htemp_signal);
+      SignalROI *tight_roi;
+      if (chid < nwire_u){
+	tight_roi = new SignalROI(WirePlaneType_t(0), chid,uboone_rois.at(i).first,uboone_rois.at(i).second, htemp_signal);
+      }else if (chid < nwire_u+nwire_v){
+	tight_roi = new SignalROI(WirePlaneType_t(1), chid,uboone_rois.at(i).first,uboone_rois.at(i).second, htemp_signal);
+      }else{
+	tight_roi = new SignalROI(WirePlaneType_t(2), chid,uboone_rois.at(i).first,uboone_rois.at(i).second, htemp_signal);
+      }
       // std::cout << i << std::endl;
 
       if (chid < nwire_u){
@@ -141,7 +148,7 @@ int WireCell2dToy::uBooNEDataAfterROI::jump(int frame_number){
 		temp_rois.push_back(next_roi);
 		front_rois[tight_roi] = temp_rois;
 	      }else{
-	      front_rois[tight_roi].push_back(next_roi);
+		front_rois[tight_roi].push_back(next_roi);
 	      }
 	    }
 	  }
@@ -255,7 +262,14 @@ int WireCell2dToy::uBooNEDataAfterROI::jump(int frame_number){
     
     uboone_rois = rois.get_loose_rois(chid);
     for (int i = 0; i!=uboone_rois.size();i++){
-      SignalROI *loose_roi = new SignalROI(chid,uboone_rois.at(i).first,uboone_rois.at(i).second,htemp_signal);
+      SignalROI *loose_roi;
+      if (chid < nwire_u){
+	loose_roi = new SignalROI(WirePlaneType_t(0),chid,uboone_rois.at(i).first,uboone_rois.at(i).second,htemp_signal);
+      }else if (chid < nwire_u + nwire_v){
+	loose_roi = new SignalROI(WirePlaneType_t(1),chid,uboone_rois.at(i).first,uboone_rois.at(i).second,htemp_signal);
+      }else{
+	loose_roi = new SignalROI(WirePlaneType_t(2),chid,uboone_rois.at(i).first,uboone_rois.at(i).second,htemp_signal);
+      }
       
       if (chid < nwire_u){
     	rois_u_loose[chid].push_back(loose_roi);
