@@ -69,33 +69,33 @@ void WireCell2dToy::uBooNEDataAfterROI::Clear(){
     for (auto it = rois_u_tight.at(i).begin(); it!=rois_u_tight.at(i).end();it++){
       delete *it;
     }
-    rois_u_tight.clear();
+    rois_u_tight.at(i).clear();
     for (auto it = rois_u_loose.at(i).begin(); it!=rois_u_loose.at(i).end();it++){
       delete *it;
     }
-    rois_u_loose.clear();
+    rois_u_loose.at(i).clear();
   }
 
   for (int i=0;i!=nwire_v;i++){
     for (auto it = rois_v_tight.at(i).begin(); it!=rois_v_tight.at(i).end();it++){
       delete *it;
     }
-    rois_v_tight.clear();
+    rois_v_tight.at(i).clear();
     for (auto it = rois_v_loose.at(i).begin(); it!=rois_v_loose.at(i).end();it++){
       delete *it;
     }
-    rois_v_loose.clear();
+    rois_v_loose.at(i).clear();
   }
 
   for (int i=0;i!=nwire_w;i++){
     for (auto it = rois_w_tight.at(i).begin(); it!=rois_w_tight.at(i).end();it++){
       delete *it;
     }
-    rois_w_tight.clear();
+    rois_w_tight.at(i).clear();
     for (auto it = rois_w_loose.at(i).begin(); it!=rois_w_loose.at(i).end();it++){
       delete *it;
     }
-    rois_w_loose.clear();
+    rois_w_loose.at(i).clear();
   }
    
    front_rois.clear();
