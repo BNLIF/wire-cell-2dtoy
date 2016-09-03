@@ -187,9 +187,9 @@ void WireCell2dToy::uBooNEDataAfterROI::CleanUpROIs(){
   }
 
 
-  int counter = 0;
+  // int counter = 0;
   for (int i=0;i!=rois_v_loose.size();i++){
-    counter += rois_v_loose.at(i).size();
+    //  counter += rois_v_loose.at(i).size();
     for (auto it = rois_v_loose.at(i).begin(); it!= rois_v_loose.at(i).end();it++){
       SignalROI *roi = *it;
       if (ROIsaved_map.find(roi)==ROIsaved_map.end()){
@@ -226,13 +226,13 @@ void WireCell2dToy::uBooNEDataAfterROI::CleanUpROIs(){
   }
 
   //remove the bad ones ...
-  int counter2 = 0;
+  //int counter2 = 0;
   for (int i=0;i!=rois_v_loose.size();i++){
     SignalROISelection to_be_removed;
     for (auto it = rois_v_loose.at(i).begin(); it!= rois_v_loose.at(i).end();it++){
       SignalROI *roi = *it;
       if (ROIsaved_map.find(roi) == ROIsaved_map.end()){
-	counter2 ++;
+	//	counter2 ++;
 	to_be_removed.push_back(roi);
 	//it = rois_v_loose.at(i).erase(it);
 	// check contained map
@@ -267,12 +267,12 @@ void WireCell2dToy::uBooNEDataAfterROI::CleanUpROIs(){
 
 
 
-  int counter1 = 0;
-  for (int i=0;i!=rois_v_loose.size();i++){
-    counter1+=rois_v_loose.at(i).size();
-  }
+  // int counter1 = 0;
+  // for (int i=0;i!=rois_v_loose.size();i++){
+  //   counter1+=rois_v_loose.at(i).size();
+  // }
   
-  std::cout << counter << " " << ROIsaved_map.size() << " " << counter1 << " " << counter2 << std::endl;
+  // std::cout << counter << " " << ROIsaved_map.size() << " " << counter1 << " " << counter2 << std::endl;
 
 
 }
