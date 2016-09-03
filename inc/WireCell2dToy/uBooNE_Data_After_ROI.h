@@ -26,6 +26,8 @@ namespace WireCell2dToy{
     int nwire_v;
     int nwire_w;
     
+    void CleanUpROIs();
+
     WireCell::SignalROIChList rois_u_tight;
     WireCell::SignalROIChList rois_v_tight;
     WireCell::SignalROIChList rois_w_tight;

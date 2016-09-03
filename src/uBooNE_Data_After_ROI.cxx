@@ -106,6 +106,177 @@ void WireCell2dToy::uBooNEDataAfterROI::Clear(){
 
 }
 
+void WireCell2dToy::uBooNEDataAfterROI::CleanUpROIs(){
+  // clean up ROIs
+  std::map<SignalROI*, int> ROIsaved_map;
+  //int counter = 0;
+  for (int i=0;i!=rois_u_loose.size();i++){
+    // counter += rois_u_loose.at(i).size();
+    for (auto it = rois_u_loose.at(i).begin(); it!= rois_u_loose.at(i).end();it++){
+      SignalROI *roi = *it;
+      if (ROIsaved_map.find(roi)==ROIsaved_map.end()){
+     	if (contained_rois.find(roi) != contained_rois.end()){
+	  // contain good stuff
+	  SignalROISelection temp_rois;
+	  temp_rois.push_back(roi);
+	  ROIsaved_map[roi] = 1;
+	  
+	  while(temp_rois.size()){
+	    SignalROI *temp_roi = temp_rois.back();
+	    temp_rois.pop_back();
+	    // save all its neighbour into a temporary holder
+	    if (front_rois.find(temp_roi)!=front_rois.end()){
+	      for (auto it1 = front_rois[temp_roi].begin();it1!=front_rois[temp_roi].end();it1++){
+		if (ROIsaved_map.find(*it1)==ROIsaved_map.end()){
+		  temp_rois.push_back(*it1);
+		  ROIsaved_map[*it1] = 1;
+		}
+	      }
+	    }
+	    if (back_rois.find(temp_roi)!=back_rois.end()){
+	      for (auto it1 = back_rois[temp_roi].begin();it1!=back_rois[temp_roi].end();it1++){
+		if (ROIsaved_map.find(*it1)==ROIsaved_map.end()){
+		  temp_rois.push_back(*it1);
+		  ROIsaved_map[*it1] = 1;
+		}
+	      }
+	    }
+	  }
+	}
+      }
+    }
+  }
+
+  //remove the bad ones ...
+  //int counter2 = 0;
+  for (int i=0;i!=rois_u_loose.size();i++){
+    SignalROISelection to_be_removed;
+    for (auto it = rois_u_loose.at(i).begin(); it!= rois_u_loose.at(i).end();it++){
+      SignalROI *roi = *it;
+      if (ROIsaved_map.find(roi) == ROIsaved_map.end()){
+	//	counter2 ++;
+	to_be_removed.push_back(roi);
+	//it = rois_u_loose.at(i).erase(it);
+	// check contained map
+	if (contained_rois.find(roi)!= contained_rois.end()){
+	  std::cout << "Wrong! " << std::endl;
+	}
+	// check front map
+	if (front_rois.find(roi)!=front_rois.end()){
+	  for (auto it1 = front_rois[roi].begin(); it1 != front_rois[roi].end(); it1++){
+	    auto it2 = find(back_rois[*it1].begin(),back_rois[*it1].end(),roi);
+	    back_rois[*it1].erase(it2);
+	  }
+	  front_rois.erase(roi);
+	}
+	// check back map
+	if (back_rois.find(roi)!=back_rois.end()){
+	  for (auto it1 = back_rois[roi].begin(); it1!=back_rois[roi].end(); it1++){
+	    auto it2 = find(front_rois[*it1].begin(),front_rois[*it1].end(),roi);
+	    front_rois[*it1].erase(it2);
+	  }
+	  back_rois.erase(roi);
+	}
+      }
+    }
+
+    for (auto it = to_be_removed.begin(); it!= to_be_removed.end(); it++){
+      auto it1 = find(rois_u_loose.at(i).begin(), rois_u_loose.at(i).end(),*it);
+      rois_u_loose.at(i).erase(it1);
+    }
+  }
+
+
+  int counter = 0;
+  for (int i=0;i!=rois_v_loose.size();i++){
+    counter += rois_v_loose.at(i).size();
+    for (auto it = rois_v_loose.at(i).begin(); it!= rois_v_loose.at(i).end();it++){
+      SignalROI *roi = *it;
+      if (ROIsaved_map.find(roi)==ROIsaved_map.end()){
+     	if (contained_rois.find(roi) != contained_rois.end()){
+	  // contain good stuff
+	  SignalROISelection temp_rois;
+	  temp_rois.push_back(roi);
+	  ROIsaved_map[roi] = 1;
+	  
+	  while(temp_rois.size()){
+	    SignalROI *temp_roi = temp_rois.back();
+	    temp_rois.pop_back();
+	    // save all its neighbour into a temporary holder
+	    if (front_rois.find(temp_roi)!=front_rois.end()){
+	      for (auto it1 = front_rois[temp_roi].begin();it1!=front_rois[temp_roi].end();it1++){
+		if (ROIsaved_map.find(*it1)==ROIsaved_map.end()){
+		  temp_rois.push_back(*it1);
+		  ROIsaved_map[*it1] = 1;
+		}
+	      }
+	    }
+	    if (back_rois.find(temp_roi)!=back_rois.end()){
+	      for (auto it1 = back_rois[temp_roi].begin();it1!=back_rois[temp_roi].end();it1++){
+		if (ROIsaved_map.find(*it1)==ROIsaved_map.end()){
+		  temp_rois.push_back(*it1);
+		  ROIsaved_map[*it1] = 1;
+		}
+	      }
+	    }
+	  }
+	}
+      }
+    }
+  }
+
+  //remove the bad ones ...
+  int counter2 = 0;
+  for (int i=0;i!=rois_v_loose.size();i++){
+    SignalROISelection to_be_removed;
+    for (auto it = rois_v_loose.at(i).begin(); it!= rois_v_loose.at(i).end();it++){
+      SignalROI *roi = *it;
+      if (ROIsaved_map.find(roi) == ROIsaved_map.end()){
+	counter2 ++;
+	to_be_removed.push_back(roi);
+	//it = rois_v_loose.at(i).erase(it);
+	// check contained map
+	if (contained_rois.find(roi)!= contained_rois.end()){
+	  std::cout << "Wrong! " << std::endl;
+	}
+	// check front map
+	if (front_rois.find(roi)!=front_rois.end()){
+	  for (auto it1 = front_rois[roi].begin(); it1 != front_rois[roi].end(); it1++){
+	    auto it2 = find(back_rois[*it1].begin(),back_rois[*it1].end(),roi);
+	    back_rois[*it1].erase(it2);
+	  }
+	  front_rois.erase(roi);
+	}
+	// check back map
+	if (back_rois.find(roi)!=back_rois.end()){
+	  for (auto it1 = back_rois[roi].begin(); it1!=back_rois[roi].end(); it1++){
+	    auto it2 = find(front_rois[*it1].begin(),front_rois[*it1].end(),roi);
+	    front_rois[*it1].erase(it2);
+	  }
+	  back_rois.erase(roi);
+	}
+      }
+    }
+
+    for (auto it = to_be_removed.begin(); it!= to_be_removed.end(); it++){
+      auto it1 = find(rois_v_loose.at(i).begin(), rois_v_loose.at(i).end(),*it);
+      rois_v_loose.at(i).erase(it1);
+    }
+  }
+
+
+
+
+  int counter1 = 0;
+  for (int i=0;i!=rois_v_loose.size();i++){
+    counter1+=rois_v_loose.at(i).size();
+  }
+  
+  std::cout << counter << " " << ROIsaved_map.size() << " " << counter1 << " " << counter2 << std::endl;
+
+
+}
+
 
 int WireCell2dToy::uBooNEDataAfterROI::jump(int frame_number){
   Clear();
@@ -507,8 +678,8 @@ int WireCell2dToy::uBooNEDataAfterROI::jump(int frame_number){
     }
   }
 
-  // std::cout << rois_u_tight.size() << " " << rois_v_tight.size() << " " << rois_w_tight.size() << " " << rois_u_loose.size() << " " << rois_v_loose.size() << " " << rois_w_loose.size() << " " << front_rois.size() << " " << back_rois.size() << " " << contained_rois.size() << std::endl;
-
+  std::cout << rois_u_tight.size() << " " << rois_v_tight.size() << " " << rois_w_tight.size() << " " << rois_u_loose.size() << " " << rois_v_loose.size() << " " << rois_w_loose.size() << " " << front_rois.size() << " " << back_rois.size() << " " << contained_rois.size() << std::endl;
+  CleanUpROIs();
   
   
 
