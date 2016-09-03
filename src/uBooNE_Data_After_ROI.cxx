@@ -277,6 +277,14 @@ void WireCell2dToy::uBooNEDataAfterROI::CleanUpROIs(){
 
 }
 
+void WireCell2dToy::uBooNEDataAfterROI::BreakROIs(){
+  
+}
+
+void WireCell2dToy::uBooNEDataAfterROI::ShrinkROIs(){
+  
+}
+
 
 int WireCell2dToy::uBooNEDataAfterROI::jump(int frame_number){
   Clear();
