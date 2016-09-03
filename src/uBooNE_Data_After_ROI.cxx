@@ -1,4 +1,6 @@
 #include "WireCell2dToy/uBooNE_Data_After_ROI.h"
+#include "TSpectrum.h"
+
 
 using namespace WireCell;
 
@@ -277,8 +279,41 @@ void WireCell2dToy::uBooNEDataAfterROI::CleanUpROIs(){
 
 }
 
-void WireCell2dToy::uBooNEDataAfterROI::BreakROIs(){
+void WireCell2dToy::uBooNEDataAfterROI::BreakROI(SignalROI* roi, float rms){
+  // main algorithm 
+  int start_bin = roi->get_start_bin();
+  int end_bin = roi->get_end_bin();
+  TH1F *htemp = new TH1F("htemp","htemp",end_bin-start_bin+1,start_bin,end_bin+1);
+  std::vector<float>& contents = roi->get_contents();
+  for (Int_t i=0;i!=htemp->GetNbinsX();i++){
+    htemp->SetBinContent(i+1,contents.at(i));
+  }
+  TSpectrum *s = new TSpectrum(100);
+  Int_t nfound = s->Search(htemp,2,"nobackground new",0.1);
+  Int_t flag_single_peak = 0;
+
   
+
+  delete s;
+  delete htemp;
+}
+
+void WireCell2dToy::uBooNEDataAfterROI::BreakROIs(){
+  // get RMS value, and put in 
+  std::vector<float>& rms_u = rois.get_uplane_rms();
+  std::vector<float>& rms_v = rois.get_vplane_rms();
+
+  for (int i=0;i!=rois_u_loose.size();i++){
+    for (auto it = rois_u_loose.at(i).begin(); it!= rois_u_loose.at(i).end(); it++){
+      BreakROI(*it,rms_u.at(i));
+    }
+  }
+  
+  for (int i=0;i!=rois_v_loose.size();i++){
+    for (auto it = rois_v_loose.at(i).begin(); it!= rois_v_loose.at(i).end(); it++){
+      BreakROI(*it,rms_v.at(i));
+    }
+  }
 }
 
 void WireCell2dToy::uBooNEDataAfterROI::ShrinkROIs(){

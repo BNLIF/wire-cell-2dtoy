@@ -28,6 +28,7 @@ namespace WireCell2dToy{
     
     void CleanUpROIs();
     void BreakROIs();
+    void BreakROI(WireCell::SignalROI *roi, float rms);
     void ShrinkROIs();
 
     WireCell::SignalROIChList rois_u_tight;
