@@ -461,8 +461,91 @@ void WireCell2dToy::uBooNEDataAfterROI::ShrinkROIs(){
 
 void WireCell2dToy::uBooNEDataAfterROI::generate_merge_ROIs(){
   // find tight ROIs not contained by the loose ROIs
-  // Duplicate them 
-  // update all the maps 
+  for (int i = 0;i!=nwire_u;i++){
+    std::map<SignalROI*,int> covered_tight_rois;
+    for (auto it = rois_u_loose.at(i).begin();it!=rois_u_loose.at(i).end();it++){
+      SignalROI *roi = *it;
+      if (contained_rois.find(roi) != contained_rois.end()){
+	for (auto it1 = contained_rois[roi].begin(); it1!= contained_rois[roi].end(); it1++){
+	  if (covered_tight_rois.find(*it1)==covered_tight_rois.end()){
+	    covered_tight_rois[*it1]  =1;
+	  }
+	}
+      }
+    }
+    SignalROISelection saved_rois;
+    for (auto it = rois_u_tight.at(i).begin();it!=rois_u_tight.at(i).end();it++){
+      SignalROI *roi = *it;
+      if (covered_tight_rois.find(roi) == covered_tight_rois.end()){
+	saved_rois.push_back(roi);
+      }
+    }
+    // if (i == 1212)
+    //   std::cout << saved_rois.size() << " " << saved_rois.at(0)->get_start_bin() << " " << saved_rois.at(0)->get_end_bin() << std::endl;
+    
+    for (auto it = saved_rois.begin(); it!=saved_rois.end();it++){
+      SignalROI *roi = *it;
+      // Duplicate them 
+      SignalROI *loose_roi = new SignalROI(roi);
+      
+      rois_u_loose.at(i).push_back(loose_roi);
+
+      // update all the maps     
+      // contained
+      SignalROISelection temp_rois;
+      temp_rois.push_back(roi);
+      contained_rois[loose_roi] = temp_rois;
+      // front map loose ROI
+      if (i < nwire_u-1){
+	for (auto it1 = rois_u_loose.at(i+1).begin(); it1!=rois_u_loose.at(i+1).end(); it1++){
+	  SignalROI *next_roi = *it1;
+	  
+	  if (loose_roi->overlap(next_roi)){
+	    if (back_rois.find(next_roi) == back_rois.end()){
+	      SignalROISelection temp_rois;
+	      temp_rois.push_back(loose_roi);
+	      back_rois[next_roi] = temp_rois;
+	    }else{
+	      back_rois[next_roi].push_back(loose_roi);
+	    }
+	      
+	    if (front_rois.find(loose_roi) == front_rois.end()){
+	      SignalROISelection temp_rois;
+	      temp_rois.push_back(next_roi);
+	      front_rois[loose_roi] = temp_rois;
+	    }else{
+	      front_rois[loose_roi].push_back(next_roi);
+	    }
+	  }
+
+	}
+      }
+      // back map loose ROI
+      if (i > 0){
+	for (auto it1 = rois_u_loose.at(i-1).begin(); it1!=rois_u_loose.at(i-1).end(); it1++){
+	  SignalROI *prev_roi = *it1;
+	  if (loose_roi->overlap(prev_roi)){
+	    if (front_rois.find(prev_roi) == front_rois.end()){
+	      SignalROISelection temp_rois;
+	      temp_rois.push_back(loose_roi);
+	      front_rois[prev_roi] = temp_rois;
+	    }else{
+	      front_rois[prev_roi].push_back(loose_roi);
+	    }
+	    if (back_rois.find(loose_roi) == back_rois.end()){
+	      SignalROISelection temp_rois;
+	      temp_rois.push_back(prev_roi);
+	      back_rois[loose_roi] = temp_rois;
+	    }else{
+	      back_rois[loose_roi].push_back(prev_roi);
+	    }
+	  }
+	}
+      }
+    }
+  }
+ 
+
 
   
 }
@@ -885,10 +968,12 @@ int WireCell2dToy::uBooNEDataAfterROI::jump(int frame_number){
 
   
   std::cout << rois_u_tight.size() << " " << rois_v_tight.size() << " " << rois_w_tight.size() << " " << rois_u_loose.size() << " " << rois_v_loose.size() << " " << rois_w_loose.size() << " " << front_rois.size() << " " << back_rois.size() << " " << contained_rois.size() << std::endl;
-  std::cout << "Generate more ROIs" << std::endl;
-  generate_merge_ROIs();
   std::cout << "Clean up ROIs" << std::endl;
   CleanUpROIs();
+
+  std::cout << "Generate more ROIs" << std::endl;
+  generate_merge_ROIs();
+
   std::cout << "Break ROIs" << std::endl;
   BreakROIs();
   std::cout << "Shrink ROIs" << std::endl;
