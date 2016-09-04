@@ -26,6 +26,8 @@ namespace WireCell2dToy{
     int nwire_v;
     int nwire_w;
     
+    void generate_merge_ROIs();
+    
     void CleanUpROIs();
     void BreakROIs();
     void BreakROI(WireCell::SignalROI *roi, float rms);

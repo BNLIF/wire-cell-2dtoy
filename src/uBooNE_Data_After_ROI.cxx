@@ -459,6 +459,10 @@ void WireCell2dToy::uBooNEDataAfterROI::ShrinkROIs(){
   
 }
 
+void WireCell2dToy::uBooNEDataAfterROI::generate_merge_ROIs(){
+
+}
+
 
 int WireCell2dToy::uBooNEDataAfterROI::jump(int frame_number){
   Clear();
@@ -860,10 +864,17 @@ int WireCell2dToy::uBooNEDataAfterROI::jump(int frame_number){
     }
   }
 
-  std::cout << rois_u_tight.size() << " " << rois_v_tight.size() << " " << rois_w_tight.size() << " " << rois_u_loose.size() << " " << rois_v_loose.size() << " " << rois_w_loose.size() << " " << front_rois.size() << " " << back_rois.size() << " " << contained_rois.size() << std::endl;
-  CleanUpROIs();
-  BreakROIs();
+
   
+  std::cout << rois_u_tight.size() << " " << rois_v_tight.size() << " " << rois_w_tight.size() << " " << rois_u_loose.size() << " " << rois_v_loose.size() << " " << rois_w_loose.size() << " " << front_rois.size() << " " << back_rois.size() << " " << contained_rois.size() << std::endl;
+  std::cout << "Generate more ROIs" << std::endl;
+  generate_merge_ROIs();
+  std::cout << "Clean up ROIs" << std::endl;
+  CleanUpROIs();
+  std::cout << "Break ROIs" << std::endl;
+  BreakROIs();
+  std::cout << "Shrink ROIs" << std::endl;
+  ShrinkROIs();
 
   // load results back into the data ... 
   
@@ -878,6 +889,7 @@ int WireCell2dToy::uBooNEDataAfterROI::jump(int frame_number){
     // load results back into the histogram
     if (chid < nwire_u){
       for (auto it = rois_u_loose.at(chid).begin(); it!= rois_u_loose.at(chid).end();it++){
+      //for (auto it = rois_u_tight.at(chid).begin(); it!= rois_u_tight.at(chid).end();it++){
 	SignalROI *roi =  *it;
 	std::vector<float>& contents = roi->get_contents();
 	int start_bin = roi->get_start_bin();
