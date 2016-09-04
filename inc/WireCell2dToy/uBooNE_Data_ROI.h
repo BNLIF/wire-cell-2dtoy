@@ -96,7 +96,8 @@ namespace WireCell2dToy{
     void extend_ROI_self(int pad = 5);
     
     void find_ROI_loose(int rebin=6);
-    
+    void extend_ROI_loose();
+
     Double_t local_ave(TH1F *h1, Int_t bin, Int_t width);
     Int_t find_ROI_end(TH1F*h1, Int_t bin, Double_t th = 0);
     Int_t find_ROI_begin(TH1F*h1, Int_t bin, Double_t th = 0);

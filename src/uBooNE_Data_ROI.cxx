@@ -127,7 +127,8 @@ WireCell2dToy::uBooNEDataROI::uBooNEDataROI(WireCell::FrameDataSource& raw_fds,W
 
   std::cout << "Finding Loose ROI" << std::endl;
   find_ROI_loose();
-  
+  std::cout << "Extend Loose ROI" << std::endl;
+  extend_ROI_loose();
 
   //std::cout << "Fidning ROI based on raw itself " << std::endl;
   //find_ROI_by_raw_itself(3.6,5); // 3 sigma with 5 (half) padding
@@ -139,6 +140,68 @@ WireCell2dToy::uBooNEDataROI::uBooNEDataROI(WireCell::FrameDataSource& raw_fds,W
 
   //std::cout << "Merge ROIs " << std::endl;
   //merge_ROIs();
+}
+
+void WireCell2dToy::uBooNEDataROI::extend_ROI_loose(){
+  // compare the loose one with tight one 
+  for(int i=0;i!=nwire_u;i++){
+    std::vector<std::pair<int,int>> temp_rois;
+    for (int j=0;j!=loose_rois_u.at(i).size();j++){
+      int start = loose_rois_u.at(i).at(j).first;
+      int end = loose_rois_u.at(i).at(j).second;
+      for (int k=0;k!=self_rois_u.at(i).size();k++){
+	int temp_start = self_rois_u.at(i).at(k).first;
+	int temp_end = self_rois_u.at(i).at(k).second;
+	if (start > temp_start && start < temp_end)
+	  start = temp_start;
+	// loop through all the tight one to examine start
+	if (end > temp_start && end < temp_end)
+	  end = temp_end; 
+	// loop through all the tight one to examine the end
+      }
+      if (temp_rois.size()==0){
+	temp_rois.push_back(std::make_pair(start,end));
+      }else{
+	if (start < temp_rois.back().second){
+	  temp_rois.back().second = end;
+	}else{
+	  temp_rois.push_back(std::make_pair(start,end));
+	}
+      }
+    }
+    loose_rois_u.at(i) = temp_rois;
+  }
+
+
+  for(int i=0;i!=nwire_v;i++){
+    std::vector<std::pair<int,int>> temp_rois;
+    for (int j=0;j!=loose_rois_v.at(i).size();j++){
+      int start = loose_rois_v.at(i).at(j).first;
+      int end = loose_rois_v.at(i).at(j).second;
+      for (int k=0;k!=self_rois_v.at(i).size();k++){
+	int temp_start = self_rois_v.at(i).at(k).first;
+	int temp_end = self_rois_v.at(i).at(k).second;
+	if (start > temp_start && start < temp_end)
+	  start = temp_start;
+	// loop through all the tight one to examine start
+	if (end > temp_start && end < temp_end)
+	  end = temp_end; 
+	// loop through all the tight one to examine the end
+      }
+      if (temp_rois.size()==0){
+	temp_rois.push_back(std::make_pair(start,end));
+      }else{
+	if (start < temp_rois.back().second){
+	  temp_rois.back().second = end;
+	}else{
+	  temp_rois.push_back(std::make_pair(start,end));
+	}
+      }
+    }
+    loose_rois_v.at(i) = temp_rois;
+  }
+  
+
 }
 
 void WireCell2dToy::uBooNEDataROI::create_ROI_connect_info(float asy){
