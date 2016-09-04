@@ -152,26 +152,28 @@ void WireCell2dToy::uBooNEDataROI::create_ROI_connect_info(float asy){
       for (int k=0; k!=self_rois_u.at(i+2).size();k++){
 	int start2 = self_rois_u.at(i+2).at(k).first;
 	int end2 = self_rois_u.at(i+2).at(k).second;
-	int length2 = end2 - start2 + 2;
+	int length2 = end2 - start2 + 1;
 	if ( fabs(length2 - length1) < (length2 + length1) * asy){
 	  int start3 = (start1+start2)/2.;
 	  int end3 = (end1+end2)/2.;
-	  // go through existing ones to make sure there is no overlap
-	  int flag = 0; 
-	  for (int i1 = 0; i1!=self_rois_u.at(i+1).size();i1++){
-	    int max_start = start3;
-	    if (self_rois_u.at(i+1).at(i1).first > max_start)
-	      max_start = self_rois_u.at(i+1).at(i1).first;
-	    int min_end = end3;
-	    if (self_rois_u.at(i+1).at(i1).second < min_end)
-	      min_end = self_rois_u.at(i+1).at(i1).second ;
-	    if (max_start < min_end){
-	      flag = 1;
-	      break;
+	  if (start3 < end3 && start3 <= end1 && start3 <=end2 && end3 >= start1 && end3 >=start2){
+	    // go through existing ones to make sure there is no overlap
+	    int flag = 0; 
+	    for (int i1 = 0; i1!=self_rois_u.at(i+1).size();i1++){
+	      int max_start = start3;
+	      if (self_rois_u.at(i+1).at(i1).first > max_start)
+		max_start = self_rois_u.at(i+1).at(i1).first;
+	      int min_end = end3;
+	      if (self_rois_u.at(i+1).at(i1).second < min_end)
+		min_end = self_rois_u.at(i+1).at(i1).second ;
+	      if (max_start < min_end){
+		flag = 1;
+		break;
+	      }
 	    }
+	    if (flag == 0)
+	      self_rois_u.at(i+1).push_back(std::make_pair(start3,end3));
 	  }
-	  if (flag == 0)
-	    self_rois_u.at(i+1).push_back(std::make_pair(start3,end3));
 	}
       } 
     }
@@ -185,26 +187,28 @@ void WireCell2dToy::uBooNEDataROI::create_ROI_connect_info(float asy){
       for (int k=0; k!=self_rois_v.at(i+2).size();k++){
 	int start2 = self_rois_v.at(i+2).at(k).first;
 	int end2 = self_rois_v.at(i+2).at(k).second;
-	int length2 = end2 - start2 + 2;
+	int length2 = end2 - start2 + 1;
 	if ( fabs(length2 - length1) < (length2 + length1) * asy){
 	  int start3 = (start1+start2)/2.;
 	  int end3 = (end1+end2)/2.;
-	  // go through existing ones to make sure there is no overlap
-	  int flag = 0; 
-	  for (int i1 = 0; i1!=self_rois_v.at(i+1).size();i1++){
-	    int max_start = start3;
-	    if (self_rois_v.at(i+1).at(i1).first > max_start)
-	      max_start = self_rois_v.at(i+1).at(i1).first;
-	    int min_end = end3;
-	    if (self_rois_v.at(i+1).at(i1).second < min_end)
-	      min_end = self_rois_v.at(i+1).at(i1).second ;
-	    if (max_start < min_end){
-	      flag = 1;
-	      break;
+	  if (start3 < end3 && start3 <= end1 && start3 <=end2 && end3 >= start1 && end3 >=start2){
+	    // go through existing ones to make sure there is no overlap
+	    int flag = 0; 
+	    for (int i1 = 0; i1!=self_rois_v.at(i+1).size();i1++){
+	      int max_start = start3;
+	      if (self_rois_v.at(i+1).at(i1).first > max_start)
+		max_start = self_rois_v.at(i+1).at(i1).first;
+	      int min_end = end3;
+	      if (self_rois_v.at(i+1).at(i1).second < min_end)
+		min_end = self_rois_v.at(i+1).at(i1).second ;
+	      if (max_start < min_end){
+		flag = 1;
+		break;
+	      }
 	    }
+	    if (flag == 0)
+	      self_rois_v.at(i+1).push_back(std::make_pair(start3,end3));
 	  }
-	  if (flag == 0)
-	    self_rois_v.at(i+1).push_back(std::make_pair(start3,end3));
 	}
       } 
     }
@@ -218,26 +222,28 @@ void WireCell2dToy::uBooNEDataROI::create_ROI_connect_info(float asy){
       for (int k=0; k!=self_rois_w.at(i+2).size();k++){
 	int start2 = self_rois_w.at(i+2).at(k).first;
 	int end2 = self_rois_w.at(i+2).at(k).second;
-	int length2 = end2 - start2 + 2;
+	int length2 = end2 - start2 + 1;
 	if ( fabs(length2 - length1) < (length2 + length1) * asy){
 	  int start3 = (start1+start2)/2.;
 	  int end3 = (end1+end2)/2.;
-	  // go through existing ones to make sure there is no overlap
-	  int flag = 0; 
-	  for (int i1 = 0; i1!=self_rois_w.at(i+1).size();i1++){
-	    int max_start = start3;
-	    if (self_rois_w.at(i+1).at(i1).first > max_start)
-	      max_start = self_rois_w.at(i+1).at(i1).first;
-	    int min_end = end3;
-	    if (self_rois_w.at(i+1).at(i1).second < min_end)
-	      min_end = self_rois_w.at(i+1).at(i1).second ;
-	    if (max_start < min_end){
-	      flag = 1;
-	      break;
+	  if (start3 < end3 && start3 <= end1 && start3 <=end2 && end3 >= start1 && end3 >=start2){
+	    // go through existing ones to make sure there is no overlap
+	    int flag = 0; 
+	    for (int i1 = 0; i1!=self_rois_w.at(i+1).size();i1++){
+	      int max_start = start3;
+	      if (self_rois_w.at(i+1).at(i1).first > max_start)
+		max_start = self_rois_w.at(i+1).at(i1).first;
+	      int min_end = end3;
+	      if (self_rois_w.at(i+1).at(i1).second < min_end)
+		min_end = self_rois_w.at(i+1).at(i1).second ;
+	      if (max_start < min_end){
+		flag = 1;
+		break;
+	      }
 	    }
+	    if (flag == 0)
+	      self_rois_w.at(i+1).push_back(std::make_pair(start3,end3));
 	  }
-	  if (flag == 0)
-	    self_rois_w.at(i+1).push_back(std::make_pair(start3,end3));
 	}
       } 
     }

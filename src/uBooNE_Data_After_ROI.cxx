@@ -462,6 +462,7 @@ void WireCell2dToy::uBooNEDataAfterROI::ShrinkROIs(){
 void WireCell2dToy::uBooNEDataAfterROI::generate_merge_ROIs(){
   // find tight ROIs not contained by the loose ROIs
   // Duplicate them 
+  // update all the maps 
 
   
 }
@@ -498,14 +499,22 @@ int WireCell2dToy::uBooNEDataAfterROI::jump(int frame_number){
     for (int i=0;i!=uboone_rois.size();i++){
       //std::cout << nbins << " " << i << " " << uboone_rois.size() << " " << chid << " " << uboone_rois.at(i).first << " " << uboone_rois.at(i).second << std::endl;
       SignalROI *tight_roi;
+      float threshold;
       if (chid < nwire_u){
 	tight_roi = new SignalROI(WirePlaneType_t(0), chid,uboone_rois.at(i).first,uboone_rois.at(i).second, htemp_signal);
+	threshold = rois.get_uplane_rms().at(chid) * 3.0;
       }else if (chid < nwire_u+nwire_v){
 	tight_roi = new SignalROI(WirePlaneType_t(1), chid,uboone_rois.at(i).first,uboone_rois.at(i).second, htemp_signal);
+	threshold = rois.get_vplane_rms().at(chid-nwire_u) * 3.0;
       }else{
 	tight_roi = new SignalROI(WirePlaneType_t(2), chid,uboone_rois.at(i).first,uboone_rois.at(i).second, htemp_signal);
+	threshold = rois.get_wplane_rms().at(chid-nwire_u-nwire_v) * 3.0;
       }
       // std::cout << i << std::endl;
+      
+      
+      // judge ...
+      if (tight_roi->get_above_threshold(threshold).size()==0) continue;
 
       if (chid < nwire_u){
 	rois_u_tight[chid].push_back(tight_roi);
@@ -665,13 +674,19 @@ int WireCell2dToy::uBooNEDataAfterROI::jump(int frame_number){
     uboone_rois = rois.get_loose_rois(chid);
     for (int i = 0; i!=uboone_rois.size();i++){
       SignalROI *loose_roi;
+      float threshold;
       if (chid < nwire_u){
 	loose_roi = new SignalROI(WirePlaneType_t(0),chid,uboone_rois.at(i).first,uboone_rois.at(i).second,htemp_signal);
+	threshold = rois.get_uplane_rms().at(chid) * 3.0;
       }else if (chid < nwire_u + nwire_v){
 	loose_roi = new SignalROI(WirePlaneType_t(1),chid,uboone_rois.at(i).first,uboone_rois.at(i).second,htemp_signal);
+	threshold = rois.get_vplane_rms().at(chid - nwire_u) * 3.0;
       }else{
 	loose_roi = new SignalROI(WirePlaneType_t(2),chid,uboone_rois.at(i).first,uboone_rois.at(i).second,htemp_signal);
+	threshold = rois.get_wplane_rms().at(chid-nwire_u-nwire_v) * 3.0;
       }
+
+      if (loose_roi->get_above_threshold(threshold).size()==0) continue;
       
       if (chid < nwire_u){
     	rois_u_loose[chid].push_back(loose_roi);
@@ -891,8 +906,8 @@ int WireCell2dToy::uBooNEDataAfterROI::jump(int frame_number){
 
     // load results back into the histogram
     if (chid < nwire_u){
-      //for (auto it = rois_u_loose.at(chid).begin(); it!= rois_u_loose.at(chid).end();it++){
-      for (auto it = rois_u_tight.at(chid).begin(); it!= rois_u_tight.at(chid).end();it++){
+      for (auto it = rois_u_loose.at(chid).begin(); it!= rois_u_loose.at(chid).end();it++){
+	//for (auto it = rois_u_tight.at(chid).begin(); it!= rois_u_tight.at(chid).end();it++){
 	SignalROI *roi =  *it;
 	std::vector<float>& contents = roi->get_contents();
 	int start_bin = roi->get_start_bin();
@@ -902,6 +917,7 @@ int WireCell2dToy::uBooNEDataAfterROI::jump(int frame_number){
       }
     }else if (chid < nwire_u + nwire_v){
       for (auto it = rois_v_loose.at(chid-nwire_u).begin(); it!= rois_v_loose.at(chid-nwire_u).end();it++){
+	//for (auto it = rois_v_tight.at(chid-nwire_u).begin(); it!= rois_v_tight.at(chid-nwire_u).end();it++){
       	SignalROI *roi =  *it;
       	std::vector<float>& contents = roi->get_contents();
       	int start_bin = roi->get_start_bin();
