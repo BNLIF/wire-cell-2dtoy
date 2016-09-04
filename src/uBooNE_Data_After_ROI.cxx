@@ -460,7 +460,10 @@ void WireCell2dToy::uBooNEDataAfterROI::ShrinkROIs(){
 }
 
 void WireCell2dToy::uBooNEDataAfterROI::generate_merge_ROIs(){
+  // find tight ROIs not contained by the loose ROIs
+  // Duplicate them 
 
+  
 }
 
 
@@ -888,8 +891,8 @@ int WireCell2dToy::uBooNEDataAfterROI::jump(int frame_number){
 
     // load results back into the histogram
     if (chid < nwire_u){
-      for (auto it = rois_u_loose.at(chid).begin(); it!= rois_u_loose.at(chid).end();it++){
-      //for (auto it = rois_u_tight.at(chid).begin(); it!= rois_u_tight.at(chid).end();it++){
+      //for (auto it = rois_u_loose.at(chid).begin(); it!= rois_u_loose.at(chid).end();it++){
+      for (auto it = rois_u_tight.at(chid).begin(); it!= rois_u_tight.at(chid).end();it++){
 	SignalROI *roi =  *it;
 	std::vector<float>& contents = roi->get_contents();
 	int start_bin = roi->get_start_bin();

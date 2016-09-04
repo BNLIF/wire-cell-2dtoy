@@ -118,12 +118,12 @@ WireCell2dToy::uBooNEDataROI::uBooNEDataROI(WireCell::FrameDataSource& raw_fds,W
 
   std::cout << "Finding ROI based on decon itself " << std::endl;
   find_ROI_by_decon_itself(3.6,5.0,0); // 5 sigma, with zero padding
-  
   //std::cout << self_rois_u.size() << " " << self_rois_v.size() << " " << self_rois_w.size() << std::endl;
-
-
   std::cout << "Extend Self ROIs" << std::endl;
   extend_ROI_self(5);
+  std::cout << "Create more Self ROIs based on connectivity" << std::endl;
+  create_ROI_connect_info();
+  
 
   std::cout << "Finding Loose ROI" << std::endl;
   find_ROI_loose();
@@ -139,6 +139,110 @@ WireCell2dToy::uBooNEDataROI::uBooNEDataROI(WireCell::FrameDataSource& raw_fds,W
 
   //std::cout << "Merge ROIs " << std::endl;
   //merge_ROIs();
+}
+
+void WireCell2dToy::uBooNEDataROI::create_ROI_connect_info(float asy){
+  
+  // u 
+  for (int i=0;i!=nwire_u-2;i++){
+    for (int j=0; j!=self_rois_u.at(i).size();j++){
+      int start1 = self_rois_u.at(i).at(j).first;
+      int end1 = self_rois_u.at(i).at(j).second;
+      int length1 = end1-start1+1;
+      for (int k=0; k!=self_rois_u.at(i+2).size();k++){
+	int start2 = self_rois_u.at(i+2).at(k).first;
+	int end2 = self_rois_u.at(i+2).at(k).second;
+	int length2 = end2 - start2 + 2;
+	if ( fabs(length2 - length1) < (length2 + length1) * asy){
+	  int start3 = (start1+start2)/2.;
+	  int end3 = (end1+end2)/2.;
+	  // go through existing ones to make sure there is no overlap
+	  int flag = 0; 
+	  for (int i1 = 0; i1!=self_rois_u.at(i+1).size();i1++){
+	    int max_start = start3;
+	    if (self_rois_u.at(i+1).at(i1).first > max_start)
+	      max_start = self_rois_u.at(i+1).at(i1).first;
+	    int min_end = end3;
+	    if (self_rois_u.at(i+1).at(i1).second < min_end)
+	      min_end = self_rois_u.at(i+1).at(i1).second ;
+	    if (max_start < min_end){
+	      flag = 1;
+	      break;
+	    }
+	  }
+	  if (flag == 0)
+	    self_rois_u.at(i+1).push_back(std::make_pair(start3,end3));
+	}
+      } 
+    }
+  }
+  // v
+  for (int i=0;i!=nwire_v-2;i++){
+    for (int j=0; j!=self_rois_v.at(i).size();j++){
+      int start1 = self_rois_v.at(i).at(j).first;
+      int end1 = self_rois_v.at(i).at(j).second;
+      int length1 = end1-start1+1;
+      for (int k=0; k!=self_rois_v.at(i+2).size();k++){
+	int start2 = self_rois_v.at(i+2).at(k).first;
+	int end2 = self_rois_v.at(i+2).at(k).second;
+	int length2 = end2 - start2 + 2;
+	if ( fabs(length2 - length1) < (length2 + length1) * asy){
+	  int start3 = (start1+start2)/2.;
+	  int end3 = (end1+end2)/2.;
+	  // go through existing ones to make sure there is no overlap
+	  int flag = 0; 
+	  for (int i1 = 0; i1!=self_rois_v.at(i+1).size();i1++){
+	    int max_start = start3;
+	    if (self_rois_v.at(i+1).at(i1).first > max_start)
+	      max_start = self_rois_v.at(i+1).at(i1).first;
+	    int min_end = end3;
+	    if (self_rois_v.at(i+1).at(i1).second < min_end)
+	      min_end = self_rois_v.at(i+1).at(i1).second ;
+	    if (max_start < min_end){
+	      flag = 1;
+	      break;
+	    }
+	  }
+	  if (flag == 0)
+	    self_rois_v.at(i+1).push_back(std::make_pair(start3,end3));
+	}
+      } 
+    }
+  }
+  // w?
+  for (int i=0;i!=nwire_w-2;i++){
+    for (int j=0; j!=self_rois_w.at(i).size();j++){
+      int start1 = self_rois_w.at(i).at(j).first;
+      int end1 = self_rois_w.at(i).at(j).second;
+      int length1 = end1-start1+1;
+      for (int k=0; k!=self_rois_w.at(i+2).size();k++){
+	int start2 = self_rois_w.at(i+2).at(k).first;
+	int end2 = self_rois_w.at(i+2).at(k).second;
+	int length2 = end2 - start2 + 2;
+	if ( fabs(length2 - length1) < (length2 + length1) * asy){
+	  int start3 = (start1+start2)/2.;
+	  int end3 = (end1+end2)/2.;
+	  // go through existing ones to make sure there is no overlap
+	  int flag = 0; 
+	  for (int i1 = 0; i1!=self_rois_w.at(i+1).size();i1++){
+	    int max_start = start3;
+	    if (self_rois_w.at(i+1).at(i1).first > max_start)
+	      max_start = self_rois_w.at(i+1).at(i1).first;
+	    int min_end = end3;
+	    if (self_rois_w.at(i+1).at(i1).second < min_end)
+	      min_end = self_rois_w.at(i+1).at(i1).second ;
+	    if (max_start < min_end){
+	      flag = 1;
+	      break;
+	    }
+	  }
+	  if (flag == 0)
+	    self_rois_w.at(i+1).push_back(std::make_pair(start3,end3));
+	}
+      } 
+    }
+  }
+
 }
 
 // void WireCell2dToy::uBooNEDataROI::extend_ROI_others(int pad){

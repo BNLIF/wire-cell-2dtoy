@@ -89,6 +89,7 @@ namespace WireCell2dToy{
     std::vector<float> vplane_rms; // calibrated field response
     std::vector<float> wplane_rms; // calibrated field response
 
+    void create_ROI_connect_info(float asy = 0.1);
     void restore_baseline(TH1F *h1);
     double cal_rms(TH1F *h1, int chid);
     void find_ROI_by_decon_itself(int th_factor_ind = 5, int th_factor_col = 5, int pad = 0);
