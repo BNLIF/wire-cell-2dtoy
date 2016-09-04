@@ -337,11 +337,11 @@ void WireCell2dToy::uBooNEDataAfterROI::BreakROI(SignalROI* roi, float rms){
 	}
       }
       
-      if (roi->get_chid() == 1209 && roi->get_plane() == WirePlaneType_t(0)){
-      	for (int j=0;j!=npeaks;j++){
-      	  std::cout << valley_pos[j] << " " << htemp->GetBinContent(valley_pos[j]-start_bin+1)<< " " << order_peak_pos[j] << " " << htemp->GetBinContent( order_peak_pos[j]-start_bin+1) << " " << valley_pos[j+1] << " " << htemp->GetBinContent(valley_pos[j+1] - start_bin+1)<< std::endl ;
-      	}
-      }
+      // if (roi->get_chid() == 1209 && roi->get_plane() == WirePlaneType_t(0)){
+      // 	for (int j=0;j!=npeaks;j++){
+      // 	  std::cout << valley_pos[j] << " " << htemp->GetBinContent(valley_pos[j]-start_bin+1)<< " " << order_peak_pos[j] << " " << htemp->GetBinContent( order_peak_pos[j]-start_bin+1) << " " << valley_pos[j+1] << " " << htemp->GetBinContent(valley_pos[j+1] - start_bin+1)<< std::endl ;
+      // 	}
+      // }
 	
 
       
@@ -385,8 +385,8 @@ void WireCell2dToy::uBooNEDataAfterROI::BreakROI(SignalROI* roi, float rms){
 	    j = npeaks;
 	  }
 
-	  if (roi->get_chid() == 1209 && roi->get_plane() == WirePlaneType_t(0))
-	    std::cout << "c: " << npeaks << " " << valley_pos1[npeaks1-1] << " " << peak_pos1[npeaks1-1] << " " << valley_pos1[npeaks1] << " " << rms * sep_peak << std::endl;
+	  // if (roi->get_chid() == 1209 && roi->get_plane() == WirePlaneType_t(0))
+	  //   std::cout << "c: " << npeaks << " " << valley_pos1[npeaks1-1] << " " << peak_pos1[npeaks1-1] << " " << valley_pos1[npeaks1] << " " << rms * sep_peak << std::endl;
 	}
       }
       // fill the last valley
@@ -415,8 +415,8 @@ void WireCell2dToy::uBooNEDataAfterROI::BreakROI(SignalROI* roi, float rms){
 
 	if (saved_boundaries.find(start_pos) != saved_boundaries.end() ||
 	    saved_boundaries.find(end_pos) != saved_boundaries.end()){
-	  if (roi->get_chid() == 1209 && roi->get_plane() == WirePlaneType_t(0))
-	    std::cout << "d: " << start_pos << " " << end_pos << std::endl;
+	  // if (roi->get_chid() == 1209 && roi->get_plane() == WirePlaneType_t(0))
+	  //   std::cout << "d: " << start_pos << " " << end_pos << std::endl;
 
 	  for (Int_t k = start_pos; k!=end_pos+1;k++){
 	    Double_t temp_content = htemp1->GetBinContent(k-start_bin+1) - (start_content + (end_content-start_content) * (k-start_pos) / (end_pos - start_pos));
