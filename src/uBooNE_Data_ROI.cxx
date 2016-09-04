@@ -130,6 +130,8 @@ WireCell2dToy::uBooNEDataROI::uBooNEDataROI(WireCell::FrameDataSource& raw_fds,W
   std::cout << "Extend Loose ROI" << std::endl;
   extend_ROI_loose();
 
+
+
   //std::cout << "Fidning ROI based on raw itself " << std::endl;
   //find_ROI_by_raw_itself(3.6,5); // 3 sigma with 5 (half) padding
   //std::cout << "Finding ROI based on other two planes " << std::endl;
