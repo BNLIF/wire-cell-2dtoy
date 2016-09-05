@@ -392,7 +392,7 @@ void WireCell2dToy::uBooNEDataAfterROI::BreakROI(SignalROI* roi, float rms){
   int start_bin = roi->get_start_bin();
   int end_bin = roi->get_end_bin();
   
-  // if (roi->get_chid()==3885){
+  // if (roi->get_chid()==1240){
   //   std::cout << "xin: " << start_bin << " " << end_bin << std::endl;
   // }
 
@@ -424,6 +424,8 @@ void WireCell2dToy::uBooNEDataAfterROI::BreakROI(SignalROI* roi, float rms){
       std::sort(order_peak_pos,order_peak_pos + npeaks);
       float valley_pos[205];
       valley_pos[0] = start_bin;
+
+      // find the first real valley
       float min = 1e9;
       for (int k=0; k< order_peak_pos[0]-start_bin;k++){
        	if (htemp->GetBinContent(k+1) < min){
@@ -441,6 +443,7 @@ void WireCell2dToy::uBooNEDataAfterROI::BreakROI(SignalROI* roi, float rms){
 	  if (htemp->GetBinContent(j-start_bin+1) > htemp->GetBinContent(order_peak_pos[0]-start_bin+1))
 	    order_peak_pos[0] = j;
 	}
+	valley_pos[0] = start_bin;
       }
 
       for (Int_t j=0;j!=npeaks-1;j++){
@@ -453,6 +456,8 @@ void WireCell2dToy::uBooNEDataAfterROI::BreakROI(SignalROI* roi, float rms){
 	  }
 	}
       }
+
+      //find the end ... 
       valley_pos[npeaks] = end_bin;
       min = 1e9;
       for (int k=order_peak_pos[npeaks-1]-start_bin; k<= end_bin-start_bin;k++){
@@ -471,7 +476,7 @@ void WireCell2dToy::uBooNEDataAfterROI::BreakROI(SignalROI* roi, float rms){
 	}
       }
       
-      // if (roi->get_chid() == 3885 && roi->get_plane() == WirePlaneType_t(1)){
+      // if (roi->get_chid() == 1240 && roi->get_plane() == WirePlaneType_t(0)){
       // 	for (int j=0;j!=npeaks;j++){
       // 	  std::cout << valley_pos[j] << " " << htemp->GetBinContent(valley_pos[j]-start_bin+1)<< " " << order_peak_pos[j] << " " << htemp->GetBinContent( order_peak_pos[j]-start_bin+1) << " " << valley_pos[j+1] << " " << htemp->GetBinContent(valley_pos[j+1] - start_bin+1)<< std::endl ;
       // 	}
@@ -519,7 +524,7 @@ void WireCell2dToy::uBooNEDataAfterROI::BreakROI(SignalROI* roi, float rms){
 	    j = npeaks;
 	  }
 
-	  // if (roi->get_chid() == 3885 && roi->get_plane() == WirePlaneType_t(1))
+	  // if (roi->get_chid() == 1240 && roi->get_plane() == WirePlaneType_t(0))
 	  //   std::cout << "c: " << npeaks << " " << valley_pos1[npeaks1-1] << " " << peak_pos1[npeaks1-1] << " " << valley_pos1[npeaks1] << " " << rms * sep_peak << std::endl;
 	}
       }
@@ -549,7 +554,7 @@ void WireCell2dToy::uBooNEDataAfterROI::BreakROI(SignalROI* roi, float rms){
 
 	if (saved_boundaries.find(start_pos) != saved_boundaries.end() ||
 	    saved_boundaries.find(end_pos) != saved_boundaries.end()){
-	  // if (roi->get_chid() == 3885 && roi->get_plane() == WirePlaneType_t(1))
+	  // if (roi->get_chid() == 1240 && roi->get_plane() == WirePlaneType_t(0))
 	  //   std::cout << "d: " << start_pos << " " << end_pos << std::endl;
 
 	  for (Int_t k = start_pos; k!=end_pos+1;k++){
@@ -1274,6 +1279,9 @@ int WireCell2dToy::uBooNEDataAfterROI::jump(int frame_number){
   generate_merge_ROIs();
   std::cout << "Break ROIs" << std::endl;
   BreakROIs();
+  std::cout << "Clean up ROIs again" << std::endl;
+  CleanUpROIs();
+
   std::cout << "Shrink ROIs" << std::endl;
   ShrinkROIs();
 
