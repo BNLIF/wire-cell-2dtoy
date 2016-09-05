@@ -637,11 +637,28 @@ void WireCell2dToy::uBooNEDataAfterROI::BreakROIs(){
     }
   }
 
+
+
   for (int i=0;i!=all_rois.size();i++){
     BreakROI1(all_rois.at(i));
   }
-  
-  std::cout << rois_u_tight.size() << " " << rois_v_tight.size() << " " << rois_w_tight.size() << " " << rois_u_loose.size() << " " << rois_v_loose.size() << " " << rois_w_loose.size() << " " << front_rois.size() << " " << back_rois.size() << " " << contained_rois.size() << std::endl;
+
+  // int num_tight[3]={0,0,0};
+  // int num_loose[3]={0,0,0};
+  // for (int i=0;i!=nwire_u;i++){
+  //   num_tight[0] += rois_u_tight.at(i).size();
+  //   num_loose[0] += rois_u_loose.at(i).size();
+  // }
+  // for (int i=0;i!=nwire_v;i++){
+  //   num_tight[1] += rois_v_tight.at(i).size();
+  //   num_loose[1] += rois_v_loose.at(i).size();
+  // }
+  // for (int i=0;i!=nwire_w;i++){
+  //   num_tight[2] += rois_w_tight.at(i).size();
+  //   num_loose[2] += rois_w_loose.at(i).size();
+  // }
+
+  // std::cout << num_tight[0] << " " << num_tight[1] << " " << num_tight[2] << " " << num_loose[0] << " " << num_loose[1] << " " << num_loose[2] << " " << front_rois.size() << " " << back_rois.size() << " " << contained_rois.size() << std::endl;
 }
 
 void WireCell2dToy::uBooNEDataAfterROI::ShrinkROIs(){
@@ -1032,6 +1049,8 @@ int WireCell2dToy::uBooNEDataAfterROI::jump(int frame_number){
       }
     }
     
+    
+
     uboone_rois = rois.get_loose_rois(chid);
     for (int i = 0; i!=uboone_rois.size();i++){
       SignalROI *loose_roi;
