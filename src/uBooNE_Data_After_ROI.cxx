@@ -667,7 +667,16 @@ void WireCell2dToy::uBooNEDataAfterROI::BreakROIs(){
 }
 
 void WireCell2dToy::uBooNEDataAfterROI::ShrinkROI(SignalROI *roi){
-
+  
+  // get tight ROI as a inner boundary
+  // get the nearby ROIs with threshold as some sort of boundary 
+  int start_bin = roi->get_start_bin();
+  int end_bin = roi->get_end_bin();
+  int chid = roi->get_chid();
+  std::vector<float>& contents = roi->get_contents();
+  
+  
+  
 }
 
 void WireCell2dToy::uBooNEDataAfterROI::ShrinkROIs(){
