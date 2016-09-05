@@ -1512,7 +1512,7 @@ int WireCell2dToy::uBooNEDataAfterROI::jump(int frame_number){
   std::cout << "Clean up ROIs 2nd time" << std::endl;
   CleanUpROIs();
   std::cout << "Shrink ROIs" << std::endl;
-  //ShrinkROIs();
+  ShrinkROIs();
   std::cout << "Clean up ROIs 3rd time" << std::endl;
   CleanUpROIs();
 
