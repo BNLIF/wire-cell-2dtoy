@@ -666,8 +666,26 @@ void WireCell2dToy::uBooNEDataAfterROI::BreakROIs(){
   // std::cout << num_tight[0] << " " << num_tight[1] << " " << num_tight[2] << " " << num_loose[0] << " " << num_loose[1] << " " << num_loose[2] << " " << front_rois.size() << " " << back_rois.size() << " " << contained_rois.size() << std::endl;
 }
 
+void WireCell2dToy::uBooNEDataAfterROI::ShrinkROI(SignalROI *roi){
+
+}
+
 void WireCell2dToy::uBooNEDataAfterROI::ShrinkROIs(){
-  
+  // collect all ROIs
+  SignalROISelection all_rois;
+  for (int i=0;i!=rois_u_loose.size();i++){
+    for (auto it = rois_u_loose.at(i).begin(); it!= rois_u_loose.at(i).end(); it++){
+      all_rois.push_back(*it);
+    }
+  }  
+  for (int i=0;i!=rois_v_loose.size();i++){
+    for (auto it = rois_v_loose.at(i).begin(); it!= rois_v_loose.at(i).end(); it++){
+      all_rois.push_back(*it);
+    }
+  }
+  for (int i=0;i!=all_rois.size();i++){
+    ShrinkROI(all_rois.at(i));
+  }
 }
 
 void WireCell2dToy::uBooNEDataAfterROI::generate_merge_ROIs(){
@@ -1281,7 +1299,6 @@ int WireCell2dToy::uBooNEDataAfterROI::jump(int frame_number){
   BreakROIs();
   std::cout << "Clean up ROIs again" << std::endl;
   CleanUpROIs();
-
   std::cout << "Shrink ROIs" << std::endl;
   ShrinkROIs();
 
