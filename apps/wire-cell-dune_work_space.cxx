@@ -332,6 +332,9 @@ int main(int argc, char* argv[])
   					    threshold_vg, threshold_wg, 
   					    nwire_u, 
   					    nwire_v, nwire_w); 
+
+  sds.set_flag(2);
+  sds_th.set_flag(2);
   
 
    int ncount = 0;
