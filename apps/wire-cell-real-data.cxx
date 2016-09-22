@@ -176,7 +176,8 @@ int main(int argc, char* argv[])
   float threshold_vg = 822.81;
   float threshold_wg = 510.84;
   
-  int time_offset = -52.;
+  //int time_offset = -52.;
+  int time_offset = -92.;
   
 
 
@@ -351,7 +352,8 @@ int main(int argc, char* argv[])
    
     
     if (i==0){
-      badtiling[i] = new WireCell2dToy::BadTiling(i,nrebin,uplane_map,vplane_map,wplane_map,gds,1);
+      badtiling[i] = new WireCell2dToy::BadTiling(i,nrebin,uplane_map,vplane_map,wplane_map,gds,0,1); // 2 plane bad tiling
+      // badtiling[i] = new WireCell2dToy::BadTiling(i,nrebin,uplane_map,vplane_map,wplane_map,gds,1,1); // 1 plane bad tiling
     }
 
     //badtiling[i] = new WireCell2dToy::BadTiling(i,nrebin,uplane_map,vplane_map,wplane_map,gds);

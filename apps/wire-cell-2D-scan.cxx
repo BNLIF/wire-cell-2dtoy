@@ -145,7 +145,7 @@ int main(int argc, char* argv[])
 
 
 
-  TFile *file = new TFile(Form("2D_display_%d_%d_%d.root",run_no,subrun_no,eve_num),"RECREATE");
+  TFile *file = new TFile(Form("scan_%d_%d_%d.root",run_no,subrun_no,event_no),"RECREATE");
 
   GeomWireSelection wires_u = gds.wires_in_plane(WirePlaneType_t(0));
   GeomWireSelection wires_v = gds.wires_in_plane(WirePlaneType_t(1));
@@ -155,30 +155,30 @@ int main(int argc, char* argv[])
   Int_t nwire_v = wires_v.size();
   Int_t nwire_w = wires_w.size();
 
-  TH2I *hu_orig = new TH2I("hu_orig","hu_orig",nwire_u,-0.5,nwire_u-0.5,total_time_bin,0,total_time_bin);
-  TH2I *hv_orig = new TH2I("hv_orig","hv_orig",nwire_v,-0.5+nwire_u,nwire_v-0.5+nwire_u,total_time_bin,0,total_time_bin);
-  TH2I *hw_orig = new TH2I("hw_orig","hw_orig",nwire_w,-0.5+nwire_u+nwire_v,nwire_w-0.5+nwire_u+nwire_v,total_time_bin,0,total_time_bin);
+  // TH2I *hu_orig = new TH2I("hu_orig","hu_orig",nwire_u,-0.5,nwire_u-0.5,total_time_bin,0,total_time_bin);
+  // TH2I *hv_orig = new TH2I("hv_orig","hv_orig",nwire_v,-0.5+nwire_u,nwire_v-0.5+nwire_u,total_time_bin,0,total_time_bin);
+  // TH2I *hw_orig = new TH2I("hw_orig","hw_orig",nwire_w,-0.5+nwire_u+nwire_v,nwire_w-0.5+nwire_u+nwire_v,total_time_bin,0,total_time_bin);
 
-  TH1I *hu_baseline = new TH1I("hu_baseline","hu_threshold",nwire_u,-0.5,-0.5+nwire_u);
-  TH1I *hv_baseline = new TH1I("hv_baseline","hv_threshold",nwire_v,-0.5+nwire_u,-0.5+nwire_u+nwire_v);
-  TH1I *hw_baseline = new TH1I("hw_baseline","hw_threshold",nwire_w,-0.5+nwire_u+nwire_v,-0.5+nwire_u+nwire_v+nwire_w);
+  // TH1I *hu_baseline = new TH1I("hu_baseline","hu_threshold",nwire_u,-0.5,-0.5+nwire_u);
+  // TH1I *hv_baseline = new TH1I("hv_baseline","hv_threshold",nwire_v,-0.5+nwire_u,-0.5+nwire_u+nwire_v);
+  // TH1I *hw_baseline = new TH1I("hw_baseline","hw_threshold",nwire_w,-0.5+nwire_u+nwire_v,-0.5+nwire_u+nwire_v+nwire_w);
 
   
-  TH1I *hu_threshold = new TH1I("hu_threshold","hu_basline",nwire_u,-0.5,-0.5+nwire_u);
-  TH1I *hv_threshold = new TH1I("hv_threshold","hv_basline",nwire_v,-0.5+nwire_u,-0.5+nwire_u+nwire_v);
-  TH1I *hw_threshold = new TH1I("hw_threshold","hw_basline",nwire_w,-0.5+nwire_u+nwire_v,-0.5+nwire_u+nwire_v+nwire_w);
+  // TH1I *hu_threshold = new TH1I("hu_threshold","hu_basline",nwire_u,-0.5,-0.5+nwire_u);
+  // TH1I *hv_threshold = new TH1I("hv_threshold","hv_basline",nwire_v,-0.5+nwire_u,-0.5+nwire_u+nwire_v);
+  // TH1I *hw_threshold = new TH1I("hw_threshold","hw_basline",nwire_w,-0.5+nwire_u+nwire_v,-0.5+nwire_u+nwire_v+nwire_w);
 
-  TH2F *hu_raw = new TH2F("hu_raw","hu_raw",nwire_u,-0.5,nwire_u-0.5,total_time_bin,0,total_time_bin);
-  TH2F *hv_raw = new TH2F("hv_raw","hv_raw",nwire_v,-0.5+nwire_u,nwire_v-0.5+nwire_u,total_time_bin,0,total_time_bin);
-  TH2F *hw_raw = new TH2F("hw_raw","hw_raw",nwire_w,-0.5+nwire_u+nwire_v,nwire_w-0.5+nwire_u+nwire_v,total_time_bin,0,total_time_bin);
+  TH2I *hu_raw = new TH2I("hu_raw","hu_raw",nwire_u,-0.5,nwire_u-0.5,total_time_bin,0,total_time_bin);
+  TH2I *hv_raw = new TH2I("hv_raw","hv_raw",nwire_v,-0.5+nwire_u,nwire_v-0.5+nwire_u,total_time_bin,0,total_time_bin);
+  TH2I *hw_raw = new TH2I("hw_raw","hw_raw",nwire_w,-0.5+nwire_u+nwire_v,nwire_w-0.5+nwire_u+nwire_v,total_time_bin,0,total_time_bin);
 
-  TH2F *hu_decon = new TH2F("hu_decon","hu_decon",nwire_u,-0.5,nwire_u-0.5,total_time_bin/nrebin,0,total_time_bin);
-  TH2F *hv_decon = new TH2F("hv_decon","hv_decon",nwire_v,-0.5+nwire_u,nwire_v-0.5+nwire_u,total_time_bin/nrebin,0,total_time_bin);
-  TH2F *hw_decon = new TH2F("hw_decon","hw_decon",nwire_w,-0.5+nwire_u+nwire_v,nwire_w-0.5+nwire_u+nwire_v,total_time_bin/nrebin,0,total_time_bin);
+  TH2I *hu_decon = new TH2I("hu_decon","hu_decon",nwire_u,-0.5,nwire_u-0.5,total_time_bin/nrebin,0,total_time_bin);
+  TH2I *hv_decon = new TH2I("hv_decon","hv_decon",nwire_v,-0.5+nwire_u,nwire_v-0.5+nwire_u,total_time_bin/nrebin,0,total_time_bin);
+  TH2I *hw_decon = new TH2I("hw_decon","hw_decon",nwire_w,-0.5+nwire_u+nwire_v,nwire_w-0.5+nwire_u+nwire_v,total_time_bin/nrebin,0,total_time_bin);
   
 
-  TH2F *htemp;
-  TH2F *htemp1;
+  TH2I *htemp;
+  TH2I *htemp1;
   
   const Frame& frame = data_fds.get();
   size_t ntraces = frame.traces.size();
@@ -202,10 +202,16 @@ int main(int argc, char* argv[])
     }
     for (int i = tbin;i!=tbin+nbins;i++){
       int tt = i+1;
-      htemp->SetBinContent(chid+1,tt,trace.charge.at(i));
+      htemp->SetBinContent(chid+1,tt,int(trace.charge.at(i)));
     }
   }
-  
+
+  hu_raw->Rebin2D(1,nrebin);
+  hv_raw->Rebin2D(1,nrebin);
+  hw_raw->Rebin2D(1,nrebin);
+
+
+
   const Frame& frame1 = wien_fds.get();
   ntraces = frame1.traces.size();
   for (size_t ind=0; ind<ntraces; ++ind) {
@@ -225,7 +231,7 @@ int main(int argc, char* argv[])
     }
      for (int i = tbin;i!=tbin+nbins;i++){
       int tt = i+1;
-      htemp1->SetBinContent(chid+1,tt,trace.charge.at(i));
+      htemp1->SetBinContent(chid+1,tt,int(trace.charge.at(i)));
     }
   }
 
@@ -244,109 +250,109 @@ int main(int argc, char* argv[])
   tree->GetEntry(eve_num);
   
   int nchannels = channelid->size();
-  TH2I *htemp2;
-  TH1I *htemp3 = new TH1I("htemp3","htemp3",4096,0,4096); //12-bit ADC
-  TH1I *htemp4;
+  // TH2I *htemp2;
+  // TH1I *htemp3 = new TH1I("htemp3","htemp3",4096,0,4096); //12-bit ADC
+  // TH1I *htemp4;
 
-  for (size_t ind=0; ind < nchannels; ++ind) {
-    TH1F* signal = dynamic_cast<TH1F*>(esignal->At(ind));
-    int chid = channelid->at(ind);
+  // for (size_t ind=0; ind < nchannels; ++ind) {
+  //   TH1F* signal = dynamic_cast<TH1F*>(esignal->At(ind));
+  //   int chid = channelid->at(ind);
      
-    WirePlaneType_t plane = gds.by_channel(chid).at(0)->plane();
-    if (plane == WirePlaneType_t(0)){
-      htemp2 = hu_orig;
-      htemp4 = hu_baseline;
-    }else if (plane == WirePlaneType_t(1)){
-      htemp2 = hv_orig;
-      htemp4 = hv_baseline;
-      chid -= nwire_u;
-    }else if (plane == WirePlaneType_t(2)){
-      htemp2 = hw_orig;
-      htemp4 = hw_baseline;
-      chid -= nwire_u + nwire_v;
-    }
+  //   WirePlaneType_t plane = gds.by_channel(chid).at(0)->plane();
+  //   if (plane == WirePlaneType_t(0)){
+  //     //  htemp2 = hu_orig;
+  //     //htemp4 = hu_baseline;
+  //   }else if (plane == WirePlaneType_t(1)){
+  //     //htemp2 = hv_orig;
+  //     //htemp4 = hv_baseline;
+  //     chid -= nwire_u;
+  //   }else if (plane == WirePlaneType_t(2)){
+  //     //htemp2 = hw_orig;
+  //     //htemp4 = hw_baseline;
+  //     chid -= nwire_u + nwire_v;
+  //   }
     
-    htemp3->Reset();
-    for (int ibin=0; ibin != total_time_bin; ibin++) {
-      int tt = ibin+1;
-      htemp2->SetBinContent(chid+1,tt,int(signal->GetBinContent(ibin+1)));
-      htemp3->Fill(int(signal->GetBinContent(ibin+1)));
-    }
-    htemp4->SetBinContent(chid+1,htemp3->GetMaximumBin()-1);
-  }
+  //   htemp3->Reset();
+  //   for (int ibin=0; ibin != total_time_bin; ibin++) {
+  //     int tt = ibin+1;
+  //     htemp2->SetBinContent(chid+1,tt,int(signal->GetBinContent(ibin+1)));
+  //     htemp3->Fill(int(signal->GetBinContent(ibin+1)));
+  //   }
+  //   htemp4->SetBinContent(chid+1,htemp3->GetMaximumBin()-1);
+  // }
 
-  std::vector<float>& uplane_rms = wien_fds.get_uplane_rms();
-  std::vector<float>& vplane_rms = wien_fds.get_vplane_rms();
-  std::vector<float>& wplane_rms = wien_fds.get_wplane_rms();
-  for (Int_t i=0;i!=uplane_rms.size();i++){
-    hu_threshold->SetBinContent(i+1,uplane_rms.at(i)*3.6 );
-  }
-  for (Int_t i=0;i!=vplane_rms.size();i++){
-    hv_threshold->SetBinContent(i+1,vplane_rms.at(i)*3.6 );
-  }
-  for (Int_t i=0;i!=wplane_rms.size();i++){
-    hw_threshold->SetBinContent(i+1,wplane_rms.at(i)*3.6 );
-  }
+  // std::vector<float>& uplane_rms = wien_fds.get_uplane_rms();
+  // std::vector<float>& vplane_rms = wien_fds.get_vplane_rms();
+  // std::vector<float>& wplane_rms = wien_fds.get_wplane_rms();
+  // for (Int_t i=0;i!=uplane_rms.size();i++){
+  //   hu_threshold->SetBinContent(i+1,uplane_rms.at(i)*3.6);
+  // }
+  // for (Int_t i=0;i!=vplane_rms.size();i++){
+  //   hv_threshold->SetBinContent(i+1,vplane_rms.at(i)*3.6);
+  // }
+  // for (Int_t i=0;i!=wplane_rms.size();i++){
+  //   hw_threshold->SetBinContent(i+1,wplane_rms.at(i)*3.6);
+  // }
 
   // finish saving
 
-  TTree *Trun = new TTree("Trun","Trun");
-  Trun->SetDirectory(file);
+  // TTree *Trun = new TTree("Trun","Trun");
+  // Trun->SetDirectory(file);
 
-  int detector = 0; // MicroBooNE
-  Trun->Branch("detector",&detector,"detector/I");
+  // int detector = 0; // MicroBooNE
+  // Trun->Branch("detector",&detector,"detector/I");
 
-  Trun->Branch("eventNo",&event_no,"eventNo/I");
-  Trun->Branch("runNo",&run_no,"runNo/I");
-  Trun->Branch("subRunNo",&subrun_no,"subRunNo/I");
+  // Trun->Branch("eventNo",&event_no,"eventNo/I");
+  // Trun->Branch("runNo",&run_no,"runNo/I");
+  // Trun->Branch("subRunNo",&subrun_no,"subRunNo/I");
   
-  Trun->Branch("unit_dis",&unit_dis,"unit_dis/F");
-  Trun->Branch("toffset_uv",&toffset_1,"toffset_uv/F");
-  Trun->Branch("toffset_uw",&toffset_2,"toffset_uw/F");
-  Trun->Branch("toffset_u",&toffset_3,"toffset_u/F");
-  Trun->Branch("total_time_bin",&total_time_bin,"total_time_bin/I");
-  Trun->Branch("recon_threshold",&recon_threshold,"recon_threshold/I");
-  Trun->Branch("frame_length",&frame_length,"frame_length/I");
-  Trun->Branch("max_events",&max_events,"max_events/I");
-  Trun->Branch("eve_num",&eve_num,"eve_num/I");
-  Trun->Branch("nrebin",&nrebin,"nrebin/I");
-  Trun->Branch("threshold_u",&threshold_u,"threshold_u/F");
-  Trun->Branch("threshold_v",&threshold_v,"threshold_v/F");
-  Trun->Branch("threshold_w",&threshold_w,"threshold_w/F");
-  Trun->Branch("time_offset",&time_offset,"time_offset/I");
+  // Trun->Branch("unit_dis",&unit_dis,"unit_dis/F");
+  // Trun->Branch("toffset_uv",&toffset_1,"toffset_uv/F");
+  // Trun->Branch("toffset_uw",&toffset_2,"toffset_uw/F");
+  // Trun->Branch("toffset_u",&toffset_3,"toffset_u/F");
+  // Trun->Branch("total_time_bin",&total_time_bin,"total_time_bin/I");
+  // Trun->Branch("recon_threshold",&recon_threshold,"recon_threshold/I");
+  // Trun->Branch("frame_length",&frame_length,"frame_length/I");
+  // Trun->Branch("max_events",&max_events,"max_events/I");
+  // Trun->Branch("eve_num",&eve_num,"eve_num/I");
+  // Trun->Branch("nrebin",&nrebin,"nrebin/I");
+  // Trun->Branch("threshold_u",&threshold_u,"threshold_u/F");
+  // Trun->Branch("threshold_v",&threshold_v,"threshold_v/F");
+  // Trun->Branch("threshold_w",&threshold_w,"threshold_w/F");
+  // Trun->Branch("time_offset",&time_offset,"time_offset/I");
 
-  Trun->Fill();
+  // Trun->Fill();
 
 
-  TTree *T_bad = new TTree("T_bad","T_bad");
-  Int_t chid, plane;
-  Int_t start_time,end_time;
-  T_bad->Branch("chid",&chid,"chid/I");
-  T_bad->Branch("plane",&plane,"plane/I");
-  T_bad->Branch("start_time",&start_time,"start_time/I");
-  T_bad->Branch("end_time",&end_time,"end_time/I");
-  T_bad->SetDirectory(file);
-  for (auto it = uplane_map.begin(); it!=uplane_map.end();it++){
-    chid = it->first;
-    plane = 0;
-    start_time = it->second.first;
-    end_time = it->second.second;
-    T_bad->Fill();
-  }
-  for (auto it = vplane_map.begin(); it!=vplane_map.end();it++){
-    chid = it->first + nwire_u;
-    plane = 1;
-    start_time = it->second.first;
-    end_time = it->second.second;
-    T_bad->Fill();
-  }
-  for (auto it = wplane_map.begin(); it!=wplane_map.end();it++){
-    chid = it->first + nwire_u + nwire_v;
-    plane = 2;
-    start_time = it->second.first;
-    end_time = it->second.second;
-    T_bad->Fill();
-  }
+  // TTree *T_bad = new TTree("T_bad","T_bad");
+  // Int_t chid, plane;
+  // Int_t start_time,end_time;
+  // T_bad->Branch("chid",&chid,"chid/I");
+  // T_bad->Branch("plane",&plane,"plane/I");
+  // T_bad->Branch("start_time",&start_time,"start_time/I");
+  // T_bad->Branch("end_time",&end_time,"end_time/I");
+  // T_bad->SetDirectory(file);
+  // for (auto it = uplane_map.begin(); it!=uplane_map.end();it++){
+  //   chid = it->first;
+  //   plane = 0;
+  //   start_time = it->second.first;
+  //   end_time = it->second.second;
+  //   T_bad->Fill();
+  // }
+  // for (auto it = vplane_map.begin(); it!=vplane_map.end();it++){
+  //   chid = it->first + nwire_u;
+  //   plane = 1;
+  //   start_time = it->second.first;
+  //   end_time = it->second.second;
+  //   T_bad->Fill();
+  // }
+  // for (auto it = wplane_map.begin(); it!=wplane_map.end();it++){
+  //   chid = it->first + nwire_u + nwire_v;
+  //   plane = 2;
+  //   start_time = it->second.first;
+  //   end_time = it->second.second;
+  //   T_bad->Fill();
+  // }
   
 
 
