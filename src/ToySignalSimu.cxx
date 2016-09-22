@@ -21,13 +21,13 @@ WireCell2dToy::ToySignalSimuFDS::ToySignalSimuFDS(WireCell::FrameDataSource& fds
 {  
   bins_per_frame = bins_per_frame1;
 
-  // GeomWireSelection wires_u = gds.wires_in_plane(WirePlaneType_t(0));
-  // GeomWireSelection wires_v = gds.wires_in_plane(WirePlaneType_t(1));
-  // GeomWireSelection wires_w = gds.wires_in_plane(WirePlaneType_t(2));
-
-  // nwire_u = wires_u.size();
-  // nwire_v = wires_v.size();
-  // nwire_w = wires_w.size();
+  GeomWireSelection wires_u = gds.wires_in_plane(WirePlaneType_t(0));
+  GeomWireSelection wires_v = gds.wires_in_plane(WirePlaneType_t(1));
+  GeomWireSelection wires_w = gds.wires_in_plane(WirePlaneType_t(2));
+  
+  nwire_u = wires_u.size();
+  nwire_v = wires_v.size();
+  nwire_w = wires_w.size();
 
   //test save
   // hu1 = new TH1F*[nwire_u];
@@ -44,7 +44,7 @@ WireCell2dToy::ToySignalSimuFDS::ToySignalSimuFDS(WireCell::FrameDataSource& fds
   //   hw1[i] = new TH1F(Form("W_%d",i),Form("W_%d",i),bins_per_frame,0,bins_per_frame);
   // }
   //test save
-  
+
   hu = new TH1F("U","U",bins_per_frame,0,bins_per_frame);
   hv = new TH1F("V","V",bins_per_frame,0,bins_per_frame);
   hw = new TH1F("W","W",bins_per_frame,0,bins_per_frame);
@@ -70,8 +70,24 @@ WireCell2dToy::ToySignalSimuFDS::ToySignalSimuFDS(WireCell::FrameDataSource& fds
   delete gv;
   delete gw;
   
+  /*
+  config = new ElectronicsConfig();
+  config->SetNTDC(bins_per_frame);
+  eRsp = new GenElecRsp(config);
+  noise = new GenNoise(config);
+  fRsp = new FieldRsp(config, "/home/xiaoyueli/BNLIF/wire-cell/signal/ave_field.root", 0, overall_time_offset, time_offset_uv, time_offset_uw);
+  sig = new GenSignal(config, config->NTDC(), true);
+  sig->SetNoise(noise);
+  sig->SetFieldResponse(fRsp);
+  sig->SetElectronicsResponse(eRsp);
+  for(int i = 0; i < 7; ++i) {
+    hRawSig[i] = new TH1F(Form("hRawSig%d",i), Form("hRawSig%d",i), config->NTDC(), 0, config->NTDC()/config->DigitFreq());
+    if(i>2) continue;
+    hSimuSig[i] = new TH1F(Form("hSimuSig%d",i), Form("hSimuSig%d",i), config->NTDC(), 0, config->NTDC()/config->DigitFreq());
+  }
+  */
 }
-
+ 
 WireCell2dToy::ToySignalSimuFDS::ToySignalSimuFDS(WireCell::FrameDataSource& fds, const WireCell::DetectorGDS& gds,int bins_per_frame1, int nframes_total, float time_offset_uv, float time_offset_uw, int flag_random, float overall_time_offset, int overall_time_shift)
   : fds(fds)
   , gds(0)
@@ -84,7 +100,6 @@ WireCell2dToy::ToySignalSimuFDS::ToySignalSimuFDS(WireCell::FrameDataSource& fds
   , overall_time_shift(overall_time_shift)
 {  
   bins_per_frame = bins_per_frame1;
-  
   // nwire_u = dgds->get_total_nwires(WirePlaneType_t(0));
   // nwire_v = dgds->get_total_nwires(WirePlaneType_t(1));
   // nwire_w = dgds->get_total_nwires(WirePlaneType_t(2));
@@ -104,7 +119,7 @@ WireCell2dToy::ToySignalSimuFDS::ToySignalSimuFDS(WireCell::FrameDataSource& fds
   //   hw1[i] = new TH1F(Form("W_%d",i),Form("W_%d",i),bins_per_frame,0,bins_per_frame);
   // }
   //test save
-  
+
   hu = new TH1F("U","U",bins_per_frame,0,bins_per_frame);
   hv = new TH1F("V","V",bins_per_frame,0,bins_per_frame);
   hw = new TH1F("W","W",bins_per_frame,0,bins_per_frame);
@@ -129,29 +144,97 @@ WireCell2dToy::ToySignalSimuFDS::ToySignalSimuFDS(WireCell::FrameDataSource& fds
   delete gu;
   delete gv;
   delete gw;
-  
+
+  /*
+  config = new ElectronicsConfig();
+  config->SetNTDC(bins_per_frame);
+  eRsp = new GenElecRsp(config);
+  noise = new GenNoise(config);
+  fRsp = new FieldRsp(config, "/home/xiaoyueli/BNLIF/wire-cell/signal/ave_field.root", 0, overall_time_offset, time_offset_uv, time_offset_uw);
+  sig = new GenSignal(config, config->NTDC(), true);
+  sig->SetNoise(noise);
+  sig->SetFieldResponse(fRsp);
+  sig->SetElectronicsResponse(eRsp);
+  for(int i = 0; i < 7; ++i) {
+    hRawSig[i] = new TH1F(Form("hRawSig%d",i), Form("hRawSig%d",i), config->NTDC(), 0, config->NTDC()/config->DigitFreq());
+    if(i>2) continue;
+    hSimuSig[i] = new TH1F(Form("hSimuSig%d",i), Form("hSimuSig%d",i), config->NTDC(), 0, config->NTDC()/config->DigitFreq());
+  }
+  */
 }
 
+WireCell2dToy::ToySignalSimuFDS::ToySignalSimuFDS(WireCell::FrameDataSource& fds, const WireCell::DetectorGDS& gds, WireCellSignal::ElectronicsConfig& conf, int nframes_total, float time_offset_uv, float time_offset_uw, int flag_random, float overall_time_offset, int overall_time_shift)
+  : fds(fds)
+  , gds(0)
+  , dgds(&gds)
+  , gds_flag(1)
+  , config(&conf)
+  , max_frames(nframes_total)
+  , time_offset_uv(time_offset_uv)
+  , time_offset_uw(time_offset_uw)
+  , flag_random(flag_random)
+  , overall_time_shift(overall_time_shift)
+{
+  std::cout<<"here?"<<std::endl;
+  bins_per_frame = config->NTDC();
+  std::cout<<"bins per frame: "<<bins_per_frame<<std::endl;;    
+  noise = new WireCellSignal::GenNoise(*config);
+  std::cout<<"noise"<<std::endl;
+  //fRsp = new WireCellSignal::ConvolutedResponse(config, "/home/xiaoyueli/BNLIF/wire-cell/signal/dune.root", overall_time_offset, time_offset_uv, time_offset_uw);
+  //fds.SetResponseFunctions(fRsp);
+}
+
+WireCell2dToy::ToySignalSimuFDS::ToySignalSimuFDS(WireCell::FrameDataSource& fds, const WireCell::GeomDataSource& gds, WireCellSignal::ElectronicsConfig& conf, int nframes_total, float time_offset_uv, float time_offset_uw, int flag_random, float overall_time_offset, int overall_time_shift)
+  : fds(fds)
+  , gds(&gds)
+  , dgds(0)
+  , gds_flag(0)
+  , config(&conf)
+  , max_frames(nframes_total)
+  , time_offset_uv(time_offset_uv)
+  , time_offset_uw(time_offset_uw)
+  , flag_random(flag_random)
+  , overall_time_shift(overall_time_shift)
+{  
+  bins_per_frame = config->NTDC();
+  noise = new WireCellSignal::GenNoise(*config);
+  //fRsp = new WireCellSignal::ConvolutedResponse(config, "/home/xiaoyueli/BNLIF/wire-cell/signal/dune.root", overall_time_offset, time_offset_uv, time_offset_uw);
+  //fds.SetResponseFunctions(fRsp);
+}
 
 int WireCell2dToy::ToySignalSimuFDS::size() const{
   return max_frames;
 }
 
 void WireCell2dToy::ToySignalSimuFDS::Save(){
+  /*
+  std::cout<<"save"<<std::endl;
   TFile *file = new TFile("temp_simu.root","RECREATE");
+  if (!file) std::cout<<"cannot create file"<<std::endl;
+  else std::cout<<"created file"<<std::endl;
   //test save
-  // for (int i=0;i!=nwire_u;i++){
-  //   TH1F *huu = (TH1F*)hu1[i]->Clone(Form("U1_%d",i));
-  // }
-  // for (int i=0;i!=nwire_v;i++){
-  //   TH1F *hvv = (TH1F*)hv1[i]->Clone(Form("V1_%d",i));
-  // }
-  // for (int i=0;i!=nwire_w;i++){
-  //   TH1F *hww = (TH1F*)hw1[i]->Clone(Form("W1_%d",i));
-  // }
+  file->cd();
+  std::cout<<"cd to file"<<std::endl;
+  std::cout<<nwire_u<<" "<<nwire_v<<" "<<nwire_w<<std::endl;
+  for (int i=0;i!=nwire_u;i++){
+    std::cout<<i<<std::endl;
+    TH1F *huu = (TH1F*)hu1[i]->Clone(Form("U1_%d",i));
+    huu->Write();
+  }
+  for (int i=0;i!=nwire_v;i++){
+    std::cout<<i<<std::endl;
+    TH1F *hvv = (TH1F*)hv1[i]->Clone(Form("V1_%d",i));
+    hvv->Write();
+  }
+  for (int i=0;i!=nwire_w;i++){
+    std::cout<<i<<std::endl;
+    TH1F *hww = (TH1F*)hw1[i]->Clone(Form("W1_%d",i));
+    hww->Write();
+  }
   //test save
   file->Write();
   file->Close();
+  */
 }
 
 int WireCell2dToy::ToySignalSimuFDS::jump(int frame_number){
@@ -172,16 +255,15 @@ int WireCell2dToy::ToySignalSimuFDS::jump(int frame_number){
   if (frame.index == frame_number) {
     return frame_number;
   }
-  
   fds.jump(frame_number);
   
-   // start FFT to convolute with response function
+#ifndef WIRECELLSIGNAL_CONVOLUTEDRESPONSE_H
   TVirtualFFT::SetTransform(0);
   TH1 *hm = 0;
   TH1 *hp = 0;
   TH1 *hmr;
   TH1 *hpr;
-
+  
   TH1 *hmr_u = 0;
   TH1 *hpr_u = 0;
   TH1 *hmr_v = 0;
@@ -194,13 +276,13 @@ int WireCell2dToy::ToySignalSimuFDS::jump(int frame_number){
   int  n  = bins_per_frame;
   TVirtualFFT *ifft;
   TH1 *fb = 0;
-
+  
   // add in random noise
   double noise[2]={0.48,0.6};
   for (int i=0;i!=2;i++){
     noise[i] = 7.8/4.7;
   }
-
+  
   hmr_u = hur->FFT(0,"MAG");  
   hpr_u = hur->FFT(0,"PH");
   hmr_v = hvr->FFT(0,"MAG");  
@@ -218,12 +300,7 @@ int WireCell2dToy::ToySignalSimuFDS::jump(int frame_number){
     int tbin = trace.tbin;
     int chid = trace.chid;
     int nbins = trace.charge.size();
-
-    //std::cout << chid << " " << std::endl;
-
-
-    TH1F *htemp;
-    
+    TH1F *htemp;    
     if (gds_flag == 0){
       WirePlaneType_t plane = gds->by_channel(chid).at(0)->plane();
       if (plane == WirePlaneType_t(0)){
@@ -272,10 +349,8 @@ int WireCell2dToy::ToySignalSimuFDS::jump(int frame_number){
     //   hmr = hmr_w;
     //   hpr = hpr_w;
     // }
-
-
     htemp->Reset();
-
+    
     for (int j = 0; j!= nbins; j++){
       float charge = htemp->GetBinContent(tbin + 1 + j);
       charge += trace.charge.at(j);
@@ -292,11 +367,11 @@ int WireCell2dToy::ToySignalSimuFDS::jump(int frame_number){
       
       if (tt > bins_per_frame) tt -= bins_per_frame;
       if (tt < 1 ) tt += bins_per_frame;
-
+      
       if (tt <= bins_per_frame)
 	htemp->SetBinContent(tt,vcharge.at(j));
     }
-
+    
     
     hm = htemp->FFT(0,"MAG");
     hp = htemp->FFT(0,"PH");
@@ -323,7 +398,7 @@ int WireCell2dToy::ToySignalSimuFDS::jump(int frame_number){
     delete hp;
     delete fb;
     delete ifft;
-
+    
     Trace t;
     t.chid = chid;
     t.tbin = 0;
@@ -333,14 +408,89 @@ int WireCell2dToy::ToySignalSimuFDS::jump(int frame_number){
     }
     //std::cout << chid << " " << htemp->GetBinContent(1) << std::endl;
     frame.traces.push_back(t);
-    //std::cout << chid << std::endl;
     // std::cout << nwire_u << " " << nwire_v << " " << nwire_w << std::endl;
   }
-  
 
+#else
+  std::cout<<" -- start signal simulation -- "<<std::endl;
+  const double eCharge = 1.602177e-4; // charge of an electron in fC 
+  frame.clear();
+  const Frame& frame1 = fds.get();
+  size_t ntraces = frame1.traces.size();
+  double noise_baseline = noise->GetBaseline();
+  std::cout<<"noise baseline is "<<noise_baseline<<std::endl;
+  TH1F *hNoise = (TH1F*)noise->NoiseInTime()->Clone();
+  hNoise->Reset();
+  for (size_t ind=0; ind<ntraces; ++ind) {
+    const Trace& trace = frame1.traces[ind];
+    int chid = trace.chid;
+    double channel_length;
+    TH1F *htemp = trace.hCharge;
+    if (!htemp) std::cerr << "raw signal doesn't exist!"<<std::endl;
+    if (!gds_flag) {
+      channel_length = gds->get_channel_length(chid)/units::cm;
+    } else {
+      channel_length = trace.channel_length/units::cm;
+    }
+    hNoise->Reset();
+    hNoise = (TH1F*)noise->NoiseInTime();
+    double noise_rms = noise->NoiseRMS();
+    noise_rms *= (1.020 + 0.0018 * channel_length)/noise_baseline;
+    if (ind%1000==0) std::cout<<"noise rms "<<noise_rms<<", length = "<<channel_length<<std::endl;
+    hNoise->Scale(noise_rms);
+    htemp->Scale(config->ADC()*eCharge);
+    htemp->Add(hNoise);    
+    //htemp->Scale(config->ADC());
+    Trace t;
+    t.chid = chid;
+    t.tbin = 0;    
+    t.charge.resize(bins_per_frame, 0.0);
+    for (int j = 0; j!=bins_per_frame; ++j) {
+      t.charge.at(j) = (int)(htemp->GetBinContent(j+1));
+    }
+    frame.traces.push_back(t);
+  }
+#endif
   
- 
-
+  /*
+  frame.clear();
+  const Frame& frame1 = fds.get();
+  size_t ntraces = frame1.traces.size();
+  for (size_t ind=0; ind<ntraces; ++ind) {
+    const Trace& trace = frame1.traces[ind];
+    int tbin = trace.tbin;
+    int chid = trace.chid;
+    int nbins = trace.charge.size();
+    TH1F *htemp;
+    WirePlaneType_t plane;
+    if(gds_flag == 0) plane = gds->by_channel(chid).at(0)->plane();
+    else plane = dgds->by_channel(chid).at(0)->plane();    
+    if (plane == WirePlaneType_t(0)) htemp = hu;
+    else if (plane == WirePlaneType_t(1)) htemp = hv;
+    else if (plane == WirePlaneType_t(2)) htemp= hw;
+    htemp->Reset();
+    for (int j = 0; j!= nbins; j++){
+      float charge = htemp->GetBinContent(tbin + 1 + j);
+      charge += trace.charge.at(j);
+      htemp->SetBinContent(tbin+1+j,charge);  
+    }    
+    std::vector<double> vcharge;
+    for (int j=0;j!=htemp->GetNbinsX();j++){
+      vcharge.push_back(htemp->GetBinContent(j+1));
+    }
+    htemp->Reset();
+    for (int j=0;j!=htemp->GetNbinsX();j++){
+      int tt = j+1 + overall_time_shift * 2;
+      
+      if (tt > bins_per_frame) tt -= bins_per_frame;
+      if (tt < 1 ) tt += bins_per_frame;
+      
+      if (tt <= bins_per_frame)
+	htemp->SetBinContent(tt,vcharge.at(j));
+    }
+  }
+  */
+  
   // //U-plane first
  
   // for (int i=0;i!=nwire_u;i++){
@@ -447,6 +597,7 @@ WireCell2dToy::ToySignalSimuFDS::~ToySignalSimuFDS(){
   // }
   //test save
 
+#ifndef WIRECELLSIGNAL_CONVOLUTEDRESPONSE_H
   delete hu;
   delete hv;
   delete hw;
@@ -458,4 +609,11 @@ WireCell2dToy::ToySignalSimuFDS::~ToySignalSimuFDS(){
   delete hur;
   delete hvr;
   delete hwr;
+
+#else
+  delete config;
+  delete noise;
+  //for(int i = 0; i < 7; ++i) delete hRawSig[i];
+  //for(int i = 0; i < 3; ++i) delete hSimuSig[i];
+#endif
 }
