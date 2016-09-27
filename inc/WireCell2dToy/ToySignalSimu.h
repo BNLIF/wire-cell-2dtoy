@@ -5,7 +5,7 @@
 #include "WireCellSignal/ElectronicsConfig.h"
 #include "WireCellSignal/ConvolutedResponse.h"
 #include "WireCellSignal/DetGenerativeFDS.h"
-#include "WireCellSignal/GenerativeFDS.h"
+//#include "WireCellSignal/GenerativeFDS.h"
 #include "WireCellSignal/GenNoise.h"
 
 #include "WireCellNav/FrameDataSource.h"
