@@ -31,7 +31,10 @@
 #include "WireCellSignal/ElectronicsConfig.h"
 #include "WireCellSignal/ConvolutedResponse.h"
 #include "WireCellSignal/DetGenerativeFDS.h"
+<<<<<<< HEAD
 //#include "WireCellSignal/GenerativeFDS.h"
+=======
+>>>>>>> 6842fdba0dbb06e452aaec35e796a8b672968ed7
 
 #include "WireCellNav/FrameDataSource.h"
 #include "WireCellNav/GenerativeFDS.h"
