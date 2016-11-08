@@ -1,6 +1,10 @@
 #ifndef WIRECELL2dToy_TOYSIGNALSIMU_H
 #define WIRECELL2dToy_TOYSIGNALSIMU_H
 
+#include "WireCellNav/FrameDataSource.h"
+#include "WireCellNav/GeomDataSource.h"
+#include "WireCellNav/DetectorGDS.h"
+#include "WireCellSst/MCTruth.h"
 
 #include "WireCellSignal/ElectronicsConfig.h"
 #include "WireCellSignal/ConvolutedResponse.h"
@@ -8,10 +12,7 @@
 //#include "WireCellSignal/GenerativeFDS.h"
 #include "WireCellSignal/GenNoise.h"
 
-#include "WireCellNav/FrameDataSource.h"
-#include "WireCellNav/GeomDataSource.h"
-#include "WireCellNav/DetectorGDS.h"
-#include "WireCellSst/MCTruth.h"
+
 
 #include "TH1F.h"
 #include "TGraph.h"
@@ -35,6 +36,10 @@ namespace WireCell2dToy {
     
   private:
     WireCell::FrameDataSource& fds;
+
+    int simulation_type; 
+    // 1 for the simple simulation (1D the oldest one)
+    // 2 for Xiaoyue's simulation (2D)
 
     int gds_flag;
     const WireCell::GeomDataSource* gds;

@@ -209,7 +209,7 @@ int main(int argc, char* argv[])
   std::cout << "Points deposited: " << pvv.size() << std::endl;
 
   WireCellSignal::ElectronicsConfig *conf = new WireCellSignal::ElectronicsConfig();
-  WireCellSignal::ConvolutedResponse *fRsp = new WireCellSignal::ConvolutedResponse(conf, "/home/xiaoyueli/BNLIF/wire-cell/signal/dune.root", time_offset, toffset_1, toffset_2);
+  WireCellSignal::ConvolutedResponse *fRsp = new WireCellSignal::ConvolutedResponse(conf, "./signal/dune.root", time_offset, toffset_1, toffset_2);
   //WireCellSignal::GenerativeFDS gfds(*toydep, gds, conf->NTDC(), max_events, 0.5*1.6*units::millimeter);
   WireCellSignal::DetGenerativeFDS gfds(*toydep, gds, conf->NTDC(), max_events, 0.5*1.6*units::millimeter);// 3m maximum drift distance
   gfds.SetResponseFunctions(fRsp);

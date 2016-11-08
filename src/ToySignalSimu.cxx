@@ -18,6 +18,7 @@ WireCell2dToy::ToySignalSimuFDS::ToySignalSimuFDS(WireCell::FrameDataSource& fds
   , time_offset_uw(time_offset_uw)
   , flag_random(flag_random)
   , overall_time_shift(overall_time_shift)
+  , simulation_type(1)
 {  
   bins_per_frame = bins_per_frame1;
 
@@ -98,6 +99,7 @@ WireCell2dToy::ToySignalSimuFDS::ToySignalSimuFDS(WireCell::FrameDataSource& fds
   , time_offset_uw(time_offset_uw)
   , flag_random(flag_random)
   , overall_time_shift(overall_time_shift)
+  , simulation_type(1)  
 {  
   bins_per_frame = bins_per_frame1;
   // nwire_u = dgds->get_total_nwires(WirePlaneType_t(0));
@@ -174,6 +176,7 @@ WireCell2dToy::ToySignalSimuFDS::ToySignalSimuFDS(WireCell::FrameDataSource& fds
   , time_offset_uw(time_offset_uw)
   , flag_random(flag_random)
   , overall_time_shift(overall_time_shift)
+  , simulation_type(2)
 {
   std::cout<<"here?"<<std::endl;
   bins_per_frame = config->NTDC();
@@ -195,6 +198,7 @@ WireCell2dToy::ToySignalSimuFDS::ToySignalSimuFDS(WireCell::FrameDataSource& fds
   , time_offset_uw(time_offset_uw)
   , flag_random(flag_random)
   , overall_time_shift(overall_time_shift)
+  , simulation_type(2)  
 {  
   bins_per_frame = config->NTDC();
   noise = new WireCellSignal::GenNoise(*config);
@@ -257,200 +261,199 @@ int WireCell2dToy::ToySignalSimuFDS::jump(int frame_number){
   }
   fds.jump(frame_number);
   
-#ifndef WIRECELLSIGNAL_CONVOLUTEDRESPONSE_H
-  TVirtualFFT::SetTransform(0);
-  TH1 *hm = 0;
-  TH1 *hp = 0;
-  TH1 *hmr;
-  TH1 *hpr;
-  
-  TH1 *hmr_u = 0;
-  TH1 *hpr_u = 0;
-  TH1 *hmr_v = 0;
-  TH1 *hpr_v = 0;
-  TH1 *hmr_w = 0;
-  TH1 *hpr_w = 0;
-  
-  double value_re[9600]; // hack for now
-  double value_im[9600];
-  int  n  = bins_per_frame;
-  TVirtualFFT *ifft;
-  TH1 *fb = 0;
-  
-  // add in random noise
-  double noise[2]={0.48,0.6};
-  for (int i=0;i!=2;i++){
-    noise[i] = 7.8/4.7;
-  }
-  
-  hmr_u = hur->FFT(0,"MAG");  
-  hpr_u = hur->FFT(0,"PH");
-  hmr_v = hvr->FFT(0,"MAG");  
-  hpr_v = hvr->FFT(0,"PH");
-  hmr_w = hwr->FFT(0,"MAG");  
-  hpr_w = hwr->FFT(0,"PH");
-  
-  frame.clear();
-  
-  //fill in the data ... 
-  const Frame& frame1 = fds.get();
-  size_t ntraces = frame1.traces.size();
-  for (size_t ind=0; ind<ntraces; ++ind) {
-    const Trace& trace = frame1.traces[ind];
-    int tbin = trace.tbin;
-    int chid = trace.chid;
-    int nbins = trace.charge.size();
-    TH1F *htemp;    
-    if (gds_flag == 0){
-      WirePlaneType_t plane = gds->by_channel(chid).at(0)->plane();
-      if (plane == WirePlaneType_t(0)){
-	htemp = hu;
-	hmr = hmr_u;
-	hpr = hpr_u;
-      }else if (plane == WirePlaneType_t(1)){
-	htemp = hv;
-	hmr = hmr_v;
-	hpr = hpr_v;
-      }else if (plane == WirePlaneType_t(2)){
-	htemp= hw;
-	hmr = hmr_w;
-	hpr = hpr_w;
-      }
-    }else{
-      WirePlaneType_t plane = dgds->by_channel(chid).at(0)->plane();
-      if (plane == WirePlaneType_t(0)){
-	htemp = hu;
-	hmr = hmr_u;
-	hpr = hpr_u;
-      }else if (plane == WirePlaneType_t(1)){
-	htemp = hv;
-	hmr = hmr_v;
-	hpr = hpr_v;
-      }else if (plane == WirePlaneType_t(2)){
-	htemp= hw;
-	hmr = hmr_w;
-	hpr = hpr_w;
-      }
+  if (simulation_type == 1){
+    TVirtualFFT::SetTransform(0);
+    TH1 *hm = 0;
+    TH1 *hp = 0;
+    TH1 *hmr;
+    TH1 *hpr;
+    
+    TH1 *hmr_u = 0;
+    TH1 *hpr_u = 0;
+    TH1 *hmr_v = 0;
+    TH1 *hpr_v = 0;
+    TH1 *hmr_w = 0;
+    TH1 *hpr_w = 0;
+    
+    double value_re[9600]; // hack for now
+    double value_im[9600];
+    int  n  = bins_per_frame;
+    TVirtualFFT *ifft;
+    TH1 *fb = 0;
+    
+    // add in random noise
+    double noise[2]={0.48,0.6};
+    for (int i=0;i!=2;i++){
+      noise[i] = 7.8/4.7;
     }
     
-    // if (chid < nwire_u){
-    //   htemp = hu;
-    //   //htemp = hu1[chid];
-    //   hmr = hmr_u;
-    //   hpr = hpr_u;
-    // }else if (chid < nwire_u + nwire_v){
-    //   htemp = hv;
-    //   //htemp = hv1[chid - nwire_u];
-    //   hmr = hmr_v;
-    //   hpr = hpr_v;
-    // }else{
-    //   htemp = hw;
-    //   //htemp = hw1[chid - nwire_u-nwire_v];
-    //   hmr = hmr_w;
-    //   hpr = hpr_w;
-    // }
-    htemp->Reset();
+    hmr_u = hur->FFT(0,"MAG");  
+    hpr_u = hur->FFT(0,"PH");
+    hmr_v = hvr->FFT(0,"MAG");  
+    hpr_v = hvr->FFT(0,"PH");
+    hmr_w = hwr->FFT(0,"MAG");  
+    hpr_w = hwr->FFT(0,"PH");
     
-    for (int j = 0; j!= nbins; j++){
-      float charge = htemp->GetBinContent(tbin + 1 + j);
-      charge += trace.charge.at(j);
-      htemp->SetBinContent(tbin+1+j,charge);  
-    }
+    frame.clear();
     
-    std::vector<double> vcharge;
-    for (int j=0;j!=htemp->GetNbinsX();j++){
-      vcharge.push_back(htemp->GetBinContent(j+1));
-    }
-    htemp->Reset();
-    for (int j=0;j!=htemp->GetNbinsX();j++){
-      int tt = j+1 + overall_time_shift * 2;
-      
-      if (tt > bins_per_frame) tt -= bins_per_frame;
-      if (tt < 1 ) tt += bins_per_frame;
-      
-      if (tt <= bins_per_frame)
-	htemp->SetBinContent(tt,vcharge.at(j));
-    }
-    
-    
-    hm = htemp->FFT(0,"MAG");
-    hp = htemp->FFT(0,"PH");
-    for (int j=0;j!=bins_per_frame;j++){
-      double rho = hm->GetBinContent(j+1)*hmr->GetBinContent(j+1);
-      double phi = hp->GetBinContent(j+1) + hpr->GetBinContent(j+1);
-      value_re[j] = rho*cos(phi)/bins_per_frame;
-      value_im[j] = rho*sin(phi)/bins_per_frame;
-    }
-    ifft = TVirtualFFT::FFT(1,&n,"C2R M K");
-    ifft->SetPointsComplex(value_re,value_im);
-    ifft->Transform();
-    fb = TH1::TransformHisto(ifft,0,"Re");
-    for (int j=0;j!=bins_per_frame;j++){
-      int content;
-      if (flag_random ==1){
-	content = round(fb->GetBinContent(j+1) * 7.8*4096./2000. + gRandom->Gaus(0,noise[1]));
+    //fill in the data ... 
+    const Frame& frame1 = fds.get();
+    size_t ntraces = frame1.traces.size();
+    for (size_t ind=0; ind<ntraces; ++ind) {
+      const Trace& trace = frame1.traces[ind];
+      int tbin = trace.tbin;
+      int chid = trace.chid;
+      int nbins = trace.charge.size();
+      TH1F *htemp;    
+      if (gds_flag == 0){
+	WirePlaneType_t plane = gds->by_channel(chid).at(0)->plane();
+	if (plane == WirePlaneType_t(0)){
+	  htemp = hu;
+	  hmr = hmr_u;
+	  hpr = hpr_u;
+	}else if (plane == WirePlaneType_t(1)){
+	  htemp = hv;
+	  hmr = hmr_v;
+	  hpr = hpr_v;
+	}else if (plane == WirePlaneType_t(2)){
+	  htemp= hw;
+	  hmr = hmr_w;
+	  hpr = hpr_w;
+	}
       }else{
-	content = round(fb->GetBinContent(j+1) * 7.8*4096./2000.);
+	WirePlaneType_t plane = dgds->by_channel(chid).at(0)->plane();
+	if (plane == WirePlaneType_t(0)){
+	  htemp = hu;
+	  hmr = hmr_u;
+	  hpr = hpr_u;
+	}else if (plane == WirePlaneType_t(1)){
+	  htemp = hv;
+	  hmr = hmr_v;
+	  hpr = hpr_v;
+	}else if (plane == WirePlaneType_t(2)){
+	  htemp= hw;
+	  hmr = hmr_w;
+	  hpr = hpr_w;
+	}
       }
-      htemp->SetBinContent(j+1,content);
+      
+      // if (chid < nwire_u){
+      //   htemp = hu;
+      //   //htemp = hu1[chid];
+      //   hmr = hmr_u;
+      //   hpr = hpr_u;
+      // }else if (chid < nwire_u + nwire_v){
+      //   htemp = hv;
+      //   //htemp = hv1[chid - nwire_u];
+      //   hmr = hmr_v;
+      //   hpr = hpr_v;
+      // }else{
+      //   htemp = hw;
+      //   //htemp = hw1[chid - nwire_u-nwire_v];
+      //   hmr = hmr_w;
+      //   hpr = hpr_w;
+      // }
+      htemp->Reset();
+      
+      for (int j = 0; j!= nbins; j++){
+	float charge = htemp->GetBinContent(tbin + 1 + j);
+	charge += trace.charge.at(j);
+	htemp->SetBinContent(tbin+1+j,charge);  
+      }
+      
+      std::vector<double> vcharge;
+      for (int j=0;j!=htemp->GetNbinsX();j++){
+	vcharge.push_back(htemp->GetBinContent(j+1));
+      }
+      htemp->Reset();
+      for (int j=0;j!=htemp->GetNbinsX();j++){
+	int tt = j+1 + overall_time_shift * 2;
+	
+	if (tt > bins_per_frame) tt -= bins_per_frame;
+	if (tt < 1 ) tt += bins_per_frame;
+	
+	if (tt <= bins_per_frame)
+	  htemp->SetBinContent(tt,vcharge.at(j));
+      }
+      
+      
+      hm = htemp->FFT(0,"MAG");
+      hp = htemp->FFT(0,"PH");
+      for (int j=0;j!=bins_per_frame;j++){
+	double rho = hm->GetBinContent(j+1)*hmr->GetBinContent(j+1);
+	double phi = hp->GetBinContent(j+1) + hpr->GetBinContent(j+1);
+	value_re[j] = rho*cos(phi)/bins_per_frame;
+	value_im[j] = rho*sin(phi)/bins_per_frame;
+      }
+      ifft = TVirtualFFT::FFT(1,&n,"C2R M K");
+      ifft->SetPointsComplex(value_re,value_im);
+      ifft->Transform();
+      fb = TH1::TransformHisto(ifft,0,"Re");
+      for (int j=0;j!=bins_per_frame;j++){
+	int content;
+	if (flag_random ==1){
+	  content = round(fb->GetBinContent(j+1) * 7.8*4096./2000. + gRandom->Gaus(0,noise[1]));
+	}else{
+	  content = round(fb->GetBinContent(j+1) * 7.8*4096./2000.);
+	}
+	htemp->SetBinContent(j+1,content);
+      }
+      delete hm;
+      delete hp;
+      delete fb;
+      delete ifft;
+      
+      Trace t;
+      t.chid = chid;
+      t.tbin = 0;
+      t.charge.resize(bins_per_frame, 0.0);
+      for (int j=0;j!=bins_per_frame;j++){
+	t.charge.at(j) = htemp->GetBinContent(j+1);
+      }
+      //std::cout << chid << " " << htemp->GetBinContent(1) << std::endl;
+      frame.traces.push_back(t);
+      // std::cout << nwire_u << " " << nwire_v << " " << nwire_w << std::endl;
     }
-    delete hm;
-    delete hp;
-    delete fb;
-    delete ifft;
-    
-    Trace t;
-    t.chid = chid;
-    t.tbin = 0;
-    t.charge.resize(bins_per_frame, 0.0);
-    for (int j=0;j!=bins_per_frame;j++){
-      t.charge.at(j) = htemp->GetBinContent(j+1);
-    }
-    //std::cout << chid << " " << htemp->GetBinContent(1) << std::endl;
-    frame.traces.push_back(t);
-    // std::cout << nwire_u << " " << nwire_v << " " << nwire_w << std::endl;
-  }
-
-#else
-  std::cout<<" -- start signal simulation -- "<<std::endl;
-  const double eCharge = 1.602177e-4; // charge of an electron in fC 
-  frame.clear();
-  const Frame& frame1 = fds.get();
-  size_t ntraces = frame1.traces.size();
-  double noise_baseline = noise->GetBaseline();
-  std::cout<<"noise baseline is "<<noise_baseline<<std::endl;
-  TH1F *hNoise = (TH1F*)noise->NoiseInTime()->Clone();
-  hNoise->Reset();
-  for (size_t ind=0; ind<ntraces; ++ind) {
-    const Trace& trace = frame1.traces[ind];
-    int chid = trace.chid;
-    double channel_length;
-    TH1F *htemp = trace.hCharge;
-    if (!htemp) std::cerr << "raw signal doesn't exist!"<<std::endl;
-    if (!gds_flag) {
-      channel_length = gds->get_channel_length(chid)/units::cm;
-    } else {
-      channel_length = trace.channel_length/units::cm;
-    }
+  }else if (simulation_type==2){
+    std::cout<<" -- start signal simulation -- "<<std::endl;
+    const double eCharge = 1.602177e-4; // charge of an electron in fC 
+    frame.clear();
+    const Frame& frame1 = fds.get();
+    size_t ntraces = frame1.traces.size();
+    double noise_baseline = noise->GetBaseline();
+    std::cout<<"noise baseline is "<<noise_baseline<<std::endl;
+    TH1F *hNoise = (TH1F*)noise->NoiseInTime()->Clone();
     hNoise->Reset();
-    hNoise = (TH1F*)noise->NoiseInTime();
-    double noise_rms = noise->NoiseRMS();
-    noise_rms *= (1.020 + 0.0018 * channel_length)/noise_baseline;
-    if (ind%1000==0) std::cout<<"noise rms "<<noise_rms<<", length = "<<channel_length<<std::endl;
-    hNoise->Scale(noise_rms);
-    htemp->Scale(config->ADC()*eCharge);
-    htemp->Add(hNoise);    
-    //htemp->Scale(config->ADC());
-    Trace t;
-    t.chid = chid;
-    t.tbin = 0;    
-    t.charge.resize(bins_per_frame, 0.0);
-    for (int j = 0; j!=bins_per_frame; ++j) {
-      t.charge.at(j) = (int)(htemp->GetBinContent(j+1));
+    for (size_t ind=0; ind<ntraces; ++ind) {
+      const Trace& trace = frame1.traces[ind];
+      int chid = trace.chid;
+      double channel_length;
+      TH1F *htemp = trace.hCharge;
+      if (!htemp) std::cerr << "raw signal doesn't exist!"<<std::endl;
+      if (!gds_flag) {
+	channel_length = gds->get_channel_length(chid)/units::cm;
+      } else {
+	channel_length = trace.channel_length/units::cm;
+      }
+      hNoise->Reset();
+      hNoise = (TH1F*)noise->NoiseInTime();
+      double noise_rms = noise->NoiseRMS();
+      noise_rms *= (1.020 + 0.0018 * channel_length)/noise_baseline;
+      if (ind%1000==0) std::cout<<"noise rms "<<noise_rms<<", length = "<<channel_length<<std::endl;
+      hNoise->Scale(noise_rms);
+      htemp->Scale(config->ADC()*eCharge);
+      htemp->Add(hNoise);    
+      //htemp->Scale(config->ADC());
+      Trace t;
+      t.chid = chid;
+      t.tbin = 0;    
+      t.charge.resize(bins_per_frame, 0.0);
+      for (int j = 0; j!=bins_per_frame; ++j) {
+	t.charge.at(j) = (int)(htemp->GetBinContent(j+1));
+      }
+      frame.traces.push_back(t);
     }
-    frame.traces.push_back(t);
   }
-#endif
   
   /*
   frame.clear();
@@ -579,6 +582,7 @@ int WireCell2dToy::ToySignalSimuFDS::jump(int frame_number){
   //   frame.traces.push_back(t);
   // }
   
+  //std::cout << frame.index << " " << frame.traces.size() << std::endl;
   
   frame.index = frame_number;
   return frame.index;
@@ -596,24 +600,25 @@ WireCell2dToy::ToySignalSimuFDS::~ToySignalSimuFDS(){
   //   delete hv1[i] ;
   // }
   //test save
-
-#ifndef WIRECELLSIGNAL_CONVOLUTEDRESPONSE_H
-  delete hu;
-  delete hv;
-  delete hw;
-
-  // delete gu;
-  // delete gv;
-  // delete gw;
-
-  delete hur;
-  delete hvr;
-  delete hwr;
-
-#else
-  delete config;
-  delete noise;
-  //for(int i = 0; i < 7; ++i) delete hRawSig[i];
+  if (simulation_type==1){
+    //#ifndef WIRECELLSIGNAL_CONVOLUTEDRESPONSE_H
+    delete hu;
+    delete hv;
+    delete hw;
+    
+    // delete gu;
+    // delete gv;
+    // delete gw;
+    
+    delete hur;
+    delete hvr;
+    delete hwr;
+  }else if (simulation_type==2){
+    //#else
+    delete config;
+    delete noise;
+    //for(int i = 0; i < 7; ++i) delete hRawSig[i];
   //for(int i = 0; i < 3; ++i) delete hSimuSig[i];
-#endif
+    //#endif
+      }
 }

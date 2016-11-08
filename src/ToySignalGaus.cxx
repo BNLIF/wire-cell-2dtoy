@@ -211,10 +211,13 @@ int WireCell2dToy::ToySignalGausFDS::jump(int frame_number){
   frame.clear();
   int scale = nbin/bins_per_frame;
 
-  
+  // std::cout << "test1 " << std::endl;
   fds.jump(frame_number);
+  //std::cout << "test2 " << std::endl;
   const Frame& frame1 = fds.get();
+  //std::cout << "test3 " << std::endl;
   size_t ntraces = frame1.traces.size();
+  //std::cout << "test4 " << std::endl;
 
   TVirtualFFT::SetTransform(0);
   
@@ -379,6 +382,8 @@ int WireCell2dToy::ToySignalGausFDS::jump(int frame_number){
   delete hpr_v;
   delete hpr_w;
   
+  
+
   frame.index = frame_number;
   return frame.index;
 }
