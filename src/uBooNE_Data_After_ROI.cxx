@@ -409,7 +409,7 @@ void WireCell2dToy::uBooNEDataAfterROI::BreakROI(SignalROI* roi, float rms){
   TSpectrum *s = new TSpectrum(200);
   Int_t nfound = s->Search(htemp,2,"nobackground new",0.1);
   float th_peak = 3.0;
-  float sep_peak = 8.0;
+  float sep_peak = 6.0;
   
   std::set<int> saved_boundaries;
 
@@ -481,6 +481,7 @@ void WireCell2dToy::uBooNEDataAfterROI::BreakROI(SignalROI* roi, float rms){
 	}
       }
       
+      
       // if (roi->get_chid() == 1240 && roi->get_plane() == WirePlaneType_t(0)){
       // 	for (int j=0;j!=npeaks;j++){
       // 	  std::cout << valley_pos[j] << " " << htemp->GetBinContent(valley_pos[j]-start_bin+1)<< " " << order_peak_pos[j] << " " << htemp->GetBinContent( order_peak_pos[j]-start_bin+1) << " " << valley_pos[j+1] << " " << htemp->GetBinContent(valley_pos[j+1] - start_bin+1)<< std::endl ;
@@ -538,6 +539,14 @@ void WireCell2dToy::uBooNEDataAfterROI::BreakROI(SignalROI* roi, float rms){
       //std::cout << roi->get_plane() << " " << roi->get_chid() << " " << npeaks << " " << npeaks1 << " " ;
       //std::cout << start_bin << " " << end_bin << std::endl;
 
+
+      // if (roi->get_chid() == 1240 && roi->get_plane() == WirePlaneType_t(0)){
+      // 	for (int j=0;j!=npeaks1;j++){
+      // 	  std::cout << valley_pos1[j] << " " << peak_pos1[j] << " " <<  valley_pos1[j+1] << std::endl ;
+      // 	}
+      // }
+
+
       for (Int_t j=0;j!=npeaks1;j++){
 	Int_t start_pos = valley_pos1[j];
 	Int_t end_pos = valley_pos1[j+1];
@@ -572,6 +581,8 @@ void WireCell2dToy::uBooNEDataAfterROI::BreakROI(SignalROI* roi, float rms){
     }
   }
   
+  // Now we should go through the system again and re-adjust the content
+
    for (Int_t i=0;i!=htemp->GetNbinsX();i++){
      contents.at(i) = htemp->GetBinContent(i+1);
    }
@@ -684,6 +695,16 @@ void WireCell2dToy::uBooNEDataAfterROI::ShrinkROI(SignalROI *roi){
   WirePlaneType_t plane = roi->get_plane();
   std::vector<float>& contents = roi->get_contents();
   
+  float threshold1;
+  if (chid < nwire_u){
+    threshold1 = rois.get_uplane_rms().at(chid) * 3.0;
+  }else if (chid<nwire_u+nwire_v){
+    threshold1 = rois.get_vplane_rms().at(chid-nwire_u)*3.0;
+  }
+  
+  int channel_save = 1240;
+  int print_flag = 1;
+
   // std::cout << "check tight ROIs " << std::endl;
   // use to save contents 
   TH1F *htemp = new TH1F("htemp","htemp",end_bin-start_bin+1,start_bin,end_bin+1);
@@ -693,6 +714,10 @@ void WireCell2dToy::uBooNEDataAfterROI::ShrinkROI(SignalROI *roi){
       SignalROI *tight_roi = *it;
       int start_bin1 = tight_roi->get_start_bin();
       int end_bin1 = tight_roi->get_end_bin();
+      
+      if (chid == channel_save && print_flag)
+	  std::cout << "Tight "  " " << start_bin1 << " " << end_bin1 << std::endl;
+
       for (int i=start_bin1;i<=end_bin1;i++){
 	if (i-start_bin >=0 && i-start_bin <=htemp->GetNbinsX()){
 	  htemp->SetBinContent(i-start_bin+1,1);
@@ -718,9 +743,12 @@ void WireCell2dToy::uBooNEDataAfterROI::ShrinkROI(SignalROI *roi){
       }
       std::vector<std::pair<int,int>> contents_above_threshold = next_roi->get_above_threshold(threshold);
       for (int i=0;i!=contents_above_threshold.size();i++){
+	if (chid == channel_save && print_flag)
+	  std::cout << "Front " << chid1 << " " << start_bin1 + contents_above_threshold.at(i).first << " " << start_bin1 + contents_above_threshold.at(i).second << std::endl;
+
 	for (int j=contents_above_threshold.at(i).first;j<=contents_above_threshold.at(i).second;j++){
-	  if (j+start_bin1-start_bin >=0 && j+start_bin1-start_bin <=htemp->GetNbinsX()){
-	    htemp->SetBinContent(j+start_bin1-start_bin+1,1);
+	  if (j+start_bin1-start_bin >=0 && j+start_bin1-start_bin <htemp->GetNbinsX()){
+	    if (contents.at(j+start_bin1-start_bin) > threshold1) htemp->SetBinContent(j+start_bin1-start_bin+1,1);
 	  }
 	}
       }
@@ -744,9 +772,12 @@ void WireCell2dToy::uBooNEDataAfterROI::ShrinkROI(SignalROI *roi){
       }
       std::vector<std::pair<int,int>> contents_above_threshold = prev_roi->get_above_threshold(threshold);
       for (int i=0;i!=contents_above_threshold.size();i++){
+	 if (chid == channel_save && print_flag)
+	   std::cout << "Back " << chid1 << " " << start_bin1 + contents_above_threshold.at(i).first << " " << start_bin1 + contents_above_threshold.at(i).second << std::endl;
+
 	for (int j=contents_above_threshold.at(i).first;j<=contents_above_threshold.at(i).second;j++){
-	  if (j+start_bin1-start_bin >=0 && j+start_bin1-start_bin <=htemp->GetNbinsX()){
-	    htemp->SetBinContent(j+start_bin1-start_bin+1,1);
+	  if (j+start_bin1-start_bin >=0 && j+start_bin1-start_bin <htemp->GetNbinsX()){
+	    if (contents.at(j+start_bin1-start_bin) > threshold1)  htemp->SetBinContent(j+start_bin1-start_bin+1,1);
 	  }
 	}
       }
@@ -755,15 +786,15 @@ void WireCell2dToy::uBooNEDataAfterROI::ShrinkROI(SignalROI *roi){
 
   //std::cout << "check contents " << std::endl;
 
-  // consider the 1/2 of the peak as threshold;
-  float max = 0;
-  for (int i=0;i!=contents.size();i++){
-    if (contents.at(i) > max)
-      max = contents.at(i);
-  }
-  for (int i=0;i!=contents.size();i++){
-    if (contents.at(i) > max/2.) htemp->SetBinContent(i+1,1);
-  }
+  // // consider the 1/2 of the peak as threshold;
+  // float max = 0;
+  // for (int i=0;i!=contents.size();i++){
+  //   if (contents.at(i) > max)
+  //     max = contents.at(i);
+  // }
+  // for (int i=0;i!=contents.size();i++){
+  //   // if (contents.at(i) > max/2. && contents.at(i) > threshold1*2 ) htemp->SetBinContent(i+1,1);
+  // }
   
   // get the first bin, and last bin, add pad
   int pad = 5;
@@ -786,7 +817,7 @@ void WireCell2dToy::uBooNEDataAfterROI::ShrinkROI(SignalROI *roi){
   if (new_start_bin < start_bin) new_start_bin = start_bin;
   if (new_end_bin > end_bin) new_end_bin = end_bin;
   
-  if (chid == 1240)
+  if (chid == channel_save)
     std::cout << "check contents " << " " << start_bin << " " << end_bin << " " << new_start_bin << " " << new_end_bin << std::endl;
   
 
@@ -1502,7 +1533,7 @@ int WireCell2dToy::uBooNEDataAfterROI::jump(int frame_number){
 
 
   
-  std::cout << rois_u_tight.size() << " " << rois_v_tight.size() << " " << rois_w_tight.size() << " " << rois_u_loose.size() << " " << rois_v_loose.size() << " " << rois_w_loose.size() << " " << front_rois.size() << " " << back_rois.size() << " " << contained_rois.size() << std::endl;
+  //std::cout << rois_u_tight.size() << " " << rois_v_tight.size() << " " << rois_w_tight.size() << " " << rois_u_loose.size() << " " << rois_v_loose.size() << " " << rois_w_loose.size() << " " << front_rois.size() << " " << back_rois.size() << " " << contained_rois.size() << std::endl;
   std::cout << "Clean up ROIs" << std::endl;
   CleanUpROIs();
   std::cout << "Generate more ROIs" << std::endl;
