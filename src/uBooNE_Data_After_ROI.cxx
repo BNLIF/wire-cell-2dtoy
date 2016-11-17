@@ -1592,17 +1592,22 @@ int WireCell2dToy::uBooNEDataAfterROI::jump(int frame_number){
 
   
   //std::cout << rois_u_tight.size() << " " << rois_v_tight.size() << " " << rois_w_tight.size() << " " << rois_u_loose.size() << " " << rois_v_loose.size() << " " << rois_w_loose.size() << " " << front_rois.size() << " " << back_rois.size() << " " << contained_rois.size() << std::endl;
-  std::cout << "Clean up ROIs" << std::endl;
+  std::cout << "Clean up loose ROIs" << std::endl;
   CleanUpROIs();
-  std::cout << "Generate more ROIs" << std::endl;
+  std::cout << "Generate more loose ROIs from isolated good tight ROIs" << std::endl;
   generate_merge_ROIs();
-  std::cout << "Break ROIs" << std::endl;
+  std::cout << "Break loose ROIs" << std::endl;
   BreakROIs();
+
   std::cout << "Clean up ROIs 2nd time" << std::endl;
+  CheckROIs();
   CleanUpROIs();
+  
   std::cout << "Shrink ROIs" << std::endl;
   ShrinkROIs();
+
   std::cout << "Clean up ROIs 3rd time" << std::endl;
+  CheckROIs();
   CleanUpROIs();
 
   // load results back into the data ... 
@@ -1668,4 +1673,9 @@ int WireCell2dToy::uBooNEDataAfterROI::jump(int frame_number){
   frame.index = frame_number;
   return frame.index;
 
+}
+
+
+void WireCell2dToy::uBooNEDataAfterROI::CheckROIs(){
+  
 }
