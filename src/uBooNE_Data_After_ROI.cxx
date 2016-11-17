@@ -581,11 +581,69 @@ void WireCell2dToy::uBooNEDataAfterROI::BreakROI(SignalROI* roi, float rms){
     }
   }
   
+  
   // Now we should go through the system again and re-adjust the content
+  std::vector<std::pair<int,int>> bins;
+  for (int i=0;i<htemp->GetNbinsX();i++){
+    if (htemp->GetBinContent(i+1) < 3*rms){
+      int start = i;
+      int end = i;
+      for (int j=i+1;j<htemp->GetNbinsX();j++){
+  	if (htemp->GetBinContent(j+1) < 3*rms){
+  	  end = j;
+  	}else{
+  	  break;
+  	}
+      }
+      bins.push_back(std::make_pair(start,end));
+      i = end;
+    }
+  }
 
-   for (Int_t i=0;i!=htemp->GetNbinsX();i++){
-     contents.at(i) = htemp->GetBinContent(i+1);
-   }
+  std::vector<int> saved_b;
+  for (int i=0;i!=bins.size();i++){
+    int start = bins.at(i).first;
+    int end = bins.at(i).second;
+    // find minimum or zero
+    float min = 1e9;
+    int bin_min = start;
+    for (int j=start;j<=end;j++){
+      if (htemp->GetBinContent(j+1) == 0){
+  	bin_min = j;
+  	break;
+      }else{
+  	if (htemp->GetBinContent(j+1) < min){
+  	  min = htemp->GetBinContent(j+1);
+  	  bin_min = j;
+  	}
+      }
+    }
+    saved_b.push_back(bin_min);
+  }
+  
+  if (saved_b.size() >=0){
+    TH1F *htemp1 = (TH1F*)htemp->Clone("htemp1");
+    htemp->Reset();
+    // std::cout << saved_b.size() << " " << bins.size() << " " << htemp->GetNbinsX() << std::endl;
+    for (Int_t j=0;j<saved_b.size()-1;j++){
+      int flag = 0;
+      int start_pos = saved_b.at(j);
+      float start_content = htemp1->GetBinContent(start_pos+1);
+      int end_pos = saved_b.at(j+1);
+      float end_content = htemp1->GetBinContent(end_pos+1);
+      
+      for (Int_t k = start_pos; k!=end_pos+1;k++){
+	Double_t temp_content = htemp1->GetBinContent(k+1) - (start_content + (end_content-start_content) * (k-start_pos) / (end_pos - start_pos));
+	htemp->SetBinContent(k+1,temp_content);
+      }
+    }
+    delete htemp1;
+  }
+
+  // get back to the original content 
+  for (Int_t i=0;i!=htemp->GetNbinsX();i++){
+    contents.at(i) = htemp->GetBinContent(i+1);
+  }
   
   
 
