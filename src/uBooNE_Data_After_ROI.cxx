@@ -415,7 +415,7 @@ void WireCell2dToy::uBooNEDataAfterROI::BreakROI(SignalROI* roi, float rms){
   TSpectrum *s = new TSpectrum(200);
   Int_t nfound = s->Search(htemp,2,"nobackground new",0.1);
   float th_peak = 3.0;
-  float sep_peak = 5.0;
+  float sep_peak = 6.0;
   
   std::set<int> saved_boundaries;
 
@@ -591,7 +591,7 @@ void WireCell2dToy::uBooNEDataAfterROI::BreakROI(SignalROI* roi, float rms){
   // if (roi->get_chid() == 1308)
   //   std::cout << "Break:  "  << roi->get_chid() << " " << start_bin << " " << end_bin << std::endl;
   
-  for (int qx = 0; qx!=3; qx++){
+  for (int qx = 0; qx!=2; qx++){
     
 
     // Now we should go through the system again and re-adjust the content
