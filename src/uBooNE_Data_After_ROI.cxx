@@ -294,19 +294,24 @@ void WireCell2dToy::uBooNEDataAfterROI::BreakROI1(SignalROI* roi){
    // now create many new ROIs
    std::vector<int> bins;
    for (int i=0;i!=htemp->GetNbinsX();i++){
-     if (htemp->GetBinContent(i+1) == 0)
+     if (fabs(htemp->GetBinContent(i+1))<1e-3)
        bins.push_back(i+start_bin);
    }
    int chid = roi->get_chid();
    WirePlaneType_t plane = roi->get_plane();
    SignalROISelection new_rois;
+
+   // if (chid == 1274)
+   //   std::cout << "BreakROI1: " << chid << " " << roi->get_start_bin() << " " << roi->get_end_bin() << " " << bins.size()  << " " << htemp->GetBinContent(1) << " " << htemp->GetBinContent(end_bin-start_bin+1) << std::endl;
    
    TH1F *h1 = new TH1F("h1","h1",end_bin+1,0,end_bin+1);
    for (int i=0;i!=bins.size()-1;i++){
      int start_bin1 = bins.at(i);
      int end_bin1 = bins.at(i+1);
+     // if (chid == 1274)
+     //   std::cout << start_bin1 << " " << end_bin1 << std::endl;
      h1->Reset();
-     for (int j=start_bin1;j!=end_bin1;j++){
+     for (int j=start_bin1;j<=end_bin1;j++){
        h1->SetBinContent(j+1,htemp->GetBinContent(j-start_bin+1));
      }
      if (start_bin1 >=0 && end_bin1 >start_bin1){
@@ -314,6 +319,7 @@ void WireCell2dToy::uBooNEDataAfterROI::BreakROI1(SignalROI* roi){
        new_rois.push_back(sub_roi);
      }
    }
+
    // update the list 
    if (chid < nwire_u){
      auto it = find(rois_u_loose.at(chid).begin(),rois_u_loose.at(chid).end(),roi);
@@ -344,8 +350,8 @@ void WireCell2dToy::uBooNEDataAfterROI::BreakROI1(SignalROI* roi){
        unlink(roi,next_rois.at(i));
        //loop new rois and link them
        for (int j=0;j!=new_rois.size();j++){
-	 if (new_rois.at(j)->overlap(next_rois.at(i)))
-	   link(new_rois.at(j),next_rois.at(i));
+   	 if (new_rois.at(j)->overlap(next_rois.at(i)))
+   	   link(new_rois.at(j),next_rois.at(i));
        }
      }
      front_rois.erase(roi);
@@ -358,8 +364,8 @@ void WireCell2dToy::uBooNEDataAfterROI::BreakROI1(SignalROI* roi){
        unlink(prev_rois.at(i),roi);
        // loop new rois and link them
        for (int j=0;j!=new_rois.size();j++){
-	 if (new_rois.at(j)->overlap(prev_rois.at(i)))
-	   link(prev_rois.at(i),new_rois.at(j));
+   	 if (new_rois.at(j)->overlap(prev_rois.at(i)))
+   	   link(prev_rois.at(i),new_rois.at(j));
        }
      }
      back_rois.erase(roi);
@@ -370,15 +376,15 @@ void WireCell2dToy::uBooNEDataAfterROI::BreakROI1(SignalROI* roi){
      SignalROISelection tight_rois = contained_rois[roi];
      for (int i=0;i!=tight_rois.size();i++){
        for (int j=0;j!=new_rois.size();j++){
-	 if (new_rois.at(j)->overlap(tight_rois.at(i))){
-	   if (contained_rois.find(new_rois.at(j)) == contained_rois.end()){
-	     SignalROISelection temp_rois;
-	     temp_rois.push_back(tight_rois.at(i));
-	     contained_rois[new_rois.at(j)] = temp_rois;
-	   }else{
-	     contained_rois[new_rois.at(j)].push_back(tight_rois.at(i));
-	   }
-	 }
+       	 if (new_rois.at(j)->overlap(tight_rois.at(i))){
+   	   if (contained_rois.find(new_rois.at(j)) == contained_rois.end()){
+   	     SignalROISelection temp_rois;
+   	     temp_rois.push_back(tight_rois.at(i));
+   	     contained_rois[new_rois.at(j)] = temp_rois;
+   	   }else{
+   	     contained_rois[new_rois.at(j)].push_back(tight_rois.at(i));
+   	   }
+   	 }
        }
      }
      contained_rois.erase(roi);
@@ -409,7 +415,7 @@ void WireCell2dToy::uBooNEDataAfterROI::BreakROI(SignalROI* roi, float rms){
   TSpectrum *s = new TSpectrum(200);
   Int_t nfound = s->Search(htemp,2,"nobackground new",0.1);
   float th_peak = 3.0;
-  float sep_peak = 6.0;
+  float sep_peak = 5.0;
   
   std::set<int> saved_boundaries;
 
@@ -582,62 +588,76 @@ void WireCell2dToy::uBooNEDataAfterROI::BreakROI(SignalROI* roi, float rms){
   }
   
   
-  // Now we should go through the system again and re-adjust the content
-  std::vector<std::pair<int,int>> bins;
-  for (int i=0;i<htemp->GetNbinsX();i++){
-    if (htemp->GetBinContent(i+1) < 3*rms){
-      int start = i;
-      int end = i;
-      for (int j=i+1;j<htemp->GetNbinsX();j++){
-  	if (htemp->GetBinContent(j+1) < 3*rms){
-  	  end = j;
-  	}else{
-  	  break;
-  	}
-      }
-      bins.push_back(std::make_pair(start,end));
-      i = end;
-    }
-  }
-
-  std::vector<int> saved_b;
-  for (int i=0;i!=bins.size();i++){
-    int start = bins.at(i).first;
-    int end = bins.at(i).second;
-    // find minimum or zero
-    float min = 1e9;
-    int bin_min = start;
-    for (int j=start;j<=end;j++){
-      if (htemp->GetBinContent(j+1) == 0){
-  	bin_min = j;
-  	break;
-      }else{
-  	if (htemp->GetBinContent(j+1) < min){
-  	  min = htemp->GetBinContent(j+1);
-  	  bin_min = j;
-  	}
-      }
-    }
-    saved_b.push_back(bin_min);
-  }
+  // if (roi->get_chid() == 1308)
+  //   std::cout << "Break:  "  << roi->get_chid() << " " << start_bin << " " << end_bin << std::endl;
   
-  if (saved_b.size() >=0){
-    TH1F *htemp1 = (TH1F*)htemp->Clone("htemp1");
-    htemp->Reset();
-    // std::cout << saved_b.size() << " " << bins.size() << " " << htemp->GetNbinsX() << std::endl;
-    for (Int_t j=0;j<saved_b.size()-1;j++){
-      int flag = 0;
-      int start_pos = saved_b.at(j);
-      float start_content = htemp1->GetBinContent(start_pos+1);
-      int end_pos = saved_b.at(j+1);
-      float end_content = htemp1->GetBinContent(end_pos+1);
-      
-      for (Int_t k = start_pos; k!=end_pos+1;k++){
-	Double_t temp_content = htemp1->GetBinContent(k+1) - (start_content + (end_content-start_content) * (k-start_pos) / (end_pos - start_pos));
-	htemp->SetBinContent(k+1,temp_content);
+  for (int qx = 0; qx!=3; qx++){
+    
+
+    // Now we should go through the system again and re-adjust the content
+    std::vector<std::pair<int,int>> bins;
+    for (int i=0;i<htemp->GetNbinsX();i++){
+      if (htemp->GetBinContent(i+1) < 3*rms){
+	int start = i;
+	int end = i;
+	for (int j=i+1;j<htemp->GetNbinsX();j++){
+	  if (htemp->GetBinContent(j+1) < 3*rms){
+	    end = j;
+	  }else{
+	    break;
+	  }
+	}
+	bins.push_back(std::make_pair(start,end));
+	// if (roi->get_chid() == 1308)
+	//   std::cout << qx << " " <<  start+start_bin << " " << end + start_bin << " " << 3*rms << " " << htemp->GetBinContent(6529-start_bin+1) << std::endl;
+	i = end;
       }
     }
-    delete htemp1;
+
+
+    std::vector<int> saved_b;
+    for (int i=0;i!=bins.size();i++){
+      int start = bins.at(i).first;
+      int end = bins.at(i).second;
+      // find minimum or zero
+      float min = 1e9;
+      int bin_min = start;
+      for (int j=start;j<=end;j++){
+	if (fabs(htemp->GetBinContent(j+1))< 1e-3){
+	  bin_min = j;
+	  break;
+	}else{
+	  if (htemp->GetBinContent(j+1) < min){
+	    min = htemp->GetBinContent(j+1);
+	    bin_min = j;
+	  }
+	}
+      }
+      
+      // if (roi->get_chid() == 1308)
+      // 	std::cout << bin_min+start_bin << std::endl;
+      
+      saved_b.push_back(bin_min);
+    }
+    
+    if (saved_b.size() >=0){
+      TH1F *htemp1 = (TH1F*)htemp->Clone("htemp1");
+      htemp->Reset();
+      // std::cout << saved_b.size() << " " << bins.size() << " " << htemp->GetNbinsX() << std::endl;
+      for (Int_t j=0;j<saved_b.size()-1;j++){
+	int flag = 0;
+	int start_pos = saved_b.at(j);
+	float start_content = htemp1->GetBinContent(start_pos+1);
+	int end_pos = saved_b.at(j+1);
+	float end_content = htemp1->GetBinContent(end_pos+1);
+	
+	for (Int_t k = start_pos; k!=end_pos+1;k++){
+	  Double_t temp_content = htemp1->GetBinContent(k+1) - (start_content + (end_content-start_content) * (k-start_pos) / (end_pos - start_pos));
+	  htemp->SetBinContent(k+1,temp_content);
+	}
+      }
+      delete htemp1;
+    }
   }
 
   // get back to the original content 
@@ -761,7 +781,7 @@ void WireCell2dToy::uBooNEDataAfterROI::ShrinkROI(SignalROI *roi){
   }
   
   int channel_save = 1240;
-  int print_flag = 1;
+  int print_flag = 0;
 
   // std::cout << "check tight ROIs " << std::endl;
   // use to save contents 
@@ -774,7 +794,7 @@ void WireCell2dToy::uBooNEDataAfterROI::ShrinkROI(SignalROI *roi){
       int end_bin1 = tight_roi->get_end_bin();
       
       if (chid == channel_save && print_flag)
-	  std::cout << "Tight "  " " << start_bin1 << " " << end_bin1 << std::endl;
+	std::cout << "Tight "  " " << start_bin1 << " " << end_bin1 << std::endl;
 
       for (int i=start_bin1;i<=end_bin1;i++){
 	if (i-start_bin >=0 && i-start_bin <=htemp->GetNbinsX()){
@@ -875,7 +895,7 @@ void WireCell2dToy::uBooNEDataAfterROI::ShrinkROI(SignalROI *roi){
   if (new_start_bin < start_bin) new_start_bin = start_bin;
   if (new_end_bin > end_bin) new_end_bin = end_bin;
   
-  if (chid == channel_save)
+  if (chid == channel_save && print_flag)
     std::cout << "check contents " << " " << start_bin << " " << end_bin << " " << new_start_bin << " " << new_end_bin << std::endl;
   
 
@@ -1596,16 +1616,17 @@ int WireCell2dToy::uBooNEDataAfterROI::jump(int frame_number){
   CleanUpROIs();
   std::cout << "Generate more loose ROIs from isolated good tight ROIs" << std::endl;
   generate_merge_ROIs();
-  std::cout << "Break loose ROIs" << std::endl;
-  BreakROIs();
 
-  std::cout << "Clean up ROIs 2nd time" << std::endl;
-  CheckROIs();
-  CleanUpROIs();
+  for (int qx = 0; qx!=2; qx++){
+    std::cout << "Break loose ROIs" << std::endl;
+    BreakROIs();
+    std::cout << "Clean up ROIs 2nd time" << std::endl;
+    CheckROIs();
+    CleanUpROIs();
+  }
   
   std::cout << "Shrink ROIs" << std::endl;
   ShrinkROIs();
-
   std::cout << "Clean up ROIs 3rd time" << std::endl;
   CheckROIs();
   CleanUpROIs();
