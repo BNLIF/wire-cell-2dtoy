@@ -309,7 +309,15 @@ int main(int argc, char* argv[])
   Trun->Branch("time_offset",&time_offset,"time_offset/I");
   Trun->Fill();
 
-
+  TTree *T_lf = new TTree("T_lf","T_lf");
+  Int_t channel;
+  T_lf->SetDirectory(file);
+  T_lf->Branch("channel",&channel,"channel/I");
+  std::set<int> lf_noisy_channels = data_fds.get_lf_noisy_channels();
+  for (auto it = lf_noisy_channels.begin(); it!= lf_noisy_channels.end(); it++){
+    channel = *it;
+    T_lf->Fill();
+  }
 
   TTree *T_bad = new TTree("T_bad","T_bad");
   Int_t chid, plane;
