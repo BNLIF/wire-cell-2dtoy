@@ -11,7 +11,7 @@ namespace WireCell2dToy{
   class uBooNEDataROI 
   {
   public:
-    uBooNEDataROI(WireCell::FrameDataSource& raw_fds, WireCell::FrameDataSource& fds, const WireCell::GeomDataSource& gds, WireCell::ChirpMap& umap, WireCell::ChirpMap& vmap, WireCell::ChirpMap& wmap);
+    uBooNEDataROI(WireCell::FrameDataSource& raw_fds, WireCell::FrameDataSource& fds, const WireCell::GeomDataSource& gds, WireCell::ChirpMap& umap, WireCell::ChirpMap& vmap, WireCell::ChirpMap& wmap, std::set<int>& lf_noisy_channels);
     ~uBooNEDataROI();
 
     std::vector<std::pair<int,int>>& get_self_rois(int chid) {
@@ -65,6 +65,7 @@ namespace WireCell2dToy{
     WireCell::ChirpMap& umap;
     WireCell::ChirpMap& vmap;
     WireCell::ChirpMap& wmap;
+    std::set<int>& lf_noisy_channels;
 
     int nwire_u;
     int nwire_v;

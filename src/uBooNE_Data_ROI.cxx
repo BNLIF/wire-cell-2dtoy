@@ -76,13 +76,14 @@ Int_t WireCell2dToy::uBooNEDataROI::find_ROI_begin(TH1F *h1, Int_t bin, Double_t
 
 
 
-WireCell2dToy::uBooNEDataROI::uBooNEDataROI(WireCell::FrameDataSource& raw_fds,WireCell::FrameDataSource& fds, const WireCell::GeomDataSource& gds, WireCell::ChirpMap& umap, WireCell::ChirpMap& vmap, WireCell::ChirpMap& wmap)
+WireCell2dToy::uBooNEDataROI::uBooNEDataROI(WireCell::FrameDataSource& raw_fds,WireCell::FrameDataSource& fds, const WireCell::GeomDataSource& gds, WireCell::ChirpMap& umap, WireCell::ChirpMap& vmap, WireCell::ChirpMap& wmap, std::set<int>& lf_noisy_channels)
   : fds(fds)
   , raw_fds(raw_fds)
   , gds(gds)
   , umap(umap)
   , vmap(vmap)
   , wmap(wmap)
+  , lf_noisy_channels(lf_noisy_channels)
 {
   GeomWireSelection wires_u = gds.wires_in_plane(WirePlaneType_t(0));
   GeomWireSelection wires_v = gds.wires_in_plane(WirePlaneType_t(1));
@@ -390,7 +391,10 @@ void WireCell2dToy::uBooNEDataROI::find_ROI_loose(int rebin){
   // if collection, just fill the histogram ... 
   TH1F *hresult = new TH1F("hresult","hresult",nbins,0,nbins);
   TH1F *hresult_filter = new TH1F("hresult_filter","hresult_filter",int(nbins/rebin),0,int(nbins/rebin));
-  TF1 *filter_low = new TF1("filter_low","1-exp(-pow(x/0.0025,2))");
+  TF1 *filter_low;
+  
+  TF1 *filter_low1 = new TF1("filter_low","1-exp(-pow(x/0.0025,2))");
+  TF1 *filter_low2 = new TF1("filter_low","1-exp(-pow(x/0.005,2))");
   
   // load the data and do the convolution ... 
   const Frame& frame1 = fds.get();
@@ -402,6 +406,18 @@ void WireCell2dToy::uBooNEDataROI::find_ROI_loose(int rebin){
     const Trace& trace = frame1.traces[i];
     int tbin = trace.tbin;
     int chid = trace.chid;
+
+    //decide filter_low 
+    filter_low = filter_low1;
+    if (lf_noisy_channels.find(chid)!=lf_noisy_channels.end()){
+      filter_low = filter_low2;
+    }else if (lf_noisy_channels.find(chid+1)!=lf_noisy_channels.end()&&chid!=nwire_u-1){
+      filter_low = filter_low2;
+    }else if (lf_noisy_channels.find(chid-1)!=lf_noisy_channels.end()&&chid!=nwire_u){
+      filter_low = filter_low2;
+    }
+    
+
     int nticks = trace.charge.size();
     hresult->Reset();
     hresult_filter->Reset();
@@ -621,7 +637,9 @@ void WireCell2dToy::uBooNEDataROI::find_ROI_loose(int rebin){
   
   delete hresult;
   delete hresult_filter;
-  delete filter_low;
+  //delete filter_low;
+  delete filter_low1;
+  delete filter_low2;
 }
 
 

@@ -118,7 +118,8 @@ int main(int argc, char* argv[])
   ChirpMap& uplane_map = data_fds.get_u_cmap();
   ChirpMap& vplane_map = data_fds.get_v_cmap();
   ChirpMap& wplane_map = data_fds.get_w_cmap();
-  
+  std::set<int>& lf_noisy_channels = data_fds.get_lf_noisy_channels();
+
    cout << "Bad Channels: " << uplane_map.size() << " " << vplane_map.size() << " " << wplane_map.size() << endl;
    
    
@@ -133,7 +134,7 @@ int main(int argc, char* argv[])
   //WireCell2dToy::uBooNEData2DDeconvolutionFDS wien_fds(data_fds,gds,uplane_map, vplane_map, wplane_map,100,toffset_1,toffset_2,toffset_3);
   //wien_fds.jump(eve_num);
 
-  WireCell2dToy::uBooNEDataROI uboone_rois(data_fds,wien_fds,gds,uplane_map,vplane_map,wplane_map);
+  WireCell2dToy::uBooNEDataROI uboone_rois(data_fds,wien_fds,gds,uplane_map,vplane_map,wplane_map,lf_noisy_channels);
   
   WireCell2dToy::uBooNEDataAfterROI roi_fds(wien_fds,gds,uboone_rois,nrebin);
   roi_fds.jump(eve_num);
@@ -314,7 +315,7 @@ int main(int argc, char* argv[])
   Int_t channel;
   T_lf->SetDirectory(file);
   T_lf->Branch("channel",&channel,"channel/I");
-  std::set<int> lf_noisy_channels = data_fds.get_lf_noisy_channels();
+  //std::set<int> lf_noisy_channels = data_fds.get_lf_noisy_channels();
   for (auto it = lf_noisy_channels.begin(); it!= lf_noisy_channels.end(); it++){
     channel = *it;
     T_lf->Fill();

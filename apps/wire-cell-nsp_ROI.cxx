@@ -104,7 +104,8 @@ int main(int argc, char* argv[])
   ChirpMap& uplane_map = wien_fds.get_u_cmap();
   ChirpMap& vplane_map = wien_fds.get_v_cmap();
   ChirpMap& wplane_map = wien_fds.get_w_cmap();
-  
+  std::set<int>& lf_noisy_channels = data_fds.get_lf_noisy_channels();
+
   int run_no;
   int subrun_no;
   int event_no;
@@ -117,13 +118,14 @@ int main(int argc, char* argv[])
 
   //std::cout << uplane_map.size() << " " << vplane_map.size() << " " << wplane_map.size() <<  " " << uplane_map[880].first << " " << uplane_map[880].second << std::endl;
   int rebin = 6;
-  WireCell2dToy::uBooNEDataROI uboone_rois(data_fds,wien_fds,gds,uplane_map,vplane_map,wplane_map);
+  WireCell2dToy::uBooNEDataROI uboone_rois(data_fds,wien_fds,gds,uplane_map,vplane_map,wplane_map,lf_noisy_channels);
   WireCell2dToy::uBooNEDataAfterROI roi_fds(wien_fds,gds,uboone_rois,rebin);
   roi_fds.jump(0);
   
   GeomWireSelection wires_u = gds.wires_in_plane(WirePlaneType_t(0));
   GeomWireSelection wires_v = gds.wires_in_plane(WirePlaneType_t(1));
   GeomWireSelection wires_w = gds.wires_in_plane(WirePlaneType_t(2));
+  
 
   Int_t nwire_u = wires_u.size();
   Int_t nwire_v = wires_v.size();
