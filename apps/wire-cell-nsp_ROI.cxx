@@ -86,6 +86,7 @@ int main(int argc, char* argv[])
   TFile *file = new TFile(filename);
   TTree *Trun = (TTree*)file->Get("Trun");
   TTree *T_bad = (TTree*)file->Get("T_bad");
+  TTree *T_lf = (TTree*)file->Get("T_lf");
 
   TH2I *hu_decon = (TH2I*)file->Get("hu_decon");
   TH2I *hv_decon = (TH2I*)file->Get("hv_decon");
@@ -97,7 +98,7 @@ int main(int argc, char* argv[])
   TH2F *hv_raw = (TH2F*)file2->Get("hv_raw");
   TH2F *hw_raw = (TH2F*)file2->Get("hw_raw");
  
-  WireCellSst::DatauBooNEFrameDataSource data_fds(hu_raw,hv_raw,hw_raw,T_bad,Trun,gds);
+  WireCellSst::DatauBooNEFrameDataSource data_fds(hu_raw,hv_raw,hw_raw,T_bad,T_lf,Trun,gds);
 
   WireCell2dToy::uBooNEData2DDeconvolutionFDS wien_fds(hu_decon,hv_decon,hw_decon,T_bad, gds);
   ChirpMap& uplane_map = wien_fds.get_u_cmap();

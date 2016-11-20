@@ -84,9 +84,11 @@ int main(int argc, char* argv[])
   TFile *file = new TFile(filename);
   TTree *Trun = (TTree*)file->Get("Trun");
   TTree *T_bad = (TTree*)file->Get("T_bad");
+  TTree *T_lf = (TTree*)file->Get("T_lf");
 
   TTree *Trun1 = Trun->CloneTree();
   TTree *T_bad1 = T_bad->CloneTree();
+  TTree *T_lf1 = T_lf->CloneTree();
 
   TH2F *hu_raw = (TH2F*)file->Get("hu_raw");
   TH2F *hv_raw = (TH2F*)file->Get("hv_raw");
@@ -99,7 +101,7 @@ int main(int argc, char* argv[])
 
   
   
-  WireCellSst::DatauBooNEFrameDataSource data_fds(hu_raw,hv_raw,hw_raw,T_bad,Trun,gds);
+  WireCellSst::DatauBooNEFrameDataSource data_fds(hu_raw,hv_raw,hw_raw,T_bad,T_lf,Trun,gds);
 
 
   //data_fds.jump(0);
@@ -142,9 +144,12 @@ int main(int argc, char* argv[])
   TFile *file1 = new TFile(Form("nsp2_%d_%d_%d.root",run_no,subrun_no,event_no),"RECREATE");
   Trun1->SetDirectory(file1);
   T_bad1->SetDirectory(file1);
+  T_lf1->SetDirectory(file1);
+
   Trun1->Write();
   T_bad1->Write();
-  
+  T_lf1->Write();
+
   int total_time_bin = wien_fds.Get_Bins_Per_Frame();
 
   

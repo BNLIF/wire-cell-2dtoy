@@ -98,10 +98,11 @@ int main(int argc, char* argv[])
   TFile *file1 = new TFile(filename);
   TTree *Trun1 = (TTree*)file1->Get("Trun");
   TTree *T_bad1 = (TTree*)file1->Get("T_bad");
+  TTree *T_lf1 = (TTree*)file1->Get("T_lf");
   TH2F *hu_raw1 = (TH2F*)file1->Get("hu_raw");
   TH2F *hv_raw1 = (TH2F*)file1->Get("hv_raw");
   TH2F *hw_raw1 = (TH2F*)file1->Get("hw_raw");
-  WireCellSst::DatauBooNEFrameDataSource data_fds(hu_raw1,hv_raw1,hw_raw1,T_bad1,Trun1,gds);
+  WireCellSst::DatauBooNEFrameDataSource data_fds(hu_raw1,hv_raw1,hw_raw1,T_bad1,T_lf1,Trun1,gds);
   
   //  const char* root_file = argv[2];
   int run_no, subrun_no, event_no;
