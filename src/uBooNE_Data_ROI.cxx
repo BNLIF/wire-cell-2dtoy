@@ -394,7 +394,7 @@ void WireCell2dToy::uBooNEDataROI::find_ROI_loose(int rebin){
   TF1 *filter_low;
   
   TF1 *filter_low1 = new TF1("filter_low","1-exp(-pow(x/0.0025,2))");
-  TF1 *filter_low2 = new TF1("filter_low","1-exp(-pow(x/0.005,2))");
+  TF1 *filter_low2 = new TF1("filter_low","1-exp(-pow(x/0.02,2))");
   
   // load the data and do the convolution ... 
   const Frame& frame1 = fds.get();
