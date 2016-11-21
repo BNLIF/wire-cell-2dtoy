@@ -29,11 +29,13 @@ namespace WireCell2dToy {
     TH2I *Get_hu_gaus(){return hu_2D_g_gaus;};
     TH2I *Get_hv_gaus(){return hv_2D_g_gaus;};
     TH2I *Get_hw_gaus(){return hw_1D_g;};
-
+    
+    void set_flag_2D(int flag){flag_2D = flag;};
 
     void Save();
     
   private:
+    int flag_2D;
     WireCell::FrameDataSource& fds;
     const WireCell::GeomDataSource& gds;
     int  max_frames;

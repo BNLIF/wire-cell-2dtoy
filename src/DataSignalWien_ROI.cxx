@@ -22,6 +22,7 @@ WireCell2dToy::DataSignalWienROIFDS::DataSignalWienROIFDS(WireCell::FrameDataSou
   , umap(umap)
   , vmap(vmap)
   , wmap(wmap)
+  , flag_2D(1)
 {  
   bins_per_frame = bins_per_frame1;
 
@@ -2656,29 +2657,29 @@ int WireCell2dToy::DataSignalWienROIFDS::jump(int frame_number){
 
   TVirtualFFT::SetTransform(0);
 
-  // std::cout << "Deconvolution with calibrated field response for 1-D U Plane" << std::endl;
-  // Deconvolute_U_1D_c();
-  // std::cout << "Deconvolution with calibrated field response for 1-D V Plane" << std::endl;
-  // Deconvolute_V_1D_c();
-
-  
-  
+  std::cout << "Deconvolution with calibrated field response for 1-D U Plane" << std::endl;
+  Deconvolute_U_1D_c();
+  std::cout << "Deconvolution with calibrated field response for 1-D V Plane" << std::endl;
+  Deconvolute_V_1D_c();
   std::cout << "Deconvolution with garfield field response for 1-D W Plane" << std::endl;
   Deconvolute_W_1D_g();
- 
+
+  //if (flag_2D==1){
   std::cout << "Deconvolution with garfield field response for 2-D V Plane" << std::endl;
   //Deconvolute_V_1D_g();
   Deconvolute_V_2D_g();
-
   std::cout << "Deconvolution with garfield field response for 2-D U Plane" << std::endl;
   Deconvolute_U_2D_g();
-
+  // }
 
 
  
   // 1: 1D_c, 2: 2D_g, 3: 2D_g_filter, 0: ROI
   int flag_save = 0;
   
+  if (flag_2D == 0){
+    flag_save = 1;
+  }
   
   std::cout << "Load results back into frame" << std::endl;
   // load the results back into the frame ... 
@@ -2719,8 +2720,8 @@ int WireCell2dToy::DataSignalWienROIFDS::jump(int frame_number){
       h5_1->SetBinContent(j+1,content);
     }
     
-    h1_1->Reset();
-    h4_1->Reset();
+    //    h1_1->Reset();
+    //  h4_1->Reset();
 
     ROI_cal(h1_1,h2_1,h3_1,h4_1,h5_1,th1,th2,hresult,hresult1,1);
 
@@ -2797,8 +2798,8 @@ int WireCell2dToy::DataSignalWienROIFDS::jump(int frame_number){
       h5_1->SetBinContent(j+1,content);
     }
 
-    h1_1->Reset();
-    h4_1->Reset();
+    // h1_1->Reset();
+    // h4_1->Reset();
 
     
     ROI_cal(h1_1,h2_1,h3_1,h4_1,h5_1,th1,th2,hresult,hresult1,1);

@@ -16,6 +16,7 @@
 #include "WireCell2dToy/ToyMatrixIterate_SingleWire.h"
 #include "WireCell2dToy/ToyMatrixIterate_Only.h"
 
+
 #include "WireCell2dToy/ToyMatrixMarkov.h"
 #include "WireCell2dToy/ToyMetric.h"
 #include "WireCell2dToy/BlobMetric.h"
@@ -135,6 +136,8 @@ int main(int argc, char* argv[])
   
   cout << "Deconvolution with Wiener filter" << endl; 
   WireCell2dToy::DataSignalWienROIFDS wien_fds(data_fds,gds,uplane_map, vplane_map, wplane_map, total_time_bin/nrebin,max_events,toffset_1,toffset_2,toffset_3); // weiner smearing for hit identification
+  wien_fds.set_flag_2D(0);
+  
   if (save_file !=2 ){
     wien_fds.jump(eve_num);
     if (save_file == 1)
@@ -144,7 +147,7 @@ int main(int argc, char* argv[])
 
 
 
-  TFile *file = new TFile(Form("2D_display_%d_%d_%d.root",run_no,subrun_no,eve_num),"RECREATE");
+  TFile *file = new TFile(Form("1D_display_%d_%d_%d.root",run_no,subrun_no,eve_num),"RECREATE");
 
   GeomWireSelection wires_u = gds.wires_in_plane(WirePlaneType_t(0));
   GeomWireSelection wires_v = gds.wires_in_plane(WirePlaneType_t(1));
