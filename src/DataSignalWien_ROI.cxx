@@ -398,7 +398,7 @@ void  WireCell2dToy::DataSignalWienROIFDS::Deconvolute_V_2D_g(){
       for (int k=0;k!=scale;k++){
 	sum += htemp->GetBinContent(scale*j+k+1);
       }
-      int bin = j+180;
+      int bin = j+30;
       if (bin >= bins_per_frame) bin -= bins_per_frame;
       if (bin >=start && bin <=end){
       }else{
@@ -444,7 +444,7 @@ void  WireCell2dToy::DataSignalWienROIFDS::Deconvolute_V_2D_g(){
 	sum += htemp->GetBinContent(scale*j+k+1);
       }
 
-      int bin = j+180;
+      int bin = j+30;
       if (bin >= bins_per_frame) bin -= bins_per_frame;
       if (bin >=start && bin <=end){
       }else{
@@ -481,7 +481,7 @@ void  WireCell2dToy::DataSignalWienROIFDS::Deconvolute_V_2D_g(){
       for (int k=0;k!=scale;k++){
 	sum += htemp->GetBinContent(scale*j+k+1);
       }
-      int bin = j+180;
+      int bin = j+30;
       if (bin >= bins_per_frame) bin -= bins_per_frame;
       if (bin >=start && bin <=end){
       }else{
@@ -755,7 +755,7 @@ void WireCell2dToy::DataSignalWienROIFDS::Deconvolute_U_2D_g(){
       for (int k=0;k!=scale;k++){
 	sum += htemp->GetBinContent(scale*j+k+1);
       }
-      int bin = j+180;
+      int bin = j+30;
       if (bin >= bins_per_frame) bin -= bins_per_frame;
       if (bin >=start && bin <=end){
       }else{
@@ -800,7 +800,7 @@ void WireCell2dToy::DataSignalWienROIFDS::Deconvolute_U_2D_g(){
       for (int k=0;k!=scale;k++){
 	sum += htemp->GetBinContent(scale*j+k+1);
       }
-      int bin = j+180;
+      int bin = j+30;
       if (bin >= bins_per_frame) bin -= bins_per_frame;
       if (bin >=start && bin <=end){
       }else{
@@ -837,7 +837,7 @@ void WireCell2dToy::DataSignalWienROIFDS::Deconvolute_U_2D_g(){
       for (int k=0;k!=scale;k++){
 	sum += htemp->GetBinContent(scale*j+k+1);
       }
-      int bin = j+180;
+      int bin = j+30;
       if (bin >= bins_per_frame) bin -= bins_per_frame;
       if (bin >=start && bin <=end){
       }else{
@@ -1943,7 +1943,7 @@ void WireCell2dToy::DataSignalWienROIFDS::Deconvolute_V_1D_g(){
       for (int k=0;k!=scale;k++){
 	sum += htemp->GetBinContent(scale*i+k+1);
       }
-      int bin = i+180;
+      int bin = i+30;
       if (bin >= bins_per_frame) bin -= bins_per_frame;
       if (bin >=start && bin <=end){
       }else{
@@ -1983,7 +1983,7 @@ void WireCell2dToy::DataSignalWienROIFDS::Deconvolute_V_1D_g(){
       for (int k=0;k!=scale;k++){
 	sum += htemp->GetBinContent(scale*i+k+1);
       }
-      int bin = i+180;
+      int bin = i+30;
       if (bin >= bins_per_frame) bin -= bins_per_frame;
       if (bin >=start && bin <=end){
       }else{
@@ -2018,7 +2018,7 @@ void WireCell2dToy::DataSignalWienROIFDS::Deconvolute_V_1D_g(){
       for (int k=0;k!=scale;k++){
 	sum += htemp->GetBinContent(scale*i+k+1);
       }
-      int bin = i+180;
+      int bin = i+30;
       if (bin >= bins_per_frame) bin -= bins_per_frame;
       if (bin >=start && bin <=end){
       }else{
@@ -2150,7 +2150,7 @@ void WireCell2dToy::DataSignalWienROIFDS::Deconvolute_W_1D_g(){
       for (int k=0;k!=scale;k++){
 	sum += htemp->GetBinContent(scale*i+k+1);
       }
-      int bin = i+180;
+      int bin = i+30;
       if (bin >= bins_per_frame) bin -= bins_per_frame;
       if (bin >=start && bin <=end){
       }else{
@@ -2190,7 +2190,7 @@ void WireCell2dToy::DataSignalWienROIFDS::Deconvolute_W_1D_g(){
 	sum += htemp->GetBinContent(scale*i+k+1);
       }
 
-      int bin = i+180;
+      int bin = i+30;
       if (bin >= bins_per_frame) bin -= bins_per_frame;
       if (bin >=start && bin <=end){
       }else{
@@ -2322,7 +2322,7 @@ void WireCell2dToy::DataSignalWienROIFDS::Deconvolute_V_1D_c(){
       for (int k=0;k!=scale;k++){
 	sum += htemp->GetBinContent(scale*i+k+1);
       }
-      int bin = i+180;
+      int bin = i+30;
       if (bin >= bins_per_frame) bin -= bins_per_frame;
       if (bin >=start && bin <=end){
       }else{
@@ -2364,7 +2364,7 @@ void WireCell2dToy::DataSignalWienROIFDS::Deconvolute_V_1D_c(){
       for (int k=0;k!=scale;k++){
 	sum += htemp->GetBinContent(scale*i+k+1);
       }
-      int bin = i+180;
+      int bin = i+30;
       if (bin >= bins_per_frame) bin -= bins_per_frame;
       if (bin >=start && bin <=end){
       }else{
@@ -2495,7 +2495,7 @@ void WireCell2dToy::DataSignalWienROIFDS::Deconvolute_U_1D_c(){
       for (int k=0;k!=scale;k++){
 	sum += htemp->GetBinContent(scale*i+k+1);
       }
-      int bin = i+180;
+      int bin = i+30;
       if (bin >= bins_per_frame) bin -= bins_per_frame;
       if (bin >=start && bin <=end){
       }else{
@@ -2534,7 +2534,7 @@ void WireCell2dToy::DataSignalWienROIFDS::Deconvolute_U_1D_c(){
       for (int k=0;k!=scale;k++){
 	sum += htemp->GetBinContent(scale*i+k+1);
       }
-      int bin = i+180;
+      int bin = i+30;
       if (bin >= bins_per_frame) bin -= bins_per_frame;
       if (bin >=start && bin <=end){
       }else{
