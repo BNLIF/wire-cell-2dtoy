@@ -98,7 +98,12 @@ int main(int argc, char* argv[])
 
  
   
+  float toffset_1=-0.787;
+  float toffset_2=-0.603;
+  float toffset_3=0.0;
 
+  // toffset_1 = 0.;
+  // toffset_2 = 0.;
   
   
   WireCellSst::DatauBooNEFrameDataSource data_fds(hu_raw,hv_raw,hw_raw,T_bad,T_lf,Trun,gds);
@@ -126,7 +131,7 @@ int main(int argc, char* argv[])
 
   
   cout << "Deconvolution with Wiener filter" << endl; 
-  WireCell2dToy::uBooNEData2DDeconvolutionFDS wien_fds(data_fds,gds,uplane_map, vplane_map, wplane_map,100,0.,0.,0.);
+  WireCell2dToy::uBooNEData2DDeconvolutionFDS wien_fds(data_fds,gds,uplane_map, vplane_map, wplane_map,100,toffset_1,toffset_2,toffset_3);
   wien_fds.jump(0);
   
   GeomWireSelection wires_u = gds.wires_in_plane(WirePlaneType_t(0));
