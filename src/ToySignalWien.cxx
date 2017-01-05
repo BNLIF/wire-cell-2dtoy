@@ -387,7 +387,7 @@ int WireCell2dToy::ToySignalWienFDS::jump(int frame_number){
 	rms2 ++;
       }
     }
-    rms1 = sqrt(rms1/rms2);
+    rms1 = sqrt(rms1/rms2) ;
     
     if (gds_flag == 0 ){
       if (chid < nwire_u){
