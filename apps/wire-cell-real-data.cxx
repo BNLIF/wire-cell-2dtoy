@@ -127,7 +127,8 @@ int main(int argc, char* argv[])
   
   //float unit_dis = 1.01483;  // 58KV @ 226.5 V/cm
   //float unit_dis = 1.14753;  // 70 KV @ 226.5 V/cm
-  float unit_dis = 1.119;  // 70 KV @ 273 V/cm
+  //float unit_dis = 1.119;  // 70 KV @ 273 V/cm
+  float unit_dis = 1.09;  // doc-db 6683
   //float unit_dis = 1.6;  //test case
 
   //**** time offset for 58kV ****// 
@@ -181,7 +182,8 @@ int main(int argc, char* argv[])
   float threshold_wg = 510.84;
   
   //int time_offset = -52.;
-  int time_offset = -92.;
+  // int time_offset = -92.;
+  int time_offset = 4; // Now the time offset is taken care int he signal processing, so we just need the overall offset ... 
   
 
 
