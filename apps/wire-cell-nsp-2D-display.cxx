@@ -90,7 +90,7 @@ int main(int argc, char* argv[])
   float toffset_3=0.0;
   int total_time_bin=9594;
   int frame_length = 3200;
-  int nrebin = 1;
+  int nrebin = 6;
   int eve_num  = atoi(argv[3]);
   int time_offset = -92.;
   
