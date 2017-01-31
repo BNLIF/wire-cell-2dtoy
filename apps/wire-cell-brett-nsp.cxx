@@ -116,7 +116,7 @@ int main(int argc, char* argv[])
    
   int run_no, subrun_no, event_no;
   
-  WireCellSst::DatauBooNEFrameDataSource data_fds(root_file,gds,total_time_bin);
+  WireCellSst::DatauBooNEFrameDataSource data_fds(root_file,gds,total_time_bin,1);
   if (save_file != 2){
     data_fds.jump(eve_num);
     if (save_file == 1)
