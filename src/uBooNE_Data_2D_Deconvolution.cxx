@@ -290,9 +290,14 @@ void WireCell2dToy::uBooNEData2DDeconvolutionFDS::Deconvolute_2D(int plane){
     gfield = gw_2D_g;
     time_offset = -time_offset_uw + 0.803;
   }
+  
   TF1 *filter_wire = new TF1("filter_wire","exp(-0.5*pow(x/[0],2))");
   double par4[1] = {1.0/sqrt(3.1415926)*1.4};
   filter_wire->SetParameters(par4);
+
+  TF1 *filter_wire1 = new TF1("filter_wire1","exp(-0.5*pow(x/[0],2))");
+  double par5[1] = {1.0/sqrt(3.1415926)*3.0};
+  filter_wire1->SetParameters(par5);
   
   TF1 *filter_low = new TF1("filter_low","1-exp(-pow(x/0.02,2))");
 
@@ -454,10 +459,17 @@ void WireCell2dToy::uBooNEData2DDeconvolutionFDS::Deconvolute_2D(int plane){
        
        
        if (temp1_im[j]*temp1_im[j]+temp1_re[j]*temp1_re[j]>0){
-   	 temp2_re[j] = (temp_re[j]*temp1_re[j]+temp_im[j]*temp1_im[j])/m/
-   	   (temp1_im[j]*temp1_im[j]+temp1_re[j]*temp1_re[j])*filter_wire->Eval(freq_wire);
-   	 temp2_im[j] = (temp_im[j]*temp1_re[j]-temp_re[j]*temp1_im[j])
-   	   /m/(temp1_im[j]*temp1_im[j]+temp1_re[j]*temp1_re[j])*filter_wire->Eval(freq_wire);
+	 if (plane!=2){
+	   temp2_re[j] = (temp_re[j]*temp1_re[j]+temp_im[j]*temp1_im[j])/m/
+	     (temp1_im[j]*temp1_im[j]+temp1_re[j]*temp1_re[j])*filter_wire->Eval(freq_wire);
+	   temp2_im[j] = (temp_im[j]*temp1_re[j]-temp_re[j]*temp1_im[j])
+	     /m/(temp1_im[j]*temp1_im[j]+temp1_re[j]*temp1_re[j])*filter_wire->Eval(freq_wire);
+	 }else{
+	   temp2_re[j] = (temp_re[j]*temp1_re[j]+temp_im[j]*temp1_im[j])/m/
+	     (temp1_im[j]*temp1_im[j]+temp1_re[j]*temp1_re[j])*filter_wire1->Eval(freq_wire);
+	   temp2_im[j] = (temp_im[j]*temp1_re[j]-temp_re[j]*temp1_im[j])
+	     /m/(temp1_im[j]*temp1_im[j]+temp1_re[j]*temp1_re[j])*filter_wire1->Eval(freq_wire);
+	 }
        }else{
    	 temp2_re[j] = 0;
    	 temp2_im[j] = 0;
@@ -548,6 +560,7 @@ void WireCell2dToy::uBooNEData2DDeconvolutionFDS::Deconvolute_2D(int plane){
    
   delete filter_low;
   delete filter_wire;
+  delete filter_wire1;
   delete filter_time;
   delete hr;
   
