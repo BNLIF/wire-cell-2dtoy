@@ -271,21 +271,26 @@ void WireCell2dToy::uBooNEData2DDeconvolutionFDS::Deconvolute_2D(int plane){
   TGraph **gfield;
   double time_offset = 0;
   if (plane == 0){
-    double par[2]={1.43555e+01/200.*2.,4.95096e+00};
+    //double par[2]={1.43555e+01/200.*2.,4.95096e+00};
+    //double par[2]={2.42524e+01/200.*2.,8.12825e+00};
+    double par[2]={2.37356e+01/200.*2.,7.88785e+00};
     filter_time->SetParameters(par);
     nwires = nwire_u;
     scale = scale_u_2d;
     gfield = gu_2D_g;
   }else if (plane == 1){
-    double par[2]={1.47404e+01/200.*2.,4.97667e+00};
+    //double par[2]={1.47404e+01/200.*2.,4.97667e+00};
+    double par[2]={2.37356e+01/200.*2.,7.88785e+00};
     filter_time->SetParameters(par);
     nwires = nwire_v;
     scale = scale_v_2d;
     gfield = gv_2D_g;
     time_offset = - time_offset_uv -0.113;
   }else if (plane == 2){
-    double par2[2]={1.45874e+01/200.*2.,5.02219e+00};
-    filter_time->SetParameters(par2);
+    //double par2[2]={1.45874e+01/200.*2.,5.02219e+00};
+    //    double par2[2]={2.41788e+01/200.*2.,8.84234e+00}; // Y
+    double par[2]={2.37356e+01/200.*2.,7.88785e+00};
+    filter_time->SetParameters(par);
     nwires = nwire_w;
     gfield = gw_2D_g;
     time_offset = -time_offset_uw + 0.803;
