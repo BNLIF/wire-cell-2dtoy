@@ -128,7 +128,10 @@ int main(int argc, char* argv[])
   //float unit_dis = 1.01483;  // 58KV @ 226.5 V/cm
   //float unit_dis = 1.14753;  // 70 KV @ 226.5 V/cm
   //float unit_dis = 1.119;  // 70 KV @ 273 V/cm
-  float unit_dis = 1.105;  // doc-db 6683 matched with 256 cm
+  //float unit_dis = 1.105;  // doc-db 6683 matched with 256 cm
+  //Note: the above one is still on the high end, 
+  float unit_dis = 1.101; // match 256 cm
+
   //float unit_dis = 1.6;  //test case
 
   //**** time offset for 58kV ****// 
@@ -513,7 +516,7 @@ int main(int argc, char* argv[])
 
       if (save_image_outline_flag==1){
 	Point p = mcell->get_allcell().at(0)->center();
-	x_save = i*nrebin/2.*unit_dis/10. - frame_length/2.*unit_dis/10.-time_offset*unit_dis/10.;
+	x_save = (i+0.5)*nrebin/2.*unit_dis/10. - frame_length/2.*unit_dis/10.-time_offset*unit_dis/10.;
 	y_save = p.y/units::cm;
 	z_save = p.z/units::cm;
 	type_save = 1; //center
@@ -529,7 +532,7 @@ int main(int argc, char* argv[])
 	
 	for (int k=0;k!=mcell->get_allcell().size();k++){
     	  Point p = mcell->get_allcell().at(k)->center();
-	  x_save = i*nrebin/2.*unit_dis/10. - frame_length/2.*unit_dis/10.-time_offset*unit_dis/10.;
+	  x_save = (i+0.5)*nrebin/2.*unit_dis/10. - frame_length/2.*unit_dis/10.-time_offset*unit_dis/10.;
 	  y_save = p.y/units::cm;
     	  z_save = p.z/units::cm;
 	  type_save = 0;
@@ -539,7 +542,7 @@ int main(int argc, char* argv[])
       }else{
 	for (int k=0;k!=mcell->get_allcell().size();k++){
     	  Point p = mcell->get_allcell().at(k)->center();
-	  x_save = i*nrebin/2.*unit_dis/10. - frame_length/2.*unit_dis/10.-time_offset*unit_dis/10.;
+	  x_save = (i+0.5)*nrebin/2.*unit_dis/10. - frame_length/2.*unit_dis/10.-time_offset*unit_dis/10.;
 	  y_save = p.y/units::cm;
     	  z_save = p.z/units::cm;
 	  t_2p->Fill();
@@ -1214,7 +1217,7 @@ int main(int argc, char* argv[])
 
       if (save_image_outline_flag==1){
 	Point p = mcell->get_allcell().at(0)->center();
-	x_save = i*nrebin/2.*unit_dis/10. - frame_length/2.*unit_dis/10.-time_offset*unit_dis/10.;
+	x_save = (i+0.5)*nrebin/2.*unit_dis/10. - frame_length/2.*unit_dis/10.-time_offset*unit_dis/10.;
 	y_save = p.y/units::cm;
 	z_save = p.z/units::cm;
 	g->SetPoint(ncount,x_save,y_save,z_save);
@@ -1234,7 +1237,7 @@ int main(int argc, char* argv[])
 	
 	for (int k=0;k!=mcell->get_allcell().size();k++){
     	  Point p = mcell->get_allcell().at(k)->center();
-	  x_save = i*nrebin/2.*unit_dis/10. - frame_length/2.*unit_dis/10.-time_offset*unit_dis/10.;
+	  x_save = (i+0.5)*nrebin/2.*unit_dis/10. - frame_length/2.*unit_dis/10.-time_offset*unit_dis/10.;
 	  y_save = p.y/units::cm;
     	  z_save = p.z/units::cm;
 	  type_save = 0;
@@ -1244,7 +1247,7 @@ int main(int argc, char* argv[])
       }else{
 	for (int k=0;k!=mcell->get_allcell().size();k++){
     	  Point p = mcell->get_allcell().at(k)->center();
-	  x_save = i*nrebin/2.*unit_dis/10. - frame_length/2.*unit_dis/10.-time_offset*unit_dis/10.;
+	  x_save = (i+0.5)*nrebin/2.*unit_dis/10. - frame_length/2.*unit_dis/10.-time_offset*unit_dis/10.;
 	  y_save = p.y/units::cm;
     	  z_save = p.z/units::cm;
 	  g->SetPoint(ncount,x_save,y_save,z_save);
@@ -1257,7 +1260,7 @@ int main(int argc, char* argv[])
     // GeomCellSelection allcell = toytiling[i]->get_allcell();
     // for (int j=0;j!=allcell.size();j++){
     //   Point p = allcell[j]->center();
-    //   x_save = i*unit_dis/10.*nrebin/2. - unit_dis/10.*frame_length/2. -time_offset*unit_dis/10.;
+    //   x_save = (i+0.5)*unit_dis/10.*nrebin/2. - unit_dis/10.*frame_length/2. -time_offset*unit_dis/10.;
     //   y_save = p.y/units::cm;
     //   z_save = p.z/units::cm;
       
@@ -1279,7 +1282,7 @@ int main(int argc, char* argv[])
 
 	if (save_image_outline_flag==1){
 	  Point p = mcell->get_allcell().at(0)->center();
-	  x_save = i*nrebin/2.*unit_dis/10. - frame_length/2.*unit_dis/10.-time_offset*unit_dis/10.;
+	  x_save = (i+0.5)*nrebin/2.*unit_dis/10. - frame_length/2.*unit_dis/10.-time_offset*unit_dis/10.;
 	  y_save = p.y/units::cm;
 	  z_save = p.z/units::cm;
 	  charge_save = charge;
@@ -1308,7 +1311,7 @@ int main(int argc, char* argv[])
 
 	   for (int k=0;k!=mcell->get_allcell().size();k++){
 	    Point p = mcell->get_allcell().at(k)->center();
-	    x_save = i*unit_dis/10.*nrebin/2. - unit_dis/10.*frame_length/2. -time_offset*unit_dis/10.;
+	    x_save = (i+0.5)*unit_dis/10.*nrebin/2. - unit_dis/10.*frame_length/2. -time_offset*unit_dis/10.;
 	    y_save = p.y/units::cm;
 	    z_save = p.z/units::cm;
 	    charge_save = charge/mcell->get_allcell().size();
@@ -1322,7 +1325,7 @@ int main(int argc, char* argv[])
 	}else{	
 	  for (int k=0;k!=mcell->get_allcell().size();k++){
 	    Point p = mcell->get_allcell().at(k)->center();
-	    x_save = i*unit_dis/10.*nrebin/2. - unit_dis/10.*frame_length/2. -time_offset*unit_dis/10.;
+	    x_save = (i+0.5)*unit_dis/10.*nrebin/2. - unit_dis/10.*frame_length/2. -time_offset*unit_dis/10.;
 	    y_save = p.y/units::cm;
 	    z_save = p.z/units::cm;
 	    charge_save = charge/mcell->get_allcell().size();
@@ -1348,7 +1351,7 @@ int main(int argc, char* argv[])
   //     if (charge> recon_threshold ){
   // 	for (int k=0;k!=mcell->get_allcell().size();k++){
   // 	  Point p = mcell->get_allcell().at(k)->center();
-  // 	  x_save = i*unit_dis/10.*nrebin/2. - unit_dis/10.*frame_length/2. -time_offset*unit_dis/10.;
+  // 	  x_save = (i+0.5)*unit_dis/10.*nrebin/2. - unit_dis/10.*frame_length/2. -time_offset*unit_dis/10.;
   // 	  y_save = p.y/units::cm;
   // 	  z_save = p.z/units::cm;
   // 	  charge_save = charge/mcell->get_allcell().size();
@@ -1365,7 +1368,7 @@ int main(int argc, char* argv[])
   //    //   for (int j=0;j!=blobtiling[i]->Get_Cells().size();j++){
   //    // 	 const GeomCell *cell = blobtiling[i]->Get_Cells().at(j);
   //    // 	 Point p = cell->center();
-  //    // 	 x_save = i*unit_dis/10.*nrebin/2. - unit_dis/10.*frame_length/2.-time_shift*unit_dis/10.;
+  //    // 	 x_save = (i+0.5)*unit_dis/10.*nrebin/2. - unit_dis/10.*frame_length/2.-time_shift*unit_dis/10.;
   //    // 	 y_save = p.y/units::cm;
   //    // 	 z_save = p.z/units::cm;
   //    // 	 charge_save = blobtiling[i]->Get_Cell_Charge(cell,1);
@@ -1400,7 +1403,7 @@ int main(int argc, char* argv[])
   //     const MergeGeomCell *mcell = (const MergeGeomCell*)((*it)->get_allcell().at(i));
   //     for (int j=0; j!=mcell->get_allcell().size();j++){
   // 	Point p = mcell->get_allcell().at(j)->center();
-  // 	x = mcell->GetTimeSlice()*unit_dis/10.*nrebin/2. - unit_dis/10.0*frame_length/2.-time_offset*unit_dis/10.;
+  // 	x = (mcell->GetTimeSlice()+0.5)*unit_dis/10.*nrebin/2. - unit_dis/10.0*frame_length/2.-time_offset*unit_dis/10.;
   // 	y = p.y/units::cm;
   // 	z = p.z/units::cm;
   // 	g1->SetPoint(ncount,x,y,z);
@@ -1467,13 +1470,13 @@ int main(int argc, char* argv[])
   //   time_slice = i;
   //   for (int j=0;j!= badtiling[i]->get_cell_all().size();j++){
   //     const GeomCell *cell = badtiling[i]->get_cell_all().at(j);
-  //     x_center = i*unit_dis/10.*nrebin/2. - unit_dis/10.*frame_length/2. -time_offset*unit_dis/10.;
+  //     x_center = (i+0.5)*unit_dis/10.*nrebin/2. - unit_dis/10.*frame_length/2. -time_offset*unit_dis/10.;
   //     y_center = cell->center().y/units::cm;
   //     z_center = cell->center().z/units::cm;
 
   //     npoints_b = cell->boundary().size();
   //     for (int k=0;k!=npoints_b;k++){
-  // 	x_b[k] = i*unit_dis/10.*nrebin/2. - unit_dis/10.*frame_length/2. -time_offset*unit_dis/10.;
+  // 	x_b[k] = (i+0.5)*unit_dis/10.*nrebin/2. - unit_dis/10.*frame_length/2. -time_offset*unit_dis/10.;
   // 	y_b[k] = cell->boundary().at(k).y/units::cm;
   // 	z_b[k] = cell->boundary().at(k).z/units::cm;
   //     }
@@ -1563,7 +1566,7 @@ int main(int argc, char* argv[])
       const MergeGeomCell *mcell = (const MergeGeomCell*)((*it)->get_allcell().at(i));
       mcell_id ++;
       time_slice = mcell->GetTimeSlice();
-      x = time_slice*nrebin/2.*unit_dis/10. - frame_length/2.*unit_dis/10.-time_offset*unit_dis/10.;
+      x = (time_slice+0.5)*nrebin/2.*unit_dis/10. - frame_length/2.*unit_dis/10.-time_offset*unit_dis/10.;
       xx =x;
       //loop single cell
       for (int j=0; j!=mcell->get_allcell().size();j++){
@@ -1621,7 +1624,7 @@ int main(int argc, char* argv[])
 
        if (save_image_outline_flag==1){
 	Point p = mcell->get_allcell().at(0)->center();
-	x_save = time_slice *nrebin/2.*unit_dis/10. - frame_length/2.*unit_dis/10.;
+	x_save = (time_slice+0.5) *nrebin/2.*unit_dis/10. - frame_length/2.*unit_dis/10.-time_offset*unit_dis/10.;;
 	y_save = mcell->center().y/units::cm;
 	z_save = mcell->center().z/units::cm;
 	charge_save = toymatrix[time_slice]->Get_Cell_Charge(mcell,1);
