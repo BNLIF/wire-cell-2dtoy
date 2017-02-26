@@ -521,7 +521,7 @@ void WireCell2dToy::uBooNEData2DDeconvolutionFDS::Deconvolute_2D(int plane){
      
      TH1F *htemp = new TH1F("htemp","htemp",nbin,0,nbin);
      for (int i=0;i!=nbin;i++){
-       htemp->SetBinContent(i+1,fb->GetBinContent(i+1)/( 14.*1.1*4096./2000.));
+       htemp->SetBinContent(i+1,fb->GetBinContent(i+1)/( 14.*1.2*4096./2000.));
      }
      delete ifft2;
      delete fb;
