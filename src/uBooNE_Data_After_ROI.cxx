@@ -279,6 +279,88 @@ void WireCell2dToy::uBooNEDataAfterROI::CleanUpROIs(){
 
 }
 
+void WireCell2dToy::uBooNEDataAfterROI::CleanUpCollectionROIs(){
+  // deal with tight ROIs, 
+  // scan with all the tight ROIs to look for peaks above certain threshold, put in a temporary set
+  float threshold = 1500; //electrons, about 1/2 of MIP per tick ...
+  std::set<SignalROI*> Good_ROIs;
+  for (int i=0;i!=nwire_w;i++){
+    for (auto it = rois_w_tight.at(i).begin();it!=rois_w_tight.at(i).end();it++){
+      SignalROI* roi = *it;
+      if (roi->get_above_threshold(threshold).size()!=0)
+	Good_ROIs.insert(roi);
+    }
+  }
+  // for a particular ROI if it is not in, or it is not connected with one in the temporary map, then remove it
+  std::list<SignalROI*> Bad_ROIs;
+  for (int i=0;i!=nwire_w;i++){
+    for (auto it = rois_w_tight.at(i).begin();it!=rois_w_tight.at(i).end();it++){
+      SignalROI* roi = *it;
+      
+      if (Good_ROIs.find(roi)!=Good_ROIs.end()) continue;
+      if (front_rois.find(roi)!=front_rois.end()){
+	SignalROISelection next_rois = front_rois[roi];
+	int flag_qx = 0;
+	for (int i=0;i!=next_rois.size();i++){
+	  SignalROI* roi1 = next_rois.at(i);
+	  if (Good_ROIs.find(roi1)!=Good_ROIs.end()) {
+	    flag_qx = 1;
+	    continue;
+	  }
+	}
+	if (flag_qx == 1) continue;
+      }
+      
+      if (back_rois.find(roi)!=back_rois.end()){
+	SignalROISelection next_rois = back_rois[roi];
+	int flag_qx = 0;
+	for (int i=0;i!=next_rois.size();i++){
+	  SignalROI* roi1 = next_rois.at(i);
+	  if (Good_ROIs.find(roi1)!=Good_ROIs.end()) {
+	    flag_qx = 1;
+	    continue;
+	  }
+	}
+	if (flag_qx == 1) continue;
+      }
+      
+      Bad_ROIs.push_back(roi);
+    }
+  }
+  
+  // remove the ROI and then update the map
+  
+  for (auto it = Bad_ROIs.begin(); it!=Bad_ROIs.end(); it ++){
+    SignalROI* roi = *it;
+    int chid = roi->get_chid()-nwire_u-nwire_v;
+    //std::cout << chid << std::endl;
+    if (front_rois.find(roi)!=front_rois.end()){
+      SignalROISelection next_rois = front_rois[roi];
+      for (int i=0;i!=next_rois.size();i++){
+   	//unlink the current roi
+   	unlink(roi,next_rois.at(i));
+      }
+      front_rois.erase(roi);
+    }
+  
+    if (back_rois.find(roi)!=back_rois.end()){
+      SignalROISelection next_rois = back_rois[roi];
+      for (int i=0;i!=next_rois.size();i++){
+   	//unlink the current roi
+   	unlink(roi,next_rois.at(i));
+      }
+      back_rois.erase(roi);
+    }
+    auto it1 = find(rois_w_tight.at(chid).begin(), rois_w_tight.at(chid).end(),roi);
+    if (it1 != rois_w_tight.at(chid).end())
+      rois_w_tight.at(chid).erase(it1);
+    
+    delete roi;
+  }
+  
+}
+
+
 void WireCell2dToy::uBooNEDataAfterROI::BreakROI1(SignalROI* roi){
   int start_bin = roi->get_start_bin();
   int end_bin = roi->get_end_bin();
@@ -1630,6 +1712,12 @@ int WireCell2dToy::uBooNEDataAfterROI::jump(int frame_number){
   std::cout << "Clean up ROIs 3rd time" << std::endl;
   CheckROIs();
   CleanUpROIs();
+
+
+  // Further reduce fake hits
+  std::cout << "Remove fake hits from collection plane" << std::endl;
+  CleanUpCollectionROIs();
+
 
   // load results back into the data ... 
   

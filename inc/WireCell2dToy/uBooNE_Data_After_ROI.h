@@ -28,6 +28,8 @@ namespace WireCell2dToy{
     
     void generate_merge_ROIs();
     
+    void CleanUpCollectionROIs();
+
     void CleanUpROIs();
     void CheckROIs();
     
