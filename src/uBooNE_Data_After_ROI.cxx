@@ -279,6 +279,50 @@ void WireCell2dToy::uBooNEDataAfterROI::CleanUpROIs(){
 
 }
 
+void WireCell2dToy::uBooNEDataAfterROI::CleanUpInductionROIs(){
+  // deal with loose ROIs
+  // focus on the isolated ones first
+  float threshold = 2000;
+  std::list<SignalROI*> Bad_ROIs;
+  for (int i=0;i!=nwire_u;i++){
+    for (auto it = rois_u_loose.at(i).begin();it!=rois_u_loose.at(i).end();it++){
+      SignalROI* roi = *it;
+      if (front_rois.find(roi)==front_rois.end() && back_rois.find(roi)==back_rois.end()){
+	if (roi->get_above_threshold(threshold).size()==0)
+	  Bad_ROIs.push_back(roi);
+      }
+    }
+  }
+  for (auto it = Bad_ROIs.begin(); it!=Bad_ROIs.end(); it ++){
+    SignalROI* roi = *it;
+    int chid = roi->get_chid();
+    auto it1 = find(rois_u_loose.at(chid).begin(), rois_u_loose.at(chid).end(),roi);
+    if (it1 != rois_u_loose.at(chid).end())
+      rois_u_loose.at(chid).erase(it1);
+    delete roi;
+  }
+  Bad_ROIs.clear();
+  for (int i=0;i!=nwire_v;i++){
+    for (auto it = rois_v_loose.at(i).begin();it!=rois_v_loose.at(i).end();it++){
+      SignalROI* roi = *it;
+      if (front_rois.find(roi)==front_rois.end() && back_rois.find(roi)==back_rois.end()){
+	if (roi->get_above_threshold(threshold).size()==0)
+	  Bad_ROIs.push_back(roi);
+      }
+    }
+  }
+  for (auto it = Bad_ROIs.begin(); it!=Bad_ROIs.end(); it ++){
+    SignalROI* roi = *it;
+    int chid = roi->get_chid()-nwire_u;
+    auto it1 = find(rois_v_loose.at(chid).begin(), rois_v_loose.at(chid).end(),roi);
+    if (it1 != rois_v_loose.at(chid).end())
+      rois_v_loose.at(chid).erase(it1);
+    delete roi;
+  }
+
+}
+
+
 void WireCell2dToy::uBooNEDataAfterROI::CleanUpCollectionROIs(){
   // deal with tight ROIs, 
   // scan with all the tight ROIs to look for peaks above certain threshold, put in a temporary set
@@ -1715,9 +1759,9 @@ int WireCell2dToy::uBooNEDataAfterROI::jump(int frame_number){
 
 
   // Further reduce fake hits
-  std::cout << "Remove fake hits from collection plane" << std::endl;
+  std::cout << "Remove fake hits " << std::endl;
   CleanUpCollectionROIs();
-
+  CleanUpInductionROIs();
 
   // load results back into the data ... 
   
