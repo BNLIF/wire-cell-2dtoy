@@ -349,7 +349,7 @@ void WireCell2dToy::uBooNEData2DDeconvolutionFDS::Deconvolute_2D(int plane){
     nwires = nwire_v;
     scale = scale_v_2d;
     gfield = gv_2D_g;
-    time_offset = - time_offset_uv -0.113;
+    time_offset = - time_offset_uv;// -0.113;
   }else if (plane == 2){
     //double par2[2]={1.45874e+01/200.*2.,5.02219e+00};
     //double par2[2]={2.41788e+01/200.*2.,8.84234e+00}; // Y
@@ -359,7 +359,7 @@ void WireCell2dToy::uBooNEData2DDeconvolutionFDS::Deconvolute_2D(int plane){
     filter_time->SetParameters(par);
     nwires = nwire_w;
     gfield = gw_2D_g;
-    time_offset = -time_offset_uw + 0.803;
+    time_offset = -time_offset_uw;// + 0.803;
   }
   
   TF1 *filter_wire = new TF1("filter_wire","exp(-0.5*pow(x/[0],2))");
