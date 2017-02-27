@@ -91,6 +91,26 @@ WireCell2dToy::uBooNEData2DDeconvolutionFDS::uBooNEData2DDeconvolutionFDS(TH2I *
 
   // std::cout << umap.size() << std::endl;
 
+// #include "calib_resp_v1.txt"
+//   for (int i=0;i!=100;i++){
+//     ref_resp_func[i] = ref_ele[i];
+//   }
+//   for (int j=0;j!=2400;j++){
+//     for (int i=0;i!=100;i++){
+//       u_resp_func[j][i] = calib_ele_chan[j][i];
+//     }
+//   }
+//   for (int j=0;j!=2400;j++){
+//     for (int i=0;i!=100;i++){
+//       v_resp_func[j][i] = calib_ele_chan[j+2400][i];
+//     }
+//   }
+//   for (int j=0;j!=3456;j++){
+//     for (int i=0;i!=100;i++){
+//       w_resp_func[j][i] = calib_ele_chan[j+4800][i];
+//     }
+//   }
+
 }
 
 
@@ -166,6 +186,27 @@ WireCell2dToy::uBooNEData2DDeconvolutionFDS::uBooNEData2DDeconvolutionFDS(WireCe
 
   scale_u_2d = 1.0;
   scale_v_2d = 1.0;
+
+
+  // #include "calib_resp_v1.txt"
+  // for (int i=0;i!=100;i++){
+  //   ref_resp_func[i] = ref_ele[i];
+  // }
+  // for (int j=0;j!=2400;j++){
+  //   for (int i=0;i!=100;i++){
+  //     u_resp_func[j][i] = calib_ele_chan[j][i];
+  //   }
+  // }
+  // for (int j=0;j!=2400;j++){
+  //   for (int i=0;i!=100;i++){
+  //     v_resp_func[j][i] = calib_ele_chan[j+2400][i];
+  //   }
+  // }
+  // for (int j=0;j!=3456;j++){
+  //   for (int i=0;i!=100;i++){
+  //     w_resp_func[j][i] = calib_ele_chan[j+4800][i];
+  //   }
+  // }
 }
 
 WireCell2dToy::uBooNEData2DDeconvolutionFDS::~uBooNEData2DDeconvolutionFDS()
@@ -201,6 +242,27 @@ int WireCell2dToy::uBooNEData2DDeconvolutionFDS::jump(int frame_number){
   fds->jump(frame_number);
 
   TVirtualFFT::SetTransform(0);
+
+
+  //#include "calib_resp_v1.txt"
+  // for (int i=0;i!=100;i++){
+  //   ref_resp_func[i] = ref_ele[i];
+  // }
+  // for (int j=0;j!=2400;j++){
+  //   for (int i=0;i!=100;i++){
+  //     u_resp_func[j][i] = calib_ele_chan[j][i];
+  //   }
+  // }
+  // for (int j=0;j!=2400;j++){
+  //   for (int i=0;i!=100;i++){
+  //     v_resp_func[j][i] = calib_ele_chan[j+2400][i];
+  //   }
+  // }
+  // for (int j=0;j!=3456;j++){
+  //   for (int i=0;i!=100;i++){
+  //     w_resp_func[j][i] = calib_ele_chan[j+4800][i];
+  //   }
+  // }
 
 
   std::cout << "Deconvolution with garfield field response for 2-D W Plane" << std::endl;
@@ -379,6 +441,16 @@ void WireCell2dToy::uBooNEData2DDeconvolutionFDS::Deconvolute_2D(int plane){
    }
    int tbin_save[nchannels];
    
+   // do the nominal electronics FFT
+#include "calib_resp_v1.txt"
+   TH1F *htemp1 = new TH1F("htemp1","htemp1",nbin,0,nbin);
+   for (int j=0;j!=100;j++){
+     htemp1->SetBinContent(j+1,ref_ele[j]);
+   }
+   TH1 *hm1 = htemp1->FFT(0,"MAG");
+   TH1 *hp1 = htemp1->FFT(0,"PH");
+   
+
    for (size_t ind=0; ind<ntraces; ++ind) {
      const Trace& trace = frame1.traces[ind];
      int tbin = trace.tbin;
@@ -396,31 +468,47 @@ void WireCell2dToy::uBooNEData2DDeconvolutionFDS::Deconvolute_2D(int plane){
      TH1 *hm = htemp->FFT(0,"MAG");
      TH1 *hp = htemp->FFT(0,"PH");
      
+     //do FFT for individual electronics response
+     TH1F *htemp2 = new TH1F("htemp2","htemp2",nbin,0,nbin);
+     for (int j=0;j!=100;j++){
+       htemp2->SetBinContent(j+1,calib_ele_chan[chid][j]);
+     }
+     TH1 *hm2 = htemp2->FFT(0,"MAG");
+     TH1 *hp2 = htemp2->FFT(0,"PH");
+
+
      if (plane == 0){
        for (Int_t j=0;j!=nticks;j++){
-	 rho_u[chid][j] = hm->GetBinContent(j+1);
-	 phi_u[chid][j] = hp->GetBinContent(j+1);
+	 rho_u[chid][j] = hm->GetBinContent(j+1) * hm1->GetBinContent(j+1) / hm2->GetBinContent(j+1);
+	 phi_u[chid][j] = hp->GetBinContent(j+1) + hp1->GetBinContent(j+1) - hp2->GetBinContent(j+1);
        }
        tbin_save[chid] = tbin;
      }else if (plane == 1){
        for (Int_t j=0;j!=nticks;j++){
-	 rho_u[chid-nwire_u][j] = hm->GetBinContent(j+1);
-	 phi_u[chid-nwire_u][j] = hp->GetBinContent(j+1);
+	 rho_u[chid-nwire_u][j] = hm->GetBinContent(j+1) * hm1->GetBinContent(j+1) / hm2->GetBinContent(j+1);
+	 phi_u[chid-nwire_u][j] = hp->GetBinContent(j+1) + hp1->GetBinContent(j+1) - hp2->GetBinContent(j+1);
        }
        tbin_save[chid-nwire_u] = tbin;
      }else if (plane == 2){
        for (Int_t j=0;j!=nticks;j++){
-	 rho_u[chid-nwire_u-nwire_v][j] = hm->GetBinContent(j+1);
-	 phi_u[chid-nwire_u-nwire_v][j] = hp->GetBinContent(j+1);
+	 rho_u[chid-nwire_u-nwire_v][j] = hm->GetBinContent(j+1) * hm1->GetBinContent(j+1) / hm2->GetBinContent(j+1);
+	 phi_u[chid-nwire_u-nwire_v][j] = hp->GetBinContent(j+1) + hp1->GetBinContent(j+1) - hp2->GetBinContent(j+1);
        }
        tbin_save[chid-nwire_u-nwire_v] = tbin;
      }
 
 
+     delete hm2;
+     delete hp2;
+     delete htemp2;
+     
      delete hm;
      delete hp;
      delete htemp;
    }
+   delete hm1;
+   delete hp1;
+   delete htemp1;
 
  double resp_re[nchannels], resp_im[nchannels];
    for (Int_t i=0;i!=nticks;i++){

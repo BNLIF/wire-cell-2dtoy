@@ -65,6 +65,11 @@ namespace WireCell2dToy{
     void Deconvolute_2D(int plane);
 
     void restore_baseline(TH1F *h1);
+
+    /* float ref_resp_func[100]; */
+    /* float u_resp_func[2400][100]; */
+    /* float v_resp_func[2400][100]; */
+    /* float w_resp_func[3456][100]; */
     
   };
 }

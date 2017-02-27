@@ -65,7 +65,8 @@ int main(int argc, char* argv[])
     cerr << "usage: wire-cell-uboone /path/to/ChannelWireGeometry.txt /path/to/celltree.root eve_num " << endl;
     return 1;
   }
-
+  TH1::AddDirectory(kFALSE);
+  
   WireCellSst::GeomDataSource gds(argv[1]);
   std::vector<double> ex = gds.extent();
   cerr << "Extent: "

@@ -62,7 +62,7 @@ int main(int argc, char* argv[])
     cerr << "usage: wire-cell-uboone /path/to/ChannelWireGeometry.txt /path/to/celltree.root eve_num " << endl;
     return 1;
   }
-
+  TH1::AddDirectory(kFALSE);
   int two_plane = 0;
   int save_file = 0;
   int nt_off1 = 0;

@@ -70,6 +70,8 @@ int main(int argc, char* argv[])
     return 1;
   }
 
+  TH1::AddDirectory(kFALSE);
+
   int two_plane = 0;
   int save_file = 0;
   int nt_off1 = 0;
