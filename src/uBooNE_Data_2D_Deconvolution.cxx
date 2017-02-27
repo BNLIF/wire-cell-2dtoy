@@ -471,7 +471,11 @@ void WireCell2dToy::uBooNEData2DDeconvolutionFDS::Deconvolute_2D(int plane){
      //do FFT for individual electronics response
      TH1F *htemp2 = new TH1F("htemp2","htemp2",nbin,0,nbin);
      for (int j=0;j!=100;j++){
-       htemp2->SetBinContent(j+1,calib_ele_chan[chid][j]);
+       if (plane == 0 || plane == 1){
+	 htemp2->SetBinContent(j+1,ref_ele[j]*0.965);
+       }else{
+	 htemp2->SetBinContent(j+1,calib_ele_chan[chid][j]);
+       }
      }
      TH1 *hm2 = htemp2->FFT(0,"MAG");
      TH1 *hp2 = htemp2->FFT(0,"PH");

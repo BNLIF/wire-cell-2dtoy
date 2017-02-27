@@ -142,6 +142,7 @@ int main(int argc, char* argv[])
   }else{
   }
 
+  TH1::AddDirectory(kTRUE);
 
 
   TFile *file = new TFile(Form("2D_display_%d_%d_%d.root",run_no,subrun_no,eve_num),"RECREATE");

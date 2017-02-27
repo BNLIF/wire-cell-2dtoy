@@ -121,6 +121,8 @@ int main(int argc, char* argv[])
   WireCell2dToy::uBooNEDataAfterROI roi_fds(wien_fds,gds,uboone_rois,nrebin);
   roi_fds.jump(eve_num);
 
+  TH1::AddDirectory(kTRUE);
+
 
   TFile *file = new TFile(Form("nsp_2D_display_%d_%d_%d.root",run_no,subrun_no,event_no),"RECREATE");
 
