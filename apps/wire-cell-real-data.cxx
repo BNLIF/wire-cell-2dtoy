@@ -435,6 +435,11 @@ int main(int argc, char* argv[])
     //  theApp.Run();
   }
   
+
+  TFile *f = new TFile(root_file);
+  TTree *t = (TTree*)f->Get("Event/Sim");
+  TBranch *br = t->GetBranch("oh_nHits");
+
   //save the image before deghosting ... 
 
   TFile *file = new TFile(Form("result_%d_%d_%d.root",run_no,subrun_no,event_no),"RECREATE");
@@ -1526,9 +1531,7 @@ int main(int argc, char* argv[])
   TClonesArray* pe_opdet = 0;
 
   
-  TFile *f = new TFile(root_file);
-  TTree *t = (TTree*)f->Get("Event/Sim");
-  TBranch *br = t->GetBranch("oh_nHits");
+  
   if (br!=0){
     t->SetBranchAddress("oh_nHits", &oh_nHits);
     t->SetBranchAddress("oh_channel",&oh_channel);
@@ -1702,7 +1705,7 @@ int main(int argc, char* argv[])
     }
   }
   ttree1->Write();
-   g->Write("shower3D");
+  g->Write("shower3D");
   g_rec->Write("shower3D_charge");
   g_rec_blob->Write("shower3D_charge_blob");
   
