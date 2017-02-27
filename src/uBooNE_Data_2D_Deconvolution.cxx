@@ -472,7 +472,7 @@ void WireCell2dToy::uBooNEData2DDeconvolutionFDS::Deconvolute_2D(int plane){
      TH1F *htemp2 = new TH1F("htemp2","htemp2",nbin,0,nbin);
      for (int j=0;j!=100;j++){
        if (plane == 0 || plane == 1){
-	 htemp2->SetBinContent(j+1,ref_ele[j]*0.965);
+	 htemp2->SetBinContent(j+1,ref_ele1_ind[j]); // 3.5% lower induction wire plane
        }else{
 	 htemp2->SetBinContent(j+1,calib_ele_chan[chid][j]);
        }
