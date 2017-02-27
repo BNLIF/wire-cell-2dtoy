@@ -1509,6 +1509,53 @@ int main(int argc, char* argv[])
   //   }
   // }
   
+  //save light information in here ... 
+
+  // OP HIT
+  Int_t oh_nHits;
+  std::vector<Int_t> * oh_channel = 0;
+  std::vector<Double_t> * oh_bgtime = 0;
+  std::vector<Double_t> * oh_trigtime = 0;
+  std::vector<Double_t> * oh_pe = 0;
+
+  // OP FLASH
+  Int_t of_nFlash;
+  std::vector<Float_t> * of_t = 0;
+  std::vector<Float_t> * of_peTotal = 0;
+  std::vector<Int_t> * of_multiplicity = 0;
+  TClonesArray* pe_opdet = 0;
+
+  
+  TFile *f = new TFile(root_file);
+  TTree *t = (TTree*)f->Get("Event/Sim");
+  t->SetBranchAddress("oh_nHits", &oh_nHits);
+  t->SetBranchAddress("oh_channel",&oh_channel);
+  t->SetBranchAddress("oh_bgtime", &oh_bgtime);
+  t->SetBranchAddress("oh_trigtime", &oh_trigtime);
+  t->SetBranchAddress("oh_pe", &oh_pe);
+  t->SetBranchAddress("of_nFlash", &of_nFlash);
+  t->SetBranchAddress("of_t", &of_t);
+  t->SetBranchAddress("of_peTotal", &of_peTotal);
+  t->SetBranchAddress("of_multiplicity", &of_multiplicity);
+  t->SetBranchAddress("pe_opdet", &pe_opdet);
+
+  t->GetEntry(eve_num);
+  
+  TTree *T_op = new TTree("T_op","T_op");
+  T_op->SetDirectory(file);
+
+  T_op->Branch("oh_nHits",&oh_nHits);  
+  T_op->Branch("oh_channel",&oh_channel);
+  T_op->Branch("oh_bgtime", &oh_bgtime);
+  T_op->Branch("oh_trigtime", &oh_trigtime);
+  T_op->Branch("oh_pe", &oh_pe);
+  T_op->Branch("of_nFlash", &of_nFlash);
+  T_op->Branch("of_t", &of_t);
+  T_op->Branch("of_peTotal", &of_peTotal);
+  T_op->Branch("of_multiplicity", &of_multiplicity);
+  T_op->Branch("pe_opdet", &pe_opdet);
+
+  T_op->Fill();
 
   
 
