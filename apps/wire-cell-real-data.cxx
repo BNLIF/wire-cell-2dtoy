@@ -1528,35 +1528,37 @@ int main(int argc, char* argv[])
   
   TFile *f = new TFile(root_file);
   TTree *t = (TTree*)f->Get("Event/Sim");
-  t->SetBranchAddress("oh_nHits", &oh_nHits);
-  t->SetBranchAddress("oh_channel",&oh_channel);
-  t->SetBranchAddress("oh_bgtime", &oh_bgtime);
-  t->SetBranchAddress("oh_trigtime", &oh_trigtime);
-  t->SetBranchAddress("oh_pe", &oh_pe);
-  t->SetBranchAddress("of_nFlash", &of_nFlash);
-  t->SetBranchAddress("of_t", &of_t);
-  t->SetBranchAddress("of_peTotal", &of_peTotal);
-  t->SetBranchAddress("of_multiplicity", &of_multiplicity);
-  t->SetBranchAddress("pe_opdet", &pe_opdet);
-
-  t->GetEntry(eve_num);
-  
-  TTree *T_op = new TTree("T_op","T_op");
-  T_op->SetDirectory(file);
-
-  T_op->Branch("oh_nHits",&oh_nHits);  
-  T_op->Branch("oh_channel",&oh_channel);
-  T_op->Branch("oh_bgtime", &oh_bgtime);
-  T_op->Branch("oh_trigtime", &oh_trigtime);
-  T_op->Branch("oh_pe", &oh_pe);
-  T_op->Branch("of_nFlash", &of_nFlash);
-  T_op->Branch("of_t", &of_t);
-  T_op->Branch("of_peTotal", &of_peTotal);
-  T_op->Branch("of_multiplicity", &of_multiplicity);
-  T_op->Branch("pe_opdet", &pe_opdet);
-
-  T_op->Fill();
-
+  TBranch *br = t->GetBranch("oh_nHits");
+  if (br!=0){
+    t->SetBranchAddress("oh_nHits", &oh_nHits);
+    t->SetBranchAddress("oh_channel",&oh_channel);
+    t->SetBranchAddress("oh_bgtime", &oh_bgtime);
+    t->SetBranchAddress("oh_trigtime", &oh_trigtime);
+    t->SetBranchAddress("oh_pe", &oh_pe);
+    t->SetBranchAddress("of_nFlash", &of_nFlash);
+    t->SetBranchAddress("of_t", &of_t);
+    t->SetBranchAddress("of_peTotal", &of_peTotal);
+    t->SetBranchAddress("of_multiplicity", &of_multiplicity);
+    t->SetBranchAddress("pe_opdet", &pe_opdet);
+    
+    t->GetEntry(eve_num);
+    
+    TTree *T_op = new TTree("T_op","T_op");
+    T_op->SetDirectory(file);
+    
+    T_op->Branch("oh_nHits",&oh_nHits);  
+    T_op->Branch("oh_channel",&oh_channel);
+    T_op->Branch("oh_bgtime", &oh_bgtime);
+    T_op->Branch("oh_trigtime", &oh_trigtime);
+    T_op->Branch("oh_pe", &oh_pe);
+    T_op->Branch("of_nFlash", &of_nFlash);
+    T_op->Branch("of_t", &of_t);
+    T_op->Branch("of_peTotal", &of_peTotal);
+    T_op->Branch("of_multiplicity", &of_multiplicity);
+    T_op->Branch("pe_opdet", &pe_opdet);
+    
+    T_op->Fill();
+  }
   
 
   TTree *ttree1 = new TTree("TC","TC");
