@@ -323,7 +323,7 @@ void WireCell2dToy::uBooNEData2DDeconvolutionFDS::Deconvolute_2D(int plane){
   size_t ntraces = frame1.traces.size();
 
   const int nticks = bins_per_frame;
-  int nbin = nticks;
+  nbin = nticks;
   double value_re[nticks];
   double value_im[nticks];
   
