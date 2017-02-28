@@ -326,11 +326,15 @@ void WireCell2dToy::uBooNEData2DDeconvolutionFDS::Deconvolute_2D(int plane){
   nbin = nticks;
   double value_re[nticks];
   double value_im[nticks];
+  for (int i=0;i!=nticks;++i){
+    value_re[i] = 0;
+    value_im[i] = 0;
+  }
   
   TF1 *filter_time = new TF1("filter_time","(x>0.0)*exp(-0.5*pow(x/[0],[1]))");
-  int nwires;
+  int nwires = 0;
   float scale = 1;
-  TGraph **gfield;
+  TGraph **gfield = 0;
   double time_offset = 0;
   if (plane == 0){
     double par[2]={1.43555e+01/200.*2.,4.95096e+00};
@@ -376,9 +380,18 @@ void WireCell2dToy::uBooNEData2DDeconvolutionFDS::Deconvolute_2D(int plane){
   const int nchannels = nwires;
   
   double rho_res[21][nticks], phi_res[21][nticks];
-  
+  for (int i=0;i!=21;++i){
+    for (int j=0;j!=nticks;++j){
+      rho_res[i][j] = 0.0;
+      phi_res[i][j] = 0.0;
+    }
+  }
+
+  TH1F hmr_u("hmr_u","hmr_u",nbin,0,nbin); 
+  TH1F hpr_u("hpr_u","hpr_u",nbin,0,nbin); 
+
   for (int j=0;j!=21;j++){ 
-    TGraph *gtemp;
+    TGraph *gtemp=0;
     if (j==0 || j==20){
       gtemp = gfield[10];
     }else if (j==1 || j==19){
@@ -413,17 +426,19 @@ void WireCell2dToy::uBooNEData2DDeconvolutionFDS::Deconvolute_2D(int plane){
 	hr->SetBinContent(i+1,0);
       }
     }
-    TH1 *hmr_u = hr->FFT(0,"MAG");
-    TH1 *hpr_u = hr->FFT(0,"PH");
+    hmr_u.Reset();
+    hpr_u.Reset();
+    hr->FFT(&hmr_u,"MAG");
+    hr->FFT(&hpr_u,"PH");
     
     for (Int_t i=0;i!=nticks;i++){
-      rho_res[j][i] = hmr_u->GetBinContent(i+1);
-      phi_res[j][i] = hpr_u->GetBinContent(i+1);
+      rho_res[j][i] = hmr_u.GetBinContent(i+1);
+      phi_res[j][i] = hpr_u.GetBinContent(i+1);
     }
 
     // std::cout << "abc " << j << std::endl;
-    delete hmr_u;
-    delete hpr_u;
+    //delete hmr_u;
+    //delete hpr_u;
   }
 
     // deconvolution ... 
@@ -440,16 +455,27 @@ void WireCell2dToy::uBooNEData2DDeconvolutionFDS::Deconvolute_2D(int plane){
      result_im.push_back(temp3);
    }
    int tbin_save[nchannels];
-   
+   for (int i=0;i!=nchannels;++i){
+     tbin_save[i] = 0;
+   }
    // do the nominal electronics FFT
 #include "calib_resp_v1.txt"
+
+   TH1F hm1("hm1","hm1",nbin,0,nbin);
+   TH1F hp1("hp1","hp1",nbin,0,nbin);
    TH1F *htemp1 = new TH1F("htemp1","htemp1",nbin,0,nbin);
    for (int j=0;j!=100;j++){
      htemp1->SetBinContent(j+1,ref_ele[j]);
    }
-   TH1 *hm1 = htemp1->FFT(0,"MAG");
-   TH1 *hp1 = htemp1->FFT(0,"PH");
+   htemp1->FFT(&hm1,"MAG");
+   htemp1->FFT(&hp1,"PH");
    
+
+   TH1F hm("hm","hm",nbin,0,nbin);
+   TH1F hp("hp","hp",nbin,0,nbin);
+
+   TH1F hm2("hm2","hm2",nbin,0,nbin);
+   TH1F hp2("hp2","hp2",nbin,0,nbin);
 
    for (size_t ind=0; ind<ntraces; ++ind) {
      const Trace& trace = frame1.traces[ind];
@@ -465,8 +491,8 @@ void WireCell2dToy::uBooNEData2DDeconvolutionFDS::Deconvolute_2D(int plane){
        int tt = i+1;
        htemp->SetBinContent(tt,trace.charge.at(i));
      }
-     TH1 *hm = htemp->FFT(0,"MAG");
-     TH1 *hp = htemp->FFT(0,"PH");
+     htemp->FFT(&hm,"MAG");
+     htemp->FFT(&hp,"PH");
      
      //do FFT for individual electronics response
      TH1F *htemp2 = new TH1F("htemp2","htemp2",nbin,0,nbin);
@@ -479,46 +505,45 @@ void WireCell2dToy::uBooNEData2DDeconvolutionFDS::Deconvolute_2D(int plane){
 	 //	 htemp2->SetBinContent(j+1,calib_ele_chan[chid][j]);
        }
      }
-     TH1 *hm2 = htemp2->FFT(0,"MAG");
-     TH1 *hp2 = htemp2->FFT(0,"PH");
+     htemp2->FFT(&hm2,"MAG");
+     htemp2->FFT(&hp2,"PH");
 
 
      if (plane == 0){
        for (Int_t j=0;j!=nticks;j++){
-	 rho_u[chid][j] = hm->GetBinContent(j+1) * hm1->GetBinContent(j+1) / hm2->GetBinContent(j+1);
-	 phi_u[chid][j] = hp->GetBinContent(j+1) + hp1->GetBinContent(j+1) - hp2->GetBinContent(j+1);
+	 rho_u[chid][j] = hm.GetBinContent(j+1) * hm1.GetBinContent(j+1) / hm2.GetBinContent(j+1);
+	 phi_u[chid][j] = hp.GetBinContent(j+1) + hp1.GetBinContent(j+1) - hp2.GetBinContent(j+1);
        }
        tbin_save[chid] = tbin;
      }else if (plane == 1){
        for (Int_t j=0;j!=nticks;j++){
-	 rho_u[chid-nwire_u][j] = hm->GetBinContent(j+1) * hm1->GetBinContent(j+1) / hm2->GetBinContent(j+1);
-	 phi_u[chid-nwire_u][j] = hp->GetBinContent(j+1) + hp1->GetBinContent(j+1) - hp2->GetBinContent(j+1);
+	 rho_u[chid-nwire_u][j] = hm.GetBinContent(j+1) * hm1.GetBinContent(j+1) / hm2.GetBinContent(j+1);
+	 phi_u[chid-nwire_u][j] = hp.GetBinContent(j+1) + hp1.GetBinContent(j+1) - hp2.GetBinContent(j+1);
        }
        tbin_save[chid-nwire_u] = tbin;
      }else if (plane == 2){
        for (Int_t j=0;j!=nticks;j++){
-	 rho_u[chid-nwire_u-nwire_v][j] = hm->GetBinContent(j+1) * hm1->GetBinContent(j+1) / hm2->GetBinContent(j+1);
-	 phi_u[chid-nwire_u-nwire_v][j] = hp->GetBinContent(j+1) + hp1->GetBinContent(j+1) - hp2->GetBinContent(j+1);
+	 rho_u[chid-nwire_u-nwire_v][j] = hm.GetBinContent(j+1) * hm1.GetBinContent(j+1) / hm2.GetBinContent(j+1);
+	 phi_u[chid-nwire_u-nwire_v][j] = hp.GetBinContent(j+1) + hp1.GetBinContent(j+1) - hp2.GetBinContent(j+1);
        }
        tbin_save[chid-nwire_u-nwire_v] = tbin;
      }
 
 
-     delete hm2;
-     delete hp2;
+    
      delete htemp2;
      
-     delete hm;
-     delete hp;
      delete htemp;
    }
-   delete hm1;
-   delete hp1;
    delete htemp1;
 
- double resp_re[nchannels], resp_im[nchannels];
+   double resp_re[nchannels], resp_im[nchannels];
+   for (int i=0;i!=nchannels;i++){
+     resp_re[i] = 0.0;
+     resp_im[i] = 0.0;
+   }
    for (Int_t i=0;i!=nticks;i++){
-     Double_t freq;
+     Double_t freq=0;
      if (i < nticks/2.){
        freq = i/(1.*nticks)*2.;
      }else{
@@ -553,7 +578,7 @@ void WireCell2dToy::uBooNEData2DDeconvolutionFDS::Deconvolute_2D(int plane){
      
      Double_t temp2_re[nchannels],temp2_im[nchannels];
      for (Int_t j=0;j!=nchannels;j++){
-       Double_t freq_wire;
+       Double_t freq_wire = 0;
        if (j < nchannels/2.){
    	 freq_wire = j/(1.*nchannels)*2.;
        }else{
@@ -600,8 +625,12 @@ void WireCell2dToy::uBooNEData2DDeconvolutionFDS::Deconvolute_2D(int plane){
      int n = nticks;
      TVirtualFFT *ifft2 = TVirtualFFT::FFT(1,&n,"C2R M K");
      double temp_re[nticks],temp_im[nticks];
+     for (int j=0;j!=nticks;++j){
+       temp_re[j] = 0;
+       temp_im[j] = 0;
+     }
      for (int j=0;j!=nticks;j++){
-       Double_t freq;
+       Double_t freq=0;
        if (j < nticks/2.){
    	 freq = j/(1.*nticks)*2.;
        }else{
