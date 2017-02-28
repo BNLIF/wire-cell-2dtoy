@@ -501,8 +501,8 @@ void WireCell2dToy::uBooNEData2DDeconvolutionFDS::Deconvolute_2D(int plane){
 	 //htemp2->SetBinContent(j+1,ref_ele1_ind[j]); // 3.5% lower induction wire plane
 	 htemp2->SetBinContent(j+1,ref_ele[j]*1.1*0.965); // 3.5% lower induction wire plane
        }else{
-	 //htemp2->SetBinContent(j+1,ref_ele[j]*1.1); // for test purpose
-	 htemp2->SetBinContent(j+1,calib_ele_chan[chid][j]);
+	 htemp2->SetBinContent(j+1,ref_ele[j]*1.1); // for test purpose
+	 //htemp2->SetBinContent(j+1,calib_ele_chan[chid][j]);
        }
      }
      htemp2->FFT(&hm2,"MAG");
