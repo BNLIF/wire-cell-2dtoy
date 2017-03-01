@@ -146,8 +146,8 @@ int main(int argc, char* argv[])
   // float toffset_2=-0.603 + (nt_off2*0.2 - 1); // time offset between u/w
   // float toffset_3=0.0;
 
-  float toffset_1=(nt_off1 * 0.2 - 1.0 );  // time offset between u/v 
-  float toffset_2=(nt_off2 * 0.2 - 1.0); // time offset between u/w
+  float toffset_1=0.0; //(nt_off1 * 0.2 - 1.0 );  // time offset between u/v 
+  float toffset_2=0.0; //(nt_off2 * 0.2 - 1.0); // time offset between u/w
   float toffset_3=0.0;
   
 
