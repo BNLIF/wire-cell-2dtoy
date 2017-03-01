@@ -8,6 +8,8 @@
 using namespace WireCell;
 
 WireCell2dToy::ToyTiling::ToyTiling()
+  : ave_charge(0)
+  , ncell(0)
 {
 }
 
@@ -208,8 +210,8 @@ WireCell2dToy::ToyTiling::ToyTiling(const WireCell::Slice& slice,WireCell::Detec
       WirePlaneType_t plane = wire->plane();
       // std::cout << i << " " << plane << " " << charge << std::endl;
       
-      double charge_noise;
-      double rel_charge_err;
+      double charge_noise=0;
+      double rel_charge_err=0;
       if (plane ==0){
 	charge_noise = noise_u;
 	rel_charge_err = rel_u;
@@ -308,7 +310,10 @@ WireCell2dToy::ToyTiling::ToyTiling(const WireCell::Slice& slice,WireCell::Detec
 
 
 
-WireCell2dToy::ToyTiling::ToyTiling(const WireCell::Slice& slice,WireCell::GeomDataSource& gds, float rel_u , float rel_v, float rel_w, float noise_u, float noise_v, float noise_w, std::vector<float>* uplane_rms, std::vector<float>* vplane_rms, std::vector<float>* wplane_rms){
+WireCell2dToy::ToyTiling::ToyTiling(const WireCell::Slice& slice,WireCell::GeomDataSource& gds, float rel_u , float rel_v, float rel_w, float noise_u, float noise_v, float noise_w, std::vector<float>* uplane_rms, std::vector<float>* vplane_rms, std::vector<float>* wplane_rms)
+  : ave_charge(0)
+  , ncell(0)
+{
   WireCell::Channel::Group group = slice.group();
 
   float tolerance = 0.1 * units::mm;
@@ -335,8 +340,8 @@ WireCell2dToy::ToyTiling::ToyTiling(const WireCell::Slice& slice,WireCell::GeomD
 
     // std::cout << i << " " << plane << " " << charge << std::endl;
 
-    double charge_noise;
-    double rel_charge_err;
+    double charge_noise=0;
+    double rel_charge_err=0;
     if (plane ==0){
       charge_noise = noise_u;
       rel_charge_err = rel_u;
@@ -390,8 +395,8 @@ WireCell2dToy::ToyTiling::ToyTiling(const WireCell::Slice& slice,WireCell::GeomD
 
 
 
-  float dis_u[3],dis_v[3],dis_w[3],
-    dis_puv[5],dis_puw[5],dis_pwv[5];
+  float dis_u[3]={0.0},dis_v[3]={0.0},dis_w[3]={0.0},
+					dis_puv[5]={0.0},dis_puw[5]={0.0},dis_pwv[5]={0.0};
   ncell = 1;
 
   //std::cout << "Wire Counts: " << wire_u.size() << " " << wire_v.size() << " " << wire_w.size() << std::endl;
@@ -412,9 +417,9 @@ WireCell2dToy::ToyTiling::ToyTiling(const WireCell::Slice& slice,WireCell::GeomD
 
   //precalculate all the offsets
   std::vector<Vector> puv_save(5), puw_save(5), pwv_save(5);
-  float dis_puv_save[5], dis_puw_save[5], dis_pwv_save[5];
+  float dis_puv_save[5]={0.0}, dis_puw_save[5]={0.0}, dis_pwv_save[5]={0.0};
   
-  double u_pitch, v_pitch, w_pitch;
+  double u_pitch=0, v_pitch=0, w_pitch=0;
   u_pitch = gds.pitch(kUwire);
   v_pitch = gds.pitch(kVwire);
   w_pitch = gds.pitch(kYwire);
@@ -806,10 +811,10 @@ void WireCell2dToy::ToyTiling::twoplane_tiling(int time, int nrebin, WireCell::G
 
   //  std::cout << wire_u.size() << " " << wire_v.size() << " " << wire_w.size() << std::endl;
 
-   float dis_u[3],dis_v[3],dis_w[3],
-    dis_puv[5],dis_puw[5],dis_pwv[5];
+  float dis_u[3]={0.0},dis_v[3]={0.0},dis_w[3]={0.0},
+					dis_puv[5]={0.0},dis_puw[5]={0.0},dis_pwv[5]={0.0};
 
-  double u_pitch, v_pitch, w_pitch;
+  double u_pitch=0, v_pitch=0, w_pitch=0;
   u_pitch = gds.pitch(kUwire);
   v_pitch = gds.pitch(kVwire);
   w_pitch = gds.pitch(kYwire);
@@ -1627,8 +1632,8 @@ const GeomCell* WireCell2dToy::ToyTiling::cell(const GeomWireSelection& wires) c
 
 void WireCell2dToy::ToyTiling::CreateCell(float tolerance, const GeomDataSource& gds, int face, int n_tpc, GeomWireSelection& temp_wire_u, 
 					  GeomWireSelection& temp_wire_v, GeomWireSelection& temp_wire_w){
-   float dis_u[3],dis_v[3],dis_w[3],
-    dis_puv[5],dis_puw[5],dis_pwv[5];
+  float dis_u[3]={0.0},dis_v[3]={0.0},dis_w[3]={0.0},
+					dis_puv[5]={0.0},dis_puw[5]={0.0},dis_pwv[5]={0.0};
   
    
   // calculate all the costant
@@ -1645,7 +1650,7 @@ void WireCell2dToy::ToyTiling::CreateCell(float tolerance, const GeomDataSource&
 
   //precalculate all the offsets
   std::vector<Vector> puv_save(5), puw_save(5), pwv_save(5);
-  float dis_puv_save[5], dis_puw_save[5], dis_pwv_save[5];
+  float dis_puv_save[5]={0.0}, dis_puw_save[5]={0.0}, dis_pwv_save[5]={0.0};
   
   double u_pitch, v_pitch, w_pitch;
   u_pitch = gds.pitch(face,kUwire);

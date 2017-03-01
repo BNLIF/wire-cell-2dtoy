@@ -118,9 +118,9 @@ int main(int argc, char* argv[])
   
   TGraph2D *shower3D = (TGraph2D*)file->Get("shower3D");
 
-  float unit_dis;
-  int nrebin;
-  int total_time_bin;
+  float unit_dis=0;
+  int nrebin=0;
+  int total_time_bin=0;
   Trun->SetBranchAddress("nrebin",&nrebin);
   Trun->SetBranchAddress("unit_dis",&unit_dis);
   Trun->SetBranchAddress("total_time_bin",&total_time_bin);
@@ -146,14 +146,14 @@ int main(int argc, char* argv[])
     toytiling[i] = new WireCell2dToy::ToyTiling();
   }
 
-  int time_slice;
+  int time_slice=0;
 
   const GeomCell *cell = 0;//tt->get_allcell().at(5);
   const GeomWire *wire = 0;//tt->get_allwire().at(3);
   
-  double charge, x,y,z;
-  int cluster_num;
-  int mcell_id;
+  double charge=0, x=0,y=0,z=0;
+  int cluster_num=0;
+  int mcell_id=0;
   TC->SetBranchAddress("time_slice",&time_slice);
   TC->SetBranchAddress("charge",&charge);
   TC->SetBranchAddress("xx",&x);
@@ -163,9 +163,9 @@ int main(int argc, char* argv[])
   TC->SetBranchAddress("mcell_id",&mcell_id);
   TC->SetBranchAddress("cell",&cell);
   
-  int u_index, v_index, w_index;
-  double u_charge, v_charge, w_charge;
-  double u_charge_err, v_charge_err, w_charge_err;
+  int u_index=0, v_index=0, w_index=0;
+  double u_charge=0, v_charge=0, w_charge=0;
+  double u_charge_err=0, v_charge_err=0, w_charge_err=0;
 
   TC->SetBranchAddress("u_index",&u_index);
   TC->SetBranchAddress("v_index",&v_index);
@@ -255,7 +255,7 @@ int main(int argc, char* argv[])
     SpaceCell *cell = mcell->Get_all_spacecell().at(0);
     
     int face = 0;
-    float drift_dist;
+    float drift_dist=0;
     if (cell->x()>temp_xmm.first && cell->x()<temp_xmm.second) {
     }else{
       if (TMath::Abs(cell->x()-temp_xmm.first) > TMath::Abs(cell->x()-temp_xmm.second)) {
@@ -364,7 +364,7 @@ int main(int argc, char* argv[])
     TFile *file1 = new TFile(new_file,"RECREATE");
     TTree *t1 = new TTree("T","T");
     t1->SetDirectory(file1);
-    Float_t Enu_true, Enu_reco;
+    Float_t Enu_true=0, Enu_reco=0;
     Enu_true = mctruth->find_neutrino_true_energy() ;
     Enu_reco = mctruth->find_neutrino_visible_energy();
     
@@ -385,14 +385,14 @@ int main(int argc, char* argv[])
     t1->Branch("nphoton",&nphoton,"nphoton/I");
     t1->Branch("nele",&nele,"nele/I");
     // save gap related variables for electron (to be added)
-    Int_t ele_gap_time_slice[200];
-    Float_t ele_gap_dis[200]; 
-    Float_t ele_gap_charge[200];
-    Float_t ele_gap_area[200];
+    Int_t ele_gap_time_slice[200]={0};
+    Float_t ele_gap_dis[200]={0.0}; 
+    Float_t ele_gap_charge[200]={0.0};
+    Float_t ele_gap_area[200]={0.0};
 
-    Float_t E_ele;
-    Float_t Theta_ele;
-    Float_t Phi_ele;
+    Float_t E_ele=0;
+    Float_t Theta_ele=0;
+    Float_t Phi_ele=0;
     t1->Branch("E_ele",&E_ele,"E_ele/F");
     t1->Branch("Theta_ele",&Theta_ele,"Theta_ele/F");
     t1->Branch("Phi_ele",&Phi_ele,"Phi_ele/F");
@@ -509,14 +509,14 @@ int main(int argc, char* argv[])
     //save gap related variables for photons
     // save up to 20 photons
     // 1 mm a point and 200 points = 20 cm
-    Int_t gap_time_slice[20][200];
-    Float_t gap_dis[20][200]; 
+    Int_t gap_time_slice[20][200]={0};
+    Float_t gap_dis[20][200]={0.0}; 
     // Float_t gap_charge[200][20];
     // Float_t gap_area[200][20];
 
-    Float_t E_photon[20];
-    Float_t Theta_photon[20];
-    Float_t Phi_photon[20];
+    Float_t E_photon[20]={0.0};
+    Float_t Theta_photon[20]={0.0};
+    Float_t Phi_photon[20]={0.0};
 
     t1->Branch("E_photon",E_photon,"E_photon[nphoton]/F");
     t1->Branch("Theta_photon",Theta_photon,"Theta_photon[nphoton]/F");
@@ -551,7 +551,7 @@ int main(int argc, char* argv[])
 	if (apa_gds!=NULL) {
 	  std::pair<double, double> xmm = apa_gds->minmax(0); 
 	  int face = 0;
-	  float drift_dist;
+	  float drift_dist=0;
 	  if (p.x>xmm.first && p.x<xmm.second) {
 	  }else{
 	    if (TMath::Abs(p.x-xmm.first) > TMath::Abs(p.x-xmm.second)) {
