@@ -160,7 +160,7 @@ int main(int argc, char* argv[])
   int frame_length = 3200;
   int max_events = 100;
   int eve_num  = atoi(argv[3]);
-  int nrebin = 4;
+  int nrebin = 6;
 
   TPCParams& mp = Singleton<TPCParams>::Instance();
   
