@@ -146,8 +146,8 @@ int main(int argc, char* argv[])
   // float toffset_2=-0.603 + (nt_off2*0.2 - 1); // time offset between u/w
   // float toffset_3=0.0;
 
-  float toffset_1=(nt_off1 * 0.1 - 0.5 );  // time offset between u/v 
-  float toffset_2=(nt_off2 * 0.1 - 0.5); // time offset between u/w
+  float toffset_1=(nt_off1 * 0.2 - 1.0 );  // time offset between u/v 
+  float toffset_2=(nt_off2 * 0.2 - 1.0); // time offset between u/w
   float toffset_3=0.0;
   
 
@@ -160,7 +160,7 @@ int main(int argc, char* argv[])
   int frame_length = 3200;
   int max_events = 100;
   int eve_num  = atoi(argv[3]);
-  int nrebin = 6;
+  int nrebin = 4;
 
   TPCParams& mp = Singleton<TPCParams>::Instance();
   

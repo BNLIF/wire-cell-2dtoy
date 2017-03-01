@@ -391,7 +391,7 @@ void WireCell2dToy::uBooNEData2DDeconvolutionFDS::Deconvolute_2D(int plane){
     filter_time->SetParameters(par);
     nwires = nwire_w;
     gfield = gw_2D_g;
-    time_offset = -time_offset_uw+0.5;// + 0.803;
+    time_offset = -time_offset_uw;// + 0.803;
   }
   
   TF1 *filter_wire = new TF1("filter_wire","exp(-0.5*pow(x/[0],2))");
@@ -522,44 +522,46 @@ void WireCell2dToy::uBooNEData2DDeconvolutionFDS::Deconvolute_2D(int plane){
      htemp->FFT(&hm,"MAG");
      htemp->FFT(&hp,"PH");
      
-     //do FFT for individual electronics response
-     TH1F *htemp2 = new TH1F("htemp2","htemp2",nbin,0,nbin);
-     for (int j=0;j!=100;j++){
-       if (plane == 0 || plane == 1){
-	 //htemp2->SetBinContent(j+1,ref_ele1_ind[j]); // 3.5% lower induction wire plane
-	 htemp2->SetBinContent(j+1,ref_ele[j]*1.1*0.965); // 3.5% lower induction wire plane
-       }else{
-	 htemp2->SetBinContent(j+1,ref_ele[j]*1.1); // for test purpose
-	 //htemp2->SetBinContent(j+1,calib_ele_chan[chid][j]);
-       }
-     }
-     htemp2->FFT(&hm2,"MAG");
-     htemp2->FFT(&hp2,"PH");
+     // //do FFT for individual electronics response
+     // TH1F *htemp2 = new TH1F("htemp2","htemp2",nbin,0,nbin);
+     // for (int j=0;j!=100;j++){
+     //   if (plane == 0 || plane == 1){
+     // 	 //htemp2->SetBinContent(j+1,ref_ele1_ind[j]); // 3.5% lower induction wire plane @ 2.2 us
+     // 	 htemp2->SetBinContent(j+1,ref_ele[j]*1.1*0.965); // 3.5% lower induction wire plane @ 2 us
+     // 	 //htemp2->SetBinContent(j+1,calib_ele_chan[chid][j]); // calibrated resp
+     //   }else{
+     // 	 //htemp2->SetBinContent(j+1,ref_ele1_ind[j]); // 3.5% lower induction wire plane @ 2.2 us
+     // 	 htemp2->SetBinContent(j+1,ref_ele[j]*1.1); // for test purpose @ 2.0 us
+     // 	 //htemp2->SetBinContent(j+1,calib_ele_chan[chid][j]); // calibrated resp
+     //   }
+     // }
+     // htemp2->FFT(&hm2,"MAG");
+     // htemp2->FFT(&hp2,"PH");
 
 
      if (plane == 0){
        for (Int_t j=0;j!=nticks;j++){
-	 rho_u[chid][j] = hm.GetBinContent(j+1) * hm1.GetBinContent(j+1) / hm2.GetBinContent(j+1);
-	 phi_u[chid][j] = hp.GetBinContent(j+1) + hp1.GetBinContent(j+1) - hp2.GetBinContent(j+1);
+	 rho_u[chid][j] = hm.GetBinContent(j+1)/1.1/0.965;// * hm1.GetBinContent(j+1) / hm2.GetBinContent(j+1);
+	 phi_u[chid][j] = hp.GetBinContent(j+1);// + hp1.GetBinContent(j+1) - hp2.GetBinContent(j+1);
        }
        tbin_save[chid] = tbin;
      }else if (plane == 1){
        for (Int_t j=0;j!=nticks;j++){
-	 rho_u[chid-nwire_u][j] = hm.GetBinContent(j+1) * hm1.GetBinContent(j+1) / hm2.GetBinContent(j+1);
-	 phi_u[chid-nwire_u][j] = hp.GetBinContent(j+1) + hp1.GetBinContent(j+1) - hp2.GetBinContent(j+1);
+	 rho_u[chid-nwire_u][j] = hm.GetBinContent(j+1)/1.1/0.965;// * hm1.GetBinContent(j+1) / hm2.GetBinContent(j+1);
+	 phi_u[chid-nwire_u][j] = hp.GetBinContent(j+1);// + hp1.GetBinContent(j+1) - hp2.GetBinContent(j+1);
        }
        tbin_save[chid-nwire_u] = tbin;
      }else if (plane == 2){
        for (Int_t j=0;j!=nticks;j++){
-	 rho_u[chid-nwire_u-nwire_v][j] = hm.GetBinContent(j+1) * hm1.GetBinContent(j+1) / hm2.GetBinContent(j+1);
-	 phi_u[chid-nwire_u-nwire_v][j] = hp.GetBinContent(j+1) + hp1.GetBinContent(j+1) - hp2.GetBinContent(j+1);
+	 rho_u[chid-nwire_u-nwire_v][j] = hm.GetBinContent(j+1)/1.1;// * hm1.GetBinContent(j+1) / hm2.GetBinContent(j+1);
+	 phi_u[chid-nwire_u-nwire_v][j] = hp.GetBinContent(j+1);// + hp1.GetBinContent(j+1) - hp2.GetBinContent(j+1);
        }
        tbin_save[chid-nwire_u-nwire_v] = tbin;
      }
 
 
     
-     delete htemp2;
+     //delete htemp2;
      
      delete htemp;
    }
