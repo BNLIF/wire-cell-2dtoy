@@ -15,6 +15,22 @@ using namespace WireCell;
 WireCell2dToy::uBooNEData2DDeconvolutionFDS::uBooNEData2DDeconvolutionFDS(TH2I *hu_decon, TH2I *hv_decon, TH2I *hw_decon, TTree *T_bad, const WireCell::GeomDataSource& gds)
   : fds (0)
   , gds (gds)
+  , max_frames(0)
+  , nbin(0)
+  , time_offset_uv(0)
+  , time_offset_uw(0)
+  , overall_time_offset(0)
+  , nwire_u(0)
+  , nwire_v(0)
+  , nwire_w(0)
+  , gu_2D_g(0)
+  , gv_2D_g(0)
+  , gw_2D_g(0)
+  , hu_2D_g(0)
+  , hv_2D_g(0)
+  , hw_2D_g(0)
+  , scale_u_2d(0)
+  , scale_v_2d(0)
 {
   load_results_from_file = true;
 
@@ -26,8 +42,8 @@ WireCell2dToy::uBooNEData2DDeconvolutionFDS::uBooNEData2DDeconvolutionFDS(TH2I *
   nwire_v = wires_v.size();
   nwire_w = wires_w.size();
 
-  Int_t chid, plane;
-  Int_t start_time, end_time;
+  Int_t chid=0, plane=0;
+  Int_t start_time=0, end_time=0;
   T_bad->SetBranchAddress("chid",&chid);
   T_bad->SetBranchAddress("plane",&plane);
   T_bad->SetBranchAddress("start_time",&start_time);
@@ -124,6 +140,18 @@ WireCell2dToy::uBooNEData2DDeconvolutionFDS::uBooNEData2DDeconvolutionFDS(WireCe
   , umap(umap)
   , vmap(vmap)
   , wmap(wmap)
+  , nbin(0)
+  , nwire_u(0)
+  , nwire_v(0)
+  , nwire_w(0)
+  , gu_2D_g(0)
+  , gv_2D_g(0)
+  , gw_2D_g(0)
+  , hu_2D_g(0)
+  , hv_2D_g(0)
+  , hw_2D_g(0)
+  , scale_u_2d(0)
+  , scale_v_2d(0)
 {  
 
   load_results_from_file = false;
