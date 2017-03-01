@@ -84,6 +84,9 @@ WireCell2dToy::uBooNEDataROI::uBooNEDataROI(WireCell::FrameDataSource& raw_fds,W
   , vmap(vmap)
   , wmap(wmap)
   , lf_noisy_channels(lf_noisy_channels)
+  , nwire_u(0)
+  , nwire_v(0)
+  , nwire_w(0)
 {
   GeomWireSelection wires_u = gds.wires_in_plane(WirePlaneType_t(0));
   GeomWireSelection wires_v = gds.wires_in_plane(WirePlaneType_t(1));
@@ -391,7 +394,7 @@ void WireCell2dToy::uBooNEDataROI::find_ROI_loose(int rebin){
   // if collection, just fill the histogram ... 
   TH1F *hresult = new TH1F("hresult","hresult",nbins,0,nbins);
   TH1F *hresult_filter = new TH1F("hresult_filter","hresult_filter",int(nbins/rebin),0,int(nbins/rebin));
-  TF1 *filter_low;
+  TF1 *filter_low = 0;
   
   TF1 *filter_low1 = new TF1("filter_low","1-exp(-pow(x/0.0025,2))");
   TF1 *filter_low2 = new TF1("filter_low","1-exp(-pow(x/0.02,2))");
@@ -401,7 +404,11 @@ void WireCell2dToy::uBooNEDataROI::find_ROI_loose(int rebin){
   size_t ntraces = frame1.traces.size();
   double value_re[nbins];
   double value_im[nbins];
-  
+  for (int i=0;i!=nbins;i++){
+    value_re[i] = 0;
+    value_im[i] = 0;
+  }
+
   for (int i=0;i!=ntraces;i++){
     const Trace& trace = frame1.traces[i];
     int tbin = trace.tbin;
@@ -457,7 +464,7 @@ void WireCell2dToy::uBooNEDataROI::find_ROI_loose(int rebin){
       TVirtualFFT *ifft2 = TVirtualFFT::FFT(1,&nticks,"C2R M K");
 
       for (int j=0;j!=nticks;j++){
-	Double_t freq;
+	Double_t freq=0;
 	if (j < nticks/2.){
 	  freq = j/(1.*nticks)*2.;
 	}else{
@@ -507,9 +514,9 @@ void WireCell2dToy::uBooNEDataROI::find_ROI_loose(int rebin){
       Double_t prev_content = hresult_filter->GetBinContent(j);
       Double_t next_content = hresult_filter->GetBinContent(j+2);
       Int_t flag_ROI = 0;
-      Int_t begin;
-      Int_t end;
-      Int_t max_bin;
+      Int_t begin=0;
+      Int_t end=0;
+      Int_t max_bin=0;
       if (content > th){
 	begin = find_ROI_begin(hresult_filter,j, th*factor1) ;
 	end = find_ROI_end(hresult_filter,j, th*factor1) ;
@@ -648,7 +655,7 @@ void WireCell2dToy::uBooNEDataROI::extend_ROI_self(int pad){
 
   for (int i=0;i!=self_rois_u.size();i++){
     std::vector<std::pair<int,int>> temp_rois;
-    int temp_begin, temp_end;
+    int temp_begin=0, temp_end=0;
     for (int j=0;j!=self_rois_u.at(i).size();j++){
       temp_begin = self_rois_u.at(i).at(j).first - pad;
       if (temp_begin < 0 ) temp_begin = 0;
@@ -672,7 +679,7 @@ void WireCell2dToy::uBooNEDataROI::extend_ROI_self(int pad){
 
   for (int i=0;i!=self_rois_v.size();i++){
     std::vector<std::pair<int,int>> temp_rois;
-    int temp_begin, temp_end;
+    int temp_begin=0, temp_end=0;
     for (int j=0;j!=self_rois_v.at(i).size();j++){
       temp_begin = self_rois_v.at(i).at(j).first - pad;
       if (temp_begin < 0 ) temp_begin = 0;
@@ -696,7 +703,7 @@ void WireCell2dToy::uBooNEDataROI::extend_ROI_self(int pad){
 
   for (int i=0;i!=self_rois_w.size();i++){
     std::vector<std::pair<int,int>> temp_rois;
-    int temp_begin, temp_end;
+    int temp_begin=0, temp_end=0;
     for (int j=0;j!=self_rois_w.at(i).size();j++){
       temp_begin = self_rois_w.at(i).at(j).first - pad;
       if (temp_begin < 0 ) temp_begin = 0;
@@ -1518,6 +1525,10 @@ void WireCell2dToy::uBooNEDataROI::find_ROI_by_decon_itself(int th_factor_ind, i
   size_t ntraces = frame1.traces.size();
   double value_re[nbins];
   double value_im[nbins];
+  for (int i=0;i!=nbins;i++){
+    value_re[i] = 0;
+    value_im[i] = 0;
+  }
   
   for (int i=0;i!=ntraces;i++){
     const Trace& trace = frame1.traces[i];
@@ -1563,7 +1574,7 @@ void WireCell2dToy::uBooNEDataROI::find_ROI_by_decon_itself(int th_factor_ind, i
       TVirtualFFT *ifft2 = TVirtualFFT::FFT(1,&nticks,"C2R M K");
 
       for (int j=0;j!=nticks;j++){
-	Double_t freq;
+	Double_t freq=0;
 	if (j < nticks/2.){
 	  freq = j/(1.*nticks)*2.;
 	}else{
@@ -1596,7 +1607,7 @@ void WireCell2dToy::uBooNEDataROI::find_ROI_by_decon_itself(int th_factor_ind, i
     restore_baseline(hresult_filter);
     //std::cout << chid << " " << cal_rms(hresult,chid) << std::endl;
     float th = cal_rms(hresult_filter,chid);
-    float threshold;// = th_factor * th + 1;
+    float threshold=0;// = th_factor * th + 1;
     //int pad = 5;
 
     if (chid < nwire_u){
@@ -1789,7 +1800,7 @@ double WireCell2dToy::uBooNEDataROI::cal_rms(TH1F *htemp, int chid){
     }
     if (h6->GetSum()>0){
       //calculate 0.16, 0.84 percentile ...  
-      double xq;
+      double xq=0;
       xq = 0.16;
       double par[2];
       h6->GetQuantiles(1,&par[0],&xq);
