@@ -67,6 +67,152 @@ using namespace std;
 
 int main(int argc, char* argv[])
 {
+  // ExecMon em("starting");
+  // cerr << em("to create a histogram") << endl;
+  
+  // TF1 *f1 = new TF1("f1","gaus",0,10);
+  // TH1F *h1 = new TH1F("h1","h1",10000,0,10000);
+  // TGraph *g1 = new TGraph();
+
+  // g1->SetPoint(0,3,5);
+  // const char* root_file = "../3455/5006287_0/celltree.root";
+  // const char* tpath = "/Event/Sim";
+  // TFile tfile(root_file,"read");
+  // TTree* tree = dynamic_cast<TTree*>(tfile.Get(tpath));
+  // tree->SetBranchStatus("*",0);
+  
+  // // tree->SetBranchStatus("eventNo",1);
+  // // tree->SetBranchAddress("eventNo" , &event_no);
+  // // tree->SetBranchStatus("runNo",1);
+  // // tree->SetBranchAddress("runNo"   , &run_no);
+  // // tree->SetBranchStatus("subRunNo",1);
+  // // tree->SetBranchAddress("subRunNo", &subrun_no);
+  
+  // std::vector<int> *channelid = new std::vector<int>;
+  // TClonesArray* esignal = new TClonesArray;
+  
+  // tree->SetBranchStatus("raw_channelId",1);
+  // tree->SetBranchAddress("raw_channelId", &channelid);
+  // tree->SetBranchStatus("raw_wf",1);
+  // tree->SetBranchAddress("raw_wf", &esignal);
+  
+  // int siz = tree->GetEntry(0);
+  
+  //  TH1F **hu=0;
+  //  TH1F **hv=0;
+  //  TH1F **hw=0;
+   
+  //  int nwire_u = 2400;
+  //  int nwire_v = 2400;
+  //  int nwire_w = 3256;
+
+  //  hu = new TH1F*[nwire_u];
+  //  hv = new TH1F*[nwire_v];
+  //  hw = new TH1F*[nwire_w];
+
+  //  int bins_per_frame = 9600;
+
+  //  for (int i=0;i!=nwire_u;i++){
+  //    hu[i] = new TH1F(Form("U2_%d",i),Form("U2_%d",i),bins_per_frame,0,bins_per_frame);
+  //    //cout << em("to create a histogram") << endl;
+  //  }
+  //  for (int i=0;i!=nwire_v;i++){
+  //    hv[i] = new TH1F(Form("V2_%d",i),Form("V2_%d",i),bins_per_frame,0,bins_per_frame);
+  //    //cout << em("to create a histogram") << endl;
+  //  }
+  //  for (int i=0;i!=nwire_w;i++){
+  //    hw[i] = new TH1F(Form("W2_%d",i),Form("W2_%d",i),bins_per_frame,0,bins_per_frame);
+  //    //cout << em("to create a histogram") << endl;
+  //  }
+   
+  // cerr << em("to delete a histogram") << endl;
+
+  // for (int i=0;i!=nwire_u;i++){
+  //   delete hu[i] ;
+  // }
+  // delete [] hu;
+  // for (int i=0;i!=nwire_v;i++){
+  //   delete hv[i] ;
+  // }
+  // delete [] hv;
+  // for (int i=0;i!=nwire_w;i++){
+  //   delete hw[i] ;
+  // }
+  // delete [] hw;
+  
+
+  // delete h1;
+  // delete f1;
+  // delete g1;
+  // tfile.Close();
+  // esignal->Clear("D");
+  // delete channelid;
+  // delete esignal;
+  // cerr << em("done") << endl;
+  
+  // hu = new TH1F*[nwire_u];
+  // hv = new TH1F*[nwire_v];
+  // hw = new TH1F*[nwire_w];
+  
+  // for (int i=0;i!=nwire_u;i++){
+  //   hu[i] = new TH1F(Form("U2_%d",i),Form("U2_%d",i),bins_per_frame,0,bins_per_frame);
+  // }
+  // for (int i=0;i!=nwire_v;i++){
+  //   hv[i] = new TH1F(Form("V2_%d",i),Form("V2_%d",i),bins_per_frame,0,bins_per_frame);
+  // }
+  // for (int i=0;i!=nwire_w;i++){
+  //   hw[i] = new TH1F(Form("W2_%d",i),Form("W2_%d",i),bins_per_frame,0,bins_per_frame);
+  // }
+  
+  // cerr << em("to delete a histogram") << endl;
+  
+  // for (int i=0;i!=nwire_u;i++){
+  //   delete hu[i] ;
+  // }
+  // delete [] hu;
+  // for (int i=0;i!=nwire_v;i++){
+  //   delete hv[i] ;
+  // }
+  // delete [] hv;
+  // for (int i=0;i!=nwire_w;i++){
+  //   delete hw[i] ;
+  // }
+  // delete [] hw;
+  
+  // cerr << em("done") << endl;
+
+  // //   hu = new TH1F*[nwire_u];
+  // // hv = new TH1F*[nwire_v];
+  // // hw = new TH1F*[nwire_w];
+  
+  // // for (int i=0;i!=nwire_u;i++){
+  // //   hu[i] = new TH1F(Form("U2_%d",i),Form("U2_%d",i),bins_per_frame,0,bins_per_frame);
+  // // }
+  // // for (int i=0;i!=nwire_v;i++){
+  // //   hv[i] = new TH1F(Form("V2_%d",i),Form("V2_%d",i),bins_per_frame,0,bins_per_frame);
+  // // }
+  // // for (int i=0;i!=nwire_w;i++){
+  // //   hw[i] = new TH1F(Form("W2_%d",i),Form("W2_%d",i),bins_per_frame,0,bins_per_frame);
+  // // }
+  
+  // // cerr << em("to delete a histogram") << endl;
+  
+  // // for (int i=0;i!=nwire_u;i++){
+  // //   delete hu[i] ;
+  // // }
+  // // delete [] hu;
+  // // for (int i=0;i!=nwire_v;i++){
+  // //   delete hv[i] ;
+  // // }
+  // // delete [] hv;
+  // // for (int i=0;i!=nwire_w;i++){
+  // //   delete hw[i] ;
+  // // }
+  // // delete [] hw;
+  
+  // // cerr << em("done") << endl;
+  
+  
   if (argc < 4) {
     cerr << "usage: wire-cell-uboone /path/to/ChannelWireGeometry.txt /path/to/celltree.root eve_num -t[0,1] -s[0,1,2]" << endl;
     return 1;
@@ -181,48 +327,46 @@ int main(int argc, char* argv[])
  
   
   cerr << em("load data frame and noise filtering") << endl;
-  WireCellSst::DatauBooNEFrameDataSource *data_fds = new WireCellSst::DatauBooNEFrameDataSource(root_file,gds,total_time_bin);
+  
+  WireCellSst::DatauBooNEFrameDataSource data_fds(root_file,gds,total_time_bin);
   
   cerr << em("prejump") << endl;
-  delete data_fds;
   
+  if (save_file != 2){
+    data_fds.jump(eve_num);
+    if (save_file == 1)
+      data_fds.Save();
+  }
   cerr << em("... done") << endl;
-
-
-  // if (save_file != 2){
-  //   data_fds.jump(eve_num);
-  //   if (save_file == 1)
-  //     data_fds.Save();
-  // }
-  //cerr << em("... done") << endl;
   
-  // run_no = data_fds.get_run_no();
-  // subrun_no = data_fds.get_subrun_no();
-  // event_no = data_fds.get_event_no();
+  run_no = data_fds.get_run_no();
+  subrun_no = data_fds.get_subrun_no();
+  event_no = data_fds.get_event_no();
   
-  // cout << "Run No: " << run_no << " " << subrun_no << " " << event_no << endl;
+  cout << "Run No: " << run_no << " " << subrun_no << " " << event_no << endl;
 
-  // ChirpMap& uplane_map = data_fds.get_u_cmap();
-  // ChirpMap& vplane_map = data_fds.get_v_cmap();
-  // ChirpMap& wplane_map = data_fds.get_w_cmap();
+  ChirpMap& uplane_map = data_fds.get_u_cmap();
+  ChirpMap& vplane_map = data_fds.get_v_cmap();
+  ChirpMap& wplane_map = data_fds.get_w_cmap();
   
-  // std::set<int>& lf_noisy_channels = data_fds.get_lf_noisy_channels();
+  std::set<int>& lf_noisy_channels = data_fds.get_lf_noisy_channels();
   
-
-
-  // cout << "Deconvolution with Wiener filter" << endl; 
-
-  // cerr << em("do TPC signal processing") << endl;
-  // WireCell2dToy::uBooNEData2DDeconvolutionFDS wien_fds(data_fds,gds,uplane_map, vplane_map, wplane_map,100,toffset_1,toffset_2,toffset_3);
-  // wien_fds.jump(eve_num);
-  // WireCell2dToy::uBooNEDataROI uboone_rois(data_fds,wien_fds,gds,uplane_map,vplane_map,wplane_map,lf_noisy_channels);
-  // WireCell2dToy::uBooNEDataAfterROI roi_fds(wien_fds,gds,uboone_rois,nrebin);
-  // roi_fds.jump(eve_num);
-  // cerr << em("... done") << endl;
+  cout << "Deconvolution with Wiener filter" << endl; 
+  cerr << em("do TPC signal processing") << endl;
+  WireCell2dToy::uBooNEData2DDeconvolutionFDS wien_fds(data_fds,gds,uplane_map, vplane_map, wplane_map,100,toffset_1,toffset_2,toffset_3);
+   cerr << em("pre jump") << endl;
+  wien_fds.jump(eve_num);
+   cerr << em("do ROI") << endl;
+  WireCell2dToy::uBooNEDataROI uboone_rois(data_fds,wien_fds,gds,uplane_map,vplane_map,wplane_map,lf_noisy_channels);
+  cerr << em("After ROI") << endl;
+  WireCell2dToy::uBooNEDataAfterROI roi_fds(wien_fds,gds,uboone_rois,nrebin);
+  cerr << em("pre jump") << endl;
+  roi_fds.jump(eve_num);
+  cerr << em("... done") << endl;
   
-  // cerr << em("Clear data inside data_fds") << endl;
-  // data_fds.Clear();
-  // cerr << em("... done") << endl;
+  cerr << em("Clear data inside data_fds") << endl;
+  data_fds.Clear();
+  cerr << em("... done") << endl;
 
 
   // std::vector<float>& uplane_rms = uboone_rois.get_uplane_rms();
