@@ -343,9 +343,9 @@ int main(int argc, char* argv[])
   }
   
 
-  TH1I *hu_threshold = new TH1I("hu_threshold","hu_threshold",nwire_u,-0.5,-0.5+nwire_u);
-  TH1I *hv_threshold = new TH1I("hv_threshold","hv_threshold",nwire_v,-0.5+nwire_u,-0.5+nwire_u+nwire_v);
-  TH1I *hw_threshold = new TH1I("hw_threshold","hw_threshold",nwire_w,-0.5+nwire_u+nwire_v,-0.5+nwire_u+nwire_v+nwire_w);
+  TH1F *hu_threshold = new TH1F("hu_threshold","hu_threshold",nwire_u,-0.5,-0.5+nwire_u);
+  TH1F *hv_threshold = new TH1F("hv_threshold","hv_threshold",nwire_v,-0.5+nwire_u,-0.5+nwire_u+nwire_v);
+  TH1F *hw_threshold = new TH1F("hw_threshold","hw_threshold",nwire_w,-0.5+nwire_u+nwire_v,-0.5+nwire_u+nwire_v+nwire_w);
   hu_threshold->SetDirectory(file);
   hv_threshold->SetDirectory(file);
   hw_threshold->SetDirectory(file);
@@ -361,13 +361,13 @@ int main(int argc, char* argv[])
   }
   
 
-  TH2F *hu_decon = new TH2F("hu_decon","hu_decon",nwire_u,-0.5,nwire_u-0.5,total_time_bin/nrebin,0,total_time_bin);
-  TH2F *hv_decon = new TH2F("hv_decon","hv_decon",nwire_v,-0.5+nwire_u,nwire_v-0.5+nwire_u,total_time_bin/nrebin,0,total_time_bin);
-  TH2F *hw_decon = new TH2F("hw_decon","hw_decon",nwire_w,-0.5+nwire_u+nwire_v,nwire_w-0.5+nwire_u+nwire_v,total_time_bin/nrebin,0,total_time_bin);
+  TH2I *hu_decon = new TH2I("hu_decon","hu_decon",nwire_u,-0.5,nwire_u-0.5,total_time_bin/nrebin,0,total_time_bin);
+  TH2I *hv_decon = new TH2I("hv_decon","hv_decon",nwire_v,-0.5+nwire_u,nwire_v-0.5+nwire_u,total_time_bin/nrebin,0,total_time_bin);
+  TH2I *hw_decon = new TH2I("hw_decon","hw_decon",nwire_w,-0.5+nwire_u+nwire_v,nwire_w-0.5+nwire_u+nwire_v,total_time_bin/nrebin,0,total_time_bin);
   hu_decon->SetDirectory(file);
   hv_decon->SetDirectory(file);
   hw_decon->SetDirectory(file);
-  TH2F *htemp1;
+  TH2I *htemp1;
   const Frame& frame1 = roi_fds.get();
   int ntraces = frame1.traces.size();
   for (size_t ind=0; ind<ntraces; ++ind) {
@@ -387,7 +387,7 @@ int main(int argc, char* argv[])
     }
     for (int i = tbin;i!=tbin+nbins;i++){
       int tt = i+1;
-      htemp1->SetBinContent(chid+1,tt,trace.charge.at(i));
+      htemp1->SetBinContent(chid+1,tt,int(trace.charge.at(i)));
     }
   }
   
