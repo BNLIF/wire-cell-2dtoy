@@ -328,75 +328,146 @@ int main(int argc, char* argv[])
   
   cerr << em("load data frame and noise filtering") << endl;
   
-  WireCellSst::DatauBooNEFrameDataSource data_fds(root_file,gds,total_time_bin);
+  WireCellSst::DatauBooNEFrameDataSource *data_fds = new WireCellSst::DatauBooNEFrameDataSource(root_file,gds,total_time_bin);
   
   cerr << em("prejump") << endl;
   
   if (save_file != 2){
-    data_fds.jump(eve_num);
+    data_fds->jump(eve_num);
     if (save_file == 1)
-      data_fds.Save();
+      data_fds->Save();
   }
   cerr << em("... done") << endl;
   
-  run_no = data_fds.get_run_no();
-  subrun_no = data_fds.get_subrun_no();
-  event_no = data_fds.get_event_no();
+  run_no = data_fds->get_run_no();
+  subrun_no = data_fds->get_subrun_no();
+  event_no = data_fds->get_event_no();
   
   cout << "Run No: " << run_no << " " << subrun_no << " " << event_no << endl;
 
-  ChirpMap& uplane_map = data_fds.get_u_cmap();
-  ChirpMap& vplane_map = data_fds.get_v_cmap();
-  ChirpMap& wplane_map = data_fds.get_w_cmap();
+  ChirpMap& uplane_map = data_fds->get_u_cmap();
+  ChirpMap& vplane_map = data_fds->get_v_cmap();
+  ChirpMap& wplane_map = data_fds->get_w_cmap();
   
-  std::set<int>& lf_noisy_channels = data_fds.get_lf_noisy_channels();
+  std::set<int>& lf_noisy_channels = data_fds->get_lf_noisy_channels();
   
   cout << "Deconvolution with Wiener filter" << endl; 
   cerr << em("do TPC signal processing") << endl;
-  WireCell2dToy::uBooNEData2DDeconvolutionFDS wien_fds(data_fds,gds,uplane_map, vplane_map, wplane_map,100,toffset_1,toffset_2,toffset_3);
+  WireCell2dToy::uBooNEData2DDeconvolutionFDS *wien_fds = new WireCell2dToy::uBooNEData2DDeconvolutionFDS(*data_fds,gds,uplane_map, vplane_map, wplane_map,100,toffset_1,toffset_2,toffset_3);
    cerr << em("pre jump") << endl;
-  wien_fds.jump(eve_num);
+  wien_fds->jump(eve_num);
    cerr << em("do ROI") << endl;
-  WireCell2dToy::uBooNEDataROI uboone_rois(data_fds,wien_fds,gds,uplane_map,vplane_map,wplane_map,lf_noisy_channels);
+  WireCell2dToy::uBooNEDataROI *uboone_rois = new WireCell2dToy::uBooNEDataROI(*data_fds,*wien_fds,gds,uplane_map,vplane_map,wplane_map,lf_noisy_channels);
   cerr << em("After ROI") << endl;
-  WireCell2dToy::uBooNEDataAfterROI roi_fds(wien_fds,gds,uboone_rois,nrebin);
+  WireCell2dToy::uBooNEDataAfterROI roi_fds(*wien_fds,gds,*uboone_rois,nrebin);
   cerr << em("pre jump") << endl;
   roi_fds.jump(eve_num);
   cerr << em("... done") << endl;
   
+  std::vector<float> uplane_rms = uboone_rois->get_uplane_rms();
+  std::vector<float> vplane_rms = uboone_rois->get_vplane_rms();
+  std::vector<float> wplane_rms = uboone_rois->get_wplane_rms();
+
+
   cerr << em("Clear data inside data_fds") << endl;
-  data_fds.Clear();
+  delete data_fds;
+  delete wien_fds;
+  delete uboone_rois;
+  roi_fds.Clear();
   cerr << em("... done") << endl;
 
+  GeomWireSelection wires_u = gds.wires_in_plane(WirePlaneType_t(0));
+  GeomWireSelection wires_v = gds.wires_in_plane(WirePlaneType_t(1));
+  GeomWireSelection wires_w = gds.wires_in_plane(WirePlaneType_t(2));
 
-  // std::vector<float>& uplane_rms = uboone_rois.get_uplane_rms();
-  // std::vector<float>& vplane_rms = uboone_rois.get_vplane_rms();
-  // std::vector<float>& wplane_rms = uboone_rois.get_wplane_rms();
-
-
-  // GeomWireSelection wires_u = gds.wires_in_plane(WirePlaneType_t(0));
-  // GeomWireSelection wires_v = gds.wires_in_plane(WirePlaneType_t(1));
-  // GeomWireSelection wires_w = gds.wires_in_plane(WirePlaneType_t(2));
-
-  // int nwire_u = wires_u.size();
-  // int nwire_v = wires_v.size();
-  // int nwire_w = wires_w.size();
+  int nwire_u = wires_u.size();
+  int nwire_v = wires_v.size();
+  int nwire_w = wires_w.size();
   
-  
-  // cerr << em("creat time slice ") << endl;
-  // WireCellSst::ToyuBooNESliceDataSource sds(roi_fds,roi_fds,threshold_u, 
-  // 					    threshold_v, threshold_w, 
-  // 					    threshold_ug, 
-  // 					    threshold_vg, threshold_wg, 
-  // 					    nwire_u, 
-  // 					    nwire_v, nwire_w,
-  // 					    &uplane_rms, &vplane_rms, &wplane_rms); 
+  cerr << em("creat time slice ") << endl;
+  WireCellSst::ToyuBooNESliceDataSource sds(roi_fds,roi_fds,threshold_u, 
+  					    threshold_v, threshold_w, 
+  					    threshold_ug, 
+  					    threshold_vg, threshold_wg, 
+  					    nwire_u, 
+  					    nwire_v, nwire_w,
+  					    &uplane_rms, &vplane_rms, &wplane_rms); 
     
-  // cerr << em("... done") << endl;
+  cerr << em("... done") << endl;
   
 
-
+  cerr << em("Create a lot of histograms ...") << endl;
+   TH1F **hu=0;
+   TH1F **hv=0;
+   TH1F **hw=0;
+   
   
+
+   hu = new TH1F*[nwire_u];
+   hv = new TH1F*[nwire_v];
+   hw = new TH1F*[nwire_w];
+
+   int bins_per_frame = 9600;
+
+   for (int i=0;i!=nwire_u;i++){
+     hu[i] = new TH1F(Form("U2_%d",i),Form("U2_%d",i),bins_per_frame,0,bins_per_frame);
+     //cout << em("to create a histogram") << endl;
+   }
+   for (int i=0;i!=nwire_v;i++){
+     hv[i] = new TH1F(Form("V2_%d",i),Form("V2_%d",i),bins_per_frame,0,bins_per_frame);
+     //cout << em("to create a histogram") << endl;
+   }
+   for (int i=0;i!=nwire_w;i++){
+     hw[i] = new TH1F(Form("W2_%d",i),Form("W2_%d",i),bins_per_frame,0,bins_per_frame);
+     //cout << em("to create a histogram") << endl;
+   }
+   
+  cerr << em("to delete a histogram") << endl;
+
+  for (int i=0;i!=nwire_u;i++){
+    delete hu[i] ;
+  }
+  delete [] hu;
+  for (int i=0;i!=nwire_v;i++){
+    delete hv[i] ;
+  }
+  delete [] hv;
+  for (int i=0;i!=nwire_w;i++){
+    delete hw[i] ;
+  }
+  delete [] hw;
+  
+  cerr << em("Open a file") << endl;
+  root_file = "../3455/5006287_0/celltree.root";
+  const char* tpath = "/Event/Sim";
+  TFile tfile(root_file,"read");
+  TTree* tree = dynamic_cast<TTree*>(tfile.Get(tpath));
+  tree->SetBranchStatus("*",0);
+  
+  // tree->SetBranchStatus("eventNo",1);
+  // tree->SetBranchAddress("eventNo" , &event_no);
+  // tree->SetBranchStatus("runNo",1);
+  // tree->SetBranchAddress("runNo"   , &run_no);
+  // tree->SetBranchStatus("subRunNo",1);
+  // tree->SetBranchAddress("subRunNo", &subrun_no);
+  
+  std::vector<int> *channelid = new std::vector<int>;
+  TClonesArray* esignal = new TClonesArray;
+  
+  tree->SetBranchStatus("raw_channelId",1);
+  tree->SetBranchAddress("raw_channelId", &channelid);
+  tree->SetBranchStatus("raw_wf",1);
+  tree->SetBranchAddress("raw_wf", &esignal);
+  
+  int siz = tree->GetEntry(0);
+
+  cerr << em("Close a file") << endl;
+  tfile.Close();
+  esignal->Clear("D");
+  delete channelid;
+  delete esignal;
+
+  cerr << em("Done ...") << endl;
 
   return 0;
   
