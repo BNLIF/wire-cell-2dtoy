@@ -67,88 +67,92 @@ using namespace std;
 
 int main(int argc, char* argv[])
 {
-  // ExecMon em("starting");
-  // cerr << em("to create a histogram") << endl;
+  ExecMon em("starting");
+  cerr << em("to create a histogram") << endl;
   
-  // TF1 *f1 = new TF1("f1","gaus",0,10);
-  // TH1F *h1 = new TH1F("h1","h1",10000,0,10000);
-  // TGraph *g1 = new TGraph();
+  TF1 *f1 = new TF1("f1","gaus",0,10);
+  TH1F *h1 = new TH1F("h1","h1",10000,0,10000);
+  TGraph *g1 = new TGraph();
 
-  // g1->SetPoint(0,3,5);
-  // const char* root_file = "../3455/5006287_0/celltree.root";
-  // const char* tpath = "/Event/Sim";
-  // TFile tfile(root_file,"read");
-  // TTree* tree = dynamic_cast<TTree*>(tfile.Get(tpath));
-  // tree->SetBranchStatus("*",0);
-  
-  // // tree->SetBranchStatus("eventNo",1);
-  // // tree->SetBranchAddress("eventNo" , &event_no);
-  // // tree->SetBranchStatus("runNo",1);
-  // // tree->SetBranchAddress("runNo"   , &run_no);
-  // // tree->SetBranchStatus("subRunNo",1);
-  // // tree->SetBranchAddress("subRunNo", &subrun_no);
-  
-  // std::vector<int> *channelid = new std::vector<int>;
-  // TClonesArray* esignal = new TClonesArray;
-  
-  // tree->SetBranchStatus("raw_channelId",1);
-  // tree->SetBranchAddress("raw_channelId", &channelid);
-  // tree->SetBranchStatus("raw_wf",1);
-  // tree->SetBranchAddress("raw_wf", &esignal);
-  
-  // int siz = tree->GetEntry(0);
-  
-  //  TH1F **hu=0;
-  //  TH1F **hv=0;
-  //  TH1F **hw=0;
+  g1->SetPoint(0,3,5);
+
+    TH1F **hu=0;
+   TH1F **hv=0;
+   TH1F **hw=0;
    
-  //  int nwire_u = 2400;
-  //  int nwire_v = 2400;
-  //  int nwire_w = 3256;
+   int nwire_u = 2400;
+   int nwire_v = 2400;
+   int nwire_w = 3256;
 
-  //  hu = new TH1F*[nwire_u];
-  //  hv = new TH1F*[nwire_v];
-  //  hw = new TH1F*[nwire_w];
+   hu = new TH1F*[nwire_u];
+   hv = new TH1F*[nwire_v];
+   hw = new TH1F*[nwire_w];
 
-  //  int bins_per_frame = 9600;
+   int bins_per_frame = 9600;
 
-  //  for (int i=0;i!=nwire_u;i++){
-  //    hu[i] = new TH1F(Form("U2_%d",i),Form("U2_%d",i),bins_per_frame,0,bins_per_frame);
-  //    //cout << em("to create a histogram") << endl;
-  //  }
-  //  for (int i=0;i!=nwire_v;i++){
-  //    hv[i] = new TH1F(Form("V2_%d",i),Form("V2_%d",i),bins_per_frame,0,bins_per_frame);
-  //    //cout << em("to create a histogram") << endl;
-  //  }
-  //  for (int i=0;i!=nwire_w;i++){
-  //    hw[i] = new TH1F(Form("W2_%d",i),Form("W2_%d",i),bins_per_frame,0,bins_per_frame);
-  //    //cout << em("to create a histogram") << endl;
-  //  }
-   
-  // cerr << em("to delete a histogram") << endl;
-
-  // for (int i=0;i!=nwire_u;i++){
-  //   delete hu[i] ;
-  // }
-  // delete [] hu;
-  // for (int i=0;i!=nwire_v;i++){
-  //   delete hv[i] ;
-  // }
-  // delete [] hv;
-  // for (int i=0;i!=nwire_w;i++){
-  //   delete hw[i] ;
-  // }
-  // delete [] hw;
+   for (int i=0;i!=nwire_u;i++){
+     hu[i] = new TH1F(Form("U2_%d",i),Form("U2_%d",i),bins_per_frame,0,bins_per_frame);
+     //cout << em("to create a histogram") << endl;
+   }
+   for (int i=0;i!=nwire_v;i++){
+     hv[i] = new TH1F(Form("V2_%d",i),Form("V2_%d",i),bins_per_frame,0,bins_per_frame);
+     //cout << em("to create a histogram") << endl;
+   }
+   for (int i=0;i!=nwire_w;i++){
+     hw[i] = new TH1F(Form("W2_%d",i),Form("W2_%d",i),bins_per_frame,0,bins_per_frame);
+     //cout << em("to create a histogram") << endl;
+   }
   
 
-  // delete h1;
-  // delete f1;
-  // delete g1;
-  // tfile.Close();
-  // esignal->Clear("D");
-  // delete channelid;
-  // delete esignal;
-  // cerr << em("done") << endl;
+  const char* root_file = "../3455/5006287_0/celltree.root";
+  const char* tpath = "/Event/Sim";
+  TFile tfile(root_file,"read");
+  TTree* tree = dynamic_cast<TTree*>(tfile.Get(tpath));
+  tree->SetBranchStatus("*",0);
+  
+  // tree->SetBranchStatus("eventNo",1);
+  // tree->SetBranchAddress("eventNo" , &event_no);
+  // tree->SetBranchStatus("runNo",1);
+  // tree->SetBranchAddress("runNo"   , &run_no);
+  // tree->SetBranchStatus("subRunNo",1);
+  // tree->SetBranchAddress("subRunNo", &subrun_no);
+  
+  std::vector<int> *channelid = new std::vector<int>;
+  TClonesArray* esignal = new TClonesArray;
+  
+  tree->SetBranchStatus("raw_channelId",1);
+  tree->SetBranchAddress("raw_channelId", &channelid);
+  tree->SetBranchStatus("raw_wf",1);
+  tree->SetBranchAddress("raw_wf", &esignal);
+  
+  int siz = tree->GetEntry(0);
+  
+ 
+   
+  cerr << em("to delete a histogram") << endl;
+
+  for (int i=0;i!=nwire_u;i++){
+    delete hu[i] ;
+  }
+  delete [] hu;
+  for (int i=0;i!=nwire_v;i++){
+    delete hv[i] ;
+  }
+  delete [] hv;
+  for (int i=0;i!=nwire_w;i++){
+    delete hw[i] ;
+  }
+  delete [] hw;
+  
+  cerr << em("done") << endl;
+  delete h1;
+  delete f1;
+  delete g1;
+  tfile.Close();
+  esignal->Clear("D");
+  delete channelid;
+  delete esignal;
+   cerr << em("done") << endl;
   
   // hu = new TH1F*[nwire_u];
   // hv = new TH1F*[nwire_v];
@@ -213,6 +217,8 @@ int main(int argc, char* argv[])
   // // cerr << em("done") << endl;
   
   
+
+  /*
   if (argc < 4) {
     cerr << "usage: wire-cell-uboone /path/to/ChannelWireGeometry.txt /path/to/celltree.root eve_num -t[0,1] -s[0,1,2]" << endl;
     return 1;
@@ -470,5 +476,6 @@ int main(int argc, char* argv[])
   cerr << em("Done ...") << endl;
 
   return 0;
-  
+
+  */  
 } // main()
