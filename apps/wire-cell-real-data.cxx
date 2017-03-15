@@ -202,16 +202,16 @@ int main(int argc, char* argv[])
   // sst->GetEntry(eve_num);
   
   
-  WireCellSst::DatauBooNEFrameDataSource data_fds(root_file,gds,total_time_bin);
+  WireCellSst::DatauBooNEFrameDataSource *data_fds = new WireCellSst::DatauBooNEFrameDataSource(root_file,gds,total_time_bin);
   if (save_file != 2){
-    data_fds.jump(eve_num);
+    data_fds->jump(eve_num);
     if (save_file == 1)
-      data_fds.Save();
+      data_fds->Save();
   }
   
-  run_no = data_fds.get_run_no();
-  subrun_no = data_fds.get_subrun_no();
-  event_no = data_fds.get_event_no();
+  run_no = data_fds->get_run_no();
+  subrun_no = data_fds->get_subrun_no();
+  event_no = data_fds->get_event_no();
   
   cout << "Run No: " << run_no << " " << subrun_no << " " << event_no << endl;
 
@@ -220,11 +220,11 @@ int main(int argc, char* argv[])
   // WireMap& vplane_map = data_fds.get_v_map();
   // WireMap& wplane_map = data_fds.get_w_map();
 
-  ChirpMap& uplane_map = data_fds.get_u_cmap();
-  ChirpMap& vplane_map = data_fds.get_v_cmap();
-  ChirpMap& wplane_map = data_fds.get_w_cmap();
+  ChirpMap uplane_map = data_fds->get_u_cmap();
+  ChirpMap vplane_map = data_fds->get_v_cmap();
+  ChirpMap wplane_map = data_fds->get_w_cmap();
   
-  std::set<int>& lf_noisy_channels = data_fds.get_lf_noisy_channels();
+  std::set<int> lf_noisy_channels = data_fds->get_lf_noisy_channels();
   
   // std::cout << uplane_map.size() << " " << vplane_map.size() << " " << wplane_map.size() << std::endl;
     
@@ -256,23 +256,29 @@ int main(int argc, char* argv[])
   //gaus_fds.jump(eve_num);
 
   cout << "Deconvolution with Wiener filter" << endl; 
-  WireCell2dToy::uBooNEData2DDeconvolutionFDS wien_fds(data_fds,gds,uplane_map, vplane_map, wplane_map,100,toffset_1,toffset_2,toffset_3);
-  wien_fds.jump(eve_num);
-  WireCell2dToy::uBooNEDataROI uboone_rois(data_fds,wien_fds,gds,uplane_map,vplane_map,wplane_map,lf_noisy_channels);
-  WireCell2dToy::uBooNEDataAfterROI roi_fds(wien_fds,gds,uboone_rois,nrebin);
+  WireCell2dToy::uBooNEData2DDeconvolutionFDS *wien_fds = new WireCell2dToy::uBooNEData2DDeconvolutionFDS(*data_fds,gds,uplane_map, vplane_map, wplane_map,100,toffset_1,toffset_2,toffset_3);
+  wien_fds->jump(eve_num);
+  WireCell2dToy::uBooNEDataROI *uboone_rois = new WireCell2dToy::uBooNEDataROI(*data_fds,*wien_fds,gds,uplane_map,vplane_map,wplane_map,lf_noisy_channels);
+  WireCell2dToy::uBooNEDataAfterROI roi_fds(*wien_fds,gds,*uboone_rois,nrebin);
   roi_fds.jump(eve_num);
   
 
-  data_fds.Clear();
+  std::vector<float> uplane_rms = uboone_rois->get_uplane_rms();
+  std::vector<float> vplane_rms = uboone_rois->get_vplane_rms();
+  std::vector<float> wplane_rms = uboone_rois->get_wplane_rms();
+
+  delete data_fds;
+  delete wien_fds;
+  delete uboone_rois;
+  roi_fds.Clear();
+  //  data_fds.Clear();
 
   // std::vector<float>& uplane_rms = wien_fds.get_uplane_rms();
   // std::vector<float>& vplane_rms = wien_fds.get_vplane_rms();
   // std::vector<float>& wplane_rms = wien_fds.get_wplane_rms();
 
-  std::vector<float>& uplane_rms = uboone_rois.get_uplane_rms();
-  std::vector<float>& vplane_rms = uboone_rois.get_vplane_rms();
-  std::vector<float>& wplane_rms = uboone_rois.get_wplane_rms();
-
+  
+  
   // // hack for now ...  remove the very busy wires ... 
   // for (int i=0;i!=uplane_rms.size();i++){
   //   //cout << "U " << i << " " << uplane_rms.at(i) << endl;
