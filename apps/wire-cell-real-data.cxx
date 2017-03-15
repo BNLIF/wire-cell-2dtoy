@@ -262,7 +262,10 @@ int main(int argc, char* argv[])
   WireCell2dToy::uBooNEDataAfterROI roi_fds(*wien_fds,gds,*uboone_rois,nrebin);
   roi_fds.jump(eve_num);
   
-
+  // Note, there is a mismatch here
+  // These RMS values are for single ticks
+  // Later they are applied to the rebinned data
+  // Probably OK as the TPC signal processing already took care the fake hits ... 
   std::vector<float> uplane_rms = uboone_rois->get_uplane_rms();
   std::vector<float> vplane_rms = uboone_rois->get_vplane_rms();
   std::vector<float> wplane_rms = uboone_rois->get_wplane_rms();

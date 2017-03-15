@@ -238,6 +238,10 @@ int main(int argc, char* argv[])
   std::vector<float> uplane_rms;
   std::vector<float> vplane_rms;
   std::vector<float> wplane_rms;
+  // Note, there is a mismatch here
+  // These RMS values are for single ticks
+  // Later they are applied to the rebinned data
+  // Probably OK as the TPC signal processing already took care the fake hits ... 
   TH1F *hu_threshold = (TH1F*)file1->Get("hu_threshold");
   TH1F *hv_threshold = (TH1F*)file1->Get("hv_threshold");
   TH1F *hw_threshold = (TH1F*)file1->Get("hw_threshold");
@@ -250,6 +254,8 @@ int main(int argc, char* argv[])
   for (int i=0;i!=hw_threshold->GetNbinsX();i++){
     wplane_rms.push_back(hw_threshold->GetBinContent(i+1));
   }
+  
+
   
   TH2I *hu_decon = (TH2I*)file1->Get("hu_decon");
   TH2I *hv_decon = (TH2I*)file1->Get("hv_decon");
