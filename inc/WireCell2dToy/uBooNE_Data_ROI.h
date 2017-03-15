@@ -34,6 +34,8 @@ namespace WireCell2dToy{
       }
     }
 
+
+    void Clear();
     /* std::vector<std::pair<int,int>>& get_others_rois(int chid) { */
     /*   if (chid < nwire_u){ */
     /* 	return others_rois_u.at(chid); */

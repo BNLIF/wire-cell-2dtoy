@@ -728,7 +728,13 @@ void WireCell2dToy::uBooNEData2DDeconvolutionFDS::Deconvolute_2D(int plane){
   
 }
 
+void WireCell2dToy::uBooNEData2DDeconvolutionFDS::Clear(){
+  hu_2D_g->Reset();
+  hv_2D_g->Reset();
+  hw_2D_g->Reset();
 
+  frame.clear();
+}
 
 
 void WireCell2dToy::uBooNEData2DDeconvolutionFDS::restore_baseline(TH1F *htemp){

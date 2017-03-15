@@ -59,7 +59,7 @@ WireCell2dToy::uBooNEDataAfterROI::uBooNEDataAfterROI(WireCell::FrameDataSource&
 
 
 WireCell2dToy::uBooNEDataAfterROI::~uBooNEDataAfterROI(){
-  
+  Clear();
 }
 
 int WireCell2dToy::uBooNEDataAfterROI::size() const{

@@ -30,6 +30,7 @@ namespace WireCell2dToy{
     
     virtual int size() const;
     virtual int jump(int frame_number);
+    void Clear();
     
   private:
     WireCell::FrameDataSource *fds;

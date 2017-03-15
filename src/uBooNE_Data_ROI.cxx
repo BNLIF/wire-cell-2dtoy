@@ -30,6 +30,21 @@ Double_t WireCell2dToy::uBooNEDataROI::local_ave(TH1F *h1, Int_t bin, Int_t widt
 }
 
 
+void WireCell2dToy::uBooNEDataROI::Clear(){
+  self_rois_u.clear();
+  self_rois_v.clear();
+  self_rois_w.clear();
+  
+  loose_rois_u.clear();
+  loose_rois_v.clear();
+  loose_rois_w.clear();
+
+  uplane_rms.clear();
+  vplane_rms.clear();
+  wplane_rms.clear();
+}
+
+
 Int_t WireCell2dToy::uBooNEDataROI::find_ROI_end(TH1F *h1, Int_t bin, Double_t th){
   Int_t end = bin;
   Double_t content = h1->GetBinContent(end+1);
