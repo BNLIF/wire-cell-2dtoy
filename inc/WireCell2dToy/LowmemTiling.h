@@ -25,6 +25,8 @@ namespace WireCell2dToy{
     const WireCell::GeomCell* cell(const WireCell::GeomWireSelection& wires) const;
 
     void form_bad_merge_wires(WireCell::ChirpMap& uplane_map, WireCell::ChirpMap& vplane_map, WireCell::ChirpMap& wplane_map);
+
+    void form_fired_merge_wires(const WireCell::Slice& slice);
     
   protected:
     WireCell::GeomDataSource& gds;
@@ -44,6 +46,8 @@ namespace WireCell2dToy{
     int nwire_v;
     int nwire_w;
     
+    WireCell::WireChargeMap wirechargemap;
+    WireCell::WireChargeMap wirecharge_errmap;
     
   };
 }

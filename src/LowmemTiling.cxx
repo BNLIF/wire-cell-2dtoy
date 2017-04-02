@@ -20,8 +20,127 @@ WireCell2dToy::LowmemTiling::LowmemTiling(int time_slice, int nrebin, const Wire
   // form bad wires group
   form_bad_merge_wires(uplane_map, vplane_map, wplane_map);
   
-  
   // form good wires group
+  form_fired_merge_wires(slice);
+  
+}
+
+void WireCell2dToy::LowmemTiling::form_fired_merge_wires(const WireCell::Slice& slice){
+  WireCell::Channel::Group group = slice.group();
+  
+  
+  //double sum = 0;
+  for (int i=0;i!=group.size();i++){
+    const WireCell::GeomWire *wire = gds.by_channel_segment(group.at(i).first,0);
+    float charge = group.at(i).second;
+    if (charge < 11) charge = 11;
+    if (wirechargemap.find(wire) == wirechargemap.end()){
+      //not found
+      wirechargemap[wire] = charge;
+    }else{
+      //wirechargemap[wire] += charge;
+    }
+  }
+  
+  // do U
+  MergeGeomWire *mwire = 0;
+  int ident = 0;
+  int last_wire = -1;
+  for (int i = 0; i!= nwire_u; i++){
+    const GeomWire *wire = gds.by_planeindex((WirePlaneType_t)0,i);
+    if (wirechargemap.find(wire)!=wirechargemap.end()){
+      if (mwire == 0){
+	mwire = new MergeGeomWire(ident,*wire);
+	mwire->SetTimeSlice(time_slice);
+	fired_wire_u.push_back(mwire);
+	ident ++;
+      }else{
+	if (i==last_wire+1){
+	  mwire->AddWire(*wire);
+	}else{
+	  // create a new wire
+	  mwire = new MergeGeomWire(ident,*wire);
+	  mwire->SetTimeSlice(time_slice);
+	  fired_wire_u.push_back(mwire);
+	  ident ++;
+	}
+      }
+      last_wire = i;
+    }
+  }
+  
+  // V
+  mwire = 0;
+  last_wire = -1;
+  for (int i = 0; i!= nwire_v; i++){
+    const GeomWire *wire = gds.by_planeindex((WirePlaneType_t)1,i);
+    if (wirechargemap.find(wire)!=wirechargemap.end()){
+      if (mwire == 0){
+	mwire = new MergeGeomWire(ident,*wire);
+	mwire->SetTimeSlice(time_slice);
+	fired_wire_v.push_back(mwire);
+	ident ++;
+      }else{
+	if (i==last_wire+1){
+	  mwire->AddWire(*wire);
+	}else{
+	  // create a new wire
+	  mwire = new MergeGeomWire(ident,*wire);
+	  mwire->SetTimeSlice(time_slice);
+	  fired_wire_v.push_back(mwire);
+	  ident ++;
+	}
+      }
+      last_wire = i;
+    }
+  }
+  
+  // W
+  mwire = 0;
+  last_wire = -1;
+  for (int i = 0; i!= nwire_w; i++){
+    const GeomWire *wire = gds.by_planeindex((WirePlaneType_t)2,i);
+    if (wirechargemap.find(wire)!=wirechargemap.end()){
+      if (mwire == 0){
+	mwire = new MergeGeomWire(ident,*wire);
+	mwire->SetTimeSlice(time_slice);
+	fired_wire_w.push_back(mwire);
+	ident ++;
+      }else{
+	if (i==last_wire+1){
+	  mwire->AddWire(*wire);
+	}else{
+	  // create a new wire
+	  mwire = new MergeGeomWire(ident,*wire);
+	  mwire->SetTimeSlice(time_slice);
+	  fired_wire_w.push_back(mwire);
+	  ident ++;
+	}
+      }
+      last_wire = i;
+    }
+  }
+
+  
+  // int sum = 0;
+  // for (int i=0;i!=fired_wire_u.size();i++){
+  //   MergeGeomWire *mwire = (MergeGeomWire*)fired_wire_u.at(i);
+  //   sum += mwire->get_allwire().size();
+  //   for (Int_t j=0;j!=mwire->get_allwire().size();j++){
+  //     std::cout << i << " " << mwire->get_allwire().at(j)->index() << std::endl;
+  //   }
+  // }
+  // for (int i=0;i!=fired_wire_v.size();i++){
+  //   MergeGeomWire *mwire = (MergeGeomWire*)fired_wire_v.at(i);
+  //   sum += mwire->get_allwire().size();
+  // }
+  // for (int i=0;i!=fired_wire_w.size();i++){
+  //   MergeGeomWire *mwire = (MergeGeomWire*)fired_wire_w.at(i);
+  //   sum += mwire->get_allwire().size();
+  // }
+
+  
+  //std::cout << fired_wire_u.size() << " " << fired_wire_v.size() << " " << fired_wire_w.size() << " " << group.size() << " " << sum << std::endl;
   
 }
 
