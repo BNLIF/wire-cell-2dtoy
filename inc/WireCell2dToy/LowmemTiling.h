@@ -28,6 +28,7 @@ namespace WireCell2dToy{
 
     void form_fired_merge_wires(const WireCell::Slice& slice);
     
+    void form_two_bad_cells();
     
 
   protected:
