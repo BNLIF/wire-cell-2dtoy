@@ -18,7 +18,21 @@ namespace WireCell2dToy{
 		 std::vector<float>& uplane_rms, std::vector<float>& vplane_rms, std::vector<float>& wplane_rms);
     
     virtual ~LowmemTiling();
-  private:
+    
+    WireCell::GeomWireSelection wires(const WireCell::GeomCell& cell) const;
+    WireCell::GeomCellSelection cells(const WireCell::GeomWire& wire) const;
+    const WireCell::GeomCell* cell(const WireCell::GeomWireSelection& wires) const;
+    
+  protected:
+    WireCell::GeomDataSource& gds;
+
+    WireCell::GeomWireSelection bad_wire_u;
+    WireCell::GeomWireSelection bad_wire_v;
+    WireCell::GeomWireSelection bad_wire_w;
+
+    WireCell::GeomWireSelection good_wire_u;
+    WireCell::GeomWireSelection good_wire_v;
+    WireCell::GeomWireSelection good_wire_w;
     
     
   };

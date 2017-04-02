@@ -4,6 +4,7 @@
 #include "WireCell2dToy/ToyEventDisplay.h"
 #include "WireCell2dToy/ToyTiling.h"
 #include "WireCell2dToy/BadTiling.h"
+#include "WireCell2dToy/LowmemTiling.h"
 
 #include "WireCell2dToy/MergeToyTiling.h"
 #include "WireCell2dToy/TruthToyTiling.h"
@@ -46,6 +47,7 @@
 #include "WireCell2dToy/uBooNE_Data_ROI.h"
 #include "WireCell2dToy/uBooNE_Data_After_ROI.h"
 #include "WireCell2dToy/pd_Data_FDS.h"
+#include "WireCell2dToy/ExecMon.h"
 
 #include "TApplication.h"
 #include "TCanvas.h"
@@ -101,6 +103,9 @@ int main(int argc, char* argv[])
   if (two_plane)
     cout << "Enable Two Plane Reconstruction " << endl; 
   
+  ExecMon em("starting");
+  cerr << em("load geometry") << endl;
+
   WireCellSst::GeomDataSource gds(argv[1]);
   std::vector<double> ex = gds.extent();
   cerr << "Extent: "
@@ -166,6 +171,8 @@ int main(int argc, char* argv[])
   const char* root_file = argv[2];  
   int run_no, subrun_no, event_no;
   
+  cerr << em("load data") << endl;
+
   // load Trun
   TFile *file1 = new TFile(root_file);
   TTree *Trun = (TTree*)file1->Get("Trun");
@@ -264,6 +271,8 @@ int main(int argc, char* argv[])
   					    &uplane_rms, &vplane_rms, &wplane_rms); 
     
   
+  cerr << em("begin tiling") << endl;
+
   
   int ncount = 0;
   int ncount1 = 0;
@@ -276,7 +285,9 @@ int main(int argc, char* argv[])
   WireCell2dToy::BadTiling **badtiling = new WireCell2dToy::BadTiling*[2400];
   WireCell2dToy::MergeToyTiling **mergetiling = new WireCell2dToy::MergeToyTiling*[2400];
   WireCell2dToy::ToyMatrix **toymatrix = new WireCell2dToy::ToyMatrix*[2400];
-    
+  WireCell2dToy::LowmemTiling **lowmemtiling = new WireCell2dToy::LowmemTiling*[2400];
+
+
   //add in cluster
   GeomClusterSet cluster_set, cluster_delset;
   
@@ -286,31 +297,37 @@ int main(int argc, char* argv[])
   int start_num = 0 ;
   int end_num = sds.size()-1;
 
+  start_num = 555;
+  end_num = 555;
   
+
   for (int i=start_num;i!=end_num+1;i++){
  
     sds.jump(i);
     WireCell::Slice slice = sds.get();
 
-    toytiling[i] = new WireCell2dToy::ToyTiling(slice,gds,0.15,0.2,0.1,threshold_ug,threshold_vg, threshold_wg, &uplane_rms, &vplane_rms, &wplane_rms);
+    
+    lowmemtiling[i] = new WireCell2dToy::LowmemTiling(slice,gds,uplane_map,vplane_map,wplane_map,uplane_rms,vplane_rms,wplane_rms);
 
-    if (two_plane)
-      toytiling[i]->twoplane_tiling(i,nrebin,gds,uplane_rms,vplane_rms,wplane_rms, uplane_map, vplane_map, wplane_map);
+    //toytiling[i] = new WireCell2dToy::ToyTiling(slice,gds,0.15,0.2,0.1,threshold_ug,threshold_vg, threshold_wg, &uplane_rms, &vplane_rms, &wplane_rms);
+
+    //    if (two_plane)
+    //  toytiling[i]->twoplane_tiling(i,nrebin,gds,uplane_rms,vplane_rms,wplane_rms, uplane_map, vplane_map, wplane_map);
 
 
-    GeomCellSelection allcell = toytiling[i]->get_allcell();
-    GeomWireSelection allwire = toytiling[i]->get_allwire();
+    //    GeomCellSelection allcell = toytiling[i]->get_allcell();
+    //GeomWireSelection allwire = toytiling[i]->get_allwire();
 
-    cout << i << " " << allcell.size() << " " << allwire.size() << endl;
+    //    cout << i << " " << allcell.size() << " " << allwire.size() << endl;
 
-    mergetiling[i] = new WireCell2dToy::MergeToyTiling(*toytiling[i],i,3);
+    //    mergetiling[i] = new WireCell2dToy::MergeToyTiling(*toytiling[i],i,3);
     
    
     
-    if (i==0){
-      badtiling[i] = new WireCell2dToy::BadTiling(i,nrebin,uplane_map,vplane_map,wplane_map,gds,0,1); // 2 plane bad tiling
+    //    if (i==0){
+    // badtiling[i] = new WireCell2dToy::BadTiling(i,nrebin,uplane_map,vplane_map,wplane_map,gds,0,1); // 2 plane bad tiling
       // badtiling[i] = new WireCell2dToy::BadTiling(i,nrebin,uplane_map,vplane_map,wplane_map,gds,1,1); // 1 plane bad tiling
-    }
+    //}
 
     //badtiling[i] = new WireCell2dToy::BadTiling(i,nrebin,uplane_map,vplane_map,wplane_map,gds);
 
@@ -363,6 +380,7 @@ int main(int argc, char* argv[])
     //  theApp.Run();
   }
   
+  cerr << em("finish tiling") << endl;
 
   return 0;
   
