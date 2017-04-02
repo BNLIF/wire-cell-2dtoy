@@ -35,20 +35,20 @@ void WireCell2dToy::LowmemTiling::check_bad_cells(WireCell2dToy::LowmemTiling* t
   for (auto it = uplane_map.begin(); it!= uplane_map.end(); it++){
     int start_time_slice = it->second.first/ nrebin;
     int end_time_slice = it->second.second/ nrebin;
-    if ((prev_time_slice - start_time_slice)*(time_slice-start_time_slice)<0 || 
-        (prev_time_slice - end_time_slice)*(time_slice-end_time_slice)<0
-	){
-      flag = 1;
-      break;
-    }
+    if (prev_time_slice < start_time_slice && time_slice >= start_time_slice ||
+	prev_time_slice <= end_time_slice && time_slice > end_time_slice )
+      {
+	flag = 1;
+	break;
+      }
     //    std::cout << start_time_slice << " " << end_time_slice << std::endl;
   }
   if (flag==0){
     for (auto it = vplane_map.begin(); it!= vplane_map.end(); it++){
       int start_time_slice = it->second.first/ nrebin;
       int end_time_slice = it->second.second/ nrebin;
-      if ((prev_time_slice - start_time_slice)*(time_slice-start_time_slice)<0 || 
-	  (prev_time_slice - end_time_slice)*(time_slice-end_time_slice)<0
+      if (prev_time_slice < start_time_slice && time_slice >= start_time_slice ||
+	prev_time_slice <= end_time_slice && time_slice > end_time_slice
 	  ){
 	flag = 1;
 	break;
@@ -60,8 +60,8 @@ void WireCell2dToy::LowmemTiling::check_bad_cells(WireCell2dToy::LowmemTiling* t
     for (auto it = wplane_map.begin(); it!= wplane_map.end(); it++){
       int start_time_slice = it->second.first/ nrebin;
       int end_time_slice = it->second.second/ nrebin;
-      if ((prev_time_slice - start_time_slice)*(time_slice-start_time_slice)<0 || 
-	  (prev_time_slice - end_time_slice)*(time_slice-end_time_slice)<0
+      if (prev_time_slice < start_time_slice && time_slice >= start_time_slice ||
+	prev_time_slice <= end_time_slice && time_slice > end_time_slice
 	  ){
 	flag = 1;
 	break;

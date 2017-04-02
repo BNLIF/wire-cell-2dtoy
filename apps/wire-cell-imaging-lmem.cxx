@@ -303,7 +303,7 @@ int main(int argc, char* argv[])
   
 
   //test 
-  uplane_map.begin()->second.second=5000;
+  // uplane_map.begin()->second.second=5000;
 
   for (int i=start_num;i!=end_num+1;i++){
  
