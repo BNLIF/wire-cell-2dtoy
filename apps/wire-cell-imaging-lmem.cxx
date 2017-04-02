@@ -307,7 +307,7 @@ int main(int argc, char* argv[])
     WireCell::Slice slice = sds.get();
 
     
-    lowmemtiling[i] = new WireCell2dToy::LowmemTiling(slice,gds,uplane_map,vplane_map,wplane_map,uplane_rms,vplane_rms,wplane_rms);
+    lowmemtiling[i] = new WireCell2dToy::LowmemTiling(i,nrebin,slice,gds,uplane_map,vplane_map,wplane_map,uplane_rms,vplane_rms,wplane_rms);
 
     //toytiling[i] = new WireCell2dToy::ToyTiling(slice,gds,0.15,0.2,0.1,threshold_ug,threshold_vg, threshold_wg, &uplane_rms, &vplane_rms, &wplane_rms);
 
