@@ -4,6 +4,7 @@
 #include "WireCellTiling/TilingBase.h"
 #include "WireCellData/GeomWireCellMap.h"
 #include "WireCellData/MergeGeomWire.h"
+#include "WireCellData/SlimMergeGeomCell.h"
 #include "WireCellNav/SliceDataSource.h"
 #include "WireCellSst/GeomDataSource.h"
 #include "WireCellNav/DetectorGDS.h"

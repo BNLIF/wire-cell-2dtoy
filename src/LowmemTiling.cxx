@@ -218,8 +218,72 @@ void WireCell2dToy::LowmemTiling::form_two_bad_cells(){
 
       if (pcell.size() >=3){
 	//Creat a cell and then get all the wires in ... 
-	
+	double u_max = -1e9, u_min = 1e9;
+	double v_max = -1e9, v_min = 1e9;
+	double w_max = -1e9, w_min = 1e9;
+	for (int k=0;k!=pcell.size();k++){
+	  double udist = gds.wire_dist(pcell.at(k),WirePlaneType_t(0));
+	  if (udist > u_max) u_max = udist;
+	  if (udist < u_min) u_min = udist;
+	  double vdist = gds.wire_dist(pcell.at(k),WirePlaneType_t(1));
+	  if (vdist > v_max) v_max = vdist;
+	  if (vdist < v_min) v_min = vdist;
+	  double wdist = gds.wire_dist(pcell.at(k),WirePlaneType_t(2));
+	  if (wdist > w_max) w_max = wdist;
+	  if (wdist < w_min) w_min = wdist;
+	}
+	//std::cout << u_max << " " << u_min << " " << v_max << " " << v_min << " " << w_max << " " << w_min << std::endl;
+	//Create a cell
+	SlimMergeGeomCell *mcell = new SlimMergeGeomCell();
+	two_bad_wire_cells.push_back(mcell);
 
+	//Insert U
+	// for (int k=0;k!=((MergeGeomWire*)bad_wire_u.at(i))->get_allwire().size();k++){
+	//   const GeomWire *uwire = ((MergeGeomWire*)bad_wire_u.at(i))->get_allwire().at(k);
+	//   double udist = gds.wire_dist(*uwire);
+	//   if (udist>u_min && udist < u_max)
+	//     mcell->AddWire(uwire,WirePlaneType_t(0));
+	// }
+
+	// for (int k=0;k!=((MergeGeomWire*)bad_wire_v.at(j))->get_allwire().size();k++){
+	//   const GeomWire *vwire = ((MergeGeomWire*)bad_wire_v.at(j))->get_allwire().at(k);
+	//   double vdist = gds.wire_dist(*vwire);
+	//   if (vdist>v_min && vdist < v_max)
+	//     mcell->AddWire(vwire,WirePlaneType_t(1));
+	// }
+	// //Insert V
+	// for (int k=0;k!=gds.wires_in_plane(WirePlaneType_t(2)).size();k++){
+	//   const GeomWire *wwire = gds.wires_in_plane(WirePlaneType_t(2)).at(k);
+	//   double wdist = gds.wire_dist(*wwire);
+	//   if (wdist>w_min && wdist < w_max)
+	//     mcell->AddWire(wwire,WirePlaneType_t(2));
+	// }
+	
+	const GeomWire* uwire_min = gds.bounds(u_min,WirePlaneType_t(0)).second;
+	const GeomWire* uwire_max = gds.bounds(u_max,WirePlaneType_t(0)).first;
+	for (int k=uwire_min->index();k!=uwire_max->index()+1;k++){
+	  const GeomWire *uwire = gds.by_planeindex(WirePlaneType_t(0),k);
+	  mcell->AddWire(uwire,WirePlaneType_t(0));
+	}
+	
+	//Insert V
+	const GeomWire* vwire_min = gds.bounds(v_min,WirePlaneType_t(1)).second;
+	const GeomWire* vwire_max = gds.bounds(v_max,WirePlaneType_t(1)).first;
+	// std::cout << vwire_min->index() << " " << vwire_max->index() << std::endl;
+	for (int k=vwire_min->index();k!=vwire_max->index()+1;k++){
+	  const GeomWire *vwire = gds.by_planeindex(WirePlaneType_t(1),k);
+	  mcell->AddWire(vwire,WirePlaneType_t(1));
+	}
+
+	//Insert W
+	const GeomWire* wwire_min = gds.bounds(w_min,WirePlaneType_t(2)).second;
+	const GeomWire* wwire_max = gds.bounds(w_max,WirePlaneType_t(2)).first;
+	for (int k=wwire_min->index();k!=wwire_max->index()+1;k++){
+	  const GeomWire *wwire = gds.by_planeindex(WirePlaneType_t(2),k);
+	  mcell->AddWire(wwire,WirePlaneType_t(2));
+	}
+	
+	//	std::cout << mcell->get_uwires().size() << " " << mcell->get_vwires().size() << " " << mcell->get_wwires().size() << std::endl;
       }
     }
   }
@@ -416,7 +480,52 @@ void WireCell2dToy::LowmemTiling::form_two_bad_cells(){
       
     
       if(pcell.size() >=3){
+	//Creat a cell and then get all the wires in ... 
+	double u_max = -1e9, u_min = 1e9;
+	double v_max = -1e9, v_min = 1e9;
+	double w_max = -1e9, w_min = 1e9;
+	for (int k=0;k!=pcell.size();k++){
+	  double udist = gds.wire_dist(pcell.at(k),WirePlaneType_t(0));
+	  if (udist > u_max) u_max = udist;
+	  if (udist < u_min) u_min = udist;
+	  double vdist = gds.wire_dist(pcell.at(k),WirePlaneType_t(1));
+	  if (vdist > v_max) v_max = vdist;
+	  if (vdist < v_min) v_min = vdist;
+	  double wdist = gds.wire_dist(pcell.at(k),WirePlaneType_t(2));
+	  if (wdist > w_max) w_max = wdist;
+	  if (wdist < w_min) w_min = wdist;
+	}
+	//std::cout << u_max << " " << u_min << " " << v_max << " " << v_min << " " << w_max << " " << w_min << std::endl;
+	//Create a cell
+	SlimMergeGeomCell *mcell = new SlimMergeGeomCell();
+	two_bad_wire_cells.push_back(mcell);
+	//Insert U
+	const GeomWire* uwire_min = gds.bounds(u_min,WirePlaneType_t(0)).second;
+	const GeomWire* uwire_max = gds.bounds(u_max,WirePlaneType_t(0)).first;
+	for (int k=uwire_min->index();k!=uwire_max->index()+1;k++){
+	  const GeomWire *uwire = gds.by_planeindex(WirePlaneType_t(0),k);
+	  mcell->AddWire(uwire,WirePlaneType_t(0));
+	}
 	
+	//Insert V
+	const GeomWire* vwire_min = gds.bounds(v_min,WirePlaneType_t(1)).second;
+	const GeomWire* vwire_max = gds.bounds(v_max,WirePlaneType_t(1)).first;
+	// std::cout << vwire_min->index() << " " << vwire_max->index() << std::endl;
+	for (int k=vwire_min->index();k!=vwire_max->index()+1;k++){
+	  const GeomWire *vwire = gds.by_planeindex(WirePlaneType_t(1),k);
+	  mcell->AddWire(vwire,WirePlaneType_t(1));
+	}
+
+	//Insert W
+	const GeomWire* wwire_min = gds.bounds(w_min,WirePlaneType_t(2)).second;
+	const GeomWire* wwire_max = gds.bounds(w_max,WirePlaneType_t(2)).first;
+	for (int k=wwire_min->index();k!=wwire_max->index()+1;k++){
+	  const GeomWire *wwire = gds.by_planeindex(WirePlaneType_t(2),k);
+	  mcell->AddWire(wwire,WirePlaneType_t(2));
+	}
+
+
+	//	std::cout << mcell->get_uwires().size() << " " << mcell->get_vwires().size() << " " << mcell->get_wwires().size() << std::endl;
       }
     } 
   }
@@ -611,7 +720,73 @@ void WireCell2dToy::LowmemTiling::form_two_bad_cells(){
       
     
       if(pcell.size() >=3){
+	//Creat a cell and then get all the wires in ... 
+	double u_max = -1e9, u_min = 1e9;
+	double v_max = -1e9, v_min = 1e9;
+	double w_max = -1e9, w_min = 1e9;
+	for (int k=0;k!=pcell.size();k++){
+	  double udist = gds.wire_dist(pcell.at(k),WirePlaneType_t(0));
+	  if (udist > u_max) u_max = udist;
+	  if (udist < u_min) u_min = udist;
+	  double vdist = gds.wire_dist(pcell.at(k),WirePlaneType_t(1));
+	  if (vdist > v_max) v_max = vdist;
+	  if (vdist < v_min) v_min = vdist;
+	  double wdist = gds.wire_dist(pcell.at(k),WirePlaneType_t(2));
+	  if (wdist > w_max) w_max = wdist;
+	  if (wdist < w_min) w_min = wdist;
+	}
+	//std::cout << u_max << " " << u_min << " " << v_max << " " << v_min << " " << w_max << " " << w_min << std::endl;
+	//Create a cell
+	SlimMergeGeomCell *mcell = new SlimMergeGeomCell();
+	two_bad_wire_cells.push_back(mcell);
+
+	//Insert U	
+	const GeomWire* uwire_min = gds.bounds(u_min,WirePlaneType_t(0)).second;
+	const GeomWire* uwire_max = gds.bounds(u_max,WirePlaneType_t(0)).first;
+	for (int k=uwire_min->index();k!=uwire_max->index()+1;k++){
+	  const GeomWire *uwire = gds.by_planeindex(WirePlaneType_t(0),k);
+	  mcell->AddWire(uwire,WirePlaneType_t(0));
+	}
 	
+	//Insert V
+	const GeomWire* vwire_min = gds.bounds(v_min,WirePlaneType_t(1)).second;
+	const GeomWire* vwire_max = gds.bounds(v_max,WirePlaneType_t(1)).first;
+	// std::cout << vwire_min->index() << " " << vwire_max->index() << std::endl;
+	for (int k=vwire_min->index();k!=vwire_max->index()+1;k++){
+	  const GeomWire *vwire = gds.by_planeindex(WirePlaneType_t(1),k);
+	  mcell->AddWire(vwire,WirePlaneType_t(1));
+	}
+
+	//Insert W
+	const GeomWire* wwire_min = gds.bounds(w_min,WirePlaneType_t(2)).second;
+	const GeomWire* wwire_max = gds.bounds(w_max,WirePlaneType_t(2)).first;
+	for (int k=wwire_min->index();k!=wwire_max->index()+1;k++){
+	  const GeomWire *wwire = gds.by_planeindex(WirePlaneType_t(2),k);
+	  mcell->AddWire(wwire,WirePlaneType_t(2));
+	}
+
+	// //Insert W
+	// for (int k=0;k!=((MergeGeomWire*)bad_wire_w.at(i))->get_allwire().size();k++){
+	//   const GeomWire *wwire = ((MergeGeomWire*)bad_wire_w.at(i))->get_allwire().at(k);
+	//   double wdist = gds.wire_dist(*wwire);
+	//   if (wdist>w_min && wdist < w_max)
+	//     mcell->AddWire(wwire,WirePlaneType_t(2));
+	// }
+	// //Insert V
+	// for (int k=0;k!=((MergeGeomWire*)bad_wire_v.at(j))->get_allwire().size();k++){
+	//   const GeomWire *vwire = ((MergeGeomWire*)bad_wire_v.at(j))->get_allwire().at(k);
+	//   double vdist = gds.wire_dist(*vwire);
+	//   if (vdist>v_min && vdist < v_max)
+	//     mcell->AddWire(vwire,WirePlaneType_t(1));
+	// }
+	// //Insert U
+	// for (int k=0;k!=gds.wires_in_plane(WirePlaneType_t(0)).size();k++){
+	//   const GeomWire *uwire = gds.wires_in_plane(WirePlaneType_t(0)).at(k);
+	//   double udist = gds.wire_dist(*uwire);
+	//   if (udist>u_min && udist < u_max)
+	//     mcell->AddWire(uwire,WirePlaneType_t(0));
+	// }
+	// std::cout << mcell->get_uwires().size() << " " << mcell->get_vwires().size() << " " << mcell->get_wwires().size() << std::endl;
       }
     } 
   }
