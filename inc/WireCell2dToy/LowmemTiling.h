@@ -8,6 +8,7 @@
 #include "WireCellNav/SliceDataSource.h"
 #include "WireCellSst/GeomDataSource.h"
 #include "WireCellNav/DetectorGDS.h"
+#include "WireCell2dToy/WireCellHolder.h"
 
 #include "Rtypes.h"
 
@@ -15,7 +16,7 @@ namespace WireCell2dToy{
 
   class LowmemTiling : public WireCell::TilingBase {
   public:
-    LowmemTiling(int time_slice, int nrebin, const WireCell::Slice& slice,WireCell::GeomDataSource& gds,
+    LowmemTiling(int time_slice, int nrebin, const WireCell::Slice& slice,WireCell::GeomDataSource& gds, WireCell2dToy::WireCellHolder& holder,
 		 std::vector<float>& uplane_rms, std::vector<float>& vplane_rms, std::vector<float>& wplane_rms);
     
     virtual ~LowmemTiling();
@@ -40,6 +41,7 @@ namespace WireCell2dToy{
 
   protected:
     WireCell::GeomDataSource& gds;
+    WireCell2dToy::WireCellHolder& holder;
 
     WireCell::GeomWireSelection bad_wire_u;
     WireCell::GeomWireSelection bad_wire_v;

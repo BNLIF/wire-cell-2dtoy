@@ -5,6 +5,7 @@
 #include "WireCell2dToy/ToyTiling.h"
 #include "WireCell2dToy/BadTiling.h"
 #include "WireCell2dToy/LowmemTiling.h"
+#include "WireCell2dToy/WireCellHolder.h"
 
 #include "WireCell2dToy/MergeToyTiling.h"
 #include "WireCell2dToy/TruthToyTiling.h"
@@ -286,7 +287,7 @@ int main(int argc, char* argv[])
   WireCell2dToy::MergeToyTiling **mergetiling = new WireCell2dToy::MergeToyTiling*[2400];
   WireCell2dToy::ToyMatrix **toymatrix = new WireCell2dToy::ToyMatrix*[2400];
   WireCell2dToy::LowmemTiling **lowmemtiling = new WireCell2dToy::LowmemTiling*[2400];
-
+  WireCell2dToy::WireCellHolder WCholder;
 
   //add in cluster
   GeomClusterSet cluster_set, cluster_delset;
@@ -297,8 +298,8 @@ int main(int argc, char* argv[])
   int start_num = 0 ;
   int end_num = sds.size()-1;
 
-  start_num = 555;
-  end_num = 555;
+  // start_num = 555;
+  // end_num = 555;
   
 
   //test 
@@ -309,7 +310,7 @@ int main(int argc, char* argv[])
     sds.jump(i);
     WireCell::Slice slice = sds.get();
     
-    lowmemtiling[i] = new WireCell2dToy::LowmemTiling(i,nrebin,slice,gds,uplane_rms,vplane_rms,wplane_rms);
+    lowmemtiling[i] = new WireCell2dToy::LowmemTiling(i,nrebin,slice,gds,WCholder,uplane_rms,vplane_rms,wplane_rms);
     if (i==start_num){
       lowmemtiling[i]->init_bad_cells(uplane_map,vplane_map,wplane_map);
     }else{
