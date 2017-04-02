@@ -301,12 +301,21 @@ int main(int argc, char* argv[])
   end_num = 555;
   
 
+  //test 
+  uplane_map.begin()->second.second=5000;
+
   for (int i=start_num;i!=end_num+1;i++){
  
     sds.jump(i);
     WireCell::Slice slice = sds.get();
     
-    lowmemtiling[i] = new WireCell2dToy::LowmemTiling(i,nrebin,slice,gds,uplane_map,vplane_map,wplane_map,uplane_rms,vplane_rms,wplane_rms);
+    lowmemtiling[i] = new WireCell2dToy::LowmemTiling(i,nrebin,slice,gds,uplane_rms,vplane_rms,wplane_rms);
+    if (i==start_num){
+      lowmemtiling[i]->init_bad_cells(uplane_map,vplane_map,wplane_map);
+    }else{
+      lowmemtiling[i]->check_bad_cells(lowmemtiling[i-1],uplane_map,vplane_map,wplane_map);
+    }
+
 
     //toytiling[i] = new WireCell2dToy::ToyTiling(slice,gds,0.15,0.2,0.1,threshold_ug,threshold_vg, threshold_wg, &uplane_rms, &vplane_rms, &wplane_rms);
 

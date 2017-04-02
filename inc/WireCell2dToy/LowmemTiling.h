@@ -16,7 +16,6 @@ namespace WireCell2dToy{
   class LowmemTiling : public WireCell::TilingBase {
   public:
     LowmemTiling(int time_slice, int nrebin, const WireCell::Slice& slice,WireCell::GeomDataSource& gds,
-		 WireCell::ChirpMap& uplane_map, WireCell::ChirpMap& vplane_map, WireCell::ChirpMap& wplane_map,
 		 std::vector<float>& uplane_rms, std::vector<float>& vplane_rms, std::vector<float>& wplane_rms);
     
     virtual ~LowmemTiling();
@@ -25,13 +24,19 @@ namespace WireCell2dToy{
     WireCell::GeomCellSelection cells(const WireCell::GeomWire& wire) const;
     const WireCell::GeomCell* cell(const WireCell::GeomWireSelection& wires) const;
 
+    int get_time_slice(){return time_slice;};
     void form_bad_merge_wires(WireCell::ChirpMap& uplane_map, WireCell::ChirpMap& vplane_map, WireCell::ChirpMap& wplane_map);
 
     void form_fired_merge_wires(const WireCell::Slice& slice);
     
     void form_two_bad_cells();
+    void init_bad_cells(WireCell::ChirpMap& uplane_map, WireCell::ChirpMap& vplane_map, WireCell::ChirpMap& wplane_map);
+    void check_bad_cells(LowmemTiling* tiling,WireCell::ChirpMap& uplane_map, WireCell::ChirpMap& vplane_map, WireCell::ChirpMap& wplane_map);
     
     WireCell::GeomCellSelection& get_two_bad_wire_cells(){return two_bad_wire_cells;};
+    WireCell::GeomWireSelection& get_bad_wire_u(){return bad_wire_u;};
+    WireCell::GeomWireSelection& get_bad_wire_v(){return bad_wire_v;};
+    WireCell::GeomWireSelection& get_bad_wire_w(){return bad_wire_w;};
 
   protected:
     WireCell::GeomDataSource& gds;
