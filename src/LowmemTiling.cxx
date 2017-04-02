@@ -22,6 +22,12 @@ WireCell2dToy::LowmemTiling::LowmemTiling(int time_slice, int nrebin, const Wire
   
   // form good wires group
   form_fired_merge_wires(slice);
+
+  // create two bad wire cells // these are special ones ... 
+  
+  // create three good wire cells & two good wire + one bad wire cells
+  
+  
   
 }
 

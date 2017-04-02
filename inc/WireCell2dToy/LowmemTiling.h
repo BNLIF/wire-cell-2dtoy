@@ -28,6 +28,8 @@ namespace WireCell2dToy{
 
     void form_fired_merge_wires(const WireCell::Slice& slice);
     
+    
+
   protected:
     WireCell::GeomDataSource& gds;
 
@@ -38,6 +40,10 @@ namespace WireCell2dToy{
     WireCell::GeomWireSelection fired_wire_u;
     WireCell::GeomWireSelection fired_wire_v;
     WireCell::GeomWireSelection fired_wire_w;
+
+    WireCell::GeomCellSelection three_good_wire_cells;
+    WireCell::GeomCellSelection two_good_wire_cells;
+    WireCell::GeomCellSelection two_bad_wire_cells;
 
     int nrebin;
     int time_slice;
