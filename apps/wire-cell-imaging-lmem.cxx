@@ -305,7 +305,6 @@ int main(int argc, char* argv[])
  
     sds.jump(i);
     WireCell::Slice slice = sds.get();
-
     
     lowmemtiling[i] = new WireCell2dToy::LowmemTiling(i,nrebin,slice,gds,uplane_map,vplane_map,wplane_map,uplane_rms,vplane_rms,wplane_rms);
 
@@ -382,6 +381,34 @@ int main(int argc, char* argv[])
   
   cerr << em("finish tiling") << endl;
 
+
+  TFile *file = new TFile(Form("result_%d_%d_%d.root",run_no,subrun_no,event_no),"RECREATE");
+  TTree *t_bad = new TTree("T_bad","T_bad");
+  t_bad->SetDirectory(file);
+  Int_t bad_npoints;
+  Double_t bad_y[100],bad_z[100];
+  t_bad->Branch("bad_npoints",&bad_npoints,"bad_npoints/I");
+  t_bad->Branch("bad_y",bad_y,"bad_y[bad_npoints]/D");
+  t_bad->Branch("bad_z",bad_z,"bad_z[bad_npoints]/D");
+
+  for (int i=0; i!=lowmemtiling[start_num]->get_two_bad_wire_cells().size();i++){
+    const SlimMergeGeomCell *cell = (SlimMergeGeomCell*)lowmemtiling[start_num]->get_two_bad_wire_cells().at(i);
+    PointVector ps = cell->boundary();
+    bad_npoints = ps.size();
+    for (int j=0;j!=bad_npoints;j++){
+      bad_y[j] = ps.at(j).y/units::cm;
+      bad_z[j] = ps.at(j).z/units::cm;
+    }
+    t_bad->Fill();
+  }
+  
+  if (T_op!=0){
+    T_op->CloneTree()->Write();
+  }
+  Trun->CloneTree()->Write();
+  file->Write();
+  file->Close();
+  
   return 0;
   
 } // main()

@@ -19,12 +19,13 @@ WireCell2dToy::LowmemTiling::LowmemTiling(int time_slice, int nrebin, const Wire
 
   // form bad wires group
   form_bad_merge_wires(uplane_map, vplane_map, wplane_map);
-  
+  // create two bad wire cells // these are special ones ... 
+  form_two_bad_cells();
+
   // form good wires group
   form_fired_merge_wires(slice);
 
-  // create two bad wire cells // these are special ones ... 
-  form_two_bad_cells();
+ 
 
   // create three good wire cells & two good wire + one bad wire cells
    
@@ -235,8 +236,9 @@ void WireCell2dToy::LowmemTiling::form_two_bad_cells(){
 	//std::cout << u_max << " " << u_min << " " << v_max << " " << v_min << " " << w_max << " " << w_min << std::endl;
 	//Create a cell
 	SlimMergeGeomCell *mcell = new SlimMergeGeomCell();
+	mcell->AddBoundary(pcell);
 	two_bad_wire_cells.push_back(mcell);
-
+	
 	//Insert U
 	// for (int k=0;k!=((MergeGeomWire*)bad_wire_u.at(i))->get_allwire().size();k++){
 	//   const GeomWire *uwire = ((MergeGeomWire*)bad_wire_u.at(i))->get_allwire().at(k);
@@ -498,6 +500,7 @@ void WireCell2dToy::LowmemTiling::form_two_bad_cells(){
 	//std::cout << u_max << " " << u_min << " " << v_max << " " << v_min << " " << w_max << " " << w_min << std::endl;
 	//Create a cell
 	SlimMergeGeomCell *mcell = new SlimMergeGeomCell();
+	mcell->AddBoundary(pcell);
 	two_bad_wire_cells.push_back(mcell);
 	//Insert U
 	const GeomWire* uwire_min = gds.bounds(u_min,WirePlaneType_t(0)).second;
@@ -738,6 +741,7 @@ void WireCell2dToy::LowmemTiling::form_two_bad_cells(){
 	//std::cout << u_max << " " << u_min << " " << v_max << " " << v_min << " " << w_max << " " << w_min << std::endl;
 	//Create a cell
 	SlimMergeGeomCell *mcell = new SlimMergeGeomCell();
+	mcell->AddBoundary(pcell);
 	two_bad_wire_cells.push_back(mcell);
 
 	//Insert U	

@@ -31,6 +31,7 @@ namespace WireCell2dToy{
     
     void form_two_bad_cells();
     
+    WireCell::GeomCellSelection& get_two_bad_wire_cells(){return two_bad_wire_cells;};
 
   protected:
     WireCell::GeomDataSource& gds;
