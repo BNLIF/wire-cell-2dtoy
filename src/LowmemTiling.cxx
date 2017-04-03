@@ -2,8 +2,7 @@
 
 using namespace WireCell;
 
-WireCell2dToy::LowmemTiling::LowmemTiling(int time_slice, int nrebin, const WireCell::Slice& slice,WireCell::GeomDataSource& gds,WireCell2dToy::WireCellHolder& holder,
-					  std::vector<float>& uplane_rms, std::vector<float>& vplane_rms, std::vector<float>& wplane_rms)
+WireCell2dToy::LowmemTiling::LowmemTiling(int time_slice, int nrebin, WireCell::GeomDataSource& gds,WireCell2dToy::WireCellHolder& holder)
   : gds(gds)
   , nrebin(nrebin)
   , time_slice(time_slice)
@@ -17,13 +16,17 @@ WireCell2dToy::LowmemTiling::LowmemTiling(int time_slice, int nrebin, const Wire
   nwire_v = wires_v.size();
   nwire_w = wires_w.size();
 
- 
+  
+   
+}
 
+void WireCell2dToy::LowmemTiling::init_good_cells(const WireCell::Slice& slice, std::vector<float>& uplane_rms, std::vector<float>& vplane_rms, std::vector<float>& wplane_rms){
   // form good wires group
   form_fired_merge_wires(slice);
-
+  
   // create three good wire cells & two good wire + one bad wire cells
-   
+  
+
 }
 
 

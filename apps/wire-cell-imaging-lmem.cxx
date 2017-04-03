@@ -310,13 +310,14 @@ int main(int argc, char* argv[])
     sds.jump(i);
     WireCell::Slice slice = sds.get();
     
-    lowmemtiling[i] = new WireCell2dToy::LowmemTiling(i,nrebin,slice,gds,WCholder,uplane_rms,vplane_rms,wplane_rms);
+    lowmemtiling[i] = new WireCell2dToy::LowmemTiling(i,nrebin,gds,WCholder);
+
     if (i==start_num){
       lowmemtiling[i]->init_bad_cells(uplane_map,vplane_map,wplane_map);
     }else{
       lowmemtiling[i]->check_bad_cells(lowmemtiling[i-1],uplane_map,vplane_map,wplane_map);
     }
-
+     lowmemtiling[i]->init_good_cells(slice,uplane_rms,vplane_rms,wplane_rms);
 
     //toytiling[i] = new WireCell2dToy::ToyTiling(slice,gds,0.15,0.2,0.1,threshold_ug,threshold_vg, threshold_wg, &uplane_rms, &vplane_rms, &wplane_rms);
 
