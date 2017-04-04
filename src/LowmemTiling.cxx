@@ -20,11 +20,72 @@ WireCell2dToy::LowmemTiling::LowmemTiling(int time_slice, int nrebin, WireCell::
    
 }
 
+WireCell::SlimMergeGeomCell* WireCell2dToy::LowmemTiling::create_slim_merge_cell(WireCell::MergeGeomWire *uwire, WireCell::MergeGeomWire *vwire, WireCell::MergeGeomWire *wwire){
+  return 0;
+}
+
+
 void WireCell2dToy::LowmemTiling::init_good_cells(const WireCell::Slice& slice, std::vector<float>& uplane_rms, std::vector<float>& vplane_rms, std::vector<float>& wplane_rms){
   // form good wires group
   form_fired_merge_wires(slice);
   
   // create three good wire cells & two good wire + one bad wire cells
+  // U/V/W = 1/1/1
+  for (int i=0;i!=fired_wire_u.size();i++){
+    MergeGeomWire *uwire = (MergeGeomWire *)fired_wire_u.at(i);
+    for (int j=0;j!=fired_wire_v.size();j++){
+      MergeGeomWire *vwire = (MergeGeomWire *)fired_wire_v.at(j);
+      for (int k=0;k!=fired_wire_w.size();k++){
+	MergeGeomWire *wwire = (MergeGeomWire *)fired_wire_w.at(k);
+	SlimMergeGeomCell *mcell = create_slim_merge_cell(uwire,vwire,wwire);
+	
+	if (mcell !=0) three_good_wire_cells.push_back(mcell);
+	
+      }
+    }
+  }
+  
+  //U/V/W = 1/1/0
+  for (int i=0;i!=fired_wire_u.size();i++){
+    MergeGeomWire *uwire = (MergeGeomWire *)fired_wire_u.at(i);
+    for (int j=0;j!=fired_wire_v.size();j++){
+      MergeGeomWire *vwire = (MergeGeomWire *)fired_wire_v.at(j);
+      for (int k=0;k!=bad_wire_w.size();k++){
+	MergeGeomWire *wwire = (MergeGeomWire *)bad_wire_w.at(k);
+	
+	SlimMergeGeomCell *mcell = create_slim_merge_cell(uwire,vwire,wwire);
+	if (mcell !=0) two_good_wire_cells.push_back(mcell);
+      }
+    }
+  }
+  
+  //U/V/W = 1/0/1
+  for (int i=0;i!=fired_wire_u.size();i++){
+    MergeGeomWire *uwire = (MergeGeomWire *)fired_wire_u.at(i);
+    for (int j=0;j!=bad_wire_v.size();j++){
+      MergeGeomWire *vwire = (MergeGeomWire *)bad_wire_v.at(j);
+      for (int k=0;k!=fired_wire_w.size();k++){
+	MergeGeomWire *wwire = (MergeGeomWire *)fired_wire_w.at(k);
+	
+	SlimMergeGeomCell *mcell = create_slim_merge_cell(uwire,vwire,wwire);
+	if (mcell !=0) two_good_wire_cells.push_back(mcell);
+      }
+    }
+  }
+  
+  //U/V/W = 0/1/1
+  for (int i=0;i!=bad_wire_u.size();i++){
+    MergeGeomWire *uwire = (MergeGeomWire *)bad_wire_u.at(i);
+    for (int j=0;j!=fired_wire_v.size();j++){
+      MergeGeomWire *vwire = (MergeGeomWire *)fired_wire_v.at(j);
+      for (int k=0;k!=fired_wire_w.size();k++){
+	MergeGeomWire *wwire = (MergeGeomWire *)fired_wire_w.at(k);
+	
+	SlimMergeGeomCell *mcell = create_slim_merge_cell(uwire,vwire,wwire);
+	if (mcell !=0) two_good_wire_cells.push_back(mcell);
+      }
+    }
+  }
   
 
 }

@@ -39,6 +39,8 @@ namespace WireCell2dToy{
     WireCell::GeomWireSelection& get_bad_wire_v(){return bad_wire_v;};
     WireCell::GeomWireSelection& get_bad_wire_w(){return bad_wire_w;};
 
+    WireCell::SlimMergeGeomCell* create_slim_merge_cell(WireCell::MergeGeomWire *uwire, WireCell::MergeGeomWire *vwire, WireCell::MergeGeomWire *wwire);
+
   protected:
     WireCell::GeomDataSource& gds;
     WireCell2dToy::WireCellHolder& holder;
