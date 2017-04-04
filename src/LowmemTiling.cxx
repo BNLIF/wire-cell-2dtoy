@@ -140,14 +140,17 @@ void WireCell2dToy::LowmemTiling::form_two_bad_cells(){
       PointVector pcell;
       std::vector<Vector> pcross(4);
 
-      bool flag1 = gds.crossing_point(dis_u[0],dis_v[0],kUwire,kVwire, pcross[0]); 
+      bool flag1 = gds.crossing_point(dis_u[0],dis_v[0],kUwire,kVwire, pcross[0]); // check the inner point
+      
       if (flag1){
+	// fill the outer point
   	pcell.push_back(pcross[0]);
       }else{
   	// scan u-wire
 	for (int k=0;k!=((MergeGeomWire*)bad_wire_u.at(i))->get_allwire().size();k++){
 	  const GeomWire *uwire_3 = ((MergeGeomWire*)bad_wire_u.at(i))->get_allwire().at(k);
 	  dis_u[2] =  gds.wire_dist(*uwire_3) - u_pitch/2.;
+
 	  if (gds.crossing_point(dis_u[2],dis_v[0],kUwire,kVwire, pcross[0])){
 	    int flag_qx = 1;
 	    for (int k1 = 0;k1!=pcell.size();k1++){
@@ -367,8 +370,8 @@ void WireCell2dToy::LowmemTiling::form_two_bad_cells(){
 	}
 
 	//Insert W
-	const GeomWire* wwire_min = gds.bounds(w_min,WirePlaneType_t(2)).second;
-	const GeomWire* wwire_max = gds.bounds(w_max,WirePlaneType_t(2)).first;
+	const GeomWire* wwire_min = gds.closest(w_min,WirePlaneType_t(2));//.bounds(w_min,WirePlaneType_t(2)).second;
+	const GeomWire* wwire_max = gds.closest(w_max,WirePlaneType_t(2));//.bounds(w_max,WirePlaneType_t(2)).first;
 	for (int k=wwire_min->index();k!=wwire_max->index()+1;k++){
 	  const GeomWire *wwire = gds.by_planeindex(WirePlaneType_t(2),k);
 	  mcell->AddWire(wwire,WirePlaneType_t(2));
@@ -602,8 +605,8 @@ void WireCell2dToy::LowmemTiling::form_two_bad_cells(){
 	}
 	
 	//Insert V
-	const GeomWire* vwire_min = gds.bounds(v_min,WirePlaneType_t(1)).second;
-	const GeomWire* vwire_max = gds.bounds(v_max,WirePlaneType_t(1)).first;
+	const GeomWire* vwire_min = gds.closest(v_min,WirePlaneType_t(1));//.bounds(v_min,WirePlaneType_t(1)).second;
+	const GeomWire* vwire_max = gds.closest(v_max,WirePlaneType_t(1));//.bounds(v_max,WirePlaneType_t(1)).first;
 	// std::cout << vwire_min->index() << " " << vwire_max->index() << std::endl;
 	for (int k=vwire_min->index();k!=vwire_max->index()+1;k++){
 	  const GeomWire *vwire = gds.by_planeindex(WirePlaneType_t(1),k);
@@ -839,8 +842,8 @@ void WireCell2dToy::LowmemTiling::form_two_bad_cells(){
 	holder.AddCell(mcell);
 
 	//Insert U	
-	const GeomWire* uwire_min = gds.bounds(u_min,WirePlaneType_t(0)).second;
-	const GeomWire* uwire_max = gds.bounds(u_max,WirePlaneType_t(0)).first;
+	const GeomWire* uwire_min = gds.closest(u_min,WirePlaneType_t(0));//.bounds(u_min,WirePlaneType_t(0)).second;
+	const GeomWire* uwire_max = gds.closest(u_max,WirePlaneType_t(0));//.bounds(u_max,WirePlaneType_t(0)).first;
 	for (int k=uwire_min->index();k!=uwire_max->index()+1;k++){
 	  const GeomWire *uwire = gds.by_planeindex(WirePlaneType_t(0),k);
 	  mcell->AddWire(uwire,WirePlaneType_t(0));
