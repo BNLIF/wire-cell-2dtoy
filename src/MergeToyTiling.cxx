@@ -29,7 +29,7 @@ WireCell2dToy::MergeToyTiling::MergeToyTiling(WireCell2dToy::ToyTiling& tiling, 
   // cellmap
   // wiremap
 
-  std::cout << "Merge Strategy " << merge_strategy << std::endl;
+  //  std::cout << "Merge Strategy " << merge_strategy << std::endl;
 
   if (merge_strategy == 1){
     

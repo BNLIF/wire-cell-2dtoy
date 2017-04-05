@@ -41,6 +41,8 @@ namespace WireCell2dToy{
 
     WireCell::SlimMergeGeomCell* create_slim_merge_cell(WireCell::MergeGeomWire *uwire, WireCell::MergeGeomWire *vwire, WireCell::MergeGeomWire *wwire);
 
+    
+
   protected:
     WireCell::GeomDataSource& gds;
     WireCell2dToy::WireCellHolder& holder;

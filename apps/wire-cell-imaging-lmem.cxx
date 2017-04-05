@@ -299,7 +299,7 @@ int main(int argc, char* argv[])
   int end_num = sds.size()-1;
 
   // start_num = 555;
-  // end_num = 555;
+  // end_num = 655;
   
 
   //test 
@@ -311,7 +311,6 @@ int main(int argc, char* argv[])
     WireCell::Slice slice = sds.get();
     
     lowmemtiling[i] = new WireCell2dToy::LowmemTiling(i,nrebin,gds,WCholder);
-
     if (i==start_num){
       lowmemtiling[i]->init_bad_cells(uplane_map,vplane_map,wplane_map);
     }else{
@@ -319,25 +318,23 @@ int main(int argc, char* argv[])
     }
     lowmemtiling[i]->init_good_cells(slice,uplane_rms,vplane_rms,wplane_rms);
 
-    //toytiling[i] = new WireCell2dToy::ToyTiling(slice,gds,0.15,0.2,0.1,threshold_ug,threshold_vg, threshold_wg, &uplane_rms, &vplane_rms, &wplane_rms);
+    // toytiling[i] = new WireCell2dToy::ToyTiling(slice,gds,0.15,0.2,0.1,threshold_ug,threshold_vg, threshold_wg, &uplane_rms, &vplane_rms, &wplane_rms);
+    
+    // toytiling[i]->twoplane_tiling(i,nrebin,gds,uplane_rms,vplane_rms,wplane_rms, uplane_map, vplane_map, wplane_map);
 
-    //    if (two_plane)
-    //  toytiling[i]->twoplane_tiling(i,nrebin,gds,uplane_rms,vplane_rms,wplane_rms, uplane_map, vplane_map, wplane_map);
 
+    // // GeomCellSelection allcell = toytiling[i]->get_allcell();
+    // // GeomWireSelection allwire = toytiling[i]->get_allwire();
+    // // cout << i << " " << allcell.size() << " " << allwire.size() << endl;
 
-    //    GeomCellSelection allcell = toytiling[i]->get_allcell();
-    //GeomWireSelection allwire = toytiling[i]->get_allwire();
-
-    //    cout << i << " " << allcell.size() << " " << allwire.size() << endl;
-
-    //    mergetiling[i] = new WireCell2dToy::MergeToyTiling(*toytiling[i],i,3);
+    // mergetiling[i] = new WireCell2dToy::MergeToyTiling(*toytiling[i],i,3);
     
    
     
-    //    if (i==0){
-    // badtiling[i] = new WireCell2dToy::BadTiling(i,nrebin,uplane_map,vplane_map,wplane_map,gds,0,1); // 2 plane bad tiling
-      // badtiling[i] = new WireCell2dToy::BadTiling(i,nrebin,uplane_map,vplane_map,wplane_map,gds,1,1); // 1 plane bad tiling
-    //}
+    // if (i==0){
+    //   badtiling[i] = new WireCell2dToy::BadTiling(i,nrebin,uplane_map,vplane_map,wplane_map,gds,0,1); // 2 plane bad tiling
+    //   // badtiling[i] = new WireCell2dToy::BadTiling(i,nrebin,uplane_map,vplane_map,wplane_map,gds,1,1); // 1 plane bad tiling
+    // }
 
     //badtiling[i] = new WireCell2dToy::BadTiling(i,nrebin,uplane_map,vplane_map,wplane_map,gds);
 
