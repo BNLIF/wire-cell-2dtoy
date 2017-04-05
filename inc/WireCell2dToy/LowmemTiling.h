@@ -35,6 +35,9 @@ namespace WireCell2dToy{
     void init_good_cells(const WireCell::Slice& slice,std::vector<float>& uplane_rms, std::vector<float>& vplane_rms, std::vector<float>& wplane_rms);
     
     WireCell::GeomCellSelection& get_two_bad_wire_cells(){return two_bad_wire_cells;};
+    WireCell::GeomCellSelection& get_three_good_wire_cells(){return three_good_wire_cells;};
+    
+
     WireCell::GeomWireSelection& get_bad_wire_u(){return bad_wire_u;};
     WireCell::GeomWireSelection& get_bad_wire_v(){return bad_wire_v;};
     WireCell::GeomWireSelection& get_bad_wire_w(){return bad_wire_w;};

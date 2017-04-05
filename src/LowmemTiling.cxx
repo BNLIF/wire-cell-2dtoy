@@ -98,35 +98,15 @@ WireCell::SlimMergeGeomCell* WireCell2dToy::LowmemTiling::create_slim_merge_cell
       ||flag3 && puv_save[2].z > bmin_w && puv_save[2].z < bmax_w 
       ||flag4 && puv_save[3].z > bmin_w && puv_save[3].z < bmax_w 
       ||flag5 && puv_save[4].z > bmin_w && puv_save[4].z < bmax_w ){
+    // if one is found, push the entire cell in ...
     pcell.push_back(puv_save[0]);
     pcell.push_back(puv_save[1]);
     pcell.push_back(puv_save[2]);
     pcell.push_back(puv_save[3]);
   }else{
     // look at the U wire ...
-    // for (int k=1;k<uwire->get_allwire().size();k++){
-    //   const GeomWire *uwire_3 = uwire->get_allwire().at(k);
-    //   dis_u[2] = gds.wire_dist(*uwire_3);
-    //   flag1 = gds.crossing_point(dis_u[2]-u_pitch/2.,dis_v[0]-v_pitch/2.,kUwire,kVwire, puv_save[0]);
-    //   flag2 = gds.crossing_point(dis_u[2]+u_pitch/2.,dis_v[0]-v_pitch/2.,kUwire,kVwire, puv_save[1]);
-    //   flag3 = gds.crossing_point(dis_u[2]-u_pitch/2.,dis_v[0]+v_pitch/2.,kUwire,kVwire, puv_save[2]);
-    //   flag4 = gds.crossing_point(dis_u[2]+u_pitch/2.,dis_v[0]+v_pitch/2.,kUwire,kVwire, puv_save[3]);
-    //   flag5 = gds.crossing_point(dis_u[2],dis_v[0],kUwire,kVwire, puv_save[4]);
-    //   if (flag1 && puv_save[0].z > bmin_w && puv_save[0].z < bmax_w 
-    // 	  ||flag2 && puv_save[1].z > bmin_w && puv_save[1].z < bmax_w 
-    // 	  ||flag3 && puv_save[2].z > bmin_w && puv_save[2].z < bmax_w 
-    // 	  ||flag4 && puv_save[3].z > bmin_w && puv_save[3].z < bmax_w 
-    // 	  ||flag5 && puv_save[4].z > bmin_w && puv_save[4].z < bmax_w ){
-    // 	pcell.push_back(puv_save[0]);
-    // 	pcell.push_back(puv_save[1]);
-    // 	pcell.push_back(puv_save[2]);
-    // 	pcell.push_back(puv_save[3]);
-    // 	break;
-    //   }
-    // }
-
-    int flag_good = 0;
     if (gds.crossing_point(bmin_w,dis_v[0],kYwire,kVwire,pcross[0])){
+      // quick calculation
       const GeomWire *uwire_4 = gds.closest(pcross[0],WirePlaneType_t(0));
       for (int k=0;k!=5;k++){
 	int index = uwire_4->index()-2+k;
@@ -148,64 +128,64 @@ WireCell::SlimMergeGeomCell* WireCell2dToy::LowmemTiling::create_slim_merge_cell
 	  pcell.push_back(puv_save[1]);
 	  pcell.push_back(puv_save[2]);
 	  pcell.push_back(puv_save[3]);
-	  flag_good = 1;
+	  break;
+	}
+      }
+    }else{
+      // for (int k=1;k<uwire->get_allwire().size();k++){
+      // 	const GeomWire *uwire_3 = uwire->get_allwire().at(k);
+      // 	dis_u[2] = gds.wire_dist(*uwire_3);
+      // 	flag1 = gds.crossing_point(dis_u[2]-u_pitch/2.,dis_v[0]-v_pitch/2.,kUwire,kVwire, puv_save[0]);
+      // 	flag2 = gds.crossing_point(dis_u[2]+u_pitch/2.,dis_v[0]-v_pitch/2.,kUwire,kVwire, puv_save[1]);
+      // 	flag3 = gds.crossing_point(dis_u[2]-u_pitch/2.,dis_v[0]+v_pitch/2.,kUwire,kVwire, puv_save[2]);
+      // 	flag4 = gds.crossing_point(dis_u[2]+u_pitch/2.,dis_v[0]+v_pitch/2.,kUwire,kVwire, puv_save[3]);
+      // 	flag5 = gds.crossing_point(dis_u[2],dis_v[0],kUwire,kVwire, puv_save[4]);
+      // 	if (flag1 && puv_save[0].z > bmin_w && puv_save[0].z < bmax_w 
+      // 	    ||flag2 && puv_save[1].z > bmin_w && puv_save[1].z < bmax_w 
+      // 	    ||flag3 && puv_save[2].z > bmin_w && puv_save[2].z < bmax_w 
+      // 	    ||flag4 && puv_save[3].z > bmin_w && puv_save[3].z < bmax_w 
+      // 	    ||flag5 && puv_save[4].z > bmin_w && puv_save[4].z < bmax_w ){
+      // 	  pcell.push_back(puv_save[0]);
+      // 	  pcell.push_back(puv_save[1]);
+      // 	  pcell.push_back(puv_save[2]);
+      // 	  pcell.push_back(puv_save[3]);
+      // 	  break;
+      // 	}
+      // }
+    }
+    
+    if (gds.crossing_point(bmax_w,dis_v[0],kYwire,kVwire,pcross[0])){
+      // quick calculation
+      const GeomWire *uwire_4 = gds.closest(pcross[0],WirePlaneType_t(0));
+      for (int k=0;k!=5;k++){
+	int index = uwire_4->index()-2+k;
+	if (index < uwire_1->index() || 
+	    index > uwire_2->index()) continue;
+	const GeomWire *uwire_3 = gds.by_planeindex(WirePlaneType_t(0), index);
+	dis_u[2] = gds.wire_dist(*uwire_3);
+	flag1 = gds.crossing_point(dis_u[2]-u_pitch/2.,dis_v[0]-v_pitch/2.,kUwire,kVwire, puv_save[0]);
+	flag2 = gds.crossing_point(dis_u[2]+u_pitch/2.,dis_v[0]-v_pitch/2.,kUwire,kVwire, puv_save[1]);
+	flag3 = gds.crossing_point(dis_u[2]-u_pitch/2.,dis_v[0]+v_pitch/2.,kUwire,kVwire, puv_save[2]);
+	flag4 = gds.crossing_point(dis_u[2]+u_pitch/2.,dis_v[0]+v_pitch/2.,kUwire,kVwire, puv_save[3]);
+	flag5 = gds.crossing_point(dis_u[2],dis_v[0],kUwire,kVwire, puv_save[4]);
+	if (flag1 && puv_save[0].z > bmin_w && puv_save[0].z < bmax_w 
+	    ||flag2 && puv_save[1].z > bmin_w && puv_save[1].z < bmax_w 
+	    ||flag3 && puv_save[2].z > bmin_w && puv_save[2].z < bmax_w 
+	    ||flag4 && puv_save[3].z > bmin_w && puv_save[3].z < bmax_w 
+	    ||flag5 && puv_save[4].z > bmin_w && puv_save[4].z < bmax_w ){
+	  pcell.push_back(puv_save[0]);
+	  pcell.push_back(puv_save[1]);
+	  pcell.push_back(puv_save[2]);
+	  pcell.push_back(puv_save[3]);
 	  break;
 	}
       }
     }
-    if (flag_good == 0){
-      if ( gds.crossing_point(bmax_w,dis_v[0],kYwire,kVwire,pcross[0])){
-	const GeomWire *uwire_4 = gds.closest(pcross[0],WirePlaneType_t(0));
-	for (int k=0;k!=5;k++){
-	  int index = uwire_4->index()-2+k;
-	  if (index < uwire_1->index() || 
-	      index > uwire_2->index()) continue;
-	  const GeomWire *uwire_3 = gds.by_planeindex(WirePlaneType_t(0), index);
-	  dis_u[2] = gds.wire_dist(*uwire_3);
-	  flag1 = gds.crossing_point(dis_u[2]-u_pitch/2.,dis_v[0]-v_pitch/2.,kUwire,kVwire, puv_save[0]);
-	  flag2 = gds.crossing_point(dis_u[2]+u_pitch/2.,dis_v[0]-v_pitch/2.,kUwire,kVwire, puv_save[1]);
-	  flag3 = gds.crossing_point(dis_u[2]-u_pitch/2.,dis_v[0]+v_pitch/2.,kUwire,kVwire, puv_save[2]);
-	  flag4 = gds.crossing_point(dis_u[2]+u_pitch/2.,dis_v[0]+v_pitch/2.,kUwire,kVwire, puv_save[3]);
-	  flag5 = gds.crossing_point(dis_u[2],dis_v[0],kUwire,kVwire, puv_save[4]);
-	  if (flag1 && puv_save[0].z > bmin_w && puv_save[0].z < bmax_w 
-	      ||flag2 && puv_save[1].z > bmin_w && puv_save[1].z < bmax_w 
-	      ||flag3 && puv_save[2].z > bmin_w && puv_save[2].z < bmax_w 
-	      ||flag4 && puv_save[3].z > bmin_w && puv_save[3].z < bmax_w 
-	      ||flag5 && puv_save[4].z > bmin_w && puv_save[4].z < bmax_w ){
-	    pcell.push_back(puv_save[0]);
-	    pcell.push_back(puv_save[1]);
-	    pcell.push_back(puv_save[2]);
-	    pcell.push_back(puv_save[3]);
-	    break;
-	  }
-	}
-      }
-    }
+    
+
     
     // look at the V wire
-    // for (int k=1;k<vwire->get_allwire().size();k++){
-    //   const GeomWire *vwire_3 = vwire->get_allwire().at(k);
-    //   dis_v[2] = gds.wire_dist(*vwire_3);
-    //   flag1 = gds.crossing_point(dis_u[0]-u_pitch/2.,dis_v[2]-v_pitch/2.,kUwire,kVwire, puv_save[0]);
-    //   flag2 = gds.crossing_point(dis_u[0]+u_pitch/2.,dis_v[2]-v_pitch/2.,kUwire,kVwire, puv_save[1]);
-    //   flag3 = gds.crossing_point(dis_u[0]-u_pitch/2.,dis_v[2]+v_pitch/2.,kUwire,kVwire, puv_save[2]);
-    //   flag4 = gds.crossing_point(dis_u[0]+u_pitch/2.,dis_v[2]+v_pitch/2.,kUwire,kVwire, puv_save[3]);
-    //   flag5 = gds.crossing_point(dis_u[0],dis_v[2],kUwire,kVwire, puv_save[4]);
-    //   if (flag1 && puv_save[0].z > bmin_w && puv_save[0].z < bmax_w 
-    // 	  ||flag2 && puv_save[1].z > bmin_w && puv_save[1].z < bmax_w 
-    // 	  ||flag3 && puv_save[2].z > bmin_w && puv_save[2].z < bmax_w 
-    // 	  ||flag4 && puv_save[3].z > bmin_w && puv_save[3].z < bmax_w 
-    // 	  ||flag5 && puv_save[4].z > bmin_w && puv_save[4].z < bmax_w ){
-    // 	pcell.push_back(puv_save[0]);
-    // 	pcell.push_back(puv_save[1]);
-    // 	pcell.push_back(puv_save[2]);
-    // 	pcell.push_back(puv_save[3]);
-    // 	break;
-    //   }
-    // }
-
-    flag_good = 0;
-    if (    gds.crossing_point(bmin_w,dis_u[0],kYwire,kUwire,pcross[0])){
+    if (gds.crossing_point(bmin_w,dis_u[0],kYwire,kUwire,pcross[0])){
       const GeomWire *vwire_4 = gds.closest(pcross[0],WirePlaneType_t(1));
       for (int k=0;k!=5;k++){
 	int index = vwire_4->index()-2+k;
@@ -227,42 +207,61 @@ WireCell::SlimMergeGeomCell* WireCell2dToy::LowmemTiling::create_slim_merge_cell
 	  pcell.push_back(puv_save[1]);
 	  pcell.push_back(puv_save[2]);
 	  pcell.push_back(puv_save[3]);
-	  flag_good = 1;
+	  break;
+	}
+      }
+    }else{
+      // for (int k=1;k<vwire->get_allwire().size();k++){
+      // 	const GeomWire *vwire_3 = vwire->get_allwire().at(k);
+      // 	dis_v[2] = gds.wire_dist(*vwire_3);
+      // 	flag1 = gds.crossing_point(dis_u[0]-u_pitch/2.,dis_v[2]-v_pitch/2.,kUwire,kVwire, puv_save[0]);
+      // 	flag2 = gds.crossing_point(dis_u[0]+u_pitch/2.,dis_v[2]-v_pitch/2.,kUwire,kVwire, puv_save[1]);
+      // 	flag3 = gds.crossing_point(dis_u[0]-u_pitch/2.,dis_v[2]+v_pitch/2.,kUwire,kVwire, puv_save[2]);
+      // 	flag4 = gds.crossing_point(dis_u[0]+u_pitch/2.,dis_v[2]+v_pitch/2.,kUwire,kVwire, puv_save[3]);
+      // 	flag5 = gds.crossing_point(dis_u[0],dis_v[2],kUwire,kVwire, puv_save[4]);
+      // 	if (flag1 && puv_save[0].z > bmin_w && puv_save[0].z < bmax_w 
+      // 	    ||flag2 && puv_save[1].z > bmin_w && puv_save[1].z < bmax_w 
+      // 	    ||flag3 && puv_save[2].z > bmin_w && puv_save[2].z < bmax_w 
+      // 	    ||flag4 && puv_save[3].z > bmin_w && puv_save[3].z < bmax_w 
+      // 	    ||flag5 && puv_save[4].z > bmin_w && puv_save[4].z < bmax_w ){
+      // 	  pcell.push_back(puv_save[0]);
+      // 	  pcell.push_back(puv_save[1]);
+      // 	  pcell.push_back(puv_save[2]);
+      // 	  pcell.push_back(puv_save[3]);
+      // 	  break;
+      // 	}
+      // }
+    }
+
+    if (gds.crossing_point(bmax_w,dis_u[0],kYwire,kUwire,pcross[0])){
+      const GeomWire *vwire_4 = gds.closest(pcross[0],WirePlaneType_t(1));
+      for (int k=0;k!=5;k++){
+	int index = vwire_4->index()-2+k;
+	if (index < vwire_1->index() || 
+	    index > vwire_2->index()) continue;
+	const GeomWire *vwire_3 = gds.by_planeindex(WirePlaneType_t(1), index);
+	dis_v[2] = gds.wire_dist(*vwire_3);
+	flag1 = gds.crossing_point(dis_u[0]-u_pitch/2.,dis_v[2]-v_pitch/2.,kUwire,kVwire, puv_save[0]);
+	flag2 = gds.crossing_point(dis_u[0]+u_pitch/2.,dis_v[2]-v_pitch/2.,kUwire,kVwire, puv_save[1]);
+	flag3 = gds.crossing_point(dis_u[0]-u_pitch/2.,dis_v[2]+v_pitch/2.,kUwire,kVwire, puv_save[2]);
+	flag4 = gds.crossing_point(dis_u[0]+u_pitch/2.,dis_v[2]+v_pitch/2.,kUwire,kVwire, puv_save[3]);
+	flag5 = gds.crossing_point(dis_u[0],dis_v[2],kUwire,kVwire, puv_save[4]);
+	if (flag1 && puv_save[0].z > bmin_w && puv_save[0].z < bmax_w 
+	    ||flag2 && puv_save[1].z > bmin_w && puv_save[1].z < bmax_w 
+	    ||flag3 && puv_save[2].z > bmin_w && puv_save[2].z < bmax_w 
+	    ||flag4 && puv_save[3].z > bmin_w && puv_save[3].z < bmax_w 
+	    ||flag5 && puv_save[4].z > bmin_w && puv_save[4].z < bmax_w ){
+	  pcell.push_back(puv_save[0]);
+	  pcell.push_back(puv_save[1]);
+	  pcell.push_back(puv_save[2]);
+	  pcell.push_back(puv_save[3]);
 	  break;
 	}
       }
     }
-    if (flag_good == 0){
-      if(  gds.crossing_point(bmax_w,dis_u[0],kYwire,kUwire,pcross[0])){
-	const GeomWire *vwire_4 = gds.closest(pcross[0],WirePlaneType_t(1));
-	for (int k=0;k!=5;k++){
-	  int index = vwire_4->index()-2+k;
-	  if (index < vwire_1->index() || 
-	      index > vwire_2->index()) continue;
-	  const GeomWire *vwire_3 = gds.by_planeindex(WirePlaneType_t(1), index);
-	  dis_v[2] = gds.wire_dist(*vwire_3);
-	  flag1 = gds.crossing_point(dis_u[0]-u_pitch/2.,dis_v[2]-v_pitch/2.,kUwire,kVwire, puv_save[0]);
-	  flag2 = gds.crossing_point(dis_u[0]+u_pitch/2.,dis_v[2]-v_pitch/2.,kUwire,kVwire, puv_save[1]);
-	  flag3 = gds.crossing_point(dis_u[0]-u_pitch/2.,dis_v[2]+v_pitch/2.,kUwire,kVwire, puv_save[2]);
-	  flag4 = gds.crossing_point(dis_u[0]+u_pitch/2.,dis_v[2]+v_pitch/2.,kUwire,kVwire, puv_save[3]);
-	  flag5 = gds.crossing_point(dis_u[0],dis_v[2],kUwire,kVwire, puv_save[4]);
-	  if (flag1 && puv_save[0].z > bmin_w && puv_save[0].z < bmax_w 
-	      ||flag2 && puv_save[1].z > bmin_w && puv_save[1].z < bmax_w 
-	      ||flag3 && puv_save[2].z > bmin_w && puv_save[2].z < bmax_w 
-	      ||flag4 && puv_save[3].z > bmin_w && puv_save[3].z < bmax_w 
-	      ||flag5 && puv_save[4].z > bmin_w && puv_save[4].z < bmax_w ){
-	    pcell.push_back(puv_save[0]);
-	    pcell.push_back(puv_save[1]);
-	    pcell.push_back(puv_save[2]);
-	    pcell.push_back(puv_save[3]);
-	    flag_good = 1;
-	    break;
-	  }
-	}
-      }
-    }
-  }
 
+  }
+  
   
   // min u and max v
   flag1 = gds.crossing_point(dis_u[0]-u_pitch/2.,dis_v[1]-v_pitch/2.,kUwire,kVwire, puv_save[0]);
@@ -281,26 +280,8 @@ WireCell::SlimMergeGeomCell* WireCell2dToy::LowmemTiling::create_slim_merge_cell
     pcell.push_back(puv_save[3]);
   }else{
     // look at the U wire ...
-    // for (int k=1;k<uwire->get_allwire().size();k++){
-    //   const GeomWire *uwire_3 = uwire->get_allwire().at(k);
-    //   dis_u[2] = gds.wire_dist(*uwire_3);
-    //   flag1 = gds.crossing_point(dis_u[2]-u_pitch/2.,dis_v[1]-v_pitch/2.,kUwire,kVwire, puv_save[0]);
-    //   flag2 = gds.crossing_point(dis_u[2]+u_pitch/2.,dis_v[1]-v_pitch/2.,kUwire,kVwire, puv_save[1]);
-    //   flag3 = gds.crossing_point(dis_u[2]-u_pitch/2.,dis_v[1]+v_pitch/2.,kUwire,kVwire, puv_save[2]);
-    //   flag4 = gds.crossing_point(dis_u[2]+u_pitch/2.,dis_v[1]+v_pitch/2.,kUwire,kVwire, puv_save[3]);
-    //   flag5 = gds.crossing_point(dis_u[2],dis_v[1],kUwire,kVwire, puv_save[4]);
-    //   if (flag1 && puv_save[0].z > bmin_w && puv_save[0].z < bmax_w 
-    // 	  ||flag2 && puv_save[1].z > bmin_w && puv_save[1].z < bmax_w 
-    // 	  ||flag3 && puv_save[2].z > bmin_w && puv_save[2].z < bmax_w 
-    // 	  ||flag4 && puv_save[3].z > bmin_w && puv_save[3].z < bmax_w 
-    // 	  ||flag5 && puv_save[4].z > bmin_w && puv_save[4].z < bmax_w ){
-    // 	pcell.push_back(puv_save[0]);
-    // 	pcell.push_back(puv_save[1]);
-    // 	pcell.push_back(puv_save[2]);
-    // 	pcell.push_back(puv_save[3]);
-    // 	break;
-    //   }
-    // }
+  
+    
     if (gds.crossing_point(bmin_w,dis_v[1],kYwire,kVwire,pcross[0])){
       const GeomWire *uwire_4 = gds.closest(pcross[0],WirePlaneType_t(0));
       for (int k=0;k!=5;k++){
@@ -326,6 +307,27 @@ WireCell::SlimMergeGeomCell* WireCell2dToy::LowmemTiling::create_slim_merge_cell
 	  break;
 	}
       }
+    }else{
+      // for (int k=1;k<uwire->get_allwire().size();k++){
+      // 	const GeomWire *uwire_3 = uwire->get_allwire().at(k);
+      // 	dis_u[2] = gds.wire_dist(*uwire_3);
+      // 	flag1 = gds.crossing_point(dis_u[2]-u_pitch/2.,dis_v[1]-v_pitch/2.,kUwire,kVwire, puv_save[0]);
+      // 	flag2 = gds.crossing_point(dis_u[2]+u_pitch/2.,dis_v[1]-v_pitch/2.,kUwire,kVwire, puv_save[1]);
+      // 	flag3 = gds.crossing_point(dis_u[2]-u_pitch/2.,dis_v[1]+v_pitch/2.,kUwire,kVwire, puv_save[2]);
+      // 	flag4 = gds.crossing_point(dis_u[2]+u_pitch/2.,dis_v[1]+v_pitch/2.,kUwire,kVwire, puv_save[3]);
+      // 	flag5 = gds.crossing_point(dis_u[2],dis_v[1],kUwire,kVwire, puv_save[4]);
+      // 	if (flag1 && puv_save[0].z > bmin_w && puv_save[0].z < bmax_w 
+      // 	    ||flag2 && puv_save[1].z > bmin_w && puv_save[1].z < bmax_w 
+      // 	    ||flag3 && puv_save[2].z > bmin_w && puv_save[2].z < bmax_w 
+      // 	    ||flag4 && puv_save[3].z > bmin_w && puv_save[3].z < bmax_w 
+      // 	    ||flag5 && puv_save[4].z > bmin_w && puv_save[4].z < bmax_w ){
+      // 	  pcell.push_back(puv_save[0]);
+      // 	  pcell.push_back(puv_save[1]);
+      // 	  pcell.push_back(puv_save[2]);
+      // 	  pcell.push_back(puv_save[3]);
+      // 	  break;
+      // 	}
+      // }
     }
     if (gds.crossing_point(bmax_w,dis_v[1],kYwire,kVwire,pcross[0])){
       const GeomWire *uwire_4 = gds.closest(pcross[0],WirePlaneType_t(0));
@@ -353,34 +355,60 @@ WireCell::SlimMergeGeomCell* WireCell2dToy::LowmemTiling::create_slim_merge_cell
 	}
       }
     }
-  
-    
     
     // look at the V wire
-    // for (int k=1;k<vwire->get_allwire().size();k++){
-    //   const GeomWire *vwire_3 = vwire->get_allwire().at(vwire->get_allwire().size()-1-k);
-    //   dis_v[2] = gds.wire_dist(*vwire_3);
-      
-    //   flag1 = gds.crossing_point(dis_u[0]-u_pitch/2.,dis_v[2]-v_pitch/2.,kUwire,kVwire, puv_save[0]);
-    //   flag2 = gds.crossing_point(dis_u[0]+u_pitch/2.,dis_v[2]-v_pitch/2.,kUwire,kVwire, puv_save[1]);
-    //   flag3 = gds.crossing_point(dis_u[0]-u_pitch/2.,dis_v[2]+v_pitch/2.,kUwire,kVwire, puv_save[2]);
-    //   flag4 = gds.crossing_point(dis_u[0]+u_pitch/2.,dis_v[2]+v_pitch/2.,kUwire,kVwire, puv_save[3]);
-    //   flag5 = gds.crossing_point(dis_u[0],dis_v[2],kUwire,kVwire, puv_save[4]);
-
-    //   if (flag1 && puv_save[0].z > bmin_w && puv_save[0].z < bmax_w 
-    // 	  ||flag2 && puv_save[1].z > bmin_w && puv_save[1].z < bmax_w 
-    // 	  ||flag3 && puv_save[2].z > bmin_w && puv_save[2].z < bmax_w 
-    // 	  ||flag4 && puv_save[3].z > bmin_w && puv_save[3].z < bmax_w 
-    // 	  ||flag5 && puv_save[4].z > bmin_w && puv_save[4].z < bmax_w ){
-    // 	pcell.push_back(puv_save[0]);
-    // 	pcell.push_back(puv_save[1]);
-    // 	pcell.push_back(puv_save[2]);
-    // 	pcell.push_back(puv_save[3]);
-    // 	break;
-    //   }
-
-    // }
     
+    
+    if (gds.crossing_point(bmax_w,dis_u[0],kYwire,kUwire,pcross[0])){
+      const GeomWire *vwire_4 = gds.closest(pcross[0],WirePlaneType_t(1));
+      for (int k=0;k!=5;k++){
+	int index = vwire_4->index()+2-k;
+	if (index < vwire_1->index() || 
+	    index > vwire_2->index()) continue;
+	const GeomWire *vwire_3 = gds.by_planeindex(WirePlaneType_t(1), index);
+	dis_v[2] = gds.wire_dist(*vwire_3);
+	flag1 = gds.crossing_point(dis_u[0]-u_pitch/2.,dis_v[2]-v_pitch/2.,kUwire,kVwire, puv_save[0]);
+	flag2 = gds.crossing_point(dis_u[0]+u_pitch/2.,dis_v[2]-v_pitch/2.,kUwire,kVwire, puv_save[1]);
+	flag3 = gds.crossing_point(dis_u[0]-u_pitch/2.,dis_v[2]+v_pitch/2.,kUwire,kVwire, puv_save[2]);
+	flag4 = gds.crossing_point(dis_u[0]+u_pitch/2.,dis_v[2]+v_pitch/2.,kUwire,kVwire, puv_save[3]);
+	flag5 = gds.crossing_point(dis_u[0],dis_v[2],kUwire,kVwire, puv_save[4]);
+	if (flag1 && puv_save[0].z > bmin_w && puv_save[0].z < bmax_w 
+	    ||flag2 && puv_save[1].z > bmin_w && puv_save[1].z < bmax_w 
+	    ||flag3 && puv_save[2].z > bmin_w && puv_save[2].z < bmax_w 
+	    ||flag4 && puv_save[3].z > bmin_w && puv_save[3].z < bmax_w 
+	    ||flag5 && puv_save[4].z > bmin_w && puv_save[4].z < bmax_w ){
+	  pcell.push_back(puv_save[0]);
+	  pcell.push_back(puv_save[1]);
+	  pcell.push_back(puv_save[2]);
+	  pcell.push_back(puv_save[3]);
+	  break;
+	}
+      }
+    }else{
+      // for (int k=1;k<vwire->get_allwire().size();k++){
+      // 	const GeomWire *vwire_3 = vwire->get_allwire().at(vwire->get_allwire().size()-1-k);
+      // 	dis_v[2] = gds.wire_dist(*vwire_3);
+	
+      // 	flag1 = gds.crossing_point(dis_u[0]-u_pitch/2.,dis_v[2]-v_pitch/2.,kUwire,kVwire, puv_save[0]);
+      // 	flag2 = gds.crossing_point(dis_u[0]+u_pitch/2.,dis_v[2]-v_pitch/2.,kUwire,kVwire, puv_save[1]);
+      // 	flag3 = gds.crossing_point(dis_u[0]-u_pitch/2.,dis_v[2]+v_pitch/2.,kUwire,kVwire, puv_save[2]);
+      // 	flag4 = gds.crossing_point(dis_u[0]+u_pitch/2.,dis_v[2]+v_pitch/2.,kUwire,kVwire, puv_save[3]);
+      // 	flag5 = gds.crossing_point(dis_u[0],dis_v[2],kUwire,kVwire, puv_save[4]);
+	
+      // 	if (flag1 && puv_save[0].z > bmin_w && puv_save[0].z < bmax_w 
+      // 	    ||flag2 && puv_save[1].z > bmin_w && puv_save[1].z < bmax_w 
+      // 	    ||flag3 && puv_save[2].z > bmin_w && puv_save[2].z < bmax_w 
+      // 	    ||flag4 && puv_save[3].z > bmin_w && puv_save[3].z < bmax_w 
+      // 	    ||flag5 && puv_save[4].z > bmin_w && puv_save[4].z < bmax_w ){
+      // 	  pcell.push_back(puv_save[0]);
+      // 	  pcell.push_back(puv_save[1]);
+      // 	  pcell.push_back(puv_save[2]);
+      // 	  pcell.push_back(puv_save[3]);
+      // 	  break;
+      // 	}
+      // }
+    }
+
     if (gds.crossing_point(bmin_w,dis_u[0],kYwire,kUwire,pcross[0])){
       const GeomWire *vwire_4 = gds.closest(pcross[0],WirePlaneType_t(1));
       for (int k=0;k!=5;k++){
@@ -407,32 +435,7 @@ WireCell::SlimMergeGeomCell* WireCell2dToy::LowmemTiling::create_slim_merge_cell
 	}
       }
     }
-    if (gds.crossing_point(bmax_w,dis_u[0],kYwire,kUwire,pcross[0])){
-      const GeomWire *vwire_4 = gds.closest(pcross[0],WirePlaneType_t(1));
-      for (int k=0;k!=5;k++){
-	int index = vwire_4->index()+2-k;
-	if (index < vwire_1->index() || 
-	    index > vwire_2->index()) continue;
-	const GeomWire *vwire_3 = gds.by_planeindex(WirePlaneType_t(1), index);
-	dis_v[2] = gds.wire_dist(*vwire_3);
-	flag1 = gds.crossing_point(dis_u[0]-u_pitch/2.,dis_v[2]-v_pitch/2.,kUwire,kVwire, puv_save[0]);
-	flag2 = gds.crossing_point(dis_u[0]+u_pitch/2.,dis_v[2]-v_pitch/2.,kUwire,kVwire, puv_save[1]);
-	flag3 = gds.crossing_point(dis_u[0]-u_pitch/2.,dis_v[2]+v_pitch/2.,kUwire,kVwire, puv_save[2]);
-	flag4 = gds.crossing_point(dis_u[0]+u_pitch/2.,dis_v[2]+v_pitch/2.,kUwire,kVwire, puv_save[3]);
-	flag5 = gds.crossing_point(dis_u[0],dis_v[2],kUwire,kVwire, puv_save[4]);
-	if (flag1 && puv_save[0].z > bmin_w && puv_save[0].z < bmax_w 
-	    ||flag2 && puv_save[1].z > bmin_w && puv_save[1].z < bmax_w 
-	    ||flag3 && puv_save[2].z > bmin_w && puv_save[2].z < bmax_w 
-	    ||flag4 && puv_save[3].z > bmin_w && puv_save[3].z < bmax_w 
-	    ||flag5 && puv_save[4].z > bmin_w && puv_save[4].z < bmax_w ){
-	  pcell.push_back(puv_save[0]);
-	  pcell.push_back(puv_save[1]);
-	  pcell.push_back(puv_save[2]);
-	  pcell.push_back(puv_save[3]);
-	  break;
-	}
-      }
-    }
+
   }
   
   
@@ -453,28 +456,57 @@ WireCell::SlimMergeGeomCell* WireCell2dToy::LowmemTiling::create_slim_merge_cell
     pcell.push_back(puv_save[3]);
   }else{
     // look at the U wire ...
-    // for (int k=1;k<uwire->get_allwire().size();k++){
-    //   const GeomWire *uwire_3 = uwire->get_allwire().at(uwire->get_allwire().size()-1-k);
-    //   dis_u[2] = gds.wire_dist(*uwire_3);
-      
-    //   flag1 = gds.crossing_point(dis_u[2]-u_pitch/2.,dis_v[0]-v_pitch/2.,kUwire,kVwire, puv_save[0]);
-    //   flag2 = gds.crossing_point(dis_u[2]+u_pitch/2.,dis_v[0]-v_pitch/2.,kUwire,kVwire, puv_save[1]);
-    //   flag3 = gds.crossing_point(dis_u[2]-u_pitch/2.,dis_v[0]+v_pitch/2.,kUwire,kVwire, puv_save[2]);
-    //   flag4 = gds.crossing_point(dis_u[2]+u_pitch/2.,dis_v[0]+v_pitch/2.,kUwire,kVwire, puv_save[3]);
-    //   flag5 = gds.crossing_point(dis_u[2],dis_v[0],kUwire,kVwire, puv_save[4]);
-
-    //   if (flag1 && puv_save[0].z > bmin_w && puv_save[0].z < bmax_w 
-    // 	  ||flag2 && puv_save[1].z > bmin_w && puv_save[1].z < bmax_w 
-    // 	  ||flag3 && puv_save[2].z > bmin_w && puv_save[2].z < bmax_w 
-    // 	  ||flag4 && puv_save[3].z > bmin_w && puv_save[3].z < bmax_w 
-    // 	  ||flag5 && puv_save[4].z > bmin_w && puv_save[4].z < bmax_w ){
-    // 	pcell.push_back(puv_save[0]);
-    // 	pcell.push_back(puv_save[1]);
-    // 	pcell.push_back(puv_save[2]);
-    // 	pcell.push_back(puv_save[3]);
-    // 	break;
-    //   }
-    // }
+    
+    
+    if (gds.crossing_point(bmax_w,dis_v[0],kYwire,kVwire,pcross[0])){
+      const GeomWire *uwire_4 = gds.closest(pcross[0],WirePlaneType_t(0));
+      for (int k=0;k!=5;k++){
+	int index = uwire_4->index()+2-k;
+	if (index < uwire_1->index() || 
+	    index > uwire_2->index()) continue;
+	const GeomWire *uwire_3 = gds.by_planeindex(WirePlaneType_t(0), index);
+	dis_u[2] = gds.wire_dist(*uwire_3);
+	flag1 = gds.crossing_point(dis_u[2]-u_pitch/2.,dis_v[0]-v_pitch/2.,kUwire,kVwire, puv_save[0]);
+	flag2 = gds.crossing_point(dis_u[2]+u_pitch/2.,dis_v[0]-v_pitch/2.,kUwire,kVwire, puv_save[1]);
+	flag3 = gds.crossing_point(dis_u[2]-u_pitch/2.,dis_v[0]+v_pitch/2.,kUwire,kVwire, puv_save[2]);
+	flag4 = gds.crossing_point(dis_u[2]+u_pitch/2.,dis_v[0]+v_pitch/2.,kUwire,kVwire, puv_save[3]);
+	flag5 = gds.crossing_point(dis_u[2],dis_v[0],kUwire,kVwire, puv_save[4]);
+	if (flag1 && puv_save[0].z > bmin_w && puv_save[0].z < bmax_w 
+	    ||flag2 && puv_save[1].z > bmin_w && puv_save[1].z < bmax_w 
+	    ||flag3 && puv_save[2].z > bmin_w && puv_save[2].z < bmax_w 
+	    ||flag4 && puv_save[3].z > bmin_w && puv_save[3].z < bmax_w 
+	    ||flag5 && puv_save[4].z > bmin_w && puv_save[4].z < bmax_w ){
+	  pcell.push_back(puv_save[0]);
+	  pcell.push_back(puv_save[1]);
+	  pcell.push_back(puv_save[2]);
+	  pcell.push_back(puv_save[3]);
+	  break;
+	}
+      }
+    }else{
+      // for (int k=1;k<uwire->get_allwire().size();k++){
+      // 	const GeomWire *uwire_3 = uwire->get_allwire().at(uwire->get_allwire().size()-1-k);
+      // 	dis_u[2] = gds.wire_dist(*uwire_3);
+	
+      // 	flag1 = gds.crossing_point(dis_u[2]-u_pitch/2.,dis_v[0]-v_pitch/2.,kUwire,kVwire, puv_save[0]);
+      // 	flag2 = gds.crossing_point(dis_u[2]+u_pitch/2.,dis_v[0]-v_pitch/2.,kUwire,kVwire, puv_save[1]);
+      // 	flag3 = gds.crossing_point(dis_u[2]-u_pitch/2.,dis_v[0]+v_pitch/2.,kUwire,kVwire, puv_save[2]);
+      // 	flag4 = gds.crossing_point(dis_u[2]+u_pitch/2.,dis_v[0]+v_pitch/2.,kUwire,kVwire, puv_save[3]);
+      // 	flag5 = gds.crossing_point(dis_u[2],dis_v[0],kUwire,kVwire, puv_save[4]);
+	
+      // 	if (flag1 && puv_save[0].z > bmin_w && puv_save[0].z < bmax_w 
+      // 	    ||flag2 && puv_save[1].z > bmin_w && puv_save[1].z < bmax_w 
+      // 	    ||flag3 && puv_save[2].z > bmin_w && puv_save[2].z < bmax_w 
+      // 	    ||flag4 && puv_save[3].z > bmin_w && puv_save[3].z < bmax_w 
+      // 	    ||flag5 && puv_save[4].z > bmin_w && puv_save[4].z < bmax_w ){
+      // 	  pcell.push_back(puv_save[0]);
+      // 	  pcell.push_back(puv_save[1]);
+      // 	  pcell.push_back(puv_save[2]);
+      // 	  pcell.push_back(puv_save[3]);
+      // 	  break;
+      // 	}
+      // }
+    }
     
     if (gds.crossing_point(bmin_w,dis_v[0],kYwire,kVwire,pcross[0])){
       const GeomWire *uwire_4 = gds.closest(pcross[0],WirePlaneType_t(0));
@@ -502,57 +534,10 @@ WireCell::SlimMergeGeomCell* WireCell2dToy::LowmemTiling::create_slim_merge_cell
 	}
       }
     }
-    if (gds.crossing_point(bmax_w,dis_v[0],kYwire,kVwire,pcross[0])){
-      const GeomWire *uwire_4 = gds.closest(pcross[0],WirePlaneType_t(0));
-      for (int k=0;k!=5;k++){
-	int index = uwire_4->index()+2-k;
-	if (index < uwire_1->index() || 
-	    index > uwire_2->index()) continue;
-	const GeomWire *uwire_3 = gds.by_planeindex(WirePlaneType_t(0), index);
-	dis_u[2] = gds.wire_dist(*uwire_3);
-	flag1 = gds.crossing_point(dis_u[2]-u_pitch/2.,dis_v[0]-v_pitch/2.,kUwire,kVwire, puv_save[0]);
-	flag2 = gds.crossing_point(dis_u[2]+u_pitch/2.,dis_v[0]-v_pitch/2.,kUwire,kVwire, puv_save[1]);
-	flag3 = gds.crossing_point(dis_u[2]-u_pitch/2.,dis_v[0]+v_pitch/2.,kUwire,kVwire, puv_save[2]);
-	flag4 = gds.crossing_point(dis_u[2]+u_pitch/2.,dis_v[0]+v_pitch/2.,kUwire,kVwire, puv_save[3]);
-	flag5 = gds.crossing_point(dis_u[2],dis_v[0],kUwire,kVwire, puv_save[4]);
-	if (flag1 && puv_save[0].z > bmin_w && puv_save[0].z < bmax_w 
-	    ||flag2 && puv_save[1].z > bmin_w && puv_save[1].z < bmax_w 
-	    ||flag3 && puv_save[2].z > bmin_w && puv_save[2].z < bmax_w 
-	    ||flag4 && puv_save[3].z > bmin_w && puv_save[3].z < bmax_w 
-	    ||flag5 && puv_save[4].z > bmin_w && puv_save[4].z < bmax_w ){
-	  pcell.push_back(puv_save[0]);
-	  pcell.push_back(puv_save[1]);
-	  pcell.push_back(puv_save[2]);
-	  pcell.push_back(puv_save[3]);
-	  break;
-	}
-      }
-    }
-    
+
+
     // look at the V wire
-    // for (int k=1;k<vwire->get_allwire().size();k++){
-    //   const GeomWire *vwire_3 = vwire->get_allwire().at(k);
-    //   dis_v[2] = gds.wire_dist(*vwire_3);
-      
-    //   flag1 = gds.crossing_point(dis_u[1]-u_pitch/2.,dis_v[2]-v_pitch/2.,kUwire,kVwire, puv_save[0]);
-    //   flag2 = gds.crossing_point(dis_u[1]+u_pitch/2.,dis_v[2]-v_pitch/2.,kUwire,kVwire, puv_save[1]);
-    //   flag3 = gds.crossing_point(dis_u[1]-u_pitch/2.,dis_v[2]+v_pitch/2.,kUwire,kVwire, puv_save[2]);
-    //   flag4 = gds.crossing_point(dis_u[1]+u_pitch/2.,dis_v[2]+v_pitch/2.,kUwire,kVwire, puv_save[3]);
-    //   flag5 = gds.crossing_point(dis_u[1],dis_v[2],kUwire,kVwire, puv_save[4]);
-
-    //   if (flag1 && puv_save[0].z > bmin_w && puv_save[0].z < bmax_w 
-    // 	  ||flag2 && puv_save[1].z > bmin_w && puv_save[1].z < bmax_w 
-    // 	  ||flag3 && puv_save[2].z > bmin_w && puv_save[2].z < bmax_w 
-    // 	  ||flag4 && puv_save[3].z > bmin_w && puv_save[3].z < bmax_w 
-    // 	  ||flag5 && puv_save[4].z > bmin_w && puv_save[4].z < bmax_w ){
-    // 	pcell.push_back(puv_save[0]);
-    // 	pcell.push_back(puv_save[1]);
-    // 	pcell.push_back(puv_save[2]);
-    // 	pcell.push_back(puv_save[3]);
-    // 	break;
-    //   }
-
-    // }
+    
 
     if (gds.crossing_point(bmin_w,dis_u[1],kYwire,kUwire,pcross[0])){
       const GeomWire *vwire_4 = gds.closest(pcross[0],WirePlaneType_t(1));
@@ -579,7 +564,32 @@ WireCell::SlimMergeGeomCell* WireCell2dToy::LowmemTiling::create_slim_merge_cell
 	  break;
 	}
       }
+    }else{
+      // for (int k=1;k<vwire->get_allwire().size();k++){
+      // 	const GeomWire *vwire_3 = vwire->get_allwire().at(k);
+      // 	dis_v[2] = gds.wire_dist(*vwire_3);
+	
+      // 	flag1 = gds.crossing_point(dis_u[1]-u_pitch/2.,dis_v[2]-v_pitch/2.,kUwire,kVwire, puv_save[0]);
+      // 	flag2 = gds.crossing_point(dis_u[1]+u_pitch/2.,dis_v[2]-v_pitch/2.,kUwire,kVwire, puv_save[1]);
+      // 	flag3 = gds.crossing_point(dis_u[1]-u_pitch/2.,dis_v[2]+v_pitch/2.,kUwire,kVwire, puv_save[2]);
+      // 	flag4 = gds.crossing_point(dis_u[1]+u_pitch/2.,dis_v[2]+v_pitch/2.,kUwire,kVwire, puv_save[3]);
+      // 	flag5 = gds.crossing_point(dis_u[1],dis_v[2],kUwire,kVwire, puv_save[4]);
+	
+      // 	if (flag1 && puv_save[0].z > bmin_w && puv_save[0].z < bmax_w 
+      // 	    ||flag2 && puv_save[1].z > bmin_w && puv_save[1].z < bmax_w 
+      // 	    ||flag3 && puv_save[2].z > bmin_w && puv_save[2].z < bmax_w 
+      // 	    ||flag4 && puv_save[3].z > bmin_w && puv_save[3].z < bmax_w 
+      // 	    ||flag5 && puv_save[4].z > bmin_w && puv_save[4].z < bmax_w ){
+      // 	  pcell.push_back(puv_save[0]);
+      // 	  pcell.push_back(puv_save[1]);
+      // 	  pcell.push_back(puv_save[2]);
+      // 	  pcell.push_back(puv_save[3]);
+      // 	  break;
+      // 	}
+	
+      // }
     }
+    
     if (gds.crossing_point(bmax_w,dis_u[1],kYwire,kUwire,pcross[0])){
       const GeomWire *vwire_4 = gds.closest(pcross[0],WirePlaneType_t(1));
       for (int k=0;k!=5;k++){
@@ -606,7 +616,7 @@ WireCell::SlimMergeGeomCell* WireCell2dToy::LowmemTiling::create_slim_merge_cell
 	}
       }
     }
-    
+
   }
 
   // max u and max v 
@@ -626,30 +636,8 @@ WireCell::SlimMergeGeomCell* WireCell2dToy::LowmemTiling::create_slim_merge_cell
     pcell.push_back(puv_save[3]);
   }else{
     // look at the U wire ...
-    // for (int k=1;k<uwire->get_allwire().size();k++){
-    //   const GeomWire *uwire_3 = uwire->get_allwire().at(uwire->get_allwire().size()-1-k);
-    //   dis_u[2] = gds.wire_dist(*uwire_3);
-      
-    //   flag1 = gds.crossing_point(dis_u[2]-u_pitch/2.,dis_v[1]-v_pitch/2.,kUwire,kVwire, puv_save[0]);
-    //   flag2 = gds.crossing_point(dis_u[2]+u_pitch/2.,dis_v[1]-v_pitch/2.,kUwire,kVwire, puv_save[1]);
-    //   flag3 = gds.crossing_point(dis_u[2]-u_pitch/2.,dis_v[1]+v_pitch/2.,kUwire,kVwire, puv_save[2]);
-    //   flag4 = gds.crossing_point(dis_u[2]+u_pitch/2.,dis_v[1]+v_pitch/2.,kUwire,kVwire, puv_save[3]);
-    //   flag5 = gds.crossing_point(dis_u[2],dis_v[1],kUwire,kVwire, puv_save[4]);
-
-    //   if (flag1 && puv_save[0].z > bmin_w && puv_save[0].z < bmax_w 
-    // 	  ||flag2 && puv_save[1].z > bmin_w && puv_save[1].z < bmax_w 
-    // 	  ||flag3 && puv_save[2].z > bmin_w && puv_save[2].z < bmax_w 
-    // 	  ||flag4 && puv_save[3].z > bmin_w && puv_save[3].z < bmax_w 
-    // 	  ||flag5 && puv_save[4].z > bmin_w && puv_save[4].z < bmax_w ){
-    // 	pcell.push_back(puv_save[0]);
-    // 	pcell.push_back(puv_save[1]);
-    // 	pcell.push_back(puv_save[2]);
-    // 	pcell.push_back(puv_save[3]);
-    // 	break;
-    //   }
-    // }
     
-    int flag_good = 0;
+    
     if (gds.crossing_point(bmax_w,dis_v[1],kYwire,kVwire,pcross[0])){
       const GeomWire *uwire_4 = gds.closest(pcross[0],WirePlaneType_t(0));
       for (int k=0;k!=5;k++){
@@ -672,51 +660,19 @@ WireCell::SlimMergeGeomCell* WireCell2dToy::LowmemTiling::create_slim_merge_cell
 	  pcell.push_back(puv_save[1]);
 	  pcell.push_back(puv_save[2]);
 	  pcell.push_back(puv_save[3]);
-	  flag_good = 1;
 	  break;
 	}
       }
-    }
-    if (flag_good == 0){
-      if (gds.crossing_point(bmin_w,dis_v[1],kYwire,kVwire,pcross[0])){
-	const GeomWire *uwire_4 = gds.closest(pcross[0],WirePlaneType_t(0));
-	for (int k=0;k!=5;k++){
-	  int index = uwire_4->index()+2-k;
-	  if (index < uwire_1->index() || 
-	      index > uwire_2->index()) continue;
-	  const GeomWire *uwire_3 = gds.by_planeindex(WirePlaneType_t(0), index);
-	  dis_u[2] = gds.wire_dist(*uwire_3);
-	  flag1 = gds.crossing_point(dis_u[2]-u_pitch/2.,dis_v[1]-v_pitch/2.,kUwire,kVwire, puv_save[0]);
-	  flag2 = gds.crossing_point(dis_u[2]+u_pitch/2.,dis_v[1]-v_pitch/2.,kUwire,kVwire, puv_save[1]);
-	  flag3 = gds.crossing_point(dis_u[2]-u_pitch/2.,dis_v[1]+v_pitch/2.,kUwire,kVwire, puv_save[2]);
-	  flag4 = gds.crossing_point(dis_u[2]+u_pitch/2.,dis_v[1]+v_pitch/2.,kUwire,kVwire, puv_save[3]);
-	  flag5 = gds.crossing_point(dis_u[2],dis_v[1],kUwire,kVwire, puv_save[4]);
-	  if (flag1 && puv_save[0].z > bmin_w && puv_save[0].z < bmax_w 
-	      ||flag2 && puv_save[1].z > bmin_w && puv_save[1].z < bmax_w 
-	      ||flag3 && puv_save[2].z > bmin_w && puv_save[2].z < bmax_w 
-	      ||flag4 && puv_save[3].z > bmin_w && puv_save[3].z < bmax_w 
-	      ||flag5 && puv_save[4].z > bmin_w && puv_save[4].z < bmax_w ){
-	    pcell.push_back(puv_save[0]);
-	    pcell.push_back(puv_save[1]);
-	    pcell.push_back(puv_save[2]);
-	    pcell.push_back(puv_save[3]);
-	    break;
-	  }
-	}
-      }
-    }
-
-
-    // look at the V wire
-    // for (int k=1;k<vwire->get_allwire().size();k++){
-    //   const GeomWire *vwire_3 = vwire->get_allwire().at(vwire->get_allwire().size()-1-k);
-    //   dis_v[2] = gds.wire_dist(*vwire_3);
+    }else{
+      // for (int k=1;k<uwire->get_allwire().size();k++){
+    //   const GeomWire *uwire_3 = uwire->get_allwire().at(uwire->get_allwire().size()-1-k);
+    //   dis_u[2] = gds.wire_dist(*uwire_3);
       
-    //   flag1 = gds.crossing_point(dis_u[1]-u_pitch/2.,dis_v[2]-v_pitch/2.,kUwire,kVwire, puv_save[0]);
-    //   flag2 = gds.crossing_point(dis_u[1]+u_pitch/2.,dis_v[2]-v_pitch/2.,kUwire,kVwire, puv_save[1]);
-    //   flag3 = gds.crossing_point(dis_u[1]-u_pitch/2.,dis_v[2]+v_pitch/2.,kUwire,kVwire, puv_save[2]);
-    //   flag4 = gds.crossing_point(dis_u[1]+u_pitch/2.,dis_v[2]+v_pitch/2.,kUwire,kVwire, puv_save[3]);
-    //   flag5 = gds.crossing_point(dis_u[1],dis_v[2],kUwire,kVwire, puv_save[4]);
+    //   flag1 = gds.crossing_point(dis_u[2]-u_pitch/2.,dis_v[1]-v_pitch/2.,kUwire,kVwire, puv_save[0]);
+    //   flag2 = gds.crossing_point(dis_u[2]+u_pitch/2.,dis_v[1]-v_pitch/2.,kUwire,kVwire, puv_save[1]);
+    //   flag3 = gds.crossing_point(dis_u[2]-u_pitch/2.,dis_v[1]+v_pitch/2.,kUwire,kVwire, puv_save[2]);
+    //   flag4 = gds.crossing_point(dis_u[2]+u_pitch/2.,dis_v[1]+v_pitch/2.,kUwire,kVwire, puv_save[3]);
+    //   flag5 = gds.crossing_point(dis_u[2],dis_v[1],kUwire,kVwire, puv_save[4]);
 
     //   if (flag1 && puv_save[0].z > bmin_w && puv_save[0].z < bmax_w 
     // 	  ||flag2 && puv_save[1].z > bmin_w && puv_save[1].z < bmax_w 
@@ -730,8 +686,38 @@ WireCell::SlimMergeGeomCell* WireCell2dToy::LowmemTiling::create_slim_merge_cell
     // 	break;
     //   }
     // }
+    }
 
-    flag_good = 0;
+    if (gds.crossing_point(bmin_w,dis_v[1],kYwire,kVwire,pcross[0])){
+      const GeomWire *uwire_4 = gds.closest(pcross[0],WirePlaneType_t(0));
+      for (int k=0;k!=5;k++){
+	int index = uwire_4->index()+2-k;
+	if (index < uwire_1->index() || 
+	    index > uwire_2->index()) continue;
+	const GeomWire *uwire_3 = gds.by_planeindex(WirePlaneType_t(0), index);
+	dis_u[2] = gds.wire_dist(*uwire_3);
+	flag1 = gds.crossing_point(dis_u[2]-u_pitch/2.,dis_v[1]-v_pitch/2.,kUwire,kVwire, puv_save[0]);
+	flag2 = gds.crossing_point(dis_u[2]+u_pitch/2.,dis_v[1]-v_pitch/2.,kUwire,kVwire, puv_save[1]);
+	flag3 = gds.crossing_point(dis_u[2]-u_pitch/2.,dis_v[1]+v_pitch/2.,kUwire,kVwire, puv_save[2]);
+	flag4 = gds.crossing_point(dis_u[2]+u_pitch/2.,dis_v[1]+v_pitch/2.,kUwire,kVwire, puv_save[3]);
+	flag5 = gds.crossing_point(dis_u[2],dis_v[1],kUwire,kVwire, puv_save[4]);
+	if (flag1 && puv_save[0].z > bmin_w && puv_save[0].z < bmax_w 
+	    ||flag2 && puv_save[1].z > bmin_w && puv_save[1].z < bmax_w 
+	    ||flag3 && puv_save[2].z > bmin_w && puv_save[2].z < bmax_w 
+	    ||flag4 && puv_save[3].z > bmin_w && puv_save[3].z < bmax_w 
+	    ||flag5 && puv_save[4].z > bmin_w && puv_save[4].z < bmax_w ){
+	  pcell.push_back(puv_save[0]);
+	  pcell.push_back(puv_save[1]);
+	  pcell.push_back(puv_save[2]);
+	  pcell.push_back(puv_save[3]);
+	  break;
+	}
+      }
+    }
+
+    // look at the V wire
+    
+
     if (gds.crossing_point(bmax_w,dis_u[1],kYwire,kUwire,pcross[0])){
       const GeomWire *vwire_4 = gds.closest(pcross[0],WirePlaneType_t(1));
       for (int k=0;k!=5;k++){
@@ -754,45 +740,65 @@ WireCell::SlimMergeGeomCell* WireCell2dToy::LowmemTiling::create_slim_merge_cell
 	  pcell.push_back(puv_save[1]);
 	  pcell.push_back(puv_save[2]);
 	  pcell.push_back(puv_save[3]);
-	  flag_good = 1;
+	  break;
+	}
+      }
+    }else{
+      // for (int k=1;k<vwire->get_allwire().size();k++){
+      // 	const GeomWire *vwire_3 = vwire->get_allwire().at(vwire->get_allwire().size()-1-k);
+      // 	dis_v[2] = gds.wire_dist(*vwire_3);
+	
+      // 	flag1 = gds.crossing_point(dis_u[1]-u_pitch/2.,dis_v[2]-v_pitch/2.,kUwire,kVwire, puv_save[0]);
+      // 	flag2 = gds.crossing_point(dis_u[1]+u_pitch/2.,dis_v[2]-v_pitch/2.,kUwire,kVwire, puv_save[1]);
+      // 	flag3 = gds.crossing_point(dis_u[1]-u_pitch/2.,dis_v[2]+v_pitch/2.,kUwire,kVwire, puv_save[2]);
+      // 	flag4 = gds.crossing_point(dis_u[1]+u_pitch/2.,dis_v[2]+v_pitch/2.,kUwire,kVwire, puv_save[3]);
+      // 	flag5 = gds.crossing_point(dis_u[1],dis_v[2],kUwire,kVwire, puv_save[4]);
+	
+      // 	if (flag1 && puv_save[0].z > bmin_w && puv_save[0].z < bmax_w 
+      // 	    ||flag2 && puv_save[1].z > bmin_w && puv_save[1].z < bmax_w 
+      // 	    ||flag3 && puv_save[2].z > bmin_w && puv_save[2].z < bmax_w 
+      // 	    ||flag4 && puv_save[3].z > bmin_w && puv_save[3].z < bmax_w 
+      // 	    ||flag5 && puv_save[4].z > bmin_w && puv_save[4].z < bmax_w ){
+      // 	  pcell.push_back(puv_save[0]);
+      // 	  pcell.push_back(puv_save[1]);
+      // 	  pcell.push_back(puv_save[2]);
+      // 	  pcell.push_back(puv_save[3]);
+      // 	  break;
+      // 	}
+      // }
+    }
+
+    if (gds.crossing_point(bmin_w,dis_u[1],kYwire,kUwire,pcross[0])){
+      const GeomWire *vwire_4 = gds.closest(pcross[0],WirePlaneType_t(1));
+      for (int k=0;k!=5;k++){
+	int index = vwire_4->index()+2-k;
+	if (index < vwire_1->index() || 
+	    index > vwire_2->index()) continue;
+	const GeomWire *vwire_3 = gds.by_planeindex(WirePlaneType_t(1), index);
+	dis_v[2] = gds.wire_dist(*vwire_3);
+	flag1 = gds.crossing_point(dis_u[1]-u_pitch/2.,dis_v[2]-v_pitch/2.,kUwire,kVwire, puv_save[0]);
+	flag2 = gds.crossing_point(dis_u[1]+u_pitch/2.,dis_v[2]-v_pitch/2.,kUwire,kVwire, puv_save[1]);
+	flag3 = gds.crossing_point(dis_u[1]-u_pitch/2.,dis_v[2]+v_pitch/2.,kUwire,kVwire, puv_save[2]);
+	flag4 = gds.crossing_point(dis_u[1]+u_pitch/2.,dis_v[2]+v_pitch/2.,kUwire,kVwire, puv_save[3]);
+	flag5 = gds.crossing_point(dis_u[1],dis_v[2],kUwire,kVwire, puv_save[4]);
+	if (flag1 && puv_save[0].z > bmin_w && puv_save[0].z < bmax_w 
+	    ||flag2 && puv_save[1].z > bmin_w && puv_save[1].z < bmax_w 
+	    ||flag3 && puv_save[2].z > bmin_w && puv_save[2].z < bmax_w 
+	    ||flag4 && puv_save[3].z > bmin_w && puv_save[3].z < bmax_w 
+	    ||flag5 && puv_save[4].z > bmin_w && puv_save[4].z < bmax_w ){
+	  pcell.push_back(puv_save[0]);
+	  pcell.push_back(puv_save[1]);
+	  pcell.push_back(puv_save[2]);
+	  pcell.push_back(puv_save[3]);
 	  break;
 	}
       }
     }
-    if (flag_good == 0){
-      if ( gds.crossing_point(bmin_w,dis_u[1],kYwire,kUwire,pcross[0])){
-	const GeomWire *vwire_4 = gds.closest(pcross[0],WirePlaneType_t(1));
-	for (int k=0;k!=5;k++){
-	  int index = vwire_4->index()+2-k;
-	  if (index < vwire_1->index() || 
-	      index > vwire_2->index()) continue;
-	  const GeomWire *vwire_3 = gds.by_planeindex(WirePlaneType_t(1), index);
-	  dis_v[2] = gds.wire_dist(*vwire_3);
-	  flag1 = gds.crossing_point(dis_u[1]-u_pitch/2.,dis_v[2]-v_pitch/2.,kUwire,kVwire, puv_save[0]);
-	  flag2 = gds.crossing_point(dis_u[1]+u_pitch/2.,dis_v[2]-v_pitch/2.,kUwire,kVwire, puv_save[1]);
-	  flag3 = gds.crossing_point(dis_u[1]-u_pitch/2.,dis_v[2]+v_pitch/2.,kUwire,kVwire, puv_save[2]);
-	  flag4 = gds.crossing_point(dis_u[1]+u_pitch/2.,dis_v[2]+v_pitch/2.,kUwire,kVwire, puv_save[3]);
-	  flag5 = gds.crossing_point(dis_u[1],dis_v[2],kUwire,kVwire, puv_save[4]);
-	  if (flag1 && puv_save[0].z > bmin_w && puv_save[0].z < bmax_w 
-	      ||flag2 && puv_save[1].z > bmin_w && puv_save[1].z < bmax_w 
-	      ||flag3 && puv_save[2].z > bmin_w && puv_save[2].z < bmax_w 
-	      ||flag4 && puv_save[3].z > bmin_w && puv_save[3].z < bmax_w 
-	      ||flag5 && puv_save[4].z > bmin_w && puv_save[4].z < bmax_w ){
-	    pcell.push_back(puv_save[0]);
-	    pcell.push_back(puv_save[1]);
-	    pcell.push_back(puv_save[2]);
-	    pcell.push_back(puv_save[3]);
-	    flag_good = 1;
-	    break;
-	  }
-	}
-      }
-    }
+
   }
   
   
   // find the max and min
-
   if (pcell.size() >=1){
     //Creat a cell and then get all the wires in ... 
     double u_max = -1e9, u_min = 1e9;
@@ -895,47 +901,47 @@ void WireCell2dToy::LowmemTiling::init_good_cells(const WireCell::Slice& slice, 
     }
   }
   
-  //U/V/W = 1/1/0
-  for (int i=0;i!=fired_wire_u.size();i++){
-    MergeGeomWire *uwire = (MergeGeomWire *)fired_wire_u.at(i);
-    for (int j=0;j!=fired_wire_v.size();j++){
-      MergeGeomWire *vwire = (MergeGeomWire *)fired_wire_v.at(j);
-      for (int k=0;k!=bad_wire_w.size();k++){
-	MergeGeomWire *wwire = (MergeGeomWire *)bad_wire_w.at(k);
+  // //U/V/W = 1/1/0
+  // for (int i=0;i!=fired_wire_u.size();i++){
+  //   MergeGeomWire *uwire = (MergeGeomWire *)fired_wire_u.at(i);
+  //   for (int j=0;j!=fired_wire_v.size();j++){
+  //     MergeGeomWire *vwire = (MergeGeomWire *)fired_wire_v.at(j);
+  //     for (int k=0;k!=bad_wire_w.size();k++){
+  // 	MergeGeomWire *wwire = (MergeGeomWire *)bad_wire_w.at(k);
 	
-	SlimMergeGeomCell *mcell = create_slim_merge_cell(uwire,vwire,wwire);
-	if (mcell !=0) two_good_wire_cells.push_back(mcell);
-      }
-    }
-  }
+  // 	SlimMergeGeomCell *mcell = create_slim_merge_cell(uwire,vwire,wwire);
+  // 	if (mcell !=0) two_good_wire_cells.push_back(mcell);
+  //     }
+  //   }
+  // }
   
-  //U/V/W = 1/0/1
-  for (int i=0;i!=fired_wire_u.size();i++){
-    MergeGeomWire *uwire = (MergeGeomWire *)fired_wire_u.at(i);
-    for (int j=0;j!=bad_wire_v.size();j++){
-      MergeGeomWire *vwire = (MergeGeomWire *)bad_wire_v.at(j);
-      for (int k=0;k!=fired_wire_w.size();k++){
-	MergeGeomWire *wwire = (MergeGeomWire *)fired_wire_w.at(k);
+  // //U/V/W = 1/0/1
+  // for (int i=0;i!=fired_wire_u.size();i++){
+  //   MergeGeomWire *uwire = (MergeGeomWire *)fired_wire_u.at(i);
+  //   for (int j=0;j!=bad_wire_v.size();j++){
+  //     MergeGeomWire *vwire = (MergeGeomWire *)bad_wire_v.at(j);
+  //     for (int k=0;k!=fired_wire_w.size();k++){
+  // 	MergeGeomWire *wwire = (MergeGeomWire *)fired_wire_w.at(k);
 	
-	SlimMergeGeomCell *mcell = create_slim_merge_cell(uwire,vwire,wwire);
-	if (mcell !=0) two_good_wire_cells.push_back(mcell);
-      }
-    }
-  }
+  // 	SlimMergeGeomCell *mcell = create_slim_merge_cell(uwire,vwire,wwire);
+  // 	if (mcell !=0) two_good_wire_cells.push_back(mcell);
+  //     }
+  //   }
+  // }
   
-  //U/V/W = 0/1/1
-  for (int i=0;i!=bad_wire_u.size();i++){
-    MergeGeomWire *uwire = (MergeGeomWire *)bad_wire_u.at(i);
-    for (int j=0;j!=fired_wire_v.size();j++){
-      MergeGeomWire *vwire = (MergeGeomWire *)fired_wire_v.at(j);
-      for (int k=0;k!=fired_wire_w.size();k++){
-	MergeGeomWire *wwire = (MergeGeomWire *)fired_wire_w.at(k);
+  // //U/V/W = 0/1/1
+  // for (int i=0;i!=bad_wire_u.size();i++){
+  //   MergeGeomWire *uwire = (MergeGeomWire *)bad_wire_u.at(i);
+  //   for (int j=0;j!=fired_wire_v.size();j++){
+  //     MergeGeomWire *vwire = (MergeGeomWire *)fired_wire_v.at(j);
+  //     for (int k=0;k!=fired_wire_w.size();k++){
+  // 	MergeGeomWire *wwire = (MergeGeomWire *)fired_wire_w.at(k);
 	
-	SlimMergeGeomCell *mcell = create_slim_merge_cell(uwire,vwire,wwire);
-	if (mcell !=0) two_good_wire_cells.push_back(mcell);
-      }
-    }
-  }
+  // 	SlimMergeGeomCell *mcell = create_slim_merge_cell(uwire,vwire,wwire);
+  // 	if (mcell !=0) two_good_wire_cells.push_back(mcell);
+  //     }
+  //   }
+  // }
   
 
 }
