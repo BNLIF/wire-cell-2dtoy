@@ -86,6 +86,7 @@ WireCell::SlimMergeGeomCell* WireCell2dToy::LowmemTiling::create_slim_merge_cell
   std::vector<Vector> puv_save(5);
   std::vector<Vector> pcross(5);
   
+  bool flag_qx = false;
   
   // min u and min v 
   bool flag1 = gds.crossing_point(dis_u[0]-u_pitch/2.,dis_v[0]-v_pitch/2.,kUwire,kVwire, puv_save[0]);
@@ -93,17 +94,30 @@ WireCell::SlimMergeGeomCell* WireCell2dToy::LowmemTiling::create_slim_merge_cell
   bool flag3 = gds.crossing_point(dis_u[0]-u_pitch/2.,dis_v[0]+v_pitch/2.,kUwire,kVwire, puv_save[2]);
   bool flag4 = gds.crossing_point(dis_u[0]+u_pitch/2.,dis_v[0]+v_pitch/2.,kUwire,kVwire, puv_save[3]);
   bool flag5 = gds.crossing_point(dis_u[0],dis_v[0],kUwire,kVwire, puv_save[4]);
-  if (flag1 && puv_save[0].z > bmin_w && puv_save[0].z < bmax_w 
-      ||flag2 && puv_save[1].z > bmin_w && puv_save[1].z < bmax_w 
-      ||flag3 && puv_save[2].z > bmin_w && puv_save[2].z < bmax_w 
-      ||flag4 && puv_save[3].z > bmin_w && puv_save[3].z < bmax_w 
-      ||flag5 && puv_save[4].z > bmin_w && puv_save[4].z < bmax_w ){
-    // if one is found, push the entire cell in ...
+  
+  if (flag1 && puv_save[0].z > bmin_w && puv_save[0].z < bmax_w){
     pcell.push_back(puv_save[0]);
+    flag_qx = true;
+  }
+  if (flag2 && puv_save[1].z > bmin_w && puv_save[1].z < bmax_w ){
     pcell.push_back(puv_save[1]);
+    flag_qx = true;
+  }
+  if (flag3 && puv_save[2].z > bmin_w && puv_save[2].z < bmax_w){
     pcell.push_back(puv_save[2]);
+    flag_qx = true;
+  }
+  if (flag4 && puv_save[3].z > bmin_w && puv_save[3].z < bmax_w){
     pcell.push_back(puv_save[3]);
-  }else{
+    flag_qx = true;
+  }
+  if (flag5 && puv_save[4].z > bmin_w && puv_save[4].z < bmax_w ){
+    // if one is found, push the entire cell in ...
+    pcell.push_back(puv_save[4]);
+    flag_qx = true;
+  }
+  
+  if (!flag_qx){
     // look at the U wire ...
     if (gds.crossing_point(bmin_w,dis_v[0],kYwire,kVwire,pcross[0])){
       // quick calculation
@@ -119,15 +133,29 @@ WireCell::SlimMergeGeomCell* WireCell2dToy::LowmemTiling::create_slim_merge_cell
 	flag3 = gds.crossing_point(dis_u[2]-u_pitch/2.,dis_v[0]+v_pitch/2.,kUwire,kVwire, puv_save[2]);
 	flag4 = gds.crossing_point(dis_u[2]+u_pitch/2.,dis_v[0]+v_pitch/2.,kUwire,kVwire, puv_save[3]);
 	flag5 = gds.crossing_point(dis_u[2],dis_v[0],kUwire,kVwire, puv_save[4]);
-	if (flag1 && puv_save[0].z > bmin_w && puv_save[0].z < bmax_w 
-	    ||flag2 && puv_save[1].z > bmin_w && puv_save[1].z < bmax_w 
-	    ||flag3 && puv_save[2].z > bmin_w && puv_save[2].z < bmax_w 
-	    ||flag4 && puv_save[3].z > bmin_w && puv_save[3].z < bmax_w 
-	    ||flag5 && puv_save[4].z > bmin_w && puv_save[4].z < bmax_w ){
+	flag_qx = false;
+	
+	if (flag1 && puv_save[0].z > bmin_w && puv_save[0].z < bmax_w){
 	  pcell.push_back(puv_save[0]);
+	  flag_qx = true;
+	}
+	if (flag2 && puv_save[1].z > bmin_w && puv_save[1].z < bmax_w ){
 	  pcell.push_back(puv_save[1]);
+	  flag_qx = true;
+	}
+	if (flag3 && puv_save[2].z > bmin_w && puv_save[2].z < bmax_w ){
 	  pcell.push_back(puv_save[2]);
+	  flag_qx = true;
+	}
+	if (flag4 && puv_save[3].z > bmin_w && puv_save[3].z < bmax_w ){
 	  pcell.push_back(puv_save[3]);
+	  flag_qx = true;
+	}
+	if (flag5 && puv_save[4].z > bmin_w && puv_save[4].z < bmax_w ){
+	  pcell.push_back(puv_save[4]);
+	  flag_qx = true;
+	}
+	if (flag_qx){
 	  break;
 	}
       }
@@ -168,15 +196,28 @@ WireCell::SlimMergeGeomCell* WireCell2dToy::LowmemTiling::create_slim_merge_cell
 	flag3 = gds.crossing_point(dis_u[2]-u_pitch/2.,dis_v[0]+v_pitch/2.,kUwire,kVwire, puv_save[2]);
 	flag4 = gds.crossing_point(dis_u[2]+u_pitch/2.,dis_v[0]+v_pitch/2.,kUwire,kVwire, puv_save[3]);
 	flag5 = gds.crossing_point(dis_u[2],dis_v[0],kUwire,kVwire, puv_save[4]);
-	if (flag1 && puv_save[0].z > bmin_w && puv_save[0].z < bmax_w 
-	    ||flag2 && puv_save[1].z > bmin_w && puv_save[1].z < bmax_w 
-	    ||flag3 && puv_save[2].z > bmin_w && puv_save[2].z < bmax_w 
-	    ||flag4 && puv_save[3].z > bmin_w && puv_save[3].z < bmax_w 
-	    ||flag5 && puv_save[4].z > bmin_w && puv_save[4].z < bmax_w ){
+	flag_qx = false;
+	if (flag1 && puv_save[0].z > bmin_w && puv_save[0].z < bmax_w){
 	  pcell.push_back(puv_save[0]);
+	  flag_qx = true;
+	}
+	if (flag2 && puv_save[1].z > bmin_w && puv_save[1].z < bmax_w ){
 	  pcell.push_back(puv_save[1]);
+	  flag_qx = true;
+	}
+	if (flag3 && puv_save[2].z > bmin_w && puv_save[2].z < bmax_w ){
 	  pcell.push_back(puv_save[2]);
+	  flag_qx = true;
+	}
+	if (flag4 && puv_save[3].z > bmin_w && puv_save[3].z < bmax_w ){
 	  pcell.push_back(puv_save[3]);
+	  flag_qx = true;
+	}
+	if (flag5 && puv_save[4].z > bmin_w && puv_save[4].z < bmax_w ){
+	  pcell.push_back(puv_save[4]);
+	  flag_qx = true;
+	}
+	if (flag_qx){
 	  break;
 	}
       }
@@ -198,15 +239,28 @@ WireCell::SlimMergeGeomCell* WireCell2dToy::LowmemTiling::create_slim_merge_cell
 	flag3 = gds.crossing_point(dis_u[0]-u_pitch/2.,dis_v[2]+v_pitch/2.,kUwire,kVwire, puv_save[2]);
 	flag4 = gds.crossing_point(dis_u[0]+u_pitch/2.,dis_v[2]+v_pitch/2.,kUwire,kVwire, puv_save[3]);
 	flag5 = gds.crossing_point(dis_u[0],dis_v[2],kUwire,kVwire, puv_save[4]);
-	if (flag1 && puv_save[0].z > bmin_w && puv_save[0].z < bmax_w 
-	    ||flag2 && puv_save[1].z > bmin_w && puv_save[1].z < bmax_w 
-	    ||flag3 && puv_save[2].z > bmin_w && puv_save[2].z < bmax_w 
-	    ||flag4 && puv_save[3].z > bmin_w && puv_save[3].z < bmax_w 
-	    ||flag5 && puv_save[4].z > bmin_w && puv_save[4].z < bmax_w ){
+	flag_qx = false;
+	if (flag1 && puv_save[0].z > bmin_w && puv_save[0].z < bmax_w ){
 	  pcell.push_back(puv_save[0]);
+	  flag_qx = true;
+	}
+	if (flag2 && puv_save[1].z > bmin_w && puv_save[1].z < bmax_w ){
+	  flag_qx = true;
 	  pcell.push_back(puv_save[1]);
+	}
+	if (flag3 && puv_save[2].z > bmin_w && puv_save[2].z < bmax_w ){
+	  flag_qx = true;
 	  pcell.push_back(puv_save[2]);
+	}
+	if (flag4 && puv_save[3].z > bmin_w && puv_save[3].z < bmax_w ){
 	  pcell.push_back(puv_save[3]);
+	  flag_qx = true;
+	}
+	if (flag5 && puv_save[4].z > bmin_w && puv_save[4].z < bmax_w ){
+	  pcell.push_back(puv_save[4]);
+	  flag_qx = true;
+	} 
+	if (flag_qx){
 	  break;
 	}
       }
@@ -246,21 +300,34 @@ WireCell::SlimMergeGeomCell* WireCell2dToy::LowmemTiling::create_slim_merge_cell
 	flag3 = gds.crossing_point(dis_u[0]-u_pitch/2.,dis_v[2]+v_pitch/2.,kUwire,kVwire, puv_save[2]);
 	flag4 = gds.crossing_point(dis_u[0]+u_pitch/2.,dis_v[2]+v_pitch/2.,kUwire,kVwire, puv_save[3]);
 	flag5 = gds.crossing_point(dis_u[0],dis_v[2],kUwire,kVwire, puv_save[4]);
-	if (flag1 && puv_save[0].z > bmin_w && puv_save[0].z < bmax_w 
-	    ||flag2 && puv_save[1].z > bmin_w && puv_save[1].z < bmax_w 
-	    ||flag3 && puv_save[2].z > bmin_w && puv_save[2].z < bmax_w 
-	    ||flag4 && puv_save[3].z > bmin_w && puv_save[3].z < bmax_w 
-	    ||flag5 && puv_save[4].z > bmin_w && puv_save[4].z < bmax_w ){
+	flag_qx = false;
+	if (flag1 && puv_save[0].z > bmin_w && puv_save[0].z < bmax_w){
 	  pcell.push_back(puv_save[0]);
+	  flag_qx = true;
+	}
+	if ( flag2 && puv_save[1].z > bmin_w && puv_save[1].z < bmax_w ){
 	  pcell.push_back(puv_save[1]);
+	  flag_qx = true;
+	}
+	if (flag3 && puv_save[2].z > bmin_w && puv_save[2].z < bmax_w ){
 	  pcell.push_back(puv_save[2]);
+	  flag_qx = true;
+	}
+	if (flag4 && puv_save[3].z > bmin_w && puv_save[3].z < bmax_w ){
 	  pcell.push_back(puv_save[3]);
+	  flag_qx = true;
+	}
+	if (flag5 && puv_save[4].z > bmin_w && puv_save[4].z < bmax_w ){
+	  pcell.push_back(puv_save[4]);
+	  flag_qx = true;
+	}
+	if (flag_qx){
 	  break;
 	}
       }
     }
-
   }
+
   
   
   // min u and max v
@@ -269,16 +336,28 @@ WireCell::SlimMergeGeomCell* WireCell2dToy::LowmemTiling::create_slim_merge_cell
   flag3 = gds.crossing_point(dis_u[0]-u_pitch/2.,dis_v[1]+v_pitch/2.,kUwire,kVwire, puv_save[2]);
   flag4 = gds.crossing_point(dis_u[0]+u_pitch/2.,dis_v[1]+v_pitch/2.,kUwire,kVwire, puv_save[3]);
   flag5 = gds.crossing_point(dis_u[0],dis_v[1],kUwire,kVwire, puv_save[4]);
-  if (flag1 && puv_save[0].z > bmin_w && puv_save[0].z < bmax_w 
-      ||flag2 && puv_save[1].z > bmin_w && puv_save[1].z < bmax_w 
-      ||flag3 && puv_save[2].z > bmin_w && puv_save[2].z < bmax_w 
-      ||flag4 && puv_save[3].z > bmin_w && puv_save[3].z < bmax_w 
-      ||flag5 && puv_save[4].z > bmin_w && puv_save[4].z < bmax_w ){
+  flag_qx = false;
+  if (flag1 && puv_save[0].z > bmin_w && puv_save[0].z < bmax_w ){
     pcell.push_back(puv_save[0]);
+    flag_qx = true;
+  }
+  if (flag2 && puv_save[1].z > bmin_w && puv_save[1].z < bmax_w ){
     pcell.push_back(puv_save[1]);
+    flag_qx =true;
+  }
+  if (flag3 && puv_save[2].z > bmin_w && puv_save[2].z < bmax_w ){
     pcell.push_back(puv_save[2]);
+    flag_qx = true;
+  }
+  if (flag4 && puv_save[3].z > bmin_w && puv_save[3].z < bmax_w ){
     pcell.push_back(puv_save[3]);
-  }else{
+    flag_qx = true;
+  }
+  if (flag5 && puv_save[4].z > bmin_w && puv_save[4].z < bmax_w ){
+    pcell.push_back(puv_save[4]);
+    flag_qx = true;
+  } 
+  if (!flag_qx){
     // look at the U wire ...
   
     
@@ -295,15 +374,29 @@ WireCell::SlimMergeGeomCell* WireCell2dToy::LowmemTiling::create_slim_merge_cell
 	flag3 = gds.crossing_point(dis_u[2]-u_pitch/2.,dis_v[1]+v_pitch/2.,kUwire,kVwire, puv_save[2]);
 	flag4 = gds.crossing_point(dis_u[2]+u_pitch/2.,dis_v[1]+v_pitch/2.,kUwire,kVwire, puv_save[3]);
 	flag5 = gds.crossing_point(dis_u[2],dis_v[1],kUwire,kVwire, puv_save[4]);
-	if (flag1 && puv_save[0].z > bmin_w && puv_save[0].z < bmax_w 
-	    ||flag2 && puv_save[1].z > bmin_w && puv_save[1].z < bmax_w 
-	    ||flag3 && puv_save[2].z > bmin_w && puv_save[2].z < bmax_w 
-	    ||flag4 && puv_save[3].z > bmin_w && puv_save[3].z < bmax_w 
-	    ||flag5 && puv_save[4].z > bmin_w && puv_save[4].z < bmax_w ){
+	flag_qx = false;
+
+	if (flag1 && puv_save[0].z > bmin_w && puv_save[0].z < bmax_w){
 	  pcell.push_back(puv_save[0]);
+	  flag_qx = true;
+	}
+	if (flag2 && puv_save[1].z > bmin_w && puv_save[1].z < bmax_w ){
 	  pcell.push_back(puv_save[1]);
+	  flag_qx = true;
+	}
+	if (flag3 && puv_save[2].z > bmin_w && puv_save[2].z < bmax_w ){
 	  pcell.push_back(puv_save[2]);
+	  flag_qx = true;
+	}
+	if (flag4 && puv_save[3].z > bmin_w && puv_save[3].z < bmax_w ){
 	  pcell.push_back(puv_save[3]);
+	  flag_qx = true;
+	}
+	if (flag5 && puv_save[4].z > bmin_w && puv_save[4].z < bmax_w ){
+	  pcell.push_back(puv_save[4]);
+	  flag_qx = true;
+	}
+	if (flag_qx){
 	  break;
 	}
       }
@@ -342,15 +435,29 @@ WireCell::SlimMergeGeomCell* WireCell2dToy::LowmemTiling::create_slim_merge_cell
 	flag3 = gds.crossing_point(dis_u[2]-u_pitch/2.,dis_v[1]+v_pitch/2.,kUwire,kVwire, puv_save[2]);
 	flag4 = gds.crossing_point(dis_u[2]+u_pitch/2.,dis_v[1]+v_pitch/2.,kUwire,kVwire, puv_save[3]);
 	flag5 = gds.crossing_point(dis_u[2],dis_v[1],kUwire,kVwire, puv_save[4]);
-	if (flag1 && puv_save[0].z > bmin_w && puv_save[0].z < bmax_w 
-	    ||flag2 && puv_save[1].z > bmin_w && puv_save[1].z < bmax_w 
-	    ||flag3 && puv_save[2].z > bmin_w && puv_save[2].z < bmax_w 
-	    ||flag4 && puv_save[3].z > bmin_w && puv_save[3].z < bmax_w 
-	    ||flag5 && puv_save[4].z > bmin_w && puv_save[4].z < bmax_w ){
+	flag_qx = false;
+	
+	if (flag1 && puv_save[0].z > bmin_w && puv_save[0].z < bmax_w){
 	  pcell.push_back(puv_save[0]);
+	  flag_qx = true;
+	}
+	if (flag2 && puv_save[1].z > bmin_w && puv_save[1].z < bmax_w ){
 	  pcell.push_back(puv_save[1]);
+	  flag_qx = true;
+	}
+	if (flag3 && puv_save[2].z > bmin_w && puv_save[2].z < bmax_w ){
+	  flag_qx = true;
 	  pcell.push_back(puv_save[2]);
+	}
+	if (flag4 && puv_save[3].z > bmin_w && puv_save[3].z < bmax_w ){
+	  flag_qx = true;
 	  pcell.push_back(puv_save[3]);
+	}
+	if (flag5 && puv_save[4].z > bmin_w && puv_save[4].z < bmax_w ){
+	  flag_qx = true;
+	  pcell.push_back(puv_save[4]);
+	}
+	if (flag_qx){
 	  break;
 	}
       }
@@ -372,15 +479,29 @@ WireCell::SlimMergeGeomCell* WireCell2dToy::LowmemTiling::create_slim_merge_cell
 	flag3 = gds.crossing_point(dis_u[0]-u_pitch/2.,dis_v[2]+v_pitch/2.,kUwire,kVwire, puv_save[2]);
 	flag4 = gds.crossing_point(dis_u[0]+u_pitch/2.,dis_v[2]+v_pitch/2.,kUwire,kVwire, puv_save[3]);
 	flag5 = gds.crossing_point(dis_u[0],dis_v[2],kUwire,kVwire, puv_save[4]);
-	if (flag1 && puv_save[0].z > bmin_w && puv_save[0].z < bmax_w 
-	    ||flag2 && puv_save[1].z > bmin_w && puv_save[1].z < bmax_w 
-	    ||flag3 && puv_save[2].z > bmin_w && puv_save[2].z < bmax_w 
-	    ||flag4 && puv_save[3].z > bmin_w && puv_save[3].z < bmax_w 
-	    ||flag5 && puv_save[4].z > bmin_w && puv_save[4].z < bmax_w ){
+	flag_qx = false;
+
+	if (flag1 && puv_save[0].z > bmin_w && puv_save[0].z < bmax_w){
 	  pcell.push_back(puv_save[0]);
+	  flag_qx = true;
+	}
+	if (flag2 && puv_save[1].z > bmin_w && puv_save[1].z < bmax_w ){
 	  pcell.push_back(puv_save[1]);
+	  flag_qx = true;
+	}
+	if (flag3 && puv_save[2].z > bmin_w && puv_save[2].z < bmax_w ){
 	  pcell.push_back(puv_save[2]);
+	  flag_qx = true;
+	}
+	if (flag4 && puv_save[3].z > bmin_w && puv_save[3].z < bmax_w ){
 	  pcell.push_back(puv_save[3]);
+	  flag_qx = true;
+	}
+	if (flag5 && puv_save[4].z > bmin_w && puv_save[4].z < bmax_w ){
+	  pcell.push_back(puv_save[4]);
+	  flag_qx = true;
+	}
+	if (flag_qx){
 	  break;
 	}
       }
@@ -422,15 +543,28 @@ WireCell::SlimMergeGeomCell* WireCell2dToy::LowmemTiling::create_slim_merge_cell
 	flag3 = gds.crossing_point(dis_u[0]-u_pitch/2.,dis_v[2]+v_pitch/2.,kUwire,kVwire, puv_save[2]);
 	flag4 = gds.crossing_point(dis_u[0]+u_pitch/2.,dis_v[2]+v_pitch/2.,kUwire,kVwire, puv_save[3]);
 	flag5 = gds.crossing_point(dis_u[0],dis_v[2],kUwire,kVwire, puv_save[4]);
-	if (flag1 && puv_save[0].z > bmin_w && puv_save[0].z < bmax_w 
-	    ||flag2 && puv_save[1].z > bmin_w && puv_save[1].z < bmax_w 
-	    ||flag3 && puv_save[2].z > bmin_w && puv_save[2].z < bmax_w 
-	    ||flag4 && puv_save[3].z > bmin_w && puv_save[3].z < bmax_w 
-	    ||flag5 && puv_save[4].z > bmin_w && puv_save[4].z < bmax_w ){
+	flag_qx = false;
+	if (flag1 && puv_save[0].z > bmin_w && puv_save[0].z < bmax_w ){
 	  pcell.push_back(puv_save[0]);
+	  flag_qx = true;
+	}
+	if (flag2 && puv_save[1].z > bmin_w && puv_save[1].z < bmax_w ){
 	  pcell.push_back(puv_save[1]);
+	  flag_qx = true;
+	}
+	if (flag3 && puv_save[2].z > bmin_w && puv_save[2].z < bmax_w ){
 	  pcell.push_back(puv_save[2]);
+	  flag_qx = true;
+	}
+	if (flag4 && puv_save[3].z > bmin_w && puv_save[3].z < bmax_w ){
 	  pcell.push_back(puv_save[3]);
+	  flag_qx = true;
+	}
+	if (flag5 && puv_save[4].z > bmin_w && puv_save[4].z < bmax_w ){
+	  pcell.push_back(puv_save[4]);
+	  flag_qx = true;
+	}
+	if (flag_qx){
 	  break;
 	}
       }
@@ -445,16 +579,32 @@ WireCell::SlimMergeGeomCell* WireCell2dToy::LowmemTiling::create_slim_merge_cell
   flag3 = gds.crossing_point(dis_u[1]-u_pitch/2.,dis_v[0]+v_pitch/2.,kUwire,kVwire, puv_save[2]);
   flag4 = gds.crossing_point(dis_u[1]+u_pitch/2.,dis_v[0]+v_pitch/2.,kUwire,kVwire, puv_save[3]);
   flag5 = gds.crossing_point(dis_u[1],dis_v[0],kUwire,kVwire, puv_save[4]);
-  if (flag1 && puv_save[0].z > bmin_w && puv_save[0].z < bmax_w 
-      ||flag2 && puv_save[1].z > bmin_w && puv_save[1].z < bmax_w 
-      ||flag3 && puv_save[2].z > bmin_w && puv_save[2].z < bmax_w 
-      ||flag4 && puv_save[3].z > bmin_w && puv_save[3].z < bmax_w 
-      ||flag5 && puv_save[4].z > bmin_w && puv_save[4].z < bmax_w ){
+  flag_qx = false;
+
+  if (flag1 && puv_save[0].z > bmin_w && puv_save[0].z < bmax_w){
     pcell.push_back(puv_save[0]);
+    flag_qx = true;
+  }
+  if (flag2 && puv_save[1].z > bmin_w && puv_save[1].z < bmax_w ){
     pcell.push_back(puv_save[1]);
+    flag_qx = true;
+  }
+  if (flag3 && puv_save[2].z > bmin_w && puv_save[2].z < bmax_w ){
     pcell.push_back(puv_save[2]);
+    flag_qx = true;
+  } 
+  if (flag4 && puv_save[3].z > bmin_w && puv_save[3].z < bmax_w ){
     pcell.push_back(puv_save[3]);
-  }else{
+    flag_qx = true;
+  }
+  if (flag5 && puv_save[4].z > bmin_w && puv_save[4].z < bmax_w ){
+    pcell.push_back(puv_save[4]);
+    flag_qx = true;
+  }
+
+  
+  
+  if (!flag_qx){
     // look at the U wire ...
     
     
@@ -471,15 +621,30 @@ WireCell::SlimMergeGeomCell* WireCell2dToy::LowmemTiling::create_slim_merge_cell
 	flag3 = gds.crossing_point(dis_u[2]-u_pitch/2.,dis_v[0]+v_pitch/2.,kUwire,kVwire, puv_save[2]);
 	flag4 = gds.crossing_point(dis_u[2]+u_pitch/2.,dis_v[0]+v_pitch/2.,kUwire,kVwire, puv_save[3]);
 	flag5 = gds.crossing_point(dis_u[2],dis_v[0],kUwire,kVwire, puv_save[4]);
-	if (flag1 && puv_save[0].z > bmin_w && puv_save[0].z < bmax_w 
-	    ||flag2 && puv_save[1].z > bmin_w && puv_save[1].z < bmax_w 
-	    ||flag3 && puv_save[2].z > bmin_w && puv_save[2].z < bmax_w 
-	    ||flag4 && puv_save[3].z > bmin_w && puv_save[3].z < bmax_w 
-	    ||flag5 && puv_save[4].z > bmin_w && puv_save[4].z < bmax_w ){
+	flag_qx = false;
+	
+	if (flag1 && puv_save[0].z > bmin_w && puv_save[0].z < bmax_w){
 	  pcell.push_back(puv_save[0]);
+	  flag_qx = true;
+	}
+	if (flag2 && puv_save[1].z > bmin_w && puv_save[1].z < bmax_w ){
 	  pcell.push_back(puv_save[1]);
+	  flag_qx = true;
+	}
+	if (flag3 && puv_save[2].z > bmin_w && puv_save[2].z < bmax_w ){
 	  pcell.push_back(puv_save[2]);
+	  flag_qx = true;
+	}
+	if (flag4 && puv_save[3].z > bmin_w && puv_save[3].z < bmax_w ){
 	  pcell.push_back(puv_save[3]);
+	  flag_qx = true;
+	}
+	if (flag5 && puv_save[4].z > bmin_w && puv_save[4].z < bmax_w ){
+	  pcell.push_back(puv_save[4]);
+	  flag_qx = true;
+	}
+
+	if (flag_qx){
 	  break;
 	}
       }
@@ -521,15 +686,31 @@ WireCell::SlimMergeGeomCell* WireCell2dToy::LowmemTiling::create_slim_merge_cell
 	flag3 = gds.crossing_point(dis_u[2]-u_pitch/2.,dis_v[0]+v_pitch/2.,kUwire,kVwire, puv_save[2]);
 	flag4 = gds.crossing_point(dis_u[2]+u_pitch/2.,dis_v[0]+v_pitch/2.,kUwire,kVwire, puv_save[3]);
 	flag5 = gds.crossing_point(dis_u[2],dis_v[0],kUwire,kVwire, puv_save[4]);
-	if (flag1 && puv_save[0].z > bmin_w && puv_save[0].z < bmax_w 
-	    ||flag2 && puv_save[1].z > bmin_w && puv_save[1].z < bmax_w 
-	    ||flag3 && puv_save[2].z > bmin_w && puv_save[2].z < bmax_w 
-	    ||flag4 && puv_save[3].z > bmin_w && puv_save[3].z < bmax_w 
-	    ||flag5 && puv_save[4].z > bmin_w && puv_save[4].z < bmax_w ){
+	flag_qx = false;
+	
+	if (flag1 && puv_save[0].z > bmin_w && puv_save[0].z < bmax_w ){
 	  pcell.push_back(puv_save[0]);
+	  flag_qx = true;
+	}
+	if (flag2 && puv_save[1].z > bmin_w && puv_save[1].z < bmax_w ){
 	  pcell.push_back(puv_save[1]);
+	  flag_qx = true;
+	}
+	if (flag3 && puv_save[2].z > bmin_w && puv_save[2].z < bmax_w ){
 	  pcell.push_back(puv_save[2]);
+	  flag_qx = true;
+	}
+	if (flag4 && puv_save[3].z > bmin_w && puv_save[3].z < bmax_w){
 	  pcell.push_back(puv_save[3]);
+	  flag_qx = true;
+	} 
+	if (flag5 && puv_save[4].z > bmin_w && puv_save[4].z < bmax_w ){
+	  pcell.push_back(puv_save[4]);
+	  flag_qx = true;
+	}
+	  
+	  
+	if (flag_qx){
 	  break;
 	}
       }
@@ -552,15 +733,33 @@ WireCell::SlimMergeGeomCell* WireCell2dToy::LowmemTiling::create_slim_merge_cell
 	flag3 = gds.crossing_point(dis_u[1]-u_pitch/2.,dis_v[2]+v_pitch/2.,kUwire,kVwire, puv_save[2]);
 	flag4 = gds.crossing_point(dis_u[1]+u_pitch/2.,dis_v[2]+v_pitch/2.,kUwire,kVwire, puv_save[3]);
 	flag5 = gds.crossing_point(dis_u[1],dis_v[2],kUwire,kVwire, puv_save[4]);
-	if (flag1 && puv_save[0].z > bmin_w && puv_save[0].z < bmax_w 
-	    ||flag2 && puv_save[1].z > bmin_w && puv_save[1].z < bmax_w 
-	    ||flag3 && puv_save[2].z > bmin_w && puv_save[2].z < bmax_w 
-	    ||flag4 && puv_save[3].z > bmin_w && puv_save[3].z < bmax_w 
-	    ||flag5 && puv_save[4].z > bmin_w && puv_save[4].z < bmax_w ){
+	flag_qx = false;
+	
+	if (flag1 && puv_save[0].z > bmin_w && puv_save[0].z < bmax_w ){
 	  pcell.push_back(puv_save[0]);
+	  flag_qx = true;
+	}
+	if (flag2 && puv_save[1].z > bmin_w && puv_save[1].z < bmax_w ){
 	  pcell.push_back(puv_save[1]);
+	  flag_qx = true;
+	}
+	if (flag3 && puv_save[2].z > bmin_w && puv_save[2].z < bmax_w ){
 	  pcell.push_back(puv_save[2]);
+	  flag_qx = true;
+	}
+	if (flag4 && puv_save[3].z > bmin_w && puv_save[3].z < bmax_w ){
 	  pcell.push_back(puv_save[3]);
+	  flag_qx = true;
+	}
+	if (flag5 && puv_save[4].z > bmin_w && puv_save[4].z < bmax_w ){
+	  pcell.push_back(puv_save[4]);
+	  flag_qx = true;
+	}
+	  
+	  
+	  
+	  
+	if (flag_qx){
 	  break;
 	}
       }
@@ -603,15 +802,30 @@ WireCell::SlimMergeGeomCell* WireCell2dToy::LowmemTiling::create_slim_merge_cell
 	flag3 = gds.crossing_point(dis_u[1]-u_pitch/2.,dis_v[2]+v_pitch/2.,kUwire,kVwire, puv_save[2]);
 	flag4 = gds.crossing_point(dis_u[1]+u_pitch/2.,dis_v[2]+v_pitch/2.,kUwire,kVwire, puv_save[3]);
 	flag5 = gds.crossing_point(dis_u[1],dis_v[2],kUwire,kVwire, puv_save[4]);
-	if (flag1 && puv_save[0].z > bmin_w && puv_save[0].z < bmax_w 
-	    ||flag2 && puv_save[1].z > bmin_w && puv_save[1].z < bmax_w 
-	    ||flag3 && puv_save[2].z > bmin_w && puv_save[2].z < bmax_w 
-	    ||flag4 && puv_save[3].z > bmin_w && puv_save[3].z < bmax_w 
-	    ||flag5 && puv_save[4].z > bmin_w && puv_save[4].z < bmax_w ){
+	flag_qx = false;
+	
+	if (flag1 && puv_save[0].z > bmin_w && puv_save[0].z < bmax_w ){
 	  pcell.push_back(puv_save[0]);
+	  flag_qx = true;
+	}
+	if (flag2 && puv_save[1].z > bmin_w && puv_save[1].z < bmax_w ){
 	  pcell.push_back(puv_save[1]);
+	  flag_qx = true;
+	}
+	if (flag3 && puv_save[2].z > bmin_w && puv_save[2].z < bmax_w ){
 	  pcell.push_back(puv_save[2]);
+	  flag_qx = true;
+	}
+	if (flag4 && puv_save[3].z > bmin_w && puv_save[3].z < bmax_w ){
 	  pcell.push_back(puv_save[3]);
+	  flag_qx = true;
+	}
+	if (flag5 && puv_save[4].z > bmin_w && puv_save[4].z < bmax_w ){
+	  pcell.push_back(puv_save[4]);
+	  flag_qx = true;
+	}
+	  	  
+	if (flag_qx){
 	  break;
 	}
       }
@@ -625,16 +839,32 @@ WireCell::SlimMergeGeomCell* WireCell2dToy::LowmemTiling::create_slim_merge_cell
   flag3 = gds.crossing_point(dis_u[1]-u_pitch/2.,dis_v[1]+v_pitch/2.,kUwire,kVwire, puv_save[2]);
   flag4 = gds.crossing_point(dis_u[1]+u_pitch/2.,dis_v[1]+v_pitch/2.,kUwire,kVwire, puv_save[3]);
   flag5 = gds.crossing_point(dis_u[1],dis_v[1],kUwire,kVwire, puv_save[4]);
-  if (flag1 && puv_save[0].z > bmin_w && puv_save[0].z < bmax_w 
-      ||flag2 && puv_save[1].z > bmin_w && puv_save[1].z < bmax_w 
-      ||flag3 && puv_save[2].z > bmin_w && puv_save[2].z < bmax_w 
-      ||flag4 && puv_save[3].z > bmin_w && puv_save[3].z < bmax_w 
-      ||flag5 && puv_save[4].z > bmin_w && puv_save[4].z < bmax_w ){
+  flag_qx = false;
+  
+  if (flag1 && puv_save[0].z > bmin_w && puv_save[0].z < bmax_w ){
     pcell.push_back(puv_save[0]);
+    flag_qx = true;
+  }
+  
+  if (flag2 && puv_save[1].z > bmin_w && puv_save[1].z < bmax_w ){
     pcell.push_back(puv_save[1]);
+    flag_qx = true;
+  }
+  
+  if (flag3 && puv_save[2].z > bmin_w && puv_save[2].z < bmax_w ){
     pcell.push_back(puv_save[2]);
+    flag_qx = true;
+  }
+  if (flag4 && puv_save[3].z > bmin_w && puv_save[3].z < bmax_w ){
     pcell.push_back(puv_save[3]);
-  }else{
+    flag_qx = true;
+  }
+  if (flag5 && puv_save[4].z > bmin_w && puv_save[4].z < bmax_w ){
+    pcell.push_back(puv_save[4]);
+    flag_qx = true;
+  }
+  
+  if (!flag_qx){
     // look at the U wire ...
     
     
@@ -651,15 +881,33 @@ WireCell::SlimMergeGeomCell* WireCell2dToy::LowmemTiling::create_slim_merge_cell
 	flag3 = gds.crossing_point(dis_u[2]-u_pitch/2.,dis_v[1]+v_pitch/2.,kUwire,kVwire, puv_save[2]);
 	flag4 = gds.crossing_point(dis_u[2]+u_pitch/2.,dis_v[1]+v_pitch/2.,kUwire,kVwire, puv_save[3]);
 	flag5 = gds.crossing_point(dis_u[2],dis_v[1],kUwire,kVwire, puv_save[4]);
-	if (flag1 && puv_save[0].z > bmin_w && puv_save[0].z < bmax_w 
-	    ||flag2 && puv_save[1].z > bmin_w && puv_save[1].z < bmax_w 
-	    ||flag3 && puv_save[2].z > bmin_w && puv_save[2].z < bmax_w 
-	    ||flag4 && puv_save[3].z > bmin_w && puv_save[3].z < bmax_w 
-	    ||flag5 && puv_save[4].z > bmin_w && puv_save[4].z < bmax_w ){
+	flag_qx = false;
+	
+	if (flag1 && puv_save[0].z > bmin_w && puv_save[0].z < bmax_w ){
 	  pcell.push_back(puv_save[0]);
+	  flag_qx = true;
+	}
+	if (flag2 && puv_save[1].z > bmin_w && puv_save[1].z < bmax_w ){
 	  pcell.push_back(puv_save[1]);
+	  flag_qx = true;
+	}
+	if (flag3 && puv_save[2].z > bmin_w && puv_save[2].z < bmax_w ){
 	  pcell.push_back(puv_save[2]);
+	  flag_qx = true;
+	}
+	if (flag4 && puv_save[3].z > bmin_w && puv_save[3].z < bmax_w ){
 	  pcell.push_back(puv_save[3]);
+	  flag_qx = true;
+	}
+	if (flag5 && puv_save[4].z > bmin_w && puv_save[4].z < bmax_w ){
+	  pcell.push_back(puv_save[4]);
+	  flag_qx = true;
+	}
+	  
+	  
+	  
+	  
+	if (flag_qx){
 	  break;
 	}
       }
@@ -701,15 +949,30 @@ WireCell::SlimMergeGeomCell* WireCell2dToy::LowmemTiling::create_slim_merge_cell
 	flag3 = gds.crossing_point(dis_u[2]-u_pitch/2.,dis_v[1]+v_pitch/2.,kUwire,kVwire, puv_save[2]);
 	flag4 = gds.crossing_point(dis_u[2]+u_pitch/2.,dis_v[1]+v_pitch/2.,kUwire,kVwire, puv_save[3]);
 	flag5 = gds.crossing_point(dis_u[2],dis_v[1],kUwire,kVwire, puv_save[4]);
-	if (flag1 && puv_save[0].z > bmin_w && puv_save[0].z < bmax_w 
-	    ||flag2 && puv_save[1].z > bmin_w && puv_save[1].z < bmax_w 
-	    ||flag3 && puv_save[2].z > bmin_w && puv_save[2].z < bmax_w 
-	    ||flag4 && puv_save[3].z > bmin_w && puv_save[3].z < bmax_w 
-	    ||flag5 && puv_save[4].z > bmin_w && puv_save[4].z < bmax_w ){
+	flag_qx = false;
+	
+	if (flag1 && puv_save[0].z > bmin_w && puv_save[0].z < bmax_w){
 	  pcell.push_back(puv_save[0]);
+	  flag_qx = true;
+	}
+	if (flag2 && puv_save[1].z > bmin_w && puv_save[1].z < bmax_w ){
 	  pcell.push_back(puv_save[1]);
+	  flag_qx = true;
+	}
+	if (flag3 && puv_save[2].z > bmin_w && puv_save[2].z < bmax_w ){
 	  pcell.push_back(puv_save[2]);
+	  flag_qx = true;
+	}
+	if (flag4 && puv_save[3].z > bmin_w && puv_save[3].z < bmax_w ){
 	  pcell.push_back(puv_save[3]);
+	  flag_qx = true;
+	}
+	if (flag5 && puv_save[4].z > bmin_w && puv_save[4].z < bmax_w ){
+	  pcell.push_back(puv_save[4]);
+	  flag_qx = true;
+	}
+	  	  
+	if (flag_qx){
 	  break;
 	}
       }
@@ -731,15 +994,30 @@ WireCell::SlimMergeGeomCell* WireCell2dToy::LowmemTiling::create_slim_merge_cell
 	flag3 = gds.crossing_point(dis_u[1]-u_pitch/2.,dis_v[2]+v_pitch/2.,kUwire,kVwire, puv_save[2]);
 	flag4 = gds.crossing_point(dis_u[1]+u_pitch/2.,dis_v[2]+v_pitch/2.,kUwire,kVwire, puv_save[3]);
 	flag5 = gds.crossing_point(dis_u[1],dis_v[2],kUwire,kVwire, puv_save[4]);
-	if (flag1 && puv_save[0].z > bmin_w && puv_save[0].z < bmax_w 
-	    ||flag2 && puv_save[1].z > bmin_w && puv_save[1].z < bmax_w 
-	    ||flag3 && puv_save[2].z > bmin_w && puv_save[2].z < bmax_w 
-	    ||flag4 && puv_save[3].z > bmin_w && puv_save[3].z < bmax_w 
-	    ||flag5 && puv_save[4].z > bmin_w && puv_save[4].z < bmax_w ){
+	flag_qx = false;
+	
+	if (flag1 && puv_save[0].z > bmin_w && puv_save[0].z < bmax_w){
 	  pcell.push_back(puv_save[0]);
+	  flag_qx = true;
+	} 
+	if (flag2 && puv_save[1].z > bmin_w && puv_save[1].z < bmax_w ){
 	  pcell.push_back(puv_save[1]);
+	  flag_qx = true;
+	}
+	if (flag3 && puv_save[2].z > bmin_w && puv_save[2].z < bmax_w ){
 	  pcell.push_back(puv_save[2]);
+	  flag_qx = true;
+	}
+	if (flag4 && puv_save[3].z > bmin_w && puv_save[3].z < bmax_w ){
 	  pcell.push_back(puv_save[3]);
+	  flag_qx = true;
+	}
+	if (flag5 && puv_save[4].z > bmin_w && puv_save[4].z < bmax_w ){
+	  pcell.push_back(puv_save[4]);
+	  flag_qx = true;
+	}
+
+	if (flag_qx){
 	  break;
 	}
       }
@@ -781,15 +1059,29 @@ WireCell::SlimMergeGeomCell* WireCell2dToy::LowmemTiling::create_slim_merge_cell
 	flag3 = gds.crossing_point(dis_u[1]-u_pitch/2.,dis_v[2]+v_pitch/2.,kUwire,kVwire, puv_save[2]);
 	flag4 = gds.crossing_point(dis_u[1]+u_pitch/2.,dis_v[2]+v_pitch/2.,kUwire,kVwire, puv_save[3]);
 	flag5 = gds.crossing_point(dis_u[1],dis_v[2],kUwire,kVwire, puv_save[4]);
-	if (flag1 && puv_save[0].z > bmin_w && puv_save[0].z < bmax_w 
-	    ||flag2 && puv_save[1].z > bmin_w && puv_save[1].z < bmax_w 
-	    ||flag3 && puv_save[2].z > bmin_w && puv_save[2].z < bmax_w 
-	    ||flag4 && puv_save[3].z > bmin_w && puv_save[3].z < bmax_w 
-	    ||flag5 && puv_save[4].z > bmin_w && puv_save[4].z < bmax_w ){
+	flag_qx = false;
+
+	if (flag1 && puv_save[0].z > bmin_w && puv_save[0].z < bmax_w ){
 	  pcell.push_back(puv_save[0]);
+	  flag_qx = true;
+	}
+	if (flag2 && puv_save[1].z > bmin_w && puv_save[1].z < bmax_w ){
 	  pcell.push_back(puv_save[1]);
+	  flag_qx = true;
+	}
+	if (flag3 && puv_save[2].z > bmin_w && puv_save[2].z < bmax_w ){
 	  pcell.push_back(puv_save[2]);
+	  flag_qx = true;
+	}
+	if (flag4 && puv_save[3].z > bmin_w && puv_save[3].z < bmax_w ){
 	  pcell.push_back(puv_save[3]);
+	  flag_qx = true;
+	}
+	if (flag5 && puv_save[4].z > bmin_w && puv_save[4].z < bmax_w ){
+	  pcell.push_back(puv_save[4]);
+	  flag_qx = true;
+	}
+	if (flag_qx){
 	  break;
 	}
       }
