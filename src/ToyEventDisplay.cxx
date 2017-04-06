@@ -172,6 +172,45 @@ void ToyEventDisplay::draw_bad_region(WireCell::ChirpMap& chirpmap, int time, in
 
 }
 
+int ToyEventDisplay::draw_wires(WireCell::GeomWireSelection& wires, TString option){
+  
+ 
+    for (int j=0;j!=wires.size();j++){
+      
+      const WireCell::GeomWire *wire = wires.at(j);
+      
+      
+      
+       float pitch = gds->pitch(wire->plane());
+      float angle = gds->angle(wire->plane());
+      //std::cout << pitch/units::mm << " " << angle << std::endl;
+      
+      TLine *l1 = new TLine(wire->point1().z/units::m - pitch/2./units::m/std::cos(angle/units::radian) ,wire->point1().y/units::m,
+			    wire->point2().z/units::m - pitch/2./units::m/std::cos(angle/units::radian) ,wire->point2().y/units::m);
+      l1->Draw(option);
+      l1->SetLineStyle(1);
+      
+      TLine *l2 = new TLine(wire->point1().z/units::m + pitch/2./units::m/std::cos(angle/units::radian) ,wire->point1().y/units::m,
+			    wire->point2().z/units::m + pitch/2./units::m/std::cos(angle/units::radian) ,wire->point2().y/units::m);
+      l2->Draw(option);
+      l2->SetLineStyle(1);
+      
+      TLine *l3 = new TLine(wire->point1().z/units::m  ,wire->point1().y/units::m,
+			    wire->point2().z/units::m  ,wire->point2().y/units::m);
+      l3->SetLineColor(2);
+      l3->Draw(option);
+      l3->SetLineStyle(1);
+    }
+    
+    // break;
+    
+
+
+
+  
+  return 0;
+}
+
 int ToyEventDisplay::draw_slice(const WireCell::Slice& slice, TString option)
 {
   
@@ -207,15 +246,18 @@ int ToyEventDisplay::draw_slice(const WireCell::Slice& slice, TString option)
 	 TLine *l1 = new TLine(wire->point1().z/units::m - pitch/2./units::m/std::cos(angle/units::radian) ,wire->point1().y/units::m,
 			       wire->point2().z/units::m - pitch/2./units::m/std::cos(angle/units::radian) ,wire->point2().y/units::m);
 	 l1->Draw(option);
-	 
+	 l1->SetLineStyle(7);
+
 	 TLine *l2 = new TLine(wire->point1().z/units::m + pitch/2./units::m/std::cos(angle/units::radian) ,wire->point1().y/units::m,
 			       wire->point2().z/units::m + pitch/2./units::m/std::cos(angle/units::radian) ,wire->point2().y/units::m);
 	 l2->Draw(option);
+	 l2->SetLineStyle(7);
 	 
 	 TLine *l3 = new TLine(wire->point1().z/units::m  ,wire->point1().y/units::m,
 			       wire->point2().z/units::m  ,wire->point2().y/units::m);
 	 l3->SetLineColor(2);
 	 l3->Draw(option);
+	 l3->SetLineStyle(7);
        }
        
        // break;
@@ -236,15 +278,18 @@ int ToyEventDisplay::draw_slice(const WireCell::Slice& slice, TString option)
       TLine *l1 = new TLine(wire->point1().z/units::m - pitch/2./units::m/std::cos(angle/units::radian) ,wire->point1().y/units::m,
 			    wire->point2().z/units::m - pitch/2./units::m/std::cos(angle/units::radian) ,wire->point2().y/units::m);
       l1->Draw(option);
-      
+      l1->SetLineStyle(7);
+
       TLine *l2 = new TLine(wire->point1().z/units::m + pitch/2./units::m/std::cos(angle/units::radian) ,wire->point1().y/units::m,
 			    wire->point2().z/units::m + pitch/2./units::m/std::cos(angle/units::radian) ,wire->point2().y/units::m);
       l2->Draw(option);
+      l2->SetLineStyle(7);
       
       TLine *l3 = new TLine(wire->point1().z/units::m  ,wire->point1().y/units::m,
 			    wire->point2().z/units::m  ,wire->point2().y/units::m);
       l3->SetLineColor(2);
       l3->Draw(option);
+      l3->SetLineStyle(7);
     }
   }
     // }

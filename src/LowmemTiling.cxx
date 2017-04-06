@@ -47,6 +47,74 @@ WireCell2dToy::LowmemTiling::LowmemTiling(int time_slice, int nrebin, WireCell::
 //   return false;
 // }
 
+bool WireCell2dToy::LowmemTiling::check_crossing(const WireCell::GeomWire* wire1, const WireCell::GeomWire* wire2, float pitch1, float pitch2, WirePlaneType_t plane, float min, float max, float tolerance){
+  
+  float dis1 = gds.wire_dist(*wire1);
+  float dis2 = gds.wire_dist(*wire2);  
+  
+  bool flag;
+  float dis;
+  std::vector<Vector> puv_save(5);
+  
+  flag = gds.crossing_point(dis1-pitch1/4.,dis2-pitch2/4.,wire1->plane(),wire2->plane(), puv_save[0]);
+  dis = gds.wire_dist(puv_save[0],plane);
+  if (flag){
+    if (dis >= min+tolerance && dis <= max-tolerance)
+      return true;
+  }
+  flag = gds.crossing_point(dis1-pitch1/4.,dis2+pitch2/4.,wire1->plane(),wire2->plane(), puv_save[0]);
+  dis = gds.wire_dist(puv_save[0],plane);
+  if (flag){
+    if (dis >= min+tolerance && dis <= max-tolerance)
+      return true;
+  }
+  flag = gds.crossing_point(dis1+pitch1/4.,dis2-pitch2/4.,wire1->plane(),wire2->plane(), puv_save[0]);
+  dis = gds.wire_dist(puv_save[0],plane);
+  if (flag){
+    if (dis >= min+tolerance && dis <= max-tolerance)
+      return true;
+  }
+  flag = gds.crossing_point(dis1+pitch1/4.,dis2+pitch2/4.,wire1->plane(),wire2->plane(), puv_save[0]);
+  dis = gds.wire_dist(puv_save[0],plane);
+  if (flag){
+    if (dis >= min+tolerance && dis <= max-tolerance)
+      return true;
+  }
+  flag = gds.crossing_point(dis1-pitch1/2.,dis2-pitch2/2.,wire1->plane(),wire2->plane(), puv_save[0]);
+  dis = gds.wire_dist(puv_save[0],plane);
+  if (flag){
+    if (dis >= min+tolerance && dis <= max-tolerance)
+      return true;
+  }
+  flag = gds.crossing_point(dis1-pitch1/2.,dis2+pitch2/2.,wire1->plane(),wire2->plane(), puv_save[0]);
+  dis = gds.wire_dist(puv_save[0],plane);
+  if (flag){
+    if (dis >= min+tolerance && dis <= max-tolerance)
+      return true;
+  }
+  flag = gds.crossing_point(dis1+pitch1/2.,dis2-pitch2/2.,wire1->plane(),wire2->plane(), puv_save[0]);
+  dis = gds.wire_dist(puv_save[0],plane);
+  if (flag){
+    if (dis >= min+tolerance && dis <= max-tolerance)
+      return true;
+  }
+  flag = gds.crossing_point(dis1+pitch1/2.,dis2+pitch2/2.,wire1->plane(),wire2->plane(), puv_save[0]);
+  dis = gds.wire_dist(puv_save[0],plane);
+  if (flag){
+    if (dis >= min+tolerance && dis <= max-tolerance)
+      return true;
+  }
+  flag = gds.crossing_point(dis1,dis2,wire1->plane(),wire2->plane(), puv_save[0]);
+  dis = gds.wire_dist(puv_save[0],plane);
+  if (flag){
+    if (dis >= min+tolerance && dis <= max-tolerance)
+      return true;
+  }
+  
+  return false;
+}
+
+
 void WireCell2dToy::LowmemTiling::test_crossing(PointVector& pcell, float dis_u, float dis_v, float bmin_w, float bmax_w, float u_pitch, float v_pitch, const GeomWire* uwire_1, const GeomWire* uwire_2, const GeomWire *vwire_1, const GeomWire *vwire_2, bool flag_test_u, bool flag_test_v){
   
   std::vector<Vector> puv_save(5);
@@ -61,23 +129,28 @@ void WireCell2dToy::LowmemTiling::test_crossing(PointVector& pcell, float dis_u,
   bool flag4 = gds.crossing_point(dis_u+u_pitch/2.,dis_v+v_pitch/2.,kUwire,kVwire, puv_save[3]);
   bool flag5 = gds.crossing_point(dis_u,dis_v,kUwire,kVwire, puv_save[4]);
   
-  if (flag1 && puv_save[0].z > bmin_w && puv_save[0].z < bmax_w){
+  float dis[5];
+  for (int i=0;i!=5;i++){
+    dis[i] = gds.wire_dist(puv_save[i],kYwire);
+  }
+
+  if (flag1 && dis[0] > bmin_w && dis[0] < bmax_w){
     pcell.push_back(puv_save[0]);
     flag_qx = true;
   }
-  if (flag2 && puv_save[1].z > bmin_w && puv_save[1].z < bmax_w ){
+  if (flag2 && dis[1] > bmin_w && dis[1] < bmax_w ){
     pcell.push_back(puv_save[1]);
     flag_qx = true;
   }
-  if (flag3 && puv_save[2].z > bmin_w && puv_save[2].z < bmax_w){
+  if (flag3 && dis[2] > bmin_w && dis[2] < bmax_w){
     pcell.push_back(puv_save[2]);
     flag_qx = true;
   }
-  if (flag4 && puv_save[3].z > bmin_w && puv_save[3].z < bmax_w){
+  if (flag4 && dis[3] > bmin_w && dis[3] < bmax_w){
     pcell.push_back(puv_save[3]);
     flag_qx = true;
   }
-  if (flag5 && puv_save[4].z > bmin_w && puv_save[4].z < bmax_w ){
+  if (flag5 && dis[4] > bmin_w && dis[4] < bmax_w ){
     // if one is found, push the entire cell in ...
     pcell.push_back(puv_save[4]);
     flag_qx = true;
@@ -102,24 +175,27 @@ void WireCell2dToy::LowmemTiling::test_crossing(PointVector& pcell, float dis_u,
 	  flag4 = gds.crossing_point(dis_u1+u_pitch/2.,dis_v+v_pitch/2.,kUwire,kVwire, puv_save[3]);
 	  flag5 = gds.crossing_point(dis_u1,dis_v,kUwire,kVwire, puv_save[4]);
 	  //flag_qx = false;
+	  for (int i=0;i!=5;i++){
+	    dis[i] = gds.wire_dist(puv_save[i],kYwire);
+	  }
 	  
-	  if (flag1 && puv_save[0].z > bmin_w && puv_save[0].z < bmax_w){
+	  if (flag1 && dis[0] > bmin_w && dis[0] < bmax_w){
 	    pcell.push_back(puv_save[0]);
 	    //flag_qx = true;
 	  }
-	  if (flag2 && puv_save[1].z > bmin_w && puv_save[1].z < bmax_w ){
+	  if (flag2 && dis[1] > bmin_w && dis[1] < bmax_w ){
 	    pcell.push_back(puv_save[1]);
 	    //flag_qx = true;
 	  }
-	  if (flag3 && puv_save[2].z > bmin_w && puv_save[2].z < bmax_w ){
+	  if (flag3 && dis[2] > bmin_w && dis[2] < bmax_w ){
 	    pcell.push_back(puv_save[2]);
 	    //flag_qx = true;
 	  }
-	  if (flag4 && puv_save[3].z > bmin_w && puv_save[3].z < bmax_w ){
+	  if (flag4 && dis[3] > bmin_w && dis[3] < bmax_w ){
 	    pcell.push_back(puv_save[3]);
 	    //flag_qx = true;
 	  }
-	  if (flag5 && puv_save[4].z > bmin_w && puv_save[4].z < bmax_w ){
+	  if (flag5 && dis[4] > bmin_w && dis[4] < bmax_w ){
 	    pcell.push_back(puv_save[4]);
 	    //flag_qx = true;
 	  }
@@ -143,24 +219,28 @@ void WireCell2dToy::LowmemTiling::test_crossing(PointVector& pcell, float dis_u,
 	  flag3 = gds.crossing_point(dis_u1-u_pitch/2.,dis_v+v_pitch/2.,kUwire,kVwire, puv_save[2]);
 	  flag4 = gds.crossing_point(dis_u1+u_pitch/2.,dis_v+v_pitch/2.,kUwire,kVwire, puv_save[3]);
 	  flag5 = gds.crossing_point(dis_u1,dis_v,kUwire,kVwire, puv_save[4]);
+	  for (int i=0;i!=5;i++){
+	    dis[i] = gds.wire_dist(puv_save[i],kYwire);
+	  }
+
 	  //flag_qx = false;
-	  if (flag1 && puv_save[0].z > bmin_w && puv_save[0].z < bmax_w){
+	  if (flag1 && dis[0] > bmin_w && dis[0] < bmax_w){
 	    pcell.push_back(puv_save[0]);
 	    //flag_qx = true;
 	  }
-	  if (flag2 && puv_save[1].z > bmin_w && puv_save[1].z < bmax_w ){
+	  if (flag2 && dis[1] > bmin_w && dis[1] < bmax_w ){
 	    pcell.push_back(puv_save[1]);
 	    //flag_qx = true;
 	  }
-	  if (flag3 && puv_save[2].z > bmin_w && puv_save[2].z < bmax_w ){
+	  if (flag3 && dis[2] > bmin_w && dis[2] < bmax_w ){
 	    pcell.push_back(puv_save[2]);
 	    //flag_qx = true;
 	  }
-	  if (flag4 && puv_save[3].z > bmin_w && puv_save[3].z < bmax_w ){
+	  if (flag4 && dis[3] > bmin_w && dis[3] < bmax_w ){
 	    pcell.push_back(puv_save[3]);
 	    //flag_qx = true;
 	  }
-	  if (flag5 && puv_save[4].z > bmin_w && puv_save[4].z < bmax_w ){
+	  if (flag5 && dis[4] > bmin_w && dis[4] < bmax_w ){
 	    pcell.push_back(puv_save[4]);
 	    //flag_qx = true;
 	  }
@@ -188,23 +268,27 @@ void WireCell2dToy::LowmemTiling::test_crossing(PointVector& pcell, float dis_u,
 	  flag4 = gds.crossing_point(dis_u+u_pitch/2.,dis_v1+v_pitch/2.,kUwire,kVwire, puv_save[3]);
 	  flag5 = gds.crossing_point(dis_u,dis_v1,kUwire,kVwire, puv_save[4]);
 	  //flag_qx = false;
-	  if (flag1 && puv_save[0].z > bmin_w && puv_save[0].z < bmax_w ){
+	  for (int i=0;i!=5;i++){
+	    dis[i] = gds.wire_dist(puv_save[i],kYwire);
+	  }
+
+	  if (flag1 && dis[0] > bmin_w && dis[0] < bmax_w ){
 	    pcell.push_back(puv_save[0]);
 	    //flag_qx = true;
 	  }
-	  if (flag2 && puv_save[1].z > bmin_w && puv_save[1].z < bmax_w ){
+	  if (flag2 && dis[1] > bmin_w && dis[1] < bmax_w ){
 	    //flag_qx = true;
 	    pcell.push_back(puv_save[1]);
 	  }
-	  if (flag3 && puv_save[2].z > bmin_w && puv_save[2].z < bmax_w ){
+	  if (flag3 && dis[2] > bmin_w && dis[2] < bmax_w ){
 	    // flag_qx = true;
 	    pcell.push_back(puv_save[2]);
 	  }
-	  if (flag4 && puv_save[3].z > bmin_w && puv_save[3].z < bmax_w ){
+	  if (flag4 && dis[3] > bmin_w && dis[3] < bmax_w ){
 	    pcell.push_back(puv_save[3]);
 	    // flag_qx = true;
 	  }
-	  if (flag5 && puv_save[4].z > bmin_w && puv_save[4].z < bmax_w ){
+	  if (flag5 && dis[4] > bmin_w && dis[4] < bmax_w ){
 	    pcell.push_back(puv_save[4]);
 	    //flag_qx = true;
 	  } 
@@ -228,23 +312,26 @@ void WireCell2dToy::LowmemTiling::test_crossing(PointVector& pcell, float dis_u,
 	  flag4 = gds.crossing_point(dis_u+u_pitch/2.,dis_v1+v_pitch/2.,kUwire,kVwire, puv_save[3]);
 	  flag5 = gds.crossing_point(dis_u,dis_v1,kUwire,kVwire, puv_save[4]);
 	  //flag_qx = false;
-	  if (flag1 && puv_save[0].z > bmin_w && puv_save[0].z < bmax_w){
+	  for (int i=0;i!=5;i++){
+	    dis[i] = gds.wire_dist(puv_save[i],kYwire);
+	  }
+	  if (flag1 && dis[0] > bmin_w && dis[0] < bmax_w){
 	    pcell.push_back(puv_save[0]);
 	    //flag_qx = true;
 	  }
-	  if ( flag2 && puv_save[1].z > bmin_w && puv_save[1].z < bmax_w ){
+	  if ( flag2 && dis[1] > bmin_w && dis[1] < bmax_w ){
 	    pcell.push_back(puv_save[1]);
 	    //flag_qx = true;
 	  }
-	  if (flag3 && puv_save[2].z > bmin_w && puv_save[2].z < bmax_w ){
+	  if (flag3 && dis[2] > bmin_w && dis[2] < bmax_w ){
 	    pcell.push_back(puv_save[2]);
 	    //flag_qx = true;
 	  }
-	  if (flag4 && puv_save[3].z > bmin_w && puv_save[3].z < bmax_w ){
+	  if (flag4 && dis[3] > bmin_w && dis[3] < bmax_w ){
 	    pcell.push_back(puv_save[3]);
 	    //flag_qx = true;
 	  }
-	  if (flag5 && puv_save[4].z > bmin_w && puv_save[4].z < bmax_w ){
+	  if (flag5 && dis[4] > bmin_w && dis[4] < bmax_w ){
 	    pcell.push_back(puv_save[4]);
 	    //flag_qx = true;
 	  }
@@ -265,7 +352,7 @@ WireCell::SlimMergeGeomCell* WireCell2dToy::LowmemTiling::create_slim_merge_cell
   float v_pitch = gds.pitch(kVwire);
   float w_pitch = gds.pitch(kYwire);
   
-  float tolerance = 0.1 * units::mm;
+  float tolerance = 0.1 * units::mm / 2.;
   
   // find U plane wires
   float dis_u[3];
@@ -322,10 +409,8 @@ WireCell::SlimMergeGeomCell* WireCell2dToy::LowmemTiling::create_slim_merge_cell
     }
     
     int ident = holder.get_ncell();
-    SlimMergeGeomCell *mcell = new SlimMergeGeomCell(ident); 
-    holder.AddCell(mcell);
+   
 
-    // Inser U
     const GeomWire* uwire_min = gds.closest(u_min,WirePlaneType_t(0));
     if (uwire_min->index() < uwire_1->index()){
       uwire_min = uwire_1;
@@ -338,12 +423,6 @@ WireCell::SlimMergeGeomCell* WireCell2dToy::LowmemTiling::create_slim_merge_cell
     }else if (uwire_max->index() > uwire_2->index()){
       uwire_max = uwire_2;
     }
-    for (int k=uwire_min->index();k!=uwire_max->index()+1;k++){
-      const GeomWire *uwire = gds.by_planeindex(WirePlaneType_t(0),k);
-      mcell->AddWire(uwire,WirePlaneType_t(0));
-    }
-	
-    // Insert V
     const GeomWire* vwire_min = gds.closest(v_min,WirePlaneType_t(1));
     if (vwire_min->index() < vwire_1->index()){
       vwire_min = vwire_1;
@@ -356,12 +435,6 @@ WireCell::SlimMergeGeomCell* WireCell2dToy::LowmemTiling::create_slim_merge_cell
     }else if (vwire_max->index() > vwire_2->index()){
       vwire_max = vwire_2;
     }
-    for (int k=vwire_min->index();k!=vwire_max->index()+1;k++){
-      const GeomWire *vwire = gds.by_planeindex(WirePlaneType_t(1),k);
-      mcell->AddWire(vwire,WirePlaneType_t(1));
-    }
-
-    //Insert W
     const GeomWire* wwire_min = gds.closest(w_min,WirePlaneType_t(2));//.bounds(w_min,WirePlaneType_t(2)).second;
     if (wwire_min->index() < wwire_1->index()){
       wwire_min = wwire_1;
@@ -374,12 +447,204 @@ WireCell::SlimMergeGeomCell* WireCell2dToy::LowmemTiling::create_slim_merge_cell
     }else if (wwire_max->index() > wwire_2->index()){
       wwire_max = wwire_2;
     }
-    for (int k=wwire_min->index();k!=wwire_max->index()+1;k++){
-      const GeomWire *wwire = gds.by_planeindex(WirePlaneType_t(2),k);
-      mcell->AddWire(wwire,WirePlaneType_t(2));
+    u_min = gds.wire_dist(*uwire_min)-u_pitch/2.;
+    u_max = gds.wire_dist(*uwire_max)+u_pitch/2.;
+    v_min = gds.wire_dist(*vwire_min)-v_pitch/2.;
+    v_max = gds.wire_dist(*vwire_max)+v_pitch/2.;
+    w_min = gds.wire_dist(*wwire_min)-w_pitch/2.;
+    w_max = gds.wire_dist(*wwire_max)+w_pitch/2.;
+    
+
+    GeomWireSelection ugroup,vgroup,wgroup;
+    // find U group
+    if (uwire_min!=0)
+      ugroup.push_back(uwire_min);
+    if (uwire_max!=uwire_min&&uwire_max!=0){
+      ugroup.push_back(uwire_max);
+      const GeomWire* uwire_p1 = gds.by_planeindex(WirePlaneType_t(0),uwire_min->index()+1);
+      if (uwire_p1!=uwire_max&&uwire_p1!=0){
+	ugroup.push_back(uwire_p1);
+	const GeomWire* uwire_n1 = gds.by_planeindex(WirePlaneType_t(0),uwire_max->index()-1);
+	if (uwire_n1!=uwire_p1&&uwire_n1!=0){
+	  ugroup.push_back(uwire_n1);
+	}
+      }
+    }
+    // find V group
+    if (vwire_min!=0)
+      vgroup.push_back(vwire_min);
+    if (vwire_max!=vwire_min&&vwire_max!=0){
+      vgroup.push_back(vwire_max);
+      const GeomWire* vwire_p1 = gds.by_planeindex(WirePlaneType_t(1),vwire_min->index()+1);
+      if (vwire_p1!=vwire_max&&vwire_p1!=0){
+	vgroup.push_back(vwire_p1);
+	const GeomWire* vwire_n1 = gds.by_planeindex(WirePlaneType_t(1),vwire_max->index()-1);
+	if (vwire_n1!=vwire_p1&&vwire_n1!=0){
+	  vgroup.push_back(vwire_n1);
+	}
+      }
+    }
+    // find W group
+    if (wwire_min!=0)
+      wgroup.push_back(wwire_min);
+    if (wwire_max!=wwire_min&&wwire_max!=0){
+      wgroup.push_back(wwire_max);
+      const GeomWire* wwire_p1 = gds.by_planeindex(WirePlaneType_t(2),wwire_min->index()+1);
+      if (wwire_p1!=wwire_max&&wwire_p1!=0){
+	wgroup.push_back(wwire_p1);
+	const GeomWire* wwire_n1 = gds.by_planeindex(WirePlaneType_t(2),wwire_max->index()-1);
+	if (wwire_n1!=wwire_p1&&wwire_n1!=0){
+	  wgroup.push_back(wwire_n1);
+	}
+      }
+    }
+    // initialize map
+    std::map<const GeomWire*, int> wiremap;
+    for (auto it = ugroup.begin();it!=ugroup.end();it++){
+      wiremap[*it]=0;
+    }
+    for (auto it = vgroup.begin();it!=vgroup.end();it++){
+      wiremap[*it]=0;
+    }
+    for (auto it = wgroup.begin();it!=wgroup.end();it++){
+      wiremap[*it]=0;
+    }
+    
+    // std::cout << ugroup.size() << " " << vgroup.size() << " " << wgroup.size() << " " 
+    // 	      << uwire_max->index()-uwire_min->index()+1 << " " 
+    // 	      << vwire_max->index()-vwire_min->index()+1 << " " 
+    // 	      << wwire_max->index()-wwire_min->index()+1 << " " 
+    // 	      << std::endl;
+    
+    // check crossing 
+    for (int i=0;i!=ugroup.size();i++){
+      const GeomWire *uwire = ugroup.at(i);
+      for (int j=0;j!=vgroup.size();j++){
+	const GeomWire *vwire = vgroup.at(j);
+	if (check_crossing(uwire, vwire, u_pitch, v_pitch, WirePlaneType_t(2), w_min, w_max, tolerance)){
+	  wiremap[uwire]++;
+	  wiremap[vwire]++;
+	}
+      }
+    }
+    for (int i=0;i!=wgroup.size();i++){
+      const GeomWire *wwire = wgroup.at(i);
+      for (int j=0;j!=vgroup.size();j++){
+	const GeomWire *vwire = vgroup.at(j);
+	if (check_crossing(wwire, vwire, w_pitch, v_pitch, WirePlaneType_t(0), u_min, u_max, tolerance)){
+	  wiremap[wwire]++;
+	  wiremap[vwire]++;
+	}
+      }
+    }
+    for (int i=0;i!=ugroup.size();i++){
+      const GeomWire *uwire = ugroup.at(i);
+      for (int j=0;j!=wgroup.size();j++){
+	const GeomWire *wwire = wgroup.at(j);
+	if (check_crossing(uwire, wwire, u_pitch, w_pitch, WirePlaneType_t(1), v_min, v_max, tolerance)){
+	  wiremap[uwire]++;
+	  wiremap[wwire]++;
+	}
+      }
     }
 
-    return mcell;
+    
+    // 	
+    // 	for (int k=0;k!=wgroup.size();k++){
+    // 	  const GeomWire *wwire = wgroup.at(k);
+    // 	  if (check_crossing(uwire,vwire,wwire,u_pitch,v_pitch,w_pitch,tolerance)){
+    // 	    wiremap[uwire]++;
+    // 	    wiremap[vwire]++;
+    // 	    wiremap[wwire]++;
+    // 	  }
+    // 	}
+    //   }
+    //   //      std::cout << wiremap[uwire] << " " << u_pitch << " " << tolerance << std::endl;
+    // }
+
+    int flag = 1;
+    if (wiremap[uwire_min]==0 ){
+      const GeomWire* wire_temp = gds.by_planeindex(WirePlaneType_t(0),uwire_min->index()+1);
+      if (wiremap.find(wire_temp)!=wiremap.end() && wiremap[wire_temp]>0){ 
+	uwire_min = wire_temp;
+      }else{
+	flag = 0;
+      }
+    }
+    if (flag==1){
+      if (wiremap[vwire_min]==0 ){
+	const GeomWire* wire_temp = gds.by_planeindex(WirePlaneType_t(1),vwire_min->index()+1);
+	if (wiremap.find(wire_temp)!=wiremap.end() && wiremap[wire_temp]>0){ 
+	  vwire_min = wire_temp;
+	}else{
+	  flag = 0;
+	}
+      }
+    }
+    if (flag==1){
+      if (wiremap[wwire_min]==0 ){
+	const GeomWire* wire_temp = gds.by_planeindex(WirePlaneType_t(2),wwire_min->index()+1);
+	if (wiremap.find(wire_temp)!=wiremap.end() && wiremap[wire_temp]>0){ 
+	  wwire_min = wire_temp;
+	}else{
+	  flag = 0;
+	}
+      }
+    }
+    if (flag==1){
+      if (wiremap[uwire_max]==0 ){
+	const GeomWire* wire_temp = gds.by_planeindex(WirePlaneType_t(0),uwire_max->index()-1);
+	if (wiremap.find(wire_temp)!=wiremap.end() && wiremap[wire_temp]>0){ 
+	  uwire_max = wire_temp;
+	}else{
+	  flag = 0;
+	}
+      }
+    }
+    if (flag==1){
+      if (wiremap[vwire_max]==0 ){
+	const GeomWire* wire_temp = gds.by_planeindex(WirePlaneType_t(1),vwire_max->index()-1);
+	if (wiremap.find(wire_temp)!=wiremap.end() && wiremap[wire_temp]>0){ 
+	  vwire_max = wire_temp;
+	}else{
+	  flag = 0;
+	}
+      }
+    }
+    if (flag==1){
+      if (wiremap[wwire_max]==0 ){
+	const GeomWire* wire_temp = gds.by_planeindex(WirePlaneType_t(2),wwire_max->index()-1);
+	if (wiremap.find(wire_temp)!=wiremap.end() && wiremap[wire_temp]>0){ 
+	  wwire_max = wire_temp;
+	}else{
+	  flag = 0;
+	}
+      }
+    }
+
+   
+   
+    if (flag==1){
+      SlimMergeGeomCell *mcell = new SlimMergeGeomCell(ident); 
+      holder.AddCell(mcell);
+      // Inser U    
+      for (int k=uwire_min->index();k!=uwire_max->index()+1;k++){
+	const GeomWire *uwire = gds.by_planeindex(WirePlaneType_t(0),k);
+	mcell->AddWire(uwire,WirePlaneType_t(0));
+      }
+      //Insert V
+      for (int k=vwire_min->index();k!=vwire_max->index()+1;k++){
+	const GeomWire *vwire = gds.by_planeindex(WirePlaneType_t(1),k);
+	mcell->AddWire(vwire,WirePlaneType_t(1));
+      }
+      // Insert W
+      for (int k=wwire_min->index();k!=wwire_max->index()+1;k++){
+	const GeomWire *wwire = gds.by_planeindex(WirePlaneType_t(2),k);
+	mcell->AddWire(wwire,WirePlaneType_t(2));
+      }
+      
+      return mcell;
+    }
   }
   
   return 0;
@@ -450,6 +715,8 @@ void WireCell2dToy::LowmemTiling::init_good_cells(const WireCell::Slice& slice, 
   
 
 }
+
+
 
 
 void WireCell2dToy::LowmemTiling::check_bad_cells(WireCell2dToy::LowmemTiling* tiling,WireCell::ChirpMap& uplane_map, WireCell::ChirpMap& vplane_map, WireCell::ChirpMap& wplane_map){
