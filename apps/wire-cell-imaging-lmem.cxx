@@ -314,15 +314,16 @@ int main(int argc, char* argv[])
   int start_num = 0 ;
   int end_num = sds.size()-1;
 
-  start_num = 455;
-  end_num = 455;
+  start_num = 532;
+  end_num = 532;
   
 
   //test 
   // uplane_map.begin()->second.second=5000;
 
   for (int i=start_num;i!=end_num+1;i++){
- 
+    //std::cout << i << std::endl;
+
     sds.jump(i);
     WireCell::Slice slice = sds.get();
     
@@ -357,9 +358,13 @@ int main(int argc, char* argv[])
       for (int k=0;k!=((SlimMergeGeomCell*)lowmemtiling[i]->get_three_good_wire_cells().at(j))->get_wwires().size();k++){
 	dwires.push_back(((SlimMergeGeomCell*)lowmemtiling[i]->get_three_good_wire_cells().at(j))->get_wwires().at(k));
       }
-      sort_by_planeindex(dwires);
-      //}
       // std::cout << dwires.size() << std::endl;
+      // for (int j=0;j!=dwires.size();j++){
+      // 	std::cout << dwires.at(j)->plane() << " " << dwires.at(j)->index() << std::endl;
+      // }
+      sort_by_ident(dwires);
+      //}
+      
       vec1_wires.push_back(dwires);
 	//      dwires.insert(dwires.begin(),((SlimMergeGeomCell*)lowmemtiling[i]->get_three_good_wire_cells().at(j))->get_uwires().begin(),((SlimMergeGeomCell*)lowmemtiling[i]->get_three_good_wire_cells().at(j))->get_uwires().end());
     }
@@ -392,19 +397,31 @@ int main(int argc, char* argv[])
       for (int k = 0; k!= ((MergeGeomCell*)mergetiling[i]->get_allcell().at(j))->get_wwires().size(); k++){
 	dwires.push_back( ((MergeGeomCell*)mergetiling[i]->get_allcell().at(j))->get_wwires().at(k));
       }
-      sort_by_planeindex(dwires);
+      sort_by_ident(dwires);
       // std::cout << dwires.size() << std::endl;
       vec2_wires.push_back(dwires);
     }
     
-    sort(vec1_wires.begin(),vec1_wires.end(),GeomWireSelectionCompare);
-    sort(vec2_wires.begin(),vec2_wires.end(),GeomWireSelectionCompare);
+    bool flag_test = false;
+    if (vec1_wires.size()!=vec2_wires.size())
+      flag_test = true;
     
-
-    
-    for (int j=0;j!=vec1_wires.size();j++){
-      std::cout << vec1_wires.at(j).size() << " " << vec2_wires.at(j).size() << std::endl;
+    if (!flag_test){
+      sort(vec1_wires.begin(),vec1_wires.end(),GeomWireSelectionCompare);
+      sort(vec2_wires.begin(),vec2_wires.end(),GeomWireSelectionCompare);
+      for (int j=0;j!=vec1_wires.size();j++){
+	std::cout << j << " " << vec1_wires.at(j).size() << " " << vec2_wires.at(j).size() << " " << vec1_wires.at(j).at(0)->index() << " " << vec2_wires.at(j).at(0)->index() << std::endl;
+	if (vec1_wires.at(j).size()!=vec2_wires.at(j).size()){
+	  flag_test = true;
+	  //break;
+	}
+	
+      }
     }
+    if(flag_test){
+      std::cout << "Bad " << i << std::endl;
+    }
+    
 
     // if (i==0){
     //   badtiling[i] = new WireCell2dToy::BadTiling(i,nrebin,uplane_map,vplane_map,wplane_map,gds,0,1); // 2 plane bad tiling
@@ -449,7 +466,7 @@ int main(int argc, char* argv[])
     display.init(0,10.3698,-2.33/2.,2.33/2.);
     display.draw_mc(1,WireCell::PointValueVector(),"colz");
     display.draw_slice(slice,""); // draw wire 
-    display.draw_wires(vec1_wires.at(11),"same"); // draw wire 
+    display.draw_wires(vec1_wires.at(64),"same"); // draw wire 
     // // display.draw_bad_region(uplane_map,i,nrebin,0,"same");
     // // display.draw_bad_region(vplane_map,i,nrebin,1,"same");
     // // display.draw_bad_region(wplane_map,i,nrebin,2,"same");
