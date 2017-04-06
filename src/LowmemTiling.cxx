@@ -410,6 +410,7 @@ WireCell::SlimMergeGeomCell* WireCell2dToy::LowmemTiling::create_slim_merge_cell
     
     int ident = holder.get_ncell();
    
+    
 
     const GeomWire* uwire_min = gds.closest(u_min,WirePlaneType_t(0));
     if (uwire_min->index() < uwire_1->index()){
@@ -453,6 +454,12 @@ WireCell::SlimMergeGeomCell* WireCell2dToy::LowmemTiling::create_slim_merge_cell
     v_max = gds.wire_dist(*vwire_max)+v_pitch/2.;
     w_min = gds.wire_dist(*wwire_min)-w_pitch/2.;
     w_max = gds.wire_dist(*wwire_max)+w_pitch/2.;
+    
+    std::cout << uwire_min->index() << " " << uwire_max->index() << " " 
+	      << vwire_min->index() << " " << vwire_max->index() << " " 
+	      << wwire_min->index() << " " << wwire_max->index() << " " 
+	      << vwire_1->index() << " " << vwire_2->index() << " " 
+	      << w_min/units::m << " " << w_max / units::m << std::endl;
     
 
     GeomWireSelection ugroup,vgroup,wgroup;

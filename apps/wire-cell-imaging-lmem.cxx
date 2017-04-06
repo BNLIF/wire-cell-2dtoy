@@ -64,7 +64,23 @@
 using namespace WireCell;
 using namespace std;
 
-
+bool GeomWireSelectionCompare(GeomWireSelection a, GeomWireSelection b) {
+  if (a.size() > b.size()){
+    return true;
+  }else if (a.size() < b.size()){
+    return false;
+  }else{
+    for (int i=0;i!=a.size();i++){
+      if (a.at(i)->ident() > b.at(i)->ident()){
+        return true;
+      }else if (a.at(i)->ident() < b.at(i)->ident()){
+        return false;
+      }
+    }
+    return false;
+  }
+  return false;
+}
 
 
 int main(int argc, char* argv[])
@@ -318,28 +334,34 @@ int main(int argc, char* argv[])
     }
     lowmemtiling[i]->init_good_cells(slice,uplane_rms,vplane_rms,wplane_rms);
     
-    std::cout << lowmemtiling[i]->get_three_good_wire_cells().size() << std::endl;
+    //    std::cout << lowmemtiling[i]->get_three_good_wire_cells().size() << std::endl;
+
+    std::vector<GeomWireSelection> vec1_wires;
+    std::vector<GeomWireSelection> vec2_wires;
+    
 
     // GeomWireSelection dwires;
 
     for (int j=0;j!=lowmemtiling[i]->get_three_good_wire_cells().size();j++){
-      std::cout << "N: " << ((SlimMergeGeomCell*)lowmemtiling[i]->get_three_good_wire_cells().at(j))->get_uwires().size() << " "
-     		<< ((SlimMergeGeomCell*)lowmemtiling[i]->get_three_good_wire_cells().at(j))->get_vwires().size() << " " 
-      << ((SlimMergeGeomCell*)lowmemtiling[i]->get_three_good_wire_cells().at(j))->get_wwires().size() << " " << std::endl;
-      
-    //   if (j==0){
-    // 	for (int k=0;k!=((SlimMergeGeomCell*)lowmemtiling[i]->get_three_good_wire_cells().at(j))->get_uwires().size();k++){
-    // 	  dwires.push_back(((SlimMergeGeomCell*)lowmemtiling[i]->get_three_good_wire_cells().at(j))->get_uwires().at(k));
-    // 	}
-    // 	for (int k=0;k!=((SlimMergeGeomCell*)lowmemtiling[i]->get_three_good_wire_cells().at(j))->get_vwires().size();k++){
-    // 	  dwires.push_back(((SlimMergeGeomCell*)lowmemtiling[i]->get_three_good_wire_cells().at(j))->get_vwires().at(k));
-    // 	}
-    // 	for (int k=0;k!=((SlimMergeGeomCell*)lowmemtiling[i]->get_three_good_wire_cells().at(j))->get_wwires().size();k++){
-    // 	  dwires.push_back(((SlimMergeGeomCell*)lowmemtiling[i]->get_three_good_wire_cells().at(j))->get_wwires().at(k));
-    // 	}
-    //}
-
-      //      dwires.insert(dwires.begin(),((SlimMergeGeomCell*)lowmemtiling[i]->get_three_good_wire_cells().at(j))->get_uwires().begin(),((SlimMergeGeomCell*)lowmemtiling[i]->get_three_good_wire_cells().at(j))->get_uwires().end());
+      //std::cout << "N: " << ((SlimMergeGeomCell*)lowmemtiling[i]->get_three_good_wire_cells().at(j))->get_uwires().size() << " "
+      //<< ((SlimMergeGeomCell*)lowmemtiling[i]->get_three_good_wire_cells().at(j))->get_vwires().size() << " " 
+      //<< ((SlimMergeGeomCell*)lowmemtiling[i]->get_three_good_wire_cells().at(j))->get_wwires().size() << " " << std::endl;
+      GeomWireSelection dwires;
+      //   if (j==0){
+      for (int k=0;k!=((SlimMergeGeomCell*)lowmemtiling[i]->get_three_good_wire_cells().at(j))->get_uwires().size();k++){
+	dwires.push_back(((SlimMergeGeomCell*)lowmemtiling[i]->get_three_good_wire_cells().at(j))->get_uwires().at(k));
+      }
+      for (int k=0;k!=((SlimMergeGeomCell*)lowmemtiling[i]->get_three_good_wire_cells().at(j))->get_vwires().size();k++){
+	dwires.push_back(((SlimMergeGeomCell*)lowmemtiling[i]->get_three_good_wire_cells().at(j))->get_vwires().at(k));
+      }
+      for (int k=0;k!=((SlimMergeGeomCell*)lowmemtiling[i]->get_three_good_wire_cells().at(j))->get_wwires().size();k++){
+	dwires.push_back(((SlimMergeGeomCell*)lowmemtiling[i]->get_three_good_wire_cells().at(j))->get_wwires().at(k));
+      }
+      sort_by_planeindex(dwires);
+      //}
+      // std::cout << dwires.size() << std::endl;
+      vec1_wires.push_back(dwires);
+	//      dwires.insert(dwires.begin(),((SlimMergeGeomCell*)lowmemtiling[i]->get_three_good_wire_cells().at(j))->get_uwires().begin(),((SlimMergeGeomCell*)lowmemtiling[i]->get_three_good_wire_cells().at(j))->get_uwires().end());
     }
 
 
@@ -354,15 +376,36 @@ int main(int argc, char* argv[])
 
     mergetiling[i] = new WireCell2dToy::MergeToyTiling(*toytiling[i],i,3);
     
-    std::cout << mergetiling[i]->get_allcell().size() << std::endl;
+    // std::cout << mergetiling[i]->get_allcell().size() << std::endl;
     
     for (int j=0;j!=mergetiling[i]->get_allcell().size();j++){
-      std::cout << "O: " << ((MergeGeomCell*)mergetiling[i]->get_allcell().at(j))->get_uwires().size() << " " 
-    		<< ((MergeGeomCell*)mergetiling[i]->get_allcell().at(j))->get_vwires().size() << " " 
-    		<< ((MergeGeomCell*)mergetiling[i]->get_allcell().at(j))->get_wwires().size() << " " << std::endl;
-     
+      // std::cout << "O: " << ((MergeGeomCell*)mergetiling[i]->get_allcell().at(j))->get_uwires().size() << " " 
+      // 		<< ((MergeGeomCell*)mergetiling[i]->get_allcell().at(j))->get_vwires().size() << " " 
+      // 		<< ((MergeGeomCell*)mergetiling[i]->get_allcell().at(j))->get_wwires().size() << " " << std::endl;
+      GeomWireSelection dwires;
+      for (int k = 0; k!= ((MergeGeomCell*)mergetiling[i]->get_allcell().at(j))->get_uwires().size(); k++){
+	dwires.push_back( ((MergeGeomCell*)mergetiling[i]->get_allcell().at(j))->get_uwires().at(k));
+      }
+      for (int k = 0; k!= ((MergeGeomCell*)mergetiling[i]->get_allcell().at(j))->get_vwires().size(); k++){
+	dwires.push_back( ((MergeGeomCell*)mergetiling[i]->get_allcell().at(j))->get_vwires().at(k));
+      }
+      for (int k = 0; k!= ((MergeGeomCell*)mergetiling[i]->get_allcell().at(j))->get_wwires().size(); k++){
+	dwires.push_back( ((MergeGeomCell*)mergetiling[i]->get_allcell().at(j))->get_wwires().at(k));
+      }
+      sort_by_planeindex(dwires);
+      // std::cout << dwires.size() << std::endl;
+      vec2_wires.push_back(dwires);
     }
     
+    sort(vec1_wires.begin(),vec1_wires.end(),GeomWireSelectionCompare);
+    sort(vec2_wires.begin(),vec2_wires.end(),GeomWireSelectionCompare);
+    
+
+    
+    for (int j=0;j!=vec1_wires.size();j++){
+      std::cout << vec1_wires.at(j).size() << " " << vec2_wires.at(j).size() << std::endl;
+    }
+
     // if (i==0){
     //   badtiling[i] = new WireCell2dToy::BadTiling(i,nrebin,uplane_map,vplane_map,wplane_map,gds,0,1); // 2 plane bad tiling
     //   // badtiling[i] = new WireCell2dToy::BadTiling(i,nrebin,uplane_map,vplane_map,wplane_map,gds,1,1); // 1 plane bad tiling
@@ -375,49 +418,49 @@ int main(int argc, char* argv[])
     // //   toymatrix[i]->Print();
     // // }
 
-    // //draw ... 
-    // TApplication theApp("theApp",&argc,argv);
-    // theApp.SetReturnFromRun(true);
+    //draw ... 
+    TApplication theApp("theApp",&argc,argv);
+    theApp.SetReturnFromRun(true);
     
-    // TCanvas c1("ToyMC","ToyMC",800,600);
-    // c1.Draw();
+    TCanvas c1("ToyMC","ToyMC",800,600);
+    c1.Draw();
     
-    // WireCell2dToy::ToyEventDisplay display(c1, gds);
-    // display.charge_min = 0;
-    // display.charge_max = 5e4;
+    WireCell2dToy::ToyEventDisplay display(c1, gds);
+    display.charge_min = 0;
+    display.charge_max = 5e4;
 
 
-    // gStyle->SetOptStat(0);
+    gStyle->SetOptStat(0);
     
-    // const Int_t NRGBs = 5;
-    // const Int_t NCont = 255;
-    // Int_t MyPalette[NCont];
-    // Double_t stops[NRGBs] = {0.0, 0.34, 0.61, 0.84, 1.0};
-    // Double_t red[NRGBs] = {0.0, 0.0, 0.87 ,1.0, 0.51};
-    // Double_t green[NRGBs] = {0.0, 0.81, 1.0, 0.2 ,0.0};
-    // Double_t blue[NRGBs] = {0.51, 1.0, 0.12, 0.0, 0.0};
-    // Int_t FI = TColor::CreateGradientColorTable(NRGBs, stops, red, green, blue, NCont);
-    // gStyle->SetNumberContours(NCont);
-    // for (int kk=0;kk!=NCont;kk++) MyPalette[kk] = FI+kk;
-    // gStyle->SetPalette(NCont,MyPalette);
+    const Int_t NRGBs = 5;
+    const Int_t NCont = 255;
+    Int_t MyPalette[NCont];
+    Double_t stops[NRGBs] = {0.0, 0.34, 0.61, 0.84, 1.0};
+    Double_t red[NRGBs] = {0.0, 0.0, 0.87 ,1.0, 0.51};
+    Double_t green[NRGBs] = {0.0, 0.81, 1.0, 0.2 ,0.0};
+    Double_t blue[NRGBs] = {0.51, 1.0, 0.12, 0.0, 0.0};
+    Int_t FI = TColor::CreateGradientColorTable(NRGBs, stops, red, green, blue, NCont);
+    gStyle->SetNumberContours(NCont);
+    for (int kk=0;kk!=NCont;kk++) MyPalette[kk] = FI+kk;
+    gStyle->SetPalette(NCont,MyPalette);
 
     
 
-    // display.init(0,10.3698,-2.33/2.,2.33/2.);
-    // display.draw_mc(1,WireCell::PointValueVector(),"colz");
-    // display.draw_slice(slice,""); // draw wire 
-    // display.draw_wires(dwires,"same"); // draw wire 
-    // // // display.draw_bad_region(uplane_map,i,nrebin,0,"same");
-    // // // display.draw_bad_region(vplane_map,i,nrebin,1,"same");
-    // // // display.draw_bad_region(wplane_map,i,nrebin,2,"same");
-    // // display.draw_bad_cell(badtiling[i]->get_cell_all());
+    display.init(0,10.3698,-2.33/2.,2.33/2.);
+    display.draw_mc(1,WireCell::PointValueVector(),"colz");
+    display.draw_slice(slice,""); // draw wire 
+    display.draw_wires(vec1_wires.at(11),"same"); // draw wire 
+    // // display.draw_bad_region(uplane_map,i,nrebin,0,"same");
+    // // display.draw_bad_region(vplane_map,i,nrebin,1,"same");
+    // // display.draw_bad_region(wplane_map,i,nrebin,2,"same");
+    // display.draw_bad_cell(badtiling[i]->get_cell_all());
   
-    // display.draw_cells(toytiling[i]->get_allcell(),"*same");
-    // display.draw_mergecells(mergetiling[i]->get_allcell(),"*same",0); //0 is normal, 1 is only draw the ones containt the truth cell
+    display.draw_cells(toytiling[i]->get_allcell(),"*same");
+    display.draw_mergecells(mergetiling[i]->get_allcell(),"*same",0); //0 is normal, 1 is only draw the ones containt the truth cell
     
-    // // display.draw_wires_charge(toytiling[i]->wcmap(),"Fsame",FI);
-    // // display.draw_cells_charge(toytiling[i]->get_allcell(),"Fsame");
-    //  theApp.Run();
+    // display.draw_wires_charge(toytiling[i]->wcmap(),"Fsame",FI);
+    // display.draw_cells_charge(toytiling[i]->get_allcell(),"Fsame");
+     theApp.Run();
   }
   
   cerr << em("finish tiling") << endl;
