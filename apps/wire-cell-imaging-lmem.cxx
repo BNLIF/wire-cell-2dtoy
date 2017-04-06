@@ -298,8 +298,8 @@ int main(int argc, char* argv[])
   int start_num = 0 ;
   int end_num = sds.size()-1;
 
-  start_num = 555;
-  end_num = 555;
+  start_num = 455;
+  end_num = 455;
   
 
   //test 
@@ -318,14 +318,14 @@ int main(int argc, char* argv[])
     }
     lowmemtiling[i]->init_good_cells(slice,uplane_rms,vplane_rms,wplane_rms);
     
-    // std::cout << lowmemtiling[i]->get_three_good_wire_cells().size() << std::endl;
+    std::cout << lowmemtiling[i]->get_three_good_wire_cells().size() << std::endl;
 
     // GeomWireSelection dwires;
 
-    // for (int j=0;j!=lowmemtiling[i]->get_three_good_wire_cells().size();j++){
-    //   std::cout << "N: " << ((SlimMergeGeomCell*)lowmemtiling[i]->get_three_good_wire_cells().at(j))->get_uwires().size() << " "
-    //  		<< ((SlimMergeGeomCell*)lowmemtiling[i]->get_three_good_wire_cells().at(j))->get_vwires().size() << " " 
-    //   << ((SlimMergeGeomCell*)lowmemtiling[i]->get_three_good_wire_cells().at(j))->get_wwires().size() << " " << std::endl;
+    for (int j=0;j!=lowmemtiling[i]->get_three_good_wire_cells().size();j++){
+      std::cout << "N: " << ((SlimMergeGeomCell*)lowmemtiling[i]->get_three_good_wire_cells().at(j))->get_uwires().size() << " "
+     		<< ((SlimMergeGeomCell*)lowmemtiling[i]->get_three_good_wire_cells().at(j))->get_vwires().size() << " " 
+      << ((SlimMergeGeomCell*)lowmemtiling[i]->get_three_good_wire_cells().at(j))->get_wwires().size() << " " << std::endl;
       
     //   if (j==0){
     // 	for (int k=0;k!=((SlimMergeGeomCell*)lowmemtiling[i]->get_three_good_wire_cells().at(j))->get_uwires().size();k++){
@@ -337,10 +337,10 @@ int main(int argc, char* argv[])
     // 	for (int k=0;k!=((SlimMergeGeomCell*)lowmemtiling[i]->get_three_good_wire_cells().at(j))->get_wwires().size();k++){
     // 	  dwires.push_back(((SlimMergeGeomCell*)lowmemtiling[i]->get_three_good_wire_cells().at(j))->get_wwires().at(k));
     // 	}
-    //   }
+    //}
 
       //      dwires.insert(dwires.begin(),((SlimMergeGeomCell*)lowmemtiling[i]->get_three_good_wire_cells().at(j))->get_uwires().begin(),((SlimMergeGeomCell*)lowmemtiling[i]->get_three_good_wire_cells().at(j))->get_uwires().end());
-    //}
+    }
 
 
     toytiling[i] = new WireCell2dToy::ToyTiling(slice,gds,0.15,0.2,0.1,threshold_ug,threshold_vg, threshold_wg, &uplane_rms, &vplane_rms, &wplane_rms);
@@ -354,14 +354,14 @@ int main(int argc, char* argv[])
 
     mergetiling[i] = new WireCell2dToy::MergeToyTiling(*toytiling[i],i,3);
     
-    // std::cout << mergetiling[i]->get_allcell().size() << std::endl;
+    std::cout << mergetiling[i]->get_allcell().size() << std::endl;
     
-    // for (int j=0;j!=mergetiling[i]->get_allcell().size();j++){
-    //   std::cout << "O: " << ((MergeGeomCell*)mergetiling[i]->get_allcell().at(j))->get_uwires().size() << " " 
-    // 		<< ((MergeGeomCell*)mergetiling[i]->get_allcell().at(j))->get_vwires().size() << " " 
-    // 		<< ((MergeGeomCell*)mergetiling[i]->get_allcell().at(j))->get_wwires().size() << " " << std::endl;
+    for (int j=0;j!=mergetiling[i]->get_allcell().size();j++){
+      std::cout << "O: " << ((MergeGeomCell*)mergetiling[i]->get_allcell().at(j))->get_uwires().size() << " " 
+    		<< ((MergeGeomCell*)mergetiling[i]->get_allcell().at(j))->get_vwires().size() << " " 
+    		<< ((MergeGeomCell*)mergetiling[i]->get_allcell().at(j))->get_wwires().size() << " " << std::endl;
      
-    // }
+    }
     
     // if (i==0){
     //   badtiling[i] = new WireCell2dToy::BadTiling(i,nrebin,uplane_map,vplane_map,wplane_map,gds,0,1); // 2 plane bad tiling
