@@ -97,7 +97,8 @@ int main(int argc, char* argv[])
   
   const char* root_file = argv[2];
   int run_no, subrun_no, event_no;
-  
+
+  // Noise Filtering from the raw data 
   WireCellSst::DatauBooNEFrameDataSource data_fds(root_file,gds,total_time_bin);
   data_fds.jump(eve_num);
 
@@ -106,18 +107,29 @@ int main(int argc, char* argv[])
   event_no = data_fds.get_event_no();
   
   cout << "Run No: " << run_no << " " << subrun_no << " " << event_no << endl;
+
+  // dead channel list ... ChirpMap -->  This is a map, A[B]=(first time tick, second time tick), B is channel number, 
   ChirpMap& uplane_map = data_fds.get_u_cmap();
   ChirpMap& vplane_map = data_fds.get_v_cmap();
   ChirpMap& wplane_map = data_fds.get_w_cmap();
+
+  // Noise channels ... 
   std::set<int>& lf_noisy_channels = data_fds.get_lf_noisy_channels();
   
-   cout << "Bad Channels: " << uplane_map.size() << " " << vplane_map.size() << " " << wplane_map.size() << endl;
-   
-  cout << "Deconvolution with Wiener filter" << endl; 
+  cout << "Bad Channels: " << uplane_map.size() << " " << vplane_map.size() << " " << wplane_map.size() << endl;
+
+
+  // Signal processing 
+  cout << "Deconvolution with Wiener filter" << endl;
+
+  // 2D deconvolution
   WireCell2dToy::uBooNEData2DDeconvolutionFDS wien_fds(data_fds,gds,uplane_map, vplane_map, wplane_map,100,toffset_1,toffset_2,toffset_3);
   wien_fds.jump(eve_num);
 
+  // ROI finder 
   WireCell2dToy::uBooNEDataROI uboone_rois(data_fds,wien_fds,gds,uplane_map,vplane_map,wplane_map,lf_noisy_channels);
+
+  // Refine ROIs
   WireCell2dToy::uBooNEDataAfterROI roi_fds(wien_fds,gds,uboone_rois,nrebin);
   roi_fds.jump(eve_num);
 
