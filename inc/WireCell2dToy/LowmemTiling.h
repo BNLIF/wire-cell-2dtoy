@@ -57,7 +57,8 @@ namespace WireCell2dToy{
     WireCell::GeomDataSource& gds;
     WireCell2dToy::WireCellHolder& holder;
 
-    WireCell::GeomWireSelection bad_wire_u;
+    // original group of wires
+    WireCell::GeomWireSelection bad_wire_u; 
     WireCell::GeomWireSelection bad_wire_v;
     WireCell::GeomWireSelection bad_wire_w;
 
@@ -65,9 +66,12 @@ namespace WireCell2dToy{
     WireCell::GeomWireSelection fired_wire_v;
     WireCell::GeomWireSelection fired_wire_w;
 
+    // current cells ... 
     WireCell::GeomCellSelection three_good_wire_cells;
     WireCell::GeomCellSelection two_good_wire_cells;
     WireCell::GeomCellSelection two_bad_wire_cells;
+
+    
 
     int nrebin;
     int time_slice;
