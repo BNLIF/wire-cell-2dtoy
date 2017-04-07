@@ -44,7 +44,12 @@ namespace WireCell2dToy{
 
     WireCell::SlimMergeGeomCell* create_slim_merge_cell(WireCell::MergeGeomWire *uwire, WireCell::MergeGeomWire *vwire, WireCell::MergeGeomWire *wwire);
 
-    void test_crossing(WireCell::PointVector& pcell, float dis_u, float dis_v, float bmin_w, float bmax_w, float u_pitch, float v_pitch, const WireCell::GeomWire* u_wire1, const WireCell::GeomWire* u_wire2, const WireCell::GeomWire *v_wire1, const WireCell::GeomWire *v_wire2, bool flag_test_u, bool flag_test_v);
+    bool test_point(WireCell::PointVector& pcell, float dis_u, float dis_v,
+		    float bmin_w, float bmax_w, float u_pitch, float v_pitch,
+		    float& dis1);
+    void test_cross(WireCell::PointVector& pcell, float dis, WireCell::WirePlaneType_t plane, float low_limit, float high_limit, float pitch, float pitch1, float w_pitch, const WireCell::GeomWire* wire1, const WireCell::GeomWire *wire2, int dir, float bmin_w, float bmax_w); // pitch corresponds to plane
+
+    /* void test_crossing(WireCell::PointVector& pcell, float dis_u, float dis_v, float bmin_w, float bmax_w, float u_pitch, float v_pitch, float w_pitch, const WireCell::GeomWire* u_wire1, const WireCell::GeomWire* u_wire2, const WireCell::GeomWire *v_wire1, const WireCell::GeomWire *v_wire2, int dir_u, int dir_v); */
     
     bool check_crossing(const WireCell::GeomWire* wire1, const WireCell::GeomWire* wire2, float pitch1, float pitch2, WireCell::WirePlaneType_t plane, float min, float max, float tolerance);
     
