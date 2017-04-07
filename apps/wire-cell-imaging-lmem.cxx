@@ -336,7 +336,7 @@ int main(int argc, char* argv[])
     }
     lowmemtiling[i]->init_good_cells(slice,uplane_rms,vplane_rms,wplane_rms);
     
-    //    std::cout << lowmemtiling[i]->get_three_good_wire_cells().size() << std::endl;
+    // //    std::cout << lowmemtiling[i]->get_three_good_wire_cells().size() << std::endl;
 
     // std::vector<GeomWireSelection> vec1_wires;
     // std::vector<GeomWireSelection> vec2_wires;
@@ -411,7 +411,7 @@ int main(int argc, char* argv[])
     //   sort(vec1_wires.begin(),vec1_wires.end(),GeomWireSelectionCompare);
     //   sort(vec2_wires.begin(),vec2_wires.end(),GeomWireSelectionCompare);
     //   for (int j=0;j!=vec1_wires.size();j++){
-    // 	//	std::cout << j << " " << vec1_wires.at(j).size() << " " << vec2_wires.at(j).size() << " " << vec1_wires.at(j).at(0)->index() << " " << vec2_wires.at(j).at(0)->index() << std::endl;
+    // 	//std::cout << j << " " << vec1_wires.at(j).size() << " " << vec2_wires.at(j).size() << " " << vec1_wires.at(j).at(0)->index() << " " << vec2_wires.at(j).at(0)->index() << std::endl;
     // 	if (vec1_wires.at(j).size()!=vec2_wires.at(j).size()){
     // 	  flag_test = true;
     // 	  //break;
