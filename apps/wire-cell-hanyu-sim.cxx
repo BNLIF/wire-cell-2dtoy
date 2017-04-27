@@ -1,7 +1,9 @@
 // Input simulation, add no noise
 // So a dummy noise fillter implemented in jump_no_noise instead of jump
 // Hanyu WEI, Apr 19, 2017
-
+// 
+// Attention to total charge for input, seems threshold exits there
+//
 #include "WireCellSst/GeomDataSource.h"
 #include "WireCellSst/DatauBooNEFrameDataSource.h"
 #include "WireCellSst/ToyuBooNESliceDataSource.h"
