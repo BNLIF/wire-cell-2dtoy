@@ -761,6 +761,7 @@ void WireCell2dToy::LowmemTiling::init_good_cells(const WireCell::Slice& slice, 
   	MergeGeomWire *wwire = (MergeGeomWire *)bad_wire_w.at(k);
 	
   	SlimMergeGeomCell *mcell = create_slim_merge_cell(uwire,vwire,wwire);
+	mcell->add_bad_planes(WirePlaneType_t(2));
   	if (mcell !=0) two_good_wire_cells.push_back(mcell);
       }
     }
@@ -775,6 +776,7 @@ void WireCell2dToy::LowmemTiling::init_good_cells(const WireCell::Slice& slice, 
   	MergeGeomWire *wwire = (MergeGeomWire *)fired_wire_w.at(k);
 	
   	SlimMergeGeomCell *mcell = create_slim_merge_cell(uwire,vwire,wwire);
+	mcell->add_bad_planes(WirePlaneType_t(1));
   	if (mcell !=0) two_good_wire_cells.push_back(mcell);
       }
     }
@@ -789,7 +791,8 @@ void WireCell2dToy::LowmemTiling::init_good_cells(const WireCell::Slice& slice, 
   	MergeGeomWire *wwire = (MergeGeomWire *)fired_wire_w.at(k);
 	
   	SlimMergeGeomCell *mcell = create_slim_merge_cell(uwire,vwire,wwire);
-  	if (mcell !=0) two_good_wire_cells.push_back(mcell);
+  	mcell->add_bad_planes(WirePlaneType_t(0));
+	if (mcell !=0) two_good_wire_cells.push_back(mcell);
       }
     }
   }
