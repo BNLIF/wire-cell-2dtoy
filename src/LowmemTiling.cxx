@@ -481,7 +481,7 @@ WireCell::SlimMergeGeomCell* WireCell2dToy::LowmemTiling::create_slim_merge_cell
       if (wdist - tolerance< w_min) w_min = wdist - tolerance;
     }
     
-    int ident = holder.get_ncell();
+    int ident = holder.get_cell_no();
    
     
 
@@ -707,7 +707,7 @@ WireCell::SlimMergeGeomCell* WireCell2dToy::LowmemTiling::create_slim_merge_cell
    
     if (flag==1){
       SlimMergeGeomCell *mcell = new SlimMergeGeomCell(ident); 
-      holder.AddCell(mcell);
+      holder.AddCell_No();
       // Inser U    
       for (int k=uwire_min->index();k!=uwire_max->index()+1;k++){
 	const GeomWire *uwire = gds.by_planeindex(WirePlaneType_t(0),k);
@@ -1070,8 +1070,8 @@ void WireCell2dToy::LowmemTiling::create_one_good_wire_cells(){
     }
   }
   
-  // for (int i=0;i!=to_be_removed_cells.size();i++){
-  //   delete to_be_removed_cells.at(i);
+  // for (int i=0;i!=not_used_one_good_wire_cells.size();i++){
+  //   delete not_used_one_good_wire_cells.at(i);
   // }
   
   // if (one_good_wire_cells.size()!=0){
@@ -1624,11 +1624,11 @@ void WireCell2dToy::LowmemTiling::form_two_bad_cells(){
 	}
 	//std::cout << u_max << " " << u_min << " " << v_max << " " << v_min << " " << w_max << " " << w_min << std::endl;
 	//Create a cell
-	int ident = holder.get_ncell();
+	int ident = holder.get_cell_no();
 	SlimMergeGeomCell *mcell = new SlimMergeGeomCell(ident); 
 	mcell->AddBoundary(pcell);
 	two_bad_wire_cells.push_back(mcell);
-	holder.AddCell(mcell);
+	holder.AddCell_No();
 	
 	//Insert U
 	// for (int k=0;k!=((MergeGeomWire*)bad_wire_u.at(i))->get_allwire().size();k++){
@@ -1890,11 +1890,11 @@ void WireCell2dToy::LowmemTiling::form_two_bad_cells(){
 	}
 	//std::cout << u_max << " " << u_min << " " << v_max << " " << v_min << " " << w_max << " " << w_min << std::endl;
 	//Create a cell
-	int ident = holder.get_ncell();
+	int ident = holder.get_cell_no();
 	SlimMergeGeomCell *mcell = new SlimMergeGeomCell(ident);
 	mcell->AddBoundary(pcell);
 	two_bad_wire_cells.push_back(mcell);
-	holder.AddCell(mcell);
+	holder.AddCell_No();
 	//Insert U
 	const GeomWire* uwire_min = gds.bounds(u_min,WirePlaneType_t(0)).second;
 	const GeomWire* uwire_max = gds.bounds(u_max,WirePlaneType_t(0)).first;
@@ -2133,12 +2133,12 @@ void WireCell2dToy::LowmemTiling::form_two_bad_cells(){
 	}
 	//std::cout << u_max << " " << u_min << " " << v_max << " " << v_min << " " << w_max << " " << w_min << std::endl;
 	//Create a cell
-	int ident = holder.get_ncell();
+	int ident = holder.get_cell_no();
 	SlimMergeGeomCell *mcell = new SlimMergeGeomCell(ident);
 	// mcell->SetTimeSlice(time_slice);
 	mcell->AddBoundary(pcell);
 	two_bad_wire_cells.push_back(mcell);
-	holder.AddCell(mcell);
+	holder.AddCell_No();
 
 	//Insert U	
 	const GeomWire* uwire_min = gds.closest(u_min,WirePlaneType_t(0));//.bounds(u_min,WirePlaneType_t(0)).second;
@@ -2306,19 +2306,19 @@ void WireCell2dToy::LowmemTiling::form_bad_merge_wires(WireCell::ChirpMap& uplan
 	const GeomWire *wire = gds.by_planeindex((WirePlaneType_t)0,i);
 	// first one 
 	if (mwire == 0){
-	  int ident = holder.get_nwire();
+	  int ident = holder.get_wire_no();
 	  mwire = new MergeGeomWire(ident,*wire);
 	  bad_wire_u.push_back(mwire);
-	  holder.AddWire(mwire);
+	  holder.AddWire_No();
 	}else{
 	  if (i==last_wire+1){
 	    mwire->AddWire(*wire);
 	  }else{
 	    // create a new wire
-	    int ident = holder.get_nwire();
+	    int ident = holder.get_wire_no();
 	    mwire = new MergeGeomWire(ident,*wire);
 	    bad_wire_u.push_back(mwire);
-	    holder.AddWire(mwire);
+	    holder.AddWire_No();
 	  }
 	}
 	last_wire = i;
@@ -2337,19 +2337,19 @@ void WireCell2dToy::LowmemTiling::form_bad_merge_wires(WireCell::ChirpMap& uplan
 	const GeomWire *wire = gds.by_planeindex((WirePlaneType_t)1,i);
 	// first one 
 	if (mwire == 0){
-	  int ident = holder.get_nwire();
+	  int ident = holder.get_wire_no();
 	  mwire = new MergeGeomWire(ident,*wire);
 	  bad_wire_v.push_back(mwire);
-	  holder.AddWire(mwire);
+	  holder.AddWire_No();
 	}else{
 	  if (i==last_wire+1){
 	    mwire->AddWire(*wire);
 	  }else{
 	    // create a new wire
-	    int ident = holder.get_nwire();
+	    int ident = holder.get_wire_no();
 	    mwire = new MergeGeomWire(ident,*wire);
 	    bad_wire_v.push_back(mwire);
-	    holder.AddWire(mwire);
+	    holder.AddWire_No();
 	  }
 	}
 	last_wire = i;
@@ -2368,19 +2368,19 @@ void WireCell2dToy::LowmemTiling::form_bad_merge_wires(WireCell::ChirpMap& uplan
 	const GeomWire *wire = gds.by_planeindex((WirePlaneType_t)2,i);
 	// first one 
 	if (mwire == 0){
-	  int ident = holder.get_nwire();
+	  int ident = holder.get_wire_no();
 	  mwire = new MergeGeomWire(ident,*wire);
 	  bad_wire_w.push_back(mwire);
-	  holder.AddWire(mwire);
+	  holder.AddWire_No();
 	}else{
 	  if (i==last_wire+1){
 	    mwire->AddWire(*wire);
 	  }else{
 	    // create a new wire
-	    int ident = holder.get_nwire();
+	    int ident = holder.get_wire_no();
 	    mwire = new MergeGeomWire(ident,*wire);
 	    bad_wire_w.push_back(mwire);
-	    holder.AddWire(mwire);
+	    holder.AddWire_No();
 	  }
 	}
 	last_wire = i;

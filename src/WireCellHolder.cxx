@@ -5,6 +5,9 @@ using namespace WireCell;
 WireCell2dToy::WireCellHolder::WireCellHolder(){
   ncell = 0;
   nwire = 0;
+
+  cell_no = 0;
+  wire_no = 0;
 }
 
 WireCell2dToy::WireCellHolder::~WireCellHolder(){

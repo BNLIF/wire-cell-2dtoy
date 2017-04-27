@@ -79,6 +79,15 @@ namespace WireCell2dToy{
     WireCell::GeomCellSelection two_bad_wire_cells;
 
     
+    //map cell to wire
+
+    //map wire to cell
+
+    //map wire to parent wire
+
+    //map parent wire to wire
+
+    //map wire --> bad or good
 
     int nrebin;
     int time_slice;

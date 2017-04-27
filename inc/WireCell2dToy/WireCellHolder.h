@@ -16,9 +16,18 @@ namespace WireCell2dToy{
     int get_ncell(){return ncell;};
     int get_nwire(){return nwire;};
 
+    void AddWire_No(){cell_no++;};
+    void AddCell_No(){wire_no++;};
+    
+    int get_cell_no(){return cell_no;};
+    int get_wire_no(){return wire_no;};
+
   protected:
     int ncell;
     int nwire;
+
+    int cell_no;
+    int wire_no;
 
     WireCell::GeomWireSelection wires;
     WireCell::GeomCellSelection cells;
