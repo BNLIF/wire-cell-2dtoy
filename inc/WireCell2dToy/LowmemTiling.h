@@ -55,6 +55,7 @@ namespace WireCell2dToy{
     
     WireCell::GeomCellSelection create_single_cells();
     WireCell::GeomCellSelection create_single_cells(WireCell::SlimMergeGeomCell * mcell);
+    void create_one_good_wire_cells();
 
   protected:
     WireCell::GeomDataSource& gds;

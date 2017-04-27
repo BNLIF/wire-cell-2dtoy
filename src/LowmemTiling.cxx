@@ -806,8 +806,15 @@ void WireCell2dToy::LowmemTiling::init_good_cells(const WireCell::Slice& slice, 
     }
   }
   
+  create_one_good_wire_cells();
 
-  // figure out the fired wires for each plane 
+
+ 
+  
+}
+
+void WireCell2dToy::LowmemTiling::create_one_good_wire_cells(){
+   // figure out the fired wires for each plane 
   std::set<const GeomWire*> fired_wires;
   for (int i = 0; i!= three_good_wire_cells.size(); i++){
     GeomWireSelection uwires = ((SlimMergeGeomCell*)three_good_wire_cells.at(i))->get_uwires();
@@ -857,7 +864,31 @@ void WireCell2dToy::LowmemTiling::init_good_cells(const WireCell::Slice& slice, 
   // }
   // std::cout << fired_wires.size() << " " << count << std::endl;
 
+  GeomWireSelection leftover_wires;
+  for (int i =0; i!= fired_wire_u.size();i++){
+    for (int j=0; j!= ((MergeGeomWire*)fired_wire_u.at(i))->get_allwire().size(); j++){
+      const GeomWire *wire = ((MergeGeomWire*)fired_wire_u.at(i))->get_allwire().at(j);
+      if (fired_wires.find(wire)==fired_wires.end())
+	leftover_wires.push_back(wire);
+    }
+  }
+  for (int i =0; i!= fired_wire_v.size();i++){
+    for (int j=0; j!= ((MergeGeomWire*)fired_wire_v.at(i))->get_allwire().size(); j++){
+      const GeomWire *wire = ((MergeGeomWire*)fired_wire_v.at(i))->get_allwire().at(j);
+      if (fired_wires.find(wire)==fired_wires.end())
+	leftover_wires.push_back(wire);
+    }
+  }
+  for (int i =0; i!= fired_wire_w.size();i++){
+    for (int j=0; j!= ((MergeGeomWire*)fired_wire_w.at(i))->get_allwire().size(); j++){
+      const GeomWire *wire = ((MergeGeomWire*)fired_wire_w.at(i))->get_allwire().at(j);
+      if (fired_wires.find(wire)==fired_wires.end())
+	leftover_wires.push_back(wire);
+    }
+  }
+  std::cout << leftover_wires.size() << std::endl;
 }
+
 
 GeomCellSelection WireCell2dToy::LowmemTiling::create_single_cells(){
   GeomCellSelection cells;
