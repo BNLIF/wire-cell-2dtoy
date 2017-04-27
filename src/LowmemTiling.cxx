@@ -807,16 +807,306 @@ void WireCell2dToy::LowmemTiling::init_good_cells(const WireCell::Slice& slice, 
   }
   
 
+  // figure out the fired wires for each plane 
+  std::set<const GeomWire*> fired_wires;
+  for (int i = 0; i!= three_good_wire_cells.size(); i++){
+    GeomWireSelection uwires = ((SlimMergeGeomCell*)three_good_wire_cells.at(i))->get_uwires();
+    GeomWireSelection vwires = ((SlimMergeGeomCell*)three_good_wire_cells.at(i))->get_vwires();
+    GeomWireSelection wwires = ((SlimMergeGeomCell*)three_good_wire_cells.at(i))->get_wwires();
+    for (int j=0;j!=uwires.size();j++){
+      fired_wires.insert(uwires.at(j));
+    }
+    for (int j=0;j!=vwires.size();j++){
+      fired_wires.insert(vwires.at(j));
+    }
+    for (int j=0;j!=wwires.size();j++){
+      fired_wires.insert(wwires.at(j));
+    }
+  }
+  for (int i=0; i!=two_good_wire_cells.size();i++){
+    GeomWireSelection uwires = ((SlimMergeGeomCell*)two_good_wire_cells.at(i))->get_uwires();
+    GeomWireSelection vwires = ((SlimMergeGeomCell*)two_good_wire_cells.at(i))->get_vwires();
+    GeomWireSelection wwires = ((SlimMergeGeomCell*)two_good_wire_cells.at(i))->get_wwires();
+
+    GeomWireSelection wires;
+    std::vector<WirePlaneType_t> bad_planes = ((SlimMergeGeomCell*)two_good_wire_cells.at(i))->get_bad_planes();
+    
+    if (find(bad_planes.begin(),bad_planes.end(),WirePlaneType_t(0)) == bad_planes.end()){
+      wires.insert(wires.end(),uwires.begin(),uwires.end());
+    }
+    if (find(bad_planes.begin(),bad_planes.end(),WirePlaneType_t(1)) == bad_planes.end()){
+      wires.insert(wires.end(),vwires.begin(),vwires.end());
+    }
+    if (find(bad_planes.begin(),bad_planes.end(),WirePlaneType_t(2)) == bad_planes.end()){
+      wires.insert(wires.end(),wwires.begin(),wwires.end());
+    }
+    for (int j=0;j!=wires.size();j++){
+      fired_wires.insert(wires.at(j));
+    }
+  }
+
+  // int count = 0;
+  // for (int i =0; i!= fired_wire_u.size();i++){
+  //   count += ((MergeGeomWire*)fired_wire_u.at(i))->get_allwire().size();
+  // }
+  // for (int i =0; i!= fired_wire_v.size();i++){
+  //   count += ((MergeGeomWire*)fired_wire_v.at(i))->get_allwire().size();
+  // }
+  // for (int i =0; i!= fired_wire_w.size();i++){
+  //   count += ((MergeGeomWire*)fired_wire_w.at(i))->get_allwire().size();
+  // }
+  // std::cout << fired_wires.size() << " " << count << std::endl;
+
 }
 
-GeomCellSelection& WireCell2dToy::LowmemTiling::create_single_cells(){
+GeomCellSelection WireCell2dToy::LowmemTiling::create_single_cells(){
   GeomCellSelection cells;
   
+  // loop three wire cells
+  for (int i = 0; i!= three_good_wire_cells.size(); i++){
+    GeomCellSelection temp_cells = create_single_cells((SlimMergeGeomCell*)three_good_wire_cells.at(i));
+    cells.insert(cells.end(),temp_cells.begin(),temp_cells.end());
+  }
+
+  // loop two wire cells
+  for (int i=0; i!=two_good_wire_cells.size();i++){
+    GeomCellSelection temp_cells = create_single_cells((SlimMergeGeomCell*)two_good_wire_cells.at(i));
+    cells.insert(cells.end(),temp_cells.begin(),temp_cells.end());
+  }
+
+  // loop one wire cells
+  for (int i=0; i!=one_good_wire_cells.size();i++){
+    GeomCellSelection temp_cells = create_single_cells((SlimMergeGeomCell*)two_good_wire_cells.at(i));
+    cells.insert(cells.end(),temp_cells.begin(),temp_cells.end());
+  }
+  
+
   return cells;
 }
 
 
+GeomCellSelection WireCell2dToy::LowmemTiling::create_single_cells(SlimMergeGeomCell *mcell){
+  GeomCellSelection cells;
+  GeomWireSelection wire_u = mcell->get_uwires();
+  GeomWireSelection wire_v = mcell->get_vwires();
+  GeomWireSelection wire_w = mcell->get_wwires();
+  float tolerance = 0.1 * units::mm;
+  float dis_u[3]={0.0},dis_v[3]={0.0},dis_w[3]={0.0},dis_puv[5]={0.0},dis_puw[5]={0.0},dis_pwv[5]={0.0};
+  int ncell = 1;
+  
+  std::vector<float> udis,vdis,wdis;
+  for (int i=0;i!=wire_u.size();i++){
+    udis.push_back(gds.wire_dist(*wire_u[i]));
+  }
+  for (int j=0;j!=wire_v.size();j++){
+    vdis.push_back(gds.wire_dist(*wire_v[j]));
+  }
+  for (int k=0;k!=wire_w.size();k++){
+    wdis.push_back(gds.wire_dist(*wire_w[k]));
+  }
+					
+  std::vector<Vector> puv_save(5), puw_save(5), pwv_save(5);
+  float dis_puv_save[5]={0.0}, dis_puw_save[5]={0.0}, dis_pwv_save[5]={0.0};
+  
+  double u_pitch=0, v_pitch=0, w_pitch=0;
+  u_pitch = gds.pitch(kUwire);
+  v_pitch = gds.pitch(kVwire);
+  w_pitch = gds.pitch(kYwire);
 
+  if (wire_u.size()>=1&&wire_v.size()>=1){
+    dis_u[0] = udis.at(0) - gds.pitch(kUwire)/2.;
+    dis_u[1] = dis_u[0] + gds.pitch(kUwire);
+    dis_u[2] = udis.at(0);
+
+    dis_v[0] = vdis.at(0) - gds.pitch(kVwire)/2.;
+    dis_v[1] = dis_v[0] + gds.pitch(kVwire);
+    dis_v[2] = vdis.at(0);
+
+    gds.crossing_point(dis_u[0],dis_v[0],kUwire,kVwire, puv_save[0]);
+    gds.crossing_point(dis_u[0],dis_v[1],kUwire,kVwire, puv_save[1]);
+    gds.crossing_point(dis_u[1],dis_v[1],kUwire,kVwire, puv_save[2]);
+    gds.crossing_point(dis_u[1],dis_v[0],kUwire,kVwire, puv_save[3]);
+    gds.crossing_point(dis_u[2],dis_v[2],kUwire,kVwire, puv_save[4]);
+
+    for (int k=0;k!=5;k++){
+      dis_puv_save[k] = gds.wire_dist(puv_save[k],kYwire);
+    }
+    
+  }
+
+  if (wire_u.size()>=1&&wire_w.size()>=1){
+    dis_u[0] = udis.at(0) - gds.pitch(kUwire)/2.;
+    dis_u[1] = dis_u[0] + gds.pitch(kUwire);
+    dis_u[2] = udis.at(0);
+
+    dis_w[0] = wdis.at(0) - w_pitch/2.;
+    dis_w[1] = dis_w[0] + w_pitch;
+    dis_w[2] = wdis.at(0);
+
+    gds.crossing_point(dis_u[0],dis_w[0],kUwire,kYwire, puw_save[0]);
+    gds.crossing_point(dis_u[0],dis_w[1],kUwire,kYwire, puw_save[1]);
+    gds.crossing_point(dis_u[1],dis_w[1],kUwire,kYwire, puw_save[2]);
+    gds.crossing_point(dis_u[1],dis_w[0],kUwire,kYwire, puw_save[3]);
+    gds.crossing_point(dis_u[2],dis_w[2],kUwire,kYwire, puw_save[4]);
+
+    for (int k=0;k!=5;k++){
+      dis_puw_save[k] = gds.wire_dist(puw_save[k],kVwire);
+    }
+
+  }
+
+  if (wire_v.size()>=1&&wire_w.size()>=1){
+
+    dis_w[0] = wdis.at(0) - w_pitch/2.;
+    dis_w[1] = dis_w[0] + w_pitch;
+    dis_w[2] = wdis.at(0);
+
+    dis_v[0] = vdis.at(0) - gds.pitch(kVwire)/2.;
+    dis_v[1] = dis_v[0] + gds.pitch(kVwire);
+    dis_v[2] = vdis.at(0);
+    
+    gds.crossing_point(dis_v[0],dis_w[0],kVwire,kYwire, pwv_save[0]);
+    gds.crossing_point(dis_v[0],dis_w[1],kVwire,kYwire, pwv_save[1]);
+    gds.crossing_point(dis_v[1],dis_w[1],kVwire,kYwire, pwv_save[2]);
+    gds.crossing_point(dis_v[1],dis_w[0],kVwire,kYwire, pwv_save[3]);
+    gds.crossing_point(dis_v[2],dis_w[2],kVwire,kYwire, pwv_save[4]);
+    
+    for (int k=0;k!=5;k++){
+      dis_pwv_save[k] = gds.wire_dist(pwv_save[k],kUwire);
+    }
+  }
+
+
+   for (int i=0;i!=wire_u.size();i++){
+    dis_u[0] = udis.at(i) - u_pitch/2.;
+    dis_u[1] = dis_u[0] + u_pitch;
+    dis_u[2] = udis.at(i);
+
+    for (int j=0;j!=wire_v.size();j++){
+      //  if (wirechargemap[wire_u[i]] <100 && wirechargemap[wire_v[j]] <100 ) continue;
+      dis_v[0] = vdis.at(j) - v_pitch/2.;
+      dis_v[1] = dis_v[0] + v_pitch;
+      dis_v[2] = vdis.at(j);
+      
+      //four vertices around
+      //      std::vector<Vector> puv(4);
+      std::vector<Vector> puv(5);
+      
+      //counter ++;
+
+      if(!gds.crossing_point(dis_u[2],dis_v[2],kUwire,kVwire, puv[4])) continue;
+      
+      // Point pp;
+      // pp.x = 0; pp.y = puv[4].y; pp.z = puv[4].z;
+      // if (!gds.contained_yz(pp)) continue;
+
+      //counter1 ++;
+      dis_puv[4] = gds.wire_dist(puv[4],kYwire);
+      for (int k=0;k!=4;k++){
+	puv[k] = puv[4] + (puv_save[k]-puv_save[4]);
+	dis_puv[k] = dis_puv[4] +(dis_puv_save[k]-dis_puv_save[4]);
+      }
+
+      for (int k=0;k!=wire_w.size();k++){
+
+	int flag = 0;
+	PointVector pcell;
+	dis_w[0] = wdis.at(k) - w_pitch/2.;
+  	dis_w[1] = dis_w[0] + w_pitch;//gds.wire_dist(*wire_w[k]) + gds.pitch(kYwire)/2.;	
+	dis_w[2] = wdis.at(k);
+
+	if (fabs(dis_w[0] - dis_puv[0])>3*units::cm) continue;
+	
+	//counter3++;
+	
+	for (int m = 0;m!=4;m++){
+	  if (dis_puv[m] > dis_w[0]-tolerance/2. && dis_puv[m] < dis_w[1]+tolerance/2.){
+	    flag = 1;
+	    pcell.push_back(puv[m]);
+	  }
+	}
+
+
+	if (flag==1 ) {
+	  //counter ++;
+	  std::vector<Vector> puw(5);
+	  
+	  gds.crossing_point(dis_u[2],dis_w[2],kUwire,kYwire, puw[4]);
+	  dis_puw[4] = gds.wire_dist(puw[4],kVwire);
+
+	  for (int k1=0;k1!=4;k1++){
+	    puw[k1] = puw[4] + (puw_save[k1]-puw_save[4]);
+	    dis_puw[k1] = dis_puw[4] +(dis_puw_save[k1]-dis_puw_save[4]);
+	    if (dis_puw[k1] > dis_v[0]-tolerance/2. && dis_puw[k1] < dis_v[1]+tolerance/2.){
+	      int flag_abc = 0;
+	      for (int kk = 0; kk!=pcell.size();kk++){
+	      	float dis = sqrt(pow(puw[k1].y-pcell.at(kk).y,2) + pow(puw[k1].z-pcell.at(kk).z,2));
+	      	if (dis < tolerance) {
+	      	  flag_abc = 1;
+	      	  break;
+	      	}
+	      }
+	      if (flag_abc == 0)
+	    	pcell.push_back(puw[k1]);
+	    }
+	  }
+	  std::vector<Vector> pwv(5);
+	  gds.crossing_point(dis_v[2],dis_w[2],kVwire,kYwire, pwv[4]);
+	  dis_pwv[4] = gds.wire_dist(pwv[4],kUwire);
+
+	  for (int k1=0;k1!=4;k1++){
+	    pwv[k1] = pwv[4] + (pwv_save[k1]-pwv_save[4]);
+	    dis_pwv[k1] = dis_pwv[4] +(dis_pwv_save[k1]-dis_pwv_save[4]);
+	    //	    dis_pwv[k] = gds.wire_dist(pwv[k],kUwire);
+	    if (dis_pwv[k1] > dis_u[0]-tolerance/2. && dis_pwv[k1] < dis_u[1]+tolerance/2.){
+	      int flag_abc = 0;
+	      for (int kk = 0; kk!=pcell.size();kk++){
+	      	float dis = sqrt(pow(pwv[k1].y-pcell.at(kk).y,2) + pow(pwv[k1].z-pcell.at(kk).z,2));
+	      	if (dis < tolerance) {
+	      	  flag_abc = 1;
+	      	  break;
+	      	}
+	      }
+	      if (flag_abc == 0)
+	      	pcell.push_back(pwv[k1]);
+	    }
+	  }
+
+	  
+	  if (pcell.size()>=3){
+	    //order all the points by phi angle
+	    
+	    const GeomCell *cell = 0;
+	    
+	    // old method
+	    GeomCell *cell_t = new GeomCell(ncell,pcell);
+	    cell_t->set_uwire(wire_u.at(i));
+	    cell_t->set_vwire(wire_v.at(j));
+	    cell_t->set_wwire(wire_w.at(k));
+	    cell = cell_t;
+
+	  
+
+	    Point cell_center = cell->center();
+	    if (gds.contained_yz(cell_center)){
+	      
+	      cells.push_back(cell);
+	      ncell++;
+	    }else{
+	      delete cell;
+	    }
+	  }
+	}
+	
+      } // W-loop
+    } // V-loop
+  } // U-loop
+  
+
+
+  
+  return cells;
+}
 
 void WireCell2dToy::LowmemTiling::check_bad_cells(WireCell2dToy::LowmemTiling* tiling,WireCell::ChirpMap& uplane_map, WireCell::ChirpMap& vplane_map, WireCell::ChirpMap& wplane_map){
   

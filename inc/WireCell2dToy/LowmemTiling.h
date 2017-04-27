@@ -52,8 +52,10 @@ namespace WireCell2dToy{
     /* void test_crossing(WireCell::PointVector& pcell, float dis_u, float dis_v, float bmin_w, float bmax_w, float u_pitch, float v_pitch, float w_pitch, const WireCell::GeomWire* u_wire1, const WireCell::GeomWire* u_wire2, const WireCell::GeomWire *v_wire1, const WireCell::GeomWire *v_wire2, int dir_u, int dir_v); */
     
     bool check_crossing(const WireCell::GeomWire* wire1, const WireCell::GeomWire* wire2, float pitch1, float pitch2, WireCell::WirePlaneType_t plane, float min, float max, float tolerance);
-    WireCell::GeomCellSelection& create_single_cells();
     
+    WireCell::GeomCellSelection create_single_cells();
+    WireCell::GeomCellSelection create_single_cells(WireCell::SlimMergeGeomCell * mcell);
+
   protected:
     WireCell::GeomDataSource& gds;
     WireCell2dToy::WireCellHolder& holder;
@@ -70,6 +72,7 @@ namespace WireCell2dToy{
     // current cells ... 
     WireCell::GeomCellSelection three_good_wire_cells;
     WireCell::GeomCellSelection two_good_wire_cells;
+    WireCell::GeomCellSelection one_good_wire_cells;
     WireCell::GeomCellSelection two_bad_wire_cells;
 
     
