@@ -982,6 +982,7 @@ void WireCell2dToy::LowmemTiling::create_one_good_wire_cells(){
   // std::cout << remaining_fired_wire_u.size() << " " << remaining_fired_wire_v.size() << " " << remaining_fired_wire_w.size() << " " << count << std::endl;
 
   
+  GeomCellSelection temp_cells;
   //U/V/W = 1/0/0
   for (int i=0;i!=remaining_fired_wire_u.size();i++){
     MergeGeomWire *uwire = (MergeGeomWire *)remaining_fired_wire_u.at(i);
@@ -993,7 +994,7 @@ void WireCell2dToy::LowmemTiling::create_one_good_wire_cells(){
   	SlimMergeGeomCell *mcell = create_slim_merge_cell(uwire,vwire,wwire);
 	
   	if (mcell !=0) {
-	  one_good_wire_cells.push_back(mcell);
+	  temp_cells.push_back(mcell);
 	  mcell->add_bad_planes(WirePlaneType_t(1));
 	  mcell->add_bad_planes(WirePlaneType_t(2));
 	}
@@ -1012,7 +1013,7 @@ void WireCell2dToy::LowmemTiling::create_one_good_wire_cells(){
   	SlimMergeGeomCell *mcell = create_slim_merge_cell(uwire,vwire,wwire);
 	
   	if (mcell !=0) {
-	  one_good_wire_cells.push_back(mcell);
+	  temp_cells.push_back(mcell);
 	  mcell->add_bad_planes(WirePlaneType_t(0));
 	  mcell->add_bad_planes(WirePlaneType_t(2));
 	}
@@ -1031,19 +1032,51 @@ void WireCell2dToy::LowmemTiling::create_one_good_wire_cells(){
   	SlimMergeGeomCell *mcell = create_slim_merge_cell(uwire,vwire,wwire);
   	
 	if (mcell !=0) {
-	  one_good_wire_cells.push_back(mcell);
+	  temp_cells.push_back(mcell);
 	  mcell->add_bad_planes(WirePlaneType_t(0));
 	  mcell->add_bad_planes(WirePlaneType_t(1));
 	}
       }
     }
   }
+
   
   // if connected to one of the existing cell, add them, or remove ... 
+  for (int i=0;i!=temp_cells.size();i++){
+    SlimMergeGeomCell *mcell = (SlimMergeGeomCell*)temp_cells.at(i);
+    int flag = 0;
+
+    for (int j=0;j!=three_good_wire_cells.size();j++){
+      SlimMergeGeomCell *mcell1 = (SlimMergeGeomCell*)three_good_wire_cells.at(j);
+      if (mcell->Overlap(mcell1)){
+	flag = 1;
+	break;
+      }
+    }
+    if (flag==0){
+      for (int j=0;j!=two_good_wire_cells.size();j++){
+	SlimMergeGeomCell *mcell1 = (SlimMergeGeomCell*)two_good_wire_cells.at(j);
+	if (mcell->Overlap(mcell1)){
+	  flag = 1;
+	  break;
+	}
+      }
+    }
+   
+    if (flag==1) {
+      one_good_wire_cells.push_back(mcell);
+    }else{
+      not_used_one_good_wire_cells.push_back(mcell);
+    }
+  }
   
+  // for (int i=0;i!=to_be_removed_cells.size();i++){
+  //   delete to_be_removed_cells.at(i);
+  // }
   
-  //std::cout << one_good_wire_cells.size() << std::endl;
-  
+  // if (one_good_wire_cells.size()!=0){
+  //   std::cout << one_good_wire_cells.size() << std::endl;
+  // }
 }
 
 

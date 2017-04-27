@@ -74,6 +74,8 @@ namespace WireCell2dToy{
     WireCell::GeomCellSelection three_good_wire_cells;
     WireCell::GeomCellSelection two_good_wire_cells;
     WireCell::GeomCellSelection one_good_wire_cells;
+
+    WireCell::GeomCellSelection not_used_one_good_wire_cells;
     WireCell::GeomCellSelection two_bad_wire_cells;
 
     

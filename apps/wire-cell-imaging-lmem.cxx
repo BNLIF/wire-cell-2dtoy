@@ -434,49 +434,49 @@ int main(int argc, char* argv[])
     // //   toymatrix[i]->Print();
     // // }
 
-    //draw ... 
-    TApplication theApp("theApp",&argc,argv);
-    theApp.SetReturnFromRun(true);
+    // //draw ... 
+    // TApplication theApp("theApp",&argc,argv);
+    // theApp.SetReturnFromRun(true);
     
-    TCanvas c1("ToyMC","ToyMC",800,600);
-    c1.Draw();
+    // TCanvas c1("ToyMC","ToyMC",800,600);
+    // c1.Draw();
     
-    WireCell2dToy::ToyEventDisplay display(c1, gds);
-    display.charge_min = 0;
-    display.charge_max = 5e4;
+    // WireCell2dToy::ToyEventDisplay display(c1, gds);
+    // display.charge_min = 0;
+    // display.charge_max = 5e4;
 
 
-    gStyle->SetOptStat(0);
+    // gStyle->SetOptStat(0);
     
-    const Int_t NRGBs = 5;
-    const Int_t NCont = 255;
-    Int_t MyPalette[NCont];
-    Double_t stops[NRGBs] = {0.0, 0.34, 0.61, 0.84, 1.0};
-    Double_t red[NRGBs] = {0.0, 0.0, 0.87 ,1.0, 0.51};
-    Double_t green[NRGBs] = {0.0, 0.81, 1.0, 0.2 ,0.0};
-    Double_t blue[NRGBs] = {0.51, 1.0, 0.12, 0.0, 0.0};
-    Int_t FI = TColor::CreateGradientColorTable(NRGBs, stops, red, green, blue, NCont);
-    gStyle->SetNumberContours(NCont);
-    for (int kk=0;kk!=NCont;kk++) MyPalette[kk] = FI+kk;
-    gStyle->SetPalette(NCont,MyPalette);
+    // const Int_t NRGBs = 5;
+    // const Int_t NCont = 255;
+    // Int_t MyPalette[NCont];
+    // Double_t stops[NRGBs] = {0.0, 0.34, 0.61, 0.84, 1.0};
+    // Double_t red[NRGBs] = {0.0, 0.0, 0.87 ,1.0, 0.51};
+    // Double_t green[NRGBs] = {0.0, 0.81, 1.0, 0.2 ,0.0};
+    // Double_t blue[NRGBs] = {0.51, 1.0, 0.12, 0.0, 0.0};
+    // Int_t FI = TColor::CreateGradientColorTable(NRGBs, stops, red, green, blue, NCont);
+    // gStyle->SetNumberContours(NCont);
+    // for (int kk=0;kk!=NCont;kk++) MyPalette[kk] = FI+kk;
+    // gStyle->SetPalette(NCont,MyPalette);
 
     
 
-    display.init(0,10.3698,-2.33/2.,2.33/2.);
-    display.draw_mc(1,WireCell::PointValueVector(),"colz");
-    display.draw_slice(slice,""); // draw wire 
-    //display.draw_wires(vec1_wires.at(64),"same"); // draw wire 
-    // // display.draw_bad_region(uplane_map,i,nrebin,0,"same");
-    // // display.draw_bad_region(vplane_map,i,nrebin,1,"same");
-    // // display.draw_bad_region(wplane_map,i,nrebin,2,"same");
-    // display.draw_bad_cell(badtiling[i]->get_cell_all());
+    // display.init(0,10.3698,-2.33/2.,2.33/2.);
+    // display.draw_mc(1,WireCell::PointValueVector(),"colz");
+    // display.draw_slice(slice,""); // draw wire 
+    // //display.draw_wires(vec1_wires.at(64),"same"); // draw wire 
+    // // // display.draw_bad_region(uplane_map,i,nrebin,0,"same");
+    // // // display.draw_bad_region(vplane_map,i,nrebin,1,"same");
+    // // // display.draw_bad_region(wplane_map,i,nrebin,2,"same");
+    // // display.draw_bad_cell(badtiling[i]->get_cell_all());
   
-    display.draw_cells(single_cells,"*same");
-    //display.draw_mergecells(mergetiling[i]->get_allcell(),"*same",0); //0 is normal, 1 is only draw the ones containt the truth cell
+    // display.draw_cells(single_cells,"*same");
+    // //display.draw_mergecells(mergetiling[i]->get_allcell(),"*same",0); //0 is normal, 1 is only draw the ones containt the truth cell
     
-    // display.draw_wires_charge(toytiling[i]->wcmap(),"Fsame",FI);
-    // display.draw_cells_charge(toytiling[i]->get_allcell(),"Fsame");
-     theApp.Run();
+    // // display.draw_wires_charge(toytiling[i]->wcmap(),"Fsame",FI);
+    // // display.draw_cells_charge(toytiling[i]->get_allcell(),"Fsame");
+    //  theApp.Run();
   }
   
   cerr << em("finish tiling") << endl;
