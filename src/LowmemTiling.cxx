@@ -864,29 +864,186 @@ void WireCell2dToy::LowmemTiling::create_one_good_wire_cells(){
   // }
   // std::cout << fired_wires.size() << " " << count << std::endl;
 
-  GeomWireSelection leftover_wires;
+  std::set<const GeomWire*> leftover_wires;
+  //  GeomWireSelection leftover_wires;
   for (int i =0; i!= fired_wire_u.size();i++){
     for (int j=0; j!= ((MergeGeomWire*)fired_wire_u.at(i))->get_allwire().size(); j++){
       const GeomWire *wire = ((MergeGeomWire*)fired_wire_u.at(i))->get_allwire().at(j);
       if (fired_wires.find(wire)==fired_wires.end())
-	leftover_wires.push_back(wire);
+	leftover_wires.insert(wire);
     }
   }
   for (int i =0; i!= fired_wire_v.size();i++){
     for (int j=0; j!= ((MergeGeomWire*)fired_wire_v.at(i))->get_allwire().size(); j++){
       const GeomWire *wire = ((MergeGeomWire*)fired_wire_v.at(i))->get_allwire().at(j);
       if (fired_wires.find(wire)==fired_wires.end())
-	leftover_wires.push_back(wire);
+	leftover_wires.insert(wire);
     }
   }
   for (int i =0; i!= fired_wire_w.size();i++){
     for (int j=0; j!= ((MergeGeomWire*)fired_wire_w.at(i))->get_allwire().size(); j++){
       const GeomWire *wire = ((MergeGeomWire*)fired_wire_w.at(i))->get_allwire().at(j);
       if (fired_wires.find(wire)==fired_wires.end())
-	leftover_wires.push_back(wire);
+	leftover_wires.insert(wire);
     }
   }
-  std::cout << leftover_wires.size() << std::endl;
+
+  
+  //std::cout << leftover_wires.size() << std::endl;
+
+  GeomWireSelection remaining_fired_wire_u, remaining_fired_wire_v, remaining_fired_wire_w;
+  // do U
+  MergeGeomWire *mwire = 0;
+  int ident = 0;
+  int last_wire = -1;
+  for (int i = 0; i!= nwire_u; i++){
+    const GeomWire *wire = gds.by_planeindex((WirePlaneType_t)0,i);
+    if (leftover_wires.find(wire)!=leftover_wires.end()){
+      if (mwire == 0){
+   	mwire = new MergeGeomWire(ident,*wire);
+	remaining_fired_wire_u.push_back(mwire);
+   	ident ++;
+      }else{
+   	if (i==last_wire+1){
+   	  mwire->AddWire(*wire);
+   	}else{
+   	  // create a new wire
+   	  mwire = new MergeGeomWire(ident,*wire);
+    	  remaining_fired_wire_u.push_back(mwire);
+   	  ident ++;
+   	}
+      }
+      last_wire = i;
+    }
+  }
+  
+  // V
+  mwire = 0;
+  last_wire = -1;
+  for (int i = 0; i!= nwire_v; i++){
+    const GeomWire *wire = gds.by_planeindex((WirePlaneType_t)1,i);
+    if (leftover_wires.find(wire)!=leftover_wires.end()){
+      if (mwire == 0){
+  	mwire = new MergeGeomWire(ident,*wire);
+  	//mwire->SetTimeSlice(time_slice);
+  	remaining_fired_wire_v.push_back(mwire);
+  	ident ++;
+      }else{
+  	if (i==last_wire+1){
+  	  mwire->AddWire(*wire);
+  	}else{
+  	  // create a new wire
+  	  mwire = new MergeGeomWire(ident,*wire);
+  	  //mwire->SetTimeSlice(time_slice);
+  	  remaining_fired_wire_v.push_back(mwire);
+  	  ident ++;
+  	}
+      }
+      last_wire = i;
+    }
+  }
+  
+  // W
+  mwire = 0;
+  last_wire = -1;
+  for (int i = 0; i!= nwire_w; i++){
+    const GeomWire *wire = gds.by_planeindex((WirePlaneType_t)2,i);
+    if (leftover_wires.find(wire)!=leftover_wires.end()){
+      if (mwire == 0){
+  	mwire = new MergeGeomWire(ident,*wire);
+  	//mwire->SetTimeSlice(time_slice);
+  	remaining_fired_wire_w.push_back(mwire);
+  	ident ++;
+      }else{
+  	if (i==last_wire+1){
+  	  mwire->AddWire(*wire);
+  	}else{
+  	  // create a new wire
+  	  mwire = new MergeGeomWire(ident,*wire);
+  	  //mwire->SetTimeSlice(time_slice);
+  	  remaining_fired_wire_w.push_back(mwire);
+  	  ident ++;
+  	}
+      }
+      last_wire = i;
+    }
+  }
+
+  // int count = 0;
+  // for (int i =0; i!= remaining_fired_wire_u.size();i++){
+  //   count += ((MergeGeomWire*)remaining_fired_wire_u.at(i))->get_allwire().size();
+  // }
+  // for (int i =0; i!= remaining_fired_wire_v.size();i++){
+  //   count += ((MergeGeomWire*)remaining_fired_wire_v.at(i))->get_allwire().size();
+  // }
+  // for (int i =0; i!= remaining_fired_wire_w.size();i++){
+  //   count += ((MergeGeomWire*)remaining_fired_wire_w.at(i))->get_allwire().size();
+  // }
+  // std::cout << remaining_fired_wire_u.size() << " " << remaining_fired_wire_v.size() << " " << remaining_fired_wire_w.size() << " " << count << std::endl;
+
+  
+  //U/V/W = 1/0/0
+  for (int i=0;i!=remaining_fired_wire_u.size();i++){
+    MergeGeomWire *uwire = (MergeGeomWire *)remaining_fired_wire_u.at(i);
+    for (int j=0;j!=bad_wire_v.size();j++){
+      MergeGeomWire *vwire = (MergeGeomWire *)bad_wire_v.at(j);
+      for (int k=0;k!=bad_wire_w.size();k++){
+  	MergeGeomWire *wwire = (MergeGeomWire *)bad_wire_w.at(k);
+	
+  	SlimMergeGeomCell *mcell = create_slim_merge_cell(uwire,vwire,wwire);
+	
+  	if (mcell !=0) {
+	  one_good_wire_cells.push_back(mcell);
+	  mcell->add_bad_planes(WirePlaneType_t(1));
+	  mcell->add_bad_planes(WirePlaneType_t(2));
+	}
+      }
+    }
+  }
+  
+  //U/V/W = 0/1/0
+  for (int i=0;i!=bad_wire_u.size();i++){
+    MergeGeomWire *uwire = (MergeGeomWire *)bad_wire_u.at(i);
+    for (int j=0;j!=remaining_fired_wire_v.size();j++){
+      MergeGeomWire *vwire = (MergeGeomWire *)remaining_fired_wire_v.at(j);
+      for (int k=0;k!=bad_wire_w.size();k++){
+  	MergeGeomWire *wwire = (MergeGeomWire *)bad_wire_w.at(k);
+	
+  	SlimMergeGeomCell *mcell = create_slim_merge_cell(uwire,vwire,wwire);
+	
+  	if (mcell !=0) {
+	  one_good_wire_cells.push_back(mcell);
+	  mcell->add_bad_planes(WirePlaneType_t(0));
+	  mcell->add_bad_planes(WirePlaneType_t(2));
+	}
+      }
+    }
+  }
+  
+  //U/V/W = 0/0/1
+  for (int i=0;i!=bad_wire_u.size();i++){
+    MergeGeomWire *uwire = (MergeGeomWire *)bad_wire_u.at(i);
+    for (int j=0;j!=bad_wire_v.size();j++){
+      MergeGeomWire *vwire = (MergeGeomWire *)bad_wire_v.at(j);
+      for (int k=0;k!=remaining_fired_wire_w.size();k++){
+  	MergeGeomWire *wwire = (MergeGeomWire *)remaining_fired_wire_w.at(k);
+	
+  	SlimMergeGeomCell *mcell = create_slim_merge_cell(uwire,vwire,wwire);
+  	
+	if (mcell !=0) {
+	  one_good_wire_cells.push_back(mcell);
+	  mcell->add_bad_planes(WirePlaneType_t(0));
+	  mcell->add_bad_planes(WirePlaneType_t(1));
+	}
+      }
+    }
+  }
+  
+  // if connected to one of the existing cell, add them, or remove ... 
+  
+  
+  //std::cout << one_good_wire_cells.size() << std::endl;
+  
 }
 
 
@@ -907,7 +1064,7 @@ GeomCellSelection WireCell2dToy::LowmemTiling::create_single_cells(){
 
   // loop one wire cells
   for (int i=0; i!=one_good_wire_cells.size();i++){
-    GeomCellSelection temp_cells = create_single_cells((SlimMergeGeomCell*)two_good_wire_cells.at(i));
+    GeomCellSelection temp_cells = create_single_cells((SlimMergeGeomCell*)one_good_wire_cells.at(i));
     cells.insert(cells.end(),temp_cells.begin(),temp_cells.end());
   }
   
