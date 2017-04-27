@@ -336,14 +336,12 @@ int main(int argc, char* argv[])
     }
     lowmemtiling[i]->init_good_cells(slice,uplane_rms,vplane_rms,wplane_rms);
     
-    // //    std::cout << lowmemtiling[i]->get_three_good_wire_cells().size() << std::endl;
+    GeomCellSelection single_cells = lowmemtiling[i]->create_single_cells();
 
+    // //    std::cout << lowmemtiling[i]->get_three_good_wire_cells().size() << std::endl;
     // std::vector<GeomWireSelection> vec1_wires;
     // std::vector<GeomWireSelection> vec2_wires;
-    
-
     // // GeomWireSelection dwires;
-
     // for (int j=0;j!=lowmemtiling[i]->get_three_good_wire_cells().size();j++){
     //   //std::cout << "N: " << ((SlimMergeGeomCell*)lowmemtiling[i]->get_three_good_wire_cells().at(j))->get_uwires().size() << " "
     //   //<< ((SlimMergeGeomCell*)lowmemtiling[i]->get_three_good_wire_cells().at(j))->get_vwires().size() << " " 
