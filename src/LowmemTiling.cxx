@@ -746,6 +746,11 @@ void WireCell2dToy::LowmemTiling::init_good_cells(const WireCell::Slice& slice, 
 	MergeGeomWire *wwire = (MergeGeomWire *)fired_wire_w.at(k);
 	SlimMergeGeomCell *mcell = create_slim_merge_cell(uwire,vwire,wwire);
 	
+	// create new mwires 
+
+	// fill all maps
+	
+
 	if (mcell !=0) three_good_wire_cells.push_back(mcell);
 	
       }
@@ -808,10 +813,15 @@ void WireCell2dToy::LowmemTiling::init_good_cells(const WireCell::Slice& slice, 
   
   create_one_good_wire_cells();
 
+  //create map
 
+  
  
   
 }
+
+
+
 
 void WireCell2dToy::LowmemTiling::create_one_good_wire_cells(){
    // figure out the fired wires for each plane 
@@ -901,6 +911,7 @@ void WireCell2dToy::LowmemTiling::create_one_good_wire_cells(){
     if (leftover_wires.find(wire)!=leftover_wires.end()){
       if (mwire == 0){
    	mwire = new MergeGeomWire(ident,*wire);
+	wire_type_map[mwire] = true;
 	remaining_fired_wire_u.push_back(mwire);
    	ident ++;
       }else{
@@ -909,7 +920,8 @@ void WireCell2dToy::LowmemTiling::create_one_good_wire_cells(){
    	}else{
    	  // create a new wire
    	  mwire = new MergeGeomWire(ident,*wire);
-    	  remaining_fired_wire_u.push_back(mwire);
+    	  wire_type_map[mwire] = true;
+	  remaining_fired_wire_u.push_back(mwire);
    	  ident ++;
    	}
       }
@@ -926,6 +938,7 @@ void WireCell2dToy::LowmemTiling::create_one_good_wire_cells(){
       if (mwire == 0){
   	mwire = new MergeGeomWire(ident,*wire);
   	//mwire->SetTimeSlice(time_slice);
+	wire_type_map[mwire] = true;
   	remaining_fired_wire_v.push_back(mwire);
   	ident ++;
       }else{
@@ -935,6 +948,7 @@ void WireCell2dToy::LowmemTiling::create_one_good_wire_cells(){
   	  // create a new wire
   	  mwire = new MergeGeomWire(ident,*wire);
   	  //mwire->SetTimeSlice(time_slice);
+	  wire_type_map[mwire] = true;
   	  remaining_fired_wire_v.push_back(mwire);
   	  ident ++;
   	}
@@ -952,6 +966,7 @@ void WireCell2dToy::LowmemTiling::create_one_good_wire_cells(){
       if (mwire == 0){
   	mwire = new MergeGeomWire(ident,*wire);
   	//mwire->SetTimeSlice(time_slice);
+	wire_type_map[mwire] = true;
   	remaining_fired_wire_w.push_back(mwire);
   	ident ++;
       }else{
@@ -961,6 +976,7 @@ void WireCell2dToy::LowmemTiling::create_one_good_wire_cells(){
   	  // create a new wire
   	  mwire = new MergeGeomWire(ident,*wire);
   	  //mwire->SetTimeSlice(time_slice);
+	  wire_type_map[mwire] = true;
   	  remaining_fired_wire_w.push_back(mwire);
   	  ident ++;
   	}
@@ -2201,6 +2217,7 @@ void WireCell2dToy::LowmemTiling::form_fired_merge_wires(const WireCell::Slice& 
       if (mwire == 0){
 	mwire = new MergeGeomWire(ident,*wire);
 	//mwire->SetTimeSlice(time_slice);
+	wire_type_map[mwire] = true;
 	fired_wire_u.push_back(mwire);
 	ident ++;
       }else{
@@ -2210,6 +2227,7 @@ void WireCell2dToy::LowmemTiling::form_fired_merge_wires(const WireCell::Slice& 
 	  // create a new wire
 	  mwire = new MergeGeomWire(ident,*wire);
 	  // mwire->SetTimeSlice(time_slice);
+	  wire_type_map[mwire] = true;
 	  fired_wire_u.push_back(mwire);
 	  ident ++;
 	}
@@ -2227,6 +2245,7 @@ void WireCell2dToy::LowmemTiling::form_fired_merge_wires(const WireCell::Slice& 
       if (mwire == 0){
 	mwire = new MergeGeomWire(ident,*wire);
 	//mwire->SetTimeSlice(time_slice);
+	wire_type_map[mwire] = true;
 	fired_wire_v.push_back(mwire);
 	ident ++;
       }else{
@@ -2236,6 +2255,7 @@ void WireCell2dToy::LowmemTiling::form_fired_merge_wires(const WireCell::Slice& 
 	  // create a new wire
 	  mwire = new MergeGeomWire(ident,*wire);
 	  //mwire->SetTimeSlice(time_slice);
+	  wire_type_map[mwire] = true;
 	  fired_wire_v.push_back(mwire);
 	  ident ++;
 	}
@@ -2253,6 +2273,7 @@ void WireCell2dToy::LowmemTiling::form_fired_merge_wires(const WireCell::Slice& 
       if (mwire == 0){
 	mwire = new MergeGeomWire(ident,*wire);
 	//mwire->SetTimeSlice(time_slice);
+	wire_type_map[mwire] = true;
 	fired_wire_w.push_back(mwire);
 	ident ++;
       }else{
@@ -2262,6 +2283,7 @@ void WireCell2dToy::LowmemTiling::form_fired_merge_wires(const WireCell::Slice& 
 	  // create a new wire
 	  mwire = new MergeGeomWire(ident,*wire);
 	  //mwire->SetTimeSlice(time_slice);
+	  wire_type_map[mwire] = true;
 	  fired_wire_w.push_back(mwire);
 	  ident ++;
 	}
@@ -2308,6 +2330,7 @@ void WireCell2dToy::LowmemTiling::form_bad_merge_wires(WireCell::ChirpMap& uplan
 	if (mwire == 0){
 	  int ident = holder.get_wire_no();
 	  mwire = new MergeGeomWire(ident,*wire);
+	  wire_type_map[mwire] = false;
 	  bad_wire_u.push_back(mwire);
 	  holder.AddWire_No();
 	}else{
@@ -2317,6 +2340,7 @@ void WireCell2dToy::LowmemTiling::form_bad_merge_wires(WireCell::ChirpMap& uplan
 	    // create a new wire
 	    int ident = holder.get_wire_no();
 	    mwire = new MergeGeomWire(ident,*wire);
+	    wire_type_map[mwire] = false;
 	    bad_wire_u.push_back(mwire);
 	    holder.AddWire_No();
 	  }
@@ -2339,6 +2363,7 @@ void WireCell2dToy::LowmemTiling::form_bad_merge_wires(WireCell::ChirpMap& uplan
 	if (mwire == 0){
 	  int ident = holder.get_wire_no();
 	  mwire = new MergeGeomWire(ident,*wire);
+	  wire_type_map[mwire] = false;
 	  bad_wire_v.push_back(mwire);
 	  holder.AddWire_No();
 	}else{
@@ -2348,6 +2373,7 @@ void WireCell2dToy::LowmemTiling::form_bad_merge_wires(WireCell::ChirpMap& uplan
 	    // create a new wire
 	    int ident = holder.get_wire_no();
 	    mwire = new MergeGeomWire(ident,*wire);
+	    wire_type_map[mwire] = false;
 	    bad_wire_v.push_back(mwire);
 	    holder.AddWire_No();
 	  }
@@ -2370,6 +2396,7 @@ void WireCell2dToy::LowmemTiling::form_bad_merge_wires(WireCell::ChirpMap& uplan
 	if (mwire == 0){
 	  int ident = holder.get_wire_no();
 	  mwire = new MergeGeomWire(ident,*wire);
+	  wire_type_map[mwire] = false;
 	  bad_wire_w.push_back(mwire);
 	  holder.AddWire_No();
 	}else{
@@ -2379,6 +2406,7 @@ void WireCell2dToy::LowmemTiling::form_bad_merge_wires(WireCell::ChirpMap& uplan
 	    // create a new wire
 	    int ident = holder.get_wire_no();
 	    mwire = new MergeGeomWire(ident,*wire);
+	    wire_type_map[mwire] = false;
 	    bad_wire_w.push_back(mwire);
 	    holder.AddWire_No();
 	  }

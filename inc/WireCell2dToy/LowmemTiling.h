@@ -57,6 +57,7 @@ namespace WireCell2dToy{
     WireCell::GeomCellSelection create_single_cells(WireCell::SlimMergeGeomCell * mcell);
     void create_one_good_wire_cells();
 
+    
   protected:
     WireCell::GeomDataSource& gds;
     WireCell2dToy::WireCellHolder& holder;
@@ -79,15 +80,19 @@ namespace WireCell2dToy{
     WireCell::GeomCellSelection two_bad_wire_cells;
 
     
-    //map cell to wire
-
-    //map wire to cell
-
-    //map wire to parent wire
-
-    //map parent wire to wire
 
     //map wire --> bad or good
+    std::map<const WireCell::GeomWire*,bool> wire_type_map;
+    //map cell to wire
+    WireCell::GeomCellMap cell_wires_map;
+    //map wire to cell
+    WireCell::GeomWireMap wire_cells_map;
+    //map wire to parent wire
+    WireCell::GeomWireWireMap wire_pwire_map;
+    //map parent wire to wire
+    WireCell::GeomWireWiresMap pwire_wires_map;
+    
+    
 
     int nrebin;
     int time_slice;
