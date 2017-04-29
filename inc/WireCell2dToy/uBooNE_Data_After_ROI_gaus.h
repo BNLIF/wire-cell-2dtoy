@@ -9,7 +9,7 @@ namespace WireCell2dToy{
   class uBooNEDataAfterROI_Gaus : public WireCell::FrameDataSource
   {
   public: 
-    uBooNEDataAfterROI_Gaus(uBooNEData2DDeconvolutionFDS* frame_data, uBooNEDataAfterROI* frame_rois);
+    uBooNEDataAfterROI_Gaus(uBooNEData2DDeconvolutionFDS* frame_data, uBooNEDataAfterROI* frame_rois, const WireCell::GeomDataSource& gds);
     ~uBooNEDataAfterROI_Gaus();
 
     virtual int jump(int frame_number);
@@ -21,6 +21,7 @@ namespace WireCell2dToy{
     uBooNEData2DDeconvolutionFDS* frame_data;
     uBooNEDataAfterROI* frame_rois;
     
+    int nwire_u, nwire_v, nwire_w;
   };
 }
 

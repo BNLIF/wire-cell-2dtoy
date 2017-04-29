@@ -2,11 +2,17 @@
 
 using namespace WireCell;
 
-WireCell2dToy::uBooNEDataAfterROI_Gaus::uBooNEDataAfterROI_Gaus(WireCell2dToy::uBooNEData2DDeconvolutionFDS* frame_data, WireCell2dToy::uBooNEDataAfterROI* frame_rois)
+WireCell2dToy::uBooNEDataAfterROI_Gaus::uBooNEDataAfterROI_Gaus(WireCell2dToy::uBooNEData2DDeconvolutionFDS* frame_data, WireCell2dToy::uBooNEDataAfterROI* frame_rois, const WireCell::GeomDataSource& gds)
   : frame_data(frame_data)
   , frame_rois(frame_rois)
 {
+  GeomWireSelection wires_u = gds.wires_in_plane(WirePlaneType_t(0));
+  GeomWireSelection wires_v = gds.wires_in_plane(WirePlaneType_t(1));
+  GeomWireSelection wires_w = gds.wires_in_plane(WirePlaneType_t(2));
 
+  nwire_u = wires_u.size();
+  nwire_v = wires_v.size();
+  nwire_w = wires_w.size();
 }
 
 WireCell2dToy::uBooNEDataAfterROI_Gaus::~uBooNEDataAfterROI_Gaus(){
@@ -61,7 +67,43 @@ int WireCell2dToy::uBooNEDataAfterROI_Gaus::jump(int frame_number){
 
     // do the baseline correction and load the results
     
-    
+    if (chid < nwire_u){
+      for (auto it = rois_u.at(chid).begin(); it!= rois_u.at(chid).end();it++){
+	SignalROI *roi =  *it;
+	int start_bin = roi->get_start_bin();
+	int end_bin = roi->get_end_bin();
+	float start_content = hu_data->GetBinContent(chid,start_bin+1);
+	float end_content = hu_data->GetBinContent(chid,end_bin+1);
+	for (int i=start_bin; i<end_bin+1; i++){
+	  int content = hu_data->GetBinContent(chid,i+1) - ((end_content - start_content)*(i-start_bin)/(end_bin-start_bin) + start_content);
+	  htemp_signal->SetBinContent(i+1,content);
+	}
+      }
+    }else if (chid < nwire_u + nwire_v){
+      for (auto it = rois_v.at(chid-nwire_u).begin(); it!= rois_v.at(chid-nwire_u).end();it++){
+	SignalROI *roi =  *it;
+	int start_bin = roi->get_start_bin();
+	int end_bin = roi->get_end_bin();
+	float start_content = hv_data->GetBinContent(chid-nwire_u,start_bin+1);
+	float end_content = hv_data->GetBinContent(chid-nwire_u,end_bin+1);
+	for (int i=start_bin; i<end_bin+1; i++){
+	  int content = hv_data->GetBinContent(chid-nwire_u,i+1) - ((end_content - start_content)*(i-start_bin)/(end_bin-start_bin) + start_content);
+	  htemp_signal->SetBinContent(i+1,content);
+	}
+      }
+    }else{
+      for (auto it = rois_w.at(chid-nwire_u-nwire_v).begin(); it!= rois_w.at(chid-nwire_u-nwire_v).end();it++){
+	SignalROI *roi =  *it;
+	int start_bin = roi->get_start_bin();
+	int end_bin = roi->get_end_bin();
+	float start_content = hw_data->GetBinContent(chid-nwire_u-nwire_v,start_bin+1);
+	float end_content = hw_data->GetBinContent(chid-nwire_u-nwire_v,end_bin+1);
+	for (int i=start_bin; i<end_bin+1; i++){
+	  int content = hw_data->GetBinContent(chid-nwire_u-nwire_v,i+1) - ((end_content - start_content)*(i-start_bin)/(end_bin-start_bin) + start_content);
+	  htemp_signal->SetBinContent(i+1,content);
+	}
+      }
+    }
 
 
     // save into frames ... 
