@@ -17,6 +17,11 @@ namespace WireCell2dToy{
     virtual int jump(int frame_number);
     virtual int size() const;
 
+    WireCell::SignalROIChList& get_u_rois(){return rois_u_loose;};
+    WireCell::SignalROIChList& get_v_rois(){return rois_v_loose;};
+    WireCell::SignalROIChList& get_w_rois(){return rois_w_tight;};
+
+
     void Clear();
   private:
     WireCell::FrameDataSource& fds;

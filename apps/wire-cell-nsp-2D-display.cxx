@@ -41,6 +41,7 @@
 #include "WireCell2dToy/uBooNE_Data_2D_Deconvolution.h"
 #include "WireCell2dToy/uBooNE_Data_ROI.h"
 #include "WireCell2dToy/uBooNE_Data_After_ROI.h"
+#include "WireCell2dToy/uBooNE_Data_After_ROI_gaus.h"
 
 #include "TApplication.h"
 #include "TCanvas.h"
@@ -133,8 +134,10 @@ int main(int argc, char* argv[])
   // Refine ROIs
   WireCell2dToy::uBooNEDataAfterROI roi_fds(wien_fds,gds,uboone_rois,nrebin);
   roi_fds.jump(eve_num);
-
   
+  //Fill Gaussian ROIs
+  WireCell2dToy::uBooNEDataAfterROI_Gaus roi_gaus_fds(&wien_fds, &roi_fds);
+  roi_gaus_fds.jump(eve_num);
 
   TH1::AddDirectory(kTRUE);
 
