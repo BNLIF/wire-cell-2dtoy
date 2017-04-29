@@ -45,6 +45,7 @@
 #include "WireCell2dToy/uBooNE_Data_2D_Deconvolution.h"
 #include "WireCell2dToy/uBooNE_Data_ROI.h"
 #include "WireCell2dToy/uBooNE_Data_After_ROI.h"
+#include "WireCell2dToy/uBooNE_Data_After_ROI_gaus.h"
 
 #include "TApplication.h"
 #include "TCanvas.h"
@@ -261,6 +262,8 @@ int main(int argc, char* argv[])
   WireCell2dToy::uBooNEDataROI *uboone_rois = new WireCell2dToy::uBooNEDataROI(*data_fds,*wien_fds,gds,uplane_map,vplane_map,wplane_map,lf_noisy_channels);
   WireCell2dToy::uBooNEDataAfterROI roi_fds(*wien_fds,gds,*uboone_rois,nrebin);
   roi_fds.jump(eve_num);
+  WireCell2dToy::uBooNEDataAfterROI_Gaus roi_gaus_fds(wien_fds, &roi_fds,gds);
+  roi_gaus_fds.jump(eve_num);
   
   // Note, there is a mismatch here
   // These RMS values are for single ticks
@@ -330,7 +333,7 @@ int main(int argc, char* argv[])
   // 					    nwire_u, 
   // 					    nwire_v, nwire_w); 
 
-  WireCellSst::ToyuBooNESliceDataSource sds(roi_fds,roi_fds,threshold_u, 
+  WireCellSst::ToyuBooNESliceDataSource sds(roi_fds,roi_gaus_fds,threshold_u, 
   					    threshold_v, threshold_w, 
   					    threshold_ug, 
   					    threshold_vg, threshold_wg, 

@@ -222,8 +222,8 @@ int main(int argc, char* argv[])
   }
 
   
-  //const Frame& frame1 = roi_fds.get();
-  const Frame& frame1 = roi_gaus_fds.get();
+  const Frame& frame1 = roi_fds.get();
+  // const Frame& frame1 = roi_gaus_fds.get();
   ntraces = frame1.traces.size();
   for (size_t ind=0; ind<ntraces; ++ind) {
     const Trace& trace = frame1.traces[ind];

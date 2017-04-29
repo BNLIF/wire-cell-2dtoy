@@ -45,6 +45,7 @@
 #include "WireCell2dToy/uBooNE_Data_2D_Deconvolution.h"
 #include "WireCell2dToy/uBooNE_Data_ROI.h"
 #include "WireCell2dToy/uBooNE_Data_After_ROI.h"
+#include "WireCell2dToy/uBooNE_Data_After_ROI_gaus.h"
 
 #include "TApplication.h"
 #include "TCanvas.h"
@@ -198,7 +199,8 @@ int main(int argc, char* argv[])
   WireCell2dToy::uBooNEDataROI *uboone_rois = new WireCell2dToy::uBooNEDataROI(*data_fds,*wien_fds,gds,uplane_map,vplane_map,wplane_map,lf_noisy_channels);
   WireCell2dToy::uBooNEDataAfterROI roi_fds(*wien_fds,gds,*uboone_rois,nrebin);
   roi_fds.jump(eve_num);
-  
+  WireCell2dToy::uBooNEDataAfterROI_Gaus roi_gaus_fds(wien_fds, &roi_fds,gds);
+  roi_gaus_fds.jump(eve_num);
 
   std::vector<float> uplane_rms = uboone_rois->get_uplane_rms();
   std::vector<float> vplane_rms = uboone_rois->get_vplane_rms();
@@ -383,6 +385,35 @@ int main(int argc, char* argv[])
       chid -= nwire_u;
     }else if (plane == WirePlaneType_t(2)){
       htemp1 = hw_decon;
+      chid -= nwire_u + nwire_v;
+    }
+    for (int i = tbin;i!=tbin+nbins;i++){
+      int tt = i+1;
+      htemp1->SetBinContent(chid+1,tt,int(trace.charge.at(i)));
+    }
+  }
+
+  TH2I *hu_decon_g = new TH2I("hu_decon_g","hu_decon_g",nwire_u,-0.5,nwire_u-0.5,total_time_bin/nrebin,0,total_time_bin);
+  TH2I *hv_decon_g = new TH2I("hv_decon_g","hv_decon_g",nwire_v,-0.5+nwire_u,nwire_v-0.5+nwire_u,total_time_bin/nrebin,0,total_time_bin);
+  TH2I *hw_decon_g = new TH2I("hw_decon_g","hw_decon_g",nwire_w,-0.5+nwire_u+nwire_v,nwire_w-0.5+nwire_u+nwire_v,total_time_bin/nrebin,0,total_time_bin);
+  hu_decon_g->SetDirectory(file);
+  hv_decon_g->SetDirectory(file);
+  hw_decon_g->SetDirectory(file);
+  const Frame& frame3 = roi_gaus_fds.get();
+  ntraces = frame3.traces.size();
+  for (size_t ind=0; ind<ntraces; ++ind) {
+    const Trace& trace = frame3.traces[ind];
+    int tbin = trace.tbin;
+    int chid = trace.chid;
+    int nbins = trace.charge.size();
+    WirePlaneType_t plane = gds.by_channel(chid).at(0)->plane();
+    if (plane == WirePlaneType_t(0)){
+      htemp1 = hu_decon_g;
+    }else if (plane == WirePlaneType_t(1)){
+      htemp1 = hv_decon_g;
+      chid -= nwire_u;
+    }else if (plane == WirePlaneType_t(2)){
+      htemp1 = hw_decon_g;
       chid -= nwire_u + nwire_v;
     }
     for (int i = tbin;i!=tbin+nbins;i++){
