@@ -32,6 +32,10 @@ namespace WireCell2dToy{
     TH2I* get_v_gaus(){return hv_2D_gg;};
     TH2I* get_w_gaus(){return hw_2D_gg;};
 
+    TH2I* get_u_wiener(){return hu_2D_g;};
+    TH2I* get_v_wiener(){return hv_2D_g;};
+    TH2I* get_w_wiener(){return hw_2D_g;};
+
     virtual int size() const;
     virtual int jump(int frame_number);
     void Clear();

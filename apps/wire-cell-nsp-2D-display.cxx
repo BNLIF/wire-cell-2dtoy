@@ -92,7 +92,7 @@ int main(int argc, char* argv[])
   float toffset_3=0.0;
   int total_time_bin=9594;
   int frame_length = 3200;
-  int nrebin = 6;
+  int nrebin = 6; // 6 is default
   int eve_num  = atoi(argv[3]);
   int time_offset = -92.;
   
@@ -143,6 +143,25 @@ int main(int argc, char* argv[])
 
 
   TFile *file = new TFile(Form("nsp_2D_display_%d_%d_%d.root",run_no,subrun_no,event_no),"RECREATE");
+
+  // // save middle histograms
+  // TH2I *hu_w = wien_fds.get_u_wiener();
+  // TH2I *hv_w = wien_fds.get_v_wiener();
+  // TH2I *hw_w = wien_fds.get_w_wiener();
+  
+  // TH2I *hu_g = wien_fds.get_u_gaus();
+  // TH2I *hv_g = wien_fds.get_v_gaus();
+  // TH2I *hw_g = wien_fds.get_w_gaus();
+  
+  // hu_w->SetDirectory(file);
+  // hv_w->SetDirectory(file);
+  // hw_w->SetDirectory(file);
+
+  // hu_g->SetDirectory(file);
+  // hv_g->SetDirectory(file);
+  // hw_g->SetDirectory(file);
+  // // save middle histograms
+
 
   GeomWireSelection wires_u = gds.wires_in_plane(WirePlaneType_t(0));
   GeomWireSelection wires_v = gds.wires_in_plane(WirePlaneType_t(1));
@@ -203,7 +222,7 @@ int main(int argc, char* argv[])
   }
 
   
-  //  const Frame& frame1 = roi_fds.get();
+  //const Frame& frame1 = roi_fds.get();
   const Frame& frame1 = roi_gaus_fds.get();
   ntraces = frame1.traces.size();
   for (size_t ind=0; ind<ntraces; ++ind) {

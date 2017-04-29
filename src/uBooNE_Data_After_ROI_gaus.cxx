@@ -72,10 +72,10 @@ int WireCell2dToy::uBooNEDataAfterROI_Gaus::jump(int frame_number){
 	SignalROI *roi =  *it;
 	int start_bin = roi->get_start_bin();
 	int end_bin = roi->get_end_bin();
-	float start_content = hu_data->GetBinContent(chid,start_bin+1);
-	float end_content = hu_data->GetBinContent(chid,end_bin+1);
+	float start_content = hu_data->GetBinContent(chid+1,start_bin+1);
+	float end_content = hu_data->GetBinContent(chid+1,end_bin+1);
 	for (int i=start_bin; i<end_bin+1; i++){
-	  int content = hu_data->GetBinContent(chid,i+1) - ((end_content - start_content)*(i-start_bin)/(end_bin-start_bin) + start_content);
+	  int content = hu_data->GetBinContent(chid+1,i+1) - ((end_content - start_content)*(i-start_bin)/(end_bin-start_bin) + start_content);
 	  htemp_signal->SetBinContent(i+1,content);
 	}
       }
@@ -84,10 +84,10 @@ int WireCell2dToy::uBooNEDataAfterROI_Gaus::jump(int frame_number){
 	SignalROI *roi =  *it;
 	int start_bin = roi->get_start_bin();
 	int end_bin = roi->get_end_bin();
-	float start_content = hv_data->GetBinContent(chid-nwire_u,start_bin+1);
-	float end_content = hv_data->GetBinContent(chid-nwire_u,end_bin+1);
+	float start_content = hv_data->GetBinContent(chid-nwire_u+1,start_bin+1);
+	float end_content = hv_data->GetBinContent(chid-nwire_u+1,end_bin+1);
 	for (int i=start_bin; i<end_bin+1; i++){
-	  int content = hv_data->GetBinContent(chid-nwire_u,i+1) - ((end_content - start_content)*(i-start_bin)/(end_bin-start_bin) + start_content);
+	  int content = hv_data->GetBinContent(chid-nwire_u+1,i+1) - ((end_content - start_content)*(i-start_bin)/(end_bin-start_bin) + start_content);
 	  htemp_signal->SetBinContent(i+1,content);
 	}
       }
@@ -96,10 +96,10 @@ int WireCell2dToy::uBooNEDataAfterROI_Gaus::jump(int frame_number){
 	SignalROI *roi =  *it;
 	int start_bin = roi->get_start_bin();
 	int end_bin = roi->get_end_bin();
-	float start_content = hw_data->GetBinContent(chid-nwire_u-nwire_v,start_bin+1);
-	float end_content = hw_data->GetBinContent(chid-nwire_u-nwire_v,end_bin+1);
+	float start_content = hw_data->GetBinContent(chid-nwire_u-nwire_v+1,start_bin+1);
+	float end_content = hw_data->GetBinContent(chid-nwire_u-nwire_v+1,end_bin+1);
 	for (int i=start_bin; i<end_bin+1; i++){
-	  int content = hw_data->GetBinContent(chid-nwire_u-nwire_v,i+1) - ((end_content - start_content)*(i-start_bin)/(end_bin-start_bin) + start_content);
+	  int content = hw_data->GetBinContent(chid-nwire_u-nwire_v+1,i+1) - ((end_content - start_content)*(i-start_bin)/(end_bin-start_bin) + start_content);
 	  htemp_signal->SetBinContent(i+1,content);
 	}
       }
