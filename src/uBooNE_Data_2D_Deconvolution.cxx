@@ -29,6 +29,9 @@ WireCell2dToy::uBooNEData2DDeconvolutionFDS::uBooNEData2DDeconvolutionFDS(TH2I *
   , hu_2D_g(0)
   , hv_2D_g(0)
   , hw_2D_g(0)
+  , hu_2D_gg(0)
+  , hv_2D_gg(0)
+  , hw_2D_gg(0)
   , scale_u_2d(0)
   , scale_v_2d(0)
 {
@@ -150,6 +153,9 @@ WireCell2dToy::uBooNEData2DDeconvolutionFDS::uBooNEData2DDeconvolutionFDS(WireCe
   , hu_2D_g(0)
   , hv_2D_g(0)
   , hw_2D_g(0)
+  , hu_2D_gg(0)
+  , hv_2D_gg(0)
+  , hw_2D_gg(0)
   , scale_u_2d(0)
   , scale_v_2d(0)
 {  
@@ -169,6 +175,10 @@ WireCell2dToy::uBooNEData2DDeconvolutionFDS::uBooNEData2DDeconvolutionFDS(WireCe
   hu_2D_g = new TH2I("hu_2D_g","hu_2D_g",nwire_u,0,nwire_u,bins_per_frame,0,bins_per_frame);
   hv_2D_g = new TH2I("hv_2D_g","hv_2D_g",nwire_v,0,nwire_v,bins_per_frame,0,bins_per_frame);
   hw_2D_g = new TH2I("hw_2D_g","hw_2D_g",nwire_w,0,nwire_w,bins_per_frame,0,bins_per_frame);
+
+  hu_2D_gg = new TH2I("hu_2D_gg","hu_2D_gg",nwire_u,0,nwire_u,bins_per_frame,0,bins_per_frame);
+  hv_2D_gg = new TH2I("hv_2D_gg","hv_2D_gg",nwire_v,0,nwire_v,bins_per_frame,0,bins_per_frame);
+  hw_2D_gg = new TH2I("hw_2D_gg","hw_2D_gg",nwire_w,0,nwire_w,bins_per_frame,0,bins_per_frame);
 
   #include "data_70_2D_11.txt"
   
@@ -244,6 +254,10 @@ WireCell2dToy::uBooNEData2DDeconvolutionFDS::~uBooNEData2DDeconvolutionFDS()
     delete hu_2D_g;
     delete hv_2D_g;
     delete hw_2D_g;
+    
+    delete hu_2D_gg;
+    delete hv_2D_gg;
+    delete hw_2D_gg;
     
     for (int i=0;i!=11;i++){
       delete gu_2D_g[i];
@@ -366,34 +380,38 @@ void WireCell2dToy::uBooNEData2DDeconvolutionFDS::Deconvolute_2D(int plane){
   double time_offset = 0;
   if (plane == 0){
     double par[2]={1.43555e+01/200.*2.,4.95096e+00};
-    //double par[2]={2.42524e+01/200.*2.,8.12825e+00};
-    //double par[2]={2.37356e+01/200.*2.,7.88785e+00};
-    //double par[2]={1.47404e+01/200.*2.,4.97667e+00};
+    // double par[2]={2.42524e+01/200.*2.,8.12825e+00};
+    // double par[2]={2.37356e+01/200.*2.,7.88785e+00};
+    // double par[2]={1.47404e+01/200.*2.,4.97667e+00};
     filter_time->SetParameters(par);
     nwires = nwire_u;
     scale = scale_u_2d;
     gfield = gu_2D_g;
   }else if (plane == 1){
-    //double par[2]={1.47404e+01/200.*2.,4.97667e+00};
-    //double par[2]={2.37356e+01/200.*2.,7.88785e+00};
-    double par[2]={1.43555e+01/200.*2.,4.95096e+00};
+    double par[2]={1.47404e+01/200.*2.,4.97667e+00};
+    // double par[2]={2.37356e+01/200.*2.,7.88785e+00};
+    // double par[2]={1.43555e+01/200.*2.,4.95096e+00};
     filter_time->SetParameters(par);
     nwires = nwire_v;
     scale = scale_v_2d;
     gfield = gv_2D_g;
     time_offset = - time_offset_uv;// -0.113;
   }else if (plane == 2){
-    //double par2[2]={1.45874e+01/200.*2.,5.02219e+00};
+    double par[2]={1.45874e+01/200.*2.,5.02219e+00};
     //double par2[2]={2.41788e+01/200.*2.,8.84234e+00}; // Y
     //double par[2]={2.37356e+01/200.*2.,7.88785e+00};
     // double par[2]={1.47404e+01/200.*2.,4.97667e+00};
-    double par[2]={1.43555e+01/200.*2.,4.95096e+00};
+    // double par[2]={1.43555e+01/200.*2.,4.95096e+00};
     filter_time->SetParameters(par);
     nwires = nwire_w;
     gfield = gw_2D_g;
     time_offset = -time_offset_uw;// + 0.803;
   }
   
+  TF1 *filter_g = new TF1("filter_g","exp(-0.5*pow(x/[0],2))");
+  double par3[1]={1.11408e-01};
+  filter_g->SetParameters(par3);
+
   TF1 *filter_wire = new TF1("filter_wire","exp(-0.5*pow(x/[0],2))");
   double par4[1] = {1.0/sqrt(3.1415926)*1.4};
   filter_wire->SetParameters(par4);
@@ -654,10 +672,15 @@ void WireCell2dToy::uBooNEData2DDeconvolutionFDS::Deconvolute_2D(int plane){
    for (Int_t chid=0;chid!=nchannels;chid++){
      int n = nticks;
      TVirtualFFT *ifft2 = TVirtualFFT::FFT(1,&n,"C2R M K");
+     TVirtualFFT *ifft2_g = TVirtualFFT::FFT(1,&n,"C2R M K");
      double temp_re[nticks],temp_im[nticks];
+     double tempg_re[nticks],tempg_im[nticks];
      for (int j=0;j!=nticks;++j){
        temp_re[j] = 0;
        temp_im[j] = 0;
+
+       tempg_re[j] = 0;
+       tempg_im[j] = 0;
      }
      for (int j=0;j!=nticks;j++){
        Double_t freq=0;
@@ -668,21 +691,39 @@ void WireCell2dToy::uBooNEData2DDeconvolutionFDS::Deconvolute_2D(int plane){
        }
        temp_re[j] = result_re[chid][j]*filter_time->Eval(freq);// *filter_low->Eval(freq);
        temp_im[j] = result_im[chid][j]*filter_time->Eval(freq);// *filter_low->Eval(freq);
+       
+       tempg_re[j] = result_re[chid][j]*filter_g->Eval(freq);// *filter_low->Eval(freq);
+       tempg_im[j] = result_im[chid][j]*filter_g->Eval(freq);// *filter_low->Eval(freq);
      }
      ifft2->SetPointsComplex(temp_re,temp_im);
      ifft2->Transform();
+     ifft2_g->SetPointsComplex(tempg_re,tempg_im);
+     ifft2_g->Transform();
+     
      TH1 *fb = 0;
      fb = TH1::TransformHisto(ifft2,fb,"Re");
      
+     TH1 *fb_g = 0;
+     fb_g = TH1::TransformHisto(ifft2_g,fb_g,"Re");
+     
+
      TH1F *htemp = new TH1F("htemp","htemp",nbin,0,nbin);
      for (int i=0;i!=nbin;i++){
        htemp->SetBinContent(i+1,fb->GetBinContent(i+1)/( 14.*1.2*4096./2000.));
      }
+
+     TH1F *htemp_g = new TH1F("htemp_g","htemp_g",nbin,0,nbin);
+     for (int i=0;i!=nbin;i++){
+       htemp_g->SetBinContent(i+1,fb_g->GetBinContent(i+1)/( 14.*1.2*4096./2000.));
+     }
+
      delete ifft2;
      delete fb;
-     
+     delete ifft2_g;
+     delete fb_g;
      // correct baseline 
      restore_baseline(htemp);
+     restore_baseline(htemp_g);
      
      int start = -1, end = -1;
      if (plane == 0){
@@ -710,20 +751,25 @@ void WireCell2dToy::uBooNEData2DDeconvolutionFDS::Deconvolute_2D(int plane){
        }else{
 	 if (plane == 0){
 	   hu_2D_g->SetBinContent(chid+1,bin+1,int(htemp->GetBinContent(j+1)));
+	   hu_2D_gg->SetBinContent(chid+1,bin+1,int(htemp_g->GetBinContent(j+1)));
 	 }else if (plane == 1){
 	   hv_2D_g->SetBinContent(chid+1,bin+1,int(htemp->GetBinContent(j+1)));
+	   hv_2D_gg->SetBinContent(chid+1,bin+1,int(htemp_g->GetBinContent(j+1)));
 	 }else if (plane == 2){
 	   hw_2D_g->SetBinContent(chid+1,bin+1,int(htemp->GetBinContent(j+1)));
+	   hw_2D_gg->SetBinContent(chid+1,bin+1,int(htemp_g->GetBinContent(j+1)));
 	 }
        }
      }
      delete htemp;
+     delete htemp_g;
    }
    
   delete filter_low;
   delete filter_wire;
   delete filter_wire1;
   delete filter_time;
+  delete filter_g;
   delete hr;
   
 }
@@ -732,6 +778,10 @@ void WireCell2dToy::uBooNEData2DDeconvolutionFDS::Clear(){
   hu_2D_g->Reset();
   hv_2D_g->Reset();
   hw_2D_g->Reset();
+
+  hu_2D_gg->Reset();
+  hv_2D_gg->Reset();
+  hw_2D_gg->Reset();
 
   frame.clear();
 }

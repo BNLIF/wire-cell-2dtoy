@@ -28,6 +28,10 @@ namespace WireCell2dToy{
     WireCell::ChirpMap& get_v_cmap(){return vmap;};
     WireCell::ChirpMap& get_w_cmap(){return wmap;};
     
+    TH2I* get_u_gaus(){return hu_2D_gg;};
+    TH2I* get_v_gaus(){return hv_2D_gg;};
+    TH2I* get_w_gaus(){return hw_2D_gg;};
+
     virtual int size() const;
     virtual int jump(int frame_number);
     void Clear();
@@ -58,6 +62,10 @@ namespace WireCell2dToy{
     TH2I *hu_2D_g;
     TH2I *hv_2D_g;
     TH2I *hw_2D_g;
+
+    TH2I *hu_2D_gg;
+    TH2I *hv_2D_gg;
+    TH2I *hw_2D_gg;
 
     float scale_u_2d, scale_v_2d;
     
