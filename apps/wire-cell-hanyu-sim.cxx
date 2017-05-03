@@ -45,6 +45,7 @@
 #include "WireCell2dToy/uBooNE_Data_2D_Deconvolution.h"
 #include "WireCell2dToy/uBooNE_Data_ROI.h"
 #include "WireCell2dToy/uBooNE_Data_After_ROI.h"
+#include "WireCell2dToy/uBooNE_Data_After_ROI_gaus.h"
 
 #include "TApplication.h"
 #include "TCanvas.h"
@@ -147,6 +148,10 @@ int main(int argc, char* argv[])
   WireCell2dToy::uBooNEDataAfterROI roi_fds(wien_fds,gds,uboone_rois,nrebin);
   roi_fds.jump(eve_num);
 
+  //Fill Gaussian ROIs
+  WireCell2dToy::uBooNEDataAfterROI_Gaus roi_gaus_fds(&wien_fds, &roi_fds,gds);
+  roi_gaus_fds.jump(eve_num);
+
   TH1::AddDirectory(kTRUE);
 
   TFile *file = new TFile(Form("Sim_%d_%d_%d.root",run_no,subrun_no,eve_num),"RECREATE");
@@ -209,6 +214,7 @@ int main(int argc, char* argv[])
   }
   
   const Frame& frame1 = roi_fds.get();
+  //const Frame& frame1 = roi_gaus_fds.get();
   ntraces = frame1.traces.size();
   for (size_t ind=0; ind<ntraces; ++ind) {
     const Trace& trace = frame1.traces[ind];
