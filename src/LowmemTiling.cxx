@@ -708,20 +708,91 @@ WireCell::SlimMergeGeomCell* WireCell2dToy::LowmemTiling::create_slim_merge_cell
     if (flag==1){
       SlimMergeGeomCell *mcell = new SlimMergeGeomCell(ident); 
       holder.AddCell_No();
+      // Creat the Merge Wires
+      MergeGeomWire *mwire_u;
+      MergeGeomWire *mwire_v;
+      MergeGeomWire *mwire_w;
+
+
       // Inser U    
       for (int k=uwire_min->index();k!=uwire_max->index()+1;k++){
-	const GeomWire *uwire = gds.by_planeindex(WirePlaneType_t(0),k);
-	mcell->AddWire(uwire,WirePlaneType_t(0));
+	const GeomWire *uwire1 = gds.by_planeindex(WirePlaneType_t(0),k);
+	mcell->AddWire(uwire1,WirePlaneType_t(0));
+	if (k==uwire_min->index()){
+	  mwire_u = new MergeGeomWire(ident,*uwire1);
+	}else{
+	  mwire_u->AddWire(*uwire1);
+	}
       }
       //Insert V
       for (int k=vwire_min->index();k!=vwire_max->index()+1;k++){
-	const GeomWire *vwire = gds.by_planeindex(WirePlaneType_t(1),k);
-	mcell->AddWire(vwire,WirePlaneType_t(1));
+	const GeomWire *vwire1 = gds.by_planeindex(WirePlaneType_t(1),k);
+	mcell->AddWire(vwire1,WirePlaneType_t(1));
+	if (k==vwire_min->index()){
+	  mwire_v = new MergeGeomWire(ident,*vwire1);
+	}else{
+	  mwire_v->AddWire(*vwire1);
+	}
       }
       // Insert W
       for (int k=wwire_min->index();k!=wwire_max->index()+1;k++){
-	const GeomWire *wwire = gds.by_planeindex(WirePlaneType_t(2),k);
-	mcell->AddWire(wwire,WirePlaneType_t(2));
+	const GeomWire *wwire1 = gds.by_planeindex(WirePlaneType_t(2),k);
+	mcell->AddWire(wwire1,WirePlaneType_t(2));
+	if (k==wwire_min->index()){
+	  mwire_w = new MergeGeomWire(ident,*wwire1);
+	}else{
+	  mwire_w->AddWire(*wwire1);
+	}
+      }
+      
+      // create the map  
+      // cell to wires
+      GeomWireSelection wires;
+      wires.push_back(mwire_u);
+      wires.push_back(mwire_v);
+      wires.push_back(mwire_w);
+      cell_wires_map[mcell] = wires;
+      
+      // wire to cells
+      GeomCellSelection cells;
+      cells.push_back(mcell);
+      wire_cells_map[mwire_u] = cells;
+      wire_cells_map[mwire_v] = cells;
+      wire_cells_map[mwire_w] = cells;
+      
+      // wire to parent wire
+      wire_pwire_map[mwire_u] = uwire;
+      wire_pwire_map[mwire_v] = vwire;
+      wire_pwire_map[mwire_w] = wwire;
+
+      // wire types
+      wire_type_map[mwire_u] = wire_type_map[uwire];
+      wire_type_map[mwire_v] = wire_type_map[vwire];     
+      wire_type_map[mwire_w] = wire_type_map[wwire];
+
+      //parent wire to wires
+      if (pwire_wires_map.find(uwire)==pwire_wires_map.end()){
+	GeomWireSelection wires;
+	wires.push_back(mwire_u);
+	pwire_wires_map[uwire] = wires;
+      }else{
+	pwire_wires_map[uwire].push_back(mwire_u);
+      }
+
+      if (pwire_wires_map.find(vwire)==pwire_wires_map.end()){
+	GeomWireSelection wires;
+	wires.push_back(mwire_v);
+	pwire_wires_map[vwire] = wires;
+      }else{
+	pwire_wires_map[vwire].push_back(mwire_v);
+      }
+
+      if (pwire_wires_map.find(wwire)==pwire_wires_map.end()){
+	GeomWireSelection wires;
+	wires.push_back(mwire_w);
+	pwire_wires_map[wwire] = wires;
+      }else{
+	pwire_wires_map[wwire].push_back(mwire_w);
       }
       
       return mcell;
