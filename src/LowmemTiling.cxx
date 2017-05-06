@@ -20,10 +20,63 @@ WireCell2dToy::LowmemTiling::LowmemTiling(int time_slice, int nrebin, WireCell::
    
 }
 
+void WireCell2dToy::LowmemTiling::MergeWires(){
+  // basically the original mergetoytiling algorithm ... 
+  
+  // loop over parent wire maps, 
+  for (auto it = pwire_wires_map.begin(); it!= pwire_wires_map.end(); it++){
+    MergeGeomWire *pwire = (MergeGeomWire*)it->first;
+    GeomWireSelection allwires = it->second;
+    if (wire_type_map[pwire]){
+      //only do merge if the parent wire is good ...
+      GeomWireSelection tempwires = allwires;
+      allwires.clear();
+      
+      
+
+      
+    }
+  }
+  
+
+
+
+}
+
+bool WireCell2dToy::LowmemTiling::replace_wire(WireCell::MergeGeomWire *old_wire, WireCell::MergeGeomWire *wire){
+  // replace the old_wire by the new wire
+  // assume the new wire contains the old wire ... 
+  // deal with the wire type map  // no point to do this if the wire is bad ... 
+  if (wire_type_map.find(old_wire) != wire_type_map.end()){
+    wire_type_map.erase(old_wire);
+  }
+  wire_type_map[wire] = true;
+
+  // deal with the wire-wire maps
+  if (wire_pwire_map.find(old_wire) != wire_pwire_map.end()){
+    MergeGeomWire *pwire = (MergeGeomWire*)wire_pwire_map[old_wire];
+  
+    GeomWireSelection& wires = pwire_wires_map[pwire];
+    auto it = find(wires.begin(),wires.end(),old_wire);
+    wires.erase(it); // remove the old one
+    wires.push_back(wire); // push in the new one
+  
+    wire_pwire_map.erase(old_wire);
+    wire_pwire_map[wire] = pwire; // get the new one registered ...
+  }
+  
+
+  // deal with the cell-wire maps
+  
+  
+  
+  delete old_wire;
+}
+
 bool WireCell2dToy::LowmemTiling::remove_wire(MergeGeomWire *wire){
   // do the cell-wire maps
   if (wire_cells_map.find(wire)!=wire_cells_map.end()){
-    GeomCellSelection cells = wire_cells_map[wire];
+    GeomCellSelection& cells = wire_cells_map[wire];
     if(cells.size()!=0){
       return false;
     }else{
@@ -35,7 +88,7 @@ bool WireCell2dToy::LowmemTiling::remove_wire(MergeGeomWire *wire){
   if (wire_pwire_map.find(wire) != wire_pwire_map.end()){
     MergeGeomWire *pwire = (MergeGeomWire*)wire_pwire_map[wire];
   
-    GeomWireSelection wires = pwire_wires_map[pwire];
+    GeomWireSelection& wires = pwire_wires_map[pwire];
     auto it = find(wires.begin(),wires.end(),wire);
     wires.erase(it);
   
@@ -56,11 +109,11 @@ bool WireCell2dToy::LowmemTiling::remove_wire(MergeGeomWire *wire){
 bool WireCell2dToy::LowmemTiling::remove_cell(GeomCell *cell){
   if (cell_wires_map.find(cell) != cell_wires_map.end()){
     // find all the wires connect to the cells
-    GeomWireSelection wires = cell_wires_map[cell];
+    GeomWireSelection& wires = cell_wires_map[cell];
     for (int i = 0; i!=wires.size();i++){
       MergeGeomWire *wire = (MergeGeomWire*)wires.at(i);
       // remove the cell from the wire map
-      GeomCellSelection cells = wire_cells_map[wire];
+      GeomCellSelection& cells = wire_cells_map[wire];
       auto it = find(cells.begin(),cells.end(),cell);
       cells.erase(it);
 

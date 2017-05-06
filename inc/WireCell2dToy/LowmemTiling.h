@@ -81,7 +81,13 @@ namespace WireCell2dToy{
 
     bool remove_cell(WireCell::GeomCell *cell);
     bool remove_wire(WireCell::MergeGeomWire *wire);
+    bool replace_wire(WireCell::MergeGeomWire *old_wire, WireCell::MergeGeomWire *wire);
+
+    void MergeWires();
+
     
+    
+
     //map wire --> bad or good
     std::map<const WireCell::GeomWire*,bool> wire_type_map;
     //map cell to wire
