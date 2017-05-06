@@ -79,8 +79,9 @@ namespace WireCell2dToy{
     WireCell::GeomCellSelection not_used_one_good_wire_cells;
     WireCell::GeomCellSelection two_bad_wire_cells;
 
+    bool remove_cell(WireCell::GeomCell *cell);
+    bool remove_wire(WireCell::MergeGeomWire *wire);
     
-
     //map wire --> bad or good
     std::map<const WireCell::GeomWire*,bool> wire_type_map;
     //map cell to wire
