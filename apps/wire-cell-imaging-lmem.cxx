@@ -344,6 +344,8 @@ int main(int argc, char* argv[])
     }
     lowmemtiling[i]->init_good_cells(slice,uplane_rms,vplane_rms,wplane_rms);
     
+    lowmemtiling[i]->MergeWires();
+
     GeomCellSelection single_cells = lowmemtiling[i]->create_single_cells();
 
     // //    std::cout << lowmemtiling[i]->get_three_good_wire_cells().size() << std::endl;

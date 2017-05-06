@@ -56,7 +56,7 @@ namespace WireCell2dToy{
     WireCell::GeomCellSelection create_single_cells();
     WireCell::GeomCellSelection create_single_cells(WireCell::SlimMergeGeomCell * mcell);
     void create_one_good_wire_cells();
-
+    void MergeWires();
     
   protected:
     WireCell::GeomDataSource& gds;
@@ -83,7 +83,8 @@ namespace WireCell2dToy{
     bool remove_wire(WireCell::MergeGeomWire *wire);
     bool replace_wire(WireCell::MergeGeomWire *old_wire, WireCell::MergeGeomWire *wire);
 
-    void MergeWires();
+    
+    int further_mergewire(WireCell::GeomWireSelection &allwire);
 
     
     
