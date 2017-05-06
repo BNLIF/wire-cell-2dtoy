@@ -344,7 +344,10 @@ int main(int argc, char* argv[])
     }
     lowmemtiling[i]->init_good_cells(slice,uplane_rms,vplane_rms,wplane_rms);
     
+    std::cout << lowmemtiling[i]->get_cell_wires_map().size() << " " << lowmemtiling[i]->get_wire_cells_map().size() << std::endl;
+
     lowmemtiling[i]->MergeWires();
+    std::cout << lowmemtiling[i]->get_cell_wires_map().size() << " " << lowmemtiling[i]->get_wire_cells_map().size() << std::endl;
 
     GeomCellSelection single_cells = lowmemtiling[i]->create_single_cells();
 
@@ -390,8 +393,12 @@ int main(int argc, char* argv[])
 
     // mergetiling[i] = new WireCell2dToy::MergeToyTiling(*toytiling[i],i,3);
     
-    // // std::cout << mergetiling[i]->get_allcell().size() << std::endl;
-    
+    // if (lowmemtiling[i]->get_cell_wires_map().size()!= mergetiling[i]->get_allcell().size() ||
+    // 	lowmemtiling[i]->get_wire_cells_map().size()!= mergetiling[i]->get_wire_all().size()){
+
+    //   std::cout << i << " " << lowmemtiling[i]->get_cell_wires_map().size() << " " << lowmemtiling[i]->get_wire_cells_map().size()<< " " << mergetiling[i]->get_allcell().size() << " " << mergetiling[i]->get_wire_all().size() << std::endl;
+    // }
+
     // for (int j=0;j!=mergetiling[i]->get_allcell().size();j++){
     //   // std::cout << "O: " << ((MergeGeomCell*)mergetiling[i]->get_allcell().at(j))->get_uwires().size() << " " 
     //   // 		<< ((MergeGeomCell*)mergetiling[i]->get_allcell().at(j))->get_vwires().size() << " " 

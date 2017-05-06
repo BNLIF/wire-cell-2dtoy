@@ -58,6 +58,15 @@ namespace WireCell2dToy{
     void create_one_good_wire_cells();
     void MergeWires();
     
+    WireCell::GeomCellMap get_cell_wires_map(){
+      return cell_wires_map;
+    }
+    //map wire to cell
+    WireCell::GeomWireMap get_wire_cells_map(){
+      return wire_cells_map;
+    }
+    
+
   protected:
     WireCell::GeomDataSource& gds;
     WireCell2dToy::WireCellHolder& holder;
@@ -87,8 +96,6 @@ namespace WireCell2dToy{
     int further_mergewire(WireCell::GeomWireSelection &allwire);
 
     
-    
-
     //map wire --> bad or good
     std::map<const WireCell::GeomWire*,bool> wire_type_map;
     //map cell to wire
