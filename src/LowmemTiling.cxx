@@ -67,7 +67,31 @@ bool WireCell2dToy::LowmemTiling::replace_wire(WireCell::MergeGeomWire *old_wire
   
 
   // deal with the cell-wire maps
-  
+  if (wire_cells_map.find(old_wire)!=wire_cells_map.end()){
+    // for each of these cell, remove the old wire and add in the new wire
+    GeomCellSelection& cells = wire_cells_map[old_wire];
+    
+    if (wire_cells_map.find(wire)==wire_cells_map.end()){
+      GeomCellSelection cells1;
+      wire_cells_map[wire] = cells1;
+    }
+
+    for (int i=0;i!=cells.size();i++){
+      const GeomCell *cell = cells.at(i);
+      // replace the old wire with the new wire ... 
+      GeomWireSelection& wires = cell_wires_map[cell];
+      auto it = find(wires.begin(),wires.end(),old_wire);
+      wires.erase(it);
+      wires.push_back(wire);
+
+      // add cells to this new wire cell ... 
+      if (find(wire_cells_map[wire].begin(), wire_cells_map[wire].end(), cell) == wire_cells_map[wire].end()){
+      	wire_cells_map[wire].push_back(cell);
+      }
+    }
+
+    
+  }
   
   
   delete old_wire;
