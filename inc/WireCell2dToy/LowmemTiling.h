@@ -65,7 +65,10 @@ namespace WireCell2dToy{
     WireCell::GeomWireMap get_wire_cells_map(){
       return wire_cells_map;
     }
-    
+    WireCell::GeomWireSelection get_all_good_wires();
+    WireCell::GeomWireSelection get_all_bad_wires();
+
+    WireCell::PointVector get_all_cell_centers();
 
   protected:
     WireCell::GeomDataSource& gds;
@@ -94,6 +97,8 @@ namespace WireCell2dToy{
 
     
     int further_mergewire(WireCell::GeomWireSelection &allwire);
+
+   
 
     
     //map wire --> bad or good
