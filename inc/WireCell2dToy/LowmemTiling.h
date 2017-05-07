@@ -74,6 +74,8 @@ namespace WireCell2dToy{
     WireCell::GeomDataSource& gds;
     WireCell2dToy::WireCellHolder& holder;
 
+    WireCell::PointVector points;
+
     // original group of wires
     WireCell::GeomWireSelection bad_wire_u; 
     WireCell::GeomWireSelection bad_wire_v;
@@ -91,7 +93,7 @@ namespace WireCell2dToy{
     WireCell::GeomCellSelection not_used_one_good_wire_cells;
     WireCell::GeomCellSelection two_bad_wire_cells;
 
-    bool remove_cell(WireCell::GeomCell *cell);
+    bool remove_cell(WireCell::SlimMergeGeomCell *cell);
     bool remove_wire(WireCell::MergeGeomWire *wire);
     bool replace_wire(WireCell::MergeGeomWire *old_wire, WireCell::MergeGeomWire *wire);
 

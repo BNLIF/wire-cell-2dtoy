@@ -296,6 +296,17 @@ int ToyEventDisplay::draw_slice(const WireCell::Slice& slice, TString option)
   return 0;
 }
 
+int ToyEventDisplay::draw_points(WireCell::PointVector pcells, TString option, int color){
+  TGraph *g1 = new TGraph();
+  for (int i=0; i!=pcells.size(); i++){
+    g1->SetPoint(i,pcells.at(i).z/units::m, pcells.at(i).y/units::m);
+  }
+  g1->Draw(option);
+  g1->SetMarkerColor(color);
+  g1->SetMarkerSize(1.0);
+  g1->SetMarkerStyle(20);
+}
+
 
 int ToyEventDisplay::draw_cells(const WireCell::GeomCellSelection& cellall, TString option, int color)
 {

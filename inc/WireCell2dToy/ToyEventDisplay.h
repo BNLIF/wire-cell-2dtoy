@@ -50,6 +50,8 @@ namespace WireCell2dToy {
 	virtual int draw_slice(const WireCell::Slice& slice, TString option);
 	virtual int draw_wires(WireCell::GeomWireSelection& wires, TString option);
 
+	virtual int draw_points(WireCell::PointVector pcells, TString option, int color = 2);
+
 	/// Draw a selection of cells
 	virtual int draw_cells(const WireCell::GeomCellSelection& cellall ,TString option,int color=4);
 	virtual int draw_mergecells(const WireCell::GeomCellSelection& cellall ,TString option, int flag=0);

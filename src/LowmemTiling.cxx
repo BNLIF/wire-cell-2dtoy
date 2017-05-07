@@ -169,7 +169,7 @@ bool WireCell2dToy::LowmemTiling::remove_wire(MergeGeomWire *wire){
 }
 
 
-bool WireCell2dToy::LowmemTiling::remove_cell(GeomCell *cell){
+bool WireCell2dToy::LowmemTiling::remove_cell(SlimMergeGeomCell *cell){
   if (cell_wires_map.find(cell) != cell_wires_map.end()){
     // find all the wires connect to the cells
     GeomWireSelection& wires = cell_wires_map[cell];
@@ -188,8 +188,8 @@ bool WireCell2dToy::LowmemTiling::remove_cell(GeomCell *cell){
 
       // remove the cell 
       cell_wires_map.erase(cell);
-      delete cell;
     }
+    delete cell;
   }
   
   return false;
@@ -1263,17 +1263,17 @@ void WireCell2dToy::LowmemTiling::init_good_cells(const WireCell::Slice& slice, 
 }
 
 WireCell::PointVector WireCell2dToy::LowmemTiling::get_all_cell_centers(){
-  PointVector pcells;
-  for (auto it = cell_wires_map.begin(); it!= cell_wires_map.end(); it++){
-    SlimMergeGeomCell *mcell = (SlimMergeGeomCell*)it->first;
-    const GeomWire *uwire = mcell->get_uwires().at(int(mcell->get_uwires().size()/2));
-    const GeomWire *vwire = mcell->get_vwires().at(int(mcell->get_vwires().size()/2));
-    Vector abc;
-    gds.crossing_point(*uwire, *vwire, abc);
-    pcells.push_back(abc);
-  }
+  // PointVector pcells;
+  // for (auto it = cell_wires_map.begin(); it!= cell_wires_map.end(); it++){
+  //   SlimMergeGeomCell *mcell = (SlimMergeGeomCell*)it->first;
+  //   const GeomWire *uwire = mcell->get_uwires().at(int(mcell->get_uwires().size()/2));
+  //   const GeomWire *vwire = mcell->get_vwires().at(int(mcell->get_vwires().size()/2));
+  //   Vector abc;
+  //   gds.crossing_point(*uwire, *vwire, abc);
+  //   pcells.push_back(abc);
+  // }
 
-  return pcells;
+  return points;
 }
 
 GeomWireSelection WireCell2dToy::LowmemTiling::get_all_good_wires(){
@@ -1324,6 +1324,7 @@ void WireCell2dToy::LowmemTiling::create_one_good_wire_cells(){
       fired_wires.insert(wwires.at(j));
     }
   }
+  
   for (int i=0; i!=two_good_wire_cells.size();i++){
     GeomWireSelection uwires = ((SlimMergeGeomCell*)two_good_wire_cells.at(i))->get_uwires();
     GeomWireSelection vwires = ((SlimMergeGeomCell*)two_good_wire_cells.at(i))->get_vwires();
@@ -1493,7 +1494,7 @@ void WireCell2dToy::LowmemTiling::create_one_good_wire_cells(){
   // for (int i =0; i!= remaining_fired_wire_w.size();i++){
   //   count += ((MergeGeomWire*)remaining_fired_wire_w.at(i))->get_allwire().size();
   // }
-  // std::cout << remaining_fired_wire_u.size() << " " << remaining_fired_wire_v.size() << " " << remaining_fired_wire_w.size() << " " << count << std::endl;
+  //std::cout << remaining_fired_wire_u.size() << " " << remaining_fired_wire_v.size() << " " << remaining_fired_wire_w.size() << " " << 0 << std::endl;
 
   
   GeomCellSelection temp_cells;
@@ -1757,14 +1758,17 @@ void WireCell2dToy::LowmemTiling::create_one_good_wire_cells(){
     if (flag==1) {
       one_good_wire_cells.push_back(mcell);
     }else{
-      not_used_one_good_wire_cells.push_back(mcell);
+      remove_cell(mcell);
+      //not_used_one_good_wire_cells.push_back(mcell);
     }
   }
   
-  // for (int i=0;i!=not_used_one_good_wire_cells.size();i++){
-  //   delete not_used_one_good_wire_cells.at(i);
+  //for (int i=0;i!=not_used_one_good_wire_cells.size();i++){
+    // remove_cell((SlimMergeGeomCell*)not_used_one_good_wire_cells.at(i));
+  // delete not_used_one_good_wire_cells.at(i);
   // }
   
+  //std::cout << not_used_one_good_wire_cells.size() << std::endl;
   // if (one_good_wire_cells.size()!=0){
   //   std::cout << one_good_wire_cells.size() << std::endl;
   // }
@@ -1774,23 +1778,36 @@ void WireCell2dToy::LowmemTiling::create_one_good_wire_cells(){
 GeomCellSelection WireCell2dToy::LowmemTiling::create_single_cells(){
   GeomCellSelection cells;
   
-  // loop three wire cells
-  for (int i = 0; i!= three_good_wire_cells.size(); i++){
-    GeomCellSelection temp_cells = create_single_cells((SlimMergeGeomCell*)three_good_wire_cells.at(i));
-    cells.insert(cells.end(),temp_cells.begin(),temp_cells.end());
-  }
+  // // loop three wire cells
+  // for (int i = 0; i!= three_good_wire_cells.size(); i++){
+  //   GeomCellSelection temp_cells = create_single_cells((SlimMergeGeomCell*)three_good_wire_cells.at(i));
+  //   cells.insert(cells.end(),temp_cells.begin(),temp_cells.end());
+    
+  //   points.push_back(temp_cells.at(int(temp_cells.size()/2))->center());
+  // }
 
-  // loop two wire cells
-  for (int i=0; i!=two_good_wire_cells.size();i++){
-    GeomCellSelection temp_cells = create_single_cells((SlimMergeGeomCell*)two_good_wire_cells.at(i));
-    cells.insert(cells.end(),temp_cells.begin(),temp_cells.end());
-  }
+  // // loop two wire cells
+  // for (int i=0; i!=two_good_wire_cells.size();i++){
+  //   GeomCellSelection temp_cells = create_single_cells((SlimMergeGeomCell*)two_good_wire_cells.at(i));
+  //   cells.insert(cells.end(),temp_cells.begin(),temp_cells.end());
 
-  // loop one wire cells
-  for (int i=0; i!=one_good_wire_cells.size();i++){
-    GeomCellSelection temp_cells = create_single_cells((SlimMergeGeomCell*)one_good_wire_cells.at(i));
+  //   points.push_back(temp_cells.at(int(temp_cells.size()/2))->center());
+  // }
+
+  // // loop one wire cells
+  // for (int i=0; i!=one_good_wire_cells.size();i++){
+  //   GeomCellSelection temp_cells = create_single_cells((SlimMergeGeomCell*)one_good_wire_cells.at(i));
+  //   cells.insert(cells.end(),temp_cells.begin(),temp_cells.end());
+
+  //   points.push_back(temp_cells.at(int(temp_cells.size()/2))->center());
+  // }
+
+  for (auto it = cell_wires_map.begin(); it!= cell_wires_map.end(); it++){
+    GeomCellSelection temp_cells = create_single_cells((SlimMergeGeomCell*)it->first);
     cells.insert(cells.end(),temp_cells.begin(),temp_cells.end());
+    points.push_back(temp_cells.at(int(temp_cells.size()/2))->center());
   }
+  
   
 
   return cells;
