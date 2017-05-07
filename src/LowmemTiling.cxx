@@ -60,15 +60,20 @@ void WireCell2dToy::LowmemTiling::DivideWires(int wire_limit, int min_wire){
     std::vector<std::pair<int,int>> saved_results;
     
     while(start_wire_index <= (*(ordered_wire_set.rbegin()))->get_allwire().back()->index()){
+      
+      // std::cout << start_wire_index << " " << (*(ordered_wire_set.rbegin()))->get_allwire().back()->index() << std::endl;
+      
       int flag = 0;
       // find the first end wire ... 
       for (auto it1 = ordered_wire_set.begin(); it1!= ordered_wire_set.end(); it1++){
 	if (start_wire_index >= (*it1)->get_allwire().front()->index() && 
 	    start_wire_index <= (*it1)->get_allwire().back()->index()){
+	  //std::cout << start_wire_index << " " << (*it1)->get_allwire().front()->index() << " " << (*it1)->get_allwire().back()->index() << std::endl;
 	  end_wire_index = (*it1)->get_allwire().back()->index();
 	  break;
 	}
       }
+      
       
       // do the sorting
       std::set<int> sorted_index;
@@ -119,8 +124,13 @@ void WireCell2dToy::LowmemTiling::DivideWires(int wire_limit, int min_wire){
       }
 
       
-      if (flag==0) 
-	start_wire_index = end_wire_index + 1;
+      if (flag==0) {
+	start_wire_index ++;
+	if (start_wire_index < end_wire_index +1)
+	  start_wire_index = end_wire_index + 1;
+	end_wire_index = start_wire_index;
+      }
+      //std::cout << flag << " " << start_wire_index << " " << end_wire_index << " " << (*(ordered_wire_set.rbegin()))->get_allwire().back()->index() << std::endl;
     }
    
     if (saved_results.size()==0) continue;

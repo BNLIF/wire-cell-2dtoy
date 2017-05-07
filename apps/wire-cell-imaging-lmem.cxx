@@ -322,8 +322,8 @@ int main(int argc, char* argv[])
   int start_num = 0 ;
   int end_num = sds.size()-1;
 
-  // start_num = 511;
-  // end_num = 511;
+  // start_num = 381;
+  // end_num = 381;
   
   TFile *file = new TFile(Form("result_%d_%d_%d.root",run_no,subrun_no,event_no),"RECREATE");
   
@@ -343,8 +343,8 @@ int main(int argc, char* argv[])
   // uplane_map.begin()->second.second=5000;
 
   for (int i=start_num;i!=end_num+1;i++){
-    // if (i%50==0)
-    //   std::cout << i << std::endl;
+    //if (i%50==0)
+    //std::cout << i << std::endl;
 
     sds.jump(i);
     WireCell::Slice slice = sds.get();
@@ -375,11 +375,7 @@ int main(int argc, char* argv[])
     //std::cout << lowmemtiling[i]->get_cell_wires_map().size() << " " << lowmemtiling[i]->get_wire_cells_map().size() << std::endl;
 
     
-
     
-
-
-
     // //    std::cout << lowmemtiling[i]->get_three_good_wire_cells().size() << std::endl;
     // std::vector<GeomWireSelection> vec1_wires;
     // std::vector<GeomWireSelection> vec2_wires;
