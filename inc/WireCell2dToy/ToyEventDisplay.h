@@ -49,6 +49,7 @@ namespace WireCell2dToy {
 	/// Draw a slice
 	virtual int draw_slice(const WireCell::Slice& slice, TString option);
 	virtual int draw_wires(WireCell::GeomWireSelection& wires, TString option);
+	virtual int draw_merged_wires(WireCell::GeomWireSelection wires, TString option, int color = 2);
 
 	virtual int draw_points(WireCell::PointVector pcells, TString option, int color = 2);
 

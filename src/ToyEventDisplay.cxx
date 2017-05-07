@@ -1,6 +1,7 @@
 #include "WireCell2dToy/ToyEventDisplay.h"
 #include "WireCellData/Units.h"
 #include "WireCellData/Point.h"
+#include "WireCellData/MergeGeomWire.h"
 //#include "WireCellData/MergeGeomCell.h"
 #include "TGraph.h"
 #include "TLine.h"
@@ -170,6 +171,36 @@ void ToyEventDisplay::draw_bad_region(WireCell::ChirpMap& chirpmap, int time, in
     }
   }
 
+}
+
+
+int ToyEventDisplay::draw_merged_wires(WireCell::GeomWireSelection wires, TString option, int color){
+   for (int j=0;j!=wires.size();j++){
+      
+     WireCell::MergeGeomWire *wire = (WireCell::MergeGeomWire*)wires.at(j);
+     const WireCell::GeomWire *wire1 = wire->get_allwire().front();
+     const WireCell::GeomWire *wire2 = wire->get_allwire().back();
+          
+      TLine *l3 = new TLine(wire1->point1().z/units::m  ,wire1->point1().y/units::m,
+      			    wire1->point2().z/units::m  ,wire1->point2().y/units::m);
+      l3->SetLineColor(color);
+      l3->Draw(option);
+      l3->SetLineStyle(1);
+
+      TLine *l1 = new TLine(wire2->point1().z/units::m  ,wire2->point1().y/units::m,
+      			    wire2->point2().z/units::m  ,wire2->point2().y/units::m);
+      l1->SetLineColor(color);
+      l1->Draw(option);
+      l1->SetLineStyle(1);
+    }
+    
+    // break;
+    
+
+
+
+  
+  return 0;
 }
 
 int ToyEventDisplay::draw_wires(WireCell::GeomWireSelection& wires, TString option){
