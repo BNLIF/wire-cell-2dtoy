@@ -322,8 +322,8 @@ int main(int argc, char* argv[])
   int start_num = 0 ;
   int end_num = sds.size()-1;
 
-  // start_num = 381;
-  // end_num = 381;
+  start_num = 511;
+  end_num = 511;
   
   TFile *file = new TFile(Form("result_%d_%d_%d.root",run_no,subrun_no,event_no),"RECREATE");
   
@@ -359,7 +359,7 @@ int main(int argc, char* argv[])
     
     //std::cout << lowmemtiling[i]->get_cell_wires_map().size() << " " << lowmemtiling[i]->get_wire_cells_map().size() << std::endl;
 
-    lowmemtiling[i]->DivideWires();
+    //lowmemtiling[i]->DivideWires(3,0);
 
     lowmemtiling[i]->MergeWires();
     GeomCellSelection single_cells = lowmemtiling[i]->create_single_cells();
@@ -370,7 +370,7 @@ int main(int argc, char* argv[])
     n_bad_wires = lowmemtiling[i]->get_all_bad_wires().size();
     n_single_cells = single_cells.size();
     Twc->Fill();
-    //std::cout << lowmemtiling[i]->get_cell_wires_map().size()<< " " << lowmemtiling[i]->get_all_good_wires().size() << " " << lowmemtiling[i]->get_all_bad_wires().size() << " " << lowmemtiling[i]->get_all_cell_centers().size() << " " << lowmemtiling[i]->get_wire_cells_map().size() << " " << single_cells.size() << std::endl;
+    std::cout << lowmemtiling[i]->get_cell_wires_map().size()<< " " << lowmemtiling[i]->get_all_good_wires().size() << " " << lowmemtiling[i]->get_all_bad_wires().size() << " " << lowmemtiling[i]->get_all_cell_centers().size() << " " << lowmemtiling[i]->get_wire_cells_map().size() << " " << single_cells.size() << std::endl;
     
     //std::cout << lowmemtiling[i]->get_cell_wires_map().size() << " " << lowmemtiling[i]->get_wire_cells_map().size() << std::endl;
 
