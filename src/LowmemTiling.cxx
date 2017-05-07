@@ -15,9 +15,25 @@ WireCell2dToy::LowmemTiling::LowmemTiling(int time_slice, int nrebin, WireCell::
   nwire_u = wires_u.size();
   nwire_v = wires_v.size();
   nwire_w = wires_w.size();
-
-  
    
+}
+
+void WireCell2dToy::LowmemTiling::DivideWires(){
+  // loop over all the parent wires,  pick up one parent wire
+  for (auto it = pwire_wires_map.begin(); it!=pwire_wires_map.end(); it++){
+    MergeGeomWire *pwire = (MergeGeomWire*)it->first;
+    GeomWireSelection wires = it->second;
+    if (wires.size()==0) continue;
+   
+   
+  }
+
+  // create new cells, link them to the old cells
+  
+  // replace the old cell
+  
+  // replace the old wires 
+  
 }
 
 void WireCell2dToy::LowmemTiling::MergeWires(){
