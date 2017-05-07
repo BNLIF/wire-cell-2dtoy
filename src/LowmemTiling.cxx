@@ -18,7 +18,7 @@ WireCell2dToy::LowmemTiling::LowmemTiling(int time_slice, int nrebin, WireCell::
    
 }
 
-void WireCell2dToy::LowmemTiling::DivideWires(int wire_limit){
+void WireCell2dToy::LowmemTiling::DivideWires(int wire_limit, int min_wire){
   
   // loop over all the parent wires,  pick up one parent wire
   for (auto it = pwire_wires_map.begin(); it!=pwire_wires_map.end(); it++){
@@ -53,61 +53,269 @@ void WireCell2dToy::LowmemTiling::DivideWires(int wire_limit){
     
     
     
-    // // figure out a way to create small wires ...
-    // int start_wire_index;
-    // int end_wire_index;
+    // figure out a way to create small wires ...
+    int start_wire_index;
+    int end_wire_index;
+    start_wire_index = (*ordered_wire_set.begin())->get_allwire().front()->index();
+    std::vector<std::pair<int,int>> saved_results;
     
-    // start_wire_index = (*ordered_wire_set.begin())->get_allwire().front()->index();
-    // end_wire_index = (*ordered_wire_set.begin())->get_allwire().back()->index();
-    
-    // std::set<int> sorted_index;
-    // for (auto it = ordered_wire_set.begin(); it!= ordered_wire_set.end(); it++){
-    //   int temp_index =  (*it)->get_allwire().front()->index() - 1;
-    //   if (temp_index >start_wire_index && temp_index <end_wire_index){ 
-    // 	end_wire_index = temp_index;
-    // 	sorted_index.insert(temp_index);
-    //   }
-    //   temp_index = (*it)->get_allwire().back()->index();
-    //   if (temp_index >start_wire_index && temp_index <end_wire_index){ 
-    // 	end_wire_index = temp_index;
-    // 	sorted_index.insert(temp_index);
-    //   }
-    // }
-    
-    // if (sorted_index.size()>0){
-    //   for (auto it = sorted_index.begin(); it!= sorted_index.end(); it++){
-    // 	end_wire_index = *it;
-    // 	int count = 0;
-    // 	for (auto it1 = ordered_wire_set.begin(); it1!= ordered_wire_set.end(); it1++){
-    // 	  int temp_start_index = (*it1)->get_allwire().front()->index();
-    // 	  int temp_end_index = (*it1)->get_allwire().back()->index();
-    // 	  if (temp_start_index <= end_wire_index && 
-    // 	      start_wire_index <= temp_end_index && 
-    // 	      (temp_start_index != start_wire_index || 
-    // 	       temp_end_index != end_wire_index)){
-    // 	    count ++;
-    // 	  }
-    // 	  std::cout << temp_start_index << " " << temp_end_index << " " << start_wire_index << " " << end_wire_index << " " << count << std::endl;
-    // 	}
-    // 	//	std::cout << count << std::endl;
-    //   } 
+    while(start_wire_index <= (*(ordered_wire_set.rbegin()))->get_allwire().back()->index()){
+      int flag = 0;
+      // find the first end wire ... 
+      for (auto it1 = ordered_wire_set.begin(); it1!= ordered_wire_set.end(); it1++){
+	if (start_wire_index >= (*it1)->get_allwire().front()->index() && 
+	    start_wire_index <= (*it1)->get_allwire().back()->index()){
+	  end_wire_index = (*it1)->get_allwire().back()->index();
+	  break;
+	}
+      }
       
-    // }
+      // do the sorting
+      std::set<int> sorted_index;
+      for (auto it1 = ordered_wire_set.begin(); it1!= ordered_wire_set.end(); it1++){
+	int temp_index =  (*it1)->get_allwire().front()->index() - 1;
+	if (temp_index >=start_wire_index && temp_index <=end_wire_index){ 
+	  end_wire_index = temp_index;
+	  if (temp_index - start_wire_index >= min_wire)
+	    sorted_index.insert(temp_index);
+	}
+	temp_index = (*it1)->get_allwire().back()->index();
+	if (temp_index >=start_wire_index && temp_index <=end_wire_index){ 
+	  end_wire_index = temp_index;
+	  if (temp_index - start_wire_index >= min_wire)
+	    sorted_index.insert(temp_index);
+	}
+      }
+      
 
+      // only do this when satisfy the condition ... 
+      if (sorted_index.size()>0){
+	for (auto it2 = sorted_index.begin(); it2!= sorted_index.end(); it2++){
+	  end_wire_index = *it2;
+	  int count = 0;
+	  for (auto it1 = ordered_wire_set.begin(); it1!= ordered_wire_set.end(); it1++){
+	    int temp_start_index = (*it1)->get_allwire().front()->index();
+	    int temp_end_index = (*it1)->get_allwire().back()->index();
+	    if (end_wire_index - temp_start_index >= min_wire && 
+		temp_end_index - start_wire_index >= min_wire && 
+		(temp_start_index != start_wire_index || 
+		 temp_end_index != end_wire_index) &&
+		(temp_start_index <= start_wire_index ||
+		 temp_end_index >= end_wire_index)
+		){
+	      count ++;
+	    }
+	    
+	    //    	  std::cout << temp_start_index << " " << temp_end_index << " " << start_wire_index << " " << end_wire_index << " " << count << std::endl;
+	  }
+	  if (count >0 && count < wire_limit){
+	    saved_results.push_back(std::make_pair(start_wire_index,end_wire_index));
+	    start_wire_index = end_wire_index +1;
+	    flag = 1;
+	    break;
+	  }
+	  //	std::cout << count << std::endl;
+	} 
+      }
 
+      
+      if (flag==0) 
+	start_wire_index = end_wire_index + 1;
+    }
+   
+    if (saved_results.size()==0) continue;
+    
+    // create new cells, link them to the old cells
+    // replace the old cell
+    // replace the old wires 
+    
+
+    GeomCellSelection old_cells;
+    GeomWireSelection old_wires;
+    for (int i=0;i!=saved_results.size();i++){
+      // find the old wire
+      MergeGeomWire *old_wire;
+      for (auto it1 = ordered_wire_set.begin(); it1!= ordered_wire_set.end(); it1++){
+	if ( (*it1)->get_allwire().front()->index()<= saved_results.at(i).first && 
+	     (*it1)->get_allwire().back()->index() >= saved_results.at(i).second && 
+	     ( (*it1)->get_allwire().front()->index()!= saved_results.at(i).first ||
+	       (*it1)->get_allwire().back()->index() != saved_results.at(i).second )){
+	  old_wire = *it1;
+	  
+	  if (find(old_wires.begin(),old_wires.end(),old_wire) != old_wires.end()) continue;
+	  old_wires.push_back(old_wire);
+	  // create new wires
+	  GeomWireSelection new_wires;
+	  if (old_wire->get_allwire().front()->index() < saved_results.at(i).first){
+	    GeomWireSelection nwires;
+	     for (int j=old_wire->get_allwire().front()->index(); j!= saved_results.at(i).first; j++){
+	       //std::cout << j << std::endl;
+	       nwires.push_back(gds.by_planeindex(old_wire->get_allwire().front()->plane(),j));
+	     }
+	     MergeGeomWire *new_wire = new MergeGeomWire(0,nwires);
+	     new_wires.push_back(new_wire);
+	   }
+	  if (old_wire->get_allwire().back()->index() > saved_results.at(i).second){
+	    GeomWireSelection nwires;
+	    for (int j=saved_results.at(i).second+1; j!= old_wire->get_allwire().back()->index() + 1; j++){
+	      nwires.push_back(gds.by_planeindex(old_wire->get_allwire().front()->plane(),j));
+	    }
+	    MergeGeomWire *new_wire = new MergeGeomWire(0,nwires);
+	    new_wires.push_back(new_wire);
+	  }
+	  {
+	    GeomWireSelection nwires;
+	    for (int j=saved_results.at(i).first; j!= saved_results.at(i).second+1; j++){
+	      nwires.push_back(gds.by_planeindex(old_wire->get_allwire().front()->plane(),j));
+	    }
+	    MergeGeomWire *new_wire = new MergeGeomWire(0,nwires);
+	    new_wires.push_back(new_wire);
+	  }
+	  
+	  //std::cout << new_wires.size() << std::endl;
+
+	  
+	  for (auto it2 = wire_cells_map[old_wire].begin(); it2!= wire_cells_map[old_wire].end(); it2++){
+	    // find the old cell
+	    SlimMergeGeomCell *old_cell = (SlimMergeGeomCell*)(*it2);
+	    // std::cout << "A: " <<  old_wire << " " << wire_cells_map[old_wire].size() << " " << old_cell << " " << create_single_cells(old_cell).size() << std::endl;
+	    
+	    // create new cells
+	    MergeGeomWire *uwire=0;
+	    MergeGeomWire *vwire=0;
+	    MergeGeomWire *wwire=0;
+	    GeomWireSelection temp_wires =  cell_wires_map[old_cell];
+	    for (int j=0;j!=temp_wires.size();j++){
+	      if (temp_wires.at(j) != old_wire){
+		if ( ((MergeGeomWire*)temp_wires.at(j))->get_allwire().front()->plane() == WirePlaneType_t(0)){
+		  uwire = (MergeGeomWire*)temp_wires.at(j);
+		}else if ( ((MergeGeomWire*)temp_wires.at(j))->get_allwire().front()->plane() == WirePlaneType_t(1)){
+		  vwire = (MergeGeomWire*)temp_wires.at(j);
+		}else{
+		  wwire = (MergeGeomWire*)temp_wires.at(j);
+		}
+	      }
+	    }
+	    int plane_flag;
+	    if (uwire ==0 ){
+	      plane_flag = 0;
+	    }else if (vwire==0){
+	      plane_flag = 1;
+	    }else{
+	      plane_flag = 2;
+	    }
+	    for (int j=0;j!=new_wires.size();j++){
+	      SlimMergeGeomCell *new_cell;
+	      if (plane_flag==0){
+		uwire = (MergeGeomWire*)new_wires.at(j);
+		new_cell = create_slim_merge_cell((MergeGeomWire*)new_wires.at(j),vwire,wwire);
+	      }else if (plane_flag==1){
+		vwire = (MergeGeomWire*)new_wires.at(j);
+		new_cell = create_slim_merge_cell(uwire,(MergeGeomWire*)new_wires.at(j),wwire);
+	      }else{
+		wwire = (MergeGeomWire*)new_wires.at(j);
+		new_cell = create_slim_merge_cell(uwire,vwire,(MergeGeomWire*)new_wires.at(j));
+	      }
+	      //std::cout << "B: " << plane_flag << " " << create_single_cells(new_cell).size() << std::endl;
+	      // add in new cells and its associated wires into maps
+	      MergeGeomWire *pwire = (MergeGeomWire*)wire_pwire_map[old_wire];
+	      
+	      // create new mwires 
+	      GeomWireSelection uwires = new_cell->get_uwires();
+	      GeomWireSelection vwires = new_cell->get_vwires();
+	      GeomWireSelection wwires = new_cell->get_wwires();
+	      MergeGeomWire *mwire_u = new MergeGeomWire(0,uwires);
+	      MergeGeomWire *mwire_v = new MergeGeomWire(0,vwires);
+	      MergeGeomWire *mwire_w = new MergeGeomWire(0,wwires);
+	    
+	      // create the map  
+	      // cell to wires
+	      GeomWireSelection wires;
+	      wires.push_back(mwire_u);
+	      wires.push_back(mwire_v);
+	      wires.push_back(mwire_w);
+	      cell_wires_map[new_cell] = wires;
+	    
+	      // wire to cells
+	      GeomCellSelection cells;
+	      cells.push_back(new_cell);
+	      wire_cells_map[mwire_u] = cells;
+	      wire_cells_map[mwire_v] = cells;
+	      wire_cells_map[mwire_w] = cells;
+	    
+	      // wire to parent wire
+	      // wire types
+	      // parent wire to wires
+	      if (plane_flag==0){
+		wire_pwire_map[mwire_u] = pwire;
+		wire_pwire_map[mwire_v] = wire_pwire_map[vwire];
+		wire_pwire_map[mwire_w] = wire_pwire_map[wwire];
+
+		pwire_wires_map[pwire].push_back(mwire_u);
+		pwire_wires_map[wire_pwire_map[vwire]].push_back(mwire_v);
+		pwire_wires_map[wire_pwire_map[wwire]].push_back(mwire_w);
+
+		wire_type_map[mwire_u] = true;
+		wire_type_map[mwire_v] = wire_type_map[vwire];     
+		wire_type_map[mwire_w] = wire_type_map[wwire];
+	      }else if (plane_flag==1){
+		wire_pwire_map[mwire_u] = wire_pwire_map[uwire];
+		wire_pwire_map[mwire_v] = pwire;
+		wire_pwire_map[mwire_w] = wire_pwire_map[wwire];
+
+		pwire_wires_map[wire_pwire_map[uwire]].push_back(mwire_u);
+		pwire_wires_map[pwire].push_back(mwire_v);
+		pwire_wires_map[wire_pwire_map[wwire]].push_back(mwire_w);
+
+		wire_type_map[mwire_u] = wire_type_map[uwire];
+		wire_type_map[mwire_v] = true;     
+		wire_type_map[mwire_w] = wire_type_map[wwire];
+	      }else{
+		wire_pwire_map[mwire_u] = wire_pwire_map[uwire];
+		wire_pwire_map[mwire_v] = wire_pwire_map[vwire];
+		wire_pwire_map[mwire_w] = pwire;
+
+		pwire_wires_map[wire_pwire_map[uwire]].push_back(mwire_u);
+		pwire_wires_map[wire_pwire_map[vwire]].push_back(mwire_v);
+		pwire_wires_map[pwire].push_back(mwire_w);
+
+		wire_type_map[mwire_u] = wire_type_map[uwire];
+		wire_type_map[mwire_v] = wire_type_map[vwire];     
+		wire_type_map[mwire_w] = true;
+	      }
+	    
+	    
+	    }
+	    // std::cout << uwire << " " << vwire << " " << wwire << std::endl;
+	    
+	    old_cells.push_back(old_cell);
+	  }
+
+	  // remove new wires ...
+	  for (int j=0;j!=new_wires.size();j++){
+	    delete new_wires.at(j);
+	  }
+	}
+      }
+    }
+
+    // remove old cell
+    for (int j=0;j!=old_cells.size();j++){
+      remove_cell((SlimMergeGeomCell*)old_cells.at(j));
+    }
+    // remove old wires
+    for (int j=0;j!=old_wires.size();j++){
+      remove_wire((MergeGeomWire*)old_wires.at(j));
+    }
 
     // std::cout << "abc " << " " << start_wire_index << " " << end_wire_index << std::endl;
-    // for (auto it = ordered_wire_set.begin(); it!= ordered_wire_set.end(); it++){
-    //   std::cout << (*it)->get_allwire().front()->index() << " " << (*it)->get_allwire().back()->index() << " " << (*it)->get_allwire().front()->plane() << " " << wires.size() << std::endl;
+    // for (auto it1 = ordered_wire_set.begin(); it1!= ordered_wire_set.end(); it1++){
+    //   std::cout << (*it1)->get_allwire().front()->index() << " " << (*it1)->get_allwire().back()->index() << " " << (*it1)->get_allwire().front()->plane() << " " << wires.size() << std::endl;
     // }
    
   }
 
-  // create new cells, link them to the old cells
-  
-  // replace the old cell
-  
-  // replace the old wires 
+ 
   
 }
 
@@ -253,8 +461,9 @@ bool WireCell2dToy::LowmemTiling::remove_wire(MergeGeomWire *wire){
   //do wire type map 
   if (wire_type_map.find(wire) != wire_type_map.end()){
     wire_type_map.erase(wire);
+    delete wire;
   }
-  delete wire;
+ 
 
   return true;
 }
