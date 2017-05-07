@@ -58,7 +58,7 @@ namespace WireCell2dToy{
     void create_one_good_wire_cells();
     void MergeWires(); // main algorithm to merge things together ... 
     
-    void DivideWires(); // do one round of dividing for all planes
+    void DivideWires(int wire_limit = 2); // do one round of dividing for all planes
     
     WireCell::GeomCellMap get_cell_wires_map(){
       return cell_wires_map;

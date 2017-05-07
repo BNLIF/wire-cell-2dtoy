@@ -18,13 +18,88 @@ WireCell2dToy::LowmemTiling::LowmemTiling(int time_slice, int nrebin, WireCell::
    
 }
 
-void WireCell2dToy::LowmemTiling::DivideWires(){
+void WireCell2dToy::LowmemTiling::DivideWires(int wire_limit){
+  
   // loop over all the parent wires,  pick up one parent wire
   for (auto it = pwire_wires_map.begin(); it!=pwire_wires_map.end(); it++){
     MergeGeomWire *pwire = (MergeGeomWire*)it->first;
     GeomWireSelection wires = it->second;
-    if (wires.size()==0) continue;
-   
+    if (!wire_type_map[pwire]) continue; // if the parent wire is bad, no need to do anything ...
+    if (wires.size()<=1) continue; // if the number of wires are zero or one, no need to do anything
+    // ensure the sorting is working ... 
+    MergeGeomWireSet ordered_wire_set;
+    int saved_size = 0;
+    for (int i=0;i!=wires.size();i++){
+      MergeGeomWire *wire = (MergeGeomWire*)wires.at(i);
+      ordered_wire_set.insert(wire);
+      if (ordered_wire_set.size() == saved_size){
+	for (auto it1 = ordered_wire_set.begin(); it1 != ordered_wire_set.end(); it1++){
+	  if (wire->get_allwire().front()->index() == (*it1)->get_allwire().front()->index() &&
+	      wire->get_allwire().back()->index() == (*it1)->get_allwire().back()->index()){
+	    //std::cout << wire << " " << (*it1) << std::endl;
+	    replace_wire(wire,*it1);
+	    break;
+	  }
+	}
+      }else{
+	saved_size = ordered_wire_set.size();
+      }
+      //      std::cout << wire << " " << wire->get_allwire().front()->index() << " " << wire->get_allwire().back()->index() << std::endl;
+    }
+    //std::cout << ordered_wire_set.size() << " " << pwire_wires_map[pwire].size() << std::endl;
+    if (ordered_wire_set.size()==1) continue; // if there is 
+    //std::cout << wires.size() << " " << ordered_wire_set.size() << std::endl;
+
+    
+    
+    
+    // // figure out a way to create small wires ...
+    // int start_wire_index;
+    // int end_wire_index;
+    
+    // start_wire_index = (*ordered_wire_set.begin())->get_allwire().front()->index();
+    // end_wire_index = (*ordered_wire_set.begin())->get_allwire().back()->index();
+    
+    // std::set<int> sorted_index;
+    // for (auto it = ordered_wire_set.begin(); it!= ordered_wire_set.end(); it++){
+    //   int temp_index =  (*it)->get_allwire().front()->index() - 1;
+    //   if (temp_index >start_wire_index && temp_index <end_wire_index){ 
+    // 	end_wire_index = temp_index;
+    // 	sorted_index.insert(temp_index);
+    //   }
+    //   temp_index = (*it)->get_allwire().back()->index();
+    //   if (temp_index >start_wire_index && temp_index <end_wire_index){ 
+    // 	end_wire_index = temp_index;
+    // 	sorted_index.insert(temp_index);
+    //   }
+    // }
+    
+    // if (sorted_index.size()>0){
+    //   for (auto it = sorted_index.begin(); it!= sorted_index.end(); it++){
+    // 	end_wire_index = *it;
+    // 	int count = 0;
+    // 	for (auto it1 = ordered_wire_set.begin(); it1!= ordered_wire_set.end(); it1++){
+    // 	  int temp_start_index = (*it1)->get_allwire().front()->index();
+    // 	  int temp_end_index = (*it1)->get_allwire().back()->index();
+    // 	  if (temp_start_index <= end_wire_index && 
+    // 	      start_wire_index <= temp_end_index && 
+    // 	      (temp_start_index != start_wire_index || 
+    // 	       temp_end_index != end_wire_index)){
+    // 	    count ++;
+    // 	  }
+    // 	  std::cout << temp_start_index << " " << temp_end_index << " " << start_wire_index << " " << end_wire_index << " " << count << std::endl;
+    // 	}
+    // 	//	std::cout << count << std::endl;
+    //   } 
+      
+    // }
+
+
+
+    // std::cout << "abc " << " " << start_wire_index << " " << end_wire_index << std::endl;
+    // for (auto it = ordered_wire_set.begin(); it!= ordered_wire_set.end(); it++){
+    //   std::cout << (*it)->get_allwire().front()->index() << " " << (*it)->get_allwire().back()->index() << " " << (*it)->get_allwire().front()->plane() << " " << wires.size() << std::endl;
+    // }
    
   }
 
