@@ -1,3 +1,5 @@
+#ifdef HAVE_XDATA               // only build if user has Xdata package
+
 /// Convert "shower3D" file to a Wire Cell Exchange Data ROOT format.
 
 #include "WireCellData/GeomCell.h"
@@ -93,3 +95,7 @@ int main(int argc, const char* argv[])
 
 }
     
+#else  // if user doesn't have Xdata package
+int main() { return 0; }
+#endif
+
