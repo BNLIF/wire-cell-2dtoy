@@ -824,6 +824,8 @@ void WireCell2dToy::uBooNEDataAfterROI::BreakROI(SignalROI* roi, float rms){
       // }
 
 
+     
+
       for (Int_t j=0;j!=npeaks1;j++){
 	Int_t start_pos = valley_pos1[j];
 	Int_t end_pos = valley_pos1[j+1];
@@ -855,16 +857,45 @@ void WireCell2dToy::uBooNEDataAfterROI::BreakROI(SignalROI* roi, float rms){
 	}
       }
       delete htemp1;
+
+      // loop through the tight ROIs it contains ...
+      // if nothing in the range, add things back ... 
+      // if (roi->get_chid() == 1151){
+      //  	std::cout << "Break:  "  << roi->get_chid() << " " << start_bin << " " << end_bin << " " << nfound << std::endl;
+      //  	std::cout << npeaks1 << std::endl;
+      // 	std::cout << contained_rois[roi].size() << std::endl;
+      
+      for (auto it = contained_rois[roi].begin(); it!= contained_rois[roi].end(); it++){
+	SignalROI *temp_roi = *it;
+	int temp_flag = 0;
+	for (int i=temp_roi->get_start_bin(); i<= temp_roi->get_end_bin(); i++){
+	  if (htemp->GetBinContent(i-roi->get_start_bin()+1)!=0){
+	    temp_flag = 1;
+	    break;
+	  }
+	}
+	std::cout << temp_flag << std::endl;
+	if (temp_flag==0){
+	  for (int i=temp_roi->get_start_bin(); i<= temp_roi->get_end_bin(); i++){
+	    htemp->SetBinContent(i-roi->get_start_bin()+1, temp_roi->get_contents().at(i-temp_roi->get_start_bin()));
+	  }
+	}
+	
+      }
+      // } // if (1151)
+
     }
   }
   
   
-  // if (roi->get_chid() == 1308)
-  //   std::cout << "Break:  "  << roi->get_chid() << " " << start_bin << " " << end_bin << std::endl;
-  
-  for (int qx = 0; qx!=2; qx++){
-    
+  // if (roi->get_chid() == 1151){
+  //   std::cout << "Break:  "  << roi->get_chid() << " " << start_bin << " " << end_bin << " " << nfound << std::endl;
+  //   for (int i=0;i<htemp->GetNbinsX();i++){
+  //     std::cout << htemp->GetBinContent(i+1) <<std::endl;
+  //   }
+  // }
 
+  for (int qx = 0; qx!=2; qx++){
     // Now we should go through the system again and re-adjust the content
     std::vector<std::pair<int,int>> bins;
     for (int i=0;i<htemp->GetNbinsX();i++){
@@ -997,6 +1028,7 @@ void WireCell2dToy::uBooNEDataAfterROI::BreakROIs(){
     for (auto it = rois_u_loose.at(i).begin(); it!= rois_u_loose.at(i).end(); it++){
       BreakROI(*it,rms_u.at(i));
       all_rois.push_back(*it);
+      
     }
   }
   
@@ -1010,8 +1042,17 @@ void WireCell2dToy::uBooNEDataAfterROI::BreakROIs(){
 
 
   for (int i=0;i!=all_rois.size();i++){
+    // if (all_rois.at(i)->get_chid()==1151){
+    //   std::cout << all_rois.at(i)->get_chid() << " " << all_rois.at(i)->get_start_bin() << " " << all_rois.at(i)->get_end_bin() << std::endl;
+    //   for (int j=0;j!=all_rois.at(i)->get_contents().size();j++){
+    // 	std::cout << j << " " << all_rois.at(i)->get_contents().at(j) << std::endl;  
+    //   }
+    // }
+
     BreakROI1(all_rois.at(i));
   }
+
+  
 
   // int num_tight[3]={0,0,0};
   // int num_loose[3]={0,0,0};
@@ -1503,8 +1544,14 @@ int WireCell2dToy::uBooNEDataAfterROI::jump(int frame_number){
       // std::cout << i << std::endl;
       
       
+      // if (chid == 1151)
+      // 	std::cout << tight_roi->get_chid() << " " <<  tight_roi->get_start_bin() << " " << tight_roi->get_end_bin() << std::endl;
+
       // judge ...
       if (tight_roi->get_above_threshold(threshold).size()==0) {
+	// if (chid ==1151)
+	//   std::cout << tight_roi->get_chid() << " " <<  tight_roi->get_start_bin() << " " << tight_roi->get_end_bin() << std::endl;
+
 	delete tight_roi;
 	continue;
       }
@@ -1888,25 +1935,27 @@ int WireCell2dToy::uBooNEDataAfterROI::jump(int frame_number){
   std::cout << "Generate more loose ROIs from isolated good tight ROIs" << std::endl;
   generate_merge_ROIs();
 
-  for (int qx = 0; qx!=2; qx++){
-    std::cout << "Break loose ROIs" << std::endl;
+  // for (int qx = 0; qx!=2; qx++){
+  //   std::cout << "Break loose ROIs" << std::endl;
     BreakROIs();
-    std::cout << "Clean up ROIs 2nd time" << std::endl;
-    CheckROIs();
-    CleanUpROIs();
-  }
+    // std::cout << "Clean up ROIs 2nd time" << std::endl;
+  //   CheckROIs();
+  //   CleanUpROIs();
+  // }
   
-  std::cout << "Shrink ROIs" << std::endl;
-  ShrinkROIs();
-  std::cout << "Clean up ROIs 3rd time" << std::endl;
-  CheckROIs();
-  CleanUpROIs();
+  
+  
+  // std::cout << "Shrink ROIs" << std::endl;
+  // ShrinkROIs();
+  // std::cout << "Clean up ROIs 3rd time" << std::endl;
+  // CheckROIs();
+  // CleanUpROIs();
 
 
-  // Further reduce fake hits
-  std::cout << "Remove fake hits " << std::endl;
-  CleanUpCollectionROIs();
-  CleanUpInductionROIs();
+  // // Further reduce fake hits
+  // std::cout << "Remove fake hits " << std::endl;
+  // CleanUpCollectionROIs();
+  // CleanUpInductionROIs();
 
   // load results back into the data ... 
   

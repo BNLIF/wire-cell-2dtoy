@@ -1658,6 +1658,9 @@ void WireCell2dToy::uBooNEDataROI::find_ROI_by_decon_itself(int th_factor_ind, i
 	if (temp_roi_begin <0 ) temp_roi_begin = 0;
 	int temp_roi_end = roi_end + pad; // filter_pad;
 	if (temp_roi_end >hresult_filter->GetNbinsX()-1) temp_roi_end = hresult_filter->GetNbinsX()-1;
+
+	//if (chid == 1151) std::cout << temp_roi_begin << " " << temp_roi_end << std::endl;
+
 	
 	if (temp_rois.size() == 0){
 	  temp_rois.push_back(std::make_pair(temp_roi_begin,temp_roi_end));

@@ -721,10 +721,7 @@ void WireCell2dToy::uBooNEData2DDeconvolutionFDS::Deconvolute_2D(int plane){
      delete fb;
      delete ifft2_g;
      delete fb_g;
-     // correct baseline 
-     restore_baseline(htemp);
-     restore_baseline(htemp_g);
-     
+
      int start = -1, end = -1;
      if (plane == 0){
        if (umap.find(chid)!=umap.end()){
@@ -742,6 +739,21 @@ void WireCell2dToy::uBooNEData2DDeconvolutionFDS::Deconvolute_2D(int plane){
 	 end = wmap[chid].second;
        }
      }
+
+     if (start !=-1){
+       for (int j=start;j<=end;j++){
+	 int bin = j-180;
+	 if (bin <0 ) bin += bins_per_frame;
+	 htemp->SetBinContent(bin+1,0);
+	 htemp_g->SetBinContent(bin+1,0);
+       }
+     }
+
+     // correct baseline 
+     restore_baseline(htemp);
+     restore_baseline(htemp_g);
+     
+    
      
      // put results back into the 2-D histogram
      for (int j=0;j!=bins_per_frame;j++){
@@ -796,12 +808,13 @@ void WireCell2dToy::uBooNEData2DDeconvolutionFDS::restore_baseline(TH1F *htemp){
   TH1F *h1 = new TH1F("h1","h1",nbin_b,min,max);
   for (int j=0;j!=nbin;j++){
     //    if (j%100==0) std::cout << j << " " << nbin << std::endl;
-    h1->Fill(htemp->GetBinContent(j+1));
+    if (htemp->GetBinContent(j+1)!=0)
+      h1->Fill(htemp->GetBinContent(j+1));
   }
   float ped = h1->GetMaximumBin()*(max-min)/(nbin_b*1.) + min;
   float ave=0,ncount = 0;
   for (int j=0;j!=nbin;j++){
-    if (fabs(htemp->GetBinContent(j+1)-ped)<400){
+    if (fabs(htemp->GetBinContent(j+1)-ped)<400 && htemp->GetBinContent(j+1)!=0){
       ave +=htemp->GetBinContent(j+1);
       ncount ++;
       }
@@ -812,7 +825,8 @@ void WireCell2dToy::uBooNEData2DDeconvolutionFDS::restore_baseline(TH1F *htemp){
     for (int j=0;j!=nbin;j++){
       double content = htemp->GetBinContent(j+1);
       content -= ave;
-      htemp->SetBinContent(j+1,content);
+      if (htemp->GetBinContent(j+1)!=0)
+	htemp->SetBinContent(j+1,content);
     }
     delete h1;
 }
