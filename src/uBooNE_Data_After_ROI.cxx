@@ -874,7 +874,7 @@ void WireCell2dToy::uBooNEDataAfterROI::BreakROI(SignalROI* roi, float rms){
 	    break;
 	  }
 	}
-	std::cout << temp_flag << std::endl;
+	//	std::cout << temp_flag << std::endl;
 	if (temp_flag==0){
 	  for (int i=temp_roi->get_start_bin(); i<= temp_roi->get_end_bin(); i++){
 	    htemp->SetBinContent(i-roi->get_start_bin()+1, temp_roi->get_contents().at(i-temp_roi->get_start_bin()));
@@ -1935,27 +1935,27 @@ int WireCell2dToy::uBooNEDataAfterROI::jump(int frame_number){
   std::cout << "Generate more loose ROIs from isolated good tight ROIs" << std::endl;
   generate_merge_ROIs();
 
-  // for (int qx = 0; qx!=2; qx++){
-  //   std::cout << "Break loose ROIs" << std::endl;
+  for (int qx = 0; qx!=2; qx++){
+    std::cout << "Break loose ROIs" << std::endl;
     BreakROIs();
-    // std::cout << "Clean up ROIs 2nd time" << std::endl;
-  //   CheckROIs();
-  //   CleanUpROIs();
-  // }
+    std::cout << "Clean up ROIs 2nd time" << std::endl;
+    CheckROIs();
+    CleanUpROIs();
+  }
   
   
   
-  // std::cout << "Shrink ROIs" << std::endl;
-  // ShrinkROIs();
-  // std::cout << "Clean up ROIs 3rd time" << std::endl;
-  // CheckROIs();
-  // CleanUpROIs();
+  std::cout << "Shrink ROIs" << std::endl;
+  ShrinkROIs();
+  std::cout << "Clean up ROIs 3rd time" << std::endl;
+  CheckROIs();
+  CleanUpROIs();
 
 
-  // // Further reduce fake hits
-  // std::cout << "Remove fake hits " << std::endl;
-  // CleanUpCollectionROIs();
-  // CleanUpInductionROIs();
+  // Further reduce fake hits
+  std::cout << "Remove fake hits " << std::endl;
+  CleanUpCollectionROIs();
+  CleanUpInductionROIs();
 
   // load results back into the data ... 
   
