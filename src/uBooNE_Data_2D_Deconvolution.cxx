@@ -505,7 +505,7 @@ void WireCell2dToy::uBooNEData2DDeconvolutionFDS::Deconvolute_2D(int plane){
      tbin_save[i] = 0;
    }
    // do the nominal electronics FFT
-#include "calib_resp_v1.txt"
+   #include "calib_resp_v1.txt"
 
    TH1F hm1("hm1","hm1",nbin,0,nbin);
    TH1F hp1("hp1","hp1",nbin,0,nbin);
@@ -558,7 +558,7 @@ void WireCell2dToy::uBooNEData2DDeconvolutionFDS::Deconvolute_2D(int plane){
 
 
      if (plane == 0){
-       for (Int_t j=0;j!=nticks;j++){
+  for (Int_t j=0;j!=nticks;j++){ // Note this 1.1 is trying to take care the difference between 2.0 us vs. 2.2 us ... 
 	 rho_u[chid][j] = hm.GetBinContent(j+1)/1.1/0.965;// * hm1.GetBinContent(j+1) / hm2.GetBinContent(j+1);
 	 phi_u[chid][j] = hp.GetBinContent(j+1);// + hp1.GetBinContent(j+1) - hp2.GetBinContent(j+1);
        }
