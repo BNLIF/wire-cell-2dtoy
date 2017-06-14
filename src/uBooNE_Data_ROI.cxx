@@ -1542,9 +1542,12 @@ void WireCell2dToy::uBooNEDataROI::find_ROI_by_decon_itself(int th_factor_ind, i
   // if collection, just fill the histogram ... 
   TH1F *hresult = new TH1F("hresult","hresult",nbins,0,nbins);
   TH1F *hresult_filter = new TH1F("hresult_filter","hresult_filter",nbins,0,nbins);
+  TH1F *hresult_filter_tight = new TH1F("hresult_filter_tight","hresult_filter_tight",nbins,0,nbins);
   TH1F *hresult_roi = new TH1F("hresult_roi","hresult_roi",nbins,0,nbins);
 
+  
   TF1 *filter_low = new TF1("filter_low","1-exp(-pow(x/0.02,2))");
+  TF1 *filter_low_tight = new TF1("filter_low","1-exp(-pow(x/0.1,2))");
   int filter_pad = 60; //ticks
 
   // load the data and do the convolution ... 
@@ -1564,6 +1567,7 @@ void WireCell2dToy::uBooNEDataROI::find_ROI_by_decon_itself(int th_factor_ind, i
     int nticks = trace.charge.size();
     hresult->Reset();
     hresult_filter->Reset();
+    hresult_filter_tight->Reset();
     hresult_roi->Reset();
     
     int dead_start = -1;
@@ -1622,6 +1626,33 @@ void WireCell2dToy::uBooNEDataROI::find_ROI_by_decon_itself(int th_factor_ind, i
       }
 
       delete fb;
+
+
+      for (int j=0;j!=nticks;j++){
+	Double_t freq=0;
+	if (j < nticks/2.){
+	  freq = j/(1.*nticks)*2.;
+	}else{
+	  freq = (nticks - j)/(1.*nticks)*2.;
+	}
+	
+	value_re[j] = hm->GetBinContent(j+1) * cos(hp->GetBinContent(j+1)) / nticks * filter_low_tight->Eval(freq);
+	value_im[j] = hm->GetBinContent(j+1) * sin(hp->GetBinContent(j+1)) / nticks * filter_low_tight->Eval(freq);
+      }
+      ifft2->SetPointsComplex(value_re,value_im);
+      ifft2->Transform();
+      fb = 0;
+      fb = TH1::TransformHisto(ifft2,fb,"Re");
+      
+      for (int j=0;j!=nticks;j++){
+	if (j < dead_start || j > dead_end)
+	  hresult_filter_tight->SetBinContent(j+1,fb->GetBinContent(j+1));
+      }
+      delete fb;
+
+      
+
+
       delete hm;
       delete hp;
       delete ifft2;
@@ -1632,20 +1663,26 @@ void WireCell2dToy::uBooNEDataROI::find_ROI_by_decon_itself(int th_factor_ind, i
       }
     }
     restore_baseline(hresult_filter);
+    restore_baseline(hresult_filter_tight);
     //std::cout << chid << " " << cal_rms(hresult,chid) << std::endl;
     float th = cal_rms(hresult_filter,chid);
+    float th_tight = cal_rms(hresult_filter_tight,chid);
     float threshold=0;// = th_factor * th + 1;
+    float threshold_tight = 0;
     //int pad = 5;
 
     if (chid < nwire_u){
       uplane_rms.at(chid) = th;
       threshold = th_factor_ind * th + 1;
+      threshold_tight = th_factor_ind * th_tight + 1;
     }else if (chid < nwire_u + nwire_v){
       vplane_rms.at(chid-nwire_u) = th;
       threshold = th_factor_ind * th + 1;
+      threshold_tight = th_factor_ind * th_tight + 1;
     }else{
       wplane_rms.at(chid-nwire_u-nwire_v) = th;
       threshold = th_factor_col * th + 1;
+      threshold_tight = th_factor_col * th_tight + 1;
     }
 
     
@@ -1656,11 +1693,15 @@ void WireCell2dToy::uBooNEDataROI::find_ROI_by_decon_itself(int th_factor_ind, i
     // now find ROI, above five sigma, and pad with +- six time ticks
     for (int j=0;j<hresult_filter->GetNbinsX()-1;j++){
       double content = hresult_filter->GetBinContent(j+1);
-      if (content > threshold){
+      double content_tight = hresult_filter_tight->GetBinContent(j+1);
+
+      if (content > threshold || 
+	  (content_tight > threshold )){
 	roi_begin = j;
 	roi_end = j;
 	for (int k=j+1;k<hresult_filter->GetNbinsX();k++){
-	  if (hresult_filter->GetBinContent(k+1) > threshold){
+	  if (hresult_filter->GetBinContent(k+1) > threshold ||
+	      (hresult_filter_tight->GetBinContent(k+1) > threshold)){
 	    roi_end = k;
 	  }else{
 	    break;
@@ -1752,8 +1793,10 @@ void WireCell2dToy::uBooNEDataROI::find_ROI_by_decon_itself(int th_factor_ind, i
   
   delete hresult;
   delete hresult_filter;
+  delete hresult_filter_tight;
   delete hresult_roi;
   delete filter_low;
+  delete filter_low_tight;
 }
 
 

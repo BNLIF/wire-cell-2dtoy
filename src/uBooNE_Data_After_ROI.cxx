@@ -688,7 +688,7 @@ void WireCell2dToy::uBooNEDataAfterROI::BreakROI(SignalROI* roi, float rms){
   float th_peak = 3.0;
   float sep_peak = 6.0;
 
-  float low_peak_sep_threshold = 1500; // electrons
+  float low_peak_sep_threshold = 1200; // electrons
   
   if (low_peak_sep_threshold < sep_peak * rms) 
     low_peak_sep_threshold = sep_peak * rms;
