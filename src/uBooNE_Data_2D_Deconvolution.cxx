@@ -379,29 +379,39 @@ void WireCell2dToy::uBooNEData2DDeconvolutionFDS::Deconvolute_2D(int plane){
   TGraph **gfield = 0;
   double time_offset = 0;
   if (plane == 0){
-    double par[2]={1.43555e+01/200.*2.,4.95096e+00};
-    // double par[2]={2.42524e+01/200.*2.,8.12825e+00};
-    // double par[2]={2.37356e+01/200.*2.,7.88785e+00};
-    // double par[2]={1.47404e+01/200.*2.,4.97667e+00};
+    //double par[2]={1.43555e+01/200.*2.,4.95096e+00}; // note filter
+    //double par[2]={1.78695e+01/200.*2.,5.33129e+00}; //  2.2 us + MIP + 200 ticks
+    //double par[2]={1.86783e+01/200.*2.,5.49510e+00}; //  2.0 us + MIP + 200 ticks
+    //double par[2] = {5.77121e+01/800.*2,3.94872e+00}; //2.0 us  + MIP + 800 ticks
+    double par[2] = {5.75416e+01/800.*2,4.10358e+00}; // 2.2 us  + MIP + 800 ticks
+    //double par[2] = {1.11408e-01,2}; // Gaussian note
+
+
     filter_time->SetParameters(par);
     nwires = nwire_u;
     scale = scale_u_2d;
     gfield = gu_2D_g;
   }else if (plane == 1){
-    double par[2]={1.47404e+01/200.*2.,4.97667e+00};
-    // double par[2]={2.37356e+01/200.*2.,7.88785e+00};
-    // double par[2]={1.43555e+01/200.*2.,4.95096e+00};
+    //double par[2]={1.47404e+01/200.*2.,4.97667e+00}; // note filter
+    //double par[2]={1.84666e+01/200.*2.,5.60489e+00}; //  2.2 us + MIP + 200 ticks
+    //double par[2]={1.79987e+01/200.*2.,5.15181e+00}; //  2.0 us + MIP + 200 ticks
+    //double par[2] = {6.05906e+01/800.*2,4.11203e+00}; //2.0 us  + MIP + 800 ticks
+    double par[2] = {5.99306e+01/800.*2,4.20820e+00}; // 2.2 us  + MIP + 800 ticks
+    //double par[2] = {1.11408e-01,2}; // Gaussian note
+
     filter_time->SetParameters(par);
     nwires = nwire_v;
     scale = scale_v_2d;
     gfield = gv_2D_g;
     time_offset = - time_offset_uv;// -0.113;
   }else if (plane == 2){
-    double par[2]={1.45874e+01/200.*2.,5.02219e+00};
-    //double par2[2]={2.41788e+01/200.*2.,8.84234e+00}; // Y
-    //double par[2]={2.37356e+01/200.*2.,7.88785e+00};
-    // double par[2]={1.47404e+01/200.*2.,4.97667e+00};
-    // double par[2]={1.43555e+01/200.*2.,4.95096e+00};
+    //double par[2]={1.45874e+01/200.*2.,5.02219e+00}; // note filter
+    //double par[2]={1.83044e+01/200.*2.,5.44945e+00}; //  2.2 us + MIP + 200 ticks
+    //double par[2]={1.84494e+01/200.*2.,5.26641e+00}; //  2.0 us + MIP + 200 ticks
+    //double par[2] = {5.89055e+01/800.*2,3.99122e+00}; //2.0 us  + MIP + 800 ticks
+    double par[2] = {5.88802e+01/800.*2,4.17455e+00}; // 2.2 us  + MIP + 800 ticks
+    //double par[2] = {1.11408e-01,2}; // Gaussian note
+    
     filter_time->SetParameters(par);
     nwires = nwire_w;
     gfield = gw_2D_g;
@@ -544,13 +554,13 @@ void WireCell2dToy::uBooNEData2DDeconvolutionFDS::Deconvolute_2D(int plane){
      TH1F *htemp2 = new TH1F("htemp2","htemp2",nbin,0,nbin);
      for (int j=0;j!=100;j++){
        if (plane == 0 || plane == 1){
-     	 //htemp2->SetBinContent(j+1,ref_ele1_ind[j]); // 3.5% lower induction wire plane @ 2.2 us
+     	 htemp2->SetBinContent(j+1,ref_ele1_ind[j]); // 3.5% lower induction wire plane @ 2.2 us
      	 //htemp2->SetBinContent(j+1,ref_ele[j]*1.1*0.965); // 3.5% lower induction wire plane @ 2 us
-     	 htemp2->SetBinContent(j+1,calib_ele_chan[chid][j]); // calibrated resp
+	 // htemp2->SetBinContent(j+1,calib_ele_chan[chid][j]); // calibrated resp
        }else{
-     	 //htemp2->SetBinContent(j+1,ref_ele1_ind[j]); // 3.5% lower induction wire plane @ 2.2 us
+     	 htemp2->SetBinContent(j+1,ref_ele1_ind[j]); // 3.5% lower induction wire plane @ 2.2 us
      	 //htemp2->SetBinContent(j+1,ref_ele[j]*1.1); // for test purpose @ 2.0 us
-     	 htemp2->SetBinContent(j+1,calib_ele_chan[chid][j]); // calibrated resp
+     	 //htemp2->SetBinContent(j+1,calib_ele_chan[chid][j]); // calibrated resp
        }
      }
      htemp2->FFT(&hm2,"MAG");
@@ -558,21 +568,30 @@ void WireCell2dToy::uBooNEData2DDeconvolutionFDS::Deconvolute_2D(int plane){
 
 
      if (plane == 0){
-  for (Int_t j=0;j!=nticks;j++){ // Note this 1.1 is trying to take care the difference between 2.0 us vs. 2.2 us ... 
+       for (Int_t j=0;j!=nticks;j++){ // Note this 1.1 is trying to take care the difference between 2.0 us vs. 2.2 us ... 
 	 rho_u[chid][j] = hm.GetBinContent(j+1)/1.1/0.965;// * hm1.GetBinContent(j+1) / hm2.GetBinContent(j+1);
 	 phi_u[chid][j] = hp.GetBinContent(j+1);// + hp1.GetBinContent(j+1) - hp2.GetBinContent(j+1);
+
+	 // rho_u[chid][j] = hm.GetBinContent(j+1) * hm1.GetBinContent(j+1) / hm2.GetBinContent(j+1);
+	 // phi_u[chid][j] = hp.GetBinContent(j+1) + hp1.GetBinContent(j+1) - hp2.GetBinContent(j+1);
        }
        tbin_save[chid] = tbin;
      }else if (plane == 1){
        for (Int_t j=0;j!=nticks;j++){
 	 rho_u[chid-nwire_u][j] = hm.GetBinContent(j+1)/1.1/0.965;// * hm1.GetBinContent(j+1) / hm2.GetBinContent(j+1);
 	 phi_u[chid-nwire_u][j] = hp.GetBinContent(j+1);// + hp1.GetBinContent(j+1) - hp2.GetBinContent(j+1);
+
+	 // rho_u[chid-nwire_u][j] = hm.GetBinContent(j+1) * hm1.GetBinContent(j+1) / hm2.GetBinContent(j+1);
+	 // phi_u[chid-nwire_u][j] = hp.GetBinContent(j+1) + hp1.GetBinContent(j+1) - hp2.GetBinContent(j+1);
        }
        tbin_save[chid-nwire_u] = tbin;
      }else if (plane == 2){
        for (Int_t j=0;j!=nticks;j++){
 	 rho_u[chid-nwire_u-nwire_v][j] = hm.GetBinContent(j+1)/1.1;// * hm1.GetBinContent(j+1) / hm2.GetBinContent(j+1);
 	 phi_u[chid-nwire_u-nwire_v][j] = hp.GetBinContent(j+1);// + hp1.GetBinContent(j+1) - hp2.GetBinContent(j+1);
+
+	 // rho_u[chid-nwire_u-nwire_v][j] = hm.GetBinContent(j+1) * hm1.GetBinContent(j+1) / hm2.GetBinContent(j+1);
+	 // phi_u[chid-nwire_u-nwire_v][j] = hp.GetBinContent(j+1) + hp1.GetBinContent(j+1) - hp2.GetBinContent(j+1);
        }
        tbin_save[chid-nwire_u-nwire_v] = tbin;
      }

@@ -429,6 +429,12 @@ void WireCell2dToy::uBooNEDataROI::find_ROI_loose(int rebin){
     int tbin = trace.tbin;
     int chid = trace.chid;
 
+    // if (lf_noisy_channels.find(chid)!=lf_noisy_channels.end()){
+    //   std::cout << chid << " " << 1 << std::endl;
+    // }else{
+    //   std::cout << chid << " " << 0 << std::endl;
+    // }
+    
     //decide filter_low 
     filter_low = filter_low1;
     if (lf_noisy_channels.find(chid)!=lf_noisy_channels.end()){
@@ -516,8 +522,11 @@ void WireCell2dToy::uBooNEDataROI::find_ROI_loose(int rebin){
       delete ifft2;
     }
     
-    
-    float th = cal_rms(hresult_filter,chid) * factor;
+
+    float th = cal_rms(hresult,chid) * rebin * factor;
+
+    //    if (chid==746) std::cout << "a " << th << " " << max_th << std::endl;
+
     if (th > max_th) th = max_th;
     
     std::vector<std::pair <int,int> > ROIs_1;
@@ -642,8 +651,11 @@ void WireCell2dToy::uBooNEDataROI::find_ROI_loose(int rebin){
     for (int j = 0; j!=ROIs_1.size();j++){
       int begin = ROIs_1.at(j).first * rebin;
       int end = ROIs_1.at(j).second *rebin + (rebin-1);
+      
       ROIs_1.at(j).first = begin;
       ROIs_1.at(j).second = end;
+
+      // if (chid ==746) std::cout << ROIs_1.at(j).first << " " << ROIs_1.at(j).second << std::endl;
     }
 
 
@@ -1810,6 +1822,9 @@ double WireCell2dToy::uBooNEDataROI::cal_rms(TH1F *htemp, int chid){
     	  min1 = int(htemp->GetBinContent(i+1));
       }
     }
+    
+    //if (chid == 746) std::cout << min1 << " " << max1 << " " << start << " " << end << std::endl;
+
     TH1F *h6 = new TH1F("h6","h6",int(max1-min1+1),min1,max1+1);
     for (int i=0;i!=htemp->GetNbinsX();i++){
       if (i < start || i > end){
@@ -1826,6 +1841,7 @@ double WireCell2dToy::uBooNEDataROI::cal_rms(TH1F *htemp, int chid){
       h6->GetQuantiles(1,&par[1],&xq);
       rms = (par[1]-par[0])/2.;
       
+      //      if (chid == 746) std::cout << rms << " " << (par[0]+par[1])/2.<< std::endl;
       //try to exclude signal
       rms2 = 0;
       for (int i=0;i!=htemp->GetNbinsX();i++){
@@ -1846,5 +1862,6 @@ double WireCell2dToy::uBooNEDataROI::cal_rms(TH1F *htemp, int chid){
     }
     delete h6;
     
+    //    if (chid == 746) std::cout << rms1 << std::endl;
     return rms1;
 }
