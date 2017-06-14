@@ -687,7 +687,12 @@ void WireCell2dToy::uBooNEDataAfterROI::BreakROI(SignalROI* roi, float rms){
   Int_t nfound = s->Search(htemp,2,"nobackground new",0.1);
   float th_peak = 3.0;
   float sep_peak = 6.0;
+
+  float low_peak_sep_threshold = 1500; // electrons
   
+  if (low_peak_sep_threshold < sep_peak * rms) 
+    low_peak_sep_threshold = sep_peak * rms;
+
   std::set<int> saved_boundaries;
 
   if (nfound > 1){
@@ -759,9 +764,9 @@ void WireCell2dToy::uBooNEDataAfterROI::BreakROI(SignalROI* roi, float rms){
       }
       
       
-      // if (roi->get_chid() == 1240 && roi->get_plane() == WirePlaneType_t(0)){
+      // if (roi->get_chid() == 1195 && roi->get_plane() == WirePlaneType_t(0)){
       // 	for (int j=0;j!=npeaks;j++){
-      // 	  std::cout << valley_pos[j] << " " << htemp->GetBinContent(valley_pos[j]-start_bin+1)<< " " << order_peak_pos[j] << " " << htemp->GetBinContent( order_peak_pos[j]-start_bin+1) << " " << valley_pos[j+1] << " " << htemp->GetBinContent(valley_pos[j+1] - start_bin+1)<< std::endl ;
+      // 	  std::cout << valley_pos[j] << " " << htemp->GetBinContent(valley_pos[j]-start_bin+1)<< " " << order_peak_pos[j] << " " << htemp->GetBinContent( order_peak_pos[j]-start_bin+1) << " " << valley_pos[j+1] << " " << htemp->GetBinContent(valley_pos[j+1] - start_bin+1)<< " " << rms * sep_peak << std::endl ;
       // 	}
       // }
 	
@@ -781,8 +786,12 @@ void WireCell2dToy::uBooNEDataAfterROI::BreakROI(SignalROI* roi, float rms){
 	  }
 	}
 
+	// if (roi->get_chid() == 1195 && roi->get_plane() == WirePlaneType_t(0)){
+	//   std::cout << "c: " << order_peak_pos[j] << " " << htemp->GetBinContent(order_peak_pos[j]-start_bin+1) << " " << valley_pos1[npeaks1] << " " << htemp->GetBinContent(valley_pos1[npeaks1]-start_bin+1) << std::endl;
+	// }
+
 	// find the next peak
-	if ( htemp->GetBinContent(order_peak_pos[j]-start_bin+1) - htemp->GetBinContent(valley_pos1[npeaks1]-start_bin+1) > rms * sep_peak){
+	if ( htemp->GetBinContent(order_peak_pos[j]-start_bin+1) - htemp->GetBinContent(valley_pos1[npeaks1]-start_bin+1) > low_peak_sep_threshold){
 	  peak_pos1[npeaks1] = order_peak_pos[j] ;
 	  npeaks1 ++;
 	  int flag1 = 0;
@@ -794,7 +803,7 @@ void WireCell2dToy::uBooNEDataAfterROI::BreakROI(SignalROI* roi, float rms){
 		peak_pos1[npeaks1-1] = order_peak_pos[k-1];
 	    }
 
-	    if (htemp->GetBinContent(peak_pos1[npeaks1-1]-start_bin+1) - htemp->GetBinContent(valley_pos[k]-start_bin+1) > rms * sep_peak){
+	    if (htemp->GetBinContent(peak_pos1[npeaks1-1]-start_bin+1) - htemp->GetBinContent(valley_pos[k]-start_bin+1) > low_peak_sep_threshold){
 	      valley_pos1[npeaks1] = valley_pos[k];
 	      j = k-1;
 	      flag1 = 1;
@@ -829,7 +838,10 @@ void WireCell2dToy::uBooNEDataAfterROI::BreakROI(SignalROI* roi, float rms){
       for (Int_t j=0;j!=npeaks1;j++){
 	Int_t start_pos = valley_pos1[j];
 	Int_t end_pos = valley_pos1[j+1];
-	//std::cout << "b " << start_pos << " " << end_pos << std::endl;
+	
+	// if (roi->get_chid()==1195)
+	//   std::cout << "b " << start_pos << " " << end_pos << std::endl;
+	
 	saved_boundaries.insert(start_pos);
 	saved_boundaries.insert(end_pos);
       }

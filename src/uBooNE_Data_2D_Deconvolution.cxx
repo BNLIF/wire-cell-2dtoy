@@ -384,7 +384,7 @@ void WireCell2dToy::uBooNEData2DDeconvolutionFDS::Deconvolute_2D(int plane){
     //double par[2]={1.86783e+01/200.*2.,5.49510e+00}; //  2.0 us + MIP + 200 ticks
     //double par[2] = {5.77121e+01/800.*2,3.94872e+00}; //2.0 us  + MIP + 800 ticks
     double par[2] = {5.75416e+01/800.*2,4.10358e+00}; // 2.2 us  + MIP + 800 ticks
-    //double par[2] = {1.11408e-01,2}; // Gaussian note
+    // double par[2] = {1.11408e-01,2}; // Gaussian note
 
 
     filter_time->SetParameters(par);
@@ -397,7 +397,7 @@ void WireCell2dToy::uBooNEData2DDeconvolutionFDS::Deconvolute_2D(int plane){
     //double par[2]={1.79987e+01/200.*2.,5.15181e+00}; //  2.0 us + MIP + 200 ticks
     //double par[2] = {6.05906e+01/800.*2,4.11203e+00}; //2.0 us  + MIP + 800 ticks
     double par[2] = {5.99306e+01/800.*2,4.20820e+00}; // 2.2 us  + MIP + 800 ticks
-    //double par[2] = {1.11408e-01,2}; // Gaussian note
+    // double par[2] = {1.11408e-01,2}; // Gaussian note
 
     filter_time->SetParameters(par);
     nwires = nwire_v;
@@ -569,29 +569,29 @@ void WireCell2dToy::uBooNEData2DDeconvolutionFDS::Deconvolute_2D(int plane){
 
      if (plane == 0){
        for (Int_t j=0;j!=nticks;j++){ // Note this 1.1 is trying to take care the difference between 2.0 us vs. 2.2 us ... 
-	 rho_u[chid][j] = hm.GetBinContent(j+1)/1.1/0.965;// * hm1.GetBinContent(j+1) / hm2.GetBinContent(j+1);
-	 phi_u[chid][j] = hp.GetBinContent(j+1);// + hp1.GetBinContent(j+1) - hp2.GetBinContent(j+1);
+	 // rho_u[chid][j] = hm.GetBinContent(j+1)/1.1/0.965;// * hm1.GetBinContent(j+1) / hm2.GetBinContent(j+1);
+	 // phi_u[chid][j] = hp.GetBinContent(j+1);// + hp1.GetBinContent(j+1) - hp2.GetBinContent(j+1);
 
-	 // rho_u[chid][j] = hm.GetBinContent(j+1) * hm1.GetBinContent(j+1) / hm2.GetBinContent(j+1);
-	 // phi_u[chid][j] = hp.GetBinContent(j+1) + hp1.GetBinContent(j+1) - hp2.GetBinContent(j+1);
+	 rho_u[chid][j] = hm.GetBinContent(j+1) * hm1.GetBinContent(j+1) / hm2.GetBinContent(j+1);
+	 phi_u[chid][j] = hp.GetBinContent(j+1) + hp1.GetBinContent(j+1) - hp2.GetBinContent(j+1);
        }
        tbin_save[chid] = tbin;
      }else if (plane == 1){
        for (Int_t j=0;j!=nticks;j++){
-	 rho_u[chid-nwire_u][j] = hm.GetBinContent(j+1)/1.1/0.965;// * hm1.GetBinContent(j+1) / hm2.GetBinContent(j+1);
-	 phi_u[chid-nwire_u][j] = hp.GetBinContent(j+1);// + hp1.GetBinContent(j+1) - hp2.GetBinContent(j+1);
+	 // rho_u[chid-nwire_u][j] = hm.GetBinContent(j+1)/1.1/0.965;// * hm1.GetBinContent(j+1) / hm2.GetBinContent(j+1);
+	 // phi_u[chid-nwire_u][j] = hp.GetBinContent(j+1);// + hp1.GetBinContent(j+1) - hp2.GetBinContent(j+1);
 
-	 // rho_u[chid-nwire_u][j] = hm.GetBinContent(j+1) * hm1.GetBinContent(j+1) / hm2.GetBinContent(j+1);
-	 // phi_u[chid-nwire_u][j] = hp.GetBinContent(j+1) + hp1.GetBinContent(j+1) - hp2.GetBinContent(j+1);
+	 rho_u[chid-nwire_u][j] = hm.GetBinContent(j+1) * hm1.GetBinContent(j+1) / hm2.GetBinContent(j+1);
+	 phi_u[chid-nwire_u][j] = hp.GetBinContent(j+1) + hp1.GetBinContent(j+1) - hp2.GetBinContent(j+1);
        }
        tbin_save[chid-nwire_u] = tbin;
      }else if (plane == 2){
        for (Int_t j=0;j!=nticks;j++){
-	 rho_u[chid-nwire_u-nwire_v][j] = hm.GetBinContent(j+1)/1.1;// * hm1.GetBinContent(j+1) / hm2.GetBinContent(j+1);
-	 phi_u[chid-nwire_u-nwire_v][j] = hp.GetBinContent(j+1);// + hp1.GetBinContent(j+1) - hp2.GetBinContent(j+1);
+	 // rho_u[chid-nwire_u-nwire_v][j] = hm.GetBinContent(j+1)/1.1;// * hm1.GetBinContent(j+1) / hm2.GetBinContent(j+1);
+	 // phi_u[chid-nwire_u-nwire_v][j] = hp.GetBinContent(j+1);// + hp1.GetBinContent(j+1) - hp2.GetBinContent(j+1);
 
-	 // rho_u[chid-nwire_u-nwire_v][j] = hm.GetBinContent(j+1) * hm1.GetBinContent(j+1) / hm2.GetBinContent(j+1);
-	 // phi_u[chid-nwire_u-nwire_v][j] = hp.GetBinContent(j+1) + hp1.GetBinContent(j+1) - hp2.GetBinContent(j+1);
+	 rho_u[chid-nwire_u-nwire_v][j] = hm.GetBinContent(j+1) * hm1.GetBinContent(j+1) / hm2.GetBinContent(j+1);
+	 phi_u[chid-nwire_u-nwire_v][j] = hp.GetBinContent(j+1) + hp1.GetBinContent(j+1) - hp2.GetBinContent(j+1);
        }
        tbin_save[chid-nwire_u-nwire_v] = tbin;
      }
