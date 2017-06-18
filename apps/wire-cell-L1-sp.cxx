@@ -2,10 +2,12 @@
 #include "WireCellRess/LassoModel.h"
 #include "WireCellRess/ElasticNetModel.h"
 
-
 #include "TFile.h"
 #include "TH2F.h"
 #include "TGraph.h"
+#include "TF1.h"
+#include "TVirtualFFT.h"
+#include "TH1.h"
 
 #include <Eigen/Dense>
 using namespace Eigen;
@@ -48,35 +50,55 @@ int main(int argc, char* argv[])
   hu_raw = (TH2F*)file->Get("hu_raw");
   hv_raw = (TH2F*)file->Get("hv_raw");
   hw_raw = (TH2F*)file->Get("hw_raw");
+
+  TH2F *hu_decon  = (TH2F*)file->Get("hu_decon");
+  TH2F *hv_decon  = (TH2F*)file->Get("hv_decon");
+  TH2F *hw_decon  = (TH2F*)file->Get("hw_decon");
+
+  
   const int nbins = hu_raw->GetNbinsY();
   int nwire_u = hu_raw->GetNbinsX();
   int nwire_v = hv_raw->GetNbinsX();
   int nwire_w = hw_raw->GetNbinsX();
   
-  TH2F *htemp;
+  TH2F *htemp, *htemp1;
   if (chid < nwire_u){
     htemp = hu_raw;
+    htemp1 = hu_decon;
   }else if (chid < nwire_v+nwire_u){
     htemp = hv_raw;
+    htemp1 = hv_decon;
     chid -= nwire_u;
   }else{
     htemp = hw_raw;
+    htemp1 = hw_decon;
     chid -= nwire_u + nwire_v;
   }
   
-  const int nbin_fit = 70;
+  int nrebin = 6;
+
+  int start_recon_bin = 575;
+  int start_bin = 575*nrebin ;// 6 * 575;
+  int nrecon_bin = 12;
+  const int nbin_fit = nrecon_bin*nrebin;
+
 
   TH1F *hsig = new TH1F("hsig","hsig",nbins,0,nbins);
-  TH1F *hsig1 = new TH1F("hsig1","hsig1",nbin_fit,0,nbin_fit);
-  TH1F *hsig_w = new TH1F("hsig_w","hsig_w",nbin_fit,0,nbin_fit);
-  TH1F *hsig_v = new TH1F("hsig_v","hsig_v",nbin_fit,0,nbin_fit);
-  
-  
+
+  TH1F *hsig1 = new TH1F("hsig1","hsig1",nbin_fit,start_bin,start_bin+nbin_fit);
+  TH1F *hsig_w = new TH1F("hsig_w","hsig_w",nbin_fit,start_bin,start_bin+nbin_fit);
+  TH1F *hsig_v = new TH1F("hsig_v","hsig_v",nbin_fit,start_bin,start_bin+nbin_fit);
+  TH1F *hrecon_sig = new TH1F("hrecon_sig","hrecon_sig",nrecon_bin,start_bin,start_bin+nbin_fit);
+  TH1F *hL1_sig = new TH1F("hL1_sig","hL1_sig",nrecon_bin,start_bin,start_bin+nbin_fit);  
+
   for (int i=0;i!=nbins;i++){
     hsig->SetBinContent(i+1,htemp->GetBinContent(chid+1,i+1));
   }
   for (int i=0;i!=nbin_fit;i++){
-    hsig1->SetBinContent(i+1,hsig->GetBinContent(3450+i+1));
+    hsig1->SetBinContent(i+1,hsig->GetBinContent(start_bin+i+1));
+  }
+  for (int i=0;i!=nrecon_bin;i++){
+    hrecon_sig->SetBinContent(i+1,htemp1->GetBinContent(chid+1,start_recon_bin+i+1)/500.);
   }
   
 
@@ -164,12 +186,88 @@ int main(int argc, char* argv[])
     hsig_v->SetBinContent(i+1,beta(nbin_fit+i));
   }
 
+  // need to convolute with the Gaussian Filter for the result ... 
+  TF1 *filter_g = new TF1("filter_g","exp(-0.5*pow(x/[0],2))");
+  double par3[1]={1.11408e-01};
+  filter_g->SetParameters(par3);
+  
+
+  // convolute with filter function and then go back to the original histograms ...
+  double temp_re[10000], temp_im[10000];
+  int nticks = nbin_fit;
+  int n = nticks;
+  TVirtualFFT *ifft2 = TVirtualFFT::FFT(1,&n,"C2R M K");
+
+  
+  TH1 *hm = hsig_w->FFT(0,"MAG");
+  TH1 *hp = hsig_w->FFT(0,"PH");
+  for (int i=0;i!=nticks;i++){
+    Double_t freq = 0;
+    if (i < nticks/2.){
+      freq = i/(1.*nticks)*2.;
+    }else{
+      freq = (nticks - i)/(1.*nticks)*2.;
+    }
+    temp_re[i] = hm->GetBinContent(i+1) * cos(hp->GetBinContent(i+1)) * filter_g->Eval(freq)/nticks;
+    temp_im[i] = hm->GetBinContent(i+1) * sin(hp->GetBinContent(i+1)) * filter_g->Eval(freq)/nticks;
+  }
+  ifft2->SetPointsComplex(temp_re,temp_im);
+  ifft2->Transform();
+  TH1 *fb = TH1::TransformHisto(ifft2,0,"Re");
+
+  for (int i=0;i!=nticks;i++){
+    hsig_w->SetBinContent(i+1,fb->GetBinContent(i+1));
+  }
+  
+  delete hm;
+  delete hp;
+  delete fb;
+  
+  hm = hsig_v->FFT(0,"MAG");
+  hp = hsig_v->FFT(0,"PH");
+  for (int i=0;i!=nticks;i++){
+    Double_t freq = 0;
+    if (i < nticks/2.){
+      freq = i/(1.*nticks)*2.;
+    }else{
+      freq = (nticks - i)/(1.*nticks)*2.;
+    }
+    temp_re[i] = hm->GetBinContent(i+1) * cos(hp->GetBinContent(i+1)) * filter_g->Eval(freq)/nticks;
+    temp_im[i] = hm->GetBinContent(i+1) * sin(hp->GetBinContent(i+1)) * filter_g->Eval(freq)/nticks;
+  }
+  ifft2->SetPointsComplex(temp_re,temp_im);
+  ifft2->Transform();
+  fb = TH1::TransformHisto(ifft2,0,"Re");
+  
+   for (int i=0;i!=nticks;i++){
+    hsig_v->SetBinContent(i+1,fb->GetBinContent(i+1));
+  }
+  
+  delete hm;
+  delete hp;
+  delete fb;
+  delete ifft2;
+
+  // get the original rebinned results ... 
   // hsig->Draw();
+
+  for (int i=0;i!= nrecon_bin;i++){
+    Double_t sum = 0;
+    for (Int_t j=0;j!=nrebin;j++){
+      sum += hsig_w->GetBinContent(i*nrebin+j+1);
+      sum += hsig_v->GetBinContent(i*nrebin+j+1);
+    }
+    hL1_sig->SetBinContent(i+1,sum);
+  }
+
 
   TFile *file1 = new TFile("L1_sp.root","RECREATE");
   hsig->SetDirectory(file1);
   hsig1->SetDirectory(file1);
   
+  hrecon_sig->SetDirectory(file1);
+  hL1_sig->SetDirectory(file1);
+
   hsig_w->SetDirectory(file1);
   hsig_v->SetDirectory(file1);
 
