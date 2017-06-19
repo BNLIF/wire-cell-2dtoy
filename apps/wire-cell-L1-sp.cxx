@@ -21,7 +21,7 @@ using namespace std;
 int main(int argc, char* argv[])
 {
   if (argc < 4) {
-    cerr << "usage: wire-cell-uboone /path/to/ChannelWireGeometry.txt /path/to/magnify.root ch_id " << endl;
+    cerr << "usage: wire-cell-uboone /path/to/ChannelWireGeometry.txt /path/to/magnify.root -c[ch_id] -s[start_bin] -l[length]" << endl;
   }
   
   WireCellSst::GeomDataSource gds(argv[1]);
@@ -41,8 +41,34 @@ int main(int argc, char* argv[])
        << " " << gds.angle(WirePlaneType_t(2))
        << endl;
   
+  // nsp_2D_file
   const char* root_file = argv[2];
-  int chid = atoi(argv[3]);
+
+
+
+  //3724 for now 
+  int chid = 3724;
+  int start_recon_bin = 575;
+  int nrecon_bin = 12;
+  
+   for(Int_t i = 3; i != argc; i++){
+      switch(argv[i][1]){
+      case 'c':
+        chid= atoi(&argv[i][2]); 
+	break;
+      case 's':
+	start_recon_bin = atoi(&argv[i][2]); 
+	break;
+      case 'l':
+	nrecon_bin = atoi(&argv[i][2]); 
+	break;
+      default:
+	cout << "Warning!!!! Unknown option: " << &argv[i][1] << endl;
+	break;
+      }
+    }
+
+  //atoi(argv[3]);
 
   TFile *file = new TFile(root_file);
   
@@ -77,9 +103,10 @@ int main(int argc, char* argv[])
   
   int nrebin = 6;
 
-  int start_recon_bin = 575;
+  
   int start_bin = 575*nrebin ;// 6 * 575;
-  int nrecon_bin = 12;
+
+  
   const int nbin_fit = nrecon_bin*nrebin;
 
 
@@ -101,8 +128,8 @@ int main(int argc, char* argv[])
     hrecon_sig->SetBinContent(i+1,htemp1->GetBinContent(chid+1,start_recon_bin+i+1)/500.);
   }
   
-
-  #include "/home/xqian/uboone/matrix_inversion/work/wire-cell/2dtoy/src/data_70_2D_11.txt"
+  // TString filename = "/home/xqian/uboone/matrix_inversion/work/wire-cell/2dtoy/src/data_70_2D_11.txt";
+  #include "../src/data_70_2D_11.txt"
 
   // read in the response functions ...
   // collection response ...
