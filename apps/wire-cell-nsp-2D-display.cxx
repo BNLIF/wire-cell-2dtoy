@@ -131,6 +131,8 @@ int main(int argc, char* argv[])
   // ROI finder 
   WireCell2dToy::uBooNEDataROI uboone_rois(data_fds,wien_fds,gds,uplane_map,vplane_map,wplane_map,lf_noisy_channels);
 
+  std::vector<float>& u_rms = uboone_rois.get_uplane_rms();
+  
   // Refine ROIs
   WireCell2dToy::uBooNEDataAfterROI roi_fds(wien_fds,gds,uboone_rois,nrebin);
   roi_fds.jump(eve_num);
