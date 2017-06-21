@@ -576,7 +576,7 @@ void WireCell2dToy::uBooNEDataAfterROI::BreakROI1(SignalROI* roi){
    //   std::cout << "BreakROI1: " << chid << " " << roi->get_start_bin() << " " << roi->get_end_bin() << " " << bins.size()  << " " << htemp->GetBinContent(1) << " " << htemp->GetBinContent(end_bin-start_bin+1) << std::endl;
    
    TH1F *h1 = new TH1F("h1","h1",end_bin+1,0,end_bin+1);
-   for (int i=0;i!=bins.size()-1;i++){
+   for (int i=0;i!=int(bins.size()-1);i++){
      int start_bin1 = bins.at(i);
      int end_bin1 = bins.at(i+1);
      // if (chid == 1274)
@@ -953,12 +953,18 @@ void WireCell2dToy::uBooNEDataAfterROI::BreakROI(SignalROI* roi, float rms){
       
       saved_b.push_back(bin_min);
     }
+
+    // test
     
     if (saved_b.size() >=0){
       TH1F *htemp1 = (TH1F*)htemp->Clone("htemp1");
       htemp->Reset();
       // std::cout << saved_b.size() << " " << bins.size() << " " << htemp->GetNbinsX() << std::endl;
-      for (Int_t j=0;j<saved_b.size()-1;j++){
+      for (Int_t j=0;j<int(saved_b.size()-1);j++){
+	// if (j==0)
+	//   std::cout << saved_b.size() << " " << j << std::endl;
+
+	
 	int flag = 0;
 	int start_pos = saved_b.at(j);
 	float start_content = htemp1->GetBinContent(start_pos+1);

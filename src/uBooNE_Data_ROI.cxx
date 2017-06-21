@@ -607,7 +607,7 @@ void WireCell2dToy::uBooNEDataROI::find_ROI_loose(int rebin){
       //  cout << "Xin1: " << ROIs_1.size() << endl;;
       while(flag_repeat){
     	flag_repeat = 1;
-    	for (Int_t k=0;k<ROIs_1.size()-1;k++){
+    	for (Int_t k=0;k<int(ROIs_1.size()-1);k++){
     	  Int_t begin = ROIs_1.at(k).first;
     	  Int_t end = ROIs_1.at(k+1).second;
 	  
