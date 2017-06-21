@@ -22,6 +22,7 @@ int main(int argc, char* argv[])
 {
   if (argc < 4) {
     cerr << "usage: wire-cell-uboone /path/to/ChannelWireGeometry.txt /path/to/magnify.root -c[ch_id] -s[start_bin] -l[length]" << endl;
+    return 0;
   }
   
   WireCellSst::GeomDataSource gds(argv[1]);
@@ -104,7 +105,7 @@ int main(int argc, char* argv[])
   int nrebin = 6;
 
   
-  int start_bin = 575*nrebin ;// 6 * 575;
+  int start_bin = start_recon_bin*nrebin ;// 6 * 575;
 
   
   const int nbin_fit = nrecon_bin*nrebin;
@@ -235,8 +236,8 @@ int main(int argc, char* argv[])
     }else{
       freq = (nticks - i)/(1.*nticks)*2.;
     }
-    temp_re[i] = hm->GetBinContent(i+1) * cos(hp->GetBinContent(i+1)) * filter_g->Eval(freq)/nticks;
-    temp_im[i] = hm->GetBinContent(i+1) * sin(hp->GetBinContent(i+1)) * filter_g->Eval(freq)/nticks;
+    temp_re[i] = hm->GetBinContent(i+1) * cos(hp->GetBinContent(i+1))* filter_g->Eval(freq)/nticks;
+    temp_im[i] = hm->GetBinContent(i+1) * sin(hp->GetBinContent(i+1))* filter_g->Eval(freq)/nticks;
   }
   ifft2->SetPointsComplex(temp_re,temp_im);
   ifft2->Transform();
