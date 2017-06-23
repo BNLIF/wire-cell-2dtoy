@@ -418,7 +418,7 @@ void WireCell2dToy::uBooNEData2DDeconvolutionFDS::Deconvolute_2D(int plane){
     time_offset = -time_offset_uw;// + 0.803;
   }
   
-  TF1 *filter_g = new TF1("filter_g","exp(-0.5*pow(x/[0],2))");
+  TF1 *filter_g = new TF1("filter_g","(x>0.0)*exp(-0.5*pow(x/[0],2))");
   double par3[1]={1.11408e-01};
   filter_g->SetParameters(par3);
 
