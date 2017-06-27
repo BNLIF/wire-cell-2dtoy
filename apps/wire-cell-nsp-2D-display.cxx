@@ -177,13 +177,13 @@ int main(int argc, char* argv[])
   TH2I *hv_orig = new TH2I("hv_orig","hv_orig",nwire_v,-0.5+nwire_u,nwire_v-0.5+nwire_u,total_time_bin,0,total_time_bin);
   TH2I *hw_orig = new TH2I("hw_orig","hw_orig",nwire_w,-0.5+nwire_u+nwire_v,nwire_w-0.5+nwire_u+nwire_v,total_time_bin,0,total_time_bin);
 
-  TH1I *hu_baseline = new TH1I("hu_baseline","hu_threshold",nwire_u,-0.5,-0.5+nwire_u);
-  TH1I *hv_baseline = new TH1I("hv_baseline","hv_threshold",nwire_v,-0.5+nwire_u,-0.5+nwire_u+nwire_v);
-  TH1I *hw_baseline = new TH1I("hw_baseline","hw_threshold",nwire_w,-0.5+nwire_u+nwire_v,-0.5+nwire_u+nwire_v+nwire_w);
+  TH1I *hu_baseline = new TH1I("hu_baseline","hu_baseline",nwire_u,-0.5,-0.5+nwire_u);
+  TH1I *hv_baseline = new TH1I("hv_baseline","hv_baseline",nwire_v,-0.5+nwire_u,-0.5+nwire_u+nwire_v);
+  TH1I *hw_baseline = new TH1I("hw_baseline","hw_baseline",nwire_w,-0.5+nwire_u+nwire_v,-0.5+nwire_u+nwire_v+nwire_w);
 
-  TH1I *hu_threshold = new TH1I("hu_threshold","hu_basline",nwire_u,-0.5,-0.5+nwire_u);
-  TH1I *hv_threshold = new TH1I("hv_threshold","hv_basline",nwire_v,-0.5+nwire_u,-0.5+nwire_u+nwire_v);
-  TH1I *hw_threshold = new TH1I("hw_threshold","hw_basline",nwire_w,-0.5+nwire_u+nwire_v,-0.5+nwire_u+nwire_v+nwire_w);
+  TH1I *hu_threshold = new TH1I("hu_threshold","hu_threshold",nwire_u,-0.5,-0.5+nwire_u);
+  TH1I *hv_threshold = new TH1I("hv_threshold","hv_threshold",nwire_v,-0.5+nwire_u,-0.5+nwire_u+nwire_v);
+  TH1I *hw_threshold = new TH1I("hw_threshold","hw_threshold",nwire_w,-0.5+nwire_u+nwire_v,-0.5+nwire_u+nwire_v+nwire_w);
 
   TH2F *hu_raw = new TH2F("hu_raw","hu_raw",nwire_u,-0.5,nwire_u-0.5,total_time_bin,0,total_time_bin);
   TH2F *hv_raw = new TH2F("hv_raw","hv_raw",nwire_v,-0.5+nwire_u,nwire_v-0.5+nwire_u,total_time_bin,0,total_time_bin);
