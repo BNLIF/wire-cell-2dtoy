@@ -633,26 +633,26 @@ void WireCell2dToy::uBooNEData2DDeconvolutionFDS::Deconvolute_2D(int plane){
 
 
    TVirtualFFT *ifft = TVirtualFFT::FFT(1,&m,"C2CFORWARD M K");
-     ifft->SetPointsComplex(value_re,value_im);
-     ifft->Transform();
-     Double_t temp_re[nchannels],temp_im[nchannels];
-     ifft->GetPointsComplex(temp_re,temp_im);
+   ifft->SetPointsComplex(value_re,value_im);
+   ifft->Transform();
+   Double_t temp_re[nchannels],temp_im[nchannels];
+   ifft->GetPointsComplex(temp_re,temp_im);
+   
+   ifft->SetPointsComplex(resp_re,resp_im);
+   ifft->Transform();
+   Double_t temp1_re[nchannels],temp1_im[nchannels];
+   ifft->GetPointsComplex(temp1_re,temp1_im);
+   
+   Double_t temp2_re[nchannels],temp2_im[nchannels];
+   for (Int_t j=0;j!=nchannels;j++){
+     Double_t freq_wire = 0;
+     if (j < nchannels/2.){
+       freq_wire = j/(1.*nchannels)*2.;
+     }else{
+       freq_wire = (nchannels -j)/(1.*nchannels)*2.;
+     }
      
-     ifft->SetPointsComplex(resp_re,resp_im);
-     ifft->Transform();
-     Double_t temp1_re[nchannels],temp1_im[nchannels];
-     ifft->GetPointsComplex(temp1_re,temp1_im);
      
-     Double_t temp2_re[nchannels],temp2_im[nchannels];
-     for (Int_t j=0;j!=nchannels;j++){
-       Double_t freq_wire = 0;
-       if (j < nchannels/2.){
-   	 freq_wire = j/(1.*nchannels)*2.;
-       }else{
-   	 freq_wire = (nchannels -j)/(1.*nchannels)*2.;
-       }
-       
-       
        if (temp1_im[j]*temp1_im[j]+temp1_re[j]*temp1_re[j]>0){
 	 if (plane!=2){
 	   temp2_re[j] = (temp_re[j]*temp1_re[j]+temp_im[j]*temp1_im[j])/m/

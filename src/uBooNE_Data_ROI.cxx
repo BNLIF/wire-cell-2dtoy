@@ -525,7 +525,7 @@ void WireCell2dToy::uBooNEDataROI::find_ROI_loose(int rebin){
 
     float th = cal_rms(hresult,chid) * rebin * factor;
 
-    //    if (chid==746) std::cout << "a " << th << " " << max_th << std::endl;
+    // if (chid==1240) std::cout << "a " << th << " " << max_th << std::endl;
 
     if (th > max_th) th = max_th;
     
@@ -578,6 +578,17 @@ void WireCell2dToy::uBooNEDataROI::find_ROI_loose(int rebin){
       }
 
        if (flag_ROI == 1){
+	 // if (chid==1240) {
+	 //   std::cout << begin << " " << end << " " << j << " " << content << " " << th << " " << prev_content << " " <<next_content << std::endl;
+	 //   for (int kk = begin; kk!=end; kk++){
+	 //     std::cout << kk << " a " << hresult_filter->GetBinContent(kk+1) 
+	 // 	       << " " << th*factor1 << " " << local_ave(hresult_filter,kk,1) << std::endl;
+	 //     for (int kkk=0;kkk!=6;kkk++){
+	 //       std::cout << "b " << hresult->GetBinContent(kk*6+kkk+1) << std::endl;
+	 //    }
+	 //  }
+	 // }
+	 
       	if (ROIs_1.size()>0){
       	  if (begin <= ROIs_1.back().second){
       	    ROIs_1.back().second = end;
@@ -655,9 +666,10 @@ void WireCell2dToy::uBooNEDataROI::find_ROI_loose(int rebin){
       ROIs_1.at(j).first = begin;
       ROIs_1.at(j).second = end;
 
-      //if (chid ==1195) std::cout << ROIs_1.at(j).first << " " << ROIs_1.at(j).second << std::endl;
+      // if (chid ==1240) std::cout << ROIs_1.at(j).first << " " << ROIs_1.at(j).second << std::endl;
     }
 
+    
 
     if (chid < nwire_u){
       loose_rois_u.at(chid) = ROIs_1;

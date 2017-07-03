@@ -674,6 +674,7 @@ void WireCell2dToy::uBooNEDataAfterROI::BreakROI(SignalROI* roi, float rms){
   int end_bin = roi->get_end_bin();
   
   if (start_bin <0 || end_bin <0 ) return;
+  
   // if (roi->get_chid()==1240){
   //   std::cout << "xin: " << start_bin << " " << end_bin << std::endl;
   // }
@@ -827,9 +828,9 @@ void WireCell2dToy::uBooNEDataAfterROI::BreakROI(SignalROI* roi, float rms){
 
 
       // if (roi->get_chid() == 1240 && roi->get_plane() == WirePlaneType_t(0)){
-      // 	for (int j=0;j!=npeaks1;j++){
-      // 	  std::cout << valley_pos1[j] << " " << peak_pos1[j] << " " <<  valley_pos1[j+1] << std::endl ;
-      // 	}
+      //  	for (int j=0;j!=npeaks1;j++){
+      //  	  std::cout << valley_pos1[j] << " " << peak_pos1[j] << " " <<  valley_pos1[j+1] << std::endl ;
+      //  	}
       // }
 
 
@@ -922,8 +923,8 @@ void WireCell2dToy::uBooNEDataAfterROI::BreakROI(SignalROI* roi, float rms){
 	  }
 	}
 	bins.push_back(std::make_pair(start,end));
-	// if (roi->get_chid() == 1308)
-	//   std::cout << qx << " " <<  start+start_bin << " " << end + start_bin << " " << 3*rms << " " << htemp->GetBinContent(6529-start_bin+1) << std::endl;
+	 // if (roi->get_chid() == 1240)
+	 //   std::cout << qx << " " <<  start+start_bin << " " << end + start_bin << " " << 3*rms << std::endl;
 	i = end;
       }
     }
