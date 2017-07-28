@@ -283,7 +283,7 @@ void WireCell2dToy::uBooNEDataAfterROI::CleanUpInductionROIs(){
   // deal with loose ROIs
   // focus on the isolated ones first
   float mean_threshold = 500;
-  float threshold = 800;
+  float threshold = 1000;
   
   
   std::list<SignalROI*> Bad_ROIs;
@@ -475,7 +475,7 @@ void WireCell2dToy::uBooNEDataAfterROI::CleanUpCollectionROIs(){
   // deal with tight ROIs, 
   // scan with all the tight ROIs to look for peaks above certain threshold, put in a temporary set
   float mean_threshold = 500; //electrons
-  float threshold = 800; //electrons, about 1/2 of MIP per tick ...
+  float threshold = 1000; //electrons, about 1/2 of MIP per tick ...
   
   std::set<SignalROI*> Good_ROIs;
   for (int i=0;i!=nwire_w;i++){
