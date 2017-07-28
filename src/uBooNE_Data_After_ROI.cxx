@@ -282,13 +282,16 @@ void WireCell2dToy::uBooNEDataAfterROI::CleanUpROIs(){
 void WireCell2dToy::uBooNEDataAfterROI::CleanUpInductionROIs(){
   // deal with loose ROIs
   // focus on the isolated ones first
-  float threshold = 1500;
+  float mean_threshold = 500;
+  float threshold = 800;
+  
+  
   std::list<SignalROI*> Bad_ROIs;
   for (int i=0;i!=nwire_u;i++){
     for (auto it = rois_u_loose.at(i).begin();it!=rois_u_loose.at(i).end();it++){
       SignalROI* roi = *it;
       if (front_rois.find(roi)==front_rois.end() && back_rois.find(roi)==back_rois.end()){
-	if (roi->get_above_threshold(threshold).size()==0)
+	if (roi->get_above_threshold(threshold).size()==0 && roi->get_average_heights() < mean_threshold)
 	  Bad_ROIs.push_back(roi);
       }
     }
@@ -306,7 +309,7 @@ void WireCell2dToy::uBooNEDataAfterROI::CleanUpInductionROIs(){
     for (auto it = rois_v_loose.at(i).begin();it!=rois_v_loose.at(i).end();it++){
       SignalROI* roi = *it;
       if (front_rois.find(roi)==front_rois.end() && back_rois.find(roi)==back_rois.end()){
-	if (roi->get_above_threshold(threshold).size()==0)
+	if (roi->get_above_threshold(threshold).size()==0 && roi->get_average_heights() < mean_threshold)
 	  Bad_ROIs.push_back(roi);
       }
     }
@@ -321,12 +324,12 @@ void WireCell2dToy::uBooNEDataAfterROI::CleanUpInductionROIs(){
   }
 
 
-  threshold = 1200;
+  //  threshold = 1200;
   std::set<SignalROI*> Good_ROIs;
   for (int i=0;i!=nwire_u;i++){
     for (auto it = rois_u_loose.at(i).begin();it!=rois_u_loose.at(i).end();it++){
       SignalROI* roi = *it;
-      if (roi->get_above_threshold(threshold).size()!=0)
+      if (roi->get_above_threshold(threshold).size()!=0 || roi->get_average_heights() > mean_threshold)
 	Good_ROIs.insert(roi);
     }
   }
@@ -471,15 +474,18 @@ void WireCell2dToy::uBooNEDataAfterROI::CleanUpInductionROIs(){
 void WireCell2dToy::uBooNEDataAfterROI::CleanUpCollectionROIs(){
   // deal with tight ROIs, 
   // scan with all the tight ROIs to look for peaks above certain threshold, put in a temporary set
-  float threshold = 1200; //electrons, about 1/2 of MIP per tick ...
+  float mean_threshold = 500; //electrons
+  float threshold = 800; //electrons, about 1/2 of MIP per tick ...
+  
   std::set<SignalROI*> Good_ROIs;
   for (int i=0;i!=nwire_w;i++){
     for (auto it = rois_w_tight.at(i).begin();it!=rois_w_tight.at(i).end();it++){
       SignalROI* roi = *it;
-      if (roi->get_above_threshold(threshold).size()!=0)
+      if (roi->get_above_threshold(threshold).size()!=0 || roi->get_average_heights() > mean_threshold)
 	Good_ROIs.insert(roi);
     }
   }
+  
   // for a particular ROI if it is not in, or it is not connected with one in the temporary map, then remove it
   std::list<SignalROI*> Bad_ROIs;
   for (int i=0;i!=nwire_w;i++){
