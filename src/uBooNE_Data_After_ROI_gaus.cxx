@@ -99,7 +99,7 @@ int WireCell2dToy::uBooNEDataAfterROI_Gaus::jump(int frame_number){
 	float start_content = hw_data->GetBinContent(chid-nwire_u-nwire_v+1,start_bin+1);
 	float end_content = hw_data->GetBinContent(chid-nwire_u-nwire_v+1,end_bin+1);
 	for (int i=start_bin; i<end_bin+1; i++){
-	  int content = hw_data->GetBinContent(chid-nwire_u-nwire_v+1,i+1) - ((end_content - start_content)*(i-start_bin)/(end_bin-start_bin) + start_content);
+	  int content = hw_data->GetBinContent(chid-nwire_u-nwire_v+1,i+1);// - ((end_content - start_content)*(i-start_bin)/(end_bin-start_bin) + start_content);
 	  htemp_signal->SetBinContent(i+1,content);
 	}
       }

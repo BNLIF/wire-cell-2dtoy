@@ -1983,6 +1983,12 @@ int WireCell2dToy::uBooNEDataAfterROI::jump(int frame_number){
   CleanUpInductionROIs();
 
   // load results back into the data ... 
+
+  WireCell2dToy::uBooNEData2DDeconvolutionFDS* temp_fds =(WireCell2dToy::uBooNEData2DDeconvolutionFDS*)&fds;
+    
+  TH2I *hu_data = temp_fds->get_u_wiener();
+  TH2I *hv_data = temp_fds->get_v_wiener();  
+  TH2I *hw_data = temp_fds->get_w_wiener();
   
   for (size_t ind=0; ind<ntraces; ++ind) {
     htemp_signal->Reset();
@@ -1992,38 +1998,77 @@ int WireCell2dToy::uBooNEDataAfterROI::jump(int frame_number){
     int chid = trace.chid;
     int nbins = trace.charge.size();
 
-    // load results back into the histogram
-    if (chid < nwire_u){
+    // // load results back into the histogram
+    // if (chid < nwire_u){
+    //   for (auto it = rois_u_loose.at(chid).begin(); it!= rois_u_loose.at(chid).end();it++){
+    // 	//for (auto it = rois_u_tight.at(chid).begin(); it!= rois_u_tight.at(chid).end();it++){
+    // 	SignalROI *roi =  *it;
+    // 	std::vector<float>& contents = roi->get_contents();
+    // 	int start_bin = roi->get_start_bin();
+    // 	for (int i=0;i!=contents.size();i++){
+    // 	  htemp_signal->SetBinContent(start_bin+1+i,contents.at(i));
+    // 	}
+    //   }
+    // }else if (chid < nwire_u + nwire_v){
+    //   for (auto it = rois_v_loose.at(chid-nwire_u).begin(); it!= rois_v_loose.at(chid-nwire_u).end();it++){
+    // 	//for (auto it = rois_v_tight.at(chid-nwire_u).begin(); it!= rois_v_tight.at(chid-nwire_u).end();it++){
+    //   	SignalROI *roi =  *it;
+    //   	std::vector<float>& contents = roi->get_contents();
+    //   	int start_bin = roi->get_start_bin();
+    //   	for (int i=0;i!=contents.size();i++){
+    //   	  htemp_signal->SetBinContent(start_bin+1+i,contents.at(i));
+    //   	}
+    //   }
+    // }else{
+    //   for (auto it = rois_w_tight.at(chid-nwire_u-nwire_v).begin(); it!= rois_w_tight.at(chid-nwire_u-nwire_v).end();it++){
+    //   	SignalROI *roi =  *it;
+    //   	std::vector<float>& contents = roi->get_contents();
+    //   	int start_bin = roi->get_start_bin();
+    //   	for (int i=0;i!=contents.size();i++){
+    //   	  htemp_signal->SetBinContent(start_bin+1+i,contents.at(i));
+    //   	}
+    //   }
+    // }
+
+      if (chid < nwire_u){
       for (auto it = rois_u_loose.at(chid).begin(); it!= rois_u_loose.at(chid).end();it++){
-	//for (auto it = rois_u_tight.at(chid).begin(); it!= rois_u_tight.at(chid).end();it++){
 	SignalROI *roi =  *it;
-	std::vector<float>& contents = roi->get_contents();
 	int start_bin = roi->get_start_bin();
-	for (int i=0;i!=contents.size();i++){
-	  htemp_signal->SetBinContent(start_bin+1+i,contents.at(i));
+	int end_bin = roi->get_end_bin();
+	float start_content = hu_data->GetBinContent(chid+1,start_bin+1);
+	float end_content = hu_data->GetBinContent(chid+1,end_bin+1);
+	for (int i=start_bin; i<end_bin+1; i++){
+	  int content = hu_data->GetBinContent(chid+1,i+1) - ((end_content - start_content)*(i-start_bin)/(end_bin-start_bin) + start_content);
+	  htemp_signal->SetBinContent(i+1,content);
 	}
       }
     }else if (chid < nwire_u + nwire_v){
       for (auto it = rois_v_loose.at(chid-nwire_u).begin(); it!= rois_v_loose.at(chid-nwire_u).end();it++){
-      //for (auto it = rois_v_tight.at(chid-nwire_u).begin(); it!= rois_v_tight.at(chid-nwire_u).end();it++){
-      	SignalROI *roi =  *it;
-      	std::vector<float>& contents = roi->get_contents();
-      	int start_bin = roi->get_start_bin();
-      	for (int i=0;i!=contents.size();i++){
-      	  htemp_signal->SetBinContent(start_bin+1+i,contents.at(i));
-      	}
+	SignalROI *roi =  *it;
+	int start_bin = roi->get_start_bin();
+	int end_bin = roi->get_end_bin();
+	float start_content = hv_data->GetBinContent(chid-nwire_u+1,start_bin+1);
+	float end_content = hv_data->GetBinContent(chid-nwire_u+1,end_bin+1);
+	for (int i=start_bin; i<end_bin+1; i++){
+	  int content = hv_data->GetBinContent(chid-nwire_u+1,i+1) - ((end_content - start_content)*(i-start_bin)/(end_bin-start_bin) + start_content);
+	  htemp_signal->SetBinContent(i+1,content);
+	}
       }
     }else{
       for (auto it = rois_w_tight.at(chid-nwire_u-nwire_v).begin(); it!= rois_w_tight.at(chid-nwire_u-nwire_v).end();it++){
-      	SignalROI *roi =  *it;
-      	std::vector<float>& contents = roi->get_contents();
-      	int start_bin = roi->get_start_bin();
-      	for (int i=0;i!=contents.size();i++){
-      	  htemp_signal->SetBinContent(start_bin+1+i,contents.at(i));
-      	}
+	SignalROI *roi =  *it;
+	int start_bin = roi->get_start_bin();
+	int end_bin = roi->get_end_bin();
+	float start_content = hw_data->GetBinContent(chid-nwire_u-nwire_v+1,start_bin+1);
+	float end_content = hw_data->GetBinContent(chid-nwire_u-nwire_v+1,end_bin+1);
+	for (int i=start_bin; i<end_bin+1; i++){
+	  int content = hw_data->GetBinContent(chid-nwire_u-nwire_v+1,i+1);// - ((end_content - start_content)*(i-start_bin)/(end_bin-start_bin) + start_content);
+	  htemp_signal->SetBinContent(i+1,content);
+	}
       }
     }
-        
+    
+    
     // save into frames ... 
     WireCell::Trace trace1;
     trace1.chid = chid;

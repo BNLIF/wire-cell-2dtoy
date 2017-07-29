@@ -4,6 +4,7 @@
 #include "WireCellNav/FrameDataSource.h"
 #include "WireCellNav/GeomDataSource.h"
 #include "WireCell2dToy/uBooNE_Data_ROI.h"
+#include "WireCell2dToy/uBooNE_Data_2D_Deconvolution.h"
 #include "WireCellData/SignalROI.h"
 #include "TH1F.h"
 
