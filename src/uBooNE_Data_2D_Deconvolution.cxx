@@ -363,9 +363,12 @@ int WireCell2dToy::uBooNEData2DDeconvolutionFDS::size() const{
 void WireCell2dToy::uBooNEData2DDeconvolutionFDS::Deconvolute_2D(int plane){
   const Frame& frame1 = fds->get();
   size_t ntraces = frame1.traces.size();
-
+  
   const int nticks = bins_per_frame;
   nbin = nticks;
+
+  //  std::cout << ntraces << " " << nticks << " " << nbin << std::endl;
+  
   double value_re[nticks];
   double value_im[nticks];
   for (int i=0;i!=nticks;++i){
@@ -547,6 +550,8 @@ void WireCell2dToy::uBooNEData2DDeconvolutionFDS::Deconvolute_2D(int plane){
        int tt = i+1;
        htemp->SetBinContent(tt,trace.charge.at(i));
      }
+     //     std::cout << ind << " " << tbin << " " << htemp->GetSum() << std::endl;
+     
      htemp->FFT(&hm,"MAG");
      htemp->FFT(&hp,"PH");
      
@@ -783,18 +788,25 @@ void WireCell2dToy::uBooNEData2DDeconvolutionFDS::Deconvolute_2D(int plane){
 	 if (plane == 0){
 	   hu_2D_g->SetBinContent(chid+1,bin+1,int(htemp->GetBinContent(j+1)));
 	   hu_2D_gg->SetBinContent(chid+1,bin+1,int(htemp_g->GetBinContent(j+1)));
+	   
 	 }else if (plane == 1){
 	   hv_2D_g->SetBinContent(chid+1,bin+1,int(htemp->GetBinContent(j+1)));
 	   hv_2D_gg->SetBinContent(chid+1,bin+1,int(htemp_g->GetBinContent(j+1)));
+	   
 	 }else if (plane == 2){
 	   hw_2D_g->SetBinContent(chid+1,bin+1,int(htemp->GetBinContent(j+1)));
 	   hw_2D_gg->SetBinContent(chid+1,bin+1,int(htemp_g->GetBinContent(j+1)));
+	   
 	 }
        }
      }
      delete htemp;
      delete htemp_g;
    }
+
+   //   std::cout << hu_2D_g->GetSum() << " " << hu_2D_gg->GetSum() << std::endl;
+   //   std::cout << hv_2D_g->GetSum() << " " << hv_2D_gg->GetSum() << std::endl;
+   //  std::cout << hw_2D_g->GetSum() << " " << hw_2D_gg->GetSum() << std::endl;
    
   delete filter_low;
   delete filter_wire;
@@ -823,7 +835,7 @@ void WireCell2dToy::uBooNEData2DDeconvolutionFDS::restore_baseline(TH1F *htemp){
   double max = htemp->GetMaximum();
   double min = htemp->GetMinimum();
   int nbin_b = max - min;
-  if (nbin_b ==0) nbin_b = 1;
+  if (nbin_b <=0) nbin_b = 1;
   TH1F *h1 = new TH1F("h1","h1",nbin_b,min,max);
   for (int j=0;j!=nbin;j++){
     //    if (j%100==0) std::cout << j << " " << nbin << std::endl;
