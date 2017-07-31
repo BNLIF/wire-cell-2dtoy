@@ -58,7 +58,9 @@ Int_t WireCell2dToy::uBooNEDataROI::find_ROI_end(TH1F *h1, Int_t bin, Double_t t
     if (end == h1->GetNbinsX()) break;
   }
 
-  while(local_ave(h1,end+1,1) < local_ave(h1,end,1)){
+  while(local_ave(h1,end+1,1) < local_ave(h1,end,1) ||
+	(local_ave(h1,end+1,1) + local_ave(h1,end+2,1))*0.5 < local_ave(h1,end,1)
+	){
     end++;
     if (end == h1->GetNbinsX()) break;
   } 
@@ -81,7 +83,9 @@ Int_t WireCell2dToy::uBooNEDataROI::find_ROI_begin(TH1F *h1, Int_t bin, Double_t
   
   // calculate the local average
   // keep going and find the minimum
-  while( local_ave(h1,begin-1,1) < local_ave(h1,begin,1)){
+  while( local_ave(h1,begin-1,1) < local_ave(h1,begin,1) ||
+	 (local_ave(h1,begin-2,1) + local_ave(h1,begin-1,1))*0.5 < local_ave(h1,begin,1)
+	 ){
     begin --;
     if (begin == 0) break;
   }
@@ -532,6 +536,12 @@ void WireCell2dToy::uBooNEDataROI::find_ROI_loose(int rebin){
     std::vector<std::pair <int,int> > ROIs_1;
     std::vector<Int_t> max_bins_1;
     int ntime = hresult_filter->GetNbinsX();
+
+    // if (chid==1200){
+    //   for (int j=0;j!=ntime;j++){
+    // 	std::cout << j << " " << hresult_filter->GetBinContent(j+1) << std::endl;
+    //   }
+    // }
     
     for (Int_t j=1; j<ntime-1;j++){
       Double_t content = hresult_filter->GetBinContent(j+1);
@@ -573,6 +583,10 @@ void WireCell2dToy::uBooNEDataROI::find_ROI_loose(int rebin){
 	       hresult_filter->GetBinContent(max_bin+1) - hresult_filter->GetBinContent(temp_end+1) > th*factor1) ){
 	    flag_ROI = 1;
 	  }
+
+	  // if (chid==1200)
+	  //   std::cout << j << " " << begin << " " << end << " " << max_bin << " " << hresult_filter->GetBinContent(max_bin+1) * 2 - hresult_filter->GetBinContent(begin+1) - hresult_filter->GetBinContent(end+1) << " " << th*2 << " " << temp_begin << " " << temp_end << " " << hresult_filter->GetBinContent(max_bin+1) - hresult_filter->GetBinContent(temp_begin+1) << " " << hresult_filter->GetBinContent(max_bin+1) - hresult_filter->GetBinContent(temp_end+1) << " " << th*factor1 << " " << flag_ROI << std::endl;
+
 	  
 	}
       }
@@ -666,7 +680,7 @@ void WireCell2dToy::uBooNEDataROI::find_ROI_loose(int rebin){
       ROIs_1.at(j).first = begin;
       ROIs_1.at(j).second = end;
 
-      // if (chid ==1240) std::cout << ROIs_1.at(j).first << " " << ROIs_1.at(j).second << std::endl;
+      //      if (abs(chid-1199)<=1) std::cout << "Loose: " << chid << " " << ROIs_1.at(j).first << " " << ROIs_1.at(j).second << std::endl;
     }
 
     
@@ -1724,7 +1738,7 @@ void WireCell2dToy::uBooNEDataROI::find_ROI_by_decon_itself(int th_factor_ind, i
 	int temp_roi_end = roi_end + pad; // filter_pad;
 	if (temp_roi_end >hresult_filter->GetNbinsX()-1) temp_roi_end = hresult_filter->GetNbinsX()-1;
 
-	//if (chid == 1151) std::cout << temp_roi_begin << " " << temp_roi_end << std::endl;
+	//	if (abs(chid-1199)<=1 ) std::cout << "Tight: " << chid << " " << temp_roi_begin << " " << temp_roi_end << std::endl;
 
 	
 	if (temp_rois.size() == 0){
