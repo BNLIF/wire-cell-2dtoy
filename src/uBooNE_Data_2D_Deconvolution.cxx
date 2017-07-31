@@ -108,6 +108,16 @@ WireCell2dToy::uBooNEData2DDeconvolutionFDS::uBooNEData2DDeconvolutionFDS(TH2I *
     frame.traces.push_back(trace);
   }
 
+  hu_2D_g = hu_decon;
+  hu_2D_gg = hu_decon;
+
+  hv_2D_g = hv_decon;
+  hv_2D_gg = hv_decon;
+
+  hw_2D_g = hw_decon;
+  hw_2D_gg = hw_decon;
+
+  
   // std::cout << umap.size() << std::endl;
 
 // #include "calib_resp_v1.txt"

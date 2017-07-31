@@ -1982,6 +1982,9 @@ int WireCell2dToy::uBooNEDataAfterROI::jump(int frame_number){
   CleanUpCollectionROIs();
   CleanUpInductionROIs();
 
+  std::cout << "Extend ROIs" << std::endl;
+  ExtendROIs(); 
+  
   // load results back into the data ... 
 
   WireCell2dToy::uBooNEData2DDeconvolutionFDS* temp_fds =(WireCell2dToy::uBooNEData2DDeconvolutionFDS*)&fds;
@@ -2091,6 +2094,21 @@ int WireCell2dToy::uBooNEDataAfterROI::jump(int frame_number){
   return frame.index;
 
 }
+
+void WireCell2dToy::uBooNEDataAfterROI::ExtendROIs(){
+  // U plane ... 
+  for (int chid = 0; chid != nwire_u; chid ++){
+    rois_u_loose.at(chid).sort(CompareRois());
+    
+    for (auto it = rois_u_loose.at(chid).begin(); it!= rois_u_loose.at(chid).end();it++){
+      SignalROI *roi =  *it;
+      //std::cout << chid << " " << roi->get_start_bin() << " " << roi->get_end_bin() << std::endl;
+    }
+  }
+  
+  
+}
+
 
 
 void WireCell2dToy::uBooNEDataAfterROI::CheckROIs(){
@@ -2211,3 +2229,6 @@ void WireCell2dToy::uBooNEDataAfterROI::CheckROIs(){
   }
 
 }
+
+
+
