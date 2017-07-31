@@ -2102,6 +2102,9 @@ int WireCell2dToy::uBooNEDataAfterROI::jump(int frame_number){
 }
 
 void WireCell2dToy::uBooNEDataAfterROI::ExtendROIs(){
+
+  bool flag = true;
+  
   // U plane ... 
   for (int chid = 0; chid != nwire_u; chid ++){
     rois_u_loose.at(chid).sort(CompareRois());
@@ -2110,45 +2113,48 @@ void WireCell2dToy::uBooNEDataAfterROI::ExtendROIs(){
       // initialize the extended bins ... 
       roi->set_ext_start_bin(roi->get_start_bin());
       roi->set_ext_end_bin(roi->get_end_bin());
-      
-      //loop through front
-      for (auto it1 = front_rois[roi].begin(); it1!=front_rois[roi].end(); it1++){
-	SignalROI *roi1 = *it1;
-	int ext_start_bin = roi->get_ext_start_bin();
-	int ext_end_bin = roi->get_ext_end_bin();
-	if (ext_start_bin > roi1->get_start_bin()) ext_start_bin = roi1->get_start_bin();
-	if (ext_end_bin < roi1->get_end_bin()) ext_end_bin = roi1->get_end_bin();
-	roi->set_ext_start_bin(ext_start_bin);
-	roi->set_ext_end_bin(ext_end_bin);
-	//	std::cout << roi->get_chid() << " " << roi1->get_chid() << " " << roi->get_start_bin() << " " << roi->get_end_bin() << " " << roi1->get_start_bin() << " " << roi1->get_end_bin() << std::endl;
-      }
-      
-      // loop through back 
-      for (auto it1 = back_rois[roi].begin(); it1!=back_rois[roi].end(); it1++){
-	SignalROI *roi1 = *it1;
-	int ext_start_bin = roi->get_ext_start_bin();
-	int ext_end_bin = roi->get_ext_end_bin();
-	if (ext_start_bin > roi1->get_start_bin()) ext_start_bin = roi1->get_start_bin();
-	if (ext_end_bin < roi1->get_end_bin()) ext_end_bin = roi1->get_end_bin();
-	roi->set_ext_start_bin(ext_start_bin);
-	roi->set_ext_end_bin(ext_end_bin);
-	//	std::cout << roi->get_chid() << " " << roi1->get_chid() << " " << roi->get_start_bin() << " " << roi->get_end_bin() << " " << roi1->get_start_bin() << " " << roi1->get_end_bin() << std::endl;
-      }
-      //std::cout << chid << " " << roi->get_start_bin() << " " << roi->get_end_bin() << std::endl;
-    }
 
-    SignalROI *prev_roi = 0;
-    for (auto it = rois_u_loose.at(chid).begin(); it!= rois_u_loose.at(chid).end();it++){
-      SignalROI *roi =  *it;
-      if (prev_roi!=0){
-	if (prev_roi->get_ext_end_bin() > roi->get_ext_start_bin()){
-	  prev_roi->set_ext_end_bin(int(prev_roi->get_end_bin() * 0.5 + roi->get_start_bin()*0.5));
-	  roi->set_ext_start_bin(int(prev_roi->get_end_bin() * 0.5 + roi->get_start_bin()*0.5));
+      if (flag){
+	//loop through front
+	for (auto it1 = front_rois[roi].begin(); it1!=front_rois[roi].end(); it1++){
+	  SignalROI *roi1 = *it1;
+	  int ext_start_bin = roi->get_ext_start_bin();
+	  int ext_end_bin = roi->get_ext_end_bin();
+	  if (ext_start_bin > roi1->get_start_bin()) ext_start_bin = roi1->get_start_bin();
+	  if (ext_end_bin < roi1->get_end_bin()) ext_end_bin = roi1->get_end_bin();
+	  roi->set_ext_start_bin(ext_start_bin);
+	  roi->set_ext_end_bin(ext_end_bin);
+	  //	std::cout << roi->get_chid() << " " << roi1->get_chid() << " " << roi->get_start_bin() << " " << roi->get_end_bin() << " " << roi1->get_start_bin() << " " << roi1->get_end_bin() << std::endl;
 	}
+	
+	// loop through back 
+	for (auto it1 = back_rois[roi].begin(); it1!=back_rois[roi].end(); it1++){
+	  SignalROI *roi1 = *it1;
+	  int ext_start_bin = roi->get_ext_start_bin();
+	  int ext_end_bin = roi->get_ext_end_bin();
+	  if (ext_start_bin > roi1->get_start_bin()) ext_start_bin = roi1->get_start_bin();
+	  if (ext_end_bin < roi1->get_end_bin()) ext_end_bin = roi1->get_end_bin();
+	  roi->set_ext_start_bin(ext_start_bin);
+	  roi->set_ext_end_bin(ext_end_bin);
+	  //	std::cout << roi->get_chid() << " " << roi1->get_chid() << " " << roi->get_start_bin() << " " << roi->get_end_bin() << " " << roi1->get_start_bin() << " " << roi1->get_end_bin() << std::endl;
+	}
+	//std::cout << chid << " " << roi->get_start_bin() << " " << roi->get_end_bin() << std::endl;
       }
-      prev_roi = roi;
     }
 
+    if (flag){
+      SignalROI *prev_roi = 0;
+      for (auto it = rois_u_loose.at(chid).begin(); it!= rois_u_loose.at(chid).end();it++){
+	SignalROI *roi =  *it;
+	if (prev_roi!=0){
+	  if (prev_roi->get_ext_end_bin() > roi->get_ext_start_bin()){
+	    prev_roi->set_ext_end_bin(int(prev_roi->get_end_bin() * 0.5 + roi->get_start_bin()*0.5));
+	    roi->set_ext_start_bin(int(prev_roi->get_end_bin() * 0.5 + roi->get_start_bin()*0.5));
+	  }
+	}
+	prev_roi = roi;
+      }
+    }
     // for (auto it = rois_u_loose.at(chid).begin(); it!= rois_u_loose.at(chid).end();it++){
     //   SignalROI *roi =  *it;
     //   std::cout << chid << " " << roi->get_ext_start_bin() << " " << roi->get_ext_end_bin() << std::endl;
@@ -2162,45 +2168,48 @@ void WireCell2dToy::uBooNEDataAfterROI::ExtendROIs(){
       // initialize the extended bins ... 
       roi->set_ext_start_bin(roi->get_start_bin());
       roi->set_ext_end_bin(roi->get_end_bin());
-      
-      //loop through front
-      for (auto it1 = front_rois[roi].begin(); it1!=front_rois[roi].end(); it1++){
-	SignalROI *roi1 = *it1;
-	int ext_start_bin = roi->get_ext_start_bin();
-	int ext_end_bin = roi->get_ext_end_bin();
-	if (ext_start_bin > roi1->get_start_bin()) ext_start_bin = roi1->get_start_bin();
-	if (ext_end_bin < roi1->get_end_bin()) ext_end_bin = roi1->get_end_bin();
-	roi->set_ext_start_bin(ext_start_bin);
-	roi->set_ext_end_bin(ext_end_bin);
-	//	std::cout << roi->get_chid() << " " << roi1->get_chid() << " " << roi->get_start_bin() << " " << roi->get_end_bin() << " " << roi1->get_start_bin() << " " << roi1->get_end_bin() << std::endl;
-      }
-      
-      // loop through back 
-      for (auto it1 = back_rois[roi].begin(); it1!=back_rois[roi].end(); it1++){
-	SignalROI *roi1 = *it1;
-	int ext_start_bin = roi->get_ext_start_bin();
-	int ext_end_bin = roi->get_ext_end_bin();
-	if (ext_start_bin > roi1->get_start_bin()) ext_start_bin = roi1->get_start_bin();
-	if (ext_end_bin < roi1->get_end_bin()) ext_end_bin = roi1->get_end_bin();
-	roi->set_ext_start_bin(ext_start_bin);
-	roi->set_ext_end_bin(ext_end_bin);
-	//	std::cout << roi->get_chid() << " " << roi1->get_chid() << " " << roi->get_start_bin() << " " << roi->get_end_bin() << " " << roi1->get_start_bin() << " " << roi1->get_end_bin() << std::endl;
-      }
-      //std::cout << chid << " " << roi->get_start_bin() << " " << roi->get_end_bin() << std::endl;
-    }
 
-    SignalROI *prev_roi = 0;
-    for (auto it = rois_v_loose.at(chid).begin(); it!= rois_v_loose.at(chid).end();it++){
-      SignalROI *roi =  *it;
-      if (prev_roi!=0){
-	if (prev_roi->get_ext_end_bin() > roi->get_ext_start_bin()){
-	  prev_roi->set_ext_end_bin(int(prev_roi->get_end_bin() * 0.5 + roi->get_start_bin()*0.5));
-	  roi->set_ext_start_bin(int(prev_roi->get_end_bin() * 0.5 + roi->get_start_bin()*0.5));
+      if (flag){
+	//loop through front
+	for (auto it1 = front_rois[roi].begin(); it1!=front_rois[roi].end(); it1++){
+	  SignalROI *roi1 = *it1;
+	  int ext_start_bin = roi->get_ext_start_bin();
+	  int ext_end_bin = roi->get_ext_end_bin();
+	  if (ext_start_bin > roi1->get_start_bin()) ext_start_bin = roi1->get_start_bin();
+	  if (ext_end_bin < roi1->get_end_bin()) ext_end_bin = roi1->get_end_bin();
+	  roi->set_ext_start_bin(ext_start_bin);
+	  roi->set_ext_end_bin(ext_end_bin);
+	  //	std::cout << roi->get_chid() << " " << roi1->get_chid() << " " << roi->get_start_bin() << " " << roi->get_end_bin() << " " << roi1->get_start_bin() << " " << roi1->get_end_bin() << std::endl;
 	}
+	
+	// loop through back 
+	for (auto it1 = back_rois[roi].begin(); it1!=back_rois[roi].end(); it1++){
+	  SignalROI *roi1 = *it1;
+	  int ext_start_bin = roi->get_ext_start_bin();
+	  int ext_end_bin = roi->get_ext_end_bin();
+	  if (ext_start_bin > roi1->get_start_bin()) ext_start_bin = roi1->get_start_bin();
+	  if (ext_end_bin < roi1->get_end_bin()) ext_end_bin = roi1->get_end_bin();
+	  roi->set_ext_start_bin(ext_start_bin);
+	  roi->set_ext_end_bin(ext_end_bin);
+	  //	std::cout << roi->get_chid() << " " << roi1->get_chid() << " " << roi->get_start_bin() << " " << roi->get_end_bin() << " " << roi1->get_start_bin() << " " << roi1->get_end_bin() << std::endl;
+	}
+	//std::cout << chid << " " << roi->get_start_bin() << " " << roi->get_end_bin() << std::endl;
       }
-      prev_roi = roi;
     }
 
+    if (flag){
+      SignalROI *prev_roi = 0;
+      for (auto it = rois_v_loose.at(chid).begin(); it!= rois_v_loose.at(chid).end();it++){
+	SignalROI *roi =  *it;
+	if (prev_roi!=0){
+	  if (prev_roi->get_ext_end_bin() > roi->get_ext_start_bin()){
+	    prev_roi->set_ext_end_bin(int(prev_roi->get_end_bin() * 0.5 + roi->get_start_bin()*0.5));
+	    roi->set_ext_start_bin(int(prev_roi->get_end_bin() * 0.5 + roi->get_start_bin()*0.5));
+	  }
+	}
+	prev_roi = roi;
+      }
+    }
     // for (auto it = rois_v_loose.at(chid).begin(); it!= rois_v_loose.at(chid).end();it++){
     //   SignalROI *roi =  *it;
     //   std::cout << chid << " " << roi->get_ext_start_bin() << " " << roi->get_ext_end_bin() << std::endl;
@@ -2215,49 +2224,52 @@ void WireCell2dToy::uBooNEDataAfterROI::ExtendROIs(){
       // initialize the extended bins ... 
       roi->set_ext_start_bin(roi->get_start_bin());
       roi->set_ext_end_bin(roi->get_end_bin());
-      
-      //loop through front
-      for (auto it1 = front_rois[roi].begin(); it1!=front_rois[roi].end(); it1++){
-	SignalROI *roi1 = *it1;
-	int ext_start_bin = roi->get_ext_start_bin();
-	int ext_end_bin = roi->get_ext_end_bin();
-	if (ext_start_bin > roi1->get_start_bin()) ext_start_bin = roi1->get_start_bin();
-	if (ext_end_bin < roi1->get_end_bin()) ext_end_bin = roi1->get_end_bin();
-	roi->set_ext_start_bin(ext_start_bin);
-	roi->set_ext_end_bin(ext_end_bin);
-	//	std::cout << roi->get_chid() << " " << roi1->get_chid() << " " << roi->get_start_bin() << " " << roi->get_end_bin() << " " << roi1->get_start_bin() << " " << roi1->get_end_bin() << std::endl;
-      }
-      
-      // loop through back 
-      for (auto it1 = back_rois[roi].begin(); it1!=back_rois[roi].end(); it1++){
-	SignalROI *roi1 = *it1;
-	int ext_start_bin = roi->get_ext_start_bin();
-	int ext_end_bin = roi->get_ext_end_bin();
-	if (ext_start_bin > roi1->get_start_bin()) ext_start_bin = roi1->get_start_bin();
-	if (ext_end_bin < roi1->get_end_bin()) ext_end_bin = roi1->get_end_bin();
-	roi->set_ext_start_bin(ext_start_bin);
-	roi->set_ext_end_bin(ext_end_bin);
-	//	std::cout << roi->get_chid() << " " << roi1->get_chid() << " " << roi->get_start_bin() << " " << roi->get_end_bin() << " " << roi1->get_start_bin() << " " << roi1->get_end_bin() << std::endl;
-      }
-      //std::cout << chid << " " << roi->get_start_bin() << " " << roi->get_end_bin() << std::endl;
-    }
 
-    SignalROI *prev_roi = 0;
-    for (auto it = rois_w_tight.at(chid).begin(); it!= rois_w_tight.at(chid).end();it++){
-      SignalROI *roi =  *it;
-      if (prev_roi!=0){
-	if (prev_roi->get_ext_end_bin() > roi->get_ext_start_bin()){
-	  prev_roi->set_ext_end_bin(int(prev_roi->get_end_bin() * 0.5 + roi->get_start_bin()*0.5));
-	  roi->set_ext_start_bin(int(prev_roi->get_end_bin() * 0.5 + roi->get_start_bin()*0.5));
+      if (flag){
+	//loop through front
+	for (auto it1 = front_rois[roi].begin(); it1!=front_rois[roi].end(); it1++){
+	  SignalROI *roi1 = *it1;
+	  int ext_start_bin = roi->get_ext_start_bin();
+	  int ext_end_bin = roi->get_ext_end_bin();
+	  if (ext_start_bin > roi1->get_start_bin()) ext_start_bin = roi1->get_start_bin();
+	  if (ext_end_bin < roi1->get_end_bin()) ext_end_bin = roi1->get_end_bin();
+	  roi->set_ext_start_bin(ext_start_bin);
+	  roi->set_ext_end_bin(ext_end_bin);
+	  //	std::cout << roi->get_chid() << " " << roi1->get_chid() << " " << roi->get_start_bin() << " " << roi->get_end_bin() << " " << roi1->get_start_bin() << " " << roi1->get_end_bin() << std::endl;
 	}
+	
+	// loop through back 
+	for (auto it1 = back_rois[roi].begin(); it1!=back_rois[roi].end(); it1++){
+	  SignalROI *roi1 = *it1;
+	  int ext_start_bin = roi->get_ext_start_bin();
+	  int ext_end_bin = roi->get_ext_end_bin();
+	  if (ext_start_bin > roi1->get_start_bin()) ext_start_bin = roi1->get_start_bin();
+	  if (ext_end_bin < roi1->get_end_bin()) ext_end_bin = roi1->get_end_bin();
+	  roi->set_ext_start_bin(ext_start_bin);
+	  roi->set_ext_end_bin(ext_end_bin);
+	  //	std::cout << roi->get_chid() << " " << roi1->get_chid() << " " << roi->get_start_bin() << " " << roi->get_end_bin() << " " << roi1->get_start_bin() << " " << roi1->get_end_bin() << std::endl;
+	}
+	//std::cout << chid << " " << roi->get_start_bin() << " " << roi->get_end_bin() << std::endl;
       }
-      prev_roi = roi;
-    }
 
-    // for (auto it = rois_w_tight.at(chid).begin(); it!= rois_w_tight.at(chid).end();it++){
-    //   SignalROI *roi =  *it;
-    //   std::cout << chid << " " << roi->get_ext_start_bin() << " " << roi->get_ext_end_bin() << std::endl;
-    // }
+    }
+    if (flag){
+      SignalROI *prev_roi = 0;
+      for (auto it = rois_w_tight.at(chid).begin(); it!= rois_w_tight.at(chid).end();it++){
+	SignalROI *roi =  *it;
+	if (prev_roi!=0){
+	  if (prev_roi->get_ext_end_bin() > roi->get_ext_start_bin()){
+	    prev_roi->set_ext_end_bin(int(prev_roi->get_end_bin() * 0.5 + roi->get_start_bin()*0.5));
+	    roi->set_ext_start_bin(int(prev_roi->get_end_bin() * 0.5 + roi->get_start_bin()*0.5));
+	  }
+	}
+	prev_roi = roi;
+      }
+    } 
+      // for (auto it = rois_w_tight.at(chid).begin(); it!= rois_w_tight.at(chid).end();it++){
+      //   SignalROI *roi =  *it;
+      //   std::cout << chid << " " << roi->get_ext_start_bin() << " " << roi->get_ext_end_bin() << std::endl;
+      // }
   }
 }
 
