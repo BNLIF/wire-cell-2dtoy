@@ -70,8 +70,10 @@ int WireCell2dToy::uBooNEDataAfterROI_Gaus::jump(int frame_number){
     if (chid < nwire_u){
       for (auto it = rois_u.at(chid).begin(); it!= rois_u.at(chid).end();it++){
 	SignalROI *roi =  *it;
-	int start_bin = roi->get_start_bin();
-	int end_bin = roi->get_end_bin();
+	// int start_bin = roi->get_start_bin();
+	// int end_bin = roi->get_end_bin();
+	int start_bin = roi->get_ext_start_bin();
+	int end_bin = roi->get_ext_end_bin();
 	float start_content = hu_data->GetBinContent(chid+1,start_bin+1);
 	float end_content = hu_data->GetBinContent(chid+1,end_bin+1);
 	for (int i=start_bin; i<end_bin+1; i++){
@@ -82,8 +84,10 @@ int WireCell2dToy::uBooNEDataAfterROI_Gaus::jump(int frame_number){
     }else if (chid < nwire_u + nwire_v){
       for (auto it = rois_v.at(chid-nwire_u).begin(); it!= rois_v.at(chid-nwire_u).end();it++){
 	SignalROI *roi =  *it;
-	int start_bin = roi->get_start_bin();
-	int end_bin = roi->get_end_bin();
+	//int start_bin = roi->get_start_bin();
+	//int end_bin = roi->get_end_bin();
+	int start_bin = roi->get_ext_start_bin();
+	int end_bin = roi->get_ext_end_bin();
 	float start_content = hv_data->GetBinContent(chid-nwire_u+1,start_bin+1);
 	float end_content = hv_data->GetBinContent(chid-nwire_u+1,end_bin+1);
 	for (int i=start_bin; i<end_bin+1; i++){
@@ -94,8 +98,10 @@ int WireCell2dToy::uBooNEDataAfterROI_Gaus::jump(int frame_number){
     }else{
       for (auto it = rois_w.at(chid-nwire_u-nwire_v).begin(); it!= rois_w.at(chid-nwire_u-nwire_v).end();it++){
 	SignalROI *roi =  *it;
-	int start_bin = roi->get_start_bin();
-	int end_bin = roi->get_end_bin();
+	//int start_bin = roi->get_start_bin();
+	//int end_bin = roi->get_end_bin();
+	int start_bin = roi->get_ext_start_bin();
+	int end_bin = roi->get_ext_end_bin();
 	float start_content = hw_data->GetBinContent(chid-nwire_u-nwire_v+1,start_bin+1);
 	float end_content = hw_data->GetBinContent(chid-nwire_u-nwire_v+1,end_bin+1);
 	for (int i=start_bin; i<end_bin+1; i++){
