@@ -99,28 +99,28 @@ WireCell2dToy::ToyMatrix::ToyMatrix(){
   mcindex = 1;
 
   MA = new TMatrixD(mwindex,mcindex);
-    MB = new TMatrixD(mwindex,swindex);
-    MAT = new TMatrixD(mcindex,mwindex);
-    MBT = new TMatrixD(swindex,mwindex);
-    
-    Vy = new TMatrixD(swindex,swindex);
-    VBy = new TMatrixD(mwindex,mwindex);
-    VBy_inv = new TMatrixD(mwindex,mwindex);
-    Vx = new TMatrixD(mcindex,mcindex);
-    Vx_inv = new TMatrixD(mcindex,mcindex);
-    
-    MC = new TMatrixD(mcindex,mcindex);
-    MC_inv = new TMatrixD(mcindex,mcindex);
-    
-    //Construct Vector
-    Wy = new TVectorD(swindex);
-    
-    MWy = new TVectorD(mwindex);
-    MWy_pred = new TVectorD(mwindex);
-
-    Cx = new TVectorD(mcindex);
-    dCx = new TVectorD(mcindex);
-
+  MB = new TMatrixD(mwindex,swindex);
+  MAT = new TMatrixD(mcindex,mwindex);
+  MBT = new TMatrixD(swindex,mwindex);
+  
+  Vy = new TMatrixD(swindex,swindex);
+  VBy = new TMatrixD(mwindex,mwindex);
+  VBy_inv = new TMatrixD(mwindex,mwindex);
+  Vx = new TMatrixD(mcindex,mcindex);
+  Vx_inv = new TMatrixD(mcindex,mcindex);
+  
+  MC = new TMatrixD(mcindex,mcindex);
+  MC_inv = new TMatrixD(mcindex,mcindex);
+  
+  //Construct Vector
+  Wy = new TVectorD(swindex);
+  
+  MWy = new TVectorD(mwindex);
+  MWy_pred = new TVectorD(mwindex);
+  
+  Cx = new TVectorD(mcindex);
+  dCx = new TVectorD(mcindex);
+  
 }
 
 
