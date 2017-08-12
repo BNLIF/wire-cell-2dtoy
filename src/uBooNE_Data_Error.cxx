@@ -68,8 +68,16 @@ WireCell2dToy::uBooNEDataError::uBooNEDataError(const WireCell::GeomDataSource& 
     trace.charge.resize(bins_per_frame, 0.0);
     for (int i=0;i!=rois.size();i++){
       int time = rois.at(i).size() * nrebin;
+
+      if (time <0) time = 12;
+      if (time > 800) {
+	std::cout << "too long time " << ind << " " << time << std::endl;
+	time = 800;
+      }
       for (int j=0; j!=rois.at(i).size();j++){
-	trace.charge.at(rois.at(i).at(j)) = gu->Eval(time); 
+       	trace.charge.at(rois.at(i).at(j)) = gu->Eval(time);
+	// if (trace.charge.at(rois.at(i).at(j))<0)
+	//   std::cout << ind << " " << time << " " << gu->Eval(time) << std::endl; 
       }
       //      std::cout << ind << " " << time << std::endl;
     }
@@ -127,6 +135,13 @@ WireCell2dToy::uBooNEDataError::uBooNEDataError(const WireCell::GeomDataSource& 
 
     for (int i=0;i!=rois.size();i++){
       int time = rois.at(i).size() * nrebin;
+
+      if (time <0) time = 12;
+      if (time > 800) {
+	std::cout << "too long time " << ind << " " << time << std::endl;
+	time = 800;
+      }
+      
       for (int j=0; j!=rois.at(i).size();j++){
 	trace.charge.at(rois.at(i).at(j)) = gv->Eval(time); 
       }
@@ -181,6 +196,13 @@ WireCell2dToy::uBooNEDataError::uBooNEDataError(const WireCell::GeomDataSource& 
 
     for (int i=0;i!=rois.size();i++){
       int time = rois.at(i).size() * nrebin;
+
+      if (time <0) time = 12;
+      if (time > 800) {
+	std::cout << "too long time " << ind << " " << time << std::endl;
+	time = 800;
+      }
+      
       for (int j=0; j!=rois.at(i).size();j++){
 	trace.charge.at(rois.at(i).at(j)) = gw->Eval(time); 
       }

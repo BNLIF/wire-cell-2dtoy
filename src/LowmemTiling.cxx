@@ -1241,9 +1241,9 @@ WireCell::SlimMergeGeomCell* WireCell2dToy::LowmemTiling::create_slim_merge_cell
 }
 
 
-void WireCell2dToy::LowmemTiling::init_good_cells(const WireCell::Slice& slice, std::vector<float>& uplane_rms, std::vector<float>& vplane_rms, std::vector<float>& wplane_rms){
+void WireCell2dToy::LowmemTiling::init_good_cells(const WireCell::Slice& slice, const WireCell::Slice& slice_err, std::vector<float>& uplane_rms, std::vector<float>& vplane_rms, std::vector<float>& wplane_rms){
   // form good wires group
-  form_fired_merge_wires(slice);
+  form_fired_merge_wires(slice, slice_err);
   
   bool flag_two_wire_cell = true;
   bool flag_one_wire_cell = true;
@@ -3192,18 +3192,22 @@ void WireCell2dToy::LowmemTiling::form_two_bad_cells(){
 }
 
 
-void WireCell2dToy::LowmemTiling::form_fired_merge_wires(const WireCell::Slice& slice){
+void WireCell2dToy::LowmemTiling::form_fired_merge_wires(const WireCell::Slice& slice, const WireCell::Slice& slice_err){
   WireCell::Channel::Group group = slice.group();
+  WireCell::Channel::Group group_err = slice_err.group();
   
   
   //double sum = 0;
   for (int i=0;i!=group.size();i++){
     const WireCell::GeomWire *wire = gds.by_channel_segment(group.at(i).first,0);
     float charge = group.at(i).second;
+    float charge_err = group_err.at(i).second;
     if (charge < 11) charge = 11;
     if (wirechargemap.find(wire) == wirechargemap.end()){
       //not found
       wirechargemap[wire] = charge;
+      wirecharge_errmap[wire] = charge_err;
+      //std::cout << wirechargemap[wire] << " " << wirecharge_errmap[wire] << std::endl;
     }else{
       //wirechargemap[wire] += charge;
     }

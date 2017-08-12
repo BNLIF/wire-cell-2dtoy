@@ -372,6 +372,7 @@ int main(int argc, char* argv[])
 
     sds.jump(i);
     WireCell::Slice slice = sds.get();
+    WireCell::Slice slice_err = sds.get_error();
     
     lowmemtiling[i] = new WireCell2dToy::LowmemTiling(i,nrebin,gds,WCholder);
     if (i==start_num){
@@ -379,7 +380,7 @@ int main(int argc, char* argv[])
     }else{
       lowmemtiling[i]->check_bad_cells(lowmemtiling[i-1],uplane_map,vplane_map,wplane_map);
     }
-    lowmemtiling[i]->init_good_cells(slice,uplane_rms,vplane_rms,wplane_rms);
+    lowmemtiling[i]->init_good_cells(slice,slice_err,uplane_rms,vplane_rms,wplane_rms);
     
     //std::cout << lowmemtiling[i]->get_cell_wires_map().size() << " " << lowmemtiling[i]->get_wire_cells_map().size() << std::endl;
 
