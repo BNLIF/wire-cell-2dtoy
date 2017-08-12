@@ -27,17 +27,55 @@ WireCell2dToy::uBooNEDataError::uBooNEDataError(const WireCell::GeomDataSource& 
 
   frame.index =eve_num;
   bins_per_frame = hu_decon->GetNbinsY();
+
+  int nbin = bins_per_frame;
+  
   // U plane
   for (size_t ind=0; ind < hu_decon->GetNbinsX(); ++ind) {
+
+    // do ROI ...
+    std::vector<bool> signalsBool;
+    signalsBool.resize(nbin, false);
+    for (int i = 0; i < nbin; ++ i){
+      if (hu_decon->GetBinContent(ind+1,i+1)!=0)
+	signalsBool.at(i) = true;
+    }
+    std::vector<std::vector<int>> rois;
+    bool inside = false;
+    for (int i=0; i<nbin; ++i) {
+      if (inside) {
+	if (signalsBool[i]) { // still inside
+	  rois.back().push_back(i);
+	}else{
+	  inside = false;
+	}
+      }
+      else {                  // outside the Rio
+	if (signalsBool[i]) { // just entered ROI
+	  std::vector<int> roi;
+	  roi.push_back(i);
+	  rois.push_back(roi);
+	  inside = true;
+	}
+      }
+    }
+    //    std::cout << rois.size() << std::endl;
+
+    
     WireCell::Trace trace;
     trace.chid = ind;
     trace.tbin = 0;		// full readout, if zero suppress this would be non-zero
     trace.charge.resize(bins_per_frame, 0.0);
-    
-    for (int ibin=0; ibin != bins_per_frame; ibin++) {
-      trace.charge.at(ibin) = hu_decon->GetBinContent(ind+1,ibin+1);
+    for (int i=0;i!=rois.size();i++){
+      int time = rois.at(i).size() * nrebin;
+      for (int j=0; j!=rois.at(i).size();j++){
+	trace.charge.at(j) = gu->Eval(time); 
+      }
+      //      std::cout << ind << " " << time << std::endl;
     }
+    
     frame.traces.push_back(trace);
+    
   }
   
   // V plane
