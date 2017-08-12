@@ -69,10 +69,21 @@ WireCell2dToy::uBooNEDataError::uBooNEDataError(const WireCell::GeomDataSource& 
     for (int i=0;i!=rois.size();i++){
       int time = rois.at(i).size() * nrebin;
       for (int j=0; j!=rois.at(i).size();j++){
-	trace.charge.at(j) = gu->Eval(time); 
+	trace.charge.at(rois.at(i).at(j)) = gu->Eval(time); 
       }
       //      std::cout << ind << " " << time << std::endl;
     }
+
+    // for (int ibin=0; ibin != bins_per_frame; ibin++) {
+    //   if (hu_decon->GetBinContent(ind+1,ibin+1)!=0){
+    // 	std::cout << ind << " " << trace.charge.at(ibin) << " " << hu_decon->GetBinContent(ind+1,ibin+1) << std::endl;
+    //   }else{
+    // 	if (trace.charge.at(ibin) !=0)
+    // 	  std::cout << "wrong! " << std::endl;
+    //   }
+    //   //trace.charge.at(ibin) = hv_decon->GetBinContent(ind+1,ibin+1);
+    // }
+
     
     frame.traces.push_back(trace);
     
@@ -80,27 +91,116 @@ WireCell2dToy::uBooNEDataError::uBooNEDataError(const WireCell::GeomDataSource& 
   
   // V plane
   for (size_t ind=0; ind < hv_decon->GetNbinsX(); ++ind) {
+    // do ROI ...
+    std::vector<bool> signalsBool;
+    signalsBool.resize(nbin, false);
+    for (int i = 0; i < nbin; ++ i){
+      if (hv_decon->GetBinContent(ind+1,i+1)!=0)
+	signalsBool.at(i) = true;
+    }
+    std::vector<std::vector<int>> rois;
+    bool inside = false;
+    for (int i=0; i<nbin; ++i) {
+      if (inside) {
+	if (signalsBool[i]) { // still inside
+	  rois.back().push_back(i);
+	}else{
+	  inside = false;
+	}
+      }
+      else {                  // outside the Rio
+	if (signalsBool[i]) { // just entered ROI
+	  std::vector<int> roi;
+	  roi.push_back(i);
+	  rois.push_back(roi);
+	  inside = true;
+	}
+      }
+    }
+
+
+
     WireCell::Trace trace;
     trace.chid = ind + nwire_u;
     trace.tbin = 0;		// full readout, if zero suppress this would be non-zero
     trace.charge.resize(bins_per_frame, 0.0);
-    
-    for (int ibin=0; ibin != bins_per_frame; ibin++) {
-      trace.charge.at(ibin) = hv_decon->GetBinContent(ind+1,ibin+1);
+
+    for (int i=0;i!=rois.size();i++){
+      int time = rois.at(i).size() * nrebin;
+      for (int j=0; j!=rois.at(i).size();j++){
+	trace.charge.at(rois.at(i).at(j)) = gv->Eval(time); 
+      }
+      //      std::cout << ind << " " << time << std::endl;
     }
+    
+    // for (int ibin=0; ibin != bins_per_frame; ibin++) {
+    //   if (hv_decon->GetBinContent(ind+1,ibin+1)!=0){
+    // 	std::cout << ind << " " << trace.charge.at(ibin) << " " << hv_decon->GetBinContent(ind+1,ibin+1) << std::endl;
+    //   }else{
+    // 	if (trace.charge.at(ibin) !=0)
+    // 	  std::cout << "wrong! " << std::endl;
+    //   }
+    //   //trace.charge.at(ibin) = hv_decon->GetBinContent(ind+1,ibin+1);
+    // }
     frame.traces.push_back(trace);
   }
 
   // W plane
   for (size_t ind=0; ind < hw_decon->GetNbinsX(); ++ind) {
+    // do ROI ...
+    std::vector<bool> signalsBool;
+    signalsBool.resize(nbin, false);
+    for (int i = 0; i < nbin; ++ i){
+      if (hw_decon->GetBinContent(ind+1,i+1)!=0)
+	signalsBool.at(i) = true;
+    }
+    std::vector<std::vector<int>> rois;
+    bool inside = false;
+    for (int i=0; i<nbin; ++i) {
+      if (inside) {
+	if (signalsBool[i]) { // still inside
+	  rois.back().push_back(i);
+	}else{
+	  inside = false;
+	}
+      }
+      else {                  // outside the Rio
+	if (signalsBool[i]) { // just entered ROI
+	  std::vector<int> roi;
+	  roi.push_back(i);
+	  rois.push_back(roi);
+	  inside = true;
+	}
+      }
+    }
+
     WireCell::Trace trace;
     trace.chid = ind + nwire_u + nwire_v;
     trace.tbin = 0;		// full readout, if zero suppress this would be non-zero
     trace.charge.resize(bins_per_frame, 0.0);
-    
-    for (int ibin=0; ibin != bins_per_frame; ibin++) {
-      trace.charge.at(ibin) = hw_decon->GetBinContent(ind+1,ibin+1);
+
+    for (int i=0;i!=rois.size();i++){
+      int time = rois.at(i).size() * nrebin;
+      for (int j=0; j!=rois.at(i).size();j++){
+	trace.charge.at(rois.at(i).at(j)) = gw->Eval(time); 
+      }
+      //      std::cout << ind << " " << time << std::endl;
     }
+
+    // for (int ibin=0; ibin != bins_per_frame; ibin++) {
+    //   if (hw_decon->GetBinContent(ind+1,ibin+1)!=0){
+    // 	std::cout << ind << " " << trace.charge.at(ibin) << " " << hw_decon->GetBinContent(ind+1,ibin+1) << std::endl;
+    //   }else{
+    // 	if (trace.charge.at(ibin) !=0)
+    // 	  std::cout << "wrong! " << std::endl;
+    //   }
+    //   //trace.charge.at(ibin) = hv_decon->GetBinContent(ind+1,ibin+1);
+    // }
+
+    
+    // for (int ibin=0; ibin != bins_per_frame; ibin++) {
+    //   trace.charge.at(ibin) = hw_decon->GetBinContent(ind+1,ibin+1);
+    // }
     frame.traces.push_back(trace);
   }
 
