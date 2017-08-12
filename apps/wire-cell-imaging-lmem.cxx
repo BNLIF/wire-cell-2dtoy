@@ -1,6 +1,8 @@
 #include "WireCellSst/GeomDataSource.h"
 #include "WireCellSst/DatauBooNEFrameDataSource.h"
 #include "WireCellSst/ToyuBooNESliceDataSource.h"
+#include "WireCellSst/uBooNESliceDataSource.h"
+
 #include "WireCell2dToy/ToyEventDisplay.h"
 #include "WireCell2dToy/ToyTiling.h"
 #include "WireCell2dToy/BadTiling.h"
@@ -292,14 +294,31 @@ int main(int argc, char* argv[])
   error_fds.jump(eve_num);
   
   
-  WireCellSst::ToyuBooNESliceDataSource sds(roi_fds,roi_gaus_fds,threshold_u, 
-  					    threshold_v, threshold_w, 
-  					    threshold_ug, 
-  					    threshold_vg, threshold_wg, 
-  					    nwire_u, 
-  					    nwire_v, nwire_w,
-  					    &uplane_rms, &vplane_rms, &wplane_rms); 
-    
+  // WireCellSst::ToyuBooNESliceDataSource sds(roi_fds,roi_gaus_fds,threshold_u, 
+  // 					    threshold_v, threshold_w, 
+  // 					    threshold_ug, 
+  // 					    threshold_vg, threshold_wg, 
+  // 					    nwire_u, 
+  // 					    nwire_v, nwire_w,
+  // 					    &uplane_rms, &vplane_rms, &wplane_rms); 
+
+  WireCellSst::uBooNESliceDataSource sds(roi_fds,roi_gaus_fds,error_fds,
+					 threshold_u, threshold_v, threshold_w,
+					 nwire_u, nwire_v, nwire_w,
+					 &uplane_rms, &vplane_rms, &wplane_rms); 
+  
+  // sds.jump(100);
+  // full_sds.jump(100);
+  // WireCell::Slice slice = sds.get();
+  // WireCell::Slice slice1 = full_sds.get();
+  // WireCell::Slice slice2 = full_sds.get_error();
+
+  // WireCell::Channel::Group group = slice.group();
+  // WireCell::Channel::Group group1 = slice1.group();
+  // WireCell::Channel::Group group2 = slice2.group();
+  // for (int i=0;i!=group.size();i++){
+  //   std::cout << group.at(i).second << " " << group1.at(i).second << " " << group2.at(i).second << std::endl;
+  // }
   
   cerr << em("begin tiling") << endl;
 
