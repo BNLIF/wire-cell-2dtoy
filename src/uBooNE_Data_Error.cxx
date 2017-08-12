@@ -1,10 +1,12 @@
 #include "WireCell2dToy/uBooNE_Data_Error.h"
+#include "TGraph.h"
 
 using namespace WireCell;
 
 
-WireCell2dToy::uBooNEDataError::uBooNEDataError(const WireCell::GeomDataSource& gds, TH2I *hu_decon, TH2I *hv_decon, TH2I *hw_decon, int eve_num)
+WireCell2dToy::uBooNEDataError::uBooNEDataError(const WireCell::GeomDataSource& gds, TH2I *hu_decon, TH2I *hv_decon, TH2I *hw_decon, int eve_num, int nrebin)
   : gds(gds)
+  , nrebin(nrebin)
 {
   GeomWireSelection wires_u = gds.wires_in_plane(WirePlaneType_t(0));
   GeomWireSelection wires_v = gds.wires_in_plane(WirePlaneType_t(1));
@@ -14,7 +16,12 @@ WireCell2dToy::uBooNEDataError::uBooNEDataError(const WireCell::GeomDataSource& 
   nwire_v = wires_v.size();
   nwire_w = wires_w.size();
 
-  
+
+#include "charge_err.txt"
+  TGraph *gu = new TGraph(201,xu,yu);
+  TGraph *gv = new TGraph(201,xv,yv);
+  TGraph *gw = new TGraph(201,xw,yw);
+
   
   frame.clear();		// win or lose, we start anew
 

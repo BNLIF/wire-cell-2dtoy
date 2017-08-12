@@ -49,6 +49,7 @@
 #include "WireCell2dToy/uBooNE_Data_After_ROI.h"
 #include "WireCell2dToy/uBooNE_Data_After_ROI_gaus.h"
 #include "WireCell2dToy/pd_Data_FDS.h"
+#include "WireCell2dToy/uBooNE_Data_Error.h"
 #include "WireCell2dToy/ExecMon.h"
 
 #include "TApplication.h"
@@ -151,12 +152,12 @@ int main(int argc, char* argv[])
   
   int save_image_outline_flag = 0; // prescale flag 
   
-  int total_time_bin=9594;
+  int total_time_bin = 9592;
   int recon_threshold = 2000;
   int frame_length = 3200;
   int max_events = 100;
   int eve_num;
-  int nrebin = 6;
+  int nrebin = 4;
 
   TPCParams& mp = Singleton<TPCParams>::Instance();
   
@@ -287,6 +288,10 @@ int main(int argc, char* argv[])
   WireCell2dToy::pdDataFDS roi_gaus_fds(gds,hu_decon_g,hv_decon_g,hw_decon_g,eve_num);
   roi_gaus_fds.jump(eve_num);
 
+  WireCell2dToy::uBooNEDataError error_fds(gds,hu_decon_g, hv_decon_g, hw_decon_g, eve_num, nrebin);
+  error_fds.jump(eve_num);
+  
+  
   WireCellSst::ToyuBooNESliceDataSource sds(roi_fds,roi_gaus_fds,threshold_u, 
   					    threshold_v, threshold_w, 
   					    threshold_ug, 

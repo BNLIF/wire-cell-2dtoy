@@ -10,7 +10,7 @@ namespace WireCell2dToy{
   class uBooNEDataError : public WireCell::FrameDataSource
   {
   public:
-    uBooNEDataError(const WireCell::GeomDataSource& gds, TH2I *hu, TH2I *hv, TH2I *hw, int eve_num);
+    uBooNEDataError(const WireCell::GeomDataSource& gds, TH2I *hu, TH2I *hv, TH2I *hw, int eve_num, int nrebin);
     ~uBooNEDataError();
 
     virtual int jump(int frame_number);
@@ -21,6 +21,7 @@ namespace WireCell2dToy{
     int nwire_u;
     int nwire_v;
     int nwire_w;
+    int nrebin;
   };
 
 }
