@@ -13,6 +13,7 @@
 #include "WireCell2dToy/TruthToyTiling.h"
 #include "WireCell2dToy/SimpleBlobToyTiling.h"
 
+#include "WireCell2dToy/L1Imaging.h"
 #include "WireCell2dToy/ToyMatrix.h"
 #include "WireCell2dToy/ToyMatrixExclusive.h"
 #include "WireCell2dToy/ToyMatrixKalman.h"
@@ -330,11 +331,13 @@ int main(int argc, char* argv[])
   int ncount_t = 0;
   
 
-  WireCell2dToy::ToyTiling **toytiling = new WireCell2dToy::ToyTiling*[2400];
-  WireCell2dToy::BadTiling **badtiling = new WireCell2dToy::BadTiling*[2400];
-  WireCell2dToy::MergeToyTiling **mergetiling = new WireCell2dToy::MergeToyTiling*[2400];
-  WireCell2dToy::ToyMatrix **toymatrix = new WireCell2dToy::ToyMatrix*[2400];
+  // WireCell2dToy::ToyTiling **toytiling = new WireCell2dToy::ToyTiling*[2400];
+  // WireCell2dToy::BadTiling **badtiling = new WireCell2dToy::BadTiling*[2400];
+  // WireCell2dToy::MergeToyTiling **mergetiling = new WireCell2dToy::MergeToyTiling*[2400];
+  // WireCell2dToy::ToyMatrix **toymatrix = new WireCell2dToy::ToyMatrix*[2400];
   WireCell2dToy::LowmemTiling **lowmemtiling = new WireCell2dToy::LowmemTiling*[2400];
+  WireCell2dToy::L1Imaging **l1imaging = new WireCell2dToy::L1Imaging*[2400];
+  
   WireCell2dToy::WireCellHolder WCholder;
 
   //add in cluster
@@ -346,8 +349,8 @@ int main(int argc, char* argv[])
   int start_num = 0 ;
   int end_num = sds.size()-1;
 
-  // start_num = 1282;
-  // end_num = 1282;
+  start_num = 1925;
+  end_num = 1925;
   
   TFile *file = new TFile(Form("result_%d_%d_%d.root",run_no,subrun_no,event_no),"RECREATE");
   
@@ -397,6 +400,10 @@ int main(int argc, char* argv[])
     n_bad_wires = lowmemtiling[i]->get_all_bad_wires().size();
     n_single_cells = single_cells.size();
     Twc->Fill();
+
+    // L1 solving
+    l1imaging[i] = new WireCell2dToy::L1Imaging(gds, *lowmemtiling[i]);
+    
     // std::cout << lowmemtiling[i]->get_cell_wires_map().size()<< " " << lowmemtiling[i]->get_all_good_wires().size() << " " << lowmemtiling[i]->get_all_bad_wires().size() << " " << lowmemtiling[i]->get_all_cell_centers().size() << " " << lowmemtiling[i]->get_wire_cells_map().size() << " " << single_cells.size() << std::endl;
     
     //std::cout << lowmemtiling[i]->get_cell_wires_map().size() << " " << lowmemtiling[i]->get_wire_cells_map().size() << std::endl;
