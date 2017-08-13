@@ -13,7 +13,7 @@
 #include "WireCell2dToy/TruthToyTiling.h"
 #include "WireCell2dToy/SimpleBlobToyTiling.h"
 
-#include "WireCell2dToy/L1Imaging.h"
+#include "WireCell2dToy/ChargeSolving.h"
 #include "WireCell2dToy/ToyMatrix.h"
 #include "WireCell2dToy/ToyMatrixExclusive.h"
 #include "WireCell2dToy/ToyMatrixKalman.h"
@@ -336,7 +336,7 @@ int main(int argc, char* argv[])
   // WireCell2dToy::MergeToyTiling **mergetiling = new WireCell2dToy::MergeToyTiling*[2400];
   // WireCell2dToy::ToyMatrix **toymatrix = new WireCell2dToy::ToyMatrix*[2400];
   WireCell2dToy::LowmemTiling **lowmemtiling = new WireCell2dToy::LowmemTiling*[2400];
-  WireCell2dToy::L1Imaging **l1imaging = new WireCell2dToy::L1Imaging*[2400];
+  WireCell2dToy::ChargeSolving **chargesolver = new WireCell2dToy::ChargeSolving*[2400];
   
   WireCell2dToy::WireCellHolder WCholder;
 
@@ -402,7 +402,7 @@ int main(int argc, char* argv[])
     Twc->Fill();
 
     // L1 solving
-    l1imaging[i] = new WireCell2dToy::L1Imaging(gds, *lowmemtiling[i]);
+    chargesolver[i] = new WireCell2dToy::ChargeSolving(gds, *lowmemtiling[i]);
     
     // std::cout << lowmemtiling[i]->get_cell_wires_map().size()<< " " << lowmemtiling[i]->get_all_good_wires().size() << " " << lowmemtiling[i]->get_all_bad_wires().size() << " " << lowmemtiling[i]->get_all_cell_centers().size() << " " << lowmemtiling[i]->get_wire_cells_map().size() << " " << single_cells.size() << std::endl;
     

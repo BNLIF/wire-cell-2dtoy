@@ -1,5 +1,5 @@
-#ifndef WIRECELL_L1IMAGING_H
-#define WIRECELL_L1IMAGING_H
+#ifndef WIRECELL_CHARGESOLVING_H
+#define WIRECELL_CHARGESOLVING_H
 
 #include "TMatrixD.h"
 #include "TVectorD.h"
@@ -10,10 +10,10 @@
 #include "LowmemTiling.h"
 
 namespace WireCell2dToy{
-  class L1Imaging {
+  class ChargeSolving {
   public:
-    L1Imaging(const WireCell::GeomDataSource& gds, LowmemTiling& tiling);
-    virtual ~L1Imaging();
+    ChargeSolving(const WireCell::GeomDataSource& gds, LowmemTiling& tiling);
+    virtual ~ChargeSolving();
 
   protected:
     const WireCell::GeomDataSource& gds;
