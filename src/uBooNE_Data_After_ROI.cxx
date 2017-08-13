@@ -302,6 +302,26 @@ void WireCell2dToy::uBooNEDataAfterROI::CleanUpInductionROIs(){
     auto it1 = find(rois_u_loose.at(chid).begin(), rois_u_loose.at(chid).end(),roi);
     if (it1 != rois_u_loose.at(chid).end())
       rois_u_loose.at(chid).erase(it1);
+
+    if (front_rois.find(roi)!=front_rois.end()){
+      SignalROISelection next_rois = front_rois[roi];
+      for (int i=0;i!=next_rois.size();i++){
+   	//unlink the current roi
+   	unlink(roi,next_rois.at(i));
+      }
+      front_rois.erase(roi);
+    }
+    
+    if (back_rois.find(roi)!=back_rois.end()){
+      SignalROISelection prev_rois = back_rois[roi];
+      for (int i=0;i!=prev_rois.size();i++){
+   	//unlink the current roi
+   	unlink(prev_rois.at(i),roi);
+      }
+      back_rois.erase(roi);
+    }
+    
+    
     delete roi;
   }
   Bad_ROIs.clear();
@@ -320,6 +340,25 @@ void WireCell2dToy::uBooNEDataAfterROI::CleanUpInductionROIs(){
     auto it1 = find(rois_v_loose.at(chid).begin(), rois_v_loose.at(chid).end(),roi);
     if (it1 != rois_v_loose.at(chid).end())
       rois_v_loose.at(chid).erase(it1);
+
+    if (front_rois.find(roi)!=front_rois.end()){
+      SignalROISelection next_rois = front_rois[roi];
+      for (int i=0;i!=next_rois.size();i++){
+   	//unlink the current roi
+   	unlink(roi,next_rois.at(i));
+      }
+      front_rois.erase(roi);
+    }
+    
+    if (back_rois.find(roi)!=back_rois.end()){
+      SignalROISelection prev_rois = back_rois[roi];
+      for (int i=0;i!=prev_rois.size();i++){
+   	//unlink the current roi
+   	unlink(prev_rois.at(i),roi);
+      }
+      back_rois.erase(roi);
+    }
+    
     delete roi;
   }
 
@@ -382,10 +421,10 @@ void WireCell2dToy::uBooNEDataAfterROI::CleanUpInductionROIs(){
     }
     
     if (back_rois.find(roi)!=back_rois.end()){
-      SignalROISelection next_rois = back_rois[roi];
-      for (int i=0;i!=next_rois.size();i++){
+      SignalROISelection prev_rois = back_rois[roi];
+      for (int i=0;i!=prev_rois.size();i++){
    	//unlink the current roi
-   	unlink(roi,next_rois.at(i));
+   	unlink(prev_rois.at(i),roi);
       }
       back_rois.erase(roi);
     }
@@ -454,10 +493,10 @@ void WireCell2dToy::uBooNEDataAfterROI::CleanUpInductionROIs(){
     }
     
     if (back_rois.find(roi)!=back_rois.end()){
-      SignalROISelection next_rois = back_rois[roi];
-      for (int i=0;i!=next_rois.size();i++){
+      SignalROISelection prev_rois = back_rois[roi];
+      for (int i=0;i!=prev_rois.size();i++){
    	//unlink the current roi
-   	unlink(roi,next_rois.at(i));
+   	unlink(prev_rois.at(i),roi);
       }
       back_rois.erase(roi);
     }
@@ -539,10 +578,10 @@ void WireCell2dToy::uBooNEDataAfterROI::CleanUpCollectionROIs(){
     }
   
     if (back_rois.find(roi)!=back_rois.end()){
-      SignalROISelection next_rois = back_rois[roi];
-      for (int i=0;i!=next_rois.size();i++){
+      SignalROISelection prev_rois = back_rois[roi];
+      for (int i=0;i!=prev_rois.size();i++){
    	//unlink the current roi
-   	unlink(roi,next_rois.at(i));
+   	unlink(prev_rois.at(i),roi);
       }
       back_rois.erase(roi);
     }
@@ -1952,7 +1991,8 @@ int WireCell2dToy::uBooNEDataAfterROI::jump(int frame_number){
     }
   }
 
-
+  // std::cout << " 1st Check: " << std::endl;
+  // TestROIs();
   
   //std::cout << rois_u_tight.size() << " " << rois_v_tight.size() << " " << rois_w_tight.size() << " " << rois_u_loose.size() << " " << rois_v_loose.size() << " " << rois_w_loose.size() << " " << front_rois.size() << " " << back_rois.size() << " " << contained_rois.size() << std::endl;
   std::cout << "Clean up loose ROIs" << std::endl;
@@ -1968,7 +2008,8 @@ int WireCell2dToy::uBooNEDataAfterROI::jump(int frame_number){
     CleanUpROIs();
   }
   
-  
+  // std::cout << "2nd  Check: " << std::endl;
+  // TestROIs();
   
   std::cout << "Shrink ROIs" << std::endl;
   ShrinkROIs();
@@ -1976,14 +2017,37 @@ int WireCell2dToy::uBooNEDataAfterROI::jump(int frame_number){
   CheckROIs();
   CleanUpROIs();
 
-
+  // std::cout << "3rd  Check: " << std::endl;
+  // TestROIs();
+  
   // Further reduce fake hits
   std::cout << "Remove fake hits " << std::endl;
   CleanUpCollectionROIs();
   CleanUpInductionROIs();
 
+  // std::cout << "Xin: " << rois_u_tight.at(2197).size() << " " << rois_u_loose.at(2197).size() << std::endl;
+  //  for (auto it = rois_u_loose.at(2196).begin();it!= rois_u_loose.at(2196).end();it++){
+  //   SignalROI *roi =  *it;
+  //   std::cout << "2196 " << roi->get_start_bin() << " " << roi->get_end_bin() << " " << roi->get_ext_start_bin() << " " << roi->get_ext_end_bin() << std::endl;
+  // }
+  // for (auto it = rois_u_loose.at(2197).begin();it!= rois_u_loose.at(2197).end();it++){
+  //   SignalROI *roi =  *it;
+  //   std::cout << "2197 " << roi->get_start_bin() << " " << roi->get_end_bin() << " " << roi->get_ext_start_bin() << " " << roi->get_ext_end_bin() << std::endl;
+  // }
+  
   std::cout << "Extend ROIs" << std::endl;
-  ExtendROIs(); 
+  ExtendROIs();
+
+  
+  
+  // std::cout << "Xin: " << rois_u_tight.at(1908).size() << " " << rois_u_loose.at(1908).size() << std::endl; 
+  // for (auto it = rois_u_loose.at(1908).begin();it!= rois_u_loose.at(1908).end();it++){
+  //   SignalROI *roi =  *it;
+  //   std::cout << roi->get_start_bin() << " " << roi->get_end_bin() << " " << roi->get_ext_start_bin() << " " << roi->get_ext_end_bin() << std::endl;
+  // }
+
+  // std::cout << "4th Check" << std::endl;
+  // TestROIs();
   
   // load results back into the data ... 
 
@@ -2050,8 +2114,8 @@ int WireCell2dToy::uBooNEDataAfterROI::jump(int frame_number){
     }else if (chid < nwire_u + nwire_v){
       for (auto it = rois_v_loose.at(chid-nwire_u).begin(); it!= rois_v_loose.at(chid-nwire_u).end();it++){
 	SignalROI *roi =  *it;
-	//int start_bin = roi->get_start_bin();
-	//int end_bin = roi->get_end_bin();
+	// int start_bin = roi->get_start_bin();
+	// int end_bin = roi->get_end_bin();
 	int start_bin = roi->get_ext_start_bin();
 	int end_bin = roi->get_ext_end_bin();
 	float start_content = hv_data->GetBinContent(chid-nwire_u+1,start_bin+1);
@@ -2064,8 +2128,8 @@ int WireCell2dToy::uBooNEDataAfterROI::jump(int frame_number){
     }else{
       for (auto it = rois_w_tight.at(chid-nwire_u-nwire_v).begin(); it!= rois_w_tight.at(chid-nwire_u-nwire_v).end();it++){
 	SignalROI *roi =  *it;
-	//int start_bin = roi->get_start_bin();
-	//int end_bin = roi->get_end_bin();
+	// int start_bin = roi->get_start_bin();
+	// int end_bin = roi->get_end_bin();
 	int start_bin = roi->get_ext_start_bin();
 	int end_bin = roi->get_ext_end_bin();
 	float start_content = hw_data->GetBinContent(chid-nwire_u-nwire_v+1,start_bin+1);
@@ -2104,15 +2168,45 @@ int WireCell2dToy::uBooNEDataAfterROI::jump(int frame_number){
 void WireCell2dToy::uBooNEDataAfterROI::ExtendROIs(){
 
   bool flag = true;
+  // initialize all ROIs
+  for (int chid= 0 ; chid!=nwire_u; chid++){
+    for (auto it = rois_u_loose.at(chid).begin(); it!= rois_u_loose.at(chid).end();it++){
+      SignalROI *roi =  *it;
+      // initialize the extended bins ... 
+      roi->set_ext_start_bin(roi->get_start_bin());
+      roi->set_ext_end_bin(roi->get_end_bin());
+
+      // if (roi->get_start_bin() <0 || roi->get_start_bin() >=9594 || roi->get_end_bin() <0 || roi->get_end_bin() > 9594)
+      // 	std::cout << roi->get_chid() << " " << roi->get_start_bin() << " " << roi->get_end_bin() << std::endl;
+    }
+  }
+  for (int chid= 0 ; chid!=nwire_v; chid++){
+    for (auto it = rois_v_loose.at(chid).begin(); it!= rois_v_loose.at(chid).end();it++){
+      SignalROI *roi =  *it;
+      // initialize the extended bins ... 
+      roi->set_ext_start_bin(roi->get_start_bin());
+      roi->set_ext_end_bin(roi->get_end_bin());
+    }
+  }
+  for (int chid= 0 ; chid!=nwire_w; chid++){
+    for (auto it = rois_w_tight.at(chid).begin(); it!= rois_w_tight.at(chid).end();it++){
+      SignalROI *roi =  *it;
+      // initialize the extended bins ... 
+      roi->set_ext_start_bin(roi->get_start_bin());
+      roi->set_ext_end_bin(roi->get_end_bin());
+    }
+  }
+  
+
   
   // U plane ... 
   for (int chid = 0; chid != nwire_u; chid ++){
     rois_u_loose.at(chid).sort(CompareRois());
     for (auto it = rois_u_loose.at(chid).begin(); it!= rois_u_loose.at(chid).end();it++){
       SignalROI *roi =  *it;
-      // initialize the extended bins ... 
-      roi->set_ext_start_bin(roi->get_start_bin());
-      roi->set_ext_end_bin(roi->get_end_bin());
+      // // initialize the extended bins ... 
+      // roi->set_ext_start_bin(roi->get_start_bin());
+      // roi->set_ext_end_bin(roi->get_end_bin());
 
       if (flag){
 	//loop through front
@@ -2124,7 +2218,8 @@ void WireCell2dToy::uBooNEDataAfterROI::ExtendROIs(){
 	  if (ext_end_bin < roi1->get_end_bin()) ext_end_bin = roi1->get_end_bin();
 	  roi->set_ext_start_bin(ext_start_bin);
 	  roi->set_ext_end_bin(ext_end_bin);
-	  //	std::cout << roi->get_chid() << " " << roi1->get_chid() << " " << roi->get_start_bin() << " " << roi->get_end_bin() << " " << roi1->get_start_bin() << " " << roi1->get_end_bin() << std::endl;
+	  // if (roi->get_chid()==1908)
+	  //   std::cout << roi->get_chid() << " " << roi1->get_chid() << " " << roi->get_start_bin() << " " << roi->get_end_bin() << " " << roi1->get_start_bin() << " " << roi1->get_end_bin() << " " << ext_start_bin << " " << ext_end_bin << std::endl;
 	}
 	
 	// loop through back 
@@ -2136,7 +2231,8 @@ void WireCell2dToy::uBooNEDataAfterROI::ExtendROIs(){
 	  if (ext_end_bin < roi1->get_end_bin()) ext_end_bin = roi1->get_end_bin();
 	  roi->set_ext_start_bin(ext_start_bin);
 	  roi->set_ext_end_bin(ext_end_bin);
-	  //	std::cout << roi->get_chid() << " " << roi1->get_chid() << " " << roi->get_start_bin() << " " << roi->get_end_bin() << " " << roi1->get_start_bin() << " " << roi1->get_end_bin() << std::endl;
+	  // if (roi->get_chid()==1908)
+	  //   std::cout << roi->get_chid() << " " << roi1->get_chid() << " " << roi->get_start_bin() << " " << roi->get_end_bin() << " " << roi1->get_start_bin() << " " << roi1->get_end_bin() << " " << ext_start_bin << " " << ext_end_bin << std::endl;
 	}
 	//std::cout << chid << " " << roi->get_start_bin() << " " << roi->get_end_bin() << std::endl;
       }
@@ -2150,6 +2246,9 @@ void WireCell2dToy::uBooNEDataAfterROI::ExtendROIs(){
 	  if (prev_roi->get_ext_end_bin() > roi->get_ext_start_bin()){
 	    prev_roi->set_ext_end_bin(int(prev_roi->get_end_bin() * 0.5 + roi->get_start_bin()*0.5));
 	    roi->set_ext_start_bin(int(prev_roi->get_end_bin() * 0.5 + roi->get_start_bin()*0.5));
+
+	    // if (roi->get_chid()==1908)
+	    //   std::cout << roi->get_chid() << " " << prev_roi->get_chid() << " " << roi->get_start_bin() << " " << roi->get_end_bin() << " " << prev_roi->get_start_bin() << " " << prev_roi->get_end_bin() << " " << int(prev_roi->get_end_bin() * 0.5 + roi->get_start_bin()*0.5) << " " << int(prev_roi->get_end_bin() * 0.5 + roi->get_start_bin()*0.5) << std::endl;
 	  }
 	}
 	prev_roi = roi;
@@ -2165,9 +2264,9 @@ void WireCell2dToy::uBooNEDataAfterROI::ExtendROIs(){
     rois_v_loose.at(chid).sort(CompareRois());
     for (auto it = rois_v_loose.at(chid).begin(); it!= rois_v_loose.at(chid).end();it++){
       SignalROI *roi =  *it;
-      // initialize the extended bins ... 
-      roi->set_ext_start_bin(roi->get_start_bin());
-      roi->set_ext_end_bin(roi->get_end_bin());
+      // // initialize the extended bins ... 
+      // roi->set_ext_start_bin(roi->get_start_bin());
+      // roi->set_ext_end_bin(roi->get_end_bin());
 
       if (flag){
 	//loop through front
@@ -2221,9 +2320,9 @@ void WireCell2dToy::uBooNEDataAfterROI::ExtendROIs(){
     rois_w_tight.at(chid).sort(CompareRois());
     for (auto it = rois_w_tight.at(chid).begin(); it!= rois_w_tight.at(chid).end();it++){
       SignalROI *roi =  *it;
-      // initialize the extended bins ... 
-      roi->set_ext_start_bin(roi->get_start_bin());
-      roi->set_ext_end_bin(roi->get_end_bin());
+      // // initialize the extended bins ... 
+      // roi->set_ext_start_bin(roi->get_start_bin());
+      // roi->set_ext_end_bin(roi->get_end_bin());
 
       if (flag){
 	//loop through front
@@ -2339,7 +2438,7 @@ void WireCell2dToy::uBooNEDataAfterROI::CheckROIs(){
   	  }
   	}
 	for (auto it2 = temp_rois.begin(); it2!= temp_rois.end();it2++){
-	  unlink(roi,*it2);
+	  unlink(*it2,roi);
 	}
       }
 
@@ -2386,7 +2485,7 @@ void WireCell2dToy::uBooNEDataAfterROI::CheckROIs(){
   	  }
   	}
 	for (auto it2 = temp_rois.begin(); it2!= temp_rois.end();it2++){
-	  unlink(roi,*it2);
+	  unlink(*it2,roi);
 	}
       }
     }
@@ -2396,3 +2495,64 @@ void WireCell2dToy::uBooNEDataAfterROI::CheckROIs(){
 
 
 
+void WireCell2dToy::uBooNEDataAfterROI::TestROIs(){
+
+  for (int chid = 0; chid != nwire_u; chid ++){
+    for (auto it = rois_u_loose.at(chid).begin(); it!= rois_u_loose.at(chid).end();it++){
+      SignalROI *roi =  *it;
+      //loop through front
+      for (auto it1 = front_rois[roi].begin(); it1!=front_rois[roi].end(); it1++){
+	SignalROI *roi1 = *it1;
+	if (find(rois_u_loose.at(chid+1).begin(), rois_u_loose.at(chid+1).end(), roi1) == rois_u_loose.at(chid+1).end())
+	  std::cout << chid << " u " << +1 << " " << roi << " " << roi1 << std::endl;
+      }
+	
+      // loop through back 
+      for (auto it1 = back_rois[roi].begin(); it1!=back_rois[roi].end(); it1++){
+	SignalROI *roi1 = *it1;
+	if (find(rois_u_loose.at(chid-1).begin(), rois_u_loose.at(chid-1).end(), roi1) == rois_u_loose.at(chid-1).end())
+	  std::cout << chid << " u " << -1 << " " << roi << " " << roi1 << std::endl;
+      }
+    }
+  }
+
+
+   for (int chid = 0; chid != nwire_v; chid ++){
+    for (auto it = rois_v_loose.at(chid).begin(); it!= rois_v_loose.at(chid).end();it++){
+      SignalROI *roi =  *it;
+      //loop through front
+      for (auto it1 = front_rois[roi].begin(); it1!=front_rois[roi].end(); it1++){
+	SignalROI *roi1 = *it1;
+	if (find(rois_v_loose.at(chid+1).begin(), rois_v_loose.at(chid+1).end(), roi1) == rois_v_loose.at(chid+1).end())
+	  std::cout << chid << " v " << +1 << " " << roi << " " << roi1 << std::endl;
+      }
+	
+      // loop through back 
+      for (auto it1 = back_rois[roi].begin(); it1!=back_rois[roi].end(); it1++){
+	SignalROI *roi1 = *it1;
+	if (find(rois_v_loose.at(chid-1).begin(), rois_v_loose.at(chid-1).end(), roi1) == rois_v_loose.at(chid-1).end())
+	  std::cout << chid << " v " << -1 << " " << roi << " " << roi1 << std::endl;
+      }
+    }
+  }
+   
+   for (int chid = 0; chid != nwire_w; chid ++){
+     for (auto it = rois_w_tight.at(chid).begin(); it!= rois_w_tight.at(chid).end();it++){
+       SignalROI *roi =  *it;
+       //loop through front
+       for (auto it1 = front_rois[roi].begin(); it1!=front_rois[roi].end(); it1++){
+	 SignalROI *roi1 = *it1;
+	if (find(rois_w_tight.at(chid+1).begin(), rois_w_tight.at(chid+1).end(), roi1) == rois_w_tight.at(chid+1).end())
+	  std::cout << chid << " w " << +1 << " " << roi << " " << roi1 << std::endl;
+      }
+	
+      // loop through back 
+      for (auto it1 = back_rois[roi].begin(); it1!=back_rois[roi].end(); it1++){
+	SignalROI *roi1 = *it1;
+	if (find(rois_w_tight.at(chid-1).begin(), rois_w_tight.at(chid-1).end(), roi1) == rois_w_tight.at(chid-1).end())
+	  std::cout << chid << " w " << -1 << " " << roi << " " << roi1 << std::endl;
+      }
+    }
+  }
+  
+}

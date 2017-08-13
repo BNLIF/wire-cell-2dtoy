@@ -47,6 +47,8 @@ namespace WireCell2dToy{
     void ShrinkROI(WireCell::SignalROI *roi);
 
     void ExtendROIs();
+
+    void TestROIs();
     
     void unlink(WireCell::SignalROI *prev_roi, WireCell::SignalROI *next_roi);
     void link(WireCell::SignalROI *prev_roi, WireCell::SignalROI *next_roi);

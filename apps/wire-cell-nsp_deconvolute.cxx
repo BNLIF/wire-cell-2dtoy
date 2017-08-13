@@ -98,8 +98,8 @@ int main(int argc, char* argv[])
 
  
   
-  float toffset_1=-0.787;
-  float toffset_2=-0.603;
+  float toffset_1=0.0;//-0.787;
+  float toffset_2=0.0;//-0.603;
   float toffset_3=0.0;
 
   // toffset_1 = 0.;

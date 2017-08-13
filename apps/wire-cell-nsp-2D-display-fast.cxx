@@ -85,12 +85,12 @@ int main(int argc, char* argv[])
   
   float unit_dis = 1.119;  // 70 KV @ 273 V/cm
   //final offset after time scan (70kV)
-  float toffset_1=-0.787;
-  float toffset_2=-0.603;
+  float toffset_1=0.0;//-0.787;
+  float toffset_2=0.0;//-0.603;
   float toffset_3=0.0;
-  int total_time_bin=9594;
+  int total_time_bin=9592;
   int frame_length = 3200;
-  int nrebin = 6;
+  int nrebin = 4;
   int eve_num  = 0;//atoi(argv[3]);
   int time_offset = -92.;
   

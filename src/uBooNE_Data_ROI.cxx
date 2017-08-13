@@ -153,6 +153,8 @@ WireCell2dToy::uBooNEDataROI::uBooNEDataROI(WireCell::FrameDataSource& raw_fds,W
 
 
 
+  // std::cout << "Xin: " << self_rois_u.at(2197).size() << " " << loose_rois_u.at(2197).size() << std::endl; 
+
   //std::cout << "Fidning ROI based on raw itself " << std::endl;
   //find_ROI_by_raw_itself(3.6,5); // 3 sigma with 5 (half) padding
   //std::cout << "Finding ROI based on other two planes " << std::endl;
@@ -678,7 +680,7 @@ void WireCell2dToy::uBooNEDataROI::find_ROI_loose(int rebin){
       ROIs_1.at(j).first = begin;
       ROIs_1.at(j).second = end;
 
-      //      if (abs(chid-1199)<=1) std::cout << "Loose: " << chid << " " << ROIs_1.at(j).first << " " << ROIs_1.at(j).second << std::endl;
+      // if (chid==2197) std::cout << "Loose: " << chid << " " << ROIs_1.at(j).first << " " << ROIs_1.at(j).second << std::endl;
     }
 
     
