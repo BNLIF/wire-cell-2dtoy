@@ -355,7 +355,45 @@ void WireCell2dToy::LowmemTiling::MergeWires(){
       }
     }
   }
+
+  calculate_merged_wire_charge();
+}
+
+void WireCell2dToy::LowmemTiling::calculate_merged_wire_charge(){
+  float relative_err_ind = 0.15; // 15% relative uncertainties for induction plane 
+  float relative_err_col = 0.05; // 5% relative uncertainties for collection plane
   
+  for (auto it = wire_cells_map.begin(); it!= wire_cells_map.end(); it++){
+    MergeGeomWire *mwire = (MergeGeomWire*)it->first;
+    if (wire_type_map[mwire]){
+      // calculate merged good wire charge
+      wirechargemap[mwire] = 0;
+      wirecharge_errmap[mwire] = 0;
+      GeomWireSelection wires = mwire->get_allwire();
+      for (size_t i=0; i!=wires.size();i++){
+	const GeomWire* swire = wires.at(i);
+	// if (wirechargemap.find(swire)==wirechargemap.end() ||
+	//     wirecharge_errmap.find(swire)==wirecharge_errmap.end()){
+	//   std::cout << "Wrong! " << std::endl;
+	// }
+	wirechargemap[mwire] += wirechargemap[swire];
+	wirecharge_errmap[mwire] += pow(wirecharge_errmap[swire],2);
+      }
+      if (wires.at(0)->plane()==WirePlaneType_t(2)){
+	wirecharge_errmap[mwire] += pow(wirechargemap[mwire] * relative_err_col,2);
+      }else{
+	wirecharge_errmap[mwire] += pow(wirechargemap[mwire] * relative_err_ind,2);
+      }
+      wirecharge_errmap[mwire] = sqrt(wirecharge_errmap[mwire]);
+
+      //std::cout << mwire << " " << wires.size()  << " " << wires.at(0)->plane() << " " << wirechargemap[mwire] << " " << wirecharge_errmap[mwire] << std::endl;
+    }else{
+      // calculate bad wire charge and uncertainties, charge = 0, error = -1
+      wirechargemap[mwire] = 0;
+      wirecharge_errmap[mwire] = -1;
+    }
+  }
+
 }
 
 int WireCell2dToy::LowmemTiling::further_mergewire(GeomWireSelection& allwire){

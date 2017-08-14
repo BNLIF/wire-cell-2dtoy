@@ -104,7 +104,7 @@ namespace WireCell2dToy{
     
     int further_mergewire(WireCell::GeomWireSelection &allwire);
 
-   
+    void calculate_merged_wire_charge();
 
     
     //map wire --> bad or good

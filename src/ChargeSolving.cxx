@@ -20,7 +20,8 @@ WireCell2dToy::ChargeSolving::ChargeSolving(const WireCell::GeomDataSource& gds,
   std::cout << one_wire_cells.size() << " " << two_wire_cells.size() << " " << three_wire_cells.size() << " " << good_wires.size() << " " << bad_wires.size() << " " << cell_wire_map.size() << " " << wire_cell_map.size() << std::endl;
 
   // divide all wires into seperate groups ...
-  
+
+  // start one good wire, find all cells move in, all the good wires move in
 }
 
 WireCell2dToy::ChargeSolving::~ChargeSolving(){
