@@ -36,6 +36,8 @@ namespace WireCell2dToy{
     
     WireCell::GeomCellSelection& get_two_bad_wire_cells(){return two_bad_wire_cells;};
     WireCell::GeomCellSelection& get_three_good_wire_cells(){return three_good_wire_cells;};
+    WireCell::GeomCellSelection& get_two_good_wire_cells(){return two_good_wire_cells;};
+    WireCell::GeomCellSelection& get_one_good_wire_cells(){return one_good_wire_cells;};
     
 
     WireCell::GeomWireSelection& get_bad_wire_u(){return bad_wire_u;};
