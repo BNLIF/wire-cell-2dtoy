@@ -74,6 +74,9 @@ namespace WireCell2dToy{
 
     WireCell::PointVector get_all_cell_centers();
 
+    WireCell::WireChargeMap& get_wire_charge_map(){return wirechargemap;};
+    WireCell::WireChargeMap& get_wire_charge_error_map(){return wirecharge_errmap;};
+    
   protected:
     WireCell::GeomDataSource& gds;
     WireCell2dToy::WireCellHolder& holder;
@@ -105,7 +108,9 @@ namespace WireCell2dToy{
     int further_mergewire(WireCell::GeomWireSelection &allwire);
 
     void calculate_merged_wire_charge();
-
+    
+    
+    
     
     //map wire --> bad or good
     std::map<const WireCell::GeomWire*,bool> wire_type_map;
