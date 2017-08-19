@@ -10,7 +10,6 @@ WireCell2dToy::ChargeSolving::ChargeSolving(const WireCell::GeomDataSource& gds,
   // divide into small groups
   divide_groups();
 
-  // solve things that can be solved 
 }
 
 WireCell2dToy::ChargeSolving::~ChargeSolving(){
@@ -44,7 +43,7 @@ void WireCell2dToy::ChargeSolving::divide_groups(){
   // final cell/wire holders
   
   
-  std::cout << all_wires.size() << " " << all_cells.size() << std::endl;
+  //std::cout << all_wires.size() << " " << all_cells.size() << std::endl;
 
   while(all_wires.size()){
     //temporary cell/wire holders
@@ -97,7 +96,7 @@ void WireCell2dToy::ChargeSolving::divide_groups(){
       
     }
 
-    std::cout << grouped_wires.size() << " " << grouped_cells.size() << std::endl;
+    // std::cout << grouped_wires.size() << " " << grouped_cells.size() << std::endl;
     final_cells_vec.push_back(grouped_cells);
     final_wires_vec.push_back(grouped_wires);
   }

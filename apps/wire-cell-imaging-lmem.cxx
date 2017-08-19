@@ -349,11 +349,11 @@ int main(int argc, char* argv[])
   int start_num = 0 ;
   int end_num = sds.size()-1;
 
-  start_num = 1925;
-  end_num = 1925;
+  // start_num = 1925;
+  // end_num = 1925;
 
-  // start_num = 650;
-  // end_num = 650;
+  start_num = 650;
+  end_num = 650;
   
   TFile *file = new TFile(Form("result_%d_%d_%d.root",run_no,subrun_no,event_no),"RECREATE");
   
