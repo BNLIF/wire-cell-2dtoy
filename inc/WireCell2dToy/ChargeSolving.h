@@ -15,9 +15,20 @@ namespace WireCell2dToy{
     ChargeSolving(const WireCell::GeomDataSource& gds, LowmemTiling& tiling);
     virtual ~ChargeSolving();
 
+
+    
   protected:
+    void divide_groups();
+
+    std::vector<WireCell::GeomCellSelection> final_cells_vec;
+    std::vector<WireCell::GeomWireSelection> final_wires_vec;
+    
     const WireCell::GeomDataSource& gds;
-    const LowmemTiling& tiling;
+    LowmemTiling& tiling;
+
+   
+    
+    
     
   };
 

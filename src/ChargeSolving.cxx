@@ -7,19 +7,30 @@ WireCell2dToy::ChargeSolving::ChargeSolving(const WireCell::GeomDataSource& gds,
   : gds(gds)
   , tiling(tiling)
 {
+  // divide into small groups
+  divide_groups();
+
+  // solve things that can be solved 
+}
+
+WireCell2dToy::ChargeSolving::~ChargeSolving(){
+}
+
+void WireCell2dToy::ChargeSolving::divide_groups(){
+
   GeomCellSelection& one_wire_cells = tiling.get_one_good_wire_cells();
   GeomCellSelection& two_wire_cells = tiling.get_two_good_wire_cells();
   GeomCellSelection& three_wire_cells = tiling.get_three_good_wire_cells();
-
+  
+  WireChargeMap& wire_charge_map = tiling.get_wire_charge_map();
+  WireChargeMap& wire_charge_error_map = tiling.get_wire_charge_error_map();
+  
   GeomWireSelection good_wires = tiling.get_all_good_wires();
   GeomWireSelection bad_wires = tiling.get_all_bad_wires();
 
   GeomCellMap cell_wire_map = tiling.get_cell_wires_map();
   GeomWireMap wire_cell_map = tiling.get_wire_cells_map();
-
-  WireChargeMap& wire_charge_map = tiling.get_wire_charge_map();
-  WireChargeMap& wire_charge_error_map = tiling.get_wire_charge_error_map();
-
+  
   // original cell/wire holders
   GeomCellSetp all_cells;
   GeomWireSetp all_wires;
@@ -31,8 +42,7 @@ WireCell2dToy::ChargeSolving::ChargeSolving(const WireCell::GeomDataSource& gds,
 
   
   // final cell/wire holders
-  std::vector<GeomCellSelection> final_cells_vec;
-  std::vector<GeomWireSelection> final_wires_vec;
+  
   
   std::cout << all_wires.size() << " " << all_cells.size() << std::endl;
 
@@ -97,12 +107,4 @@ WireCell2dToy::ChargeSolving::ChargeSolving(const WireCell::GeomDataSource& gds,
 
   // divide all wires into seperate groups ...
 
- 
-  
-  
-  
-  
-}
-
-WireCell2dToy::ChargeSolving::~ChargeSolving(){
 }
