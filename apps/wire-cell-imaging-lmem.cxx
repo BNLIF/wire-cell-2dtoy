@@ -352,8 +352,8 @@ int main(int argc, char* argv[])
   // start_num = 1925;
   // end_num = 1925;
 
-  start_num = 650;
-  end_num = 650;
+  // start_num = 650;
+  // end_num = 650;
   
   TFile *file = new TFile(Form("result_%d_%d_%d.root",run_no,subrun_no,event_no),"RECREATE");
   
@@ -364,11 +364,15 @@ int main(int argc, char* argv[])
   Int_t n_bad_wires;
   Int_t time_slice;
   Int_t n_single_cells;
+  Int_t ndirect_solved;
+  Int_t nL1_solved;
   Twc->Branch("time_slice",&time_slice,"time_slice/I");
   Twc->Branch("n_cells",&n_cells,"n_cells/I");
   Twc->Branch("n_good_wires",&n_good_wires,"n_good_wires/I");  
   Twc->Branch("n_bad_wires",&n_bad_wires,"n_bad_wires/I");
   Twc->Branch("n_single_cells",&n_single_cells,"n_single_cells/I");
+  Twc->Branch("ndirect_solved",&ndirect_solved,"ndirect_solved/I");
+  Twc->Branch("nL1_solved",&nL1_solved,"nL1_solved/I");
   //test 
   // uplane_map.begin()->second.second=5000;
 
@@ -402,10 +406,14 @@ int main(int argc, char* argv[])
     n_good_wires = lowmemtiling[i]->get_all_good_wires().size();
     n_bad_wires = lowmemtiling[i]->get_all_bad_wires().size();
     n_single_cells = single_cells.size();
-    Twc->Fill();
+    
 
     // L1 solving
     chargesolver[i] = new WireCell2dToy::ChargeSolving(gds, *lowmemtiling[i]);
+    ndirect_solved = chargesolver[i]->get_ndirect_solved();
+    nL1_solved = chargesolver[i]->get_nL1_solved();
+
+    Twc->Fill();
     
     // std::cout << lowmemtiling[i]->get_cell_wires_map().size()<< " " << lowmemtiling[i]->get_all_good_wires().size() << " " << lowmemtiling[i]->get_all_bad_wires().size() << " " << lowmemtiling[i]->get_all_cell_centers().size() << " " << lowmemtiling[i]->get_wire_cells_map().size() << " " << single_cells.size() << std::endl;
     

@@ -7,6 +7,9 @@ WireCell2dToy::ChargeSolving::ChargeSolving(const WireCell::GeomDataSource& gds,
   : gds(gds)
   , tiling(tiling)
 {
+  ndirect_solved = 0;
+  nL1_solved = 0;
+  
   // divide into small groups
   divide_groups();
 
@@ -15,9 +18,6 @@ WireCell2dToy::ChargeSolving::ChargeSolving(const WireCell::GeomDataSource& gds,
 WireCell2dToy::ChargeSolving::~ChargeSolving(){
 }
 
-void WireCell2dToy::ChargeSolving::direct_solve(){
-  
-}
 
 
 void WireCell2dToy::ChargeSolving::divide_groups(){
@@ -105,6 +105,12 @@ void WireCell2dToy::ChargeSolving::divide_groups(){
 
     MatrixSolver *matrix = new MatrixSolver(grouped_cells, grouped_wires, cell_wire_map, wire_cell_map, wire_charge_map, wire_charge_error_map);
 
+    if (matrix->get_solve_flag()==1){
+      ndirect_solved ++;
+    }else if (matrix->get_solve_flag()==2){
+      nL1_solved++;
+    }
+    
     group_matrices.push_back(matrix);
     
   }

@@ -14,13 +14,16 @@ namespace WireCell2dToy{
   public:
     MatrixSolver(WireCell::GeomCellSelection& cells, WireCell::GeomWireSelection& wires, WireCell::GeomCellMap& cell_wire_map, WireCell::GeomWireMap& wire_cell_map, WireCell::WireChargeMap& wire_charge_map, WireCell::WireChargeMap& wire_charge_error_map);
     virtual ~MatrixSolver();
+
+    int get_solve_flag(){return solve_flag;};
   private:
 
     void Direct_Solve();
+    void L1_Solve();
     
     int solve_flag;
-    double chi2;
-    int ndf;
+    double direct_chi2;
+    int direct_ndf;
     
     TMatrixD *MA, *MB, *MAT, *MBT;
     TMatrixD *Vy, *VBy, *Vx, *VBy_inv, *Vx_inv;

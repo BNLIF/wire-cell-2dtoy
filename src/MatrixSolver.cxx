@@ -129,6 +129,9 @@ WireCell2dToy::MatrixSolver::MatrixSolver(GeomCellSelection& allmcell, GeomWireS
 
     if (det > 1e-5){
       Direct_Solve();
+    }else{
+      // first time L1 solve ...
+      L1_Solve();
     }
     
     //std::cout << det << std::endl;
@@ -136,6 +139,12 @@ WireCell2dToy::MatrixSolver::MatrixSolver(GeomCellSelection& allmcell, GeomWireS
   }
   
 }
+void WireCell2dToy::MatrixSolver::L1_Solve(){
+  
+  
+  solve_flag = 2;
+}
+
 
 void WireCell2dToy::MatrixSolver::Direct_Solve(){
   *MC_inv = *MC;
@@ -152,9 +161,9 @@ void WireCell2dToy::MatrixSolver::Direct_Solve(){
   
   TVectorD sol = (*MB) * (*Wy) - (*MA) * (*Cx);
   TVectorD sol1 =  (*VBy_inv) * sol;
-  chi2 = sol * (sol1)/1e6;
+  direct_chi2 = sol * (sol1)/1e6;
   
-  ndf = mwindex - mcindex;
+  direct_ndf = mwindex - mcindex;
   
   // std::cout << chi2 << " " << ndf << std::endl;
   // for (int i=0;i!=mcindex;i++){
