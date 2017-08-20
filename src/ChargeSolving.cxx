@@ -15,6 +15,11 @@ WireCell2dToy::ChargeSolving::ChargeSolving(const WireCell::GeomDataSource& gds,
 WireCell2dToy::ChargeSolving::~ChargeSolving(){
 }
 
+void WireCell2dToy::ChargeSolving::direct_solve(){
+  
+}
+
+
 void WireCell2dToy::ChargeSolving::divide_groups(){
 
   GeomCellSelection& one_wire_cells = tiling.get_one_good_wire_cells();
@@ -43,7 +48,7 @@ void WireCell2dToy::ChargeSolving::divide_groups(){
   // final cell/wire holders
   
   
-  //std::cout << all_wires.size() << " " << all_cells.size() << std::endl;
+  std::cout << all_wires.size() << " " << all_cells.size() << std::endl;
 
   while(all_wires.size()){
     //temporary cell/wire holders
@@ -96,14 +101,19 @@ void WireCell2dToy::ChargeSolving::divide_groups(){
       
     }
 
-    // std::cout << grouped_wires.size() << " " << grouped_cells.size() << std::endl;
+    std::cout << "Xin " << grouped_wires.size() << " " << grouped_cells.size() << std::endl;
     final_cells_vec.push_back(grouped_cells);
     final_wires_vec.push_back(grouped_wires);
+
+    MatrixSolver *matrix = new MatrixSolver(grouped_cells, grouped_wires, cell_wire_map, wire_cell_map, wire_charge_map, wire_charge_error_map);
+
+    group_matrices.push_back(matrix);
+    
   }
+
   
   
   // std::cout << one_wire_cells.size() << " " << two_wire_cells.size() << " " << three_wire_cells.size() << " " << good_wires.size() << " " << bad_wires.size() << " " << cell_wire_map.size() << " " << wire_cell_map.size() << std::endl;
-
   // divide all wires into seperate groups ...
 
 }

@@ -7,7 +7,8 @@
 #include "WireCellData/GeomWire.h"
 #include "WireCellData/MergeGeomCell.h"
 #include "WireCellData/MergeGeomWire.h"
-#include "LowmemTiling.h"
+#include "WireCell2dToy/LowmemTiling.h"
+#include "WireCell2dToy/MatrixSolver.h"
 
 namespace WireCell2dToy{
   class ChargeSolving {
@@ -15,13 +16,15 @@ namespace WireCell2dToy{
     ChargeSolving(const WireCell::GeomDataSource& gds, LowmemTiling& tiling);
     virtual ~ChargeSolving();
 
-
+    void direct_solve();
+    
     
   protected:
     void divide_groups();
 
     std::vector<WireCell::GeomCellSelection> final_cells_vec;
     std::vector<WireCell::GeomWireSelection> final_wires_vec;
+    std::vector<WireCell2dToy::MatrixSolver*> group_matrices;
     
     const WireCell::GeomDataSource& gds;
     LowmemTiling& tiling;
