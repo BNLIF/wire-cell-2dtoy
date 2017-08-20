@@ -1,4 +1,10 @@
 #include "WireCell2dToy/MatrixSolver.h"
+#include "TDecompChol.h"
+#include "WireCellRess/LassoModel.h"
+#include "WireCellRess/ElasticNetModel.h"
+#include <Eigen/Dense>
+
+using namespace Eigen;
 
 using namespace WireCell;
 
@@ -140,7 +146,66 @@ WireCell2dToy::MatrixSolver::MatrixSolver(GeomCellSelection& allmcell, GeomWireS
   
 }
 void WireCell2dToy::MatrixSolver::L1_Solve(){
+  // regularization need to choose to balance the  chisquare and total charge
+  // calculate the total wire charge
+  float total_wire_charge = 0;
+  *MWy = (*MB) * (*Wy);
+  for (int i=0; i!=mwindex;i++){
+    total_wire_charge += (*MWy)[i];
+  }
+  double lambda = 3./total_wire_charge; // guessed regularization strength
+  //std::cout << mwindex << " " << total_wire_charge/3. << std::endl;
   
+  
+  //now try to make the equation ... 
+  // MWy - MA * C 
+  // decompose VBy_inv
+  TDecompChol test(*VBy_inv);
+  test.Decompose();
+  TMatrixD U(mwindex,mwindex);
+  U =  test.GetU();
+  U *=0.001; // error needs to be scale down by 1000 ... 
+  TVectorD UMWy = U * (*MWy);
+  TMatrixD UMA = U * (*MA);
+
+  // fill in the results ...
+  VectorXd W = VectorXd::Zero(mwindex);
+  MatrixXd G = MatrixXd::Zero(mwindex,mcindex);
+  for (int i=0; i!=mwindex; i++){
+    W(i) = UMWy(i);
+    for (int j=0;j!=mcindex;j++){
+      G(i,j) = UMA(i,j);
+    }
+  }
+
+  WireCell::LassoModel m2(lambda, 100000, 1e-3);
+  m2.SetData(G, W);
+  m2.Fit();
+
+  VectorXd beta = m2.Getbeta();
+  int nbeta = beta.size();
+  L1_ndf = mwindex;
+  for (int i=0;i!=nbeta;i++){
+    (*Cx)[i] = beta(i);
+    (*dCx)[i] = 0;
+    if (beta(i)!=0)
+      L1_ndf --;
+  }
+  L1_chi2_base =  m2.chi2_base() ;
+  L1_chi2_penalty = m2.chi2_l1();
+
+
+
+  
+  //std::cout << "Xin" << " " << m2.chi2_base() << " " << m2.chi2_l1()  << " " << L1_ndf << std::endl;
+  
+  // for (int i=0;i!=nbeta;i++){
+  //   std::cout << beta(i) << std::endl;
+  // }
+  
+  // Y.Print();
+  //  MWy->Print();
+  // Modify MWy, MA 
   
   solve_flag = 2;
 }

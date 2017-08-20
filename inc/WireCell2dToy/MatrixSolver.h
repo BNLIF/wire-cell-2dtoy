@@ -24,6 +24,9 @@ namespace WireCell2dToy{
     int solve_flag;
     double direct_chi2;
     int direct_ndf;
+
+    double L1_chi2_base, L1_chi2_penalty;
+    int L1_ndf;
     
     TMatrixD *MA, *MB, *MAT, *MBT;
     TMatrixD *Vy, *VBy, *Vx, *VBy_inv, *Vx_inv;
