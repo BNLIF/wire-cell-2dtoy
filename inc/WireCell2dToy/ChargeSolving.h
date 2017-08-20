@@ -18,9 +18,15 @@ namespace WireCell2dToy{
 
     int get_ndirect_solved(){return ndirect_solved;};
     int get_nL1_solved(){return nL1_solved;};
-    
+
+    double get_mcell_charge(WireCell::MergeGeomCell *mcell){return ccmap[mcell];};
+    int get_ndf();
+    double get_chi2();
     
   protected:
+    int ndf;
+    double chi2;
+    
     int ndirect_solved;
     int nL1_solved;
     
@@ -29,6 +35,8 @@ namespace WireCell2dToy{
     std::vector<WireCell::GeomCellSelection> final_cells_vec;
     std::vector<WireCell::GeomWireSelection> final_wires_vec;
     std::vector<WireCell2dToy::MatrixSolver*> group_matrices;
+
+    WireCell::CellChargeMap ccmap;
     
     const WireCell::GeomDataSource& gds;
     LowmemTiling& tiling;

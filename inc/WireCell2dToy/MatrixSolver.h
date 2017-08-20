@@ -15,6 +15,15 @@ namespace WireCell2dToy{
     MatrixSolver(WireCell::GeomCellSelection& cells, WireCell::GeomWireSelection& wires, WireCell::GeomCellMap& cell_wire_map, WireCell::GeomWireMap& wire_cell_map, WireCell::WireChargeMap& wire_charge_map, WireCell::WireChargeMap& wire_charge_error_map);
     virtual ~MatrixSolver();
 
+    double get_mcell_charge(WireCell::MergeGeomCell *mcell);
+
+    double get_direct_chi2(){return direct_chi2;};
+    int get_direct_ndf(){return direct_ndf;};
+
+    double get_L1_chi2_base(){return L1_chi2_base;};
+    double get_L1_chi2_penalty(){return L1_chi2_penalty;};
+    int get_L1_ndf(){return L1_ndf;};
+    
     int get_solve_flag(){return solve_flag;};
   private:
 

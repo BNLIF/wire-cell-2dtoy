@@ -149,11 +149,12 @@ void WireCell2dToy::MatrixSolver::L1_Solve(){
   // regularization need to choose to balance the  chisquare and total charge
   // calculate the total wire charge
   float total_wire_charge = 0;
+  float scale_factor = 1000;
   *MWy = (*MB) * (*Wy);
   for (int i=0; i!=mwindex;i++){
     total_wire_charge += (*MWy)[i];
   }
-  double lambda = 3./total_wire_charge; // guessed regularization strength
+  double lambda = 3./total_wire_charge*scale_factor; // guessed regularization strength
   //std::cout << mwindex << " " << total_wire_charge/3. << std::endl;
   
   
@@ -164,10 +165,15 @@ void WireCell2dToy::MatrixSolver::L1_Solve(){
   test.Decompose();
   TMatrixD U(mwindex,mwindex);
   U =  test.GetU();
-  U *=0.001; // error needs to be scale down by 1000 ... 
-  TVectorD UMWy = U * (*MWy);
   TMatrixD UMA = U * (*MA);
+  U *= 1./scale_factor; // error needs to be scale down by 1000 ... 
+  TVectorD UMWy = U * (*MWy);
 
+
+
+  // MA->Print();
+  // UMA.Print();
+  
   // fill in the results ...
   VectorXd W = VectorXd::Zero(mwindex);
   MatrixXd G = MatrixXd::Zero(mwindex,mcindex);
@@ -186,7 +192,8 @@ void WireCell2dToy::MatrixSolver::L1_Solve(){
   int nbeta = beta.size();
   L1_ndf = mwindex;
   for (int i=0;i!=nbeta;i++){
-    (*Cx)[i] = beta(i);
+    (*Cx)[i] = beta(i) * scale_factor;
+    //std::cout << (*Cx)[i] << std::endl;
     (*dCx)[i] = 0;
     if (beta(i)!=0)
       L1_ndf --;
@@ -194,10 +201,8 @@ void WireCell2dToy::MatrixSolver::L1_Solve(){
   L1_chi2_base =  m2.chi2_base() ;
   L1_chi2_penalty = m2.chi2_l1();
 
-
-
   
-  //std::cout << "Xin" << " " << m2.chi2_base() << " " << m2.chi2_l1()  << " " << L1_ndf << std::endl;
+  // std::cout << "Xin" << " " << m2.chi2_base() << " " << m2.chi2_l1()  << " " << L1_ndf << std::endl;
   
   // for (int i=0;i!=nbeta;i++){
   //   std::cout << beta(i) << std::endl;
@@ -208,6 +213,16 @@ void WireCell2dToy::MatrixSolver::L1_Solve(){
   // Modify MWy, MA 
   
   solve_flag = 2;
+}
+
+double WireCell2dToy::MatrixSolver::get_mcell_charge(MergeGeomCell *mcell){
+  double charge = 0;
+
+  if (mcimap.find(mcell) != mcimap.end()){
+    charge = (*Cx)[mcimap[mcell]];
+  }
+  
+  return charge;
 }
 
 

@@ -110,6 +110,12 @@ void WireCell2dToy::ChargeSolving::divide_groups(){
     }else if (matrix->get_solve_flag()==2){
       nL1_solved++;
     }
+
+    for (auto it = grouped_cells.begin(); it!=grouped_cells.end(); it++){
+      MergeGeomCell *mcell = (MergeGeomCell*)(*it);
+      ccmap[mcell] = matrix->get_mcell_charge(mcell) ;
+      //   std::cout << matrix->get_mcell_charge(mcell) << std::endl;
+    }
     
     group_matrices.push_back(matrix);
     
@@ -121,3 +127,42 @@ void WireCell2dToy::ChargeSolving::divide_groups(){
   // divide all wires into seperate groups ...
 
 }
+
+double WireCell2dToy::ChargeSolving::get_chi2(){
+  chi2 = 0;
+  
+  for (auto it = group_matrices.begin(); it!=group_matrices.end(); it++){
+    MatrixSolver* matrix = (*it);
+    if (matrix->get_solve_flag()==1){
+      chi2 += matrix->get_direct_chi2();
+      //std::cout << "1 " << matrix->get_direct_chi2() << std::endl;
+    }else if (matrix->get_solve_flag()==2){
+      chi2 += matrix->get_L1_chi2_base();
+      //std::cout << "2 " << matrix->get_L1_chi2_base() << std::endl;
+    }
+    //    std::cout << chi2 << std::endl;
+  }
+  
+  return chi2;
+}
+
+
+int WireCell2dToy::ChargeSolving::get_ndf(){
+  ndf = 0;
+
+  for (auto it = group_matrices.begin(); it!=group_matrices.end(); it++){
+    MatrixSolver* matrix = (*it);
+    if (matrix->get_solve_flag()==1){
+      ndf += matrix->get_direct_ndf();
+      //std::cout << "1 " << matrix->get_direct_ndf() << std::endl;
+    }else if (matrix->get_solve_flag()==2){
+      ndf += matrix->get_L1_ndf();
+      //std::cout << "2 " << matrix->get_L1_ndf() << std::endl;
+    }
+    // std::cout << ndf << std::endl;
+  }
+  
+  return ndf;
+}
+
+

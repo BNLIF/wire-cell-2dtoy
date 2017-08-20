@@ -352,8 +352,10 @@ int main(int argc, char* argv[])
   // start_num = 1925;
   // end_num = 1925;
 
-  start_num = 650;
-  end_num = 650;
+  //  start_num = 650;
+  // end_num = 650;
+
+  // end_num = 500;
   
   TFile *file = new TFile(Form("result_%d_%d_%d.root",run_no,subrun_no,event_no),"RECREATE");
   
@@ -377,8 +379,8 @@ int main(int argc, char* argv[])
   // uplane_map.begin()->second.second=5000;
 
   for (int i=start_num;i!=end_num+1;i++){
-    //if (i%50==0)
-    //std::cout << i << std::endl;
+    if (i%50==0)
+      std::cout << i << std::endl;
 
     sds.jump(i);
     WireCell::Slice slice = sds.get();
@@ -399,13 +401,12 @@ int main(int argc, char* argv[])
     lowmemtiling[i]->MergeWires();
 
     // create individual cells ...
-    GeomCellSelection single_cells = lowmemtiling[i]->create_single_cells();
-
+    //GeomCellSelection single_cells = lowmemtiling[i]->create_single_cells();
     time_slice = i;
-    n_cells = lowmemtiling[i]->get_all_cell_centers().size();
+    n_cells = lowmemtiling[i]->get_cell_wires_map().size();//get_all_cell_centers().size();
     n_good_wires = lowmemtiling[i]->get_all_good_wires().size();
     n_bad_wires = lowmemtiling[i]->get_all_bad_wires().size();
-    n_single_cells = single_cells.size();
+    //n_single_cells = single_cells.size();
     
 
     // L1 solving
@@ -572,6 +573,71 @@ int main(int argc, char* argv[])
   cerr << em("finish tiling") << endl;
 
 
+  TGraph2D *g = new TGraph2D();
+  TGraph2D *g_rec = new TGraph2D();
+  TTree *t_rec_simple = new TTree("T_rec","T_rec");
+  TTree *t_rec_charge = new TTree("T_rec_charge","T_rec_charge");
+  Double_t x_save, y_save, z_save;
+  Double_t charge_save;
+  Double_t ncharge_save;
+  Double_t chi2_save;
+  Double_t ndf_save;
+  
+  t_rec_simple->SetDirectory(file);
+  t_rec_simple->Branch("x",&x_save,"x/D");
+  t_rec_simple->Branch("y",&y_save,"y/D");
+  t_rec_simple->Branch("z",&z_save,"z/D");
+  
+  t_rec_charge->SetDirectory(file);
+  t_rec_charge->Branch("x",&x_save,"x/D");
+  t_rec_charge->Branch("y",&y_save,"y/D");
+  t_rec_charge->Branch("z",&z_save,"z/D");
+  t_rec_charge->Branch("q",&charge_save,"q/D");
+  t_rec_charge->Branch("nq",&ncharge_save,"nq/D");
+  t_rec_charge->Branch("chi2",&chi2_save,"chi2/D");
+  t_rec_charge->Branch("ndf",&ndf_save,"ndf/D");
+  
+  
+  for (int i=start_num; i!=end_num+1;i++){
+    GeomCellMap cell_wires_map = lowmemtiling[i]->get_cell_wires_map();
+    chi2_save = chargesolver[i]->get_chi2();
+    ndf_save = chargesolver[i]->get_ndf();
+    
+    for (auto it = cell_wires_map.begin(); it!= cell_wires_map.end(); it++){
+      MergeGeomCell *mcell = (MergeGeomCell*) it->first;
+      GeomCellSelection temp_cells = lowmemtiling[i]->create_single_cells((SlimMergeGeomCell*)it->first);
+      for (auto it1 = temp_cells.begin(); it1!=temp_cells.end(); it1++){
+	Point p = (*it1)->center();
+	x_save = i*nrebin/2.*unit_dis/10. - frame_length/2.*unit_dis/10.;
+	y_save = p.y/units::cm;
+	z_save = p.z/units::cm;
+	g->SetPoint(ncount,x_save, y_save, z_save);
+	t_rec_simple->Fill();
+	ncount ++;
+      }
+      
+      // fill the charge ... 
+      if (chargesolver[i]->get_mcell_charge(mcell)>300){
+      	charge_save = chargesolver[i]->get_mcell_charge(mcell) / (temp_cells.size() * 1.0) ;
+      	ncharge_save = temp_cells.size();
+	
+      	for (auto it1 = temp_cells.begin(); it1!=temp_cells.end(); it1++){
+      	  Point p = (*it1)->center();
+      	  x_save = i*nrebin/2.*unit_dis/10. - frame_length/2.*unit_dis/10.;
+      	  y_save = p.y/units::cm;
+      	  z_save = p.z/units::cm;
+      	  g_rec->SetPoint(ncount1,x_save, y_save, z_save);
+	  
+      	  t_rec_charge->Fill();
+	  
+      	  ncount1 ++;
+      	}
+      }
+    }
+    // 
+  }
+  g->Write("g");
+  g_rec->Write("g_rec");
   
   TTree *t_bad = new TTree("T_bad","T_bad");
   t_bad->SetDirectory(file);
