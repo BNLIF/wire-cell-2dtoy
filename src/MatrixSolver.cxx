@@ -5,6 +5,7 @@ using namespace WireCell;
 WireCell2dToy::MatrixSolver::MatrixSolver(GeomCellSelection& allmcell, GeomWireSelection& mwires, WireCell::GeomCellMap& cell_wire_map, WireCell::GeomWireMap& wire_cell_map, WireCell::WireChargeMap& wire_charge_map, WireCell::WireChargeMap& wire_charge_error_map)
 {
   //
+  solve_flag = -1;
   
   // build up the index
   mcindex = 0;
@@ -16,14 +17,14 @@ WireCell2dToy::MatrixSolver::MatrixSolver(GeomCellSelection& allmcell, GeomWireS
     if (mcimap.find(mcell) == mcimap.end()){
       mcimap[mcell] = mcindex;
       mcindex ++;
-
       const GeomWireSelection wires = cell_wire_map[mcell];
-      // cout << wires.size() << endl;
+      // std::cout << wires.size() << std::endl;
       for (int k=0;k!=wires.size();k++){
        	//construct merged wire index
        	const MergeGeomWire *mwire = (MergeGeomWire*)wires[k];
        	// require all the wire must be good to be used in the matrix solving 
-       	if (mwimap.find(mwire) == mwimap.end() && wire_charge_map[mwire] >10){
+       	if (mwimap.find(mwire) == mwimap.end() 
+	    && wire_charge_map[mwire] >10){
        	  //if (mwimap.find(mwire) == mwimap.end() ){
        	  mwimap[mwire] = mwindex;
        	  mwindex ++;
@@ -43,7 +44,7 @@ WireCell2dToy::MatrixSolver::MatrixSolver(GeomCellSelection& allmcell, GeomWireS
     }
   }
 
-  std::cout << swindex << " " << mwindex << " " << mcindex << std::endl;
+  //  std::cout << swindex << " " << mwindex << " " << mcindex << std::endl;
 
   if (mcindex >0 ){
      //Construct Matrix
@@ -81,11 +82,94 @@ WireCell2dToy::MatrixSolver::MatrixSolver(GeomCellSelection& allmcell, GeomWireS
 	//std::cout << index << " " << charge << " " << charge_err << std::endl;
       }
     }
+    
 
-     
+    for (int j=0;j!=mwires.size();j++){
+      if (mwimap.find(mwires[j])!=mwimap.end()){
+       	int index = mwimap[mwires[j]];
+       	//construct MA
+       	for (int k=0; k!=wire_cell_map[mwires[j]].size();k++){
+	  int index1 = mcimap[wire_cell_map[mwires[j]].at(k)];
+       	  (*MA)(index,index1) = 1;
+       	}
+	
+       	//construct MB
+       	for (int k=0;k!=((MergeGeomWire*)mwires[j])->get_allwire().size();k++){
+       	  int index1 = swimap[((MergeGeomWire*)mwires[j])->get_allwire().at(k)];
+      	  (*MB)(index,index1) = 1;
+       	}
+      }
+    }
+
+    //MA->Print();
+    // // construct the rest of matrix
+    MBT->Transpose(*MB);
+    MAT->Transpose(*MA);
+    
+    *VBy = (*MB) * (*Vy) * (*MBT);
+    
+    //    std::cout << "fill in the data" << std::endl;
+    
+    *VBy_inv = *VBy;
+    //    if (fabs(VBy->Determinant())<0.01) {
+    // std::cout << "Problem " << VBy->Determinant() << std::endl;
+    //}
+    VBy_inv->Invert();
+    
+    //std::cout << "invert the matrix " << std::endl; 
+    *MC = (*MAT) * (*VBy_inv) * (*MA);
+
+    solve_flag = 0;
+    double det;
+    if (mcindex <= mwindex){
+      det = MC->Determinant();
+    }else{
+      det = 0;
+    }
+
+    if (det > 1e-5){
+      Direct_Solve();
+    }
+    
+    //std::cout << det << std::endl;
+    
   }
   
 }
+
+void WireCell2dToy::MatrixSolver::Direct_Solve(){
+  *MC_inv = *MC;
+  MC_inv->Invert();
+  *Cx = (*MC_inv) * (*MAT) * (*VBy_inv) * (*MB) * (*Wy);
+  
+  *Vx_inv = (*MAT) * (*VBy_inv) * (*MA);
+  *Vx = *Vx_inv;
+  Vx->Invert();
+  
+  for (int i=0;i!=mcindex;i++){
+    (*dCx)[i] = sqrt( (*Vx)(i,i)) * 1000.;
+  }
+  
+  TVectorD sol = (*MB) * (*Wy) - (*MA) * (*Cx);
+  TVectorD sol1 =  (*VBy_inv) * sol;
+  chi2 = sol * (sol1)/1e6;
+  
+  ndf = mwindex - mcindex;
+  
+  // std::cout << chi2 << " " << ndf << std::endl;
+  // for (int i=0;i!=mcindex;i++){
+  //   std::cout << (*Cx)[i] << " " << (*dCx)[i] << std::endl;
+  // }
+
+  // MA->Print();
+  *MWy = (*MB) * (*Wy);
+  *MWy_pred = (*MA)*(*Cx);
+  // for (int i=0;i!=mwindex;i++){
+  //   std::cout << (*MWy)[i] << std::endl;
+  // }
+  solve_flag = 1;
+}
+
 
 WireCell2dToy::MatrixSolver::~MatrixSolver(){
   delete MA;

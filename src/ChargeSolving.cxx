@@ -46,9 +46,7 @@ void WireCell2dToy::ChargeSolving::divide_groups(){
 
   
   // final cell/wire holders
-  
-  
-  std::cout << all_wires.size() << " " << all_cells.size() << std::endl;
+  // std::cout << all_wires.size() << " " << all_cells.size() << std::endl;
 
   while(all_wires.size()){
     //temporary cell/wire holders
@@ -101,7 +99,7 @@ void WireCell2dToy::ChargeSolving::divide_groups(){
       
     }
 
-    std::cout << "Xin " << grouped_wires.size() << " " << grouped_cells.size() << std::endl;
+    // std::cout << "Xin " << grouped_wires.size() << " " << grouped_cells.size() << std::endl;
     final_cells_vec.push_back(grouped_cells);
     final_wires_vec.push_back(grouped_wires);
 

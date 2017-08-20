@@ -16,6 +16,12 @@ namespace WireCell2dToy{
     virtual ~MatrixSolver();
   private:
 
+    void Direct_Solve();
+    
+    int solve_flag;
+    double chi2;
+    int ndf;
+    
     TMatrixD *MA, *MB, *MAT, *MBT;
     TMatrixD *Vy, *VBy, *Vx, *VBy_inv, *Vx_inv;
 
