@@ -154,7 +154,7 @@ void WireCell2dToy::MatrixSolver::L1_Solve(){
   for (int i=0; i!=mwindex;i++){
     total_wire_charge += (*MWy)[i];
   }
-  double lambda = 3./total_wire_charge*scale_factor; // guessed regularization strength
+  double lambda = 3./total_wire_charge/2.*scale_factor; // guessed regularization strength
   //std::cout << mwindex << " " << total_wire_charge/3. << std::endl;
   
   
@@ -169,6 +169,9 @@ void WireCell2dToy::MatrixSolver::L1_Solve(){
   U *= 1./scale_factor; // error needs to be scale down by 1000 ... 
   TVectorD UMWy = U * (*MWy);
 
+  //  std::cout << total_wire_charge/3./scale_factor/mcindex*0.005 << std::endl;
+  double TOL = total_wire_charge/3./scale_factor/mcindex*0.005; //  0.5% charge stability ... 
+  //  double TOL = 1e-3; // original 
 
 
   // MA->Print();
@@ -184,7 +187,7 @@ void WireCell2dToy::MatrixSolver::L1_Solve(){
     }
   }
 
-  WireCell::LassoModel m2(lambda, 100000, 1e-3);
+  WireCell::LassoModel m2(lambda, 100000, TOL);
   m2.SetData(G, W);
   m2.Fit();
 
@@ -202,7 +205,7 @@ void WireCell2dToy::MatrixSolver::L1_Solve(){
   L1_chi2_penalty = m2.chi2_l1();
 
   
-  // std::cout << "Xin" << " " << m2.chi2_base() << " " << m2.chi2_l1()  << " " << L1_ndf << std::endl;
+  //  std::cout << "Xin" << " " << m2.chi2_base() << " " << m2.chi2_l1()  << " " << L1_ndf << std::endl;
   
   // for (int i=0;i!=nbeta;i++){
   //   std::cout << beta(i) << std::endl;

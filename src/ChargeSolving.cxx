@@ -129,38 +129,51 @@ void WireCell2dToy::ChargeSolving::divide_groups(){
 }
 
 double WireCell2dToy::ChargeSolving::get_chi2(){
+  return chi2;
+}
+
+void WireCell2dToy::ChargeSolving::Update_ndf_chi2(){
+  ndf = 0;
+  L1_ndf.clear();
+  direct_ndf.clear();
+  for (auto it = group_matrices.begin(); it!=group_matrices.end(); it++){
+    MatrixSolver* matrix = (*it);
+    if (matrix->get_solve_flag()==1){
+      ndf += matrix->get_direct_ndf();
+      direct_ndf.push_back(matrix->get_direct_ndf());
+      //std::cout << "1 " << matrix->get_direct_ndf() << std::endl;
+    }else if (matrix->get_solve_flag()==2){
+      ndf += matrix->get_L1_ndf();
+      L1_ndf.push_back(matrix->get_L1_ndf());
+      //std::cout << "2 " << matrix->get_L1_ndf() << std::endl;
+    }
+    // std::cout << ndf << std::endl;
+  }
+
   chi2 = 0;
-  
+  L1_chi2_base.clear();
+  L1_chi2_penalty.clear();
+  direct_chi2.clear();
   for (auto it = group_matrices.begin(); it!=group_matrices.end(); it++){
     MatrixSolver* matrix = (*it);
     if (matrix->get_solve_flag()==1){
       chi2 += matrix->get_direct_chi2();
+      direct_chi2.push_back(matrix->get_direct_chi2());
       //std::cout << "1 " << matrix->get_direct_chi2() << std::endl;
     }else if (matrix->get_solve_flag()==2){
       chi2 += matrix->get_L1_chi2_base();
+      L1_chi2_base.push_back(matrix->get_L1_chi2_base());
+      L1_chi2_penalty.push_back(matrix->get_L1_chi2_penalty());
       //std::cout << "2 " << matrix->get_L1_chi2_base() << std::endl;
     }
     //    std::cout << chi2 << std::endl;
   }
   
-  return chi2;
+  
 }
 
-
 int WireCell2dToy::ChargeSolving::get_ndf(){
-  ndf = 0;
-
-  for (auto it = group_matrices.begin(); it!=group_matrices.end(); it++){
-    MatrixSolver* matrix = (*it);
-    if (matrix->get_solve_flag()==1){
-      ndf += matrix->get_direct_ndf();
-      //std::cout << "1 " << matrix->get_direct_ndf() << std::endl;
-    }else if (matrix->get_solve_flag()==2){
-      ndf += matrix->get_L1_ndf();
-      //std::cout << "2 " << matrix->get_L1_ndf() << std::endl;
-    }
-    // std::cout << ndf << std::endl;
-  }
+  
   
   return ndf;
 }

@@ -368,13 +368,32 @@ int main(int argc, char* argv[])
   Int_t n_single_cells;
   Int_t ndirect_solved;
   Int_t nL1_solved;
+  Int_t total_ndf;
+  Double_t total_chi2;
+
+  Int_t L1_ndf[1000];
+  Int_t direct_ndf[1000];
+  Double_t L1_chi2_base[1000];
+  Double_t L1_chi2_penalty[1000];
+  Double_t direct_chi2[1000];
+  
   Twc->Branch("time_slice",&time_slice,"time_slice/I");
   Twc->Branch("n_cells",&n_cells,"n_cells/I");
   Twc->Branch("n_good_wires",&n_good_wires,"n_good_wires/I");  
   Twc->Branch("n_bad_wires",&n_bad_wires,"n_bad_wires/I");
   Twc->Branch("n_single_cells",&n_single_cells,"n_single_cells/I");
+  
   Twc->Branch("ndirect_solved",&ndirect_solved,"ndirect_solved/I");
   Twc->Branch("nL1_solved",&nL1_solved,"nL1_solved/I");
+  Twc->Branch("total_ndf",&total_ndf,"total_ndf/I");
+  Twc->Branch("total_chi2",&total_chi2,"total_chi2/D");
+
+  Twc->Branch("L1_ndf",L1_ndf,"L1_ndf[nL1_solved]/I");
+  Twc->Branch("L1_chi2_base",L1_chi2_base,"L1_chi2_base[nL1_solved]/D");
+  Twc->Branch("L1_chi2_penalty",L1_chi2_penalty,"L1_chi2_penalty[nL1_solved]/D");
+  Twc->Branch("direct_ndf",direct_ndf,"direct_ndf[ndirect_solved]/I");
+  Twc->Branch("direct_chi2",direct_chi2,"direct_chi2[ndirect_solved]/D");
+  
   //test 
   // uplane_map.begin()->second.second=5000;
 
@@ -414,6 +433,20 @@ int main(int argc, char* argv[])
     ndirect_solved = chargesolver[i]->get_ndirect_solved();
     nL1_solved = chargesolver[i]->get_nL1_solved();
 
+    chargesolver[i]->Update_ndf_chi2();
+    
+    total_chi2 = chargesolver[i]->get_ndf();
+    total_ndf = chargesolver[i]->get_chi2();
+    for (Int_t k=0;k!=nL1_solved;k++){
+      L1_ndf[k] = chargesolver[i]->get_L1_ndf(k);
+      L1_chi2_base[k] = chargesolver[i]->get_L1_chi2_base(k);
+      L1_chi2_penalty[k] = chargesolver[i]->get_L1_chi2_penalty(k);
+    }
+    for (Int_t k=0;k!=ndirect_solved;k++){
+      direct_ndf[k] = chargesolver[i]->get_direct_ndf(k);
+      direct_chi2[k] = chargesolver[i]->get_direct_chi2(k);
+    }
+    
     Twc->Fill();
     
     // std::cout << lowmemtiling[i]->get_cell_wires_map().size()<< " " << lowmemtiling[i]->get_all_good_wires().size() << " " << lowmemtiling[i]->get_all_bad_wires().size() << " " << lowmemtiling[i]->get_all_cell_centers().size() << " " << lowmemtiling[i]->get_wire_cells_map().size() << " " << single_cells.size() << std::endl;
