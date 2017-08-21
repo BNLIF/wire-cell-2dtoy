@@ -187,7 +187,7 @@ void WireCell2dToy::MatrixSolver::L1_Solve(std::map<const GeomCell*, double>& ce
     }
   }
 
-  WireCell::LassoModel m2(lambda, 100000, TOL);
+  WireCell::LassoModel m2(lambda, 100000, TOL, true);
   m2.SetData(G, W);
   // set weights
   for (auto it = mcimap.begin(); it!=mcimap.end(); it++){

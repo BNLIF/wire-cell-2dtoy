@@ -360,8 +360,9 @@ void WireCell2dToy::LowmemTiling::MergeWires(){
 }
 
 void WireCell2dToy::LowmemTiling::calculate_merged_wire_charge(){
-  float relative_err_ind = 0.15; // 15% relative uncertainties for induction plane 
-  float relative_err_col = 0.05; // 5% relative uncertainties for collection plane
+  // set relative uncertainties to zero
+  float relative_err_ind = 0.0; // 15% relative uncertainties for induction plane 
+  float relative_err_col = 0.0; // 5% relative uncertainties for collection plane
   
   for (auto it = wire_cells_map.begin(); it!= wire_cells_map.end(); it++){
     MergeGeomWire *mwire = (MergeGeomWire*)it->first;
@@ -1284,7 +1285,7 @@ void WireCell2dToy::LowmemTiling::init_good_cells(const WireCell::Slice& slice, 
   form_fired_merge_wires(slice, slice_err);
   
   bool flag_two_wire_cell = true;
-  bool flag_one_wire_cell = true;
+  bool flag_one_wire_cell = false;
 
   // create three good wire cells & two good wire + one bad wire cells
   // U/V/W = 1/1/1

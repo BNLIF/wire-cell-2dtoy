@@ -30,8 +30,8 @@ WireCell2dToy::uBooNEDataError::uBooNEDataError(const WireCell::GeomDataSource& 
 
   int nbin = bins_per_frame;
 
-  double fudge_factor = 1.5;
-  
+  double fudge_factor = 1.1;//
+  double fudge_factor_ind = 2.1/1.1;
   // U plane
   for (size_t ind=0; ind < hu_decon->GetNbinsX(); ++ind) {
 
@@ -79,7 +79,7 @@ WireCell2dToy::uBooNEDataError::uBooNEDataError(const WireCell::GeomDataSource& 
 	time = 800;
       }
       for (int j=0; j!=rois.at(i).size();j++){
-       	trace.charge.at(rois.at(i).at(j)) = gu->Eval(time) * fudge_factor * nrebin / 4.;
+       	trace.charge.at(rois.at(i).at(j)) = gu->Eval(time) * fudge_factor *fudge_factor_ind * nrebin / 4.;
 	// if (trace.charge.at(rois.at(i).at(j))<0)
 	//   std::cout << ind << " " << time << " " << gu->Eval(time) << std::endl; 
       }
@@ -147,7 +147,7 @@ WireCell2dToy::uBooNEDataError::uBooNEDataError(const WireCell::GeomDataSource& 
       }
       
       for (int j=0; j!=rois.at(i).size();j++){
-	trace.charge.at(rois.at(i).at(j)) = gv->Eval(time) * fudge_factor* nrebin / 4.; 
+	trace.charge.at(rois.at(i).at(j)) = gv->Eval(time) * fudge_factor * fudge_factor_ind * nrebin / 4.; 
       }
       //      std::cout << ind << " " << time << std::endl;
     }
@@ -208,7 +208,7 @@ WireCell2dToy::uBooNEDataError::uBooNEDataError(const WireCell::GeomDataSource& 
       }
       
       for (int j=0; j!=rois.at(i).size();j++){
-	trace.charge.at(rois.at(i).at(j)) = gw->Eval(time) * fudge_factor* nrebin / 4.; 
+	trace.charge.at(rois.at(i).at(j)) = gw->Eval(time) * fudge_factor * nrebin / 4.; 
       }
       //      std::cout << ind << " " << time << std::endl;
     }

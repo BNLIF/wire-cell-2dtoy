@@ -355,7 +355,7 @@ int main(int argc, char* argv[])
   // start_num = 650;
   // end_num = 650;
 
-  // end_num = 0;
+  //end_num = 100;
   
   TFile *file = new TFile(Form("result_%d_%d_%d.root",run_no,subrun_no,event_no),"RECREATE");
   
@@ -610,6 +610,9 @@ int main(int argc, char* argv[])
   TGraph2D *g_rec = new TGraph2D();
   TTree *t_rec_simple = new TTree("T_rec","T_rec");
   TTree *t_rec_charge = new TTree("T_rec_charge","T_rec_charge");
+
+  TTree *t_mcell = new TTree("T_mcell","T_mcell");
+  
   Double_t x_save, y_save, z_save;
   Double_t charge_save;
   Double_t ncharge_save;
@@ -629,10 +632,28 @@ int main(int argc, char* argv[])
   t_rec_charge->Branch("nq",&ncharge_save,"nq/D");
   t_rec_charge->Branch("chi2",&chi2_save,"chi2/D");
   t_rec_charge->Branch("ndf",&ndf_save,"ndf/D");
+
+  t_mcell->SetDirectory(file);
+  Double_t uq, vq, wq, udq, vdq, wdq;
+  t_mcell->Branch("x",&x_save,"x/D");
+  t_mcell->Branch("y",&y_save,"y/D");
+  t_mcell->Branch("z",&z_save,"z/D");
+  t_mcell->Branch("q",&charge_save,"q/D");
+  t_mcell->Branch("uq",&uq,"uq/D");
+  t_mcell->Branch("vq",&vq,"vq/D");
+  t_mcell->Branch("wq",&wq,"wq/D");
+  t_mcell->Branch("udq",&udq,"udq/D");
+  t_mcell->Branch("vdq",&vdq,"vdq/D");
+  t_mcell->Branch("wdq",&wdq,"wdq/D");
   
   
   for (int i=start_num; i!=end_num+1;i++){
     GeomCellMap cell_wires_map = lowmemtiling[i]->get_cell_wires_map();
+    GeomWireMap wire_cells_map = lowmemtiling[i]->get_wire_cells_map();
+    GeomCellSelection three_good_wire_cells = lowmemtiling[i]->get_three_good_wire_cells();
+    WireCell::WireChargeMap& wire_charge = lowmemtiling[i]->get_wire_charge_map();
+    WireCell::WireChargeMap& wire_charge_error = lowmemtiling[i]->get_wire_charge_error_map();
+    
     chi2_save = chargesolver[i]->get_chi2();
     ndf_save = chargesolver[i]->get_ndf();
     
@@ -647,6 +668,54 @@ int main(int argc, char* argv[])
 	g->SetPoint(ncount,x_save, y_save, z_save);
 	t_rec_simple->Fill();
 	ncount ++;
+      }
+
+      // need the cell to be very good,
+      bool flag_save = true;
+      if (cell_wires_map[mcell].size()==3 && find(three_good_wire_cells.begin(), three_good_wire_cells.end(), mcell)!= three_good_wire_cells.end()){
+	for (auto it1 = cell_wires_map[mcell].begin(); it1!= cell_wires_map[mcell].end(); it1++){
+	  MergeGeomWire *mwire = (MergeGeomWire*)(*it1);
+	  if (wire_cells_map[mwire].size()!=1){
+	    flag_save = false;
+	    break;
+	  }
+	}
+      }else{
+	flag_save = false;
+      }
+      //      std::cout << flag_save << std::endl;
+      if (chargesolver[i]->get_mcell_charge(mcell)>300 && flag_save){
+	charge_save = chargesolver[i]->get_mcell_charge(mcell);
+	x_save = 0;
+	y_save = 0;
+	z_save = 0;
+
+	for (auto it1 = temp_cells.begin(); it1!=temp_cells.end(); it1++){
+	  Point p = (*it1)->center();
+	  x_save += i*nrebin/2.*unit_dis/10. - frame_length/2.*unit_dis/10.;
+	  y_save += p.y/units::cm;
+	  z_save += p.z/units::cm;
+	}
+	x_save /= temp_cells.size();
+	y_save /= temp_cells.size();
+	z_save /= temp_cells.size();
+
+	for (auto it1 = cell_wires_map[mcell].begin(); it1!= cell_wires_map[mcell].end(); it1++){
+	  MergeGeomWire *mwire = (MergeGeomWire*)(*it1);
+	  if (mwire->get_allwire().front()->iplane()==0){
+	    uq = wire_charge[mwire];
+	    udq = wire_charge_error[mwire];
+	  }else if(mwire->get_allwire().front()->iplane()==1){
+	    vq = wire_charge[mwire];
+	    vdq = wire_charge_error[mwire];
+	  }else if(mwire->get_allwire().front()->iplane()==2){
+	    wq = wire_charge[mwire];
+	    wdq = wire_charge_error[mwire];
+	  }
+	}
+       
+	
+	t_mcell->Fill();
       }
       
       // fill the charge ... 
