@@ -25,11 +25,12 @@ namespace WireCell2dToy{
     int get_L1_ndf(){return L1_ndf;};
     
     int get_solve_flag(){return solve_flag;};
-  private:
 
-    void Direct_Solve();
-    void L1_Solve();
+    void L1_Solve(std::map<const WireCell::GeomCell*, double>& cell_weight_map);
     
+  private:
+    void Direct_Solve();
+        
     int solve_flag;
     double direct_chi2;
     int direct_ndf;

@@ -44,7 +44,8 @@ namespace WireCell2dToy{
     std::vector<double> direct_chi2;
     
     void divide_groups();
-
+    void init_cell_weight_map();
+    
     std::vector<WireCell::GeomCellSelection> final_cells_vec;
     std::vector<WireCell::GeomWireSelection> final_wires_vec;
     std::vector<WireCell2dToy::MatrixSolver*> group_matrices;
@@ -54,7 +55,7 @@ namespace WireCell2dToy{
     const WireCell::GeomDataSource& gds;
     LowmemTiling& tiling;
 
-   
+    std::map<const WireCell::GeomCell*, double> cell_weight_map;
     
     
     

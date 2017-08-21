@@ -9,6 +9,9 @@ WireCell2dToy::ChargeSolving::ChargeSolving(const WireCell::GeomDataSource& gds,
 {
   ndirect_solved = 0;
   nL1_solved = 0;
+
+  // initialize the cell weight map
+  init_cell_weight_map();
   
   // divide into small groups
   divide_groups();
@@ -16,6 +19,31 @@ WireCell2dToy::ChargeSolving::ChargeSolving(const WireCell::GeomDataSource& gds,
 }
 
 WireCell2dToy::ChargeSolving::~ChargeSolving(){
+}
+
+void WireCell2dToy::ChargeSolving::init_cell_weight_map(){
+  GeomCellSelection& one_wire_cells = tiling.get_one_good_wire_cells();
+  GeomCellSelection& two_wire_cells = tiling.get_two_good_wire_cells();
+  GeomCellSelection& three_wire_cells = tiling.get_three_good_wire_cells();
+
+  GeomCellMap cell_wire_map = tiling.get_cell_wires_map();
+  GeomWireMap wire_cell_map = tiling.get_wire_cells_map();
+
+  for (auto it = three_wire_cells.begin(); it!=three_wire_cells.end(); it++){
+    const GeomCell *mcell = (*it);
+    cell_weight_map[mcell] = 1;
+  }
+
+  for (auto it = two_wire_cells.begin(); it!=two_wire_cells.end(); it++){
+    const GeomCell *mcell = (*it);
+    cell_weight_map[mcell] = 1000;
+  }
+
+  for (auto it = one_wire_cells.begin(); it!=one_wire_cells.end(); it++){
+    const GeomCell *mcell = (*it);
+    cell_weight_map[mcell] = 2000;
+  }
+  
 }
 
 
@@ -105,6 +133,11 @@ void WireCell2dToy::ChargeSolving::divide_groups(){
 
     MatrixSolver *matrix = new MatrixSolver(grouped_cells, grouped_wires, cell_wire_map, wire_cell_map, wire_charge_map, wire_charge_error_map);
 
+    // do L1 solve ... 
+    if (matrix->get_solve_flag()==0){
+      matrix->L1_Solve(cell_weight_map);
+    }
+    
     if (matrix->get_solve_flag()==1){
       ndirect_solved ++;
     }else if (matrix->get_solve_flag()==2){

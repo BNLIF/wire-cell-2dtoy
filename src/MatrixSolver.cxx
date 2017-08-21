@@ -135,17 +135,17 @@ WireCell2dToy::MatrixSolver::MatrixSolver(GeomCellSelection& allmcell, GeomWireS
 
     if (det > 1e-5){
       Direct_Solve();
-    }else{
+    }//else{
       // first time L1 solve ...
-      L1_Solve();
-    }
+    // L1_Solve();
+    //}
     
     //std::cout << det << std::endl;
     
   }
   
 }
-void WireCell2dToy::MatrixSolver::L1_Solve(){
+void WireCell2dToy::MatrixSolver::L1_Solve(std::map<const GeomCell*, double>& cell_weight_map){
   // regularization need to choose to balance the  chisquare and total charge
   // calculate the total wire charge
   float total_wire_charge = 0;
@@ -189,6 +189,14 @@ void WireCell2dToy::MatrixSolver::L1_Solve(){
 
   WireCell::LassoModel m2(lambda, 100000, TOL);
   m2.SetData(G, W);
+  // set weights
+  for (auto it = mcimap.begin(); it!=mcimap.end(); it++){
+    const GeomCell* mcell = it->first;
+    int index = it->second;
+    m2.SetLambdaWeight(index, cell_weight_map[mcell]);
+    //std::cout << index << " " << cell_weight_map[mcell] << std::endl;
+  }
+  
   m2.Fit();
 
   VectorXd beta = m2.Getbeta();
@@ -205,7 +213,7 @@ void WireCell2dToy::MatrixSolver::L1_Solve(){
   L1_chi2_penalty = m2.chi2_l1();
 
   
-  //  std::cout << "Xin" << " " << m2.chi2_base() << " " << m2.chi2_l1()  << " " << L1_ndf << std::endl;
+  //std::cout << "Xin" << " " << m2.chi2_base() << " " << m2.chi2_l1()  << " " << L1_ndf << std::endl;
   
   // for (int i=0;i!=nbeta;i++){
   //   std::cout << beta(i) << std::endl;
