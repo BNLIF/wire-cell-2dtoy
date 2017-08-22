@@ -90,9 +90,9 @@ int main(int argc, char* argv[])
   float toffset_1=0.0; //-0.787;
   float toffset_2=0.0;//-0.603;
   float toffset_3=0.0;
-  int total_time_bin=9592;
+  int total_time_bin=9594;
   int frame_length = 3200;
-  int nrebin = 1; // 6 is default
+  int nrebin = 4; // 6 is default
   int eve_num  = atoi(argv[3]);
   int time_offset = -92.;
   

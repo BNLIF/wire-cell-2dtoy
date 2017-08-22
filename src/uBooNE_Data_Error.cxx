@@ -75,7 +75,7 @@ WireCell2dToy::uBooNEDataError::uBooNEDataError(const WireCell::GeomDataSource& 
 
       if (time <0) time = 12;
       if (time > 800) {
-	std::cout << "too long time " << ind << " " << time << std::endl;
+	std::cout << "too long time U " << ind << " " << time << std::endl;
 	time = 800;
       }
       for (int j=0; j!=rois.at(i).size();j++){
@@ -142,7 +142,7 @@ WireCell2dToy::uBooNEDataError::uBooNEDataError(const WireCell::GeomDataSource& 
 
       if (time <0) time = 12;
       if (time > 800) {
-	std::cout << "too long time " << ind << " " << time << std::endl;
+	std::cout << "too long time V " << ind << " " << time << std::endl;
 	time = 800;
       }
       
@@ -203,7 +203,7 @@ WireCell2dToy::uBooNEDataError::uBooNEDataError(const WireCell::GeomDataSource& 
 
       if (time <0) time = 12;
       if (time > 800) {
-	std::cout << "too long time " << ind << " " << time << std::endl;
+	//std::cout << "too long time W " << ind << " " << time << std::endl;
 	time = 800;
       }
       

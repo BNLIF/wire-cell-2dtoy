@@ -2017,7 +2017,7 @@ int WireCell2dToy::uBooNEDataAfterROI::jump(int frame_number){
   CheckROIs();
   CleanUpROIs();
 
-  // std::cout << "3rd  Check: " << std::endl;
+  //  std::cout << "3rd  Check: " << std::endl;
   // TestROIs();
   
   // Further reduce fake hits
