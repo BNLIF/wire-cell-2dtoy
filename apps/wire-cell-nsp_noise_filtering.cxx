@@ -82,7 +82,7 @@ int main(int argc, char* argv[])
   
   float unit_dis = 1.119;  // 70 KV @ 273 V/cm
 
-  int total_time_bin=9592;
+  int total_time_bin=9594;
 
   int frame_length = 3200;
   int max_events = 100;
