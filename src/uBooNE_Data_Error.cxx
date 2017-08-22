@@ -31,7 +31,7 @@ WireCell2dToy::uBooNEDataError::uBooNEDataError(const WireCell::GeomDataSource& 
   int nbin = bins_per_frame;
 
   double fudge_factor = 1.1;//
-  double fudge_factor_ind = 2.1/1.1;
+  double fudge_factor_ind = 2.1;
   // U plane
   for (size_t ind=0; ind < hu_decon->GetNbinsX(); ++ind) {
 

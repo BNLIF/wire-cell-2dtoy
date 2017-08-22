@@ -171,7 +171,7 @@ void WireCell2dToy::MatrixSolver::L1_Solve(std::map<const GeomCell*, double>& ce
 
   //  std::cout << total_wire_charge/3./scale_factor/mcindex*0.005 << std::endl;
   double TOL = total_wire_charge/3./scale_factor/mcindex*0.005; //  0.5% charge stability ... 
-  //  double TOL = 1e-3; // original 
+  //TOL = 1e-3; // original 
 
 
   // MA->Print();

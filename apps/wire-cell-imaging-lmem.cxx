@@ -672,19 +672,21 @@ int main(int argc, char* argv[])
 
       // need the cell to be very good,
       bool flag_save = true;
-      if (cell_wires_map[mcell].size()==3 && find(three_good_wire_cells.begin(), three_good_wire_cells.end(), mcell)!= three_good_wire_cells.end()){
-	for (auto it1 = cell_wires_map[mcell].begin(); it1!= cell_wires_map[mcell].end(); it1++){
-	  MergeGeomWire *mwire = (MergeGeomWire*)(*it1);
-	  if (wire_cells_map[mwire].size()!=1){
-	    flag_save = false;
-	    break;
-	  }
-	}
-      }else{
-	flag_save = false;
-      }
+      // if (cell_wires_map[mcell].size()==3 && find(three_good_wire_cells.begin(), three_good_wire_cells.end(), mcell)!= three_good_wire_cells.end()){
+      // 	for (auto it1 = cell_wires_map[mcell].begin(); it1!= cell_wires_map[mcell].end(); it1++){
+      // 	  MergeGeomWire *mwire = (MergeGeomWire*)(*it1);
+      // 	  if (wire_cells_map[mwire].size()!=1){
+      // 	    flag_save = false;
+      // 	    break;
+      // 	  }
+      // 	}
+      // }else{
+      // 	flag_save = false;
+      // }
       //      std::cout << flag_save << std::endl;
-      if (chargesolver[i]->get_mcell_charge(mcell)>300 && flag_save){
+      //
+      //if (chargesolver[i]->get_mcell_charge(mcell)>300 && flag_save){
+      {
 	charge_save = chargesolver[i]->get_mcell_charge(mcell);
 	x_save = 0;
 	y_save = 0;
@@ -713,9 +715,7 @@ int main(int argc, char* argv[])
 	    wdq = wire_charge_error[mwire];
 	  }
 	}
-       
-	
-	t_mcell->Fill();
+       	t_mcell->Fill();
       }
       
       // fill the charge ... 

@@ -36,12 +36,12 @@ void WireCell2dToy::ChargeSolving::init_cell_weight_map(){
 
   for (auto it = two_wire_cells.begin(); it!=two_wire_cells.end(); it++){
     const GeomCell *mcell = (*it);
-    cell_weight_map[mcell] = 1000;
+    cell_weight_map[mcell] = 100;
   }
 
   for (auto it = one_wire_cells.begin(); it!=one_wire_cells.end(); it++){
     const GeomCell *mcell = (*it);
-    cell_weight_map[mcell] = 2000;
+    cell_weight_map[mcell] = 200;
   }
   
 }
