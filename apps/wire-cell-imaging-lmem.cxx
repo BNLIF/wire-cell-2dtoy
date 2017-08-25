@@ -397,8 +397,8 @@ int main(int argc, char* argv[])
   // uplane_map.begin()->second.second=5000;
 
   for (int i=start_num;i!=end_num+1;i++){
-    if (i%50==0)
-      std::cout << i << std::endl;
+    if (i%200==0)
+      std::cout << "Tiling: " << i << std::endl;
 
     sds.jump(i);
     WireCell::Slice slice = sds.get();
@@ -418,13 +418,7 @@ int main(int argc, char* argv[])
     //lowmemtiling[i]->DivideWires(3,0);
     lowmemtiling[i]->MergeWires();
 
-    // create individual cells ...
-    //GeomCellSelection single_cells = lowmemtiling[i]->create_single_cells();
-    time_slice = i;
-    n_cells = lowmemtiling[i]->get_cell_wires_map().size();//get_all_cell_centers().size();
-    n_good_wires = lowmemtiling[i]->get_all_good_wires().size();
-    n_bad_wires = lowmemtiling[i]->get_all_bad_wires().size();
-    //n_single_cells = single_cells.size();
+    
 
 
     // std::cout << lowmemtiling[i]->get_three_good_wire_cells().size() << " " <<
@@ -437,7 +431,6 @@ int main(int argc, char* argv[])
     // 	std::cout << "Wrong! " << std::endl;
     //   }
     // }
-    
     // //    std::cout << lowmemtiling[i]->get_cell_wires_map().size() << std::endl;
     if (i!=start_num){
       int count1 = 0, count2 = 0;
@@ -462,24 +455,7 @@ int main(int argc, char* argv[])
       // std::cout << count1 << " " << count2 << std::endl;
     }
     
-    
-    // L1 solving
-    chargesolver[i] = new WireCell2dToy::ChargeSolving(gds, *lowmemtiling[i]);
-    ndirect_solved = chargesolver[i]->get_ndirect_solved();
-    nL1_solved = chargesolver[i]->get_nL1_solved();
-    chargesolver[i]->Update_ndf_chi2();
-    total_chi2 = chargesolver[i]->get_ndf();
-    total_ndf = chargesolver[i]->get_chi2();
-    for (Int_t k=0;k!=nL1_solved;k++){
-      L1_ndf[k] = chargesolver[i]->get_L1_ndf(k);
-      L1_chi2_base[k] = chargesolver[i]->get_L1_chi2_base(k);
-      L1_chi2_penalty[k] = chargesolver[i]->get_L1_chi2_penalty(k);
-    }
-    for (Int_t k=0;k!=ndirect_solved;k++){
-      direct_ndf[k] = chargesolver[i]->get_direct_ndf(k);
-      direct_chi2[k] = chargesolver[i]->get_direct_chi2(k);
-    }
-    Twc->Fill();
+   
     
     // std::cout << lowmemtiling[i]->get_cell_wires_map().size()<< " " << lowmemtiling[i]->get_all_good_wires().size() << " " << lowmemtiling[i]->get_all_bad_wires().size() << " " << lowmemtiling[i]->get_all_cell_centers().size() << " " << lowmemtiling[i]->get_wire_cells_map().size() << " " << single_cells.size() << std::endl;
     
@@ -637,6 +613,38 @@ int main(int argc, char* argv[])
   
   cerr << em("finish tiling") << endl;
 
+  for (int i=start_num;i!=end_num+1;i++){
+    if (i%100==0)
+      std::cout << "Solving: " << i << std::endl;
+    
+     // create individual cells ...
+    //GeomCellSelection single_cells = lowmemtiling[i]->create_single_cells();
+    time_slice = i;
+    n_cells = lowmemtiling[i]->get_cell_wires_map().size();//get_all_cell_centers().size();
+    n_good_wires = lowmemtiling[i]->get_all_good_wires().size();
+    n_bad_wires = lowmemtiling[i]->get_all_bad_wires().size();
+    //n_single_cells = single_cells.size();
+    // L1 solving
+    chargesolver[i] = new WireCell2dToy::ChargeSolving(gds, *lowmemtiling[i]);
+    ndirect_solved = chargesolver[i]->get_ndirect_solved();
+    nL1_solved = chargesolver[i]->get_nL1_solved();
+    chargesolver[i]->Update_ndf_chi2();
+    total_chi2 = chargesolver[i]->get_ndf();
+    total_ndf = chargesolver[i]->get_chi2();
+    for (Int_t k=0;k!=nL1_solved;k++){
+      L1_ndf[k] = chargesolver[i]->get_L1_ndf(k);
+      L1_chi2_base[k] = chargesolver[i]->get_L1_chi2_base(k);
+      L1_chi2_penalty[k] = chargesolver[i]->get_L1_chi2_penalty(k);
+    }
+    for (Int_t k=0;k!=ndirect_solved;k++){
+      direct_ndf[k] = chargesolver[i]->get_direct_ndf(k);
+      direct_chi2[k] = chargesolver[i]->get_direct_chi2(k);
+    }
+    Twc->Fill();
+  }
+  cerr << em("finish solving") << endl;
+
+  
 
   TGraph2D *g = new TGraph2D();
   TGraph2D *g_rec = new TGraph2D();
