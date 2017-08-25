@@ -21,7 +21,6 @@
 #include "WireCell2dToy/ToyMatrixIterate_SingleWire.h"
 #include "WireCell2dToy/ToyMatrixIterate_Only.h"
 
-
 #include "WireCell2dToy/ToyMatrixMarkov.h"
 #include "WireCell2dToy/ToyMetric.h"
 #include "WireCell2dToy/BlobMetric.h"
@@ -635,6 +634,8 @@ int main(int argc, char* argv[])
 
   t_mcell->SetDirectory(file);
   Double_t uq, vq, wq, udq, vdq, wdq;
+  Int_t time_slice_save;
+  t_mcell->Branch("t",&time_slice_save,"t/I");
   t_mcell->Branch("x",&x_save,"x/D");
   t_mcell->Branch("y",&y_save,"y/D");
   t_mcell->Branch("z",&z_save,"z/D");
@@ -658,7 +659,7 @@ int main(int argc, char* argv[])
     ndf_save = chargesolver[i]->get_ndf();
     
     for (auto it = cell_wires_map.begin(); it!= cell_wires_map.end(); it++){
-      MergeGeomCell *mcell = (MergeGeomCell*) it->first;
+      SlimMergeGeomCell *mcell = (SlimMergeGeomCell*) it->first;
       GeomCellSelection temp_cells = lowmemtiling[i]->create_single_cells((SlimMergeGeomCell*)it->first);
       for (auto it1 = temp_cells.begin(); it1!=temp_cells.end(); it1++){
 	Point p = (*it1)->center();
@@ -688,6 +689,7 @@ int main(int argc, char* argv[])
       //if (chargesolver[i]->get_mcell_charge(mcell)>300 && flag_save){
       {
 	charge_save = chargesolver[i]->get_mcell_charge(mcell);
+	time_slice_save = mcell->GetTimeSlice();
 	x_save = 0;
 	y_save = 0;
 	z_save = 0;

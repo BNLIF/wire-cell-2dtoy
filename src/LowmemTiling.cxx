@@ -1231,7 +1231,8 @@ WireCell::SlimMergeGeomCell* WireCell2dToy::LowmemTiling::create_slim_merge_cell
    
    
     if (flag==1){
-      SlimMergeGeomCell *mcell = new SlimMergeGeomCell(ident); 
+      SlimMergeGeomCell *mcell = new SlimMergeGeomCell(ident);
+      mcell->SetTimeSlice(time_slice);
       holder.AddCell_No();
       // // Creat the Merge Wires
       // MergeGeomWire *mwire_u;
@@ -2682,7 +2683,8 @@ void WireCell2dToy::LowmemTiling::form_two_bad_cells(){
 	//std::cout << u_max << " " << u_min << " " << v_max << " " << v_min << " " << w_max << " " << w_min << std::endl;
 	//Create a cell
 	int ident = holder.get_cell_no();
-	SlimMergeGeomCell *mcell = new SlimMergeGeomCell(ident); 
+	SlimMergeGeomCell *mcell = new SlimMergeGeomCell(ident);
+	mcell->SetTimeSlice(time_slice);
 	mcell->AddBoundary(pcell);
 	two_bad_wire_cells.push_back(mcell);
 	holder.AddCell_No();
@@ -2949,6 +2951,7 @@ void WireCell2dToy::LowmemTiling::form_two_bad_cells(){
 	//Create a cell
 	int ident = holder.get_cell_no();
 	SlimMergeGeomCell *mcell = new SlimMergeGeomCell(ident);
+	mcell->SetTimeSlice(time_slice);
 	mcell->AddBoundary(pcell);
 	two_bad_wire_cells.push_back(mcell);
 	holder.AddCell_No();
@@ -3192,7 +3195,7 @@ void WireCell2dToy::LowmemTiling::form_two_bad_cells(){
 	//Create a cell
 	int ident = holder.get_cell_no();
 	SlimMergeGeomCell *mcell = new SlimMergeGeomCell(ident);
-	// mcell->SetTimeSlice(time_slice);
+	mcell->SetTimeSlice(time_slice);
 	mcell->AddBoundary(pcell);
 	two_bad_wire_cells.push_back(mcell);
 	holder.AddCell_No();

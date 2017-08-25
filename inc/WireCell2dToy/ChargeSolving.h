@@ -19,7 +19,7 @@ namespace WireCell2dToy{
     int get_ndirect_solved(){return ndirect_solved;};
     int get_nL1_solved(){return nL1_solved;};
 
-    double get_mcell_charge(WireCell::MergeGeomCell *mcell){return ccmap[mcell];};
+    double get_mcell_charge(const WireCell::GeomCell *mcell){return ccmap[mcell];};
     void Update_ndf_chi2();
     int get_ndf();
     double get_chi2();
