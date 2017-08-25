@@ -357,6 +357,16 @@ void WireCell2dToy::LowmemTiling::MergeWires(){
   }
 
   calculate_merged_wire_charge();
+
+  for (auto it=cell_wires_map.begin(); it!= cell_wires_map.end(); it++){
+    SlimMergeGeomCell *mcell = (SlimMergeGeomCell*)it->first;
+    mcell->OrderWires();
+
+    // for (size_t i=0;i!=mcell->get_uwires().size();i++){
+    //   std::cout << i << " " << mcell->get_uwires().at(i)->ident() << " " << mcell->get_uwires().at(i)->index() << std::endl;
+    // }
+  }
+  
 }
 
 void WireCell2dToy::LowmemTiling::calculate_merged_wire_charge(){
