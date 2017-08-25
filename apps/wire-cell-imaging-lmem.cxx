@@ -836,6 +836,35 @@ int main(int argc, char* argv[])
   }
   g->Write("g");
   g_rec->Write("g_rec");
+
+
+  Double_t x,y,z;
+  //save cluster
+  int ncluster = 0;
+  for (auto it = cluster_set.begin();it!=cluster_set.end();it++){
+    ncount = 0;
+    TGraph2D *g1 = new TGraph2D();
+    for (int i=0; i!=(*it)->get_allcell().size();i++){
+      const SlimMergeGeomCell *mcell = (const SlimMergeGeomCell*)((*it)->get_allcell().at(i));
+
+      int time_slice_save = mcell->GetTimeSlice();
+      GeomCellSelection temp_cells = lowmemtiling[time_slice_save]->create_single_cells((SlimMergeGeomCell*)mcell);
+      
+      for (int j=0; j!=temp_cells.size();j++){
+  	Point p = temp_cells.at(j)->center();
+  	x = mcell->GetTimeSlice()*nrebin/2.*unit_dis/10. - frame_length/2.*unit_dis/10.;
+  	y = p.y/units::cm;
+  	z = p.z/units::cm;
+  	g1->SetPoint(ncount,x,y,z);
+  	ncount ++;
+      }
+    }
+    // cout << ncount << endl;
+    g1->Write(Form("cluster_%d",ncluster));
+    ncluster ++;
+  }
+
+  
   
   TTree *t_bad = new TTree("T_bad","T_bad");
   t_bad->SetDirectory(file);
