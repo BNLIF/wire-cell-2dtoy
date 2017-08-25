@@ -30,7 +30,7 @@
 #include "WireCellData/MergeGeomCell.h"
 #include "WireCellData/MergeGeomWire.h"
 
-#include "WireCellData/GeomCluster.h"
+#include "WireCellData/Slim3DCluster.h"
 //#include "WireCellNav/SliceDataSource.h"
 
 
@@ -340,7 +340,7 @@ int main(int argc, char* argv[])
   WireCell2dToy::WireCellHolder WCholder;
 
   //add in cluster
-  GeomClusterSet cluster_set, cluster_delset;
+  Slim3DClusterSet cluster_set, cluster_delset;
   
   int ncount_mcell = 0;
 
@@ -418,8 +418,61 @@ int main(int argc, char* argv[])
     //lowmemtiling[i]->DivideWires(3,0);
     lowmemtiling[i]->MergeWires();
 
-    
 
+    // form clusters
+    WireCell::GeomCellMap cell_wires_map = lowmemtiling[i]->get_cell_wires_map();
+    GeomCellSelection allmcell;
+    for (auto it=cell_wires_map.begin(); it!= cell_wires_map.end(); it++){
+      SlimMergeGeomCell *mcell = (SlimMergeGeomCell*)it->first;
+      allmcell.push_back(mcell);
+    }
+    if (cluster_set.empty()){
+      // if cluster is empty, just insert all the mcell, each as a cluster
+      for (int j=0;j!=allmcell.size();j++){
+	Slim3DCluster *cluster = new Slim3DCluster(*((SlimMergeGeomCell*)allmcell[j]));
+	cluster_set.insert(cluster);
+      }
+    }else{
+      for (int j=0;j!=allmcell.size();j++){
+	int flag = 0;
+	int flag_save = 0;
+	Slim3DCluster *cluster_save = 0;
+	cluster_delset.clear();
+
+	// loop through merged cell
+	for (auto it = cluster_set.begin();it!=cluster_set.end();it++){
+	  //loop through clusters
+	  
+	  flag += (*it)->AddCell(*((SlimMergeGeomCell*)allmcell[j]));
+	  if (flag==1 && flag != flag_save){
+	    cluster_save = *it;
+	  }else if (flag>1 && flag != flag_save){
+	    cluster_save->MergeCluster(*(*it));
+	    cluster_delset.insert(*it);
+	  }
+	  flag_save = flag;
+  	  
+	}
+	
+	for (auto it = cluster_delset.begin();it!=cluster_delset.end();it++){
+	  cluster_set.erase(*it);
+	  delete (*it);
+	}
+	
+	if (flag==0){
+	  Slim3DCluster *cluster = new Slim3DCluster(*((SlimMergeGeomCell*)allmcell[j]));
+	  cluster_set.insert(cluster);
+	}
+      }
+
+      // int ncount_mcell_cluster = 0;
+      // for (auto it = cluster_set.begin();it!=cluster_set.end();it++){
+      // 	ncount_mcell_cluster += (*it)->get_allcell().size();
+      // }
+      // ncount_mcell += allmcell.size();
+      // cout << i << " " << allmcell.size()  << " " << cluster_set.size()  << endl;
+    }
+    
 
     // std::cout << lowmemtiling[i]->get_three_good_wire_cells().size() << " " <<
     //   lowmemtiling[i]->get_two_good_wire_cells().size() << " " <<
