@@ -432,28 +432,28 @@ int main(int argc, char* argv[])
     //   }
     // }
     // //    std::cout << lowmemtiling[i]->get_cell_wires_map().size() << std::endl;
-    if (i!=start_num){
-      int count1 = 0, count2 = 0;
-      // compare with all cells before ...
-      WireCell::GeomCellMap cell_wires_map1 = lowmemtiling[i]->get_cell_wires_map();
-      WireCell::GeomCellMap cell_wires_map2 = lowmemtiling[i-1]->get_cell_wires_map();
-      for (auto it=cell_wires_map1.begin(); it!= cell_wires_map1.end();it++){
-     	SlimMergeGeomCell *mcell1 = (SlimMergeGeomCell*)it->first;
-    	for (auto it1=cell_wires_map2.begin(); it1!= cell_wires_map2.end();it1++){
-    	  SlimMergeGeomCell *mcell2 = (SlimMergeGeomCell*)it1->first;
-	  // mcell1->Overlap(mcell2);
-	  mcell1->Overlap_fast(mcell2);
+    // if (i!=start_num){
+    //   int count1 = 0, count2 = 0;
+    //   // compare with all cells before ...
+    //   WireCell::GeomCellMap cell_wires_map1 = lowmemtiling[i]->get_cell_wires_map();
+    //   WireCell::GeomCellMap cell_wires_map2 = lowmemtiling[i-1]->get_cell_wires_map();
+    //   for (auto it=cell_wires_map1.begin(); it!= cell_wires_map1.end();it++){
+    //  	SlimMergeGeomCell *mcell1 = (SlimMergeGeomCell*)it->first;
+    // 	for (auto it1=cell_wires_map2.begin(); it1!= cell_wires_map2.end();it1++){
+    // 	  SlimMergeGeomCell *mcell2 = (SlimMergeGeomCell*)it1->first;
+    // 	  // mcell1->Overlap(mcell2);
+    // 	  mcell1->Overlap_fast(mcell2);
 
-    	  // if (mcell1->Overlap(mcell2) == mcell1->Overlap_fast(mcell2)){
-    	  //   count1 ++;
-    	  // }else{
-    	  //   count2++;
-    	  // }
-    	}
+    // 	  // if (mcell1->Overlap(mcell2) == mcell1->Overlap_fast(mcell2)){
+    // 	  //   count1 ++;
+    // 	  // }else{
+    // 	  //   count2++;
+    // 	  // }
+    // 	}
 
-      }
-      // std::cout << count1 << " " << count2 << std::endl;
-    }
+    //   }
+    //   // std::cout << count1 << " " << count2 << std::endl;
+    // }
     
    
     
