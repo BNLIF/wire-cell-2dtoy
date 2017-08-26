@@ -843,9 +843,11 @@ int main(int argc, char* argv[])
   int ncluster = 0;
   for (auto it = cluster_set.begin();it!=cluster_set.end();it++){
     ncount = 0;
+    (*it)->Calc_Projection();
+    
     TGraph2D *g1 = new TGraph2D();
     for (int i=0; i!=(*it)->get_allcell().size();i++){
-      const SlimMergeGeomCell *mcell = (const SlimMergeGeomCell*)((*it)->get_allcell().at(i));
+      SlimMergeGeomCell *mcell = (SlimMergeGeomCell*)((*it)->get_allcell().at(i));
 
       int time_slice_save = mcell->GetTimeSlice();
       GeomCellSelection temp_cells = lowmemtiling[time_slice_save]->create_single_cells((SlimMergeGeomCell*)mcell);
