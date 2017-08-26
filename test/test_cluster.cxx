@@ -53,6 +53,16 @@ int main(int argc, char* argv[])
     mcell4->AddWire(vwires.at(i),WirePlaneType_t(1));
     mcell4->AddWire(wwires.at(i),WirePlaneType_t(2));
   }
+  
+  SlimMergeGeomCell *mcell4p = new SlimMergeGeomCell(2);
+  mcell4p->SetTimeSlice(3);
+  mcell4p->add_bad_planes(WirePlaneType_t(2));
+  for (int i=6; i!=25;i++){
+    mcell4p->AddWire(uwires.at(i),WirePlaneType_t(0));
+    mcell4p->AddWire(vwires.at(i),WirePlaneType_t(1));
+    mcell4p->AddWire(wwires.at(i),WirePlaneType_t(2));
+  }
+  
 
   SlimMergeGeomCell *mcell5 = new SlimMergeGeomCell(2);
   mcell5->SetTimeSlice(4);
@@ -67,10 +77,15 @@ int main(int argc, char* argv[])
   cluster->AddCell(*mcell2);
   cluster->AddCell(*mcell3);
   cluster->AddCell(*mcell4);
-  //  cluster->AddCell(*mcell5);
+  cluster->AddCell(*mcell5);
   cluster->Calc_Projection();
 
-  Slim3DCluster *cluster1 = new Slim3DCluster(*mcell5);
+  
+  Slim3DCluster *cluster1 = new Slim3DCluster(*mcell1);
+  cluster1->AddCell(*mcell2);
+  // cluster1->AddCell(*mcell3);
+  cluster1->AddCell(*mcell4p);
+  cluster1->AddCell(*mcell5);
   cluster1->Calc_Projection();
 
   
