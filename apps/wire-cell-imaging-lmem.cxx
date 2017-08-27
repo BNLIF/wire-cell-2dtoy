@@ -666,6 +666,203 @@ int main(int argc, char* argv[])
   
   cerr << em("finish tiling") << endl;
 
+  std::map<Projected2DCluster*, std::vector<Slim3DCluster*>> u_2D_3D_clus_map;
+  std::map<Projected2DCluster*, std::vector<Slim3DCluster*>> v_2D_3D_clus_map;
+  std::map<Projected2DCluster*, std::vector<Slim3DCluster*>> w_2D_3D_clus_map;
+
+  for (auto it = cluster_set.begin();it!=cluster_set.end();it++){
+    (*it)->Calc_Projection();
+    // get U
+    Projected2DCluster *u_2Dclus = (*it)->get_projection(WirePlaneType_t(0));
+    if (u_2Dclus->get_number_time_slices() >0){
+      bool flag_save = true;
+
+      std::vector<Projected2DCluster*> to_be_removed;
+      
+      for (auto it1 = u_2D_3D_clus_map.begin(); it1!= u_2D_3D_clus_map.end(); it1++){
+	Projected2DCluster *comp_2Dclus = it1->first;
+	std::vector<Slim3DCluster*>& vec_3Dclus = it1->second;
+	
+	int comp_score = comp_2Dclus->judge_coverage(u_2Dclus);
+
+	if (comp_score == 1){
+	  // u_2Dclus is part of comp_2Dclus
+	  flag_save = false;
+	  break;
+	}else if (comp_score == 2){
+	  // u_2D_clus is the same as comp_2Dclus
+	  flag_save = false;
+	  vec_3Dclus.push_back((*it));
+	  break;
+	}else if (comp_score == -1){
+	  // comp_2Dclus is part of u_2Dclus
+	  to_be_removed.push_back(comp_2Dclus);
+	}else if (comp_score == 0){
+	  //they do not match ...
+	  // do nothing ... 
+	}
+      }
+
+      // remove the small stuff ...
+      for (auto it1 = to_be_removed.begin(); it1!=to_be_removed.end(); it1++){
+	u_2D_3D_clus_map.erase((*it1));
+      }
+      
+      // save it 
+      if (flag_save){
+      	std::vector<Slim3DCluster*> vec_3Dclus;
+      	vec_3Dclus.push_back((*it));
+      	u_2D_3D_clus_map[u_2Dclus] = vec_3Dclus;
+      }
+      //std::cout << u_2D_3D_clus_map.size() << std::endl;
+    }
+    // get V
+    Projected2DCluster *v_2Dclus = (*it)->get_projection(WirePlaneType_t(1));
+    if (v_2Dclus->get_number_time_slices() >0){
+      bool flag_save = true;
+
+      std::vector<Projected2DCluster*> to_be_removed;
+      
+      for (auto it1 = v_2D_3D_clus_map.begin(); it1!= v_2D_3D_clus_map.end(); it1++){
+	Projected2DCluster *comp_2Dclus = it1->first;
+	std::vector<Slim3DCluster*>& vec_3Dclus = it1->second;
+	
+	int comp_score = comp_2Dclus->judge_coverage(v_2Dclus);
+
+	if (comp_score == 1){
+	  // v_2Dclus is part of comp_2Dclus
+	  flag_save = false;
+	  break;
+	}else if (comp_score == 2){
+	  // v_2D_clus is the same as comp_2Dclus
+	  flag_save = false;
+	  vec_3Dclus.push_back((*it));
+	  break;
+	}else if (comp_score == -1){
+	  // comp_2Dclus is part of v_2Dclus
+	  to_be_removed.push_back(comp_2Dclus);
+	}else if (comp_score == 0){
+	  //they do not match ...
+	  // do nothing ... 
+	}
+      }
+
+      // remove the small stuff ...
+      for (auto it1 = to_be_removed.begin(); it1!=to_be_removed.end(); it1++){
+	v_2D_3D_clus_map.erase((*it1));
+      }
+      
+      // save it 
+      if (flag_save){
+      	std::vector<Slim3DCluster*> vec_3Dclus;
+      	vec_3Dclus.push_back((*it));
+      	v_2D_3D_clus_map[v_2Dclus] = vec_3Dclus;
+      }
+      //std::cout << v_2D_3D_clus_map.size() << std::endl;
+    }
+    
+    // get W
+    Projected2DCluster *w_2Dclus = (*it)->get_projection(WirePlaneType_t(2));
+    if (w_2Dclus->get_number_time_slices() >0){
+      bool flag_save = true;
+
+      std::vector<Projected2DCluster*> to_be_removed;
+      
+      for (auto it1 = w_2D_3D_clus_map.begin(); it1!= w_2D_3D_clus_map.end(); it1++){
+	Projected2DCluster *comp_2Dclus = it1->first;
+	std::vector<Slim3DCluster*>& vec_3Dclus = it1->second;
+	
+	int comp_score = comp_2Dclus->judge_coverage(w_2Dclus);
+
+	if (comp_score == 1){
+	  // w_2Dclus is part of comp_2Dclus
+	  flag_save = false;
+	  break;
+	}else if (comp_score == 2){
+	  // w_2D_clus is the same as comp_2Dclus
+	  flag_save = false;
+	  vec_3Dclus.push_back((*it));
+	  break;
+	}else if (comp_score == -1){
+	  // comp_2Dclus is part of w_2Dclus
+	  to_be_removed.push_back(comp_2Dclus);
+	}else if (comp_score == 0){
+	  //they do not match ...
+	  // do nothing ... 
+	}
+      }
+
+      // remove the small stuff ...
+      for (auto it1 = to_be_removed.begin(); it1!=to_be_removed.end(); it1++){
+	w_2D_3D_clus_map.erase((*it1));
+      }
+      
+      // save it 
+      if (flag_save){
+      	std::vector<Slim3DCluster*> vec_3Dclus;
+      	vec_3Dclus.push_back((*it));
+      	w_2D_3D_clus_map[w_2Dclus] = vec_3Dclus;
+      }
+      //std::cout << w_2D_3D_clus_map.size() << std::endl;
+    }
+  }
+
+  //label the cluster ...
+  for (auto it = u_2D_3D_clus_map.begin(); it!= u_2D_3D_clus_map.end(); it++){
+    for (auto it1 = it->second.begin(); it1!=it->second.end(); it1++){
+      (*it1)->set_flag_saved(1);
+    }
+  }
+  for (auto it = v_2D_3D_clus_map.begin(); it!= v_2D_3D_clus_map.end(); it++){
+    for (auto it1 = it->second.begin(); it1!=it->second.end(); it1++){
+      (*it1)->set_flag_saved(1);
+    }
+  }
+  for (auto it = w_2D_3D_clus_map.begin(); it!= w_2D_3D_clus_map.end(); it++){
+    for (auto it1 = it->second.begin(); it1!=it->second.end(); it1++){
+      (*it1)->set_flag_saved(1);
+    }
+  }
+  // remove the mcell from tiling ...
+  int ncluster_saved = 0;
+  int ncluster_deleted = 0;
+  int nmcell_saved = 0;
+  int nmcell_deleted = 0;
+  int nmcell_before = 0, nmcell_after = 0;
+  for (int i=start_num;i!=end_num+1;i++){
+    nmcell_before += lowmemtiling[i]->get_cell_wires_map().size();
+  }
+  
+  for (auto it = cluster_set.begin();it!=cluster_set.end();it++){
+    GeomCellSelection mcells =(*it)->get_allcell();
+      
+    if ((*it)->get_flag_saved()==1){
+      ncluster_saved ++;
+      nmcell_saved += mcells.size();
+    }else{
+      ncluster_deleted ++;
+      nmcell_deleted += mcells.size();
+      // remove them ...
+      for (auto it1 = mcells.begin(); it1!=mcells.end(); it1++){
+	SlimMergeGeomCell *mcell = (SlimMergeGeomCell*)(*it1);
+	lowmemtiling[mcell->GetTimeSlice()]->Erase_Cell(mcell);
+      }
+      
+    }
+  }
+
+  for (int i=start_num;i!=end_num+1;i++){
+    nmcell_after += lowmemtiling[i]->get_cell_wires_map().size();
+  }
+  
+  std::cout << ncluster_saved << " " << nmcell_saved << " "
+	    << ncluster_deleted << " " << nmcell_deleted << " "
+	    << nmcell_before << " " << nmcell_after << " "
+	    << std::endl;
+  
+  cerr << em("finish deghosting") << endl;
+  
+  
   for (int i=start_num;i!=end_num+1;i++){
     if (i%100==0)
       std::cout << "Solving: " << i << std::endl;
@@ -838,33 +1035,33 @@ int main(int argc, char* argv[])
   g_rec->Write("g_rec");
 
 
-  Double_t x,y,z;
-  //save cluster
-  int ncluster = 0;
-  for (auto it = cluster_set.begin();it!=cluster_set.end();it++){
-    ncount = 0;
-    (*it)->Calc_Projection();
-    
-    TGraph2D *g1 = new TGraph2D();
-    for (int i=0; i!=(*it)->get_allcell().size();i++){
-      SlimMergeGeomCell *mcell = (SlimMergeGeomCell*)((*it)->get_allcell().at(i));
+  // Double_t x,y,z;
+  // //save cluster
+  // int ncluster = 0;
+  // for (auto it = cluster_set.begin();it!=cluster_set.end();it++){
+  //   ncount = 0;
 
-      int time_slice_save = mcell->GetTimeSlice();
-      GeomCellSelection temp_cells = lowmemtiling[time_slice_save]->create_single_cells((SlimMergeGeomCell*)mcell);
+    
+  //   TGraph2D *g1 = new TGraph2D();
+  //   for (int i=0; i!=(*it)->get_allcell().size();i++){
+  //     SlimMergeGeomCell *mcell = (SlimMergeGeomCell*)((*it)->get_allcell().at(i));
+
+  //     int time_slice_save = mcell->GetTimeSlice();
+  //     GeomCellSelection temp_cells = lowmemtiling[time_slice_save]->create_single_cells((SlimMergeGeomCell*)mcell);
       
-      for (int j=0; j!=temp_cells.size();j++){
-  	Point p = temp_cells.at(j)->center();
-  	x = mcell->GetTimeSlice()*nrebin/2.*unit_dis/10. - frame_length/2.*unit_dis/10.;
-  	y = p.y/units::cm;
-  	z = p.z/units::cm;
-  	g1->SetPoint(ncount,x,y,z);
-  	ncount ++;
-      }
-    }
-    // cout << ncount << endl;
-    g1->Write(Form("cluster_%d",ncluster));
-    ncluster ++;
-  }
+  //     for (int j=0; j!=temp_cells.size();j++){
+  // 	Point p = temp_cells.at(j)->center();
+  // 	x = mcell->GetTimeSlice()*nrebin/2.*unit_dis/10. - frame_length/2.*unit_dis/10.;
+  // 	y = p.y/units::cm;
+  // 	z = p.z/units::cm;
+  // 	g1->SetPoint(ncount,x,y,z);
+  // 	ncount ++;
+  //     }
+  //   }
+  //   // cout << ncount << endl;
+  //   g1->Write(Form("cluster_%d",ncluster));
+  //   ncluster ++;
+  // }
 
   
   

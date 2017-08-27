@@ -527,6 +527,49 @@ bool WireCell2dToy::LowmemTiling::remove_wire(MergeGeomWire *wire){
   return true;
 }
 
+void WireCell2dToy::LowmemTiling::Erase_Cell(SlimMergeGeomCell *cell){
+
+  {
+    // remove it from three_good_wire_cells
+    auto it = find(three_good_wire_cells.begin(), three_good_wire_cells.end(), cell);
+    if (it!= three_good_wire_cells.end())
+      three_good_wire_cells.erase(it);
+  }
+  
+  {
+    // remove it from two_good_wire_cells
+    auto it = find(two_good_wire_cells.begin(), two_good_wire_cells.end(), cell);
+    if (it!= two_good_wire_cells.end())
+      two_good_wire_cells.erase(it);
+  }
+  // remove it from one_good_wire_cells
+  {
+    // remove it from two_good_wire_cells
+    auto it = find(one_good_wire_cells.begin(), one_good_wire_cells.end(), cell);
+    if (it!= one_good_wire_cells.end())
+      one_good_wire_cells.erase(it);
+  }
+  
+  // remove it from map ...
+  
+  if (cell_wires_map.find(cell) != cell_wires_map.end()){
+    // find all the wires connect to the cells
+    GeomWireSelection& wires = cell_wires_map[cell];
+    for (int i = 0; i!=wires.size();i++){
+      MergeGeomWire *wire = (MergeGeomWire*)wires.at(i);
+      // remove the cell from the wire map
+      GeomCellSelection& cells = wire_cells_map[wire];
+      auto it = find(cells.begin(),cells.end(),cell);
+      if (it!=cells.end())
+	cells.erase(it);
+      // remove the cell 
+      cell_wires_map.erase(cell);
+    }
+  }
+   
+  // remove it from holder (no need ...)
+  
+}
 
 bool WireCell2dToy::LowmemTiling::remove_cell(SlimMergeGeomCell *cell){
   if (cell_wires_map.find(cell) != cell_wires_map.end()){

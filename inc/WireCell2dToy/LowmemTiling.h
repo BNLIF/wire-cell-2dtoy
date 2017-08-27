@@ -76,6 +76,8 @@ namespace WireCell2dToy{
 
     WireCell::WireChargeMap& get_wire_charge_map(){return wirechargemap;};
     WireCell::WireChargeMap& get_wire_charge_error_map(){return wirecharge_errmap;};
+
+    void Erase_Cell(WireCell::SlimMergeGeomCell *cell);
     
   protected:
     WireCell::GeomDataSource& gds;
