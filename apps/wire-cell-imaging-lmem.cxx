@@ -683,8 +683,8 @@ int main(int argc, char* argv[])
 	Projected2DCluster *comp_2Dclus = it1->first;
 	std::vector<Slim3DCluster*>& vec_3Dclus = it1->second;
 	
-	//int comp_score = comp_2Dclus->judge_coverage(u_2Dclus);
-	int comp_score = comp_2Dclus->judge_coverage_alt(u_2Dclus);
+	int comp_score = comp_2Dclus->judge_coverage(u_2Dclus);
+	//	int comp_score = comp_2Dclus->judge_coverage_alt(u_2Dclus);
 	// std::vector<int> comp_results = comp_2Dclus->calc_coverage(u_2Dclus);
 	// if (comp_results.at(2) + comp_results.at(3) >0)
 	//   std::cout << "Xin: " << 0 << " " << comp_results.at(0) << " " << comp_results.at(1) << " " <<
@@ -732,8 +732,8 @@ int main(int argc, char* argv[])
 	Projected2DCluster *comp_2Dclus = it1->first;
 	std::vector<Slim3DCluster*>& vec_3Dclus = it1->second;
 	
-	//	int comp_score = comp_2Dclus->judge_coverage(v_2Dclus);
-	int comp_score = comp_2Dclus->judge_coverage_alt(v_2Dclus);
+	int comp_score = comp_2Dclus->judge_coverage(v_2Dclus);
+	//int comp_score = comp_2Dclus->judge_coverage_alt(v_2Dclus);
 
 	// std::vector<int> comp_results = comp_2Dclus->calc_coverage(v_2Dclus);
 	// if (comp_results.at(2) + comp_results.at(3) >0)
@@ -783,8 +783,8 @@ int main(int argc, char* argv[])
 	Projected2DCluster *comp_2Dclus = it1->first;
 	std::vector<Slim3DCluster*>& vec_3Dclus = it1->second;
 	
-	// int comp_score = comp_2Dclus->judge_coverage(w_2Dclus);
-	int comp_score = comp_2Dclus->judge_coverage_alt(w_2Dclus);
+	int comp_score = comp_2Dclus->judge_coverage(w_2Dclus);
+	//int comp_score = comp_2Dclus->judge_coverage_alt(w_2Dclus);
 	// std::vector<int> comp_results = comp_2Dclus->calc_coverage(w_2Dclus);
 	// if (comp_results.at(2) + comp_results.at(3) >0)
 	//   std::cout << "Xin: " << 2 << " " << comp_results.at(0) << " " << comp_results.at(1) << " " <<
@@ -896,8 +896,18 @@ int main(int argc, char* argv[])
   
   for (auto it = cluster_set.begin();it!=cluster_set.end();it++){
     GeomCellSelection mcells =(*it)->get_allcell();
+    int num = 0;
+    if ((*it)->get_projection(WirePlaneType_t(0))->get_number_time_slices()!=0) num++;
+    if ((*it)->get_projection(WirePlaneType_t(1))->get_number_time_slices()!=0) num++;
+    if ((*it)->get_projection(WirePlaneType_t(2))->get_number_time_slices()!=0) num++;
+
+    // std::cout << num << " " << (*it)->get_flag_saved() << " " <<  (*it)->get_flag_saved_1() << std::endl;
+
+    if ((num==2 && (*it)->get_flag_saved() - (*it)->get_flag_saved_1() ==2) ||
+	(num==3 && (*it)->get_flag_saved() - (*it)->get_flag_saved_1()>=2)){
+    //if ((*it)->get_flag_saved() - (*it)->get_flag_saved_1() >0){
+      // look at each cell level ...
       
-    if ((*it)->get_flag_saved() - (*it)->get_flag_saved_1() >0){
       ncluster_saved ++;
       nmcell_saved += mcells.size();
     }else{
