@@ -99,7 +99,11 @@ int main(int argc, char* argv[])
   
   std::cout << "Status: " << u_proj->judge_coverage(u1_proj) << std::endl;
   std::cout << "Status: " << u1_proj->judge_coverage(u_proj) << std::endl;
-  
+
+  std::vector<int> comp_results = u_proj->calc_coverage(u1_proj);
+  std::cout << "Xin: " << " " << comp_results.at(0) << " " << comp_results.at(1) << " " <<
+	  comp_results.at(2) << " " << comp_results.at(3) << std::endl;
+	
 
   
 }
