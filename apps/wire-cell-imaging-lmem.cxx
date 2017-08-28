@@ -809,20 +809,65 @@ int main(int argc, char* argv[])
 
   //label the cluster ...
   for (auto it = u_2D_3D_clus_map.begin(); it!= u_2D_3D_clus_map.end(); it++){
+    // if (it->second.size()>1)
+    //   std::cout << "U: " << it->second.size() << std::endl;
     for (auto it1 = it->second.begin(); it1!=it->second.end(); it1++){
-      (*it1)->set_flag_saved(1);
+      (*it1)->set_flag_saved((*it1)->get_flag_saved()+1);
+      // (*it1)->set_flag_saved(1);
     }
   }
   for (auto it = v_2D_3D_clus_map.begin(); it!= v_2D_3D_clus_map.end(); it++){
+    // if (it->second.size()>1)
+    //   std::cout << "V: " << it->second.size() << std::endl;
     for (auto it1 = it->second.begin(); it1!=it->second.end(); it1++){
-      (*it1)->set_flag_saved(1);
+      (*it1)->set_flag_saved((*it1)->get_flag_saved()+1);
+      //(*it1)->set_flag_saved(1);
     }
   }
   for (auto it = w_2D_3D_clus_map.begin(); it!= w_2D_3D_clus_map.end(); it++){
+    // if (it->second.size()>1)
+    //   std::cout << "W: " << it->second.size() << std::endl;
     for (auto it1 = it->second.begin(); it1!=it->second.end(); it1++){
-      (*it1)->set_flag_saved(1);
+      (*it1)->set_flag_saved((*it1)->get_flag_saved()+1);
+      //(*it1)->set_flag_saved(1);
     }
   }
+  // rescan it
+  for (auto it = u_2D_3D_clus_map.begin(); it!= u_2D_3D_clus_map.end(); it++){
+    int max_flag_saved = -1;
+    for (auto it1 = it->second.begin(); it1!=it->second.end(); it1++){
+      if ((*it1)->get_flag_saved()>max_flag_saved)
+  	max_flag_saved = (*it1)->get_flag_saved();
+    }
+    for (auto it1 = it->second.begin(); it1!=it->second.end(); it1++){
+      if ((*it1)->get_flag_saved()!=max_flag_saved)
+  	(*it1)->set_flag_saved_1((*it1)->get_flag_saved_1()+1);
+    }
+  }
+  for (auto it = v_2D_3D_clus_map.begin(); it!= v_2D_3D_clus_map.end(); it++){
+    int max_flag_saved = -1;
+    for (auto it1 = it->second.begin(); it1!=it->second.end(); it1++){
+      if ((*it1)->get_flag_saved()>max_flag_saved)
+  	max_flag_saved = (*it1)->get_flag_saved();
+    }
+    for (auto it1 = it->second.begin(); it1!=it->second.end(); it1++){
+      if ((*it1)->get_flag_saved()!=max_flag_saved)
+  	(*it1)->set_flag_saved_1((*it1)->get_flag_saved_1()+1);
+    }
+  }
+  for (auto it = w_2D_3D_clus_map.begin(); it!= w_2D_3D_clus_map.end(); it++){
+    int max_flag_saved = -1;
+    for (auto it1 = it->second.begin(); it1!=it->second.end(); it1++){
+      if ((*it1)->get_flag_saved()>max_flag_saved)
+  	max_flag_saved = (*it1)->get_flag_saved();
+    }
+    for (auto it1 = it->second.begin(); it1!=it->second.end(); it1++){
+      if ((*it1)->get_flag_saved()!=max_flag_saved)
+  	(*it1)->set_flag_saved_1((*it1)->get_flag_saved_1()+1);
+    }
+  }
+  
+  
   // remove the mcell from tiling ...
   int ncluster_saved = 0;
   int ncluster_deleted = 0;
@@ -836,7 +881,7 @@ int main(int argc, char* argv[])
   for (auto it = cluster_set.begin();it!=cluster_set.end();it++){
     GeomCellSelection mcells =(*it)->get_allcell();
       
-    if ((*it)->get_flag_saved()==1){
+    if ((*it)->get_flag_saved() - (*it)->get_flag_saved_1() >0){
       ncluster_saved ++;
       nmcell_saved += mcells.size();
     }else{
