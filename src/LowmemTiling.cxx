@@ -1296,7 +1296,10 @@ WireCell::SlimMergeGeomCell* WireCell2dToy::LowmemTiling::create_slim_merge_cell
       // Inser U    
       for (int k=uwire_min->index();k!=uwire_max->index()+1;k++){
 	const GeomWire *uwire1 = gds.by_planeindex(WirePlaneType_t(0),k);
-	mcell->AddWire(uwire1,WirePlaneType_t(0));
+	float charge = 0;
+	if (wirechargemap.find(uwire1)!=wirechargemap.end())
+	  charge = wirechargemap[uwire1];
+	mcell->AddWire(uwire1,WirePlaneType_t(0),charge);
 	// if (k==uwire_min->index()){
 	//   mwire_u = new MergeGeomWire(ident,*uwire1);
 	// }else{
@@ -1306,7 +1309,10 @@ WireCell::SlimMergeGeomCell* WireCell2dToy::LowmemTiling::create_slim_merge_cell
       //Insert V
       for (int k=vwire_min->index();k!=vwire_max->index()+1;k++){
 	const GeomWire *vwire1 = gds.by_planeindex(WirePlaneType_t(1),k);
-	mcell->AddWire(vwire1,WirePlaneType_t(1));
+	float charge = 0;
+	if (wirechargemap.find(vwire1)!=wirechargemap.end())
+	  charge = wirechargemap[vwire1];
+	mcell->AddWire(vwire1,WirePlaneType_t(1),charge);
 	// if (k==vwire_min->index()){
 	//   mwire_v = new MergeGeomWire(ident,*vwire1);
 	// }else{
@@ -1316,7 +1322,10 @@ WireCell::SlimMergeGeomCell* WireCell2dToy::LowmemTiling::create_slim_merge_cell
       // Insert W
       for (int k=wwire_min->index();k!=wwire_max->index()+1;k++){
 	const GeomWire *wwire1 = gds.by_planeindex(WirePlaneType_t(2),k);
-	mcell->AddWire(wwire1,WirePlaneType_t(2));
+	float charge = 0;
+	if (wirechargemap.find(wwire1)!=wirechargemap.end())
+	  charge = wirechargemap[wwire1];
+	mcell->AddWire(wwire1,WirePlaneType_t(2),charge);
 	// if (k==wwire_min->index()){
 	//   mwire_w = new MergeGeomWire(ident,*wwire1);
 	// }else{
@@ -2768,7 +2777,10 @@ void WireCell2dToy::LowmemTiling::form_two_bad_cells(){
 	const GeomWire* uwire_max = gds.bounds(u_max,WirePlaneType_t(0)).first;
 	for (int k=uwire_min->index();k!=uwire_max->index()+1;k++){
 	  const GeomWire *uwire = gds.by_planeindex(WirePlaneType_t(0),k);
-	  mcell->AddWire(uwire,WirePlaneType_t(0));
+	  float charge = 0;
+	  if (wirechargemap.find(uwire)!=wirechargemap.end())
+	    charge = wirechargemap[uwire];
+	  mcell->AddWire(uwire,WirePlaneType_t(0),charge);
 	}
 	
 	//Insert V
@@ -2777,7 +2789,10 @@ void WireCell2dToy::LowmemTiling::form_two_bad_cells(){
 	// std::cout << vwire_min->index() << " " << vwire_max->index() << std::endl;
 	for (int k=vwire_min->index();k!=vwire_max->index()+1;k++){
 	  const GeomWire *vwire = gds.by_planeindex(WirePlaneType_t(1),k);
-	  mcell->AddWire(vwire,WirePlaneType_t(1));
+	  float charge = 0;
+	  if (wirechargemap.find(vwire)!=wirechargemap.end())
+	    charge = wirechargemap[vwire];
+	  mcell->AddWire(vwire,WirePlaneType_t(1),charge);
 	}
 
 	//Insert W
@@ -2785,7 +2800,10 @@ void WireCell2dToy::LowmemTiling::form_two_bad_cells(){
 	const GeomWire* wwire_max = gds.closest(w_max,WirePlaneType_t(2));//.bounds(w_max,WirePlaneType_t(2)).first;
 	for (int k=wwire_min->index();k!=wwire_max->index()+1;k++){
 	  const GeomWire *wwire = gds.by_planeindex(WirePlaneType_t(2),k);
-	  mcell->AddWire(wwire,WirePlaneType_t(2));
+	  float charge = 0;
+	  if (wirechargemap.find(wwire)!=wirechargemap.end())
+	    charge = wirechargemap[wwire];
+	  mcell->AddWire(wwire,WirePlaneType_t(2),charge);
 	}
 	
 	//	std::cout << mcell->get_uwires().size() << " " << mcell->get_vwires().size() << " " << mcell->get_wwires().size() << std::endl;
@@ -3013,7 +3031,10 @@ void WireCell2dToy::LowmemTiling::form_two_bad_cells(){
 	const GeomWire* uwire_max = gds.bounds(u_max,WirePlaneType_t(0)).first;
 	for (int k=uwire_min->index();k!=uwire_max->index()+1;k++){
 	  const GeomWire *uwire = gds.by_planeindex(WirePlaneType_t(0),k);
-	  mcell->AddWire(uwire,WirePlaneType_t(0));
+	  float charge = 0;
+	  if (wirechargemap.find(uwire)!=wirechargemap.end())
+	    charge = wirechargemap[uwire];
+	  mcell->AddWire(uwire,WirePlaneType_t(0),charge);
 	}
 	
 	//Insert V
@@ -3022,7 +3043,10 @@ void WireCell2dToy::LowmemTiling::form_two_bad_cells(){
 	// std::cout << vwire_min->index() << " " << vwire_max->index() << std::endl;
 	for (int k=vwire_min->index();k!=vwire_max->index()+1;k++){
 	  const GeomWire *vwire = gds.by_planeindex(WirePlaneType_t(1),k);
-	  mcell->AddWire(vwire,WirePlaneType_t(1));
+	  float charge = 0;
+	  if (wirechargemap.find(vwire)!=wirechargemap.end())
+	    charge = wirechargemap[vwire];
+	  mcell->AddWire(vwire,WirePlaneType_t(1),charge);
 	}
 
 	//Insert W
@@ -3030,7 +3054,10 @@ void WireCell2dToy::LowmemTiling::form_two_bad_cells(){
 	const GeomWire* wwire_max = gds.bounds(w_max,WirePlaneType_t(2)).first;
 	for (int k=wwire_min->index();k!=wwire_max->index()+1;k++){
 	  const GeomWire *wwire = gds.by_planeindex(WirePlaneType_t(2),k);
-	  mcell->AddWire(wwire,WirePlaneType_t(2));
+	  float charge = 0;
+	  if (wirechargemap.find(wwire)!=wirechargemap.end())
+	    charge = wirechargemap[wwire];
+	  mcell->AddWire(wwire,WirePlaneType_t(2),charge);
 	}
 
 
@@ -3258,7 +3285,10 @@ void WireCell2dToy::LowmemTiling::form_two_bad_cells(){
 	const GeomWire* uwire_max = gds.closest(u_max,WirePlaneType_t(0));//.bounds(u_max,WirePlaneType_t(0)).first;
 	for (int k=uwire_min->index();k!=uwire_max->index()+1;k++){
 	  const GeomWire *uwire = gds.by_planeindex(WirePlaneType_t(0),k);
-	  mcell->AddWire(uwire,WirePlaneType_t(0));
+	  float charge = 0;
+	  if (wirechargemap.find(uwire)!=wirechargemap.end())
+	    charge = wirechargemap[uwire];
+	  mcell->AddWire(uwire,WirePlaneType_t(0),charge);
 	}
 	
 	//Insert V
@@ -3267,7 +3297,10 @@ void WireCell2dToy::LowmemTiling::form_two_bad_cells(){
 	// std::cout << vwire_min->index() << " " << vwire_max->index() << std::endl;
 	for (int k=vwire_min->index();k!=vwire_max->index()+1;k++){
 	  const GeomWire *vwire = gds.by_planeindex(WirePlaneType_t(1),k);
-	  mcell->AddWire(vwire,WirePlaneType_t(1));
+	  float charge = 0;
+	  if (wirechargemap.find(vwire)!=wirechargemap.end())
+	    charge = wirechargemap[vwire];
+	  mcell->AddWire(vwire,WirePlaneType_t(1),charge);
 	}
 
 	//Insert W
@@ -3275,7 +3308,10 @@ void WireCell2dToy::LowmemTiling::form_two_bad_cells(){
 	const GeomWire* wwire_max = gds.bounds(w_max,WirePlaneType_t(2)).first;
 	for (int k=wwire_min->index();k!=wwire_max->index()+1;k++){
 	  const GeomWire *wwire = gds.by_planeindex(WirePlaneType_t(2),k);
-	  mcell->AddWire(wwire,WirePlaneType_t(2));
+	  float charge = 0;
+	  if (wirechargemap.find(wwire)!=wirechargemap.end())
+	    charge = wirechargemap[wwire];
+	  mcell->AddWire(wwire,WirePlaneType_t(2),charge);
 	}
 
 
@@ -3297,7 +3333,7 @@ void WireCell2dToy::LowmemTiling::form_fired_merge_wires(const WireCell::Slice& 
     const WireCell::GeomWire *wire = gds.by_channel_segment(group.at(i).first,0);
     float charge = group.at(i).second;
     float charge_err = group_err.at(i).second;
-    if (charge < 11) charge = 11;
+    //  if (charge < 11) charge = 11;
     if (wirechargemap.find(wire) == wirechargemap.end()){
       //not found
       wirechargemap[wire] = charge;

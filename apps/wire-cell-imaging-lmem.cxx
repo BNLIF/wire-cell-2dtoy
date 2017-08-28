@@ -683,12 +683,20 @@ int main(int argc, char* argv[])
 	Projected2DCluster *comp_2Dclus = it1->first;
 	std::vector<Slim3DCluster*>& vec_3Dclus = it1->second;
 	
-	int comp_score = comp_2Dclus->judge_coverage(u_2Dclus);
+	int comp_score1 = comp_2Dclus->judge_coverage(u_2Dclus);
 	//	int comp_score = comp_2Dclus->judge_coverage_alt(u_2Dclus);
 	// std::vector<int> comp_results = comp_2Dclus->calc_coverage(u_2Dclus);
 	// if (comp_results.at(2) + comp_results.at(3) >0)
 	//   std::cout << "Xin: " << 0 << " " << comp_results.at(0) << " " << comp_results.at(1) << " " <<
 	//     comp_results.at(2) << " " << comp_results.at(3) << std::endl;
+
+	int comp_score;
+	if (comp_score1 ==1 || comp_score1 == -1 || comp_score1 ==2){
+	  comp_score = comp_score1;
+	}else if (comp_score1==0){
+	  // do a new round of comparison
+	  comp_score = comp_score1;
+	}
 	
 	if (comp_score == 1){
 	  // u_2Dclus is part of comp_2Dclus
@@ -732,13 +740,21 @@ int main(int argc, char* argv[])
 	Projected2DCluster *comp_2Dclus = it1->first;
 	std::vector<Slim3DCluster*>& vec_3Dclus = it1->second;
 	
-	int comp_score = comp_2Dclus->judge_coverage(v_2Dclus);
+	int comp_score1 = comp_2Dclus->judge_coverage(v_2Dclus);
 	//int comp_score = comp_2Dclus->judge_coverage_alt(v_2Dclus);
 
 	// std::vector<int> comp_results = comp_2Dclus->calc_coverage(v_2Dclus);
 	// if (comp_results.at(2) + comp_results.at(3) >0)
 	//   std::cout << "Xin: " << 1 << " " << comp_results.at(0) << " " << comp_results.at(1) << " " <<
 	//     comp_results.at(2) << " " << comp_results.at(3) << std::endl;
+
+	int comp_score;
+	if (comp_score1 ==1 || comp_score1 == -1 || comp_score1 ==2){
+	  comp_score = comp_score1;
+	}else if (comp_score1==0){
+	  // do a new round of comparison
+	  comp_score = comp_score1;
+	}
 	
 	if (comp_score == 1){
 	  // v_2Dclus is part of comp_2Dclus
@@ -783,12 +799,21 @@ int main(int argc, char* argv[])
 	Projected2DCluster *comp_2Dclus = it1->first;
 	std::vector<Slim3DCluster*>& vec_3Dclus = it1->second;
 	
-	int comp_score = comp_2Dclus->judge_coverage(w_2Dclus);
+	int comp_score1 = comp_2Dclus->judge_coverage(w_2Dclus);
 	//int comp_score = comp_2Dclus->judge_coverage_alt(w_2Dclus);
 	// std::vector<int> comp_results = comp_2Dclus->calc_coverage(w_2Dclus);
 	// if (comp_results.at(2) + comp_results.at(3) >0)
 	//   std::cout << "Xin: " << 2 << " " << comp_results.at(0) << " " << comp_results.at(1) << " " <<
 	//     comp_results.at(2) << " " << comp_results.at(3) << std::endl;
+
+	int comp_score;
+	if (comp_score1 ==1 || comp_score1 == -1 || comp_score1 ==2){
+	  comp_score = comp_score1;
+	}else if (comp_score1==0){
+	  // do a new round of comparison
+	  comp_score = comp_score1;
+	}
+	
 	
 	if (comp_score == 1){
 	  // w_2Dclus is part of comp_2Dclus
