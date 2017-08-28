@@ -695,10 +695,11 @@ int main(int argc, char* argv[])
 	  comp_score = comp_score1;
 	}else if (comp_score1==0){
 	  // do a new round of comparison
-	  comp_score = comp_score1;
-	  std::vector<int> comp_results = comp_2Dclus->calc_coverage(u_2Dclus);
-	  std::cout << "Xin: " << 0 << " " << comp_results.at(0) << " " << comp_results.at(1) << " " <<
-	    comp_results.at(2) << " " << comp_results.at(3) << " " << comp_results.at(4) << " " << comp_results.at(5) << std::endl;
+	  comp_score = comp_2Dclus->judge_coverage_alt(u_2Dclus);//comp_score1;
+	  // std::vector<int> comp_results = comp_2Dclus->calc_coverage(u_2Dclus);
+	  // if (comp_results.at(2)!=0)
+	  //   std::cout << "Xin: " << 0 << " " << comp_results.at(0) << " " << comp_results.at(1) << " " <<
+	  //     comp_results.at(2) << " " << comp_results.at(3) << " " << comp_results.at(4) << " " << comp_results.at(5) << " " << comp_results.at(6) << " " << comp_results.at(7) << std::endl;
 	}
 	
 	if (comp_score == 1){
@@ -756,11 +757,12 @@ int main(int argc, char* argv[])
 	  comp_score = comp_score1;
 	}else if (comp_score1==0){
 	  // do a new round of comparison
-	  comp_score = comp_score1;
+	  comp_score = comp_2Dclus->judge_coverage_alt(v_2Dclus);//comp_score1;
 
-	  std::vector<int> comp_results = comp_2Dclus->calc_coverage(v_2Dclus);
-	  std::cout << "Xin: " << 1 << " " << comp_results.at(0) << " " << comp_results.at(1) << " " <<
-	    comp_results.at(2) << " " << comp_results.at(3) << " " << comp_results.at(4) << " " << comp_results.at(5) << std::endl;
+	  // std::vector<int> comp_results = comp_2Dclus->calc_coverage(v_2Dclus);
+	  // if (comp_results.at(2)!=0)
+	  //   std::cout << "Xin: " << 1 << " " << comp_results.at(0) << " " << comp_results.at(1) << " " <<
+	  //     comp_results.at(2) << " " << comp_results.at(3) << " " << comp_results.at(4) << " " << comp_results.at(5) << " " << comp_results.at(6) << " " << comp_results.at(7)<< std::endl;
 	}
 	
 	if (comp_score == 1){
@@ -818,11 +820,13 @@ int main(int argc, char* argv[])
 	  comp_score = comp_score1;
 	}else if (comp_score1==0){
 	  // do a new round of comparison
-	  comp_score = comp_score1;
+	  comp_score = comp_2Dclus->judge_coverage_alt(w_2Dclus);//comp_score1;
 
-	  std::vector<int> comp_results = comp_2Dclus->calc_coverage(w_2Dclus);
-	  std::cout << "Xin: " << 2 << " " << comp_results.at(0) << " " << comp_results.at(1) << " " <<
-	    comp_results.at(2) << " " << comp_results.at(3) << " " << comp_results.at(4) << " " << comp_results.at(5) << std::endl;
+
+	  // std::vector<int> comp_results = comp_2Dclus->calc_coverage(w_2Dclus);
+	  // if (comp_results.at(2)!=0)
+	  //   std::cout << "Xin: " << 2 << " " << comp_results.at(0) << " " << comp_results.at(1) << " " <<
+	  //     comp_results.at(2) << " " << comp_results.at(3) << " " << comp_results.at(4) << " " << comp_results.at(5) << " " << comp_results.at(6) << " " << comp_results.at(7) << std::endl;
 	}
 	
 	
