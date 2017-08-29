@@ -695,7 +695,18 @@ int main(int argc, char* argv[])
 	  comp_score = comp_score1;
 	}else if (comp_score1==0){
 	  // do a new round of comparison
-	  comp_score = comp_2Dclus->judge_coverage_alt(u_2Dclus);//comp_score1;
+	  comp_score = comp_score1;
+
+	  // int comp_score2 = comp_2Dclus->judge_coverage_alt(u_2Dclus);
+	  // if (comp_score2==1){
+	  //   (*it)->set_flag_saved_u(1);
+	  // }else if (comp_score2==-1){
+	  //   for (auto it2 = vec_3Dclus.begin(); it2!=vec_3Dclus.end(); it2++){
+	  //     (*it2)->set_flag_saved_u(1);
+	  //   }
+	  // }
+	  
+	  //comp_score = comp_2Dclus->judge_coverage_alt(u_2Dclus); //comp_score1;
 	  // std::vector<int> comp_results = comp_2Dclus->calc_coverage(u_2Dclus);
 	  // if (comp_results.at(2)!=0)
 	  //   std::cout << "Xin: " << 0 << " " << comp_results.at(0) << " " << comp_results.at(1) << " " <<
@@ -757,8 +768,23 @@ int main(int argc, char* argv[])
 	  comp_score = comp_score1;
 	}else if (comp_score1==0){
 	  // do a new round of comparison
-	  comp_score = comp_2Dclus->judge_coverage_alt(v_2Dclus);//comp_score1;
+	  comp_score = comp_score1;
 
+	  // int comp_score2 = comp_2Dclus->judge_coverage_alt(v_2Dclus);
+	  // if (comp_score2==1){
+	  //   (*it)->set_flag_saved_v(1);
+	  // }else if (comp_score2==-1){
+	  //   for (auto it2 = vec_3Dclus.begin(); it2!=vec_3Dclus.end(); it2++){
+	  //     (*it2)->set_flag_saved_v(1);
+	  //   }
+	  // }
+
+	  
+	  //comp_score = comp_2Dclus->judge_coverage_alt(v_2Dclus);//comp_score1;
+	  
+
+
+	  
 	  // std::vector<int> comp_results = comp_2Dclus->calc_coverage(v_2Dclus);
 	  // if (comp_results.at(2)!=0)
 	  //   std::cout << "Xin: " << 1 << " " << comp_results.at(0) << " " << comp_results.at(1) << " " <<
@@ -820,7 +846,18 @@ int main(int argc, char* argv[])
 	  comp_score = comp_score1;
 	}else if (comp_score1==0){
 	  // do a new round of comparison
-	  comp_score = comp_2Dclus->judge_coverage_alt(w_2Dclus);//comp_score1;
+	  comp_score = comp_score1;
+
+	  // int comp_score2 = comp_2Dclus->judge_coverage_alt(w_2Dclus);
+	  // if (comp_score2==1){
+	  //   (*it)->set_flag_saved_w(1);
+	  // }else if (comp_score2==-1){
+	  //   for (auto it2 = vec_3Dclus.begin(); it2!=vec_3Dclus.end(); it2++){
+	  //     (*it2)->set_flag_saved_w(1);
+	  //   }
+	  // }
+	  
+	  // comp_score = comp_2Dclus->judge_coverage_alt(w_2Dclus);//comp_score1;
 
 
 	  // std::vector<int> comp_results = comp_2Dclus->calc_coverage(w_2Dclus);
@@ -943,10 +980,12 @@ int main(int argc, char* argv[])
 
     // std::cout << num << " " << (*it)->get_flag_saved() << " " <<  (*it)->get_flag_saved_1() << std::endl;
 
-    if ((num==2 && (*it)->get_flag_saved() - (*it)->get_flag_saved_1() ==2) ||
-	(num==3 && (*it)->get_flag_saved() - (*it)->get_flag_saved_1()>=2)){
+    // if ( (num==3 && ((*it)->get_flag_saved() - (*it)->get_flag_saved_1() >=2) && ((*it)->get_flag_saved_u() + (*it)->get_flag_saved_v() + (*it)->get_flag_saved_w() ==0)) ||  //require two plane has independent stuff
+    // 	 (num==2 && ((*it)->get_flag_saved() - (*it)->get_flag_saved_1() ==2) && ((*it)->get_flag_saved_u() + (*it)->get_flag_saved_v() + (*it)->get_flag_saved_w() ==0)) // require two plane, and tighter cut
+    // 	 ){
     //if ((*it)->get_flag_saved() - (*it)->get_flag_saved_1() >0){
-      // look at each cell level ...
+    if ((*it)->get_flag_saved() - (*it)->get_flag_saved_1() >=2){
+    // look at each cell level ...
       
       ncluster_saved ++;
       nmcell_saved += mcells.size();
@@ -1086,9 +1125,9 @@ int main(int argc, char* argv[])
       // }else{
       // 	flag_save = false;
       // }
-      //      std::cout << flag_save << std::endl;
-      //
-      //if (chargesolver[i]->get_mcell_charge(mcell)>300 && flag_save){
+      // //  std::cout << flag_save << std::endl;
+      
+      // if (chargesolver[i]->get_mcell_charge(mcell)>300 && flag_save)
       {
 	charge_save = chargesolver[i]->get_mcell_charge(mcell);
 	time_slice_save = mcell->GetTimeSlice();
