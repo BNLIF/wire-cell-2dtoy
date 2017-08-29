@@ -135,8 +135,11 @@ WireCell2dToy::MatrixSolver::MatrixSolver(GeomCellSelection& allmcell, GeomWireS
 
     if (det > 1e-5){
       Direct_Solve();
-    }//else{
-      // first time L1 solve ...
+    }
+
+    
+    //else{
+    // first time L1 solve ...
     // L1_Solve();
     //}
     

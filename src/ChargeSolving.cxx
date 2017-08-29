@@ -146,6 +146,13 @@ void WireCell2dToy::ChargeSolving::divide_groups(){
 
     for (auto it = grouped_cells.begin(); it!=grouped_cells.end(); it++){
       MergeGeomCell *mcell = (MergeGeomCell*)(*it);
+      //test
+      // if (matrix->get_solve_flag()==1){
+      // 	ccmap[mcell] = matrix->get_mcell_charge(mcell) ;
+      // }else{
+      // 	ccmap[mcell] = 10000;
+      // }
+      
       ccmap[mcell] = matrix->get_mcell_charge(mcell) ;
       //   std::cout << matrix->get_mcell_charge(mcell) << std::endl;
     }
