@@ -1068,7 +1068,7 @@ int main(int argc, char* argv[])
     // 	 (num==2 && ((*it)->get_flag_saved() - (*it)->get_flag_saved_1() ==2) && ((*it)->get_flag_saved_u() + (*it)->get_flag_saved_v() + (*it)->get_flag_saved_w() ==0)) // require two plane, and tighter cut
     // 	 ){
     //if ((*it)->get_flag_saved() - (*it)->get_flag_saved_1() >0){
-    if ((*it)->get_flag_saved() - (*it)->get_flag_saved_1() >=2){
+    if ((*it)->get_flag_saved() - (*it)->get_flag_saved_1() >0){
     // look at each cell level ...
       
       ncluster_saved ++;
