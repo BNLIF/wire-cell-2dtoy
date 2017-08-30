@@ -443,7 +443,7 @@ int main(int argc, char* argv[])
 	for (auto it = cluster_set.begin();it!=cluster_set.end();it++){
 	  //loop through clusters
 	  
-	  flag += (*it)->AddCell(*((SlimMergeGeomCell*)allmcell[j]));
+	  flag += (*it)->AddCell(*((SlimMergeGeomCell*)allmcell[j]),2);
 	  if (flag==1 && flag != flag_save){
 	    cluster_save = *it;
 	  }else if (flag>1 && flag != flag_save){
@@ -663,9 +663,62 @@ int main(int argc, char* argv[])
     // // display.draw_cells_charge(toytiling[i]->get_allcell(),"Fsame");
     //  theApp.Run();
   }
+
+  // save cluster into the output file ... 
+
+  Double_t x,y,z;
+  //save cluster
+  Int_t ncluster = 0;
+  TTree *T_cluster= new TTree("T_cluster","T_cluster");
+  T_cluster->Branch("cluster_id",&ncluster,"cluster_id/I");
+  T_cluster->Branch("x",&x,"x/D");
+  T_cluster->Branch("y",&y,"y/D");
+  T_cluster->Branch("z",&z,"z/D");
+  T_cluster->SetDirectory(file);
+  
+  for (auto it = cluster_set.begin();it!=cluster_set.end();it++){
+    (*it)->set_id(ncluster);
+    
+  //   TGraph2D *g1 = new TGraph2D();
+    for (int i=0; i!=(*it)->get_allcell().size();i++){
+      SlimMergeGeomCell *mcell = (SlimMergeGeomCell*)((*it)->get_allcell().at(i));
+      int time_slice_save = mcell->GetTimeSlice();
+      GeomCellSelection temp_cells = lowmemtiling[time_slice_save]->create_single_cells((SlimMergeGeomCell*)mcell);
+      for (int j=0; j!=temp_cells.size();j++){
+   	Point p = temp_cells.at(j)->center();
+   	x = mcell->GetTimeSlice()*nrebin/2.*unit_dis/10. - frame_length/2.*unit_dis/10.;
+   	y = p.y/units::cm;
+   	z = p.z/units::cm;
+	T_cluster->Fill();
+	// 	g1->SetPoint(ncount,x,y,z);
+	// 	ncount ++;
+      }
+    }
+    // cout << ncount << endl;
+    //   g1->Write(Form("cluster_%d",ncluster));
+    ncluster ++;
+  }
   
   cerr << em("finish tiling") << endl;
-
+  
+  TTree *T_2Dcluster = new TTree("T_2Dcluster","T_2Dcluster");
+  T_2Dcluster->SetDirectory(file);
+  Int_t cluster1_ID, cluster2_ID;
+  Int_t plane_no;
+  Int_t cluster1_wire, cluster2_wire;
+  Int_t common_wire;
+  Float_t cluster1_charge, cluster2_charge;
+  Float_t common_charge;
+  T_2Dcluster->Branch("cluster1_ID",&cluster1_ID,"cluster1_ID/I");
+  T_2Dcluster->Branch("cluster2_ID",&cluster2_ID,"cluster2_ID/I");
+  T_2Dcluster->Branch("plane_no",&plane_no,"plane_no/I");
+  T_2Dcluster->Branch("cluster1_wire",&cluster1_wire,"cluster1_wire/I");
+  T_2Dcluster->Branch("cluster2_wire",&cluster2_wire,"cluster2_wire/I");
+  T_2Dcluster->Branch("common_wire",&common_wire,"common_wire/I");
+  T_2Dcluster->Branch("cluster1_charge",&cluster1_charge,"cluster1_charge/F");
+  T_2Dcluster->Branch("cluster2_charge",&cluster2_charge,"cluster2_charge/F");
+  T_2Dcluster->Branch("common_charge",&common_charge,"common_charge/F");
+  
   std::map<Projected2DCluster*, std::vector<Slim3DCluster*>> u_2D_3D_clus_map;
   std::map<Projected2DCluster*, std::vector<Slim3DCluster*>> v_2D_3D_clus_map;
   std::map<Projected2DCluster*, std::vector<Slim3DCluster*>> w_2D_3D_clus_map;
@@ -676,20 +729,30 @@ int main(int argc, char* argv[])
     Projected2DCluster *u_2Dclus = (*it)->get_projection(WirePlaneType_t(0));
     if (u_2Dclus->get_number_time_slices() >0){
       bool flag_save = true;
-
       std::vector<Projected2DCluster*> to_be_removed;
+      cluster2_ID = u_2Dclus->get_parent_cluster_id();
+      plane_no = 0;
       
       for (auto it1 = u_2D_3D_clus_map.begin(); it1!= u_2D_3D_clus_map.end(); it1++){
 	Projected2DCluster *comp_2Dclus = it1->first;
 	std::vector<Slim3DCluster*>& vec_3Dclus = it1->second;
 	
+	
 	int comp_score1 = comp_2Dclus->judge_coverage(u_2Dclus);
 	//	int comp_score = comp_2Dclus->judge_coverage_alt(u_2Dclus);
-	// std::vector<int> comp_results = comp_2Dclus->calc_coverage(u_2Dclus);
+	std::vector<int> comp_results = comp_2Dclus->calc_coverage(u_2Dclus);
 	// if (comp_results.at(2) + comp_results.at(3) >0)
 	//   std::cout << "Xin: " << 0 << " " << comp_results.at(0) << " " << comp_results.at(1) << " " <<
 	//     comp_results.at(2) << " " << comp_results.at(3) << std::endl;
-
+	cluster1_ID = comp_2Dclus->get_parent_cluster_id();
+	cluster1_wire = comp_results.at(0);
+	cluster2_wire = comp_results.at(1);
+	common_wire = comp_results.at(2);
+	cluster1_charge = comp_results.at(3);
+	cluster2_charge = comp_results.at(4);
+	common_charge = comp_results.at(5);
+	T_2Dcluster->Fill();
+	
 	int comp_score;
 	if (comp_score1 ==1 || comp_score1 == -1 || comp_score1 ==2){
 	  comp_score = comp_score1;
@@ -748,7 +811,8 @@ int main(int argc, char* argv[])
     Projected2DCluster *v_2Dclus = (*it)->get_projection(WirePlaneType_t(1));
     if (v_2Dclus->get_number_time_slices() >0){
       bool flag_save = true;
-
+      cluster2_ID = v_2Dclus->get_parent_cluster_id();
+      plane_no = 1;
       std::vector<Projected2DCluster*> to_be_removed;
       
       for (auto it1 = v_2D_3D_clus_map.begin(); it1!= v_2D_3D_clus_map.end(); it1++){
@@ -757,7 +821,17 @@ int main(int argc, char* argv[])
 	
 	int comp_score1 = comp_2Dclus->judge_coverage(v_2Dclus);
 	//int comp_score = comp_2Dclus->judge_coverage_alt(v_2Dclus);
+	std::vector<int> comp_results = comp_2Dclus->calc_coverage(v_2Dclus);
+	cluster1_ID = comp_2Dclus->get_parent_cluster_id();
+	cluster1_wire = comp_results.at(0);
+	cluster2_wire = comp_results.at(1);
+	common_wire = comp_results.at(2);
+	cluster1_charge = comp_results.at(3);
+	cluster2_charge = comp_results.at(4);
+	common_charge = comp_results.at(5);
+	T_2Dcluster->Fill();
 
+	
 	// std::vector<int> comp_results = comp_2Dclus->calc_coverage(v_2Dclus);
 	// if (comp_results.at(2) + comp_results.at(3) >0)
 	//   std::cout << "Xin: " << 1 << " " << comp_results.at(0) << " " << comp_results.at(1) << " " <<
@@ -827,7 +901,8 @@ int main(int argc, char* argv[])
     Projected2DCluster *w_2Dclus = (*it)->get_projection(WirePlaneType_t(2));
     if (w_2Dclus->get_number_time_slices() >0){
       bool flag_save = true;
-
+      cluster2_ID = w_2Dclus->get_parent_cluster_id();
+      plane_no = 2;
       std::vector<Projected2DCluster*> to_be_removed;
       
       for (auto it1 = w_2D_3D_clus_map.begin(); it1!= w_2D_3D_clus_map.end(); it1++){
@@ -840,7 +915,16 @@ int main(int argc, char* argv[])
 	// if (comp_results.at(2) + comp_results.at(3) >0)
 	//   std::cout << "Xin: " << 2 << " " << comp_results.at(0) << " " << comp_results.at(1) << " " <<
 	//     comp_results.at(2) << " " << comp_results.at(3) << std::endl;
-
+	std::vector<int> comp_results = comp_2Dclus->calc_coverage(w_2Dclus);
+	cluster1_ID = comp_2Dclus->get_parent_cluster_id();
+	cluster1_wire = comp_results.at(0);
+	cluster2_wire = comp_results.at(1);
+	common_wire = comp_results.at(2);
+	cluster1_charge = comp_results.at(3);
+	cluster2_charge = comp_results.at(4);
+	common_charge = comp_results.at(5);
+	T_2Dcluster->Fill();
+	
 	int comp_score;
 	if (comp_score1 ==1 || comp_score1 == -1 || comp_score1 ==2){
 	  comp_score = comp_score1;
@@ -1185,33 +1269,7 @@ int main(int argc, char* argv[])
   g_rec->Write("g_rec");
 
 
-  // Double_t x,y,z;
-  // //save cluster
-  // int ncluster = 0;
-  // for (auto it = cluster_set.begin();it!=cluster_set.end();it++){
-  //   ncount = 0;
 
-    
-  //   TGraph2D *g1 = new TGraph2D();
-  //   for (int i=0; i!=(*it)->get_allcell().size();i++){
-  //     SlimMergeGeomCell *mcell = (SlimMergeGeomCell*)((*it)->get_allcell().at(i));
-
-  //     int time_slice_save = mcell->GetTimeSlice();
-  //     GeomCellSelection temp_cells = lowmemtiling[time_slice_save]->create_single_cells((SlimMergeGeomCell*)mcell);
-      
-  //     for (int j=0; j!=temp_cells.size();j++){
-  // 	Point p = temp_cells.at(j)->center();
-  // 	x = mcell->GetTimeSlice()*nrebin/2.*unit_dis/10. - frame_length/2.*unit_dis/10.;
-  // 	y = p.y/units::cm;
-  // 	z = p.z/units::cm;
-  // 	g1->SetPoint(ncount,x,y,z);
-  // 	ncount ++;
-  //     }
-  //   }
-  //   // cout << ncount << endl;
-  //   g1->Write(Form("cluster_%d",ncluster));
-  //   ncluster ++;
-  // }
 
   
   
