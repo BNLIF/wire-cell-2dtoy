@@ -413,7 +413,6 @@ int main(int argc, char* argv[])
     lowmemtiling[i]->init_good_cells(slice,slice_err,uplane_rms,vplane_rms,wplane_rms);
     
     //std::cout << lowmemtiling[i]->get_cell_wires_map().size() << " " << lowmemtiling[i]->get_wire_cells_map().size() << std::endl;
-
     // refine the merge cells 
     //lowmemtiling[i]->DivideWires(3,0);
     lowmemtiling[i]->MergeWires();
@@ -701,28 +700,15 @@ int main(int argc, char* argv[])
   
   cerr << em("finish tiling") << endl;
   
-  TTree *T_2Dcluster = new TTree("T_2Dcluster","T_2Dcluster");
-  T_2Dcluster->SetDirectory(file);
-  Int_t cluster1_ID, cluster2_ID;
-  Int_t plane_no;
-  Int_t cluster1_wire, cluster2_wire;
-  Int_t common_wire;
-  Float_t cluster1_charge, cluster2_charge;
-  Float_t common_charge;
-  T_2Dcluster->Branch("cluster1_ID",&cluster1_ID,"cluster1_ID/I");
-  T_2Dcluster->Branch("cluster2_ID",&cluster2_ID,"cluster2_ID/I");
-  T_2Dcluster->Branch("plane_no",&plane_no,"plane_no/I");
-  T_2Dcluster->Branch("cluster1_wire",&cluster1_wire,"cluster1_wire/I");
-  T_2Dcluster->Branch("cluster2_wire",&cluster2_wire,"cluster2_wire/I");
-  T_2Dcluster->Branch("common_wire",&common_wire,"common_wire/I");
-  T_2Dcluster->Branch("cluster1_charge",&cluster1_charge,"cluster1_charge/F");
-  T_2Dcluster->Branch("cluster2_charge",&cluster2_charge,"cluster2_charge/F");
-  T_2Dcluster->Branch("common_charge",&common_charge,"common_charge/F");
-  
+
+
+
+
+  // first round only deal with the absolute match ... 
   std::map<Projected2DCluster*, std::vector<Slim3DCluster*>> u_2D_3D_clus_map;
   std::map<Projected2DCluster*, std::vector<Slim3DCluster*>> v_2D_3D_clus_map;
   std::map<Projected2DCluster*, std::vector<Slim3DCluster*>> w_2D_3D_clus_map;
-
+  
   for (auto it = cluster_set.begin();it!=cluster_set.end();it++){
     (*it)->Calc_Projection();
     // get U
@@ -730,52 +716,11 @@ int main(int argc, char* argv[])
     if (u_2Dclus->get_number_time_slices() >0){
       bool flag_save = true;
       std::vector<Projected2DCluster*> to_be_removed;
-      cluster2_ID = u_2Dclus->get_parent_cluster_id();
-      plane_no = 0;
-      
       for (auto it1 = u_2D_3D_clus_map.begin(); it1!= u_2D_3D_clus_map.end(); it1++){
 	Projected2DCluster *comp_2Dclus = it1->first;
 	std::vector<Slim3DCluster*>& vec_3Dclus = it1->second;
-	
-	
-	int comp_score1 = comp_2Dclus->judge_coverage(u_2Dclus);
-	//	int comp_score = comp_2Dclus->judge_coverage_alt(u_2Dclus);
-	std::vector<int> comp_results = comp_2Dclus->calc_coverage(u_2Dclus);
-	// if (comp_results.at(2) + comp_results.at(3) >0)
-	//   std::cout << "Xin: " << 0 << " " << comp_results.at(0) << " " << comp_results.at(1) << " " <<
-	//     comp_results.at(2) << " " << comp_results.at(3) << std::endl;
-	cluster1_ID = comp_2Dclus->get_parent_cluster_id();
-	cluster1_wire = comp_results.at(0);
-	cluster2_wire = comp_results.at(1);
-	common_wire = comp_results.at(2);
-	cluster1_charge = comp_results.at(3);
-	cluster2_charge = comp_results.at(4);
-	common_charge = comp_results.at(5);
-	T_2Dcluster->Fill();
-	
-	int comp_score;
-	if (comp_score1 ==1 || comp_score1 == -1 || comp_score1 ==2){
-	  comp_score = comp_score1;
-	}else if (comp_score1==0){
-	  // do a new round of comparison
-	  //comp_score = comp_score1;
+	int comp_score = comp_2Dclus->judge_coverage(u_2Dclus);
 
-	  // int comp_score2 = comp_2Dclus->judge_coverage_alt(u_2Dclus);
-	  // if (comp_score2==1){
-	  //   (*it)->set_flag_saved_u(1);
-	  // }else if (comp_score2==-1){
-	  //   for (auto it2 = vec_3Dclus.begin(); it2!=vec_3Dclus.end(); it2++){
-	  //     (*it2)->set_flag_saved_u(1);
-	  //   }
-	  // }
-	  
-	  comp_score = comp_2Dclus->judge_coverage_alt(u_2Dclus); //comp_score1;
-	  // std::vector<int> comp_results = comp_2Dclus->calc_coverage(u_2Dclus);
-	  // if (comp_results.at(2)!=0)
-	  //   std::cout << "Xin: " << 0 << " " << comp_results.at(0) << " " << comp_results.at(1) << " " <<
-	  //     comp_results.at(2) << " " << comp_results.at(3) << " " << comp_results.at(4) << " " << comp_results.at(5) << " " << comp_results.at(6) << " " << comp_results.at(7) << std::endl;
-	}
-	
 	if (comp_score == 1){
 	  // u_2Dclus is part of comp_2Dclus
 	  flag_save = false;
@@ -798,7 +743,6 @@ int main(int argc, char* argv[])
       for (auto it1 = to_be_removed.begin(); it1!=to_be_removed.end(); it1++){
 	u_2D_3D_clus_map.erase((*it1));
       }
-      
       // save it 
       if (flag_save){
       	std::vector<Slim3DCluster*> vec_3Dclus;
@@ -807,80 +751,37 @@ int main(int argc, char* argv[])
       }
       //std::cout << u_2D_3D_clus_map.size() << std::endl;
     }
+  
     // get V
     Projected2DCluster *v_2Dclus = (*it)->get_projection(WirePlaneType_t(1));
     if (v_2Dclus->get_number_time_slices() >0){
       bool flag_save = true;
-      cluster2_ID = v_2Dclus->get_parent_cluster_id();
-      plane_no = 1;
       std::vector<Projected2DCluster*> to_be_removed;
-      
       for (auto it1 = v_2D_3D_clus_map.begin(); it1!= v_2D_3D_clus_map.end(); it1++){
-	Projected2DCluster *comp_2Dclus = it1->first;
-	std::vector<Slim3DCluster*>& vec_3Dclus = it1->second;
-	
-	int comp_score1 = comp_2Dclus->judge_coverage(v_2Dclus);
-	//int comp_score = comp_2Dclus->judge_coverage_alt(v_2Dclus);
-	std::vector<int> comp_results = comp_2Dclus->calc_coverage(v_2Dclus);
-	cluster1_ID = comp_2Dclus->get_parent_cluster_id();
-	cluster1_wire = comp_results.at(0);
-	cluster2_wire = comp_results.at(1);
-	common_wire = comp_results.at(2);
-	cluster1_charge = comp_results.at(3);
-	cluster2_charge = comp_results.at(4);
-	common_charge = comp_results.at(5);
-	T_2Dcluster->Fill();
-
-	
-	// std::vector<int> comp_results = comp_2Dclus->calc_coverage(v_2Dclus);
-	// if (comp_results.at(2) + comp_results.at(3) >0)
-	//   std::cout << "Xin: " << 1 << " " << comp_results.at(0) << " " << comp_results.at(1) << " " <<
-	//     comp_results.at(2) << " " << comp_results.at(3) << std::endl;
-
-	int comp_score;
-	if (comp_score1 ==1 || comp_score1 == -1 || comp_score1 ==2){
-	  comp_score = comp_score1;
-	}else if (comp_score1==0){
-	  // do a new round of comparison
-	  comp_score = comp_score1;
-	  // int comp_score2 = comp_2Dclus->judge_coverage_alt(v_2Dclus);
-	  // if (comp_score2==1){
-	  //   (*it)->set_flag_saved_v(1);
-	  // }else if (comp_score2==-1){
-	  //   for (auto it2 = vec_3Dclus.begin(); it2!=vec_3Dclus.end(); it2++){
-	  //     (*it2)->set_flag_saved_v(1);
-	  //   }
-	  // }
-	  comp_score = comp_2Dclus->judge_coverage_alt(v_2Dclus);//comp_score1;
-	  // std::vector<int> comp_results = comp_2Dclus->calc_coverage(v_2Dclus);
-	  // if (comp_results.at(2)!=0)
-	  //   std::cout << "Xin: " << 1 << " " << comp_results.at(0) << " " << comp_results.at(1) << " " <<
-	  //     comp_results.at(2) << " " << comp_results.at(3) << " " << comp_results.at(4) << " " << comp_results.at(5) << " " << comp_results.at(6) << " " << comp_results.at(7)<< std::endl;
-	}
-	
-	if (comp_score == 1){
-	  // v_2Dclus is part of comp_2Dclus
-	  flag_save = false;
-	  break;
-	}else if (comp_score == 2){
-	  // v_2D_clus is the same as comp_2Dclus
-	  flag_save = false;
-	  vec_3Dclus.push_back((*it));
-	  break;
-	}else if (comp_score == -1){
-	  // comp_2Dclus is part of v_2Dclus
-	  to_be_removed.push_back(comp_2Dclus);
-	}else if (comp_score == 0){
-	  //they do not match ...
-	  // do nothing ... 
-	}
+  	Projected2DCluster *comp_2Dclus = it1->first;
+  	std::vector<Slim3DCluster*>& vec_3Dclus = it1->second;
+  	int comp_score = comp_2Dclus->judge_coverage(v_2Dclus);
+  	if (comp_score == 1){
+  	  // v_2Dclus is part of comp_2Dclus
+  	  flag_save = false;
+  	  break;
+  	}else if (comp_score == 2){
+  	  // v_2D_clus is the same as comp_2Dclus
+  	  flag_save = false;
+  	  vec_3Dclus.push_back((*it));
+  	  break;
+  	}else if (comp_score == -1){
+  	  // comp_2Dclus is part of v_2Dclus
+  	  to_be_removed.push_back(comp_2Dclus);
+  	}else if (comp_score == 0){
+  	  //they do not match ...
+  	  // do nothing ... 
+  	}
       }
-
       // remove the small stuff ...
       for (auto it1 = to_be_removed.begin(); it1!=to_be_removed.end(); it1++){
-	v_2D_3D_clus_map.erase((*it1));
+  	v_2D_3D_clus_map.erase((*it1));
       }
-      
       // save it 
       if (flag_save){
       	std::vector<Slim3DCluster*> vec_3Dclus;
@@ -894,79 +795,33 @@ int main(int argc, char* argv[])
     Projected2DCluster *w_2Dclus = (*it)->get_projection(WirePlaneType_t(2));
     if (w_2Dclus->get_number_time_slices() >0){
       bool flag_save = true;
-      cluster2_ID = w_2Dclus->get_parent_cluster_id();
-      plane_no = 2;
       std::vector<Projected2DCluster*> to_be_removed;
-      
       for (auto it1 = w_2D_3D_clus_map.begin(); it1!= w_2D_3D_clus_map.end(); it1++){
-	Projected2DCluster *comp_2Dclus = it1->first;
-	std::vector<Slim3DCluster*>& vec_3Dclus = it1->second;
+  	Projected2DCluster *comp_2Dclus = it1->first;
+  	std::vector<Slim3DCluster*>& vec_3Dclus = it1->second;
 	
-	int comp_score1 = comp_2Dclus->judge_coverage(w_2Dclus);
-	//int comp_score = comp_2Dclus->judge_coverage_alt(w_2Dclus);
-	// std::vector<int> comp_results = comp_2Dclus->calc_coverage(w_2Dclus);
-	// if (comp_results.at(2) + comp_results.at(3) >0)
-	//   std::cout << "Xin: " << 2 << " " << comp_results.at(0) << " " << comp_results.at(1) << " " <<
-	//     comp_results.at(2) << " " << comp_results.at(3) << std::endl;
-	std::vector<int> comp_results = comp_2Dclus->calc_coverage(w_2Dclus);
-	cluster1_ID = comp_2Dclus->get_parent_cluster_id();
-	cluster1_wire = comp_results.at(0);
-	cluster2_wire = comp_results.at(1);
-	common_wire = comp_results.at(2);
-	cluster1_charge = comp_results.at(3);
-	cluster2_charge = comp_results.at(4);
-	common_charge = comp_results.at(5);
-	T_2Dcluster->Fill();
-	
-	int comp_score;
-	if (comp_score1 ==1 || comp_score1 == -1 || comp_score1 ==2){
-	  comp_score = comp_score1;
-	}else if (comp_score1==0){
-	  // do a new round of comparison
-	  //comp_score = comp_score1;
-
-	  // int comp_score2 = comp_2Dclus->judge_coverage_alt(w_2Dclus);
-	  // if (comp_score2==1){
-	  //   (*it)->set_flag_saved_w(1);
-	  // }else if (comp_score2==-1){
-	  //   for (auto it2 = vec_3Dclus.begin(); it2!=vec_3Dclus.end(); it2++){
-	  //     (*it2)->set_flag_saved_w(1);
-	  //   }
-	  // }
-	  
-	  comp_score = comp_2Dclus->judge_coverage_alt(w_2Dclus);//comp_score1;
-
-
-	  // std::vector<int> comp_results = comp_2Dclus->calc_coverage(w_2Dclus);
-	  // if (comp_results.at(2)!=0)
-	  //   std::cout << "Xin: " << 2 << " " << comp_results.at(0) << " " << comp_results.at(1) << " " <<
-	  //     comp_results.at(2) << " " << comp_results.at(3) << " " << comp_results.at(4) << " " << comp_results.at(5) << " " << comp_results.at(6) << " " << comp_results.at(7) << std::endl;
-	}
-	
-	
+  	int comp_score = comp_2Dclus->judge_coverage(w_2Dclus);
 	if (comp_score == 1){
-	  // w_2Dclus is part of comp_2Dclus
-	  flag_save = false;
-	  break;
-	}else if (comp_score == 2){
-	  // w_2D_clus is the same as comp_2Dclus
-	  flag_save = false;
-	  vec_3Dclus.push_back((*it));
-	  break;
-	}else if (comp_score == -1){
-	  // comp_2Dclus is part of w_2Dclus
-	  to_be_removed.push_back(comp_2Dclus);
-	}else if (comp_score == 0){
-	  //they do not match ...
-	  // do nothing ... 
-	}
+      	  // w_2Dclus is part of comp_2Dclus
+      	  flag_save = false;
+      	  break;
+      	}else if (comp_score == 2){
+      	  // w_2D_clus is the same as comp_2Dclus
+      	  flag_save = false;
+      	  vec_3Dclus.push_back((*it));
+      	  break;
+      	}else if (comp_score == -1){
+      	  // comp_2Dclus is part of w_2Dclus
+      	  to_be_removed.push_back(comp_2Dclus);
+      	}else if (comp_score == 0){
+      	  //they do not match ...
+      	  // do nothing ... 
+      	}
       }
-
       // remove the small stuff ...
       for (auto it1 = to_be_removed.begin(); it1!=to_be_removed.end(); it1++){
-	w_2D_3D_clus_map.erase((*it1));
+  	w_2D_3D_clus_map.erase((*it1));
       }
-      
       // save it 
       if (flag_save){
       	std::vector<Slim3DCluster*> vec_3Dclus;
@@ -976,6 +831,155 @@ int main(int argc, char* argv[])
       //std::cout << w_2D_3D_clus_map.size() << std::endl;
     }
   }
+
+
+  TTree *T_2Dcluster = new TTree("T_2Dcluster","T_2Dcluster");
+  T_2Dcluster->SetDirectory(file);
+  Int_t cluster1_ID, cluster2_ID;
+  Int_t plane_no;
+  Int_t cluster1_wire, cluster2_wire;
+  Int_t cluster1_dead_wire, cluster2_dead_wire;
+  Int_t common_wire;
+  Float_t cluster1_charge, cluster2_charge;
+  Float_t cluster1_charge_estimated, cluster2_charge_estimated;
+  Float_t common_charge;
+  Int_t value;
+  T_2Dcluster->Branch("cluster1_ID",&cluster1_ID,"cluster1_ID/I");
+  T_2Dcluster->Branch("cluster2_ID",&cluster2_ID,"cluster2_ID/I");
+  T_2Dcluster->Branch("plane_no",&plane_no,"plane_no/I");
+  T_2Dcluster->Branch("cluster1_wire",&cluster1_wire,"cluster1_wire/I");
+  T_2Dcluster->Branch("cluster2_wire",&cluster2_wire,"cluster2_wire/I");
+  T_2Dcluster->Branch("cluster1_dead_wire",&cluster1_dead_wire,"cluster1_dead_wire/I");
+  T_2Dcluster->Branch("cluster2_dead_wire",&cluster2_dead_wire,"cluster2_dead_wire/I");
+  T_2Dcluster->Branch("common_wire",&common_wire,"common_wire/I");
+  T_2Dcluster->Branch("cluster1_charge",&cluster1_charge,"cluster1_charge/F");
+  T_2Dcluster->Branch("cluster2_charge",&cluster2_charge,"cluster2_charge/F");
+  T_2Dcluster->Branch("cluster1_charge_estimated",&cluster1_charge_estimated,"cluster1_charge_estimated/F");
+  T_2Dcluster->Branch("cluster2_charge_estimated",&cluster2_charge_estimated,"cluster2_charge_estimated/F");
+  T_2Dcluster->Branch("common_charge",&common_charge,"common_charge/F");
+  T_2Dcluster->Branch("value",&value,"value/I");
+
+  
+  std::cout << cluster_set.size() << " " << u_2D_3D_clus_map.size() << " " << v_2D_3D_clus_map.size() << " " << w_2D_3D_clus_map.size() << std::endl;
+  {
+    std::vector<Projected2DCluster*> to_be_removed;
+    for (auto it = u_2D_3D_clus_map.begin(); it!= u_2D_3D_clus_map.end(); it++){
+      Projected2DCluster *u_2Dclus = it->first;
+      if (find(to_be_removed.begin(), to_be_removed.end(), u_2Dclus) == to_be_removed.end()){
+  	cluster2_ID = u_2Dclus->get_parent_cluster_id();
+  	plane_no = 0;
+  	auto it1 = it; it1++;
+  	for (auto it2 = it1; it2!= u_2D_3D_clus_map.end(); it2++){
+  	  Projected2DCluster *comp_2Dclus = it2->first;
+	  
+  	  std::vector<int> comp_results = comp_2Dclus->calc_coverage(u_2Dclus);
+  	  cluster1_ID = comp_2Dclus->get_parent_cluster_id();
+  	  cluster1_wire = comp_results.at(0);
+  	  cluster2_wire = comp_results.at(1);
+  	  cluster1_dead_wire = comp_results.at(2);
+  	  cluster2_dead_wire = comp_results.at(3);
+  	  common_wire = comp_results.at(4);
+  	  cluster1_charge = comp_results.at(5);
+  	  cluster2_charge = comp_results.at(6);
+  	  cluster1_charge_estimated = comp_results.at(7);
+  	  cluster2_charge_estimated = comp_results.at(8);
+  	  common_charge = comp_results.at(9);
+  	  value = comp_2Dclus->judge_coverage_alt(u_2Dclus);
+  	  T_2Dcluster->Fill();
+
+  	  if (value==1){
+  	    to_be_removed.push_back(u_2Dclus);
+  	  }else if (value==-1){
+  	    to_be_removed.push_back(comp_2Dclus);
+  	  }
+  	}
+      }
+    }
+    for (auto it = to_be_removed.begin(); it!= to_be_removed.end(); it++){
+      u_2D_3D_clus_map.erase((*it));
+    }
+  }
+
+  {
+    std::vector<Projected2DCluster*> to_be_removed;
+    for (auto it = v_2D_3D_clus_map.begin(); it!= v_2D_3D_clus_map.end(); it++){
+      Projected2DCluster *v_2Dclus = it->first;
+      if (find(to_be_removed.begin(), to_be_removed.end(), v_2Dclus) == to_be_removed.end()){
+  	cluster2_ID = v_2Dclus->get_parent_cluster_id();
+  	plane_no = 1;
+  	auto it1 = it; it1++;
+  	for (auto it2 = it1; it2!= v_2D_3D_clus_map.end(); it2++){
+  	  Projected2DCluster *comp_2Dclus = it2->first;
+  	  std::vector<int> comp_results = comp_2Dclus->calc_coverage(v_2Dclus);
+	  
+  	  cluster1_ID = comp_2Dclus->get_parent_cluster_id();
+  	  cluster1_wire = comp_results.at(0);
+  	  cluster2_wire = comp_results.at(1);
+  	  cluster1_dead_wire = comp_results.at(2);
+  	  cluster2_dead_wire = comp_results.at(3);
+  	  common_wire = comp_results.at(4);
+  	  cluster1_charge = comp_results.at(5);
+  	  cluster2_charge = comp_results.at(6);
+  	  cluster1_charge_estimated = comp_results.at(7);
+  	  cluster2_charge_estimated = comp_results.at(8);
+  	  common_charge = comp_results.at(9);
+  	  value = comp_2Dclus->judge_coverage_alt(v_2Dclus);
+  	  T_2Dcluster->Fill();
+
+  	  if (value==1){
+  	    to_be_removed.push_back(v_2Dclus);
+  	  }else if (value==-1){
+  	    to_be_removed.push_back(comp_2Dclus);
+  	  }
+  	}
+      }
+    }
+    for (auto it = to_be_removed.begin(); it!= to_be_removed.end(); it++){
+      v_2D_3D_clus_map.erase((*it));
+    }
+  }
+
+  
+  {
+    std::vector<Projected2DCluster*> to_be_removed;
+    for (auto it = w_2D_3D_clus_map.begin(); it!= w_2D_3D_clus_map.end(); it++){
+      Projected2DCluster *w_2Dclus = it->first;
+      if (find(to_be_removed.begin(), to_be_removed.end(), w_2Dclus) == to_be_removed.end()){
+  	cluster2_ID = w_2Dclus->get_parent_cluster_id();
+  	plane_no = 2;
+  	auto it1 = it; it1++;
+  	for (auto it2 = it1; it2!= w_2D_3D_clus_map.end(); it2++){
+  	  Projected2DCluster *comp_2Dclus = it2->first;
+  	  std::vector<int> comp_results = comp_2Dclus->calc_coverage(w_2Dclus);
+  	  cluster1_ID = comp_2Dclus->get_parent_cluster_id();
+  	  cluster1_wire = comp_results.at(0);
+  	  cluster2_wire = comp_results.at(1);
+  	  cluster1_dead_wire = comp_results.at(2);
+  	  cluster2_dead_wire = comp_results.at(3);
+  	  common_wire = comp_results.at(4);
+  	  cluster1_charge = comp_results.at(5);
+  	  cluster2_charge = comp_results.at(6);
+  	  cluster1_charge_estimated = comp_results.at(7);
+  	  cluster2_charge_estimated = comp_results.at(8);
+  	  common_charge = comp_results.at(9);
+  	  value = comp_2Dclus->judge_coverage_alt(w_2Dclus);
+  	  T_2Dcluster->Fill();
+
+  	  if (value==1){
+  	    to_be_removed.push_back(w_2Dclus);
+  	  }else if (value==-1){
+  	    to_be_removed.push_back(comp_2Dclus);
+  	  }
+  	}
+      }
+    }
+    for (auto it = to_be_removed.begin(); it!= to_be_removed.end(); it++){
+      w_2D_3D_clus_map.erase((*it));
+    }
+  }
+
+  std::cout << cluster_set.size() << " " << u_2D_3D_clus_map.size() << " " << v_2D_3D_clus_map.size() << " " << w_2D_3D_clus_map.size() << std::endl;
+  
 
   //label the cluster ...
   for (auto it = u_2D_3D_clus_map.begin(); it!= u_2D_3D_clus_map.end(); it++){
@@ -1002,6 +1006,7 @@ int main(int argc, char* argv[])
       //(*it1)->set_flag_saved(1);
     }
   }
+  
   // rescan it
   for (auto it = u_2D_3D_clus_map.begin(); it!= u_2D_3D_clus_map.end(); it++){
     int max_flag_saved = -1;
@@ -1036,7 +1041,25 @@ int main(int argc, char* argv[])
   	(*it1)->set_flag_saved_1((*it1)->get_flag_saved_1()+1);
     }
   }
-  
+
+  TTree *T_3Dcluster = new TTree("T_3Dcluster","T_3Dcluster");
+  Int_t cluster_id;
+  Int_t saved;
+  Float_t total_charge;
+  Float_t min_charge;
+  Int_t flag_saved;
+  Int_t flag_saved_1;
+  Int_t n_mcells;
+  Int_t n_timeslices;
+  T_3Dcluster->Branch("cluster_id",&cluster_id,"cluster_id/I");
+  T_3Dcluster->Branch("saved",&saved,"saved/I");
+  T_3Dcluster->Branch("total_charge",&total_charge,"total_charge/F");
+  T_3Dcluster->Branch("min_charge",&min_charge,"min_charge/F");
+  T_3Dcluster->Branch("flag_saved",&flag_saved,"flag_saved/I");
+  T_3Dcluster->Branch("flag_saved_1",&flag_saved_1,"flag_saved_1/I");
+  T_3Dcluster->Branch("n_mcells",&n_mcells,"n_mcells/I");
+  T_3Dcluster->Branch("n_timeslices",&n_timeslices,"n_timeslices/I");
+  T_3Dcluster->SetDirectory(file);
   
   // remove the mcell from tiling ...
   int ncluster_saved = 0;
@@ -1056,14 +1079,54 @@ int main(int argc, char* argv[])
     if ((*it)->get_projection(WirePlaneType_t(2))->get_number_time_slices()!=0) num++;
 
     // std::cout << num << " " << (*it)->get_flag_saved() << " " <<  (*it)->get_flag_saved_1() << std::endl;
-
     // if ( (num==3 && ((*it)->get_flag_saved() - (*it)->get_flag_saved_1() >=2) && ((*it)->get_flag_saved_u() + (*it)->get_flag_saved_v() + (*it)->get_flag_saved_w() ==0)) ||  //require two plane has independent stuff
     // 	 (num==2 && ((*it)->get_flag_saved() - (*it)->get_flag_saved_1() ==2) && ((*it)->get_flag_saved_u() + (*it)->get_flag_saved_v() + (*it)->get_flag_saved_w() ==0)) // require two plane, and tighter cut
     // 	 ){
     //if ((*it)->get_flag_saved() - (*it)->get_flag_saved_1() >0){
-    if ((*it)->get_flag_saved() - (*it)->get_flag_saved_1() >0){
-    // look at each cell level ...
-      
+
+    cluster_id = (*it)->get_id();
+    total_charge = (*it)->get_total_charge();
+    min_charge = (*it)->get_min_total_charge();
+    flag_saved = (*it)->get_flag_saved();
+    flag_saved_1 = (*it)->get_flag_saved_1();
+    n_mcells = (*it)->get_allcell().size();
+    n_timeslices = (*it)->get_ordercell().size();
+    
+    if ((*it)->get_flag_saved()-(*it)->get_flag_saved_1() ==3){
+      // look at each cell level ...
+      if ( sqrt(pow(n_timeslices/3.,2) + pow(min_charge/n_mcells/3000.,2))<1 || min_charge/n_mcells/2000.<1.){
+	saved = 0;
+      }else{
+	saved = 1;
+      }
+    }else if ((*it)->get_flag_saved()-(*it)->get_flag_saved_1()  ==2){
+      if ( sqrt(pow(n_timeslices/8.,2) + pow(min_charge/n_mcells/8000.,2))<1 ||  min_charge/n_mcells/4000.<1.){
+	saved = 0;
+      }else{
+	saved = 1;
+      }
+    }else if ((*it)->get_flag_saved()-(*it)->get_flag_saved_1()  ==1){
+      if ( sqrt(pow(n_timeslices/8.,2) + pow(min_charge/n_mcells/8000.,2))<1 || min_charge/n_mcells/6000.<1.){
+	saved = 0;
+      }else{
+	saved = 1;
+      }
+      // if (n_mcells==1){
+      // 	if (min_charge<5000) saved = 0;
+      // }else if (n_mcells==2){
+      // 	if (min_charge<10000) saved = 0;
+      // }else if (n_mcells==3){
+      // 	if (min_charge < 13000) saved = 0;
+      // }else if (n_mcells>=4){
+      // 	if (min_charge<16000) saved = 0;
+      // }
+    }else{
+      saved = 0;
+    }
+
+    // if (min_charge/n_mcells < 5000) saved = 0;
+
+    if (saved==1){
       ncluster_saved ++;
       nmcell_saved += mcells.size();
     }else{
@@ -1074,8 +1137,9 @@ int main(int argc, char* argv[])
 	SlimMergeGeomCell *mcell = (SlimMergeGeomCell*)(*it1);
 	lowmemtiling[mcell->GetTimeSlice()]->Erase_Cell(mcell);
       }
-      
     }
+    
+    T_3Dcluster->Fill();
   }
 
   for (int i=start_num;i!=end_num+1;i++){
