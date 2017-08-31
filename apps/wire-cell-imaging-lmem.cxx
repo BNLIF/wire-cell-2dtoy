@@ -1136,7 +1136,7 @@ int main(int argc, char* argv[])
 	    << nmcell_before << " " << nmcell_after << " "
 	    << std::endl;
   
-  cerr << em("finish deghosting") << endl;
+  cerr << em("finish 1st round of deghosting") << endl;
   
   
   for (int i=start_num;i!=end_num+1;i++){
@@ -1171,8 +1171,48 @@ int main(int argc, char* argv[])
     }
     Twc->Fill();
   }
-  cerr << em("finish solving") << endl;
+  cerr << em("finish 1st round of solving") << endl;
 
+  Int_t nc_mcells = 0;
+  for (int i=start_num; i!=end_num+1;i++){
+    GeomCellMap cell_wires_map = lowmemtiling[i]->get_cell_wires_map();
+    for (auto it = cell_wires_map.begin(); it!= cell_wires_map.end(); it++){
+      SlimMergeGeomCell *mcell = (SlimMergeGeomCell*) it->first;
+       if (chargesolver[i]->get_mcell_charge(mcell)>300){
+	 nc_mcells ++;
+       }
+    }
+  }
+  std::cout << nc_mcells << std::endl;
+      
+  // label merge cells according to connectivities, going through clusters ..
+  
+  // repeat solving by changing the weight
+
+  // see the difference
+  nc_mcells = 0;
+  for (int i=start_num; i!=end_num+1;i++){
+    GeomCellMap cell_wires_map = lowmemtiling[i]->get_cell_wires_map();
+    for (auto it = cell_wires_map.begin(); it!= cell_wires_map.end(); it++){
+      SlimMergeGeomCell *mcell = (SlimMergeGeomCell*) it->first;
+       if (chargesolver[i]->get_mcell_charge(mcell)>300){
+	 nc_mcells ++;
+       }
+    }
+  }
+  std::cout << nc_mcells << std::endl;
+
+  // delete clusters here ... 
+  for (auto it = cluster_set.begin();it!=cluster_set.end();it++){
+    delete *it;
+  }
+  cluster_set.clear();
+  cluster_delset.clear();
+  u_2D_3D_clus_map.clear();
+  v_2D_3D_clus_map.clear();
+  w_2D_3D_clus_map.clear();
+  
+  cerr << em("finish 2nd round of solving with connectivities") << endl;
   
 
   TGraph2D *g = new TGraph2D();
