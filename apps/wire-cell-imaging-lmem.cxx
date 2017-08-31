@@ -1207,16 +1207,12 @@ int main(int argc, char* argv[])
 	good_mcells.insert(mcell1);
     }
   }
-  
-  std::set<SlimMergeGeomCell*> potential_bad_two_wire_cells;
-  for (int i=start_num; i!=end_num+1;i++){
-    GeomCellSelection mcells = lowmemtiling[i]->local_deghosting(0.6,false);
-    for (auto it = mcells.begin(); it!= mcells.end(); it++){
-      potential_bad_two_wire_cells.insert((SlimMergeGeomCell*)(*it));
-    }
-  }
 
-  //  return 0;
+  // removel absolute can be removed ...
+  // completely overlapped with the good three-wire-cells ... 
+  for (int i=start_num; i!=end_num+1;i++){
+    lowmemtiling[i]->local_deghosting(good_mcells);
+  }
   
   //std::cout << good_mcells.size() << std::endl;
   // // see the difference
@@ -1233,6 +1229,7 @@ int main(int argc, char* argv[])
   // std::cout << nc_mcells << std::endl;
   cerr << em("finish 2nd round of solving with connectivities") << endl;
 
+  
   // delete clusters here ... 
   for (auto it = cluster_set.begin();it!=cluster_set.end();it++){
     delete *it;
@@ -1253,46 +1250,46 @@ int main(int argc, char* argv[])
     GeomCellSelection allmcell;
     for (auto it=cell_wires_map.begin(); it!= cell_wires_map.end(); it++){
       SlimMergeGeomCell *mcell = (SlimMergeGeomCell*)it->first;
-      if (good_mcells.find(mcell)!=good_mcells.end() && potential_bad_two_wire_cells.find(mcell) == potential_bad_two_wire_cells.end())
-	allmcell.push_back(mcell);
+      if (good_mcells.find(mcell)!=good_mcells.end() )
+  	allmcell.push_back(mcell);
     }
     if (cluster_set.empty()){
       // if cluster is empty, just insert all the mcell, each as a cluster
       for (int j=0;j!=allmcell.size();j++){
-	Slim3DCluster *cluster = new Slim3DCluster(*((SlimMergeGeomCell*)allmcell[j]));
-	cluster_set.insert(cluster);
+  	Slim3DCluster *cluster = new Slim3DCluster(*((SlimMergeGeomCell*)allmcell[j]));
+  	cluster_set.insert(cluster);
       }
     }else{
       for (int j=0;j!=allmcell.size();j++){
-	int flag = 0;
-	int flag_save = 0;
-	Slim3DCluster *cluster_save = 0;
-	cluster_delset.clear();
+  	int flag = 0;
+  	int flag_save = 0;
+  	Slim3DCluster *cluster_save = 0;
+  	cluster_delset.clear();
 
-	// loop through merged cell
-	for (auto it = cluster_set.begin();it!=cluster_set.end();it++){
-	  //loop through clusters
+  	// loop through merged cell
+  	for (auto it = cluster_set.begin();it!=cluster_set.end();it++){
+  	  //loop through clusters
 	  
-	  flag += (*it)->AddCell(*((SlimMergeGeomCell*)allmcell[j]),2);
-	  if (flag==1 && flag != flag_save){
-	    cluster_save = *it;
-	  }else if (flag>1 && flag != flag_save){
-	    cluster_save->MergeCluster(*(*it));
-	    cluster_delset.insert(*it);
-	  }
-	  flag_save = flag;
+  	  flag += (*it)->AddCell(*((SlimMergeGeomCell*)allmcell[j]),2);
+  	  if (flag==1 && flag != flag_save){
+  	    cluster_save = *it;
+  	  }else if (flag>1 && flag != flag_save){
+  	    cluster_save->MergeCluster(*(*it));
+  	    cluster_delset.insert(*it);
+  	  }
+  	  flag_save = flag;
   	  
-	}
+  	}
 	
-	for (auto it = cluster_delset.begin();it!=cluster_delset.end();it++){
-	  cluster_set.erase(*it);
-	  delete (*it);
-	}
+  	for (auto it = cluster_delset.begin();it!=cluster_delset.end();it++){
+  	  cluster_set.erase(*it);
+  	  delete (*it);
+  	}
 	
-	if (flag==0){
-	  Slim3DCluster *cluster = new Slim3DCluster(*((SlimMergeGeomCell*)allmcell[j]));
-	  cluster_set.insert(cluster);
-	}
+  	if (flag==0){
+  	  Slim3DCluster *cluster = new Slim3DCluster(*((SlimMergeGeomCell*)allmcell[j]));
+  	  cluster_set.insert(cluster);
+  	}
       }
 
       // int ncount_mcell_cluster = 0;
@@ -1313,46 +1310,46 @@ int main(int argc, char* argv[])
     GeomCellSelection allmcell;
     for (auto it=cell_wires_map.begin(); it!= cell_wires_map.end(); it++){
       SlimMergeGeomCell *mcell = (SlimMergeGeomCell*)it->first;
-      if (good_mcells.find(mcell)==good_mcells.end()|| potential_bad_two_wire_cells.find(mcell)!=potential_bad_two_wire_cells.end())
-	allmcell.push_back(mcell);
+      if (good_mcells.find(mcell)==good_mcells.end())
+  	allmcell.push_back(mcell);
     }
     if (cluster_set.empty()){
       // if cluster is empty, just insert all the mcell, each as a cluster
       for (int j=0;j!=allmcell.size();j++){
-	Slim3DCluster *cluster = new Slim3DCluster(*((SlimMergeGeomCell*)allmcell[j]));
-	cluster_set.insert(cluster);
+  	Slim3DCluster *cluster = new Slim3DCluster(*((SlimMergeGeomCell*)allmcell[j]));
+  	cluster_set.insert(cluster);
       }
     }else{
       for (int j=0;j!=allmcell.size();j++){
-	int flag = 0;
-	int flag_save = 0;
-	Slim3DCluster *cluster_save = 0;
-	cluster_delset.clear();
+  	int flag = 0;
+  	int flag_save = 0;
+  	Slim3DCluster *cluster_save = 0;
+  	cluster_delset.clear();
 
-	// loop through merged cell
-	for (auto it = cluster_set.begin();it!=cluster_set.end();it++){
-	  //loop through clusters
+  	// loop through merged cell
+  	for (auto it = cluster_set.begin();it!=cluster_set.end();it++){
+  	  //loop through clusters
 	  
-	  flag += (*it)->AddCell(*((SlimMergeGeomCell*)allmcell[j]),2);
-	  if (flag==1 && flag != flag_save){
-	    cluster_save = *it;
-	  }else if (flag>1 && flag != flag_save){
-	    cluster_save->MergeCluster(*(*it));
-	    cluster_delset.insert(*it);
-	  }
-	  flag_save = flag;
+  	  flag += (*it)->AddCell(*((SlimMergeGeomCell*)allmcell[j]),2);
+  	  if (flag==1 && flag != flag_save){
+  	    cluster_save = *it;
+  	  }else if (flag>1 && flag != flag_save){
+  	    cluster_save->MergeCluster(*(*it));
+  	    cluster_delset.insert(*it);
+  	  }
+  	  flag_save = flag;
   	  
-	}
+  	}
 	
-	for (auto it = cluster_delset.begin();it!=cluster_delset.end();it++){
-	  cluster_set.erase(*it);
-	  delete (*it);
-	}
+  	for (auto it = cluster_delset.begin();it!=cluster_delset.end();it++){
+  	  cluster_set.erase(*it);
+  	  delete (*it);
+  	}
 	
-	if (flag==0){
-	  Slim3DCluster *cluster = new Slim3DCluster(*((SlimMergeGeomCell*)allmcell[j]));
-	  cluster_set.insert(cluster);
-	}
+  	if (flag==0){
+  	  Slim3DCluster *cluster = new Slim3DCluster(*((SlimMergeGeomCell*)allmcell[j]));
+  	  cluster_set.insert(cluster);
+  	}
       }
 
       // int ncount_mcell_cluster = 0;
@@ -1391,9 +1388,9 @@ int main(int argc, char* argv[])
    	x = mcell->GetTimeSlice()*nrebin/2.*unit_dis/10. - frame_length/2.*unit_dis/10.;
    	y = p.y/units::cm;
    	z = p.z/units::cm;
-	T_cluster->Fill();
-	// 	g1->SetPoint(ncount,x,y,z);
-	// 	ncount ++;
+  	T_cluster->Fill();
+  	// 	g1->SetPoint(ncount,x,y,z);
+  	// 	ncount ++;
       }
     }
     // cout << ncount << endl;
@@ -1411,31 +1408,31 @@ int main(int argc, char* argv[])
       bool flag_save = true;
       std::vector<Projected2DCluster*> to_be_removed;
       for (auto it1 = u_2D_3D_clus_map.begin(); it1!= u_2D_3D_clus_map.end(); it1++){
-	Projected2DCluster *comp_2Dclus = it1->first;
-	std::vector<Slim3DCluster*>& vec_3Dclus = it1->second;
-	int comp_score = comp_2Dclus->judge_coverage(u_2Dclus);
+  	Projected2DCluster *comp_2Dclus = it1->first;
+  	std::vector<Slim3DCluster*>& vec_3Dclus = it1->second;
+  	int comp_score = comp_2Dclus->judge_coverage(u_2Dclus);
 
-	if (comp_score == 1){
-	  // u_2Dclus is part of comp_2Dclus
-	  flag_save = false;
-	  break;
-	}else if (comp_score == 2){
-	  // u_2D_clus is the same as comp_2Dclus
-	  flag_save = false;
-	  vec_3Dclus.push_back((*it));
-	  break;
-	}else if (comp_score == -1){
-	  // comp_2Dclus is part of u_2Dclus
-	  to_be_removed.push_back(comp_2Dclus);
-	}else if (comp_score == 0){
-	  //they do not match ...
-	  // do nothing ... 
-	}
+  	if (comp_score == 1){
+  	  // u_2Dclus is part of comp_2Dclus
+  	  flag_save = false;
+  	  break;
+  	}else if (comp_score == 2){
+  	  // u_2D_clus is the same as comp_2Dclus
+  	  flag_save = false;
+  	  vec_3Dclus.push_back((*it));
+  	  break;
+  	}else if (comp_score == -1){
+  	  // comp_2Dclus is part of u_2Dclus
+  	  to_be_removed.push_back(comp_2Dclus);
+  	}else if (comp_score == 0){
+  	  //they do not match ...
+  	  // do nothing ... 
+  	}
       }
 
       // remove the small stuff ...
       for (auto it1 = to_be_removed.begin(); it1!=to_be_removed.end(); it1++){
-	u_2D_3D_clus_map.erase((*it1));
+  	u_2D_3D_clus_map.erase((*it1));
       }
       // save it 
       if (flag_save){
@@ -1495,7 +1492,7 @@ int main(int argc, char* argv[])
   	std::vector<Slim3DCluster*>& vec_3Dclus = it1->second;
 	
   	int comp_score = comp_2Dclus->judge_coverage(w_2Dclus);
-	if (comp_score == 1){
+  	if (comp_score == 1){
       	  // w_2Dclus is part of comp_2Dclus
       	  flag_save = false;
       	  break;
@@ -1740,21 +1737,21 @@ int main(int argc, char* argv[])
     if ((*it)->get_flag_saved()-(*it)->get_flag_saved_1() ==3){
       // look at each cell level ...
       if ( sqrt(pow(n_timeslices/3.,2) + pow(min_charge/n_mcells/3000.,2))<1 || min_charge/n_mcells/2000.<1.){
-	saved = 0;
+  	saved = 0;
       }else{
-	saved = 1;
+  	saved = 1;
       }
     }else if ((*it)->get_flag_saved()-(*it)->get_flag_saved_1()  ==2){
       if ( sqrt(pow(n_timeslices/8.,2) + pow(min_charge/n_mcells/8000.,2))<1 ||  min_charge/n_mcells/4000.<1.){
-	saved = 0;
+  	saved = 0;
       }else{
-	saved = 1;
+  	saved = 1;
       }
     }else if ((*it)->get_flag_saved()-(*it)->get_flag_saved_1()  ==1){
       if (sqrt(pow(n_timeslices/8.,2) + pow(min_charge/n_mcells/8000.,2))<1 || min_charge/n_mcells/6000.<1.){
-	saved = 0;
+  	saved = 0;
       }else{
-	saved = 1;
+  	saved = 1;
       }
     }else{
       saved = 0;
@@ -1782,17 +1779,17 @@ int main(int argc, char* argv[])
   }
   
   std::cout << ncluster_saved << " " << nmcell_saved << " "
-	    << ncluster_deleted << " " << nmcell_deleted << " "
-	    << nmcell_before << " " << nmcell_after << " "
-	    << std::endl;
+  	    << ncluster_deleted << " " << nmcell_deleted << " "
+  	    << nmcell_before << " " << nmcell_after << " "
+  	    << std::endl;
   
   cerr << em("finish 2nd round of clustering and deghosting") << std::endl;
 
-  for (int i=start_num;i!=end_num+1;i++){
-    lowmemtiling[i]->local_deghosting(0.9,true);
-  }
+  // for (int i=start_num;i!=end_num+1;i++){
+  //   lowmemtiling[i]->local_deghosting(0.9,true);
+  // }
   
-  cerr << em("finish the 3rd round of (local) deghosting") << std::endl;
+  // cerr << em("finish the 3rd round of (local) deghosting") << std::endl;
 
   for (int i=start_num;i!=end_num+1;i++){
     if (i%400==0)

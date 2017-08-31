@@ -1497,9 +1497,7 @@ void WireCell2dToy::LowmemTiling::re_establish_maps(){
   }
 }
 
-GeomCellSelection WireCell2dToy::LowmemTiling::local_deghosting(float cut_value, bool flag_del){
-
-  
+void WireCell2dToy::LowmemTiling::local_deghosting(std::set<SlimMergeGeomCell*>& good_mcells){
   
   // do the local deghosting
   std::set<const GeomWire*> used_uwires;
@@ -1508,139 +1506,158 @@ GeomCellSelection WireCell2dToy::LowmemTiling::local_deghosting(float cut_value,
 
   for (auto it = three_good_wire_cells.begin(); it!= three_good_wire_cells.end(); it++){
     SlimMergeGeomCell *mcell = (SlimMergeGeomCell*)(*it);
-    GeomWireSelection uwires = mcell->get_uwires();
-    GeomWireSelection vwires = mcell->get_vwires();
-    GeomWireSelection wwires = mcell->get_wwires();
-    for (auto it1 = uwires.begin(); it1!= uwires.end(); it1++){
-      used_uwires.insert(*it1);
-    }
-    for (auto it1 = vwires.begin(); it1!= vwires.end(); it1++){
-      used_vwires.insert(*it1);
-    }
-    for (auto it1 = wwires.begin(); it1!= wwires.end(); it1++){
-      used_wwires.insert(*it1);
-    }
-  }
-
-  GeomCellSelection to_be_removed = two_good_wire_cells;
-  GeomCellSelection to_be_added;
-  int prev_to_be_removed = -1;
-  
-  for (int ntest = 0; ntest!=10;ntest++){
-    GeomCellSelection testing = to_be_removed;
-    to_be_removed.clear();
-    to_be_added.clear();
-    
-    for (auto it = testing.begin(); it!= testing.end(); it++){
-      SlimMergeGeomCell *mcell = (SlimMergeGeomCell*)(*it);
+    if (good_mcells.find(mcell)!=good_mcells.end()){
       GeomWireSelection uwires = mcell->get_uwires();
       GeomWireSelection vwires = mcell->get_vwires();
       GeomWireSelection wwires = mcell->get_wwires();
-      
+      for (auto it1 = uwires.begin(); it1!= uwires.end(); it1++){
+	used_uwires.insert(*it1);
+      }
+      for (auto it1 = vwires.begin(); it1!= vwires.end(); it1++){
+	used_vwires.insert(*it1);
+      }
+      for (auto it1 = wwires.begin(); it1!= wwires.end(); it1++){
+	used_wwires.insert(*it1);
+      }
+    }
+  }
+
+  GeomCellSelection to_be_removed;
+
+  for (auto it = two_good_wire_cells.begin(); it!= two_good_wire_cells.end(); it++){
+    SlimMergeGeomCell *mcell = (SlimMergeGeomCell*)(*it);
+    if (good_mcells.find(mcell)==good_mcells.end()){
+      GeomWireSelection uwires = mcell->get_uwires();
+      GeomWireSelection vwires = mcell->get_vwires();
+      GeomWireSelection wwires = mcell->get_wwires();
+
       std::vector<WirePlaneType_t> bad_planes = mcell->get_bad_planes();
       bool flag_u = true, flag_v = true, flag_w = true;
       for (auto it1 = bad_planes.begin(); it1!=bad_planes.end(); it1++){
-	if (*it1 == WirePlaneType_t(0))
-	  flag_u = false;
-	if (*it1 == WirePlaneType_t(1))
-	  flag_v = false;
-	if (*it1 == WirePlaneType_t(2))
-	  flag_w = false;
+  	if (*it1 == WirePlaneType_t(0))
+  	  flag_u = false;
+  	if (*it1 == WirePlaneType_t(1))
+  	  flag_v = false;
+  	if (*it1 == WirePlaneType_t(2))
+  	  flag_w = false;
       }
-      
+
       bool save_flag = false;
-      
+
       if (flag_u && !save_flag){
-	int nwire = 0;
-	int nwire_common = 0;
-	for (auto it1 = uwires.begin(); it1!=uwires.end(); it1++){
-	  nwire++;
-	  if (used_uwires.find((*it1))!=used_uwires.end())
-	    nwire_common++;
-	}
-	if (nwire_common < cut_value * nwire) save_flag =true;
+  	int nwire = 0;
+  	int nwire_common = 0;
+  	for (auto it1 = uwires.begin(); it1!=uwires.end(); it1++){
+  	  nwire++;
+  	  if (used_uwires.find((*it1))!=used_uwires.end())
+  	    nwire_common++;
+  	}
+  	if (nwire_common != nwire) save_flag =true;
       }
       
       if (flag_v && !save_flag){
-	int nwire = 0;
-	int nwire_common = 0;
-	for (auto it1 = vwires.begin(); it1!=vwires.end(); it1++){
-	  nwire++;
-	  if (used_vwires.find((*it1))!=used_vwires.end())
-	    nwire_common++;
-	}
-	if (nwire_common <  cut_value * nwire) save_flag =true;
+  	int nwire = 0;
+  	int nwire_common = 0;
+  	for (auto it1 = vwires.begin(); it1!=vwires.end(); it1++){
+  	  nwire++;
+  	  if (used_vwires.find((*it1))!=used_vwires.end())
+  	    nwire_common++;
+  	}
+  	if (nwire_common != nwire) save_flag =true;
       }
       
       if (flag_w && !save_flag){
-	int nwire = 0;
-	int nwire_common = 0;
-	for (auto it1 = wwires.begin(); it1!=wwires.end(); it1++){
-	  nwire++;
-	  if (used_wwires.find((*it1))!=used_wwires.end())
-	    nwire_common++;
-	}
-	if (nwire_common < cut_value * nwire) save_flag =true;
-      }
-      
-      if (!save_flag) {
-	to_be_removed.push_back(mcell);
-      }else{
-	to_be_added.push_back(mcell);
-      }
-    }
-
-    for (auto it = to_be_added.begin(); it!= to_be_added.end(); it++) {
-      SlimMergeGeomCell *mcell = (SlimMergeGeomCell*)(*it);
-      GeomWireSelection uwires = mcell->get_uwires();
-      GeomWireSelection vwires = mcell->get_vwires();
-      GeomWireSelection wwires = mcell->get_wwires();
-      
-      std::vector<WirePlaneType_t> bad_planes = mcell->get_bad_planes();
-      bool flag_u = true, flag_v = true, flag_w = true;
-      for (auto it1 = bad_planes.begin(); it1!=bad_planes.end(); it1++){
-	if (*it1 == WirePlaneType_t(0))
-	  flag_u = false;
-	if (*it1 == WirePlaneType_t(1))
-	  flag_v = false;
-	if (*it1 == WirePlaneType_t(2))
-	  flag_w = false;
+  	int nwire = 0;
+  	int nwire_common = 0;
+  	for (auto it1 = wwires.begin(); it1!=wwires.end(); it1++){
+  	  nwire++;
+  	  if (used_wwires.find((*it1))!=used_wwires.end())
+  	    nwire_common++;
+  	}
+  	if (nwire_common != nwire) save_flag =true;
       }
 
-      if (flag_u){
-	for (auto it2 = uwires.begin(); it2!=uwires.end(); it2++){
-	  used_uwires.insert(*it2);
-	}
-      }
-      if (flag_v){
-	for (auto it2 = vwires.begin(); it2!=vwires.end(); it2++){
-	  used_vwires.insert(*it2);
-	}
-      }
-      if (flag_w){
-	for (auto it2 = wwires.begin(); it2!=wwires.end(); it2++){
-	  used_wwires.insert(*it2);
-	}
-      }
-      
-    }
-
-    if (to_be_removed.size()== prev_to_be_removed)
-      break;
-    prev_to_be_removed = to_be_removed.size();
-    // std::cout << to_be_removed.size() << " " << to_be_added.size() << std::endl;
-    
+      if (!save_flag) to_be_removed.push_back(mcell);
+    }  
   }
+
+  for (auto it=to_be_removed.begin(); it!=to_be_removed.end(); it++){
+    Erase_Cell((SlimMergeGeomCell*)(*it));
+  }
+
+  // GeomCellSelection to_be_removed = two_good_wire_cells;
+  // GeomCellSelection to_be_added;
+  // int prev_to_be_removed = -1;
+  
+  // for (int ntest = 0; ntest!=10;ntest++){
+  //   GeomCellSelection testing = to_be_removed;
+  //   to_be_removed.clear();
+  //   to_be_added.clear();
+    
+  //   for (auto it = testing.begin(); it!= testing.end(); it++){
+  //     SlimMergeGeomCell *mcell = (SlimMergeGeomCell*)(*it);
+  //     GeomWireSelection uwires = mcell->get_uwires();
+  //     GeomWireSelection vwires = mcell->get_vwires();
+  //     GeomWireSelection wwires = mcell->get_wwires();
+      
+ 
+      
+  //     if (!save_flag) {
+  // 	to_be_removed.push_back(mcell);
+  //     }else{
+  // 	to_be_added.push_back(mcell);
+  //     }
+  //   }
+
+  //   for (auto it = to_be_added.begin(); it!= to_be_added.end(); it++) {
+  //     SlimMergeGeomCell *mcell = (SlimMergeGeomCell*)(*it);
+  //     GeomWireSelection uwires = mcell->get_uwires();
+  //     GeomWireSelection vwires = mcell->get_vwires();
+  //     GeomWireSelection wwires = mcell->get_wwires();
+      
+  //     std::vector<WirePlaneType_t> bad_planes = mcell->get_bad_planes();
+  //     bool flag_u = true, flag_v = true, flag_w = true;
+  //     for (auto it1 = bad_planes.begin(); it1!=bad_planes.end(); it1++){
+  // 	if (*it1 == WirePlaneType_t(0))
+  // 	  flag_u = false;
+  // 	if (*it1 == WirePlaneType_t(1))
+  // 	  flag_v = false;
+  // 	if (*it1 == WirePlaneType_t(2))
+  // 	  flag_w = false;
+  //     }
+
+  //     if (flag_u){
+  // 	for (auto it2 = uwires.begin(); it2!=uwires.end(); it2++){
+  // 	  used_uwires.insert(*it2);
+  // 	}
+  //     }
+  //     if (flag_v){
+  // 	for (auto it2 = vwires.begin(); it2!=vwires.end(); it2++){
+  // 	  used_vwires.insert(*it2);
+  // 	}
+  //     }
+  //     if (flag_w){
+  // 	for (auto it2 = wwires.begin(); it2!=wwires.end(); it2++){
+  // 	  used_wwires.insert(*it2);
+  // 	}
+  //     }
+      
+  //   }
+
+  //   if (to_be_removed.size()== prev_to_be_removed)
+  //     break;
+  //   prev_to_be_removed = to_be_removed.size();
+  //   // std::cout << to_be_removed.size() << " " << to_be_added.size() << std::endl;
+    
+  // }
 
   
 
-  if (flag_del){
-    for (auto it=to_be_removed.begin(); it!=to_be_removed.end(); it++){
-      Erase_Cell((SlimMergeGeomCell*)(*it));
-    }
-  }
+  // if (flag_del){
+  //   
+  // }
 
-  return to_be_removed;
+  // return to_be_removed;
   
 }
 
