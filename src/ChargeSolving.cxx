@@ -11,7 +11,7 @@ WireCell2dToy::ChargeSolving::ChargeSolving(const WireCell::GeomDataSource& gds,
   nL1_solved = 0;
 
   // initialize the cell weight map
-  init_cell_weight_map();
+  init_cell_weight_map(9);
   
   // divide into small groups
   divide_groups();
@@ -21,7 +21,39 @@ WireCell2dToy::ChargeSolving::ChargeSolving(const WireCell::GeomDataSource& gds,
 WireCell2dToy::ChargeSolving::~ChargeSolving(){
 }
 
-void WireCell2dToy::ChargeSolving::init_cell_weight_map(){
+void WireCell2dToy::ChargeSolving::L1_resolve(float weight, float reduce_weight_factor){
+  update_cell_weight_map(weight, reduce_weight_factor);
+  
+  // loop existing matrices and resolve ...
+  for (auto it = group_matrices.begin(); it!= group_matrices.end(); it++){
+    MatrixSolver *matrix = (*it);
+    if (matrix->get_solve_flag()==2){
+      matrix->L1_Solve(cell_weight_map);
+      GeomCellSelection cells = matrix->get_all_cells();
+      for (auto it = cells.begin(); it!=cells.end(); it++){
+	MergeGeomCell *mcell = (MergeGeomCell*)(*it);
+	//	std::cout << ccmap[mcell] << " ";
+	ccmap[mcell] = matrix->get_mcell_charge(mcell) ;
+	//std::cout << ccmap[mcell] << std::endl;
+      }
+    }
+  }
+}
+
+void WireCell2dToy::ChargeSolving::update_cell_weight_map(float weight, float reduce_weight_factor){
+  for (auto it= cell_weight_map.begin(); it!=cell_weight_map.end(); it++){
+    const GeomCell *mcell = it->first;
+    float temp_weight = weight;
+    if (front_connectivity.find(mcell)!=front_connectivity.end())
+      temp_weight /= reduce_weight_factor;
+    if (back_connectivity.find(mcell)!=back_connectivity.end())
+      temp_weight /= reduce_weight_factor;
+    cell_weight_map[mcell] = temp_weight;
+    //std::cout << temp_weight << std::endl;
+  }
+}
+
+void WireCell2dToy::ChargeSolving::init_cell_weight_map(float weight){
   GeomCellSelection& one_wire_cells = tiling.get_one_good_wire_cells();
   GeomCellSelection& two_wire_cells = tiling.get_two_good_wire_cells();
   GeomCellSelection& three_wire_cells = tiling.get_three_good_wire_cells();
@@ -31,17 +63,17 @@ void WireCell2dToy::ChargeSolving::init_cell_weight_map(){
 
   for (auto it = three_wire_cells.begin(); it!=three_wire_cells.end(); it++){
     const GeomCell *mcell = (*it);
-    cell_weight_map[mcell] = 1;
+    cell_weight_map[mcell] = weight;
   }
 
   for (auto it = two_wire_cells.begin(); it!=two_wire_cells.end(); it++){
     const GeomCell *mcell = (*it);
-    cell_weight_map[mcell] = 1;
+    cell_weight_map[mcell] = weight;
   }
 
   for (auto it = one_wire_cells.begin(); it!=one_wire_cells.end(); it++){
     const GeomCell *mcell = (*it);
-    cell_weight_map[mcell] = 1;
+    cell_weight_map[mcell] = weight;
   }
   
 }

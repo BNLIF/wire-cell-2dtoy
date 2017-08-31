@@ -231,6 +231,15 @@ void WireCell2dToy::MatrixSolver::L1_Solve(std::map<const GeomCell*, double>& ce
   solve_flag = 2;
 }
 
+GeomCellSelection WireCell2dToy::MatrixSolver::get_all_cells(){
+  GeomCellSelection cells;
+  for (auto it = mcimap.begin(); it!=mcimap.end();it++){
+    cells.push_back(it->first);
+  }
+  return cells;
+}
+
+
 double WireCell2dToy::MatrixSolver::get_mcell_charge(MergeGeomCell *mcell){
   double charge = 0;
 

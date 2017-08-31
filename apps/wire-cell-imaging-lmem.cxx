@@ -1140,7 +1140,7 @@ int main(int argc, char* argv[])
   
   
   for (int i=start_num;i!=end_num+1;i++){
-    if (i%100==0)
+    if (i%200==0)
       std::cout << "Solving: " << i << std::endl;
 
     // tiling after the firs round of deghosting ... 
@@ -1184,11 +1184,39 @@ int main(int argc, char* argv[])
     }
   }
   std::cout << nc_mcells << std::endl;
-      
   // label merge cells according to connectivities, going through clusters ..
-  
-  // repeat solving by changing the weight
+  std::map<const GeomCell*, GeomCellSelection> front_cell_map;
+  std::map<const GeomCell*, GeomCellSelection> back_cell_map;
+  for (auto it = cluster_set.begin();it!=cluster_set.end();it++){
+    (*it)->Form_maps(2, front_cell_map,back_cell_map);
+  }
+  // std::cout << front_cell_map.size() << " " << back_cell_map.size() << std::endl;
 
+  // repeat solving by changing the weight // getting weight ...
+
+  for (auto it = front_cell_map.begin(); it!=front_cell_map.end();it++){
+    SlimMergeGeomCell *mcell1 = (SlimMergeGeomCell*) it->first;
+    int time_slice1 = mcell1->GetTimeSlice();
+    bool flag1 = chargesolver[time_slice1]->get_mcell_charge(mcell1)>300;
+    //std::cout << flag1 << std::endl;
+    for (auto it1 = it->second.begin(); it1!=it->second.end(); it1++){
+      SlimMergeGeomCell *mcell2 = (SlimMergeGeomCell*)(*it1);
+      int time_slice2 = mcell2->GetTimeSlice();
+      bool flag2 = chargesolver[time_slice2]->get_mcell_charge(mcell2)>300;
+      if (flag2)
+	chargesolver[time_slice1]->add_front_connectivity(mcell1);
+      if(flag1)
+	chargesolver[time_slice2]->add_back_connectivity(mcell2);
+    }
+  }
+  
+  for (int i=start_num; i!=end_num+1;i++){
+    if (i%200==0)
+      std::cout << "2nd Solving: " << i << std::endl;
+    chargesolver[i]->L1_resolve(9,3);
+  }
+  
+  
   // see the difference
   nc_mcells = 0;
   for (int i=start_num; i!=end_num+1;i++){

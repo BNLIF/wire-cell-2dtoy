@@ -27,6 +27,8 @@ namespace WireCell2dToy{
     int get_solve_flag(){return solve_flag;};
 
     void L1_Solve(std::map<const WireCell::GeomCell*, double>& cell_weight_map);
+
+    WireCell::GeomCellSelection get_all_cells();
     
   private:
     void Direct_Solve();
