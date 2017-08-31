@@ -348,8 +348,8 @@ int main(int argc, char* argv[])
   int start_num = 0 ;
   int end_num = sds.size()-1;
 
-  // start_num = 1925;
-  // end_num = 1925;
+  //  start_num = 1925;
+  //end_num = 1925;
 
   // start_num = 650;
   // end_num = 650;
@@ -1145,7 +1145,7 @@ int main(int argc, char* argv[])
       direct_ndf[k] = chargesolver[i]->get_direct_ndf(k);
       direct_chi2[k] = chargesolver[i]->get_direct_chi2(k);
     }
-    Twc->Fill();
+    //Twc->Fill();
   }
   cerr << em("finish 1st round of solving") << endl;
 
@@ -1207,8 +1207,18 @@ int main(int argc, char* argv[])
 	good_mcells.insert(mcell1);
     }
   }
-  //std::cout << good_mcells.size() << std::endl;
   
+  std::set<SlimMergeGeomCell*> potential_bad_two_wire_cells;
+  for (int i=start_num; i!=end_num+1;i++){
+    GeomCellSelection mcells = lowmemtiling[i]->local_deghosting(0.6,false);
+    for (auto it = mcells.begin(); it!= mcells.end(); it++){
+      potential_bad_two_wire_cells.insert((SlimMergeGeomCell*)(*it));
+    }
+  }
+
+  //  return 0;
+  
+  //std::cout << good_mcells.size() << std::endl;
   // // see the difference
   // nc_mcells = 0;
   // for (int i=start_num; i!=end_num+1;i++){
@@ -1243,7 +1253,7 @@ int main(int argc, char* argv[])
     GeomCellSelection allmcell;
     for (auto it=cell_wires_map.begin(); it!= cell_wires_map.end(); it++){
       SlimMergeGeomCell *mcell = (SlimMergeGeomCell*)it->first;
-      if (good_mcells.find(mcell)!=good_mcells.end())
+      if (good_mcells.find(mcell)!=good_mcells.end() && potential_bad_two_wire_cells.find(mcell) == potential_bad_two_wire_cells.end())
 	allmcell.push_back(mcell);
     }
     if (cluster_set.empty()){
@@ -1303,7 +1313,7 @@ int main(int argc, char* argv[])
     GeomCellSelection allmcell;
     for (auto it=cell_wires_map.begin(); it!= cell_wires_map.end(); it++){
       SlimMergeGeomCell *mcell = (SlimMergeGeomCell*)it->first;
-      if (good_mcells.find(mcell)==good_mcells.end())
+      if (good_mcells.find(mcell)==good_mcells.end()|| potential_bad_two_wire_cells.find(mcell)!=potential_bad_two_wire_cells.end())
 	allmcell.push_back(mcell);
     }
     if (cluster_set.empty()){
@@ -1516,6 +1526,125 @@ int main(int argc, char* argv[])
     }
   }
 
+
+   {
+    std::vector<Projected2DCluster*> to_be_removed;
+    for (auto it = u_2D_3D_clus_map.begin(); it!= u_2D_3D_clus_map.end(); it++){
+      Projected2DCluster *u_2Dclus = it->first;
+      if (find(to_be_removed.begin(), to_be_removed.end(), u_2Dclus) == to_be_removed.end()){
+  	cluster2_ID = u_2Dclus->get_parent_cluster_id();
+  	plane_no = 0;
+  	auto it1 = it; it1++;
+  	for (auto it2 = it1; it2!= u_2D_3D_clus_map.end(); it2++){
+  	  Projected2DCluster *comp_2Dclus = it2->first;
+	  
+  	  std::vector<int> comp_results = comp_2Dclus->calc_coverage(u_2Dclus);
+  	  cluster1_ID = comp_2Dclus->get_parent_cluster_id();
+  	  cluster1_wire = comp_results.at(0);
+  	  cluster2_wire = comp_results.at(1);
+  	  cluster1_dead_wire = comp_results.at(2);
+  	  cluster2_dead_wire = comp_results.at(3);
+  	  common_wire = comp_results.at(4);
+  	  cluster1_charge = comp_results.at(5);
+  	  cluster2_charge = comp_results.at(6);
+  	  cluster1_charge_estimated = comp_results.at(7);
+  	  cluster2_charge_estimated = comp_results.at(8);
+  	  common_charge = comp_results.at(9);
+  	  value = comp_2Dclus->judge_coverage_alt(u_2Dclus);
+  	  T_2Dcluster->Fill();
+
+  	  if (value==1){
+  	    to_be_removed.push_back(u_2Dclus);
+  	  }else if (value==-1){
+  	    to_be_removed.push_back(comp_2Dclus);
+  	  }
+  	}
+      }
+    }
+    for (auto it = to_be_removed.begin(); it!= to_be_removed.end(); it++){
+      u_2D_3D_clus_map.erase((*it));
+    }
+  }
+
+  {
+    std::vector<Projected2DCluster*> to_be_removed;
+    for (auto it = v_2D_3D_clus_map.begin(); it!= v_2D_3D_clus_map.end(); it++){
+      Projected2DCluster *v_2Dclus = it->first;
+      if (find(to_be_removed.begin(), to_be_removed.end(), v_2Dclus) == to_be_removed.end()){
+  	cluster2_ID = v_2Dclus->get_parent_cluster_id();
+  	plane_no = 1;
+  	auto it1 = it; it1++;
+  	for (auto it2 = it1; it2!= v_2D_3D_clus_map.end(); it2++){
+  	  Projected2DCluster *comp_2Dclus = it2->first;
+  	  std::vector<int> comp_results = comp_2Dclus->calc_coverage(v_2Dclus);
+	  
+  	  cluster1_ID = comp_2Dclus->get_parent_cluster_id();
+  	  cluster1_wire = comp_results.at(0);
+  	  cluster2_wire = comp_results.at(1);
+  	  cluster1_dead_wire = comp_results.at(2);
+  	  cluster2_dead_wire = comp_results.at(3);
+  	  common_wire = comp_results.at(4);
+  	  cluster1_charge = comp_results.at(5);
+  	  cluster2_charge = comp_results.at(6);
+  	  cluster1_charge_estimated = comp_results.at(7);
+  	  cluster2_charge_estimated = comp_results.at(8);
+  	  common_charge = comp_results.at(9);
+  	  value = comp_2Dclus->judge_coverage_alt(v_2Dclus);
+  	  T_2Dcluster->Fill();
+
+  	  if (value==1){
+  	    to_be_removed.push_back(v_2Dclus);
+  	  }else if (value==-1){
+  	    to_be_removed.push_back(comp_2Dclus);
+  	  }
+  	}
+      }
+    }
+    for (auto it = to_be_removed.begin(); it!= to_be_removed.end(); it++){
+      v_2D_3D_clus_map.erase((*it));
+    }
+  }
+
+  
+  {
+    std::vector<Projected2DCluster*> to_be_removed;
+    for (auto it = w_2D_3D_clus_map.begin(); it!= w_2D_3D_clus_map.end(); it++){
+      Projected2DCluster *w_2Dclus = it->first;
+      if (find(to_be_removed.begin(), to_be_removed.end(), w_2Dclus) == to_be_removed.end()){
+  	cluster2_ID = w_2Dclus->get_parent_cluster_id();
+  	plane_no = 2;
+  	auto it1 = it; it1++;
+  	for (auto it2 = it1; it2!= w_2D_3D_clus_map.end(); it2++){
+  	  Projected2DCluster *comp_2Dclus = it2->first;
+  	  std::vector<int> comp_results = comp_2Dclus->calc_coverage(w_2Dclus);
+  	  cluster1_ID = comp_2Dclus->get_parent_cluster_id();
+  	  cluster1_wire = comp_results.at(0);
+  	  cluster2_wire = comp_results.at(1);
+  	  cluster1_dead_wire = comp_results.at(2);
+  	  cluster2_dead_wire = comp_results.at(3);
+  	  common_wire = comp_results.at(4);
+  	  cluster1_charge = comp_results.at(5);
+  	  cluster2_charge = comp_results.at(6);
+  	  cluster1_charge_estimated = comp_results.at(7);
+  	  cluster2_charge_estimated = comp_results.at(8);
+  	  common_charge = comp_results.at(9);
+  	  value = comp_2Dclus->judge_coverage_alt(w_2Dclus);
+  	  T_2Dcluster->Fill();
+
+  	  if (value==1){
+  	    to_be_removed.push_back(w_2Dclus);
+  	  }else if (value==-1){
+  	    to_be_removed.push_back(comp_2Dclus);
+  	  }
+  	}
+      }
+    }
+    for (auto it = to_be_removed.begin(); it!= to_be_removed.end(); it++){
+      w_2D_3D_clus_map.erase((*it));
+    }
+  }
+
+  
   std::cout << cluster_set.size() << " " << u_2D_3D_clus_map.size() << " " << v_2D_3D_clus_map.size() << " " << w_2D_3D_clus_map.size() << std::endl;
 
   //label the cluster ...
@@ -1659,9 +1788,45 @@ int main(int argc, char* argv[])
   
   cerr << em("finish 2nd round of clustering and deghosting") << std::endl;
 
-
+  for (int i=start_num;i!=end_num+1;i++){
+    lowmemtiling[i]->local_deghosting(0.9,true);
+  }
+  
   cerr << em("finish the 3rd round of (local) deghosting") << std::endl;
 
+  for (int i=start_num;i!=end_num+1;i++){
+    if (i%400==0)
+      std::cout << "3rd Solving: " << i << std::endl;
+    // tiling after the firs round of deghosting ... 
+    lowmemtiling[i]->MergeWires();
+    // create individual cells ...
+    //GeomCellSelection single_cells = lowmemtiling[i]->create_single_cells();
+    time_slice = i;
+    n_cells = lowmemtiling[i]->get_cell_wires_map().size();//get_all_cell_centers().size();
+    n_good_wires = lowmemtiling[i]->get_all_good_wires().size();
+    n_bad_wires = lowmemtiling[i]->get_all_bad_wires().size();
+    //n_single_cells = single_cells.size();
+    // L1 solving
+    chargesolver[i]->clear_connectivity();
+    chargesolver[i]->L1_resolve(9,1);
+    
+    ndirect_solved = chargesolver[i]->get_ndirect_solved();
+    nL1_solved = chargesolver[i]->get_nL1_solved();
+    chargesolver[i]->Update_ndf_chi2();
+    total_chi2 = chargesolver[i]->get_ndf();
+    total_ndf = chargesolver[i]->get_chi2();
+    for (Int_t k=0;k!=nL1_solved;k++){
+      L1_ndf[k] = chargesolver[i]->get_L1_ndf(k);
+      L1_chi2_base[k] = chargesolver[i]->get_L1_chi2_base(k);
+      L1_chi2_penalty[k] = chargesolver[i]->get_L1_chi2_penalty(k);
+    }
+    for (Int_t k=0;k!=ndirect_solved;k++){
+      direct_ndf[k] = chargesolver[i]->get_direct_ndf(k);
+      direct_chi2[k] = chargesolver[i]->get_direct_chi2(k);
+    }
+    Twc->Fill();
+  }
+  
   
   cerr << em("finish the 2nd round of solving") << std::endl;
   

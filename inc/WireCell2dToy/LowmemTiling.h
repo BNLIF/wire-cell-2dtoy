@@ -82,6 +82,8 @@ namespace WireCell2dToy{
     void Erase_Cell(WireCell::SlimMergeGeomCell *cell);
 
     void Print_maps();
+    WireCell::GeomCellSelection local_deghosting(float cut_value = 0.9, bool flag_del = false);
+    
     
   protected:
     WireCell::GeomDataSource& gds;
@@ -115,6 +117,7 @@ namespace WireCell2dToy{
     int further_mergewire(WireCell::GeomWireSelection &allwire);
 
     void calculate_merged_wire_charge();
+
     
     
     
