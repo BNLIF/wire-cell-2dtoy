@@ -562,6 +562,13 @@ void WireCell2dToy::LowmemTiling::Erase_Cell(SlimMergeGeomCell *cell){
       auto it = find(cells.begin(),cells.end(),cell);
       if (it!=cells.end())
 	cells.erase(it);
+
+      // if the wire does not connect anything, remove it ... 
+      if(cells.size()==0){
+	remove_wire(wire); 
+      }
+
+      
       // remove the cell 
       cell_wires_map.erase(cell);
     }

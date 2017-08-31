@@ -415,7 +415,7 @@ int main(int argc, char* argv[])
     //std::cout << lowmemtiling[i]->get_cell_wires_map().size() << " " << lowmemtiling[i]->get_wire_cells_map().size() << std::endl;
     // refine the merge cells 
     //lowmemtiling[i]->DivideWires(3,0);
-    lowmemtiling[i]->MergeWires();
+    //lowmemtiling[i]->MergeWires();
 
 
     // form clusters
@@ -1077,13 +1077,7 @@ int main(int argc, char* argv[])
     if ((*it)->get_projection(WirePlaneType_t(0))->get_number_time_slices()!=0) num++;
     if ((*it)->get_projection(WirePlaneType_t(1))->get_number_time_slices()!=0) num++;
     if ((*it)->get_projection(WirePlaneType_t(2))->get_number_time_slices()!=0) num++;
-
-    // std::cout << num << " " << (*it)->get_flag_saved() << " " <<  (*it)->get_flag_saved_1() << std::endl;
-    // if ( (num==3 && ((*it)->get_flag_saved() - (*it)->get_flag_saved_1() >=2) && ((*it)->get_flag_saved_u() + (*it)->get_flag_saved_v() + (*it)->get_flag_saved_w() ==0)) ||  //require two plane has independent stuff
-    // 	 (num==2 && ((*it)->get_flag_saved() - (*it)->get_flag_saved_1() ==2) && ((*it)->get_flag_saved_u() + (*it)->get_flag_saved_v() + (*it)->get_flag_saved_w() ==0)) // require two plane, and tighter cut
-    // 	 ){
-    //if ((*it)->get_flag_saved() - (*it)->get_flag_saved_1() >0){
-
+    
     cluster_id = (*it)->get_id();
     total_charge = (*it)->get_total_charge();
     min_charge = (*it)->get_min_total_charge();
@@ -1111,15 +1105,6 @@ int main(int argc, char* argv[])
       }else{
 	saved = 1;
       }
-      // if (n_mcells==1){
-      // 	if (min_charge<5000) saved = 0;
-      // }else if (n_mcells==2){
-      // 	if (min_charge<10000) saved = 0;
-      // }else if (n_mcells==3){
-      // 	if (min_charge < 13000) saved = 0;
-      // }else if (n_mcells>=4){
-      // 	if (min_charge<16000) saved = 0;
-      // }
     }else{
       saved = 0;
     }
@@ -1157,6 +1142,9 @@ int main(int argc, char* argv[])
   for (int i=start_num;i!=end_num+1;i++){
     if (i%100==0)
       std::cout << "Solving: " << i << std::endl;
+
+    // tiling after the firs round of deghosting ... 
+    lowmemtiling[i]->MergeWires();
     
      // create individual cells ...
     //GeomCellSelection single_cells = lowmemtiling[i]->create_single_cells();

@@ -126,16 +126,18 @@ WireCell2dToy::MatrixSolver::MatrixSolver(GeomCellSelection& allmcell, GeomWireS
     *MC = (*MAT) * (*VBy_inv) * (*MA);
 
     solve_flag = 0;
-    double det;
-    if (mcindex <= mwindex){
-      det = MC->Determinant();
-    }else{
-      det = 0;
-    }
+    
+    // Use direct to solve ... 
+    // double det;
+    // if (mcindex <= mwindex){
+    //   det = MC->Determinant();
+    // }else{
+    //   det = 0;
+    // }
 
-    if (det > 1e-5){
-      Direct_Solve();
-    }
+    // if (det > 1e-5){
+    //   Direct_Solve();
+    // }
 
     
     //else{
