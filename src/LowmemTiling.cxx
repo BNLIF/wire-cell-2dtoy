@@ -493,6 +493,32 @@ bool WireCell2dToy::LowmemTiling::replace_wire(WireCell::MergeGeomWire *old_wire
   delete old_wire;
 }
 
+bool WireCell2dToy::LowmemTiling::remove_wire_clear(MergeGeomWire *wire){
+  // do the cell-wire maps
+  if (wire_cells_map.find(wire)!=wire_cells_map.end()){
+    wire_cells_map.erase(wire);
+  }
+  
+  //do the wire-wire maps
+  if (wire_pwire_map.find(wire) != wire_pwire_map.end()){
+    MergeGeomWire *pwire = (MergeGeomWire*)wire_pwire_map[wire];
+    GeomWireSelection& wires = pwire_wires_map[pwire];
+    auto it = find(wires.begin(),wires.end(),wire);
+    if (it!=wires.end())
+      wires.erase(it);
+    wire_pwire_map.erase(wire);
+  }
+  
+  //do wire type map 
+  if (wire_type_map.find(wire) != wire_type_map.end()){
+    wire_type_map.erase(wire);
+    delete wire;
+  }
+  return true;
+}
+
+
+
 bool WireCell2dToy::LowmemTiling::remove_wire(MergeGeomWire *wire){
   // do the cell-wire maps
   if (wire_cells_map.find(wire)!=wire_cells_map.end()){
@@ -1348,7 +1374,128 @@ WireCell::SlimMergeGeomCell* WireCell2dToy::LowmemTiling::create_slim_merge_cell
   
   return 0;
 }
+void WireCell2dToy::LowmemTiling::Print_maps(){
+  std::cout << wire_type_map.size() << " " << cell_wires_map.size()
+	    << " " << wire_cells_map.size() << " " << wire_pwire_map.size()
+	    << " " << pwire_wires_map.size() << std::endl;
+}
 
+void WireCell2dToy::LowmemTiling::re_establish_maps(){
+  std::map<const GeomCell*, const GeomWire*> cell_upwire_map;
+  std::map<const GeomCell*, const GeomWire*> cell_vpwire_map;
+  std::map<const GeomCell*, const GeomWire*> cell_wpwire_map;
+  std::vector<const GeomCell*> all_cells;
+  
+  for (auto it = cell_wires_map.begin(); it!=cell_wires_map.end(); it++){
+    const GeomCell *mcell = it->first;
+    all_cells.push_back(mcell);
+    GeomWireSelection wires = it->second;
+    for (auto it1 = wires.begin(); it1!=wires.end(); it1++){
+      MergeGeomWire *mwire = (MergeGeomWire*)(*it1);
+      MergeGeomWire *p_mwire = (MergeGeomWire*)wire_pwire_map[mwire];
+      if (mwire->get_allwire().at(0)->plane()==WirePlaneType_t(0)){
+    	cell_upwire_map[mcell] = p_mwire;
+      }else if (mwire->get_allwire().at(0)->plane()==WirePlaneType_t(1)){
+    	cell_vpwire_map[mcell] = p_mwire;
+      }else if (mwire->get_allwire().at(0)->plane()==WirePlaneType_t(2)){
+    	cell_wpwire_map[mcell] = p_mwire;
+      }
+    }
+  }
+
+  //  std::cout << "T: " << cell_upwire_map.size() << " " << cell_vpwire_map.size() << " " << cell_wpwire_map.size() << " " << all_cells.size() << std::endl;
+  
+   // delete all wires ...
+  GeomWireSelection wires;
+  for (auto it = wire_pwire_map.begin(); it!=wire_pwire_map.end(); it++){
+    MergeGeomWire *mwire = (MergeGeomWire*)it->first;
+    wires.push_back(mwire);
+  }
+  for (auto it = wires.begin(); it!=wires.end(); it++){
+    MergeGeomWire *mwire = (MergeGeomWire*)(*it);
+    remove_wire_clear(mwire);
+  }
+  // clear all maps ...
+  // wire_pwire_map.clear();
+  // wire_cells_map.clear();
+  cell_wires_map.clear();
+  
+
+  // fill in all maps again ... 
+  for (auto it = all_cells.begin(); it!=all_cells.end(); it++){
+    SlimMergeGeomCell *mcell = (SlimMergeGeomCell*)(*it);
+
+      // create new mwires 
+    GeomWireSelection uwires = mcell->get_uwires();
+    GeomWireSelection vwires = mcell->get_vwires();
+    GeomWireSelection wwires = mcell->get_wwires();
+    MergeGeomWire *mwire_u = new MergeGeomWire(0,uwires);
+    MergeGeomWire *mwire_v = new MergeGeomWire(0,vwires);
+    MergeGeomWire *mwire_w = new MergeGeomWire(0,wwires);
+
+    // create the map  
+    // cell to wires
+    GeomWireSelection wires;
+    wires.push_back(mwire_u);
+    wires.push_back(mwire_v);
+    wires.push_back(mwire_w);
+    cell_wires_map[mcell] = wires;
+    
+    // wire to cells
+    GeomCellSelection cells;
+    cells.push_back(mcell);
+    wire_cells_map[mwire_u] = cells;
+    wire_cells_map[mwire_v] = cells;
+    wire_cells_map[mwire_w] = cells;
+
+    MergeGeomWire *uwire = (MergeGeomWire*)cell_upwire_map[mcell];
+    MergeGeomWire *vwire = (MergeGeomWire*)cell_vpwire_map[mcell];
+    MergeGeomWire *wwire = (MergeGeomWire*)cell_wpwire_map[mcell];
+
+    // wire to parent wire
+    wire_pwire_map[mwire_u] = uwire;
+    wire_pwire_map[mwire_v] = vwire;
+    wire_pwire_map[mwire_w] = wwire;
+	  
+    // wire types
+    wire_type_map[mwire_u] = wire_type_map[uwire];
+    wire_type_map[mwire_v] = wire_type_map[vwire];     
+    wire_type_map[mwire_w] = wire_type_map[wwire];
+	  
+
+    //std::cout <<  wire_type_map[mwire_u] << " " << wire_type_map[mwire_v] << " " << wire_type_map[mwire_w]  << std::endl;
+
+    //  std::cout << pwire_wires_map[uwire].size() << std::endl;
+    
+    //parent wire to wires
+    if (pwire_wires_map.find(uwire)==pwire_wires_map.end()){
+      GeomWireSelection wires;
+      wires.push_back(mwire_u);
+      pwire_wires_map[uwire] = wires;
+    }else{
+      pwire_wires_map[uwire].push_back(mwire_u);
+    }
+    
+    if (pwire_wires_map.find(vwire)==pwire_wires_map.end()){
+      GeomWireSelection wires;
+      wires.push_back(mwire_v);
+      pwire_wires_map[vwire] = wires;
+    }else{
+      pwire_wires_map[vwire].push_back(mwire_v);
+    }
+    
+    if (pwire_wires_map.find(wwire)==pwire_wires_map.end()){
+      GeomWireSelection wires;
+      wires.push_back(mwire_w);
+      pwire_wires_map[wwire] = wires;
+    }else{
+      pwire_wires_map[wwire].push_back(mwire_w);
+    }
+
+    // std::cout << pwire_wires_map[uwire].size() << std::endl;
+    
+  }
+}
 
 void WireCell2dToy::LowmemTiling::init_good_cells(const WireCell::Slice& slice, const WireCell::Slice& slice_err, std::vector<float>& uplane_rms, std::vector<float>& vplane_rms, std::vector<float>& wplane_rms){
   // form good wires group

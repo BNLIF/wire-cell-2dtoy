@@ -24,6 +24,8 @@ namespace WireCell2dToy{
     WireCell::GeomCellSelection cells(const WireCell::GeomWire& wire) const;
     const WireCell::GeomCell* cell(const WireCell::GeomWireSelection& wires) const;
 
+    void re_establish_maps();
+    
     int get_time_slice(){return time_slice;};
     void form_bad_merge_wires(WireCell::ChirpMap& uplane_map, WireCell::ChirpMap& vplane_map, WireCell::ChirpMap& wplane_map);
 
@@ -78,6 +80,8 @@ namespace WireCell2dToy{
     WireCell::WireChargeMap& get_wire_charge_error_map(){return wirecharge_errmap;};
 
     void Erase_Cell(WireCell::SlimMergeGeomCell *cell);
+
+    void Print_maps();
     
   protected:
     WireCell::GeomDataSource& gds;
@@ -104,6 +108,7 @@ namespace WireCell2dToy{
 
     bool remove_cell(WireCell::SlimMergeGeomCell *cell);
     bool remove_wire(WireCell::MergeGeomWire *wire);
+    bool remove_wire_clear(WireCell::MergeGeomWire *wire);
     bool replace_wire(WireCell::MergeGeomWire *old_wire, WireCell::MergeGeomWire *wire);
 
     
