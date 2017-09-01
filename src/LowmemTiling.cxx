@@ -1504,6 +1504,7 @@ GeomCellSelection WireCell2dToy::LowmemTiling::local_deghosting(std::set<SlimMer
   std::set<const GeomWire*> used_vwires;
   std::set<const GeomWire*> used_wwires;
 
+  // find the wires for three-wire cells and also good cells
   for (auto it = three_good_wire_cells.begin(); it!= three_good_wire_cells.end(); it++){
     SlimMergeGeomCell *mcell = (SlimMergeGeomCell*)(*it);
     if (good_mcells.find(mcell)!=good_mcells.end()){
@@ -1584,7 +1585,10 @@ GeomCellSelection WireCell2dToy::LowmemTiling::local_deghosting(std::set<SlimMer
   for (auto it=to_be_removed.begin(); it!=to_be_removed.end(); it++){
     Erase_Cell((SlimMergeGeomCell*)(*it));
   }
-
+  to_be_removed.clear();
+  
+  
+  
   // loop through the two wire cell again
   // find the ones that are absolute not matching with others ...
   // for the rest, return it to be bad for consideration ... 
@@ -1714,76 +1718,100 @@ GeomCellSelection WireCell2dToy::LowmemTiling::local_deghosting(std::set<SlimMer
       saved.insert(cells.front());
   }
 
-  GeomCellSelection to_be_saved;
-  for (auto it = proj_u.begin(); it!=proj_u.end(); it++){
-    //std::cout << "U: " << it->first.first << " " << it->first.second << std::endl;
-    GeomCellSelection& cells = it->second;
-    if (cells.size()>1){
-      bool flag_saved = true;
-      for (auto it1 = cells.begin(); it1!=cells.end(); it1++){
-	if (saved.find((*it1))!=saved.end()){
-	  flag_saved = false;
-	  break;
-	}
-      }
-      if (flag_saved){
-	for (auto it1 = cells.begin(); it1!=cells.end(); it1++){
-	  to_be_saved.push_back(*it1);
-	}
+  for (auto it = saved.begin(); it!=saved.end(); it++){
+    SlimMergeGeomCell *mcell = (SlimMergeGeomCell*)(*it);
+    GeomWireSelection uwires = mcell->get_uwires();
+    GeomWireSelection vwires = mcell->get_vwires();
+    GeomWireSelection wwires = mcell->get_wwires();
+    
+    std::vector<WirePlaneType_t> bad_planes = mcell->get_bad_planes();
+    bool flag_u = true, flag_v = true, flag_w = true;
+    for (auto it1 = bad_planes.begin(); it1!=bad_planes.end(); it1++){
+      if (*it1 == WirePlaneType_t(0))
+	flag_u = false;
+      if (*it1 == WirePlaneType_t(1))
+	flag_v = false;
+      if (*it1 == WirePlaneType_t(2))
+	flag_w = false;
+    }
+    
+    if (flag_u){
+      for (auto it1 = uwires.begin(); it1!= uwires.end(); it1++){
+	used_uwires.insert(*it1);
       }
     }
-  }
-  for (auto it = proj_v.begin(); it!=proj_v.end(); it++){
-    //std::cout << "V: " << it->first.first << " " << it->first.second << std::endl;
-    GeomCellSelection& cells = it->second;
-    if (cells.size()>1){
-      bool flag_saved = true;
-      for (auto it1 = cells.begin(); it1!=cells.end(); it1++){
-	if (saved.find((*it1))!=saved.end()){
-	  flag_saved = false;
-	  break;
-	}
-      }
-      if (flag_saved){
-	for (auto it1 = cells.begin(); it1!=cells.end(); it1++){
-	  to_be_saved.push_back(*it1);
-	}
+    if (flag_v){
+      for (auto it1 = vwires.begin(); it1!= vwires.end(); it1++){
+	used_vwires.insert(*it1);
       }
     }
-  }
-  for (auto it = proj_w.begin(); it!=proj_w.end(); it++){
-    //std::cout << "W: " << it->first.first << " " << it->first.second << std::endl;
-    GeomCellSelection& cells = it->second;
-    if (cells.size()>1){
-      bool flag_saved = true;
-      for (auto it1 = cells.begin(); it1!=cells.end(); it1++){
-	if (saved.find((*it1))!=saved.end()){
-	  flag_saved = false;
-	  break;
-	}
-      }
-      if (flag_saved){
-	for (auto it1 = cells.begin(); it1!=cells.end(); it1++){
-	  to_be_saved.push_back(*it1);
-	}
+    if (flag_w){
+      for (auto it1 = wwires.begin(); it1!= wwires.end(); it1++){
+	used_wwires.insert(*it1);
       }
     }
   }
 
-  //std::cout << proj_u.size() << " " << proj_v.size() << " " << proj_w.size() << " " << two_good_wire_cells.size() << " " << saved.size() << " " << to_be_saved.size() << std::endl;
   
-  for (auto it = to_be_saved.begin(); it!=to_be_saved.end(); it++){
-    saved.insert((*it));
-  }
-
-  to_be_removed.clear();
   for (auto it = two_good_wire_cells.begin(); it!= two_good_wire_cells.end(); it++){
-    if (saved.find((*it))==saved.end()){
-      to_be_removed.push_back((*it));
-    }
-  }
-  // std::cout << to_be_removed.size() << std::endl;
+    SlimMergeGeomCell *mcell = (SlimMergeGeomCell*)(*it);
+    if (good_mcells.find(mcell)==good_mcells.end() && saved.find(mcell)==saved.end()){
+      GeomWireSelection uwires = mcell->get_uwires();
+      GeomWireSelection vwires = mcell->get_vwires();
+      GeomWireSelection wwires = mcell->get_wwires();
 
+      std::vector<WirePlaneType_t> bad_planes = mcell->get_bad_planes();
+      bool flag_u = true, flag_v = true, flag_w = true;
+      for (auto it1 = bad_planes.begin(); it1!=bad_planes.end(); it1++){
+  	if (*it1 == WirePlaneType_t(0))
+  	  flag_u = false;
+  	if (*it1 == WirePlaneType_t(1))
+  	  flag_v = false;
+  	if (*it1 == WirePlaneType_t(2))
+  	  flag_w = false;
+      }
+
+      bool save_flag = false;
+
+      if (flag_u && !save_flag){
+  	int nwire = 0;
+  	int nwire_common = 0;
+  	for (auto it1 = uwires.begin(); it1!=uwires.end(); it1++){
+  	  nwire++;
+  	  if (used_uwires.find((*it1))!=used_uwires.end())
+  	    nwire_common++;
+  	}
+  	if (nwire_common <0.8*  nwire) save_flag =true;
+      }
+      
+      if (flag_v && !save_flag){
+  	int nwire = 0;
+  	int nwire_common = 0;
+  	for (auto it1 = vwires.begin(); it1!=vwires.end(); it1++){
+  	  nwire++;
+  	  if (used_vwires.find((*it1))!=used_vwires.end())
+  	    nwire_common++;
+  	}
+  	if (nwire_common <0.8* nwire) save_flag =true;
+      }
+      
+      if (flag_w && !save_flag){
+  	int nwire = 0;
+  	int nwire_common = 0;
+  	for (auto it1 = wwires.begin(); it1!=wwires.end(); it1++){
+  	  nwire++;
+  	  if (used_wwires.find((*it1))!=used_wwires.end())
+  	    nwire_common++;
+  	}
+  	if (nwire_common <0.8* nwire) save_flag =true;
+      }
+
+      if (!save_flag) to_be_removed.push_back(mcell);
+    }  
+  }
+
+  
+  
   if (flag_del){
     for (auto it=to_be_removed.begin(); it!=to_be_removed.end(); it++){
       Erase_Cell((SlimMergeGeomCell*)(*it));
@@ -1792,6 +1820,72 @@ GeomCellSelection WireCell2dToy::LowmemTiling::local_deghosting(std::set<SlimMer
   }
   
   return to_be_removed;
+  
+  
+
+  // GeomCellSelection to_be_saved;
+  // for (auto it = proj_u.begin(); it!=proj_u.end(); it++){
+  //   //std::cout << "U: " << it->first.first << " " << it->first.second << std::endl;
+  //   GeomCellSelection& cells = it->second;
+  //   if (cells.size()>1){
+  //     bool flag_saved = true;
+  //     for (auto it1 = cells.begin(); it1!=cells.end(); it1++){
+  // 	if (saved.find((*it1))!=saved.end()){
+  // 	  flag_saved = false;
+  // 	  break;
+  // 	}
+  //     }
+  //     if (flag_saved){
+  // 	for (auto it1 = cells.begin(); it1!=cells.end(); it1++){
+  // 	  to_be_saved.push_back(*it1);
+  // 	}
+  //     }
+  //   }
+  // }
+  // for (auto it = proj_v.begin(); it!=proj_v.end(); it++){
+  //   //std::cout << "V: " << it->first.first << " " << it->first.second << std::endl;
+  //   GeomCellSelection& cells = it->second;
+  //   if (cells.size()>1){
+  //     bool flag_saved = true;
+  //     for (auto it1 = cells.begin(); it1!=cells.end(); it1++){
+  // 	if (saved.find((*it1))!=saved.end()){
+  // 	  flag_saved = false;
+  // 	  break;
+  // 	}
+  //     }
+  //     if (flag_saved){
+  // 	for (auto it1 = cells.begin(); it1!=cells.end(); it1++){
+  // 	  to_be_saved.push_back(*it1);
+  // 	}
+  //     }
+  //   }
+  // }
+  // for (auto it = proj_w.begin(); it!=proj_w.end(); it++){
+  //   //std::cout << "W: " << it->first.first << " " << it->first.second << std::endl;
+  //   GeomCellSelection& cells = it->second;
+  //   if (cells.size()>1){
+  //     bool flag_saved = true;
+  //     for (auto it1 = cells.begin(); it1!=cells.end(); it1++){
+  // 	if (saved.find((*it1))!=saved.end()){
+  // 	  flag_saved = false;
+  // 	  break;
+  // 	}
+  //     }
+  //     if (flag_saved){
+  // 	for (auto it1 = cells.begin(); it1!=cells.end(); it1++){
+  // 	  to_be_saved.push_back(*it1);
+  // 	}
+  //     }
+  //   }
+  // }
+
+  // //std::cout << proj_u.size() << " " << proj_v.size() << " " << proj_w.size() << " " << two_good_wire_cells.size() << " " << saved.size() << " " << to_be_saved.size() << std::endl;
+  
+  // for (auto it = to_be_saved.begin(); it!=to_be_saved.end(); it++){
+  //   saved.insert((*it));
+  // }
+
+  
 }
 
 void WireCell2dToy::LowmemTiling::init_good_cells(const WireCell::Slice& slice, const WireCell::Slice& slice_err, std::vector<float>& uplane_rms, std::vector<float>& vplane_rms, std::vector<float>& wplane_rms){
