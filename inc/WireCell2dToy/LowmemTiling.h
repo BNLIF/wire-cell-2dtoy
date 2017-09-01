@@ -82,7 +82,7 @@ namespace WireCell2dToy{
     void Erase_Cell(WireCell::SlimMergeGeomCell *cell);
 
     void Print_maps();
-    void local_deghosting(std::set<WireCell::SlimMergeGeomCell*>& good_mcells);
+    WireCell::GeomCellSelection local_deghosting(std::set<WireCell::SlimMergeGeomCell*>& good_mcells, bool flag_del = false);
     
     
   protected:
