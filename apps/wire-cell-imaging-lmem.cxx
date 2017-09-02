@@ -351,8 +351,8 @@ int main(int argc, char* argv[])
   // start_num = 1925;
   // end_num = 1925;
 
-  //  start_num = 1201;
-  //end_num = 1202;
+  // start_num = 1665;
+  // end_num = 1665;
 
   //end_num = 100;
   
@@ -426,6 +426,8 @@ int main(int argc, char* argv[])
     // lowmemtiling[i]->MergeWires();
     // lowmemtiling[i]->Print_maps();
 
+    
+    
     // form clusters
     WireCell::GeomCellMap cell_wires_map = lowmemtiling[i]->get_cell_wires_map();
     GeomCellSelection allmcell;
@@ -649,7 +651,7 @@ int main(int argc, char* argv[])
     // for (int kk=0;kk!=NCont;kk++) MyPalette[kk] = FI+kk;
     // gStyle->SetPalette(NCont,MyPalette);
 
-    
+    // GeomCellSelection single_cells = lowmemtiling[i]->create_single_cells();
 
     // display.init(0,10.3698,-2.33/2.,2.33/2.);
     // display.draw_mc(1,WireCell::PointValueVector(),"colz");
@@ -1150,7 +1152,7 @@ int main(int argc, char* argv[])
     }
     //Twc->Fill();
   }
-  cerr << em("finish 1st round of solving") << endl;
+  // cerr << em("finish 1st round of solving") << endl;
 
   // Int_t nc_mcells = 0;
   // for (int i=start_num; i!=end_num+1;i++){
@@ -1223,28 +1225,67 @@ int main(int argc, char* argv[])
   // removel absolute can be removed ...
   // completely overlapped with the good three-wire-cells ... 
   std::set<SlimMergeGeomCell*> potential_bad_mcells;
-  
   for (int i=start_num; i!=end_num+1;i++){
-    //GeomCellSelection mcells = lowmemtiling[i]->local_deghosting(potential_good_mcells,false);
-    GeomCellSelection mcells = lowmemtiling[i]->local_deghosting(potential_good_mcells,false);
+    GeomCellSelection mcells = lowmemtiling[i]->local_deghosting(potential_good_mcells,good_mcells,false);
     for (auto it = mcells.begin(); it!=mcells.end(); it++){
       potential_bad_mcells.insert((SlimMergeGeomCell*)(*it));
     }
+    //  if (i==1681){
+    //   //draw ...
+    //   sds.jump(i);
+    //   WireCell::Slice slice = sds.get();
+    //   TApplication theApp("theApp",&argc,argv);
+    //   theApp.SetReturnFromRun(true);
+      
+    //   TCanvas c1("ToyMC","ToyMC",800,600);
+    //   c1.Draw();
+      
+    //   WireCell2dToy::ToyEventDisplay display(c1, gds);
+    //   display.charge_min = 0;
+    //   display.charge_max = 5e4;
+      
+      
+    //   gStyle->SetOptStat(0);
+      
+    //   const Int_t NRGBs = 5;
+    //   const Int_t NCont = 255;
+    //   Int_t MyPalette[NCont];
+    //   Double_t stops[NRGBs] = {0.0, 0.34, 0.61, 0.84, 1.0};
+    //   Double_t red[NRGBs] = {0.0, 0.0, 0.87 ,1.0, 0.51};
+    //   Double_t green[NRGBs] = {0.0, 0.81, 1.0, 0.2 ,0.0};
+    //   Double_t blue[NRGBs] = {0.51, 1.0, 0.12, 0.0, 0.0};
+    //   Int_t FI = TColor::CreateGradientColorTable(NRGBs, stops, red, green, blue, NCont);
+    //   gStyle->SetNumberContours(NCont);
+    //   for (int kk=0;kk!=NCont;kk++) MyPalette[kk] = FI+kk;
+    //   gStyle->SetPalette(NCont,MyPalette);
+      
+    //   GeomCellSelection single_cells = lowmemtiling[i]->create_single_cells();
+      
+    //   display.init(0,10.3698,-2.33/2.,2.33/2.);
+    //   display.draw_mc(1,WireCell::PointValueVector(),"colz");
+    //   display.draw_slice(slice,""); // draw wire 
+    //   // display.draw_wires(vec1_wires.at(64),"same"); // draw wire 
+    //   // // display.draw_bad_region(uplane_map,i,nrebin,0,"same");
+    //   // // display.draw_bad_region(vplane_map,i,nrebin,1,"same");
+    //   // // display.draw_bad_region(wplane_map,i,nrebin,2,"same");
+    //   // display.draw_bad_cell(badtiling[i]->get_cell_all());
+    //   display.draw_cells(single_cells,"*same");
+    //   //display.draw_points(lowmemtiling[i]->get_all_cell_centers(),"*");
+    //   //display.draw_merged_wires(lowmemtiling[i]->get_all_good_wires(),"same",2);
+    //   //display.draw_merged_wires(lowmemtiling[i]->get_all_bad_wires(),"same",1);
+      
+    //   //display.draw_mergecells(mergetiling[i]->get_allcell(),"*same",0); //0 is normal, 1 is only draw the ones containt the truth cell
+      
+    //   // display.draw_wires_charge(toytiling[i]->wcmap(),"Fsame",FI);
+    //   // display.draw_cells_charge(toytiling[i]->get_allcell(),"Fsame");
+    //   theApp.Run();
+    // }
   }
-  int  nmcell_after1 = 0;
-  for (int i=start_num;i!=end_num+1;i++){
-    nmcell_after1 += lowmemtiling[i]->get_cell_wires_map().size();
-  }
-  
-  for (int i=start_num; i!=end_num+1;i++){
-    GeomCellSelection mcells = lowmemtiling[i]->local_deghosting(potential_good_mcells,true);
-  }
-  
   nmcell_after = 0;
   for (int i=start_num;i!=end_num+1;i++){
     nmcell_after += lowmemtiling[i]->get_cell_wires_map().size();
   }
-  std::cout << nmcell_before << " " << nmcell_after << " " << potential_bad_mcells.size() << " " << nmcell_after1<< std::endl;
+  std::cout << nmcell_before << " " << nmcell_after << " " << potential_bad_mcells.size() << std::endl;
   
   
   //std::cout << good_mcells.size() << std::endl;
@@ -1970,25 +2011,8 @@ int main(int argc, char* argv[])
   
   cerr << em("finish 2nd round of clustering and deghosting") << std::endl;
 
-  // nmcell_before = 0;
-  // for (int i=start_num;i!=end_num+1;i++){
-  //   nmcell_before += lowmemtiling[i]->get_cell_wires_map().size();
-  // }
-  
-  // for (int i=start_num;i!=end_num+1;i++){
-  //   std::set<SlimMergeGeomCell*> cells_set;
-  //   lowmemtiling[i]->local_deghosting(cells_set,true);
-  // }
 
-  // nmcell_after = 0;
-  // for (int i=start_num;i!=end_num+1;i++){
-  //   nmcell_after += lowmemtiling[i]->get_cell_wires_map().size();
-  // }
-  // std::cout << nmcell_before << " " << nmcell_after << std::endl;
-  
-  // cerr << em("finish the 3rd round of (local) deghosting") << std::endl;
-
-  for (int i=start_num;i!=end_num+1;i++){
+   for (int i=start_num;i!=end_num+1;i++){
     if (i%400==0)
       std::cout << "2nd Solving: " << i << std::endl;
     // tiling after the firs round of deghosting ... 
@@ -2018,11 +2042,138 @@ int main(int argc, char* argv[])
       direct_ndf[k] = chargesolver[i]->get_direct_ndf(k);
       direct_chi2[k] = chargesolver[i]->get_direct_chi2(k);
     }
-    Twc->Fill();
+    //Twc->Fill();
+  }
+
+   
+   // label merge cells according to connectivities, going through clusters ..
+   front_cell_map.clear();
+  back_cell_map.clear();
+  for (auto it = cluster_set.begin();it!=cluster_set.end();it++){
+    (*it)->Form_maps(2, front_cell_map,back_cell_map);
+  }
+  // std::cout << front_cell_map.size() << " " << back_cell_map.size() << std::endl;
+
+  // repeat solving by changing the weight // getting weight ...
+
+  for (auto it = front_cell_map.begin(); it!=front_cell_map.end();it++){
+    SlimMergeGeomCell *mcell1 = (SlimMergeGeomCell*) it->first;
+    int time_slice1 = mcell1->GetTimeSlice();
+    bool flag1 = chargesolver[time_slice1]->get_mcell_charge(mcell1)>300;
+    //std::cout << flag1 << std::endl;
+    for (auto it1 = it->second.begin(); it1!=it->second.end(); it1++){
+      SlimMergeGeomCell *mcell2 = (SlimMergeGeomCell*)(*it1);
+      int time_slice2 = mcell2->GetTimeSlice();
+      bool flag2 = chargesolver[time_slice2]->get_mcell_charge(mcell2)>300;
+      if (flag2)
+	chargesolver[time_slice1]->add_front_connectivity(mcell1);
+      if(flag1)
+	chargesolver[time_slice2]->add_back_connectivity(mcell2);
+    }
   }
   
+  for (int i=start_num; i!=end_num+1;i++){
+    if (i%400==0)
+      std::cout << "1st Solving with connectivity: " << i << std::endl;
+    chargesolver[i]->L1_resolve(9,3);
+  }
+
+  potential_good_mcells.clear();
+  good_mcells.clear();
+  for (auto it = front_cell_map.begin(); it!=front_cell_map.end();it++){
+    SlimMergeGeomCell *mcell1 = (SlimMergeGeomCell*) it->first;
+    int time_slice1 = mcell1->GetTimeSlice();
+    bool flag1 = chargesolver[time_slice1]->get_mcell_charge(mcell1)>300;
+    if (flag1)
+      good_mcells.insert(mcell1);
+    for (auto it1 = it->second.begin(); it1!=it->second.end(); it1++){
+      SlimMergeGeomCell *mcell2 = (SlimMergeGeomCell*)(*it1);
+      int time_slice2 = mcell2->GetTimeSlice();
+      bool flag2 = chargesolver[time_slice2]->get_mcell_charge(mcell2)>300;
+      if (flag1)
+  	potential_good_mcells.insert(mcell2);
+      if (flag2){
+	potential_good_mcells.insert(mcell1);
+	good_mcells.insert(mcell2);
+      }
+    }
+  }
   
   cerr << em("finish the 2nd round of solving") << std::endl;
+
+
+  nmcell_before = 0;
+  for (int i=start_num;i!=end_num+1;i++){
+    nmcell_before += lowmemtiling[i]->get_cell_wires_map().size();
+  }
+  
+  for (int i=start_num; i!=end_num+1;i++){
+    lowmemtiling[i]->local_deghosting1(potential_good_mcells);//(potential_good_mcells,false);
+
+    
+
+    // if (i==1681){
+      //draw ...
+      // sds.jump(i);
+      // WireCell::Slice slice = sds.get();
+      // TApplication theApp("theApp",&argc,argv);
+      // theApp.SetReturnFromRun(true);
+      
+      // TCanvas c1("ToyMC","ToyMC",800,600);
+      // c1.Draw();
+      
+      // WireCell2dToy::ToyEventDisplay display(c1, gds);
+      // display.charge_min = 0;
+      // display.charge_max = 5e4;
+      
+      
+      // gStyle->SetOptStat(0);
+      
+      // const Int_t NRGBs = 5;
+      // const Int_t NCont = 255;
+      // Int_t MyPalette[NCont];
+      // Double_t stops[NRGBs] = {0.0, 0.34, 0.61, 0.84, 1.0};
+      // Double_t red[NRGBs] = {0.0, 0.0, 0.87 ,1.0, 0.51};
+      // Double_t green[NRGBs] = {0.0, 0.81, 1.0, 0.2 ,0.0};
+      // Double_t blue[NRGBs] = {0.51, 1.0, 0.12, 0.0, 0.0};
+      // Int_t FI = TColor::CreateGradientColorTable(NRGBs, stops, red, green, blue, NCont);
+      // gStyle->SetNumberContours(NCont);
+      // for (int kk=0;kk!=NCont;kk++) MyPalette[kk] = FI+kk;
+      // gStyle->SetPalette(NCont,MyPalette);
+      
+      // GeomCellSelection single_cells = lowmemtiling[i]->create_single_cells();
+      
+      // display.init(0,10.3698,-2.33/2.,2.33/2.);
+      // display.draw_mc(1,WireCell::PointValueVector(),"colz");
+      // display.draw_slice(slice,""); // draw wire 
+      // // display.draw_wires(vec1_wires.at(64),"same"); // draw wire 
+      // // // display.draw_bad_region(uplane_map,i,nrebin,0,"same");
+      // // // display.draw_bad_region(vplane_map,i,nrebin,1,"same");
+      // // // display.draw_bad_region(wplane_map,i,nrebin,2,"same");
+      // // display.draw_bad_cell(badtiling[i]->get_cell_all());
+      // display.draw_cells(single_cells,"*same");
+      // //display.draw_points(lowmemtiling[i]->get_all_cell_centers(),"*");
+      // //display.draw_merged_wires(lowmemtiling[i]->get_all_good_wires(),"same",2);
+      // //display.draw_merged_wires(lowmemtiling[i]->get_all_bad_wires(),"same",1);
+      
+      // //display.draw_mergecells(mergetiling[i]->get_allcell(),"*same",0); //0 is normal, 1 is only draw the ones containt the truth cell
+      
+      // // display.draw_wires_charge(toytiling[i]->wcmap(),"Fsame",FI);
+      // // display.draw_cells_charge(toytiling[i]->get_allcell(),"Fsame");
+      // theApp.Run();
+    // }
+  }
+  nmcell_after = 0;
+  for (int i=start_num;i!=end_num+1;i++){
+    nmcell_after += lowmemtiling[i]->get_cell_wires_map().size();
+  }
+  std::cout << nmcell_before << " " << nmcell_after << std::endl;
+
+  
+
+  
+  cerr << em("finish the local deghosting ... ") << std::endl;
+  
   
   TGraph2D *g = new TGraph2D();
   TGraph2D *g_rec = new TGraph2D();
