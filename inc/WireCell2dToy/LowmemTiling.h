@@ -85,6 +85,8 @@ namespace WireCell2dToy{
     WireCell::GeomCellSelection local_deghosting(std::set<WireCell::SlimMergeGeomCell*>& potential_good_mcells, std::set<WireCell::SlimMergeGeomCell*>& good_mcells, bool flag_del = false);
 
     void local_deghosting1(std::set<WireCell::SlimMergeGeomCell*>& good_mcells);
+
+    WireCell::GeomWireSelection find_L1SP_wires();
     
   protected:
     WireCell::GeomDataSource& gds;

@@ -18,6 +18,35 @@ WireCell2dToy::LowmemTiling::LowmemTiling(int time_slice, int nrebin, WireCell::
    
 }
 
+
+GeomWireSelection WireCell2dToy::LowmemTiling::find_L1SP_wires(){
+  std::set<const GeomWire*> wires_set;
+  for (auto it = two_good_wire_cells.begin(); it!= two_good_wire_cells.end(); it++){
+    SlimMergeGeomCell *mcell = (SlimMergeGeomCell*)(*it);
+    // loop through Y plane wires to find if a wire is inthe shorted region
+    GeomWireSelection wwires = mcell->get_wwires();
+    GeomWireSelection vwires = mcell->get_vwires();
+    bool flag_save = false;
+    for (auto it1 = wwires.begin(); it1!=wwires.end(); it1++){
+      if ((*it1)->index()>=2336 && (*it1)->index()<=2463){
+	flag_save = true;
+	break;
+      }
+    }
+    // return all V plane wires within the channel cut
+    if (flag_save){
+      for (auto it1 = vwires.begin(); it1!=vwires.end(); it1++){
+	wires_set.insert((*it1));
+      }
+    }
+  }
+  GeomWireSelection wires;
+  if (wires_set.size()>0)
+    std::copy(wires_set.begin(), wires_set.end(), std::back_inserter(wires));
+  
+  return wires;
+}
+
 void WireCell2dToy::LowmemTiling::DivideWires(int wire_limit, int min_wire){
   
   // loop over all the parent wires,  pick up one parent wire

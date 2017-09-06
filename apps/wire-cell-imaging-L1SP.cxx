@@ -7,6 +7,7 @@
 #include "WireCell2dToy/ToyTiling.h"
 #include "WireCell2dToy/BadTiling.h"
 #include "WireCell2dToy/LowmemTiling.h"
+#include "WireCell2dToy/uBooNE_L1SP.h"
 #include "WireCell2dToy/WireCellHolder.h"
 
 #include "WireCell2dToy/MergeToyTiling.h"
@@ -281,6 +282,7 @@ int main(int argc, char* argv[])
   TH2F *hw_decon = (TH2F*)file1->Get("hw_decon");
 
   TH2F *hv_raw = (TH2F*)file1->Get("hv_raw");
+  WireCell2dToy::uBooNE_L1SP l1sp(hv_raw);
   
   WireCell2dToy::pdDataFDS roi_fds(gds,hu_decon,hv_decon,hw_decon,eve_num);
   roi_fds.jump(eve_num);
@@ -414,75 +416,28 @@ int main(int argc, char* argv[])
     }
     lowmemtiling[i]->init_good_cells(slice,slice_err,uplane_rms,vplane_rms,wplane_rms);
 
+    
+    GeomWireSelection wires = lowmemtiling[i]->find_L1SP_wires();
+    l1sp.AddWires(i,wires);
+    
+    // std::cout << i << " " << wires.size() << std::endl;
+    
     // lowmemtiling[i]->Print_maps();
     // //std::cout << lowmemtiling[i]->get_cell_wires_map().size() << " " << lowmemtiling[i]->get_wire_cells_map().size() << std::endl;
     // // refine the merge cells 
     // //lowmemtiling[i]->DivideWires(3,0);
     // lowmemtiling[i]->MergeWires();
     // lowmemtiling[i]->Print_maps();
-
     // lowmemtiling[i]->re_establish_maps();
-
     // lowmemtiling[i]->Print_maps();
-
     // lowmemtiling[i]->MergeWires();
     // lowmemtiling[i]->Print_maps();
-
     
     
-    // form clusters
-    WireCell::GeomCellMap cell_wires_map = lowmemtiling[i]->get_cell_wires_map();
-    GeomCellSelection allmcell;
-    for (auto it=cell_wires_map.begin(); it!= cell_wires_map.end(); it++){
-      SlimMergeGeomCell *mcell = (SlimMergeGeomCell*)it->first;
-      allmcell.push_back(mcell);
-    }
-    if (cluster_set.empty()){
-      // if cluster is empty, just insert all the mcell, each as a cluster
-      for (int j=0;j!=allmcell.size();j++){
-	Slim3DCluster *cluster = new Slim3DCluster(*((SlimMergeGeomCell*)allmcell[j]));
-	cluster_set.insert(cluster);
-      }
-    }else{
-      for (int j=0;j!=allmcell.size();j++){
-	int flag = 0;
-	int flag_save = 0;
-	Slim3DCluster *cluster_save = 0;
-	cluster_delset.clear();
+    
+    
 
-	// loop through merged cell
-	for (auto it = cluster_set.begin();it!=cluster_set.end();it++){
-	  //loop through clusters
-	  
-	  flag += (*it)->AddCell(*((SlimMergeGeomCell*)allmcell[j]),2);
-	  if (flag==1 && flag != flag_save){
-	    cluster_save = *it;
-	  }else if (flag>1 && flag != flag_save){
-	    cluster_save->MergeCluster(*(*it));
-	    cluster_delset.insert(*it);
-	  }
-	  flag_save = flag;
-  	  
-	}
-	
-	for (auto it = cluster_delset.begin();it!=cluster_delset.end();it++){
-	  cluster_set.erase(*it);
-	  delete (*it);
-	}
-	
-	if (flag==0){
-	  Slim3DCluster *cluster = new Slim3DCluster(*((SlimMergeGeomCell*)allmcell[j]));
-	  cluster_set.insert(cluster);
-	}
-      }
-
-      // int ncount_mcell_cluster = 0;
-      // for (auto it = cluster_set.begin();it!=cluster_set.end();it++){
-      // 	ncount_mcell_cluster += (*it)->get_allcell().size();
-      // }
-      // ncount_mcell += allmcell.size();
-      // cout << i << " " << allmcell.size()  << " " << cluster_set.size()  << endl;
-    }
+   
     
 
     // std::cout << lowmemtiling[i]->get_three_good_wire_cells().size() << " " <<
