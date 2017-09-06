@@ -276,16 +276,16 @@ int main(int argc, char* argv[])
     wplane_rms.push_back(hw_threshold->GetBinContent(i+1));
   }
   
-  TH2I *hu_decon = (TH2I*)file1->Get("hu_decon");
-  TH2I *hv_decon = (TH2I*)file1->Get("hv_decon");
-  TH2I *hw_decon = (TH2I*)file1->Get("hw_decon");
+  TH2F *hu_decon = (TH2F*)file1->Get("hu_decon");
+  TH2F *hv_decon = (TH2F*)file1->Get("hv_decon");
+  TH2F *hw_decon = (TH2F*)file1->Get("hw_decon");
   
   WireCell2dToy::pdDataFDS roi_fds(gds,hu_decon,hv_decon,hw_decon,eve_num);
   roi_fds.jump(eve_num);
 
-  TH2I *hu_decon_g = (TH2I*)file1->Get("hu_decon_g");
-  TH2I *hv_decon_g = (TH2I*)file1->Get("hv_decon_g");
-  TH2I *hw_decon_g = (TH2I*)file1->Get("hw_decon_g");
+  TH2F *hu_decon_g = (TH2F*)file1->Get("hu_decon_g");
+  TH2F *hv_decon_g = (TH2F*)file1->Get("hv_decon_g");
+  TH2F *hw_decon_g = (TH2F*)file1->Get("hw_decon_g");
   
   WireCell2dToy::pdDataFDS roi_gaus_fds(gds,hu_decon_g,hv_decon_g,hw_decon_g,eve_num);
   roi_gaus_fds.jump(eve_num);

@@ -10,6 +10,7 @@ namespace WireCell2dToy{
   class uBooNEDataError : public WireCell::FrameDataSource
   {
   public:
+    uBooNEDataError(const WireCell::GeomDataSource& gds, TH2F *hu, TH2F *hv, TH2F *hw, int eve_num, int nrebin);
     uBooNEDataError(const WireCell::GeomDataSource& gds, TH2I *hu, TH2I *hv, TH2I *hw, int eve_num, int nrebin);
     ~uBooNEDataError();
 

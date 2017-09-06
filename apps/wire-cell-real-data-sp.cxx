@@ -363,13 +363,13 @@ int main(int argc, char* argv[])
   }
   
 
-  TH2I *hu_decon = new TH2I("hu_decon","hu_decon",nwire_u,-0.5,nwire_u-0.5,total_time_bin/nrebin,0,total_time_bin);
-  TH2I *hv_decon = new TH2I("hv_decon","hv_decon",nwire_v,-0.5+nwire_u,nwire_v-0.5+nwire_u,total_time_bin/nrebin,0,total_time_bin);
-  TH2I *hw_decon = new TH2I("hw_decon","hw_decon",nwire_w,-0.5+nwire_u+nwire_v,nwire_w-0.5+nwire_u+nwire_v,total_time_bin/nrebin,0,total_time_bin);
+  TH2F *hu_decon = new TH2F("hu_decon","hu_decon",nwire_u,-0.5,nwire_u-0.5,total_time_bin/nrebin,0,total_time_bin);
+  TH2F *hv_decon = new TH2F("hv_decon","hv_decon",nwire_v,-0.5+nwire_u,nwire_v-0.5+nwire_u,total_time_bin/nrebin,0,total_time_bin);
+  TH2F *hw_decon = new TH2F("hw_decon","hw_decon",nwire_w,-0.5+nwire_u+nwire_v,nwire_w-0.5+nwire_u+nwire_v,total_time_bin/nrebin,0,total_time_bin);
   hu_decon->SetDirectory(file);
   hv_decon->SetDirectory(file);
   hw_decon->SetDirectory(file);
-  TH2I *htemp1;
+  TH2F *htemp1;
   const Frame& frame1 = roi_fds.get();
   int ntraces = frame1.traces.size();
   for (size_t ind=0; ind<ntraces; ++ind) {
@@ -393,9 +393,9 @@ int main(int argc, char* argv[])
     }
   }
 
-  TH2I *hu_decon_g = new TH2I("hu_decon_g","hu_decon_g",nwire_u,-0.5,nwire_u-0.5,total_time_bin/nrebin,0,total_time_bin);
-  TH2I *hv_decon_g = new TH2I("hv_decon_g","hv_decon_g",nwire_v,-0.5+nwire_u,nwire_v-0.5+nwire_u,total_time_bin/nrebin,0,total_time_bin);
-  TH2I *hw_decon_g = new TH2I("hw_decon_g","hw_decon_g",nwire_w,-0.5+nwire_u+nwire_v,nwire_w-0.5+nwire_u+nwire_v,total_time_bin/nrebin,0,total_time_bin);
+  TH2F *hu_decon_g = new TH2F("hu_decon_g","hu_decon_g",nwire_u,-0.5,nwire_u-0.5,total_time_bin/nrebin,0,total_time_bin);
+  TH2F *hv_decon_g = new TH2F("hv_decon_g","hv_decon_g",nwire_v,-0.5+nwire_u,nwire_v-0.5+nwire_u,total_time_bin/nrebin,0,total_time_bin);
+  TH2F *hw_decon_g = new TH2F("hw_decon_g","hw_decon_g",nwire_w,-0.5+nwire_u+nwire_v,nwire_w-0.5+nwire_u+nwire_v,total_time_bin/nrebin,0,total_time_bin);
   hu_decon_g->SetDirectory(file);
   hv_decon_g->SetDirectory(file);
   hw_decon_g->SetDirectory(file);

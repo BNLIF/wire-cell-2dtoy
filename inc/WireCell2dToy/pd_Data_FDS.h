@@ -12,6 +12,7 @@ namespace WireCell2dToy{
   {
   public:
     pdDataFDS(const WireCell::GeomDataSource& gds, TH2I *hu, TH2I *hv, TH2I *hw, int eve_num);
+    pdDataFDS(const WireCell::GeomDataSource& gds, TH2F *hu, TH2F *hv, TH2F *hw, int eve_num);
     ~pdDataFDS();
 
     virtual int jump(int frame_number);
