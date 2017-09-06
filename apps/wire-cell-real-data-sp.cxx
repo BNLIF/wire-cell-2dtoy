@@ -206,7 +206,7 @@ int main(int argc, char* argv[])
   std::vector<float> vplane_rms = uboone_rois->get_vplane_rms();
   std::vector<float> wplane_rms = uboone_rois->get_wplane_rms();
 
-  delete data_fds;
+  
   delete wien_fds;
   delete uboone_rois;
   roi_fds.Clear();
@@ -394,7 +394,7 @@ int main(int argc, char* argv[])
       htemp->SetBinContent(chid+1,tt,trace.charge.at(i));
     }
   }
-  
+  delete data_fds;
 
   TH2F *hu_decon = new TH2F("hu_decon","hu_decon",nwire_u,-0.5,nwire_u-0.5,total_time_bin/nrebin,0,total_time_bin);
   TH2F *hv_decon = new TH2F("hv_decon","hv_decon",nwire_v,-0.5+nwire_u,nwire_v-0.5+nwire_u,total_time_bin/nrebin,0,total_time_bin);
