@@ -282,7 +282,7 @@ int main(int argc, char* argv[])
   TH2F *hw_decon = (TH2F*)file1->Get("hw_decon");
 
   TH2F *hv_raw = (TH2F*)file1->Get("hv_raw");
-  WireCell2dToy::uBooNE_L1SP l1sp(hv_raw);
+  
   
   WireCell2dToy::pdDataFDS roi_fds(gds,hu_decon,hv_decon,hw_decon,eve_num);
   roi_fds.jump(eve_num);
@@ -290,6 +290,8 @@ int main(int argc, char* argv[])
   TH2F *hu_decon_g = (TH2F*)file1->Get("hu_decon_g");
   TH2F *hv_decon_g = (TH2F*)file1->Get("hv_decon_g");
   TH2F *hw_decon_g = (TH2F*)file1->Get("hw_decon_g");
+
+  WireCell2dToy::uBooNE_L1SP l1sp(hv_raw,hv_decon_g,nrebin);
   
   WireCell2dToy::pdDataFDS roi_gaus_fds(gds,hu_decon_g,hv_decon_g,hw_decon_g,eve_num);
   roi_gaus_fds.jump(eve_num);
@@ -629,8 +631,8 @@ int main(int argc, char* argv[])
     // // display.draw_cells_charge(toytiling[i]->get_allcell(),"Fsame");
     //  theApp.Run();
   }
-
- 
+  l1sp.Form_rois(2);
+  
   
   cerr << em("finish tiling") << endl;
 

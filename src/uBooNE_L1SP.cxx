@@ -7,8 +7,10 @@
 using namespace Eigen;
 using namespace WireCell;
 
-WireCell2dToy::uBooNE_L1SP::uBooNE_L1SP(TH2F *hv_raw)
+WireCell2dToy::uBooNE_L1SP::uBooNE_L1SP(TH2F *hv_raw, TH2F *hv_decon, int nrebin)
   : hv_raw(hv_raw)
+  , hv_decon(hv_decon)
+  , nrebin(nrebin)
 {
 }
 
@@ -30,6 +32,14 @@ void WireCell2dToy::uBooNE_L1SP::AddWires(int time_slice, GeomWireSelection& wir
   }
 }
 
-void WireCell2dToy::uBooNE_L1SP::Form_rois(){
+void WireCell2dToy::uBooNE_L1SP::Form_rois(int pad){
   
+  for (auto it = init_map.begin(); it!=init_map.end(); it++){
+    int wire_index = it->first;
+    std::vector<int> time_slices = it->second;
+    std::sort(time_slices.begin(), time_slices.end());
+    
+    std::cout << wire_index << " " << time_slices.size() << std::endl;
+    
+  }
 }
