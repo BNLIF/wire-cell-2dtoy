@@ -361,6 +361,39 @@ int main(int argc, char* argv[])
   for (Int_t i=0;i!=wplane_rms.size();i++){
     hw_threshold->SetBinContent(i+1,wplane_rms.at(i));
   }
+
+
+  //TH2F *hu_raw = new TH2F("hu_raw","hu_raw",nwire_u,-0.5,nwire_u-0.5,total_time_bin,0,total_time_bin);
+  TH2F *hv_raw = new TH2F("hv_raw","hv_raw",nwire_v,-0.5+nwire_u,nwire_v-0.5+nwire_u,total_time_bin,0,total_time_bin);
+  //TH2F *hw_raw = new TH2F("hw_raw","hw_raw",nwire_w,-0.5+nwire_u+nwire_v,nwire_w-0.5+nwire_u+nwire_v,total_time_bin,0,total_time_bin);
+  hv_raw->SetDirectory(file);
+  TH2F *htemp;
+  
+  const Frame& frame = data_fds->get();
+  size_t ntraces = frame.traces.size();
+  for (size_t ind=0; ind<ntraces; ++ind) {
+    const Trace& trace = frame.traces[ind];
+    int tbin = trace.tbin;
+    int chid = trace.chid;
+    int nbins = trace.charge.size();
+    WirePlaneType_t plane = gds.by_channel(chid).at(0)->plane();
+    if (plane == WirePlaneType_t(0)){
+      // htemp = hu_raw;
+      continue;
+    }else if (plane == WirePlaneType_t(1)){
+      htemp = hv_raw;
+      chid -= nwire_u;
+      if (chid < 1166 || chid > 1905) continue;
+    }else if (plane == WirePlaneType_t(2)){
+      //htemp = hw_raw;
+      chid -= nwire_u + nwire_v;
+      continue;
+    }
+    for (int i = tbin;i!=tbin+nbins;i++){
+      int tt = i+1;
+      htemp->SetBinContent(chid+1,tt,trace.charge.at(i));
+    }
+  }
   
 
   TH2F *hu_decon = new TH2F("hu_decon","hu_decon",nwire_u,-0.5,nwire_u-0.5,total_time_bin/nrebin,0,total_time_bin);
@@ -371,7 +404,7 @@ int main(int argc, char* argv[])
   hw_decon->SetDirectory(file);
   TH2F *htemp1;
   const Frame& frame1 = roi_fds.get();
-  int ntraces = frame1.traces.size();
+  ntraces = frame1.traces.size();
   for (size_t ind=0; ind<ntraces; ++ind) {
     const Trace& trace = frame1.traces[ind];
     int tbin = trace.tbin;
