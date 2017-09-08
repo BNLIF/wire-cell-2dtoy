@@ -7,6 +7,7 @@
 #include "WireCell2dToy/ToyTiling.h"
 #include "WireCell2dToy/BadTiling.h"
 #include "WireCell2dToy/LowmemTiling.h"
+#include "WireCell2dToy/uBooNE_L1SP.h"
 #include "WireCell2dToy/WireCellHolder.h"
 
 #include "WireCell2dToy/MergeToyTiling.h"
@@ -286,6 +287,10 @@ int main(int argc, char* argv[])
   TH2F *hu_decon_g = (TH2F*)file1->Get("hu_decon_g");
   TH2F *hv_decon_g = (TH2F*)file1->Get("hv_decon_g");
   TH2F *hw_decon_g = (TH2F*)file1->Get("hw_decon_g");
+
+  TH2F *hv_raw = (TH2F*)file1->Get("hv_raw");
+  
+  WireCell2dToy::uBooNE_L1SP l1sp(hv_raw,hv_decon,hv_decon_g,nrebin);
   
   WireCell2dToy::pdDataFDS roi_gaus_fds(gds,hu_decon_g,hv_decon_g,hw_decon_g,eve_num);
   roi_gaus_fds.jump(eve_num);
@@ -412,6 +417,35 @@ int main(int argc, char* argv[])
     }
     lowmemtiling[i]->init_good_cells(slice,slice_err,uplane_rms,vplane_rms,wplane_rms);
 
+    GeomWireSelection wires = lowmemtiling[i]->find_L1SP_wires();
+    l1sp.AddWires(i,wires);
+  }
+
+  cerr << em("finish initial tiling") << endl;
+
+  
+  l1sp.Form_rois(6);
+  roi_fds.refresh(hu_decon,hv_decon,hw_decon,eve_num);
+  roi_gaus_fds.refresh(hu_decon_g,hv_decon_g,hw_decon_g,eve_num);
+
+  std::set<int> time_slice_set = l1sp.get_time_slice_set();
+  for (auto it = time_slice_set.begin(); it!= time_slice_set.end(); it++){
+    int time_slice = *it;
+    if (time_slice >= start_num && time_slice <=end_num){
+      
+      sds.jump(time_slice);
+      WireCell::Slice slice = sds.get();
+      WireCell::Slice slice_err = sds.get_error();
+      
+      lowmemtiling[time_slice]->reset_good_cells();
+      lowmemtiling[time_slice]->init_good_cells(slice,slice_err,uplane_rms,vplane_rms,wplane_rms);
+    }
+  }
+
+  cerr << em("finish L1SP and retiling") << endl;
+  
+  for (int i=start_num;i!=end_num+1;i++){
+  
     // lowmemtiling[i]->Print_maps();
     // //std::cout << lowmemtiling[i]->get_cell_wires_map().size() << " " << lowmemtiling[i]->get_wire_cells_map().size() << std::endl;
     // // refine the merge cells 
@@ -675,7 +709,7 @@ int main(int argc, char* argv[])
 
  
   
-  cerr << em("finish tiling") << endl;
+  cerr << em("finish initial clustering") << endl;
 
   //return 0;
 

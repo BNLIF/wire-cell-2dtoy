@@ -179,63 +179,75 @@ void WireCell2dToy::uBooNE_L1SP::L1_fit(int wire_index, int start_tick, int end_
   const int nbin_fit = end_tick-start_tick;
   // fill the data ... 
   VectorXd W = VectorXd::Zero(nbin_fit);
+
+  double temp_sum = 0;
+  double temp1_sum = 0;
   for (int i=0; i!= nbin_fit; i++){
     W(i) = hv_raw->GetBinContent(wire_index+1,start_tick+i+1);
-  }
-
-  // std::cout << nbin_fit << " " << wire_index+2400 << " " << start_tick/4. << " " << (end_tick-start_tick)/4. << std::endl;
-  
-  //for matrix G
-  MatrixXd G = MatrixXd::Zero(nbin_fit, nbin_fit*2);
-  for (int i=0;i!=nbin_fit;i++){ 
-    // X 
-    Double_t t1 = i/2.; // us, measured time  
-    for (int j=0;j!=nbin_fit;j++){
-      // Y ... 
-      Double_t t2 = j/2.; // us, real signal time
-      double delta_t = t1 - t2;
-      if (delta_t >-84 && delta_t < 15.8){
-	G(i,j) = gw->Eval(delta_t) *500;
-	G(i,nbin_fit+j) = gv->Eval(delta_t)*500; 
-      }
+    if (fabs(W(i))>6) {
+      temp_sum += W(i);
+      temp1_sum += fabs(W(i));
     }
   }
 
-  double lambda = 5;//1/2.;
-  WireCell::LassoModel m2(lambda, 100000, 0.05);
-  m2.SetData(G, W);
-  m2.Fit();
+ 
   
-  VectorXd beta = m2.Getbeta();
-  
-  double sum1 = 0;
-  double sum2 = 0;
-
-  for (int i=0;i!=nbin_fit;i++){
-    sum1 += beta(i);
-    sum2 += beta(nbin_fit+i);
-  }
-
-  // std::cout << sum1 << " " << sum2 << std::endl;
-  
-  if (sum1 >6 ){
-    // replace it in the decon_v ...
+  if (temp_sum/temp1_sum >0.5 && temp1_sum > 160){
     
-    for (int i=0;i<nbin_fit/nrebin;i++){
-      double content = 0;
-      for (int j=0;j!=nrebin;j++){
-	content += beta(nrebin*i+j) + beta(nbin_fit + nrebin*i + j);
+    std::cout << nbin_fit << " " << wire_index+2400 << " " << start_tick/4. << " " << (end_tick-start_tick)/4. << " " << temp_sum << " " << temp1_sum << " "; //std::endl;
+    
+    //for matrix G
+    MatrixXd G = MatrixXd::Zero(nbin_fit, nbin_fit*2);
+    for (int i=0;i!=nbin_fit;i++){ 
+      // X 
+      Double_t t1 = i/2.; // us, measured time  
+      for (int j=0;j!=nbin_fit;j++){
+	// Y ... 
+	Double_t t2 = j/2.; // us, real signal time
+	double delta_t = t1 - t2;
+	if (delta_t >-15 && delta_t < 10){
+	  G(i,j) = gw->Eval(delta_t) *500;
+	  G(i,nbin_fit+j) = gv->Eval(delta_t)*500; 
+	}
       }
-      content *= 500;
-      hv_decon->SetBinContent(wire_index+1,start_tick/nrebin+1+i,content);
-      hv_decon_g->SetBinContent(wire_index+1,start_tick/nrebin+1+i,content);
+    }
+    
+    double lambda = 5;//1/2.;
+    WireCell::LassoModel m2(lambda, 100000, 0.05);
+    m2.SetData(G, W);
+    m2.Fit();
+    
+    VectorXd beta = m2.Getbeta();
+    
+    double sum1 = 0;
+    double sum2 = 0;
+    
+    for (int i=0;i!=nbin_fit;i++){
+      sum1 += beta(i);
+      sum2 += beta(nbin_fit+i);
+    }
+    
+    std::cout << sum1 << " " << sum2 << std::endl;
+    
+    if (sum1 >6 ){
+      // replace it in the decon_v ...
       
-      if (content > 0 && init_time_slice_set.find(start_tick/nrebin+i)!=init_time_slice_set.end()){
-	time_slice_set.insert(start_tick/nrebin+i);
+      for (int i=0;i<nbin_fit/nrebin;i++){
+	double content = 0;
+	for (int j=0;j!=nrebin;j++){
+	  content += beta(nrebin*i+j) + beta(nbin_fit + nrebin*i + j);
+	}
+	content *= 500;
+	hv_decon->SetBinContent(wire_index+1,start_tick/nrebin+1+i,content);
+	hv_decon_g->SetBinContent(wire_index+1,start_tick/nrebin+1+i,content);
+	
+	if (content > 0 && init_time_slice_set.find(start_tick/nrebin+i)!=init_time_slice_set.end()){
+	  time_slice_set.insert(start_tick/nrebin+i);
+	}
+	//std::cout << hv_decon->GetBinContent(wire_index+1,start_tick/nrebin+1+i) << " " << content << std::endl;
       }
-      //std::cout << hv_decon->GetBinContent(wire_index+1,start_tick/nrebin+1+i) << " " << content << std::endl;
+      
+      //  std::cout << sum1 << " " << sum2 << std::endl;
     }
-    
-    //  std::cout << sum1 << " " << sum2 << std::endl;
   }
 }
