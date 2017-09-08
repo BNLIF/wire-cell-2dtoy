@@ -173,7 +173,7 @@ void WireCell2dToy::uBooNE_L1SP::L1_fit(int wire_index, int start_tick, int end_
     W(i) = hv_raw->GetBinContent(wire_index+1,start_tick+i+1);
   }
 
-  std::cout << nbin_fit << " " << wire_index << " " << start_tick << " " << end_tick << std::endl;
+  // std::cout << nbin_fit << " " << wire_index+2400 << " " << start_tick/4. << " " << (end_tick-start_tick)/4. << std::endl;
   
   //for matrix G
   MatrixXd G = MatrixXd::Zero(nbin_fit, nbin_fit*2);
@@ -191,7 +191,7 @@ void WireCell2dToy::uBooNE_L1SP::L1_fit(int wire_index, int start_tick, int end_
     }
   }
 
-  double lambda = 0.01;//1/2.;
+  double lambda = 5;//1/2.;
   WireCell::LassoModel m2(lambda, 100000, 0.05);
   m2.SetData(G, W);
   m2.Fit();
@@ -205,10 +205,21 @@ void WireCell2dToy::uBooNE_L1SP::L1_fit(int wire_index, int start_tick, int end_
     sum1 += beta(i);
     sum2 += beta(nbin_fit+i);
   }
+
+  // std::cout << sum1 << " " << sum2 << std::endl;
   
-  if (sum1 >18 ){
+  if (sum1 >6 ){
     // replace it in the decon_v ...
     
+    for (int i=0;i<nbin_fit/nrebin;i++){
+      double content = 0;
+      for (int j=0;j!=nrebin;j++){
+	content += beta(nrebin*i+j) + beta(nbin_fit + nrebin*i + j);
+      }
+      content *= 500;
+      hv_decon->SetBinContent(wire_index+1,start_tick/nrebin+1+i,content);
+      //std::cout << hv_decon->GetBinContent(wire_index+1,start_tick/nrebin+1+i) << " " << content << std::endl;
+    }
     
     //  std::cout << sum1 << " " << sum2 << std::endl;
   }

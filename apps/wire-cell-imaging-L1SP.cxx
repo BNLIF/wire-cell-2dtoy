@@ -360,11 +360,11 @@ int main(int argc, char* argv[])
   // start_num = 1665;
   // end_num = 1665;
   
-  // start_num = 6600/4.;
-  // end_num = 7500/4.;
+  start_num = 6600/4.;
+  end_num = 7500/4.;
   
-  start_num = 400;
-  end_num = 600;
+  // start_num = 400;
+  // end_num = 600;
   
   TFile *file = new TFile(Form("result_%d_%d_%d.root",run_no,subrun_no,event_no),"RECREATE");
   
@@ -635,7 +635,7 @@ int main(int argc, char* argv[])
     // // display.draw_cells_charge(toytiling[i]->get_allcell(),"Fsame");
     //  theApp.Run();
   }
-  l1sp.Form_rois(2);
+  l1sp.Form_rois(6);
   
   
   cerr << em("finish tiling") << endl;

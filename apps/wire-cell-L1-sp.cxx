@@ -102,7 +102,7 @@ int main(int argc, char* argv[])
     chid -= nwire_u + nwire_v;
   }
   
-  int nrebin = 6;
+  int nrebin = 4;
 
   
   int start_bin = start_recon_bin*nrebin ;// 6 * 575;
@@ -126,7 +126,12 @@ int main(int argc, char* argv[])
     hsig1->SetBinContent(i+1,hsig->GetBinContent(start_bin+i+1));
   }
   for (int i=0;i!=nrecon_bin;i++){
-    hrecon_sig->SetBinContent(i+1,htemp1->GetBinContent(chid+1,start_recon_bin+i+1)/500.);
+    hrecon_sig->SetBinContent(i+1,(htemp1->GetBinContent(chid+1,nrebin * start_recon_bin+i*nrebin+1) +
+				   htemp1->GetBinContent(chid+1,nrebin * start_recon_bin+i*nrebin+1+1) +
+				   htemp1->GetBinContent(chid+1,nrebin * start_recon_bin+i*nrebin+2+1) +
+				   htemp1->GetBinContent(chid+1,nrebin * start_recon_bin+i*nrebin+3+1)
+				   
+				   )/500.);
   }
   
   // TString filename = "/home/xqian/uboone/matrix_inversion/work/wire-cell/2dtoy/src/data_70_2D_11.txt";
@@ -200,11 +205,13 @@ int main(int argc, char* argv[])
 	G(i,nbin_fit+j) = gv->Eval(delta_t) * scaling;
       }
     }
+    //G(i,2*nbin_fit) = -1;
   }
   // solve ... 
-  double lambda = 0.1;
-  WireCell::LassoModel m2(lambda, 100000, 1e-3);
+  double lambda = 5;//nbin_fit *4 / 50./2.;
+  WireCell::LassoModel m2(lambda, 100000, 0.05);
   m2.SetData(G, W);
+  //m2.SetLambdaWeight(2*nbin_fit,0);
   m2.Fit();
   
   VectorXd beta = m2.Getbeta();
@@ -213,6 +220,7 @@ int main(int argc, char* argv[])
     hsig_w->SetBinContent(i+1,beta(i));
     hsig_v->SetBinContent(i+1,beta(nbin_fit+i));
   }
+  //std::cout << beta(nbin_fit*2) << std::endl;
 
   // need to convolute with the Gaussian Filter for the result ... 
   TF1 *filter_g = new TF1("filter_g","exp(-0.5*pow(x/[0],2))");
