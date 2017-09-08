@@ -34,7 +34,7 @@ namespace WireCell2dToy{
     void form_two_bad_cells();
     void init_bad_cells(WireCell::ChirpMap& uplane_map, WireCell::ChirpMap& vplane_map, WireCell::ChirpMap& wplane_map);
     void check_bad_cells(LowmemTiling* tiling,WireCell::ChirpMap& uplane_map, WireCell::ChirpMap& vplane_map, WireCell::ChirpMap& wplane_map);
-    void reset_good_cells();
+    void reset_cells();
     void init_good_cells(const WireCell::Slice& slice, const WireCell::Slice& slice_err, std::vector<float>& uplane_rms, std::vector<float>& vplane_rms, std::vector<float>& wplane_rms);
     
     WireCell::GeomCellSelection& get_two_bad_wire_cells(){return two_bad_wire_cells;};
@@ -88,6 +88,13 @@ namespace WireCell2dToy{
     void local_deghosting1(std::set<WireCell::SlimMergeGeomCell*>& good_mcells);
 
     WireCell::GeomWireSelection find_L1SP_wires();
+
+    std::map<const WireCell::GeomWire*,bool> get_wire_type_map(){return wire_type_map;};
+
+    WireCell::GeomWireWireMap get_wire_pwire_map(){ return wire_pwire_map;};
+    //map parent wire to wire
+    WireCell::GeomWireWiresMap get_pwire_wires_map(){return pwire_wires_map;};
+    
     
   protected:
     WireCell::GeomDataSource& gds;

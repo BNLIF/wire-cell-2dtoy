@@ -194,7 +194,7 @@ void WireCell2dToy::uBooNE_L1SP::L1_fit(int wire_index, int start_tick, int end_
   
   if (temp_sum/temp1_sum >0.5 && temp1_sum > 160){
     
-    std::cout << nbin_fit << " " << wire_index+2400 << " " << start_tick/4. << " " << (end_tick-start_tick)/4. << " " << temp_sum << " " << temp1_sum << " "; //std::endl;
+    //std::cout << nbin_fit << " " << wire_index+2400 << " " << start_tick/4. << " " << (end_tick-start_tick)/4. << " " << temp_sum << " " << temp1_sum << " "; //std::endl;
     
     //for matrix G
     MatrixXd G = MatrixXd::Zero(nbin_fit, nbin_fit*2);
@@ -227,7 +227,7 @@ void WireCell2dToy::uBooNE_L1SP::L1_fit(int wire_index, int start_tick, int end_
       sum2 += beta(nbin_fit+i);
     }
     
-    std::cout << sum1 << " " << sum2 << std::endl;
+    //std::cout << sum1 << " " << sum2 << std::endl;
     
     if (sum1 >6 ){
       // replace it in the decon_v ...

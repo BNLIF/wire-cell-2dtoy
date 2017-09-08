@@ -340,11 +340,11 @@ int main(int argc, char* argv[])
   // start_num = 1665;
   // end_num = 1665;
   
-  start_num = 6600/4.;
-  end_num = 7500/4.;
+  // start_num = 6600/4.;
+  // end_num = 7500/4.;
   
-  // start_num = 400;
-  // end_num = 600;
+  start_num = 100;
+  end_num = 105;
   
   TFile *file = new TFile(Form("result_%d_%d_%d.root",run_no,subrun_no,event_no),"RECREATE");
   
@@ -402,10 +402,17 @@ int main(int argc, char* argv[])
     }
     lowmemtiling[i]->init_good_cells(slice,slice_err,uplane_rms,vplane_rms,wplane_rms);
 
-    // std::cout << i << " " << lowmemtiling[i]->get_three_good_wire_cells().size() << " " << lowmemtiling[i]->get_two_good_wire_cells().size() << " " << lowmemtiling[i]->get_all_good_wires().size() << " " << lowmemtiling[i]->get_all_bad_wires().size() << " " << lowmemtiling[i]->get_cell_wires_map().size() << " " << lowmemtiling[i]->get_wire_cells_map().size() << " " << lowmemtiling[i]->get_wire_charge_map().size() << " " << lowmemtiling[i]->get_two_bad_wire_cells().size() << std::endl;
-    // lowmemtiling[i]->reset_good_cells();
+    // std::cout << i << " " << lowmemtiling[i]->get_three_good_wire_cells().size() << " " << lowmemtiling[i]->get_two_good_wire_cells().size() << " " << lowmemtiling[i]->get_all_good_wires().size() << " " << lowmemtiling[i]->get_all_bad_wires().size() << " " << lowmemtiling[i]->get_cell_wires_map().size() << " " << lowmemtiling[i]->get_wire_cells_map().size() << " " << lowmemtiling[i]->get_wire_charge_map().size() << " " << lowmemtiling[i]->get_wire_charge_error_map().size() << " " << lowmemtiling[i]->get_two_bad_wire_cells().size() << " " << lowmemtiling[i]->get_wire_type_map().size() << " " << lowmemtiling[i]->get_wire_pwire_map().size() << " " << lowmemtiling[i]->get_pwire_wires_map().size() << std::endl;
+    // lowmemtiling[i]->reset_cells();
+    
+    // if (i==start_num){
+    //   lowmemtiling[i]->init_bad_cells(uplane_map,vplane_map,wplane_map);
+    // }else{
+    //   lowmemtiling[i]->check_bad_cells(lowmemtiling[i-1],uplane_map,vplane_map,wplane_map);
+    // }
     // lowmemtiling[i]->init_good_cells(slice,slice_err,uplane_rms,vplane_rms,wplane_rms);
-    //  std::cout << i << " " << lowmemtiling[i]->get_three_good_wire_cells().size() << " " << lowmemtiling[i]->get_two_good_wire_cells().size() << " " << lowmemtiling[i]->get_all_good_wires().size() << " " << lowmemtiling[i]->get_all_bad_wires().size() << " " << lowmemtiling[i]->get_cell_wires_map().size() << " " << lowmemtiling[i]->get_wire_cells_map().size() << " " << lowmemtiling[i]->get_wire_charge_map().size() << " " << lowmemtiling[i]->get_two_bad_wire_cells().size() << std::endl;
+    
+    // std::cout << i << " " << lowmemtiling[i]->get_three_good_wire_cells().size() << " " << lowmemtiling[i]->get_two_good_wire_cells().size() << " " << lowmemtiling[i]->get_all_good_wires().size() << " " << lowmemtiling[i]->get_all_bad_wires().size() << " " << lowmemtiling[i]->get_cell_wires_map().size() << " " << lowmemtiling[i]->get_wire_cells_map().size() << " " << lowmemtiling[i]->get_wire_charge_map().size() << " " << lowmemtiling[i]->get_wire_charge_error_map().size() << " " << lowmemtiling[i]->get_two_bad_wire_cells().size() << " " << lowmemtiling[i]->get_wire_type_map().size() << " " << lowmemtiling[i]->get_wire_pwire_map().size() << " " << lowmemtiling[i]->get_pwire_wires_map().size()<< std::endl;
     
     GeomWireSelection wires = lowmemtiling[i]->find_L1SP_wires();
     l1sp.AddWires(i,wires);
@@ -426,8 +433,13 @@ int main(int argc, char* argv[])
       WireCell::Slice slice = sds.get();
       WireCell::Slice slice_err = sds.get_error();
       //  std::cout << time_slice << " " << lowmemtiling[time_slice]->get_three_good_wire_cells().size() << " " << lowmemtiling[time_slice]->get_two_good_wire_cells().size() << " " << lowmemtiling[time_slice]->get_all_good_wires().size() << " " << lowmemtiling[time_slice]->get_all_bad_wires().size() << " " << lowmemtiling[time_slice]->get_cell_wires_map().size() << " " << lowmemtiling[time_slice]->get_wire_cells_map().size() << " " << lowmemtiling[time_slice]->get_wire_charge_map().size() << " " << lowmemtiling[time_slice]->get_two_bad_wire_cells().size() << std::endl;
-      lowmemtiling[time_slice]->reset_good_cells();
-      lowmemtiling[time_slice]->init_good_cells(slice,slice_err,uplane_rms,vplane_rms,wplane_rms);
+       lowmemtiling[time_slice]->reset_cells();
+       if (time_slice==start_num){
+	 lowmemtiling[time_slice]->init_bad_cells(uplane_map,vplane_map,wplane_map);
+       }else{
+	 lowmemtiling[time_slice]->check_bad_cells(lowmemtiling[time_slice-1],uplane_map,vplane_map,wplane_map);
+       }
+       lowmemtiling[time_slice]->init_good_cells(slice,slice_err,uplane_rms,vplane_rms,wplane_rms);
       // std::cout << time_slice << " " << lowmemtiling[time_slice]->get_three_good_wire_cells().size() << " " << lowmemtiling[time_slice]->get_two_good_wire_cells().size() << " " << lowmemtiling[time_slice]->get_all_good_wires().size() << " " << lowmemtiling[time_slice]->get_all_bad_wires().size() << " " << lowmemtiling[time_slice]->get_cell_wires_map().size() << " " << lowmemtiling[time_slice]->get_wire_cells_map().size() << " " << lowmemtiling[time_slice]->get_wire_charge_map().size() << " " << lowmemtiling[time_slice]->get_two_bad_wire_cells().size() << std::endl;
       // std::cout << time_slice << " " << slice.group().size() << " ";
       // slice = sds.get();

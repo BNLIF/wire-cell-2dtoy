@@ -359,7 +359,8 @@ int main(int argc, char* argv[])
   // start_num = 1665;
   // end_num = 1665;
 
-  //end_num = 100;
+  start_num = 50;
+  end_num = 150;
   
   TFile *file = new TFile(Form("result_%d_%d_%d.root",run_no,subrun_no,event_no),"RECREATE");
   
@@ -427,17 +428,24 @@ int main(int argc, char* argv[])
   l1sp.Form_rois(6);
   roi_fds.refresh(hu_decon,hv_decon,hw_decon,eve_num);
   roi_gaus_fds.refresh(hu_decon_g,hv_decon_g,hw_decon_g,eve_num);
-
+  error_fds.refresh(hu_decon_g, hv_decon_g, hw_decon_g, eve_num);
+  
   std::set<int> time_slice_set = l1sp.get_time_slice_set();
   for (auto it = time_slice_set.begin(); it!= time_slice_set.end(); it++){
     int time_slice = *it;
+    //std::cout << time_slice << std::endl;
     if (time_slice >= start_num && time_slice <=end_num){
       
       sds.jump(time_slice);
       WireCell::Slice slice = sds.get();
       WireCell::Slice slice_err = sds.get_error();
       
-      lowmemtiling[time_slice]->reset_good_cells();
+      lowmemtiling[time_slice]->reset_cells();
+      if (time_slice==start_num){
+	 lowmemtiling[time_slice]->init_bad_cells(uplane_map,vplane_map,wplane_map);
+       }else{
+	 lowmemtiling[time_slice]->check_bad_cells(lowmemtiling[time_slice-1],uplane_map,vplane_map,wplane_map);
+       }
       lowmemtiling[time_slice]->init_good_cells(slice,slice_err,uplane_rms,vplane_rms,wplane_rms);
     }
   }

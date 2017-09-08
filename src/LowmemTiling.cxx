@@ -2292,37 +2292,43 @@ GeomCellSelection WireCell2dToy::LowmemTiling::local_deghosting(std::set<SlimMer
   
 }
 
-void WireCell2dToy::LowmemTiling::reset_good_cells(){
+void WireCell2dToy::LowmemTiling::reset_cells(){
   // clean up all fired_wires
-  fired_wire_u.clear();
-  fired_wire_v.clear();
-  fired_wire_w.clear();
+  fired_wire_u.clear(); // check
+  fired_wire_v.clear(); // check
+  fired_wire_w.clear(); // check
+
+  //clean up all bad wires
+  bad_wire_u.clear();
+  bad_wire_v.clear();
+  bad_wire_w.clear();
   
   // clean up all good wire cells
   three_good_wire_cells.clear();
   two_good_wire_cells.clear();
   one_good_wire_cells.clear();
   not_used_one_good_wire_cells.clear();
+  two_bad_wire_cells.clear();
   
   // clean up all maps ...
-  pwire_wires_map.clear();
-  wire_pwire_map.clear();
-  wire_cells_map.clear();
-  cell_wires_map.clear();
+  pwire_wires_map.clear(); // check 
+  wire_pwire_map.clear(); // check
+  wire_cells_map.clear(); // check
+  cell_wires_map.clear(); // check
 
   wire_type_map.clear();
-  for (auto it = bad_wire_u.begin(); it!= bad_wire_u.end(); it++){
-    wire_type_map[*it] = false;
-  }
-  for (auto it = bad_wire_v.begin(); it!= bad_wire_v.end(); it++){
-    wire_type_map[*it] = false;
-  }
-  for (auto it = bad_wire_w.begin(); it!= bad_wire_w.end(); it++){
-    wire_type_map[*it] = false;
-  }
+  // for (auto it = bad_wire_u.begin(); it!= bad_wire_u.end(); it++){
+  //   wire_type_map[*it] = false;
+  // }
+  // for (auto it = bad_wire_v.begin(); it!= bad_wire_v.end(); it++){
+  //   wire_type_map[*it] = false;
+  // }
+  // for (auto it = bad_wire_w.begin(); it!= bad_wire_w.end(); it++){
+  //   wire_type_map[*it] = false;
+  // }
 
-  wirechargemap.clear();
-  wirecharge_errmap.clear();
+  wirechargemap.clear(); // check
+  wirecharge_errmap.clear(); // check
   
 }
 
@@ -3485,15 +3491,19 @@ void WireCell2dToy::LowmemTiling::check_bad_cells(WireCell2dToy::LowmemTiling* t
     for (int i=0;i!=tiling->get_bad_wire_u().size();i++){
       MergeGeomWire *mwire1 = (MergeGeomWire*)tiling->get_bad_wire_u().at(i);
       bad_wire_u.push_back(mwire1);
+      wire_type_map[mwire1] = false;
     }
     for (int i=0;i!=tiling->get_bad_wire_v().size();i++){
       MergeGeomWire *mwire1 = (MergeGeomWire*)tiling->get_bad_wire_v().at(i);
       bad_wire_v.push_back(mwire1);
+      wire_type_map[mwire1] = false;
     }
     for (int i=0;i!=tiling->get_bad_wire_w().size();i++){
       MergeGeomWire *mwire1 = (MergeGeomWire*)tiling->get_bad_wire_w().at(i);
       bad_wire_w.push_back(mwire1);
+      wire_type_map[mwire1] = false;
     }
+    
     // copy cells;
     for (int i=0;i!=tiling->get_two_bad_wire_cells().size();i++){
       SlimMergeGeomCell *mcell1 = (SlimMergeGeomCell*)tiling->get_two_bad_wire_cells().at(i);
