@@ -439,6 +439,13 @@ int main(int argc, char* argv[])
       sds.jump(time_slice);
       WireCell::Slice slice = sds.get();
       WireCell::Slice slice_err = sds.get_error();
+
+      // std::cout << lowmemtiling[time_slice]->get_wire_charge_error_map().size() << std::endl;
+      // WireCell::WireChargeMap& wire_charge_err_map = lowmemtiling[time_slice]->get_wire_charge_error_map();
+      // for (auto it1= wire_charge_err_map.begin(); it1 != wire_charge_err_map.end(); it1++){
+      // 	if ((*it1).second==0)
+      // 	  std::cout << "A: " << (*it1).second << std::endl;
+      // }
       
       lowmemtiling[time_slice]->reset_cells();
       if (time_slice==start_num){
@@ -447,6 +454,15 @@ int main(int argc, char* argv[])
 	 lowmemtiling[time_slice]->check_bad_cells(lowmemtiling[time_slice-1],uplane_map,vplane_map,wplane_map);
        }
       lowmemtiling[time_slice]->init_good_cells(slice,slice_err,uplane_rms,vplane_rms,wplane_rms);
+
+      // std::cout << lowmemtiling[time_slice]->get_wire_charge_error_map().size() << std::endl;
+      // {
+      // 	WireCell::WireChargeMap& wire_charge_err_map = lowmemtiling[time_slice]->get_wire_charge_error_map();
+      // 	for (auto it1= wire_charge_err_map.begin(); it1 != wire_charge_err_map.end(); it1++){
+      // 	  if ((*it1).second==0)
+      // 	    std::cout << "B: " << (*it1).second << std::endl;
+      // 	} 
+      // }
     }
   }
 

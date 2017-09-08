@@ -85,7 +85,9 @@ WireCell2dToy::MatrixSolver::MatrixSolver(GeomCellSelection& allmcell, GeomWireS
 	float charge_err = wire_charge_error_map[it->first];
 	(*Wy)[index] =charge;
 	(*Vy)(index,index) = charge_err*charge_err/1e6;
-	//std::cout << index << " " << charge << " " << charge_err << std::endl;
+	
+	// if (charge_err==0)
+	//   std::cout << index << " " << charge << " " << charge_err << std::endl;
       }
     }
     
@@ -166,6 +168,9 @@ void WireCell2dToy::MatrixSolver::L1_Solve(std::map<const GeomCell*, double>& ce
   //now try to make the equation ... 
   // MWy - MA * C 
   // decompose VBy_inv
+
+  //VBy_inv->Print();
+  
   TDecompChol test(*VBy_inv);
   test.Decompose();
   TMatrixD U(mwindex,mwindex);

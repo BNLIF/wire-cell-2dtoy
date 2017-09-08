@@ -393,6 +393,13 @@ int main(int argc, char* argv[])
     sds.jump(i);
     WireCell::Slice slice = sds.get();
     WireCell::Slice slice_err = sds.get_error();
+
+    // WireCell::Channel::Group group = slice.group();
+    // WireCell::Channel::Group group_err = slice_err.group();
+    //double sum = 0;
+    // for (int i=0;i!=group.size();i++){
+    //   std::cout << group.at(i).first << " " << group.at(i).second << " " << group_err.at(i).first << " " << group_err.at(i).second << std::endl;
+    // }
     
     lowmemtiling[i] = new WireCell2dToy::LowmemTiling(i,nrebin,gds,WCholder);
     if (i==start_num){
@@ -421,17 +428,21 @@ int main(int argc, char* argv[])
   l1sp.Form_rois(6);
   roi_fds.refresh(hu_decon,hv_decon,hw_decon,eve_num);
   roi_gaus_fds.refresh(hu_decon_g,hv_decon_g,hw_decon_g,eve_num);
-
+  error_fds.refresh(hu_decon_g, hv_decon_g, hw_decon_g, eve_num);
+  
   std::set<int> time_slice_set = l1sp.get_time_slice_set();
 
-  std::cout << time_slice_set.size() << std::endl;
+  //std::cout << time_slice_set.size() << std::endl;
   for (auto it = time_slice_set.begin(); it!= time_slice_set.end(); it++){
     int time_slice = *it;
     if (time_slice >= start_num && time_slice <=end_num){
+
       
       sds.jump(time_slice);
       WireCell::Slice slice = sds.get();
       WireCell::Slice slice_err = sds.get_error();
+
+      std::cout << time_slice << " " << slice.group().size() << " " << slice_err.group().size() << std::endl;
       //  std::cout << time_slice << " " << lowmemtiling[time_slice]->get_three_good_wire_cells().size() << " " << lowmemtiling[time_slice]->get_two_good_wire_cells().size() << " " << lowmemtiling[time_slice]->get_all_good_wires().size() << " " << lowmemtiling[time_slice]->get_all_bad_wires().size() << " " << lowmemtiling[time_slice]->get_cell_wires_map().size() << " " << lowmemtiling[time_slice]->get_wire_cells_map().size() << " " << lowmemtiling[time_slice]->get_wire_charge_map().size() << " " << lowmemtiling[time_slice]->get_two_bad_wire_cells().size() << std::endl;
        lowmemtiling[time_slice]->reset_cells();
        if (time_slice==start_num){

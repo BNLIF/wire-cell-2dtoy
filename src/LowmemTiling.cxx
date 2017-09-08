@@ -4331,7 +4331,10 @@ void WireCell2dToy::LowmemTiling::form_fired_merge_wires(const WireCell::Slice& 
       //not found
       wirechargemap[wire] = charge;
       wirecharge_errmap[wire] = charge_err;
-      //std::cout << wirechargemap[wire] << " " << wirecharge_errmap[wire] << std::endl;
+
+      // if (charge_err==0)
+      // 	std::cout << wirechargemap[wire] << " " << wirecharge_errmap[wire] << std::endl;
+      
     }else{
       //wirechargemap[wire] += charge;
     }
