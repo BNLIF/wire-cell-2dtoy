@@ -8,9 +8,10 @@
 using namespace Eigen;
 using namespace WireCell;
 
-WireCell2dToy::uBooNE_L1SP::uBooNE_L1SP(TH2F *hv_raw, TH2F *hv_decon, int nrebin)
+WireCell2dToy::uBooNE_L1SP::uBooNE_L1SP(TH2F *hv_raw, TH2F *hv_decon, TH2F *hv_decon_g, int nrebin)
   : hv_raw(hv_raw)
   , hv_decon(hv_decon)
+  , hv_decon_g(hv_decon_g)
   , nrebin(nrebin)
 {
   #include "data_70_2D_11.txt"
@@ -77,6 +78,15 @@ WireCell2dToy::uBooNE_L1SP::~uBooNE_L1SP(){
 
 void WireCell2dToy::uBooNE_L1SP::AddWires(int time_slice, GeomWireSelection& wires){
   if (wires.size() >0){
+    
+    // save +- 2 time slices ... 
+    init_time_slice_set.insert(time_slice);
+    init_time_slice_set.insert(time_slice+1);
+    init_time_slice_set.insert(time_slice-1);
+    init_time_slice_set.insert(time_slice+2);
+    init_time_slice_set.insert(time_slice-2);
+      
+    
     for (auto it = wires.begin(); it!=wires.end(); it++){
       int wire_index = (*it)->index();
       if (init_map.find(wire_index)!=init_map.end()){
@@ -114,29 +124,29 @@ void WireCell2dToy::uBooNE_L1SP::Form_rois(int pad){
       int start_bin = it->first;
       int end_bin = it->second;
       //std::cout << start_bin << " " << end_bin << " " ;
-      while(hv_decon->GetBinContent(wire_index+1,start_bin)>0){
+      while(hv_decon_g->GetBinContent(wire_index+1,start_bin)>0){
 	start_bin --;
 	if (start_bin<=0) break;
       }
-      while(hv_decon->GetBinContent(wire_index+1,end_bin)>0){
+      while(hv_decon_g->GetBinContent(wire_index+1,end_bin)>0){
 	end_bin ++;
-	if (end_bin >= hv_decon->GetNbinsX()-1) break;
+	if (end_bin >= hv_decon_g->GetNbinsX()-1) break;
       }
 
       // add padding ...
       start_bin = start_bin - pad;
-      while(hv_decon->GetBinContent(wire_index+1,start_bin)>0){
+      while(hv_decon_g->GetBinContent(wire_index+1,start_bin)>0){
 	start_bin -=pad;
 	if (start_bin<=0) break;
       }
       end_bin = end_bin + pad;
-      while(hv_decon->GetBinContent(wire_index+1,end_bin)>0){
+      while(hv_decon_g->GetBinContent(wire_index+1,end_bin)>0){
 	end_bin +=pad;
-	if (end_bin >= hv_decon->GetNbinsX()-1) break;
+	if (end_bin >= hv_decon_g->GetNbinsX()-1) break;
       }
       
       if (start_bin <0) start_bin = 0;
-      if (end_bin>hv_decon->GetNbinsX()-1) end_bin = hv_decon->GetNbinsX()-1;
+      if (end_bin>hv_decon_g->GetNbinsX()-1) end_bin = hv_decon_g->GetNbinsX()-1;
       it->first = start_bin;
       it->second = end_bin;
       //std::cout << start_bin << " " << end_bin << std::endl;
@@ -160,7 +170,7 @@ void WireCell2dToy::uBooNE_L1SP::Form_rois(int pad){
     }
     
     // std::cout << wire_index << " " << rois_save.size() << std::endl;
-    // std::cout << wire_index << " " << time_slices.size() << " " << time_slices.front() << " " << time_slices.back() << " " << hv_decon->GetBinContent(wire_index+1,time_slices.front()+1)<< std::endl;
+    // std::cout << wire_index << " " << time_slices.size() << " " << time_slices.front() << " " << time_slices.back() << " " << hv_decon_g->GetBinContent(wire_index+1,time_slices.front()+1)<< std::endl;
   }
 }
 
@@ -218,6 +228,11 @@ void WireCell2dToy::uBooNE_L1SP::L1_fit(int wire_index, int start_tick, int end_
       }
       content *= 500;
       hv_decon->SetBinContent(wire_index+1,start_tick/nrebin+1+i,content);
+      hv_decon_g->SetBinContent(wire_index+1,start_tick/nrebin+1+i,content);
+      
+      if (content > 0 && init_time_slice_set.find(start_tick/nrebin+i)!=init_time_slice_set.end()){
+	time_slice_set.insert(start_tick/nrebin+i);
+      }
       //std::cout << hv_decon->GetBinContent(wire_index+1,start_tick/nrebin+1+i) << " " << content << std::endl;
     }
     

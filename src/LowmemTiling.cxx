@@ -2292,6 +2292,40 @@ GeomCellSelection WireCell2dToy::LowmemTiling::local_deghosting(std::set<SlimMer
   
 }
 
+void WireCell2dToy::LowmemTiling::reset_good_cells(){
+  // clean up all fired_wires
+  fired_wire_u.clear();
+  fired_wire_v.clear();
+  fired_wire_w.clear();
+  
+  // clean up all good wire cells
+  three_good_wire_cells.clear();
+  two_good_wire_cells.clear();
+  one_good_wire_cells.clear();
+  not_used_one_good_wire_cells.clear();
+  
+  // clean up all maps ...
+  pwire_wires_map.clear();
+  wire_pwire_map.clear();
+  wire_cells_map.clear();
+  cell_wires_map.clear();
+
+  wire_type_map.clear();
+  for (auto it = bad_wire_u.begin(); it!= bad_wire_u.end(); it++){
+    wire_type_map[*it] = false;
+  }
+  for (auto it = bad_wire_v.begin(); it!= bad_wire_v.end(); it++){
+    wire_type_map[*it] = false;
+  }
+  for (auto it = bad_wire_w.begin(); it!= bad_wire_w.end(); it++){
+    wire_type_map[*it] = false;
+  }
+
+  wirechargemap.clear();
+  wirecharge_errmap.clear();
+  
+}
+
 void WireCell2dToy::LowmemTiling::init_good_cells(const WireCell::Slice& slice, const WireCell::Slice& slice_err, std::vector<float>& uplane_rms, std::vector<float>& vplane_rms, std::vector<float>& wplane_rms){
   // form good wires group
   form_fired_merge_wires(slice, slice_err);
