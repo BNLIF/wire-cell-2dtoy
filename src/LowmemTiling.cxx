@@ -1714,6 +1714,24 @@ void WireCell2dToy::LowmemTiling::local_deghosting1(std::set<WireCell::SlimMerge
   }
 
   
+  std::set<SlimMergeGeomCell*> cannot_remove;
+  for (auto it = two_good_wire_cells.begin(); it!= two_good_wire_cells.end(); it++){
+    SlimMergeGeomCell *mcell = (SlimMergeGeomCell*)(*it);
+    int count = 0;
+    for (auto it1 = three_good_wire_cells.begin(); it1!= three_good_wire_cells.end(); it1++){
+      SlimMergeGeomCell *mcell1 = (SlimMergeGeomCell*)(*it1);
+      if (good_mcells.find(mcell1)!=good_mcells.end()){
+	if (mcell->Adjacent(mcell1))
+	  count ++;
+	if (count==2){
+	  cannot_remove.insert(mcell);
+	  break;
+	}
+      }
+    }
+  }
+
+  
   GeomCellSelection to_be_removed;
 
   for (auto it = two_good_wire_cells.begin(); it!= two_good_wire_cells.end(); it++){
@@ -1793,7 +1811,8 @@ void WireCell2dToy::LowmemTiling::local_deghosting1(std::set<WireCell::SlimMerge
     // std::cout << mwires.size() << " " << count << std::endl;
   }
   for (auto it=to_be_removed.begin(); it!=to_be_removed.end(); it++){
-    Erase_Cell((SlimMergeGeomCell*)(*it));
+    if (cannot_remove.find((SlimMergeGeomCell*)(*it))==cannot_remove.end())
+      Erase_Cell((SlimMergeGeomCell*)(*it));
   }
   
 }
@@ -1825,6 +1844,25 @@ GeomCellSelection WireCell2dToy::LowmemTiling::local_deghosting(std::set<SlimMer
       }
     }
   }
+
+
+  std::set<SlimMergeGeomCell*> cannot_remove;
+  for (auto it = two_good_wire_cells.begin(); it!= two_good_wire_cells.end(); it++){
+    SlimMergeGeomCell *mcell = (SlimMergeGeomCell*)(*it);
+    int count = 0;
+    for (auto it1 = three_good_wire_cells.begin(); it1!= three_good_wire_cells.end(); it1++){
+      SlimMergeGeomCell *mcell1 = (SlimMergeGeomCell*)(*it1);
+      if (good_mcells.find(mcell1)!=good_mcells.end()){
+	if (mcell->Adjacent(mcell1))
+	  count ++;
+	if (count==2){
+	  cannot_remove.insert(mcell);
+	  break;
+	}
+      }
+    }
+  }
+  
 
   GeomCellSelection to_be_removed;
 
@@ -1888,7 +1926,8 @@ GeomCellSelection WireCell2dToy::LowmemTiling::local_deghosting(std::set<SlimMer
   // std::cout << two_good_wire_cells.size() << " " << to_be_removed.size() << std::endl;
   //delete absolutely that can be deleted ... 
   for (auto it=to_be_removed.begin(); it!=to_be_removed.end(); it++){
-    Erase_Cell((SlimMergeGeomCell*)(*it));
+    if (cannot_remove.find((SlimMergeGeomCell*)(*it))==cannot_remove.end())
+      Erase_Cell((SlimMergeGeomCell*)(*it));
   }
   to_be_removed.clear();
 
@@ -2006,7 +2045,8 @@ GeomCellSelection WireCell2dToy::LowmemTiling::local_deghosting(std::set<SlimMer
 
   if (flag_del){
     for (auto it=to_be_removed.begin(); it!=to_be_removed.end(); it++){
-      Erase_Cell((SlimMergeGeomCell*)(*it));
+      if (cannot_remove.find((SlimMergeGeomCell*)(*it))==cannot_remove.end())
+	Erase_Cell((SlimMergeGeomCell*)(*it));
     }
     to_be_removed.clear();
   }
