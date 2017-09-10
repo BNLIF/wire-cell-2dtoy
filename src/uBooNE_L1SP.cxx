@@ -78,14 +78,19 @@ WireCell2dToy::uBooNE_L1SP::~uBooNE_L1SP(){
 
 void WireCell2dToy::uBooNE_L1SP::AddWireTime_Raw(){
   for (int wire_index= 1166; wire_index<=1905;wire_index++){
-    for (int time_slice = 0; time_slice != hv_raw->GetNbinsY();time_slice++){
-      float content = hv_raw->GetBinContent(wire_index+1,time_slice+1);
-      if (content>10){
+    for (int time_tick = 0; time_tick != hv_raw->GetNbinsY();time_tick++){
+      float content = hv_raw->GetBinContent(wire_index+1,time_tick+1);
+      if (content>20){
 	if (init_map.find(wire_index)!=init_map.end()){
-	  init_map[wire_index].push_back(time_slice);
+	  for (int time_slice = time_tick/nrebin; time_slice < time_tick/nrebin+5; time_slice ++){
+	    if (find(init_map[wire_index].begin(),init_map[wire_index].end(),time_slice)==init_map[wire_index].end())
+	      init_map[wire_index].push_back(time_slice);
+	  }
 	}else{
 	  std::vector<int> times;
-	  times.push_back(time_slice);
+	  for (int time_slice = time_tick/nrebin; time_slice < time_tick/nrebin +5; time_slice ++){
+	    times.push_back(time_slice);
+	  }
 	  init_map[wire_index] = times;
 	}
       }
@@ -194,6 +199,9 @@ void WireCell2dToy::uBooNE_L1SP::Form_rois(int pad){
 
 void WireCell2dToy::uBooNE_L1SP::L1_fit(int wire_index, int start_tick, int end_tick){
   const int nbin_fit = end_tick-start_tick;
+
+  // std::cout << start_tick << " " << end_tick << std::endl;
+  
   // fill the data ... 
   VectorXd W = VectorXd::Zero(nbin_fit);
 
@@ -207,18 +215,21 @@ void WireCell2dToy::uBooNE_L1SP::L1_fit(int wire_index, int start_tick, int end_
     }
   }
 
-  std::cout << nbin_fit << " " << wire_index+2400 << " " << start_tick/4. << " " << (end_tick-start_tick)/4. << " " << temp_sum << " " << temp1_sum << std::endl;
+  
 
+  
   int flag_l1 = 0; // do nothing
   // 1 do L1 
 
-  if (temp_sum/(temp1_sum*90./nbin_fit)>0.5&& temp1_sum>160){
+  if (temp_sum/(temp1_sum*90./nbin_fit)>0.2&& temp1_sum>160){
     flag_l1 = 1; // do L1 ...
-  }else if (0){
+  }else if (temp1_sum*90./nbin_fit < 50.){
     flag_l1 = 2; //remove signal ... 
   }
 
+  std::cout << nbin_fit << " " << wire_index+2400 << " " << start_tick/4. << " " << (end_tick-start_tick)/4. << " " << temp_sum << " " << temp1_sum << " " << flag_l1 << std::endl;
   
+  // std::cout << flag_l1 << std::endl;
   
   if (flag_l1==1){
     //for matrix G
@@ -275,7 +286,6 @@ void WireCell2dToy::uBooNE_L1SP::L1_fit(int wire_index, int start_tick, int end_
   }else if (flag_l1==2){
     for (int i=0;i<nbin_fit/nrebin;i++){
       double content = 0;
-      content *= 500;
       hv_decon->SetBinContent(wire_index+1,start_tick/nrebin+1+i,content);
       hv_decon_g->SetBinContent(wire_index+1,start_tick/nrebin+1+i,content);
     }
