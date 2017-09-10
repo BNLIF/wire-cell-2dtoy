@@ -343,8 +343,8 @@ int main(int argc, char* argv[])
   // start_num = 6600/4.;
   // end_num = 7500/4.;
   
-  start_num = 100;
-  end_num = 105;
+  // start_num = 100;
+  // end_num = 105;
   
   TFile *file = new TFile(Form("result_%d_%d_%d.root",run_no,subrun_no,event_no),"RECREATE");
   
@@ -425,6 +425,8 @@ int main(int argc, char* argv[])
     l1sp.AddWires(i,wires);
     
   }
+  
+  l1sp.AddWireTime_Raw();
   l1sp.Form_rois(6);
   roi_fds.refresh(hu_decon,hv_decon,hw_decon,eve_num);
   roi_gaus_fds.refresh(hu_decon_g,hv_decon_g,hw_decon_g,eve_num);
@@ -442,7 +444,7 @@ int main(int argc, char* argv[])
       WireCell::Slice slice = sds.get();
       WireCell::Slice slice_err = sds.get_error();
 
-      std::cout << time_slice << " " << slice.group().size() << " " << slice_err.group().size() << std::endl;
+      //std::cout << time_slice << " " << slice.group().size() << " " << slice_err.group().size() << std::endl;
       //  std::cout << time_slice << " " << lowmemtiling[time_slice]->get_three_good_wire_cells().size() << " " << lowmemtiling[time_slice]->get_two_good_wire_cells().size() << " " << lowmemtiling[time_slice]->get_all_good_wires().size() << " " << lowmemtiling[time_slice]->get_all_bad_wires().size() << " " << lowmemtiling[time_slice]->get_cell_wires_map().size() << " " << lowmemtiling[time_slice]->get_wire_cells_map().size() << " " << lowmemtiling[time_slice]->get_wire_charge_map().size() << " " << lowmemtiling[time_slice]->get_two_bad_wire_cells().size() << std::endl;
        lowmemtiling[time_slice]->reset_cells();
        if (time_slice==start_num){
@@ -469,6 +471,19 @@ int main(int argc, char* argv[])
   
   cerr << em("finish tiling") << endl;
 
+  TFile *file2 = new TFile("temp_l1sp.root","RECREATE");
+  hv_raw->SetDirectory(file2);
+  hu_decon->SetDirectory(file2);
+  hv_decon->SetDirectory(file2);
+  hw_decon->SetDirectory(file2);
+  hu_decon_g->SetDirectory(file2);
+  hv_decon_g->SetDirectory(file2);
+  hw_decon_g->SetDirectory(file2);
+  hu_threshold->SetDirectory(file2);
+  hv_threshold->SetDirectory(file2);
+  hw_threshold->SetDirectory(file2);
+  file2->Write();
+  file2->Close();
   
   
 

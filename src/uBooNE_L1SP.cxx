@@ -76,6 +76,23 @@ WireCell2dToy::uBooNE_L1SP::~uBooNE_L1SP(){
   delete gw;
 }
 
+void WireCell2dToy::uBooNE_L1SP::AddWireTime_Raw(){
+  for (int wire_index= 1166; wire_index<=1905;wire_index++){
+    for (int time_slice = 0; time_slice != hv_raw->GetNbinsY();time_slice++){
+      float content = hv_raw->GetBinContent(wire_index+1,time_slice+1);
+      if (content>10){
+	if (init_map.find(wire_index)!=init_map.end()){
+	  init_map[wire_index].push_back(time_slice);
+	}else{
+	  std::vector<int> times;
+	  times.push_back(time_slice);
+	  init_map[wire_index] = times;
+	}
+      }
+    }
+  }
+}
+
 void WireCell2dToy::uBooNE_L1SP::AddWires(int time_slice, GeomWireSelection& wires){
   if (wires.size() >0){
     
@@ -190,12 +207,20 @@ void WireCell2dToy::uBooNE_L1SP::L1_fit(int wire_index, int start_tick, int end_
     }
   }
 
- 
+  std::cout << nbin_fit << " " << wire_index+2400 << " " << start_tick/4. << " " << (end_tick-start_tick)/4. << " " << temp_sum << " " << temp1_sum << std::endl;
+
+  int flag_l1 = 0; // do nothing
+  // 1 do L1 
+
+  if (temp_sum/(temp1_sum*90./nbin_fit)>0.5&& temp1_sum>160){
+    flag_l1 = 1; // do L1 ...
+  }else if (0){
+    flag_l1 = 2; //remove signal ... 
+  }
+
   
-  if (temp_sum/temp1_sum >0.5 && temp1_sum > 160){
-    
-    //std::cout << nbin_fit << " " << wire_index+2400 << " " << start_tick/4. << " " << (end_tick-start_tick)/4. << " " << temp_sum << " " << temp1_sum << " "; //std::endl;
-    
+  
+  if (flag_l1==1){
     //for matrix G
     MatrixXd G = MatrixXd::Zero(nbin_fit, nbin_fit*2);
     for (int i=0;i!=nbin_fit;i++){ 
@@ -231,7 +256,6 @@ void WireCell2dToy::uBooNE_L1SP::L1_fit(int wire_index, int start_tick, int end_
     
     if (sum1 >6 ){
       // replace it in the decon_v ...
-      
       for (int i=0;i<nbin_fit/nrebin;i++){
 	double content = 0;
 	for (int j=0;j!=nrebin;j++){
@@ -246,8 +270,14 @@ void WireCell2dToy::uBooNE_L1SP::L1_fit(int wire_index, int start_tick, int end_
 	}
 	//std::cout << hv_decon->GetBinContent(wire_index+1,start_tick/nrebin+1+i) << " " << content << std::endl;
       }
-      
       //  std::cout << sum1 << " " << sum2 << std::endl;
+    }
+  }else if (flag_l1==2){
+    for (int i=0;i<nbin_fit/nrebin;i++){
+      double content = 0;
+      content *= 500;
+      hv_decon->SetBinContent(wire_index+1,start_tick/nrebin+1+i,content);
+      hv_decon_g->SetBinContent(wire_index+1,start_tick/nrebin+1+i,content);
     }
   }
 }

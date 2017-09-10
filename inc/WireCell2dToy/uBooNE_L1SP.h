@@ -13,8 +13,10 @@ namespace WireCell2dToy{
     ~uBooNE_L1SP();
 
     void AddWires(int time_slice, WireCell::GeomWireSelection& wires);
-    void Form_rois(int pad = 2);
+
+    void AddWireTime_Raw();
     
+    void Form_rois(int pad = 2);
     void L1_fit(int wire_index, int start_tick, int end_tick);
     
     std::set<int> get_time_slice_set(){return time_slice_set;};
