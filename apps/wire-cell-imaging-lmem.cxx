@@ -2586,7 +2586,7 @@ int main(int argc, char* argv[])
   
   TTree *t_rec_simple = new TTree("T_rec","T_rec");
   TTree *t_rec_charge = new TTree("T_rec_charge","T_rec_charge");
-  TTree *t_rec_deblob = new TTree("T_rec_deblob","T_rec_deblob");
+  TTree *t_rec_deblob = new TTree("T_rec_charge_blob","T_rec_charge_blob");
   
   TTree *t_mcell = new TTree("T_mcell","T_mcell");
   
