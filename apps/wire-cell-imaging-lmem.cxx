@@ -2367,6 +2367,7 @@ int main(int argc, char* argv[])
   cluster_set.clear();
   cluster_delset.clear();
   
+  
   {
     Slim3DClusterSet temp_cluster_set, temp_cluster_delset;
     // 2nd round of clustering
@@ -2509,12 +2510,14 @@ int main(int argc, char* argv[])
   T_cluster->Branch("z",&z,"z/D");
   T_cluster->SetDirectory(file);
   
+  good_mcells.clear();
   for (auto it = cluster_set.begin();it!=cluster_set.end();it++){
     (*it)->set_id(ncluster);
     
   //   TGraph2D *g1 = new TGraph2D();
     for (int i=0; i!=(*it)->get_allcell().size();i++){
       SlimMergeGeomCell *mcell = (SlimMergeGeomCell*)((*it)->get_allcell().at(i));
+      good_mcells.insert(mcell);
       int time_slice_save = mcell->GetTimeSlice();
       GeomCellSelection temp_cells = lowmemtiling[time_slice_save]->create_single_cells((SlimMergeGeomCell*)mcell);
       for (int j=0; j!=temp_cells.size();j++){
@@ -2578,9 +2581,13 @@ int main(int argc, char* argv[])
   
   TGraph2D *g = new TGraph2D();
   TGraph2D *g_rec = new TGraph2D();
+
+  TGraph2D *g_deblob = new TGraph2D();
+  
   TTree *t_rec_simple = new TTree("T_rec","T_rec");
   TTree *t_rec_charge = new TTree("T_rec_charge","T_rec_charge");
-
+  TTree *t_rec_deblob = new TTree("T_rec_deblob","T_rec_deblob");
+  
   TTree *t_mcell = new TTree("T_mcell","T_mcell");
   
   Double_t x_save, y_save, z_save;
@@ -2603,6 +2610,17 @@ int main(int argc, char* argv[])
   t_rec_charge->Branch("chi2",&chi2_save,"chi2/D");
   t_rec_charge->Branch("ndf",&ndf_save,"ndf/D");
 
+  
+  t_rec_deblob->SetDirectory(file);
+  t_rec_deblob->Branch("x",&x_save,"x/D");
+  t_rec_deblob->Branch("y",&y_save,"y/D");
+  t_rec_deblob->Branch("z",&z_save,"z/D");
+  t_rec_deblob->Branch("q",&charge_save,"q/D");
+  t_rec_deblob->Branch("nq",&ncharge_save,"nq/D");
+  t_rec_deblob->Branch("chi2",&chi2_save,"chi2/D");
+  t_rec_deblob->Branch("ndf",&ndf_save,"ndf/D");
+  
+  
   t_mcell->SetDirectory(file);
   Double_t uq, vq, wq, udq, vdq, wdq;
   Int_t time_slice_save;
@@ -2702,18 +2720,39 @@ int main(int argc, char* argv[])
       	  y_save = p.y/units::cm;
       	  z_save = p.z/units::cm;
       	  g_rec->SetPoint(ncount1,x_save, y_save, z_save);
-	  
-      	  t_rec_charge->Fill();
+	  t_rec_charge->Fill();
 	  
       	  ncount1 ++;
       	}
       }
+
+      if (good_mcells.find(mcell)!=good_mcells.end()){
+	if (chargesolver[i]->get_mcell_charge(mcell)>300){
+	  charge_save = chargesolver[i]->get_mcell_charge(mcell) / (temp_cells.size() * 1.0) ;
+	  ncharge_save = temp_cells.size();
+	}else{
+	  charge_save = 300 / (temp_cells.size() * 1.0) ;
+	  ncharge_save = temp_cells.size();
+	}
+	
+	for (auto it1 = temp_cells.begin(); it1!=temp_cells.end(); it1++){
+      	  Point p = (*it1)->center();
+      	  x_save = i*nrebin/2.*unit_dis/10. - frame_length/2.*unit_dis/10.;
+      	  y_save = p.y/units::cm;
+      	  z_save = p.z/units::cm;
+      	  g_deblob->SetPoint(ncount1,x_save, y_save, z_save);
+	  t_rec_deblob->Fill();
+	  
+      	  ncount1 ++;
+      	}
+      }
+      
     }
     // 
   }
   g->Write("g");
   g_rec->Write("g_rec");
-
+  g_deblob->Write("g_blob");
 
 
 
