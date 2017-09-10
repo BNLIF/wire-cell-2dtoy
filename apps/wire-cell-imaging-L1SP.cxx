@@ -426,9 +426,14 @@ int main(int argc, char* argv[])
     l1sp.AddWires(i,wires);
     
   }
-  
+   cerr << em("finish tiling") << endl;
+   
   l1sp.AddWireTime_Raw();
+  cerr << em("finish raw signal examination") << endl;
   l1sp.Form_rois(6);
+  cerr << em("finish L1SP") << endl;
+  
+  
   roi_fds.refresh(hu_decon,hv_decon,hw_decon,eve_num);
   roi_gaus_fds.refresh(hu_decon_g,hv_decon_g,hw_decon_g,eve_num);
   error_fds.refresh(hu_decon_g, hv_decon_g, hw_decon_g, eve_num);

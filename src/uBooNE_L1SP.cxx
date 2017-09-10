@@ -77,25 +77,57 @@ WireCell2dToy::uBooNE_L1SP::~uBooNE_L1SP(){
 }
 
 void WireCell2dToy::uBooNE_L1SP::AddWireTime_Raw(){
+  TH1F *h1 = new TH1F("h1","h1",200,-50,50);
   for (int wire_index= 1166; wire_index<=1905;wire_index++){
+    h1->Reset();
+    for (int time_tick = 0; time_tick != hv_raw->GetNbinsY();time_tick++){
+      h1->Fill(hv_raw->GetBinContent(wire_index+1,time_tick+1));
+    }
+    double par[3];
+    double xq = 0.5;
+    h1->GetQuantiles(1,&par[1],&xq);
+    xq = 0.5 + 0.34;
+    h1->GetQuantiles(1,&par[0],&xq);
+    xq = 0.5 - 0.34;
+    h1->GetQuantiles(1,&par[2],&xq);
+
+    double cut = 4.2 *  sqrt((pow(par[0]-par[1],2)+pow(par[2]-par[1],2))/2.); // 4.2 sigma cut ...
+    if (cut < 9) cut = 9;
+    
     for (int time_tick = 0; time_tick != hv_raw->GetNbinsY();time_tick++){
       float content = hv_raw->GetBinContent(wire_index+1,time_tick+1);
-      if (content>20){
+
+      if (content > cut && hv_decon->GetBinContent(wire_index+1,int(time_tick/nrebin+1))<=0){
+	double content1 = hv_raw->GetBinContent(wire_index+1,int(time_tick/nrebin)*nrebin+1);
+	if (content1 < hv_raw->GetBinContent(wire_index+1,int(time_tick/nrebin)*nrebin+2))
+	  content1 = hv_raw->GetBinContent(wire_index+1,int(time_tick/nrebin)*nrebin+2);
+	if (content1 < hv_raw->GetBinContent(wire_index+1,int(time_tick/nrebin)*nrebin+3))
+	  content1 = hv_raw->GetBinContent(wire_index+1,int(time_tick/nrebin)*nrebin+3);
+	if (content1 < hv_raw->GetBinContent(wire_index+1,int(time_tick/nrebin)*nrebin+4))
+	  content1 = hv_raw->GetBinContent(wire_index+1,int(time_tick/nrebin)*nrebin+4);
+       	content1 *= 500/4.*nrebin;
+	hv_decon->SetBinContent(wire_index+1,int(time_tick/nrebin+1),content1);
+	hv_decon_g->SetBinContent(wire_index+1,int(time_tick/nrebin+1),content1);
+      }
+      
+      if (content>cut){
 	if (init_map.find(wire_index)!=init_map.end()){
 	  for (int time_slice = time_tick/nrebin; time_slice < time_tick/nrebin+5; time_slice ++){
-	    if (find(init_map[wire_index].begin(),init_map[wire_index].end(),time_slice)==init_map[wire_index].end())
-	      init_map[wire_index].push_back(time_slice);
+	    //if (find(init_map[wire_index].begin(),init_map[wire_index].end(),time_slice)==init_map[wire_index].end())
+	    init_map[wire_index].insert(time_slice);
 	  }
 	}else{
-	  std::vector<int> times;
+	  std::set<int> times;
 	  for (int time_slice = time_tick/nrebin; time_slice < time_tick/nrebin +5; time_slice ++){
-	    times.push_back(time_slice);
+	    //	    times.push_back(time_slice);
+	    times.insert(time_slice);
 	  }
 	  init_map[wire_index] = times;
 	}
       }
     }
   }
+  delete h1;
 }
 
 void WireCell2dToy::uBooNE_L1SP::AddWires(int time_slice, GeomWireSelection& wires){
@@ -112,10 +144,10 @@ void WireCell2dToy::uBooNE_L1SP::AddWires(int time_slice, GeomWireSelection& wir
     for (auto it = wires.begin(); it!=wires.end(); it++){
       int wire_index = (*it)->index();
       if (init_map.find(wire_index)!=init_map.end()){
-	init_map[wire_index].push_back(time_slice);
+	init_map[wire_index].insert(time_slice);
       }else{
-	std::vector<int> times;
-	times.push_back(time_slice);
+	std::set<int> times;
+	times.insert(time_slice);
 	init_map[wire_index] = times;
       }
     }
@@ -126,8 +158,10 @@ void WireCell2dToy::uBooNE_L1SP::Form_rois(int pad){
   
   for (auto it = init_map.begin(); it!=init_map.end(); it++){
     int wire_index = it->first;
-    std::vector<int> time_slices = it->second;
-    std::sort(time_slices.begin(), time_slices.end());
+    std::set<int> time_slices_set = it->second;
+    std::vector<int> time_slices;
+    std::copy(time_slices_set.begin(), time_slices_set.end(), std::back_inserter(time_slices));
+    //  std::sort(time_slices.begin(), time_slices.end());
 
     std::vector<std::pair<int,int>> rois;
     std::vector<std::pair<int,int>> rois_save;
@@ -270,7 +304,7 @@ void WireCell2dToy::uBooNE_L1SP::L1_fit(int wire_index, int start_tick, int end_
       for (int i=0;i<nbin_fit/nrebin;i++){
 	double content = 0;
 	for (int j=0;j!=nrebin;j++){
-	  content += beta(nrebin*i+j) + beta(nbin_fit + nrebin*i + j);
+	  content += beta(nrebin*i+j) + beta(nbin_fit + nrebin*i + j) * 1.8;
 	}
 	content *= 500;
 	hv_decon->SetBinContent(wire_index+1,start_tick/nrebin+1+i,content);

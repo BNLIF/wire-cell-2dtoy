@@ -32,7 +32,7 @@ namespace WireCell2dToy{
     
     int nrebin;
     // wire index --> time
-    std::map<int,std::vector<int>> init_map;
+    std::map<int,std::set<int>> init_map;
   };
 }
 
