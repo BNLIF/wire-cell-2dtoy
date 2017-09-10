@@ -304,7 +304,7 @@ void WireCell2dToy::uBooNE_L1SP::L1_fit(int wire_index, int start_tick, int end_
       for (int i=0;i<nbin_fit/nrebin;i++){
 	double content = 0;
 	for (int j=0;j!=nrebin;j++){
-	  content += beta(nrebin*i+j) + beta(nbin_fit + nrebin*i + j) * 1.8;
+	  content += beta(nrebin*i+j) + beta(nbin_fit + nrebin*i + j) * 2.0;
 	}
 	content *= 500;
 	hv_decon->SetBinContent(wire_index+1,start_tick/nrebin+1+i,content);
