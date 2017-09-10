@@ -261,9 +261,10 @@ void WireCell2dToy::uBooNE_L1SP::L1_fit(int wire_index, int start_tick, int end_
     flag_l1 = 2; //remove signal ... 
   }
 
-  std::cout << nbin_fit << " " << wire_index+2400 << " " << start_tick/4. << " " << (end_tick-start_tick)/4. << " " << temp_sum << " " << temp1_sum << " " << flag_l1 << std::endl;
+  //std::cout << nbin_fit << " " << wire_index+2400 << " " << start_tick/4. << " " << (end_tick-start_tick)/4. << " " << temp_sum << " " << temp1_sum << " " << flag_l1 << std::endl;
   
   // std::cout << flag_l1 << std::endl;
+  //flag_l1 = 0;
   
   if (flag_l1==1){
     //for matrix G

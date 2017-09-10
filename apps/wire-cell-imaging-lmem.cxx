@@ -246,7 +246,6 @@ int main(int argc, char* argv[])
   T_chirp->SetBranchAddress("end_time",&end_time);
   for (Int_t i=0;i!=T_chirp->GetEntries();i++){
     T_chirp->GetEntry(i);
-    
     std::pair<int,int> abc(start_time,end_time);
     if (plane == 0){
       uplane_map[chid] = abc;
@@ -256,6 +255,9 @@ int main(int argc, char* argv[])
       wplane_map[chid-nwire_u-nwire_v] = abc;
     }
   }
+  
+  
+  
   
   std::vector<float> uplane_rms;
   std::vector<float> vplane_rms;
@@ -288,6 +290,45 @@ int main(int argc, char* argv[])
   TH2F *hv_decon_g = (TH2F*)file1->Get("hv_decon_g");
   TH2F *hw_decon_g = (TH2F*)file1->Get("hw_decon_g");
 
+
+  // add a special treatment here ...
+  for (int i=296; i!=671;i++){
+    if (uplane_map.find(i)==uplane_map.end()){
+      if ((uplane_map.find(i-1)!=uplane_map.end() &&
+	   uplane_map.find(i+2)!=uplane_map.end()) ||
+	  (uplane_map.find(i-2)!=uplane_map.end() &&
+	   uplane_map.find(i+1)!=uplane_map.end())
+	  ){
+	std::cout << "U plane (shorted): " << i << " added to bad chanel list" << std::endl;
+	uplane_map[i] = uplane_map[i-1];
+	for (int j=0;j!=hu_decon->GetNbinsY();j++){
+	  hu_decon->SetBinContent(i+1,j+1,0);
+	  hu_decon_g->SetBinContent(i+1,j+1,0);
+	}
+      }
+    }
+  }
+  for (int i=2336;i!=2463;i++){
+    if (wplane_map.find(i)==wplane_map.end()){
+      if ((wplane_map.find(i-1)!=wplane_map.end() &&
+	   wplane_map.find(i+2)!=wplane_map.end()) ||
+	  (wplane_map.find(i-2)!=wplane_map.end() &&
+	   wplane_map.find(i+1)!=wplane_map.end())
+	  ){
+	wplane_map[i] = wplane_map[i-1];
+	std::cout << "W plane (shorted): " << i << " added to bad chanel list" << std::endl;
+	for (int j=0;j!=hw_decon->GetNbinsY();j++){
+	  hw_decon->SetBinContent(i+1,j+1,0);
+	  hw_decon_g->SetBinContent(i+1,j+1,0);
+	}
+      }
+    }
+  }
+  //
+
+
+
+  
   TH2F *hv_raw = (TH2F*)file1->Get("hv_raw");
   
   WireCell2dToy::uBooNE_L1SP l1sp(hv_raw,hv_decon,hv_decon_g,nrebin);
