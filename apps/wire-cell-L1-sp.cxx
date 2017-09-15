@@ -102,7 +102,7 @@ int main(int argc, char* argv[])
     chid -= nwire_u + nwire_v;
   }
   
-  int nrebin = 4;
+  int nrebin = 6;
 
   
   int start_bin = start_recon_bin*nrebin ;// 6 * 575;
@@ -126,12 +126,14 @@ int main(int argc, char* argv[])
     hsig1->SetBinContent(i+1,hsig->GetBinContent(start_bin+i+1));
   }
   for (int i=0;i!=nrecon_bin;i++){
-    hrecon_sig->SetBinContent(i+1,(htemp1->GetBinContent(chid+1,nrebin * start_recon_bin+i*nrebin+1) +
-				   htemp1->GetBinContent(chid+1,nrebin * start_recon_bin+i*nrebin+1+1) +
-				   htemp1->GetBinContent(chid+1,nrebin * start_recon_bin+i*nrebin+2+1) +
-				   htemp1->GetBinContent(chid+1,nrebin * start_recon_bin+i*nrebin+3+1)
+    double sum = 0;
+    hrecon_sig->SetBinContent(i+1,htemp1->GetBinContent(chid+1,start_recon_bin+i+1)/500.);
+    // hrecon_sig->SetBinContent(i+1,(htemp1->GetBinContent(chid+1,nrebin * start_recon_bin+i*nrebin+1) +
+    // 				   htemp1->GetBinContent(chid+1,nrebin * start_recon_bin+i*nrebin+1+1) +
+    // 				   htemp1->GetBinContent(chid+1,nrebin * start_recon_bin+i*nrebin+2+1) +
+    // 				   htemp1->GetBinContent(chid+1,nrebin * start_recon_bin+i*nrebin+3+1)
 				   
-				   )/500.);
+    // 				   )/500.);
   }
   
   // TString filename = "/home/xqian/uboone/matrix_inversion/work/wire-cell/2dtoy/src/data_70_2D_11.txt";
