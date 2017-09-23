@@ -450,7 +450,13 @@ int main(int argc, char* argv[])
       WireCell::Slice slice = sds.get();
       WireCell::Slice slice_err = sds.get_error();
 
-      //std::cout << time_slice << " " << slice.group().size() << " " << slice_err.group().size() << std::endl;
+      std::cout << time_slice << " " << slice.group().size() << " " << slice_err.group().size() << std::endl;
+      // if (time_slice == 2070){
+      // 	WireCell::Channel::Group group = slice.group();
+      // 	for (int k=0;k!=group.size();k++){
+      // 	  std::cout << k << " " << group.at(k).first << " " << group.at(k).second << std::endl;
+      // 	}
+      // }
       //  std::cout << time_slice << " " << lowmemtiling[time_slice]->get_three_good_wire_cells().size() << " " << lowmemtiling[time_slice]->get_two_good_wire_cells().size() << " " << lowmemtiling[time_slice]->get_all_good_wires().size() << " " << lowmemtiling[time_slice]->get_all_bad_wires().size() << " " << lowmemtiling[time_slice]->get_cell_wires_map().size() << " " << lowmemtiling[time_slice]->get_wire_cells_map().size() << " " << lowmemtiling[time_slice]->get_wire_charge_map().size() << " " << lowmemtiling[time_slice]->get_two_bad_wire_cells().size() << std::endl;
        lowmemtiling[time_slice]->reset_cells();
        if (time_slice==start_num){

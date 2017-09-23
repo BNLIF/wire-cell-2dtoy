@@ -92,7 +92,7 @@ int main(int argc, char* argv[])
   float toffset_3=0.0;
   int total_time_bin=9594;
   int frame_length = 3200;
-  int nrebin = 4; // 6 is default
+  int nrebin = 1; // 6 is default
   int eve_num  = atoi(argv[3]);
   int time_offset = -92.;
   
@@ -224,8 +224,8 @@ int main(int argc, char* argv[])
   }
 
   
-  const Frame& frame1 = roi_fds.get();
-  // const Frame& frame1 = roi_gaus_fds.get();
+  //const Frame& frame1 = roi_fds.get();
+  const Frame& frame1 = roi_gaus_fds.get();
   ntraces = frame1.traces.size();
   for (size_t ind=0; ind<ntraces; ++ind) {
     const Trace& trace = frame1.traces[ind];
