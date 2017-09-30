@@ -19,7 +19,7 @@ namespace WireCell2dToy{
   protected:
     TFile *file;
     TTree *T;
-    
+    WireCell::COphitSelection op_hits;
   };
 }
 

@@ -1,9 +1,10 @@
 #include "WireCell2dToy/uBooNE_light_reco.h"
 
-//using namespace WireCell;
+
 #include "TH1S.h"
 #include <iostream>
 
+using namespace WireCell;
 
 
 WireCell2dToy::uBooNE_light_reco::uBooNE_light_reco(const char* root_file){
@@ -48,5 +49,11 @@ void WireCell2dToy::uBooNE_light_reco::load_event(int eve_num){
   T->GetEntry(eve_num);
   //  std::cout << op_femch->size() << " " << op_gain->size() << std::endl;
   
+  for (Int_t i=32;i!=op_femch->size();i++){
+    COphit *op_hit = new COphit(op_femch->at(i), (TH1S*)op_wf->At(i), op_timestamp->at(i) - triggerTime, op_gain->at(op_femch->at(i)), op_gainerror->at(op_femch->at(i)));
+    std::cout << op_hit->get_PE() << " " << op_hit->get_PE_err() << " " << op_hit->get_gain() << std::endl;
+    // std::cout << op_hit->get_ch_no() << " " << op_hit->get_peak() << " " << op_hit->get_baseline() << " " << op_hit->get_time() << " " << op_hit->get_integral() << " " << op_hit->get_gain() << std::endl;
+    op_hits.push_back(op_hit);
+  }
   
 }
