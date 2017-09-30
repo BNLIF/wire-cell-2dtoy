@@ -1,6 +1,8 @@
 #ifndef WIRECELL_UBOONE_LIGHT_RECO_H
 #define WIRECELL_UBOONE_LIGHT_RECO_H
 
+#include "WireCellData/COphit.h"
+
 #include "TFile.h"
 #include "TTree.h"
 #include "TClonesArray.h"

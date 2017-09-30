@@ -1,7 +1,10 @@
 #include "WireCell2dToy/uBooNE_light_reco.h"
 
 //using namespace WireCell;
+#include "TH1S.h"
 #include <iostream>
+
+
 
 WireCell2dToy::uBooNE_light_reco::uBooNE_light_reco(const char* root_file){
   file = new TFile(root_file);
@@ -43,7 +46,7 @@ void WireCell2dToy::uBooNE_light_reco::load_event(int eve_num){
 
   //  std::cout << T->GetEntries() << std::endl;
   T->GetEntry(eve_num);
-  //std::cout << op_femch->size() << std::endl;
-
+  //  std::cout << op_femch->size() << " " << op_gain->size() << std::endl;
+  
   
 }
