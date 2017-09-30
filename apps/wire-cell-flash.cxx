@@ -1,5 +1,5 @@
 #include "WireCellSst/GeomDataSource.h"
-
+#include "WireCell2dToy/uBooNE_light_reco.h"
 #include "TH1F.h"
 
 #include <iostream>
@@ -35,7 +35,8 @@ int main(int argc, char* argv[])
   const char* root_file = argv[2];
   int eve_num = atoi(argv[3]);
 
-  
+  WireCell2dToy::uBooNE_light_reco uboone_flash(root_file);
+  uboone_flash.load_event(eve_num);
   
   return 1;
 }
