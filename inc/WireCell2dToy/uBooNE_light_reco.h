@@ -1,7 +1,8 @@
 #ifndef WIRECELL_UBOONE_LIGHT_RECO_H
 #define WIRECELL_UBOONE_LIGHT_RECO_H
 
-#include "WireCellData/COphit.h"
+
+#include "WireCellData/Opflash.h"
 
 #include "TFile.h"
 #include "TTree.h"
@@ -19,7 +20,8 @@ namespace WireCell2dToy{
   protected:
     TFile *file;
     TTree *T;
-    WireCell::COphitSelection op_hits;
+    WireCell::OpflashSelection flashes;
+    // WireCell::COphitSelection op_hits;
   };
 }
 
