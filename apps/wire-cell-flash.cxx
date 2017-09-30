@@ -1,6 +1,7 @@
 #include "WireCellSst/GeomDataSource.h"
 #include "WireCell2dToy/uBooNE_light_reco.h"
 #include "TH1F.h"
+#include "TH2F.h"
 
 #include <iostream>
 
@@ -37,6 +38,18 @@ int main(int argc, char* argv[])
 
   WireCell2dToy::uBooNE_light_reco uboone_flash(root_file);
   uboone_flash.load_event(eve_num);
+
+  TFile *file = new TFile("temp.root","RECREATE");
+  TH2F *h1 = new TH2F("h1","h1",1500,0,1500,32,0,32);
+  h1->SetDirectory(file);
+  for (int i=0;i!=32;i++){
+    TH1F *h2 = uboone_flash.get_raw_hist(i);
+    for (int j=0;j!=1500;j++){
+      h1->SetBinContent(j+1,i+1,h2->GetBinContent(j+1));
+    }
+  }
+  file->Write();
+  file->Close();
   
   return 1;
 }

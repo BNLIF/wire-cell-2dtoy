@@ -12,11 +12,22 @@ WireCell2dToy::uBooNE_light_reco::uBooNE_light_reco(const char* root_file){
   T = (TTree*)file->Get("/Event/Sim");
   //  T->AddFile(root_file);
   // std::cout << T->GetEntries() << std::endl;
-
- 
+  hraw = new TH1F*[32];
+  hdecon = new TH1F*[32];
+  for (int i=0;i!=32;i++){
+    hraw[i] = new TH1F(Form("hraw_%d",i),Form("hraw_%d",i),1500,0,1500);
+    hdecon[i] = new TH1F(Form("hdecon_%d",i),Form("hdecon_%d",i),250,0,250);
+  }
 }
 
 WireCell2dToy::uBooNE_light_reco::~uBooNE_light_reco(){
+  for (int i=0;i!=32;i++){
+    delete hraw[i];
+    delete hdecon[i];
+  }
+  delete hraw;
+  delete hdecon;
+  
   delete T;
   delete file;
 }
@@ -120,4 +131,35 @@ void WireCell2dToy::uBooNE_light_reco::load_event(int eve_num){
     //std::cout << flash->get_num_fired() << " " << flash->get_time() << " " << flash->get_total_PE() << std::endl;
     flashes.push_back(flash);
   }
+
+  // fill in the rawl ... 
+  
+  for (int i=0;i!=32;i++){
+    TH1S *hsignal = (TH1S*)op_wf->At(i);
+    for (int j=0;j!=1500;j++){
+      hraw[i]->SetBinContent(j+1,hsignal->GetBinContent(j+1)-2050);
+    }
+  }
+  
+  Process_beam_wfs();
+  
+}
+
+void WireCell2dToy::uBooNE_light_reco::Process_beam_wfs(){
+  // correct the baseline ...
+  TH1F h1("h1","h1",200,-100,100);
+  for (int i=0;i!=32;i++){
+    h1.Clear();
+    for (int j=0;j!=1500;j++){
+      h1.Fill(hraw[i]->GetBinContent(j+1));
+    }
+    double xq = 0.5;
+    double baseline;
+    h1.GetQuantiles(1,&baseline,&xq);
+    //std::cout << baseline << std::endl;
+    for (int j=0;j!=1500;j++){
+      hraw[i]->SetBinContent(j+1,hraw[i]->GetBinContent(j+1)-baseline);
+    }
+  }
+  
 }

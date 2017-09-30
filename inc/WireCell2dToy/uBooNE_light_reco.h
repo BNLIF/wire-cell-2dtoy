@@ -16,12 +16,21 @@ namespace WireCell2dToy{
     ~uBooNE_light_reco();
 
     void load_event(int eve_num);
+    TH1F* get_raw_hist(int ch){return hraw[ch];};
     
   protected:
+    void Process_beam_wfs();
+    
     TFile *file;
     TTree *T;
     WireCell::OpflashSelection flashes;
     // WireCell::COphitSelection op_hits;
+
+    TH1F **hraw; // raw
+    TH1F **hdecon; // deconvolution and rebin ...
+    
+    
+    
   };
 }
 
