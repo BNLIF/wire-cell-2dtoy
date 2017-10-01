@@ -284,6 +284,9 @@ void WireCell2dToy::uBooNE_light_reco::Process_beam_wfs(){
     for (int i=0;i!=1500;i++){
       fb->SetBinContent(i+1,fb->GetBinContent(i+1)-results.first+0.01);
     }
+
+    // prepare L1 fit ... 
+    
     for (int i=0;i!=250;i++){
       hdecon[j]->SetBinContent(i+1,
 			       fb->GetBinContent(6*i+1) +
