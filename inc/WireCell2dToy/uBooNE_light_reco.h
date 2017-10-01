@@ -18,6 +18,12 @@ namespace WireCell2dToy{
     void load_event(int eve_num);
     TH1F* get_raw_hist(int ch){return hraw[ch];};
     TH1F* get_decon_hist(int ch){return hdecon[ch];};
+    TH1F* get_l1_hist(int ch){return hl1[ch];};
+
+    TH1F* get_totPE(){return h_totPE;};
+    TH1F* get_mult(){return h_mult;};
+    TH1F* get_l1_mult(){return h_l1_mult;};
+    TH1F* get_l1_totPE(){return h_l1_totPE;};
     
   protected:
     void Process_beam_wfs();
@@ -31,7 +37,12 @@ namespace WireCell2dToy{
     double gain[32];
     TH1F **hraw; // raw
     TH1F **hdecon; // deconvolution and rebin ...
-    
+    TH1F **hl1;
+
+    TH1F *h_totPE;
+    TH1F *h_mult;
+    TH1F *h_l1_mult;
+    TH1F *h_l1_totPE;
     
     
   };

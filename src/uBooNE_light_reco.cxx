@@ -19,19 +19,32 @@ WireCell2dToy::uBooNE_light_reco::uBooNE_light_reco(const char* root_file){
   // std::cout << T->GetEntries() << std::endl;
   hraw = new TH1F*[32];
   hdecon = new TH1F*[32];
+  hl1 = new TH1F*[32];
   for (int i=0;i!=32;i++){
     hraw[i] = new TH1F(Form("hraw_%d",i),Form("hraw_%d",i),1500,0,1500);
     hdecon[i] = new TH1F(Form("hdecon_%d",i),Form("hdecon_%d",i),250,0,250);
+    hl1[i] = new TH1F(Form("hl1_%d",i),Form("hl1_%d",i),250,0,250);
   }
+  h_totPE = new TH1F("h_totPE","h_totPE",250,0,250);
+  h_mult = new TH1F("h_mult","h_mult",250,0,250);
+  h_l1_mult = new TH1F("h_l1_mult","h_l1_mult",250,0,250);
+  h_l1_totPE = new TH1F("h_l1_totPE","h_l1_totPE",250,0,250);
 }
 
 WireCell2dToy::uBooNE_light_reco::~uBooNE_light_reco(){
   for (int i=0;i!=32;i++){
     delete hraw[i];
     delete hdecon[i];
+    delete hl1[i];
   }
   delete hraw;
   delete hdecon;
+  delete hl1;
+
+  delete h_totPE;
+  delete h_mult;
+  delete h_l1_mult;
+  delete h_l1_totPE;
   
   delete T;
   delete file;
@@ -304,12 +317,14 @@ void WireCell2dToy::uBooNE_light_reco::Process_beam_wfs(){
     // work on the L1 ... 
     std::vector<double> vals_y;
     std::vector<double> vals_x;
+    std::vector<int> vals_bin;
     
     for (int i=0;i!=250;i++){
       double content = hrebin->GetBinContent(i+1);
       if (content>0.3){
 	vals_y.push_back(content);
 	vals_x.push_back(hrebin->GetBinCenter(i+1));
+	vals_bin.push_back(i);
       }
       // if (content <0) content =0;
       //W(i) = content;
@@ -319,20 +334,44 @@ void WireCell2dToy::uBooNE_light_reco::Process_beam_wfs(){
     MatrixXd G = MatrixXd::Zero(nbin_fit,nbin_fit);
     
     for (int i=0;i!=nbin_fit;i++){
-      
-      //      for (int k=0;k!=nbin_fit;k++){
-	
-      //      }
+      W(i) = vals_y.at(i) / sqrt(vals_y.at(i));
+      double t1 = vals_x.at(i); // measured time
+      for (int k=0;k!=nbin_fit;k++){
+	double t2 = vals_x.at(k); // real time 
+	if (t1>t2) {
+	  G(i,k) = (0.75 * (exp(-((t1-t2)*6*15.625/1000.-3*15.625/1000.)/1.5)-exp(-((t1-t2)*6*15.625/1000.+3*15.625/1000.)/1.5))) / sqrt(vals_y.at(i));
+	}else if (t1==t2){
+	  G(i,k) = (0.25 + 0.75 *(1-exp(-3*15.625/1000./1.5))) / sqrt(vals_y.at(i));
+	}else{
+	  continue;
+	}
+	//std::cout << i << " " << k << " " << G(i,k) << std::endl;
+      }
     }
-
-    //
     
-    //    hraw[j]->Reset();
-    //for (int i=0;i!=1500;i++){
-    // if (hflag->GetBinContent(i+1)==0)
-    // hraw[j]->SetBinContent(i+1,fb->GetBinContent(i+1));
-    //}
-
+    double lambda = 5;//1/2.;
+    WireCell::LassoModel m2(lambda, 100000, 0.05);
+    m2.SetData(G, W);
+    m2.Fit();
+    VectorXd beta = m2.Getbeta();
+    
+    // double sum1 = 0, sum2 = 0;
+    // for (int i=0;i!=nbin_fit;i++){
+    //   sum1 += beta(i);
+    // }
+    // for (int i=0;i!=250;i++){
+    //   sum2 += hrebin->GetBinContent(i+1);
+    // }
+    // std::cout << j << " " << sum1 << " " << sum2 << std::endl;
+    
+    
+    for (int i=0;i!=250;i++){
+      // 
+      hdecon[j]->SetBinContent(i+1,hrebin->GetBinContent(i+1));
+    }
+    for (int i=0;i!=nbin_fit;i++){
+      hl1[j]->SetBinContent(vals_bin.at(i)+1,beta(i));
+    }
 
     delete hrebin;
     delete hflag;
@@ -350,6 +389,25 @@ void WireCell2dToy::uBooNE_light_reco::Process_beam_wfs(){
     delete hp_spe;
   }
   
+  // Now need to define the flash, 8 us, 85 bins out of 250 bins
+  // PE, multiplicity threshold  
+  // L1 PE, multiplicity ...
+  
+  //TH1F *h_totPE = new TH1F("h_totPE","h_totPE",250,0,250);
+  for (int i=0;i!=32;i++){
+    for (int j=0;j!=250;j++){
+      double content = hdecon[i]->GetBinContent(j+1);
+      if (content >0.2)
+	h_totPE->SetBinContent(j+1,h_totPE->GetBinContent(j+1) + content);
+      if (content > 1.5) // ~2 PE threshold ... 
+	h_mult->SetBinContent(j+1,h_mult->GetBinContent(j+1)+1);
+      
+      content = hl1[i]->GetBinContent(j+1);
+      h_l1_totPE->SetBinContent(j+1,h_l1_totPE->GetBinContent(j+1)+content);
+      if (content > 1) // 1 PE threshold
+	h_l1_mult->SetBinContent(j+1,h_l1_mult->GetBinContent(j+1)+1);
+    }
+  }
 
   delete hrc;
   delete hspe;
