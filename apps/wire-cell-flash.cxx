@@ -41,12 +41,17 @@ int main(int argc, char* argv[])
 
   TFile *file = new TFile("temp.root","RECREATE");
   TH2F *h1 = new TH2F("h1","h1",1500,0,1500,32,0,32);
+  TH2F *h2 = new TH2F("h2","h2",250,0,250,32,0,32);
   h1->SetDirectory(file);
+  h2->SetDirectory(file);
   for (int i=0;i!=32;i++){
-    TH1F *h2 = uboone_flash.get_raw_hist(i);
+    TH1F *h3 = uboone_flash.get_raw_hist(i);
+    TH1F *h4 = uboone_flash.get_decon_hist(i);
     for (int j=0;j!=1500;j++){
-      //      if (h2->GetBinContent(j+1)>3)
-      h1->SetBinContent(j+1,i+1,h2->GetBinContent(j+1));
+      h1->SetBinContent(j+1,i+1,h3->GetBinContent(j+1));
+    }
+    for (int j=0;j!=250;j++){
+      h2->SetBinContent(j+1,i+1,h4->GetBinContent(j+1));
     }
   }
   file->Write();
