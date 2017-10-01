@@ -1,5 +1,7 @@
 #include "WireCell2dToy/uBooNE_light_reco.h"
-
+#include "WireCellRess/LassoModel.h"
+#include "WireCellRess/ElasticNetModel.h"
+#include <Eigen/Dense>
 
 #include "TH1S.h"
 #include "TF1.h"
@@ -7,6 +9,7 @@
 #include <iostream>
 
 using namespace WireCell;
+using namespace Eigen;
 
 
 WireCell2dToy::uBooNE_light_reco::uBooNE_light_reco(const char* root_file){
@@ -286,9 +289,10 @@ void WireCell2dToy::uBooNE_light_reco::Process_beam_wfs(){
     }
 
     // prepare L1 fit ... 
+    TH1F *hrebin = new TH1F("hrebin","hrebin",250,0,250);
     
     for (int i=0;i!=250;i++){
-      hdecon[j]->SetBinContent(i+1,
+      hrebin->SetBinContent(i+1,
 			       fb->GetBinContent(6*i+1) +
 			       fb->GetBinContent(6*i+2) +
 			       fb->GetBinContent(6*i+3) +
@@ -297,13 +301,40 @@ void WireCell2dToy::uBooNE_light_reco::Process_beam_wfs(){
 			       fb->GetBinContent(6*i+6) );
     }
     
+    // work on the L1 ... 
+    std::vector<double> vals_y;
+    std::vector<double> vals_x;
+    
+    for (int i=0;i!=250;i++){
+      double content = hrebin->GetBinContent(i+1);
+      if (content>0.3){
+	vals_y.push_back(content);
+	vals_x.push_back(hrebin->GetBinCenter(i+1));
+      }
+      // if (content <0) content =0;
+      //W(i) = content;
+    }
+    int nbin_fit = vals_x.size();
+    VectorXd W = VectorXd::Zero(nbin_fit);
+    MatrixXd G = MatrixXd::Zero(nbin_fit,nbin_fit);
+    
+    for (int i=0;i!=nbin_fit;i++){
+      
+      //      for (int k=0;k!=nbin_fit;k++){
+	
+      //      }
+    }
+
+    //
+    
     //    hraw[j]->Reset();
     //for (int i=0;i!=1500;i++){
     // if (hflag->GetBinContent(i+1)==0)
     // hraw[j]->SetBinContent(i+1,fb->GetBinContent(i+1));
     //}
 
-    
+
+    delete hrebin;
     delete hflag;
     
     // rebin ...
