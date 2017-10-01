@@ -45,6 +45,7 @@ int main(int argc, char* argv[])
   for (int i=0;i!=32;i++){
     TH1F *h2 = uboone_flash.get_raw_hist(i);
     for (int j=0;j!=1500;j++){
+      //      if (h2->GetBinContent(j+1)>3)
       h1->SetBinContent(j+1,i+1,h2->GetBinContent(j+1));
     }
   }

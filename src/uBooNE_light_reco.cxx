@@ -149,17 +149,24 @@ void WireCell2dToy::uBooNE_light_reco::Process_beam_wfs(){
   // correct the baseline ...
   TH1F h1("h1","h1",200,-100,100);
   for (int i=0;i!=32;i++){
-    h1.Clear();
+    h1.Reset();
     for (int j=0;j!=1500;j++){
       h1.Fill(hraw[i]->GetBinContent(j+1));
     }
-    double xq = 0.5;
-    double baseline;
-    h1.GetQuantiles(1,&baseline,&xq);
-    //std::cout << baseline << std::endl;
+    // double xq = 0.5;
+    // double baseline;
+    // h1.GetQuantiles(1,&baseline,&xq);
+    double baseline = h1.GetMaximumBin()-100;
+    //std::cout << h1.GetMaximum() << " " << baseline << std::endl;
     for (int j=0;j!=1500;j++){
       hraw[i]->SetBinContent(j+1,hraw[i]->GetBinContent(j+1)-baseline);
     }
   }
+
+  // deconvolution ...
+
+  // ROI finding
+
+  // rebin ... 
   
 }
