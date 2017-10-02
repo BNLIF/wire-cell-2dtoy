@@ -453,6 +453,7 @@ void WireCell2dToy::uBooNE_light_reco::Process_beam_wfs(){
     //  std::cout << start_bin << " " << end_bin << std::endl;
     //check with the next bin content ...
     Opflash *flash = new Opflash(hdecon, beam_dt[0], start_bin, end_bin);
+    flash->Add_l1info(h_l1_totPE, h_l1_mult, beam_dt[0], start_bin, end_bin);
     //std::cout << flash->get_time() << " " <<flash->get_total_PE() << " " << flash->get_num_fired() << std::endl;
     beam_flashes.push_back(flash);
   }
