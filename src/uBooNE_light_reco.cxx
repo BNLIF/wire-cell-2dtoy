@@ -142,22 +142,24 @@ void WireCell2dToy::uBooNE_light_reco::load_event(int eve_num){
     //std::cout << ophits_group.at(i).at(0)->get_time() << " " << ophits_group.at(i).at(0)->get_PE() << std::endl;
   //}
 
-  
   // form flash ....
   for (size_t j=0; j!=ophits_group.size();j++){
     Opflash *flash = new Opflash(ophits_group.at(j));
     //std::cout << flash->get_num_fired() << " " << flash->get_time() << " " << flash->get_total_PE() << std::endl;
-    flashes.push_back(flash);
+    cosmic_flashes.push_back(flash);
   }
+ 
 
-  // fill in the rawl ... 
+  // fill in the raw ... 
   for (int i=0;i!=32;i++){
     TH1S *hsignal = (TH1S*)op_wf->At(i);
     for (int j=0;j!=1500;j++){
       hraw[i]->SetBinContent(j+1,hsignal->GetBinContent(j+1)-2050);
     }
     gain[i] = op_gain->at(i);
+    beam_dt[i] = op_timestamp->at(i) - triggerTime;
   }
+  
   
   Process_beam_wfs();
   
@@ -392,7 +394,6 @@ void WireCell2dToy::uBooNE_light_reco::Process_beam_wfs(){
   // Now need to define the flash, 8 us, 85 bins out of 250 bins
   // PE, multiplicity threshold  
   // L1 PE, multiplicity ...
-  
   //TH1F *h_totPE = new TH1F("h_totPE","h_totPE",250,0,250);
   for (int i=0;i!=32;i++){
     for (int j=0;j!=250;j++){
@@ -409,6 +410,74 @@ void WireCell2dToy::uBooNE_light_reco::Process_beam_wfs(){
     }
   }
 
+  // Now working on the flashes ... 
+  // [-2,78)
+
+  std::vector<int> flash_time;
+  std::vector<double> flash_pe;
+  
+  for (int i=0;i!=250;i++){
+    double pe = h_totPE->GetBinContent(i+1);
+    double mult = h_mult->GetBinContent(i+1);
+    // careteria: multiplicity needs to be higher than 3, PE needs to be higher than 6
+    if (pe >= 6 && mult >= 3){
+      if (flash_time.size()==0){
+	flash_time.push_back(i);
+	flash_pe.push_back(pe);
+      }else{
+	if (i - flash_time.back() >= 78){
+	  flash_time.push_back(i);
+	  flash_pe.push_back(pe);
+	  // start one, and open a window of 8 us, if anything above it, not the next 2 bin
+	  // if find one is bigger than this, save a flash ... start a new flash?
+	}else if (i-flash_time.back() > 4 && pe > flash_pe.back()){
+	  flash_time.push_back(i);
+	  flash_pe.push_back(pe);
+	}
+      }
+    }
+  }
+  
+  //  std::cout << flash_time.size() << " " << flash_pe.size() << std::endl;
+  //  for a flash, examine the L1 one to decide if add in more time ...?
+  for (size_t i=0; i!=flash_time.size(); i++){
+    int start_bin = flash_time.at(i)-2;
+    if (start_bin <0) start_bin = 0;
+
+    int end_bin = start_bin + 78; // default
+    if (end_bin > 250) end_bin = 250;
+    if (i+1<flash_time.size()){
+      if (end_bin > flash_time.at(i+1)-2)
+	end_bin = flash_time.at(i+1)-2;
+    }
+    //  std::cout << start_bin << " " << end_bin << std::endl;
+    //check with the next bin content ...
+    Opflash *flash = new Opflash(hdecon, beam_dt[0], start_bin, end_bin);
+    //std::cout << flash->get_time() << " " <<flash->get_total_PE() << " " << flash->get_num_fired() << std::endl;
+    beam_flashes.push_back(flash);
+  }
+
+  for (size_t i=0; i!=cosmic_flashes.size();i++){
+    Opflash *cflash = cosmic_flashes.at(i);
+    bool save = true;
+    for (size_t j=0; j!=beam_flashes.size();j++){
+      Opflash *bflash = beam_flashes.at(j);
+      if (cflash->get_time() >= bflash->get_low_time() &&
+	  cflash->get_time() <= bflash->get_high_time()){
+	save = false;
+	break;
+      }
+    }
+    if (save)
+      flashes.push_back(cflash);
+  }
+  for (size_t j=0; j!=beam_flashes.size();j++){
+    Opflash *bflash = beam_flashes.at(j);
+    flashes.push_back(bflash);
+  }
+  // std::cout << cosmic_flashes.size() << " " << beam_flashes.size() << " " << flashes.size() << std::endl;
+  
+  
   delete hrc;
   delete hspe;
 }

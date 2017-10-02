@@ -31,10 +31,13 @@ namespace WireCell2dToy{
     
     TFile *file;
     TTree *T;
+    WireCell::OpflashSelection cosmic_flashes;
+    WireCell::OpflashSelection beam_flashes;
     WireCell::OpflashSelection flashes;
     // WireCell::COphitSelection op_hits;
 
     double gain[32];
+    double beam_dt[32];
     TH1F **hraw; // raw
     TH1F **hdecon; // deconvolution and rebin ...
     TH1F **hl1;
