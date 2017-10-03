@@ -25,6 +25,10 @@ namespace WireCell2dToy{
     TH1F* get_l1_mult(){return h_l1_mult;};
     TH1F* get_l1_totPE(){return h_l1_totPE;};
     
+    WireCell::OpflashSelection& get_flashes(){return flashes;};
+    WireCell::OpflashSelection& get_cosmic_flashes(){return cosmic_flashes;};
+    WireCell::OpflashSelection& get_beam_flashes(){return beam_flashes;};
+    
   protected:
     void Process_beam_wfs();
     std::pair<double,double> cal_mean_rms(TH1 *hist, int nbin=1500);

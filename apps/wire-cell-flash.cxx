@@ -110,7 +110,49 @@ int main(int argc, char* argv[])
   h_l1_mult->SetDirectory(file);
   h_l1_totPE->SetDirectory(file);
 
+  TTree *T_flash = new TTree("T_flash","T_flash");
+  T_flash->SetDirectory(file);
+  int type;
+  double low_time, high_time;
+  double time;
+  double total_PE;
+  double PE[32],PE_err[32];
+  std::vector<int> fired_channels;
+  std::vector<double> l1_fired_time;
+  std::vector<double> l1_fired_pe;
 
+  T_flash->Branch("type",&type);
+  T_flash->Branch("low_time",&low_time);
+  T_flash->Branch("high_time",&high_time);
+  T_flash->Branch("time",&time);
+  T_flash->Branch("total_PE",&total_PE);
+  T_flash->Branch("PE",PE,"PE[32]/D");
+  T_flash->Branch("PE_err",PE_err,"PE_err[32]/D");
+  T_flash->Branch("fired_channels",&fired_channels);
+  T_flash->Branch("l1_fired_time",&l1_fired_time);
+  T_flash->Branch("l1_fired_pe",&l1_fired_pe);
+
+  WireCell::OpflashSelection& flashes = uboone_flash.get_flashes();
+  for (auto it = flashes.begin(); it!=flashes.end(); it++){
+    fired_channels.clear();
+    
+    Opflash *flash = (*it);
+    type = flash->get_type();
+    low_time = flash->get_low_time();
+    high_time = flash->get_high_time();
+    time = flash->get_time();
+    total_PE = flash->get_total_PE();
+    for (int i=0;i!=32;i++){
+      PE[i] = flash->get_PE(i);
+      PE_err[i] = flash->get_PE_err(i);
+      if (flash->get_fired(i))
+	fired_channels.push_back(i);
+    }
+    l1_fired_time = flash->get_l1_fired_time();
+    l1_fired_pe = flash->get_l1_fired_pe();
+    T_flash->Fill();
+    
+  }
   
   file->Write();
   file->Close();
