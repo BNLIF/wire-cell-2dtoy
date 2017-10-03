@@ -67,15 +67,17 @@ int main(int argc, char* argv[])
   T->GetEntry(eve_num);
   
   
-  TFile *file = new TFile("temp.root","RECREATE");
+  TFile *file = new TFile(Form("flash_%d_%d_%d.root",run_no, subrun_no, event_no),"RECREATE");
   TTree *t1 = new TTree("T_data","T_data");
   t1->SetDirectory(file);
+  
   t1->Branch("op_femch",&op_femch);
   t1->Branch("op_gain",&op_gain);
   t1->Branch("op_gainerror",&op_gainerror);
   t1->Branch("op_timestamp",&op_timestamp);
-  t1->Branch("op_wf",&op_wf);
+  t1->Branch("op_wf",&op_wf,25600,0);
   t1->Branch("triggerTime",&triggerTime);
+  
   t1->Branch("runNo",&run_no);
   t1->Branch("subRunNo",&subrun_no);
   t1->Branch("eventNo",&event_no);
