@@ -39,7 +39,48 @@ int main(int argc, char* argv[])
   WireCell2dToy::uBooNE_light_reco uboone_flash(root_file);
   uboone_flash.load_event(eve_num);
 
+  TFile *file1 = new TFile(root_file);
+  TTree *T = (TTree*)file1->Get("/Event/Sim");
+  TClonesArray* op_wf = new TClonesArray;
+  std::vector<int> *op_femch = new std::vector<int>;
+  std::vector<double> *op_timestamp = new std::vector<double>;
+  std::vector<double> *op_gain = new std::vector<double>;
+  std::vector<double> *op_gainerror = new std::vector<double>;
+  double triggerTime;
+
+  int event_no, run_no, subrun_no;
+  
+  T->SetBranchAddress("op_femch",&op_femch);
+  T->SetBranchAddress("op_gain",&op_gain);
+  T->SetBranchAddress("op_gainerror",&op_gainerror);
+  T->SetBranchAddress("op_timestamp",&op_timestamp);
+  T->SetBranchAddress("op_wf",&op_wf);
+  T->SetBranchAddress("triggerTime",&triggerTime);
+
+  T->SetBranchStatus("eventNo",1);
+  T->SetBranchAddress("eventNo" , &event_no);
+  T->SetBranchStatus("runNo",1);
+  T->SetBranchAddress("runNo"   , &run_no);
+  T->SetBranchStatus("subRunNo",1);
+  T->SetBranchAddress("subRunNo", &subrun_no);
+  
+  T->GetEntry(eve_num);
+  
+  
   TFile *file = new TFile("temp.root","RECREATE");
+  TTree *t1 = new TTree("T_data","T_data");
+  t1->SetDirectory(file);
+  t1->Branch("op_femch",&op_femch);
+  t1->Branch("op_gain",&op_gain);
+  t1->Branch("op_gainerror",&op_gainerror);
+  t1->Branch("op_timestamp",&op_timestamp);
+  t1->Branch("op_wf",&op_wf);
+  t1->Branch("triggerTime",&triggerTime);
+  t1->Branch("runNo",&run_no);
+  t1->Branch("subRunNo",&subrun_no);
+  t1->Branch("eventNo",&event_no);
+  t1->Fill();
+  
   TH2F *h1 = new TH2F("hraw","hraw",1500,0,1500,32,0,32);
   TH2F *h2 = new TH2F("hdecon","hdecon",250,0,250,32,0,32);
   TH2F *h3 = new TH2F("hl1","hl1",250,0,250,32,0,32);
@@ -58,6 +99,7 @@ int main(int argc, char* argv[])
       h3->SetBinContent(j+1,i+1,h30->GetBinContent(j+1));
     }
   }
+
   TH1F *h_totPE = (TH1F*)uboone_flash.get_totPE()->Clone("totPE");
   TH1F *h_mult = (TH1F*)uboone_flash.get_mult()->Clone("mult");
   TH1F *h_l1_mult = (TH1F*)uboone_flash.get_l1_mult()->Clone("l1_mult");
@@ -67,6 +109,8 @@ int main(int argc, char* argv[])
   h_mult->SetDirectory(file);
   h_l1_mult->SetDirectory(file);
   h_l1_totPE->SetDirectory(file);
+
+
   
   file->Write();
   file->Close();
