@@ -242,14 +242,14 @@ void WireCell2dToy::uBooNE_light_reco::Process_beam_wfs(){
       }else{
 	freq = (1500-i)/1500.*2;
       }
-      double rho = hm->GetBinContent(i+1) / hm_rc->GetBinContent(i+1) / hm_spe->GetBinContent(i+1)  ;
+      double rho = hm->GetBinContent(i+1)/ hm_rc->GetBinContent(i+1) / hm_spe->GetBinContent(i+1)  ;
       double phi = hp->GetBinContent(i+1) - hp_rc->GetBinContent(i+1) - hp_spe->GetBinContent(i+1);
       if (i==0) rho = 0;
       value_re[i] = rho * f3.Eval(freq)* cos(phi)/1500.;
       value_im[i] = rho * f3.Eval(freq)* sin(phi)/1500.;
 
-      value_re1[i] = rho * f2.Eval(freq)* cos(phi)/1500.;
-      value_im1[i] = rho * f2.Eval(freq)* sin(phi)/1500.;
+      value_re1[i] = rho * cos(phi)/1500.* f2.Eval(freq);
+      value_im1[i] = rho * sin(phi)/1500.* f2.Eval(freq);
     }
 
     // ROI finding
