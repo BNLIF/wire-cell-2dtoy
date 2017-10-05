@@ -420,6 +420,7 @@ void WireCell2dToy::uBooNE_light_reco::Process_beam_wfs(){
     double pe = h_totPE->GetBinContent(i+1);
     double mult = h_mult->GetBinContent(i+1);
     // careteria: multiplicity needs to be higher than 3, PE needs to be higher than 6
+    //std::cout << pe << " " << mult << std::endl;
     if (pe >= 6 && mult >= 3){
       if (flash_time.size()==0){
 	flash_time.push_back(i);
@@ -441,6 +442,7 @@ void WireCell2dToy::uBooNE_light_reco::Process_beam_wfs(){
   //  std::cout << flash_time.size() << " " << flash_pe.size() << std::endl;
   //  for a flash, examine the L1 one to decide if add in more time ...?
   for (size_t i=0; i!=flash_time.size(); i++){
+    //std::cout << flash_time.at(i) << " " << flash_pe.at(i) << std::endl;
     int start_bin = flash_time.at(i)-2;
     if (start_bin <0) start_bin = 0;
 
