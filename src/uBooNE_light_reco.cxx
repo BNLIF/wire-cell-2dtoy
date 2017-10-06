@@ -162,7 +162,33 @@ void WireCell2dToy::uBooNE_light_reco::load_event(int eve_num){
   
   
   Process_beam_wfs();
-  
+
+  // sort the flashes ... 
+  sort_flashes();
+}
+void WireCell2dToy::uBooNE_light_reco::sort_flashes(){
+  OpFlashSet cosmic_set;
+  for (auto it= cosmic_flashes.begin(); it!= cosmic_flashes.end(); it++){
+    cosmic_set.insert(*it);
+  }
+  cosmic_flashes.clear();
+  std::copy(cosmic_set.begin(), cosmic_set.end(), std::back_inserter(cosmic_flashes));
+
+  OpFlashSet beam_set;
+  for (auto it=beam_flashes.begin(); it!=beam_flashes.end(); it++){
+    beam_set.insert(*it);
+  }
+  beam_flashes.clear();
+  std::copy(beam_set.begin(), beam_set.end(), std::back_inserter(beam_flashes));
+
+  // std::cout << flashes.size() << std::endl;
+  OpFlashSet all_set;
+  for (auto it=flashes.begin(); it!=flashes.end(); it++){
+    all_set.insert(*it);
+  }
+  flashes.clear();
+  std::copy(all_set.begin(), all_set.end(), std::back_inserter(flashes));
+  // std::cout << flashes.size() << std::endl;
 }
 
 void WireCell2dToy::uBooNE_light_reco::Process_beam_wfs(){

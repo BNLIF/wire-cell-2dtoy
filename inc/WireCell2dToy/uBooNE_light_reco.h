@@ -31,6 +31,7 @@ namespace WireCell2dToy{
     
   protected:
     void Process_beam_wfs();
+    void sort_flashes();
     std::pair<double,double> cal_mean_rms(TH1 *hist, int nbin=1500);
     
     TFile *file;
