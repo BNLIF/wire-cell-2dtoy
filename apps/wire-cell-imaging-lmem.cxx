@@ -2673,7 +2673,9 @@ int main(int argc, char* argv[])
 
   for (auto it = cluster_set.begin();it!=cluster_set.end();it++){
     for (auto it1 = dead_cluster_set.begin();it1!=dead_cluster_set.end();it1++){
-      std::cout << (*it)->get_id() << " " << (*it1)->get_id() << " " << (*it)->Is_Connected(*it1,2).size() << std::endl;
+      GeomCellSelection mcells = (*it)->Is_Connected(*it1,2);
+      if (mcells.size()>0)
+	std::cout << (*it)->get_id() << " " << (*it)->get_allcell().size() << " " << (*it1)->get_id() << " " << (*it1)->get_mcells().size() << " " << mcells.size() << std::endl;
     }
   }
   cerr << em("form map between dead and live clusters ... ") << std::endl;
