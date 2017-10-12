@@ -2650,6 +2650,12 @@ int main(int argc, char* argv[])
     //std::cout << i << " " << dead_cluster_set.size() << " " << allmcell.size() << std::endl;
   }
 
+  int cluster_id1 = 0;
+  for (auto it = dead_cluster_set.begin();it!=dead_cluster_set.end();it++){
+    (*it)->set_id(cluster_id1);
+    cluster_id1++;
+  }
+    
   // for (int i=start_num;i!=end_num+1;i++){
   //   GeomCellSelection allmcell = lowmemtiling[i]->get_two_bad_wire_cells();
   //   for (int j=0;j<allmcell.size();j++){
@@ -2664,6 +2670,13 @@ int main(int argc, char* argv[])
   // std::cout << "Done ... " << std::endl;
   // end to group the dead cells ... 
   cerr << em("finish cluster dead region ... ") << std::endl;
+
+  for (auto it = cluster_set.begin();it!=cluster_set.end();it++){
+    for (auto it1 = dead_cluster_set.begin();it1!=dead_cluster_set.end();it1++){
+      std::cout << (*it)->get_id() << " " << (*it1)->get_id() << " " << (*it)->Is_Connected(*it1,2).size() << std::endl;
+    }
+  }
+  cerr << em("form map between dead and live clusters ... ") << std::endl;
   
   if (save_file==1){
     Double_t x_save, y_save, z_save;
@@ -2997,9 +3010,9 @@ int main(int argc, char* argv[])
     TDC->Branch("wire_index_v",wire_index_v,"wire_index_v[nwire_v]/I");
     TDC->Branch("wire_index_w",wire_index_w,"wire_index_w[nwire_w]/I");
 
-    cluster_id = 0;
+    
     for (auto it = dead_cluster_set.begin();it!=dead_cluster_set.end();it++){
-      (*it)->set_id(cluster_id);
+      cluster_id = (*it)->get_id();
       std::map<SlimMergeGeomCell*,std::set<int>> results = (*it)->get_mcell_time_map();
       for (auto it1 = results.begin(); it1!=results.end(); it1++){
 	SlimMergeGeomCell* mcell = it1->first;
@@ -3047,7 +3060,6 @@ int main(int argc, char* argv[])
 	TDC->Fill();
 	
       }
-      cluster_id ++;
     }
     
     
