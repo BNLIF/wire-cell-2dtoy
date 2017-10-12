@@ -103,7 +103,7 @@ int main(int argc, char* argv[])
   int nt_off2 = 0; // not used
   int solve_charge = 1; // not used
 
-  int save_file = 0; //
+  int save_file = 1; //
   // 1 for debug mode for bee ...
 
   for(Int_t i = 1; i != argc; i++){
@@ -124,6 +124,12 @@ int main(int argc, char* argv[])
        nt_off2 = atoi(&argv[i][2]);
        break;
      }
+  }
+
+  if(save_file==1){
+    std::cout << "Save file for bee. " << std::endl;
+  }else if (save_file==0){
+    std::cout << "Save file for pattern recognition. " << std::endl;
   }
   
   // if (two_plane)
@@ -395,6 +401,8 @@ int main(int argc, char* argv[])
   int start_num = 0 ;
   int end_num = sds.size()-1;
 
+  // end_num = 10;
+  
   // start_num = 1925;
   // end_num = 1925;
 
@@ -463,6 +471,8 @@ int main(int argc, char* argv[])
     }
     lowmemtiling[i]->init_good_cells(slice,slice_err,uplane_rms,vplane_rms,wplane_rms);
 
+    //  std::cout << lowmemtiling[i]->get_two_bad_wire_cells().size() << std::endl;
+    
     GeomWireSelection wires = lowmemtiling[i]->find_L1SP_wires();
     l1sp.AddWires(i,wires);
   }
@@ -501,6 +511,7 @@ int main(int argc, char* argv[])
        }
       lowmemtiling[time_slice]->init_good_cells(slice,slice_err,uplane_rms,vplane_rms,wplane_rms);
 
+      //std::cout << lowmemtiling[time_slice]->get_two_bad_wire_cells().size() << std::endl;
       // std::cout << lowmemtiling[time_slice]->get_wire_charge_error_map().size() << std::endl;
       // {
       // 	WireCell::WireChargeMap& wire_charge_err_map = lowmemtiling[time_slice]->get_wire_charge_error_map();
@@ -2770,7 +2781,7 @@ int main(int argc, char* argv[])
     t_bad->Branch("bad_npoints",&bad_npoints,"bad_npoints/I");
     t_bad->Branch("bad_y",bad_y,"bad_y[bad_npoints]/D");
     t_bad->Branch("bad_z",bad_z,"bad_z[bad_npoints]/D");
-    
+
     for (int i=0; i!=lowmemtiling[start_num]->get_two_bad_wire_cells().size();i++){
       const SlimMergeGeomCell *cell = (SlimMergeGeomCell*)lowmemtiling[start_num]->get_two_bad_wire_cells().at(i);
       PointVector ps = cell->boundary();
@@ -2909,7 +2920,6 @@ int main(int argc, char* argv[])
 
     TTree *TDC = new TTree("TDC","TDC");
     TDC->SetDirectory(file);
-    TDC->Branch("cluster_id",&cluster_id,"cluster_id/I");
     TDC->Branch("time_slice",&time_slice,"time_slice/I");
 
     TDC->Branch("nwire_u",&nwire_u,"nwire_u/I");
@@ -2921,7 +2931,52 @@ int main(int argc, char* argv[])
     TDC->Branch("wire_index_u",wire_index_u,"wire_index_u[nwire_u]/I");
     TDC->Branch("wire_index_v",wire_index_v,"wire_index_v[nwire_v]/I");
     TDC->Branch("wire_index_w",wire_index_w,"wire_index_w[nwire_w]/I");
-    
+
+    // for (int i=start_num;i!=end_num+1;i++){
+
+    //   // std::cout << lowmemtiling[i]->get_two_bad_wire_cells().size() << std::endl;
+      
+    //   for (int k=0; k!=lowmemtiling[i]->get_two_bad_wire_cells().size();k++){
+    // 	SlimMergeGeomCell *mcell = (SlimMergeGeomCell*)lowmemtiling[i]->get_two_bad_wire_cells().at(k);
+    // 	time_slice = i;
+	
+    // 	GeomWireSelection uwires = mcell->get_uwires();
+    // 	GeomWireSelection vwires = mcell->get_vwires();
+    // 	GeomWireSelection wwires = mcell->get_wwires();
+    // 	nwire_u = uwires.size();
+    // 	nwire_v = vwires.size();
+    // 	nwire_w = wwires.size();
+
+    // 	std::vector<WirePlaneType_t> bad_planes = mcell->get_bad_planes();
+    // 	flag_u = 1;
+    // 	flag_v = 1;
+    // 	flag_w = 1;
+    // 	for (size_t j= 0 ; j!=bad_planes.size(); j++){
+    // 	  if (bad_planes.at(j)==WirePlaneType_t(0)){
+    // 	    flag_u = 0;
+    // 	  }else if (bad_planes.at(j)==WirePlaneType_t(1)){
+    // 	    flag_v = 0;
+    // 	  }else if (bad_planes.at(j)==WirePlaneType_t(2)){
+    // 	    flag_w = 0;
+    // 	  }
+    // 	}
+
+    // 	for (int j=0;j!=nwire_u;j++){
+    // 	  const GeomWire *wire = uwires.at(j);
+    // 	  wire_index_u[j] = wire->index();
+    // 	}
+    // 	for (int j=0;j!=nwire_v;j++){
+    // 	  const GeomWire *wire = vwires.at(j);
+    // 	  wire_index_v[j] = wire->index();
+    // 	}
+    // 	for (int j=0;j!=nwire_w;j++){
+    // 	  const GeomWire *wire = wwires.at(j);
+    // 	  wire_index_w[j] = wire->index();
+    // 	}
+	
+    // 	TDC->Fill();
+    //   }
+    // }
   }
 
 
