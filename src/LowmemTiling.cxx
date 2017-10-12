@@ -3525,8 +3525,10 @@ void WireCell2dToy::LowmemTiling::check_bad_cells(WireCell2dToy::LowmemTiling* t
 
   if (flag==1){
     std::cout << "Regenerate bad cells at time slice " << time_slice << std::endl;
+    regen_two_bad_wire_cells = true;
     init_bad_cells(uplane_map,vplane_map,wplane_map);
   }else{
+    regen_two_bad_wire_cells = false;
     //copy wires 
     for (int i=0;i!=tiling->get_bad_wire_u().size();i++){
       MergeGeomWire *mwire1 = (MergeGeomWire*)tiling->get_bad_wire_u().at(i);
@@ -3563,7 +3565,7 @@ void WireCell2dToy::LowmemTiling::init_bad_cells(WireCell::ChirpMap& uplane_map,
   form_bad_merge_wires(uplane_map, vplane_map, wplane_map);
   // create two bad wire cells // these are special ones ... 
   form_two_bad_cells();
-
+  regen_two_bad_wire_cells = true;
   //  std::cout << two_bad_wire_cells.size() << std::endl; 
 	    
 }
