@@ -97,11 +97,15 @@ int main(int argc, char* argv[])
 
   TH1::AddDirectory(kFALSE);
 
-  int two_plane = 0;
-  int save_file = 0;
-  int nt_off1 = 0;
-  int nt_off2 = 0;
-  int solve_charge = 1;
+  int two_plane = 0; //not used
+  
+  int nt_off1 = 0; // not used
+  int nt_off2 = 0; // not used
+  int solve_charge = 1; // not used
+
+  int save_file = 0; //
+  // 1 for debug mode for bee ...
+
   for(Int_t i = 1; i != argc; i++){
      switch(argv[i][1]){
      case 't':
@@ -122,8 +126,8 @@ int main(int argc, char* argv[])
      }
   }
   
-  if (two_plane)
-    cout << "Enable Two Plane Reconstruction " << endl; 
+  // if (two_plane)
+  //   cout << "Enable Two Plane Reconstruction " << endl; 
   
   ExecMon em("starting");
   cerr << em("load geometry") << endl;
@@ -401,9 +405,7 @@ int main(int argc, char* argv[])
   // end_num = 150;
   
   TFile *file = new TFile(Form("result_%d_%d_%d.root",run_no,subrun_no,event_no),"RECREATE");
-  
-  TTree *Twc = new TTree("Twc","Twc");
-  Twc->SetDirectory(file);
+
   Int_t n_cells;
   Int_t n_good_wires;
   Int_t n_bad_wires;
@@ -413,29 +415,34 @@ int main(int argc, char* argv[])
   Int_t nL1_solved;
   Int_t total_ndf;
   Double_t total_chi2;
-
+  
   Int_t L1_ndf[1000];
   Int_t direct_ndf[1000];
   Double_t L1_chi2_base[1000];
   Double_t L1_chi2_penalty[1000];
   Double_t direct_chi2[1000];
-  
-  Twc->Branch("time_slice",&time_slice,"time_slice/I");
-  Twc->Branch("n_cells",&n_cells,"n_cells/I");
-  Twc->Branch("n_good_wires",&n_good_wires,"n_good_wires/I");  
-  Twc->Branch("n_bad_wires",&n_bad_wires,"n_bad_wires/I");
-  Twc->Branch("n_single_cells",&n_single_cells,"n_single_cells/I");
-  
-  Twc->Branch("ndirect_solved",&ndirect_solved,"ndirect_solved/I");
-  Twc->Branch("nL1_solved",&nL1_solved,"nL1_solved/I");
-  Twc->Branch("total_ndf",&total_ndf,"total_ndf/I");
-  Twc->Branch("total_chi2",&total_chi2,"total_chi2/D");
+  TTree *Twc;
+  if (save_file==1){
+    Twc = new TTree("Twc","Twc");
+    Twc->SetDirectory(file);
 
-  Twc->Branch("L1_ndf",L1_ndf,"L1_ndf[nL1_solved]/I");
-  Twc->Branch("L1_chi2_base",L1_chi2_base,"L1_chi2_base[nL1_solved]/D");
-  Twc->Branch("L1_chi2_penalty",L1_chi2_penalty,"L1_chi2_penalty[nL1_solved]/D");
-  Twc->Branch("direct_ndf",direct_ndf,"direct_ndf[ndirect_solved]/I");
-  Twc->Branch("direct_chi2",direct_chi2,"direct_chi2[ndirect_solved]/D");
+    Twc->Branch("time_slice",&time_slice,"time_slice/I");
+    Twc->Branch("n_cells",&n_cells,"n_cells/I");
+    Twc->Branch("n_good_wires",&n_good_wires,"n_good_wires/I");  
+    Twc->Branch("n_bad_wires",&n_bad_wires,"n_bad_wires/I");
+    Twc->Branch("n_single_cells",&n_single_cells,"n_single_cells/I");
+    
+    Twc->Branch("ndirect_solved",&ndirect_solved,"ndirect_solved/I");
+    Twc->Branch("nL1_solved",&nL1_solved,"nL1_solved/I");
+    Twc->Branch("total_ndf",&total_ndf,"total_ndf/I");
+    Twc->Branch("total_chi2",&total_chi2,"total_chi2/D");
+    
+    Twc->Branch("L1_ndf",L1_ndf,"L1_ndf[nL1_solved]/I");
+    Twc->Branch("L1_chi2_base",L1_chi2_base,"L1_chi2_base[nL1_solved]/D");
+    Twc->Branch("L1_chi2_penalty",L1_chi2_penalty,"L1_chi2_penalty[nL1_solved]/D");
+    Twc->Branch("direct_ndf",direct_ndf,"direct_ndf[ndirect_solved]/I");
+    Twc->Branch("direct_chi2",direct_chi2,"direct_chi2[ndirect_solved]/D");
+  }
   
   //test 
   // uplane_map.begin()->second.second=5000;
@@ -1117,7 +1124,7 @@ int main(int argc, char* argv[])
     }
   }
 
-  TTree *T_3Dcluster = new TTree("T_3Dcluster","T_3Dcluster");
+  TTree *T_3Dcluster;
   Int_t cluster_id;
   Int_t saved;
   Float_t total_charge;
@@ -1126,15 +1133,19 @@ int main(int argc, char* argv[])
   Int_t flag_saved_1;
   Int_t n_mcells;
   Int_t n_timeslices;
-  T_3Dcluster->Branch("cluster_id",&cluster_id,"cluster_id/I");
-  T_3Dcluster->Branch("saved",&saved,"saved/I");
-  T_3Dcluster->Branch("total_charge",&total_charge,"total_charge/F");
-  T_3Dcluster->Branch("min_charge",&min_charge,"min_charge/F");
-  T_3Dcluster->Branch("flag_saved",&flag_saved,"flag_saved/I");
-  T_3Dcluster->Branch("flag_saved_1",&flag_saved_1,"flag_saved_1/I");
-  T_3Dcluster->Branch("n_mcells",&n_mcells,"n_mcells/I");
-  T_3Dcluster->Branch("n_timeslices",&n_timeslices,"n_timeslices/I");
-  T_3Dcluster->SetDirectory(file);
+  
+  if (save_file ==1){
+    T_3Dcluster = new TTree("T_3Dcluster","T_3Dcluster");
+    T_3Dcluster->Branch("cluster_id",&cluster_id,"cluster_id/I");
+    T_3Dcluster->Branch("saved",&saved,"saved/I");
+    T_3Dcluster->Branch("total_charge",&total_charge,"total_charge/F");
+    T_3Dcluster->Branch("min_charge",&min_charge,"min_charge/F");
+    T_3Dcluster->Branch("flag_saved",&flag_saved,"flag_saved/I");
+    T_3Dcluster->Branch("flag_saved_1",&flag_saved_1,"flag_saved_1/I");
+    T_3Dcluster->Branch("n_mcells",&n_mcells,"n_mcells/I");
+    T_3Dcluster->Branch("n_timeslices",&n_timeslices,"n_timeslices/I");
+    T_3Dcluster->SetDirectory(file);
+  }
   
   // remove the mcell from tiling ...
   int ncluster_saved = 0;
@@ -2504,12 +2515,15 @@ int main(int argc, char* argv[])
   Double_t x,y,z;
   //save cluster
   Int_t ncluster = 0;
-  TTree *T_cluster= new TTree("T_cluster","T_cluster");
-  T_cluster->Branch("cluster_id",&ncluster,"cluster_id/I");
-  T_cluster->Branch("x",&x,"x/D");
-  T_cluster->Branch("y",&y,"y/D");
-  T_cluster->Branch("z",&z,"z/D");
-  T_cluster->SetDirectory(file);
+  TTree *T_cluster ;
+  if (save_file==1){
+    T_cluster = new TTree("T_cluster","T_cluster");
+    T_cluster->Branch("cluster_id",&ncluster,"cluster_id/I");
+    T_cluster->Branch("x",&x,"x/D");
+    T_cluster->Branch("y",&y,"y/D");
+    T_cluster->Branch("z",&z,"z/D");
+    T_cluster->SetDirectory(file);
+  }
   
   good_mcells.clear();
   for (auto it = cluster_set.begin();it!=cluster_set.end();it++){
@@ -2521,14 +2535,16 @@ int main(int argc, char* argv[])
       good_mcells.insert(mcell);
       int time_slice_save = mcell->GetTimeSlice();
       GeomCellSelection temp_cells = lowmemtiling[time_slice_save]->create_single_cells((SlimMergeGeomCell*)mcell);
-      for (int j=0; j!=temp_cells.size();j++){
-   	Point p = temp_cells.at(j)->center();
-   	x = mcell->GetTimeSlice()*nrebin/2.*unit_dis/10. - frame_length/2.*unit_dis/10.;
-   	y = p.y/units::cm;
-   	z = p.z/units::cm;
-  	T_cluster->Fill();
-  	// 	g1->SetPoint(ncount,x,y,z);
-  	// 	ncount ++;
+      if (save_file==1){
+	for (int j=0; j!=temp_cells.size();j++){
+	  Point p = temp_cells.at(j)->center();
+	  x = mcell->GetTimeSlice()*nrebin/2.*unit_dis/10. - frame_length/2.*unit_dis/10.;
+	  y = p.y/units::cm;
+	  z = p.z/units::cm;
+	  T_cluster->Fill();
+	  // 	g1->SetPoint(ncount,x,y,z);
+	  // 	ncount ++;
+	}
       }
     }
     // cout << ncount << endl;
@@ -2578,204 +2594,199 @@ int main(int argc, char* argv[])
 
   
   cerr << em("finish the local deghosting ... ") << std::endl;
-  
-  
-  TGraph2D *g = new TGraph2D();
-  TGraph2D *g_rec = new TGraph2D();
-
-  TGraph2D *g_deblob = new TGraph2D();
-  
-  TTree *t_rec_simple = new TTree("T_rec","T_rec");
-  TTree *t_rec_charge = new TTree("T_rec_charge","T_rec_charge");
-  TTree *t_rec_deblob = new TTree("T_rec_charge_blob","T_rec_charge_blob");
-  
-  TTree *t_mcell = new TTree("T_mcell","T_mcell");
-  
-  Double_t x_save, y_save, z_save;
-  Double_t charge_save;
-  Double_t ncharge_save;
-  Double_t chi2_save;
-  Double_t ndf_save;
-  
-  t_rec_simple->SetDirectory(file);
-  t_rec_simple->Branch("x",&x_save,"x/D");
-  t_rec_simple->Branch("y",&y_save,"y/D");
-  t_rec_simple->Branch("z",&z_save,"z/D");
-  
-  t_rec_charge->SetDirectory(file);
-  t_rec_charge->Branch("x",&x_save,"x/D");
-  t_rec_charge->Branch("y",&y_save,"y/D");
-  t_rec_charge->Branch("z",&z_save,"z/D");
-  t_rec_charge->Branch("q",&charge_save,"q/D");
-  t_rec_charge->Branch("nq",&ncharge_save,"nq/D");
-  t_rec_charge->Branch("chi2",&chi2_save,"chi2/D");
-  t_rec_charge->Branch("ndf",&ndf_save,"ndf/D");
 
   
-  t_rec_deblob->SetDirectory(file);
-  t_rec_deblob->Branch("x",&x_save,"x/D");
-  t_rec_deblob->Branch("y",&y_save,"y/D");
-  t_rec_deblob->Branch("z",&z_save,"z/D");
-  t_rec_deblob->Branch("q",&charge_save,"q/D");
-  t_rec_deblob->Branch("nq",&ncharge_save,"nq/D");
-  t_rec_deblob->Branch("chi2",&chi2_save,"chi2/D");
-  t_rec_deblob->Branch("ndf",&ndf_save,"ndf/D");
   
-  
-  t_mcell->SetDirectory(file);
-  Double_t uq, vq, wq, udq, vdq, wdq;
-  Int_t time_slice_save;
-  t_mcell->Branch("t",&time_slice_save,"t/I");
-  t_mcell->Branch("x",&x_save,"x/D");
-  t_mcell->Branch("y",&y_save,"y/D");
-  t_mcell->Branch("z",&z_save,"z/D");
-  t_mcell->Branch("q",&charge_save,"q/D");
-  t_mcell->Branch("uq",&uq,"uq/D");
-  t_mcell->Branch("vq",&vq,"vq/D");
-  t_mcell->Branch("wq",&wq,"wq/D");
-  t_mcell->Branch("udq",&udq,"udq/D");
-  t_mcell->Branch("vdq",&vdq,"vdq/D");
-  t_mcell->Branch("wdq",&wdq,"wdq/D");
-  
-  
-  for (int i=start_num; i!=end_num+1;i++){
-    GeomCellMap cell_wires_map = lowmemtiling[i]->get_cell_wires_map();
-    GeomWireMap wire_cells_map = lowmemtiling[i]->get_wire_cells_map();
-    GeomCellSelection three_good_wire_cells = lowmemtiling[i]->get_three_good_wire_cells();
-    WireCell::WireChargeMap& wire_charge = lowmemtiling[i]->get_wire_charge_map();
-    WireCell::WireChargeMap& wire_charge_error = lowmemtiling[i]->get_wire_charge_error_map();
+  if (save_file==1){
+    Double_t x_save, y_save, z_save;
+    Double_t charge_save;
+    Double_t ncharge_save;
+    Double_t chi2_save;
+    Double_t ndf_save;
     
-    chi2_save = chargesolver[i]->get_chi2();
-    ndf_save = chargesolver[i]->get_ndf();
+    Double_t uq, vq, wq, udq, vdq, wdq;
+    Int_t time_slice_save;
     
-    for (auto it = cell_wires_map.begin(); it!= cell_wires_map.end(); it++){
-      SlimMergeGeomCell *mcell = (SlimMergeGeomCell*) it->first;
-      GeomCellSelection temp_cells = lowmemtiling[i]->create_single_cells((SlimMergeGeomCell*)it->first);
-      for (auto it1 = temp_cells.begin(); it1!=temp_cells.end(); it1++){
-	Point p = (*it1)->center();
-	x_save = i*nrebin/2.*unit_dis/10. - frame_length/2.*unit_dis/10.;
-	y_save = p.y/units::cm;
-	z_save = p.z/units::cm;
-	g->SetPoint(ncount,x_save, y_save, z_save);
-	t_rec_simple->Fill();
-	ncount ++;
-      }
+    TGraph2D *g = new TGraph2D();
+    TTree *t_rec_simple = new TTree("T_rec","T_rec");
+    t_rec_simple->SetDirectory(file);
+    t_rec_simple->Branch("x",&x_save,"x/D");
+    t_rec_simple->Branch("y",&y_save,"y/D");
+    t_rec_simple->Branch("z",&z_save,"z/D");
+    
+    TGraph2D *g_rec = new TGraph2D();
+    TTree *t_rec_charge = new TTree("T_rec_charge","T_rec_charge");
+    t_rec_charge->SetDirectory(file);
+    t_rec_charge->Branch("x",&x_save,"x/D");
+    t_rec_charge->Branch("y",&y_save,"y/D");
+    t_rec_charge->Branch("z",&z_save,"z/D");
+    t_rec_charge->Branch("q",&charge_save,"q/D");
+    t_rec_charge->Branch("nq",&ncharge_save,"nq/D");
+    t_rec_charge->Branch("chi2",&chi2_save,"chi2/D");
+    t_rec_charge->Branch("ndf",&ndf_save,"ndf/D");
 
-      // need the cell to be very good,
-      bool flag_save = true;
-      // if (cell_wires_map[mcell].size()==3 && find(three_good_wire_cells.begin(), three_good_wire_cells.end(), mcell)!= three_good_wire_cells.end()){
-      // 	for (auto it1 = cell_wires_map[mcell].begin(); it1!= cell_wires_map[mcell].end(); it1++){
-      // 	  MergeGeomWire *mwire = (MergeGeomWire*)(*it1);
-      // 	  if (wire_cells_map[mwire].size()!=1){
-      // 	    flag_save = false;
-      // 	    break;
-      // 	  }
-      // 	}
-      // }else{
-      // 	flag_save = false;
-      // }
-      // //  std::cout << flag_save << std::endl;
+    
+    TGraph2D *g_deblob = new TGraph2D();
+    TTree *t_rec_deblob = new TTree("T_rec_charge_blob","T_rec_charge_blob");
+    t_rec_deblob->SetDirectory(file);
+    t_rec_deblob->Branch("x",&x_save,"x/D");
+    t_rec_deblob->Branch("y",&y_save,"y/D");
+    t_rec_deblob->Branch("z",&z_save,"z/D");
+    t_rec_deblob->Branch("q",&charge_save,"q/D");
+    t_rec_deblob->Branch("nq",&ncharge_save,"nq/D");
+    t_rec_deblob->Branch("chi2",&chi2_save,"chi2/D");
+    t_rec_deblob->Branch("ndf",&ndf_save,"ndf/D");
+
+    TTree *t_mcell = new TTree("T_mcell","T_mcell");
+    t_mcell->SetDirectory(file);
+    t_mcell->Branch("t",&time_slice_save,"t/I");
+    t_mcell->Branch("x",&x_save,"x/D");
+    t_mcell->Branch("y",&y_save,"y/D");
+    t_mcell->Branch("z",&z_save,"z/D");
+    t_mcell->Branch("q",&charge_save,"q/D");
+    t_mcell->Branch("uq",&uq,"uq/D");
+    t_mcell->Branch("vq",&vq,"vq/D");
+    t_mcell->Branch("wq",&wq,"wq/D");
+    t_mcell->Branch("udq",&udq,"udq/D");
+    t_mcell->Branch("vdq",&vdq,"vdq/D");
+    t_mcell->Branch("wdq",&wdq,"wdq/D");
+    
+    for (int i=start_num; i!=end_num+1;i++){
+      GeomCellMap cell_wires_map = lowmemtiling[i]->get_cell_wires_map();
+      GeomWireMap wire_cells_map = lowmemtiling[i]->get_wire_cells_map();
+      GeomCellSelection three_good_wire_cells = lowmemtiling[i]->get_three_good_wire_cells();
+      WireCell::WireChargeMap& wire_charge = lowmemtiling[i]->get_wire_charge_map();
+      WireCell::WireChargeMap& wire_charge_error = lowmemtiling[i]->get_wire_charge_error_map();
       
-      // if (chargesolver[i]->get_mcell_charge(mcell)>300 && flag_save)
-      {
-	charge_save = chargesolver[i]->get_mcell_charge(mcell);
-	time_slice_save = mcell->GetTimeSlice();
-	x_save = 0;
-	y_save = 0;
-	z_save = 0;
-
+      chi2_save = chargesolver[i]->get_chi2();
+      ndf_save = chargesolver[i]->get_ndf();
+      
+      for (auto it = cell_wires_map.begin(); it!= cell_wires_map.end(); it++){
+	SlimMergeGeomCell *mcell = (SlimMergeGeomCell*) it->first;
+	GeomCellSelection temp_cells = lowmemtiling[i]->create_single_cells((SlimMergeGeomCell*)it->first);
 	for (auto it1 = temp_cells.begin(); it1!=temp_cells.end(); it1++){
 	  Point p = (*it1)->center();
-	  x_save += i*nrebin/2.*unit_dis/10. - frame_length/2.*unit_dis/10.;
-	  y_save += p.y/units::cm;
-	  z_save += p.z/units::cm;
+	  x_save = i*nrebin/2.*unit_dis/10. - frame_length/2.*unit_dis/10.;
+	  y_save = p.y/units::cm;
+	  z_save = p.z/units::cm;
+	  g->SetPoint(ncount,x_save, y_save, z_save);
+	  t_rec_simple->Fill();
+	  ncount ++;
 	}
-	x_save /= temp_cells.size();
-	y_save /= temp_cells.size();
-	z_save /= temp_cells.size();
-
-	for (auto it1 = cell_wires_map[mcell].begin(); it1!= cell_wires_map[mcell].end(); it1++){
-	  MergeGeomWire *mwire = (MergeGeomWire*)(*it1);
-	  if (mwire->get_allwire().front()->iplane()==0){
-	    uq = wire_charge[mwire];
-	    udq = wire_charge_error[mwire];
-	  }else if(mwire->get_allwire().front()->iplane()==1){
-	    vq = wire_charge[mwire];
-	    vdq = wire_charge_error[mwire];
-	  }else if(mwire->get_allwire().front()->iplane()==2){
-	    wq = wire_charge[mwire];
-	    wdq = wire_charge_error[mwire];
-	  }
-	}
-       	t_mcell->Fill();
-      }
-      
-      // fill the charge ... 
-      if (chargesolver[i]->get_mcell_charge(mcell)>300){
-      	charge_save = chargesolver[i]->get_mcell_charge(mcell) / (temp_cells.size() * 1.0) ;
-      	ncharge_save = temp_cells.size();
 	
-      	for (auto it1 = temp_cells.begin(); it1!=temp_cells.end(); it1++){
-      	  Point p = (*it1)->center();
-      	  x_save = i*nrebin/2.*unit_dis/10. - frame_length/2.*unit_dis/10.;
-      	  y_save = p.y/units::cm;
-      	  z_save = p.z/units::cm;
-      	  g_rec->SetPoint(ncount1,x_save, y_save, z_save);
-	  t_rec_charge->Fill();
+	// need the cell to be very good,
+	bool flag_save = true;
+	// if (cell_wires_map[mcell].size()==3 && find(three_good_wire_cells.begin(), three_good_wire_cells.end(), mcell)!= three_good_wire_cells.end()){
+	// 	for (auto it1 = cell_wires_map[mcell].begin(); it1!= cell_wires_map[mcell].end(); it1++){
+	// 	  MergeGeomWire *mwire = (MergeGeomWire*)(*it1);
+	// 	  if (wire_cells_map[mwire].size()!=1){
+	// 	    flag_save = false;
+	// 	    break;
+	// 	  }
+	// 	}
+	// }else{
+	// 	flag_save = false;
+	// }
+	// //  std::cout << flag_save << std::endl;
+	
+	// if (chargesolver[i]->get_mcell_charge(mcell)>300 && flag_save)
+	{
+	  charge_save = chargesolver[i]->get_mcell_charge(mcell);
+	  time_slice_save = mcell->GetTimeSlice();
+	  x_save = 0;
+	  y_save = 0;
+	  z_save = 0;
 	  
-      	  ncount1 ++;
-      	}
-      }
-
-      if (good_mcells.find(mcell)!=good_mcells.end()){
+	  for (auto it1 = temp_cells.begin(); it1!=temp_cells.end(); it1++){
+	    Point p = (*it1)->center();
+	    x_save += i*nrebin/2.*unit_dis/10. - frame_length/2.*unit_dis/10.;
+	    y_save += p.y/units::cm;
+	    z_save += p.z/units::cm;
+	  }
+	  x_save /= temp_cells.size();
+	  y_save /= temp_cells.size();
+	  z_save /= temp_cells.size();
+	  
+	  for (auto it1 = cell_wires_map[mcell].begin(); it1!= cell_wires_map[mcell].end(); it1++){
+	    MergeGeomWire *mwire = (MergeGeomWire*)(*it1);
+	    if (mwire->get_allwire().front()->iplane()==0){
+	      uq = wire_charge[mwire];
+	      udq = wire_charge_error[mwire];
+	    }else if(mwire->get_allwire().front()->iplane()==1){
+	      vq = wire_charge[mwire];
+	      vdq = wire_charge_error[mwire];
+	    }else if(mwire->get_allwire().front()->iplane()==2){
+	      wq = wire_charge[mwire];
+	      wdq = wire_charge_error[mwire];
+	    }
+	  }
+	  t_mcell->Fill();
+	}
+	
+	// fill the charge ... 
 	if (chargesolver[i]->get_mcell_charge(mcell)>300){
 	  charge_save = chargesolver[i]->get_mcell_charge(mcell) / (temp_cells.size() * 1.0) ;
 	  ncharge_save = temp_cells.size();
-	}else{
-	  charge_save = 300 / (temp_cells.size() * 1.0) ;
-	  ncharge_save = temp_cells.size();
+	  
+	  for (auto it1 = temp_cells.begin(); it1!=temp_cells.end(); it1++){
+	    Point p = (*it1)->center();
+	    x_save = i*nrebin/2.*unit_dis/10. - frame_length/2.*unit_dis/10.;
+	    y_save = p.y/units::cm;
+	    z_save = p.z/units::cm;
+	    g_rec->SetPoint(ncount1,x_save, y_save, z_save);
+	    t_rec_charge->Fill();
+	    
+	    ncount1 ++;
+	  }
 	}
 	
-	for (auto it1 = temp_cells.begin(); it1!=temp_cells.end(); it1++){
-      	  Point p = (*it1)->center();
-      	  x_save = i*nrebin/2.*unit_dis/10. - frame_length/2.*unit_dis/10.;
-      	  y_save = p.y/units::cm;
-      	  z_save = p.z/units::cm;
-      	  g_deblob->SetPoint(ncount1,x_save, y_save, z_save);
-	  t_rec_deblob->Fill();
+	if (good_mcells.find(mcell)!=good_mcells.end()){
+	  if (chargesolver[i]->get_mcell_charge(mcell)>300){
+	    charge_save = chargesolver[i]->get_mcell_charge(mcell) / (temp_cells.size() * 1.0) ;
+	    ncharge_save = temp_cells.size();
+	  }else{
+	    charge_save = 300 / (temp_cells.size() * 1.0) ;
+	    ncharge_save = temp_cells.size();
+	  }
 	  
-      	  ncount1 ++;
-      	}
+	  for (auto it1 = temp_cells.begin(); it1!=temp_cells.end(); it1++){
+	    Point p = (*it1)->center();
+	    x_save = i*nrebin/2.*unit_dis/10. - frame_length/2.*unit_dis/10.;
+	    y_save = p.y/units::cm;
+	    z_save = p.z/units::cm;
+	    g_deblob->SetPoint(ncount1,x_save, y_save, z_save);
+	    t_rec_deblob->Fill();
+	    
+	    ncount1 ++;
+	  }
+	}
+	
       }
-      
+      // 
     }
-    // 
-  }
-  g->Write("g");
-  g_rec->Write("g_rec");
-  g_deblob->Write("g_blob");
-
-
-
-  
-  
-  TTree *t_bad = new TTree("T_bad","T_bad");
-  t_bad->SetDirectory(file);
-  Int_t bad_npoints;
-  Double_t bad_y[100],bad_z[100];
-  t_bad->Branch("bad_npoints",&bad_npoints,"bad_npoints/I");
-  t_bad->Branch("bad_y",bad_y,"bad_y[bad_npoints]/D");
-  t_bad->Branch("bad_z",bad_z,"bad_z[bad_npoints]/D");
-
-  for (int i=0; i!=lowmemtiling[start_num]->get_two_bad_wire_cells().size();i++){
-    const SlimMergeGeomCell *cell = (SlimMergeGeomCell*)lowmemtiling[start_num]->get_two_bad_wire_cells().at(i);
-    PointVector ps = cell->boundary();
-    bad_npoints = ps.size();
-    for (int j=0;j!=bad_npoints;j++){
-      bad_y[j] = ps.at(j).y/units::cm;
-      bad_z[j] = ps.at(j).z/units::cm;
+    g->Write("g");
+    g_rec->Write("g_rec");
+    g_deblob->Write("g_blob");
+    
+    TTree *t_bad = new TTree("T_bad","T_bad");
+    t_bad->SetDirectory(file);
+    Int_t bad_npoints;
+    Double_t bad_y[100],bad_z[100];
+    t_bad->Branch("bad_npoints",&bad_npoints,"bad_npoints/I");
+    t_bad->Branch("bad_y",bad_y,"bad_y[bad_npoints]/D");
+    t_bad->Branch("bad_z",bad_z,"bad_z[bad_npoints]/D");
+    
+    for (int i=0; i!=lowmemtiling[start_num]->get_two_bad_wire_cells().size();i++){
+      const SlimMergeGeomCell *cell = (SlimMergeGeomCell*)lowmemtiling[start_num]->get_two_bad_wire_cells().at(i);
+      PointVector ps = cell->boundary();
+      bad_npoints = ps.size();
+      for (int j=0;j!=bad_npoints;j++){
+	bad_y[j] = ps.at(j).y/units::cm;
+	bad_z[j] = ps.at(j).z/units::cm;
+      }
+      t_bad->Fill();
     }
-    t_bad->Fill();
+    
   }
   
   if (T_op!=0){
