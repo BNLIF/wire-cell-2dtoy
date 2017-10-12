@@ -3783,6 +3783,8 @@ void WireCell2dToy::LowmemTiling::form_two_bad_cells(){
 	SlimMergeGeomCell *mcell = new SlimMergeGeomCell(ident);
 	mcell->SetTimeSlice(time_slice);
 	mcell->AddBoundary(pcell);
+	mcell->add_bad_planes(WirePlaneType_t(0));
+	mcell->add_bad_planes(WirePlaneType_t(1));
 	two_bad_wire_cells.push_back(mcell);
 	holder.AddCell_No();
 	
@@ -4059,6 +4061,8 @@ void WireCell2dToy::LowmemTiling::form_two_bad_cells(){
 	SlimMergeGeomCell *mcell = new SlimMergeGeomCell(ident);
 	mcell->SetTimeSlice(time_slice);
 	mcell->AddBoundary(pcell);
+	mcell->add_bad_planes(WirePlaneType_t(0));
+	mcell->add_bad_planes(WirePlaneType_t(2));
 	two_bad_wire_cells.push_back(mcell);
 	holder.AddCell_No();
 	//Insert U
@@ -4312,6 +4316,8 @@ void WireCell2dToy::LowmemTiling::form_two_bad_cells(){
 	SlimMergeGeomCell *mcell = new SlimMergeGeomCell(ident);
 	mcell->SetTimeSlice(time_slice);
 	mcell->AddBoundary(pcell);
+	mcell->add_bad_planes(WirePlaneType_t(1));
+	mcell->add_bad_planes(WirePlaneType_t(2));
 	two_bad_wire_cells.push_back(mcell);
 	holder.AddCell_No();
 
