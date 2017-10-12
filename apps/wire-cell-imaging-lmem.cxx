@@ -2905,7 +2905,23 @@ int main(int argc, char* argv[])
 	
 	TC->Fill();
       }
-    }
+    } // end saving live stuff ...
+
+    TTree *TDC = new TTree("TDC","TDC");
+    TDC->SetDirectory(file);
+    TDC->Branch("cluster_id",&cluster_id,"cluster_id/I");
+    TDC->Branch("time_slice",&time_slice,"time_slice/I");
+
+    TDC->Branch("nwire_u",&nwire_u,"nwire_u/I");
+    TDC->Branch("nwire_v",&nwire_v,"nwire_v/I");
+    TDC->Branch("nwire_w",&nwire_w,"nwire_w/I");
+    TDC->Branch("flag_u",&flag_u,"flag_u/I");
+    TDC->Branch("flag_v",&flag_v,"flag_v/I");
+    TDC->Branch("flag_w",&flag_w,"flag_w/I");
+    TDC->Branch("wire_index_u",wire_index_u,"wire_index_u[nwire_u]/I");
+    TDC->Branch("wire_index_v",wire_index_v,"wire_index_v[nwire_v]/I");
+    TDC->Branch("wire_index_w",wire_index_w,"wire_index_w[nwire_w]/I");
+    
   }
 
 
