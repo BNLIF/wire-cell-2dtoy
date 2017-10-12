@@ -32,6 +32,7 @@
 #include "WireCellData/MergeGeomWire.h"
 
 #include "WireCellData/Slim3DCluster.h"
+#include "WireCellData/Slim3DDeadCluster.h"
 //#include "WireCellNav/SliceDataSource.h"
 
 
@@ -394,6 +395,7 @@ int main(int argc, char* argv[])
 
   //add in cluster
   Slim3DClusterSet cluster_set, cluster_delset;
+  Slim3DDeadClusterSet dead_cluster_set, dead_cluster_delset;
   
   int ncount_mcell = 0;
 
@@ -401,7 +403,7 @@ int main(int argc, char* argv[])
   int start_num = 0 ;
   int end_num = sds.size()-1;
 
-  // end_num = 10;
+  end_num = 10;
   
   // start_num = 1925;
   // end_num = 1925;
@@ -479,6 +481,49 @@ int main(int argc, char* argv[])
 
   cerr << em("finish initial tiling") << endl;
 
+  // try to group the dead cells ...
+  for (int i=start_num;i!=end_num+1;i++){
+    GeomCellSelection allmcell = lowmemtiling[i]->get_two_bad_wire_cells();
+    if (dead_cluster_set.empty()){
+      Slim3DDeadCluster *cluster = new Slim3DDeadCluster(*((SlimMergeGeomCell*)allmcell[0]),i);
+      dead_cluster_set.insert(cluster);
+    }
+
+    for (int j=0;j<allmcell.size();j++){
+      int flag = 0;
+      int flag_save = 0;
+      Slim3DDeadCluster *cluster_save = 0;
+      dead_cluster_delset.clear();
+      
+      // loop through merged cell
+      for (auto it = dead_cluster_set.begin();it!=dead_cluster_set.end();it++){
+	//loop through clusters
+	flag += (*it)->AddCell(*((SlimMergeGeomCell*)allmcell[j]),i);
+	if (flag==1 && flag != flag_save){
+	  cluster_save = *it;
+	}else if (flag>1 && flag != flag_save){
+	  cluster_save->MergeCluster(*(*it));
+	  dead_cluster_delset.insert(*it);
+	}
+	flag_save = flag;
+      }
+
+      //std::cout << i << " " << j << " " << flag << " " << flag_save << std::endl;
+      for (auto it = dead_cluster_delset.begin();it!=dead_cluster_delset.end();it++){
+	dead_cluster_set.erase(*it);
+	delete (*it);
+      }
+      
+      if (flag==0){
+	Slim3DDeadCluster *cluster = new Slim3DDeadCluster(*((SlimMergeGeomCell*)allmcell[j]),i);
+	dead_cluster_set.insert(cluster);
+      }
+    }
+    std::cout << dead_cluster_set.size() << " " << allmcell.size() << std::endl;
+  }
+  
+  // end to group the dead cells ... 
+  
   l1sp.AddWireTime_Raw();
   l1sp.Form_rois(6);
   
