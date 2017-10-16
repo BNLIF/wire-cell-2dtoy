@@ -50,6 +50,45 @@ WireCell2dToy::uBooNE_light_reco::~uBooNE_light_reco(){
   delete file;
 }
 
+void WireCell2dToy::uBooNE_light_reco::load_event_raw(int eve_num){
+
+  TClonesArray* cosmic_hg_wf = new TClonesArray;
+  TClonesArray* cosmic_lg_wf = new TClonesArray;
+  TClonesArray* beam_hg_wf = new TClonesArray;
+  TClonesArray* beam_lg_wf = new TClonesArray;
+  std::vector<short> *cosmic_hg_opch = new std::vector<short>;
+  std::vector<short> *cosmic_lg_opch = new std::vector<short>;
+  std::vector<short> *beam_hg_opch = new std::vector<short>;
+  std::vector<short> *beam_lg_opch = new std::vector<short>;
+  std::vector<double> *cosmic_hg_timestamp = new std::vector<double>;
+  std::vector<double> *cosmic_lg_timestamp = new std::vector<double>;
+  std::vector<double> *beam_hg_timestamp = new std::vector<double>;
+  std::vector<double> *beam_lg_timestamp = new std::vector<double>;
+  std::vector<float> *op_gain = new std::vector<float>;
+  std::vector<float> *op_gainerror = new std::vector<float>;
+  std::vector<int> *opch_to_opdet = new std::vector<int>;
+  double triggerTime;
+
+  T->SetBranchAddress("cosmic_hg_wf",&cosmic_hg_wf);
+  T->SetBranchAddress("cosmic_lg_wf",&cosmic_lg_wf);
+  T->SetBranchAddress("beam_hg_wf",&beam_hg_wf);
+  T->SetBranchAddress("beam_lg_wf",&beam_lg_wf);
+  T->SetBranchAddress("cosmic_hg_opch",&cosmic_hg_opch);
+  T->SetBranchAddress("cosmic_lg_opch",&cosmic_lg_opch);
+  T->SetBranchAddress("beam_hg_opch",&beam_hg_opch);
+  T->SetBranchAddress("beam_lg_opch",&beam_lg_opch);
+  T->SetBranchAddress("cosmic_hg_timestamp",&cosmic_hg_timestamp);
+  T->SetBranchAddress("cosmic_lg_timestamp",&cosmic_lg_timestamp);
+  T->SetBranchAddress("beam_hg_timestamp",&beam_hg_timestamp);
+  T->SetBranchAddress("beam_lg_timestamp",&beam_lg_timestamp);
+  T->SetBranchAddress("op_gain",&op_gain);
+  T->SetBranchAddress("op_gainerror",&op_gainerror);
+  T->SetBranchAddress("opch_to_opdet",&opch_to_opdet);
+  T->SetBranchAddress("triggerTime",&triggerTime);
+
+  T->GetEntry(eve_num);
+}
+
 void WireCell2dToy::uBooNE_light_reco::load_event(int eve_num){
 
   TClonesArray* op_wf = new TClonesArray;
