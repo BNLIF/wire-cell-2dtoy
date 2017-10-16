@@ -94,7 +94,8 @@ namespace WireCell2dToy{
     WireCell::GeomWireWireMap get_wire_pwire_map(){ return wire_pwire_map;};
     //map parent wire to wire
     WireCell::GeomWireWiresMap get_pwire_wires_map(){return pwire_wires_map;};
-    
+
+    bool get_regen_two_bad_wire_cells(){return regen_two_bad_wire_cells;};
     
   protected:
     WireCell::GeomDataSource& gds;
@@ -118,6 +119,7 @@ namespace WireCell2dToy{
 
     WireCell::GeomCellSelection not_used_one_good_wire_cells;
     WireCell::GeomCellSelection two_bad_wire_cells;
+    bool regen_two_bad_wire_cells;
 
     bool remove_cell(WireCell::SlimMergeGeomCell *cell);
     bool remove_wire(WireCell::MergeGeomWire *wire);

@@ -533,7 +533,7 @@ void WireCell2dToy::uBooNEData2DDeconvolutionFDS::Deconvolute_2D(int plane){
    TH1F hm1("hm1","hm1",nbin,0,nbin);
    TH1F hp1("hp1","hp1",nbin,0,nbin);
    TH1F *htemp1 = new TH1F("htemp1","htemp1",nbin,0,nbin);
-   for (int j=0;j!=100;j++){
+   for (int j=0;j!=310;j++){
      htemp1->SetBinContent(j+1,ref_ele[j]);
    }
    htemp1->FFT(&hm1,"MAG");
@@ -567,17 +567,17 @@ void WireCell2dToy::uBooNEData2DDeconvolutionFDS::Deconvolute_2D(int plane){
      
      //do FFT for individual electronics response
      TH1F *htemp2 = new TH1F("htemp2","htemp2",nbin,0,nbin);
-     for (int j=0;j!=100;j++){
+     for (int j=0;j!=310;j++){
        if (plane == 0 || plane == 1){
-     	 htemp2->SetBinContent(j+1,ref_ele1_ind[j]); // 3.5% lower induction wire plane @ 2.2 us
+     	 //htemp2->SetBinContent(j+1,ref_ele1_ind[j]); // 3.5% lower induction wire plane @ 2.2 us
 	 // htemp2->SetBinContent(j+1,ref_ele[j]);
      	 //htemp2->SetBinContent(j+1,ref_ele[j]*1.1*0.965); // 3.5% lower induction wire plane @ 2 us
-	 // htemp2->SetBinContent(j+1,calib_ele_chan[chid][j]); // calibrated resp
+	 htemp2->SetBinContent(j+1,calib_ele_chan.at(chid).at(j)); // calibrated resp
        }else{
-	 htemp2->SetBinContent(j+1,ref_ele1_ind[j]); // 3.5% lower induction wire plane @ 2.2 us
+	 //htemp2->SetBinContent(j+1,ref_ele1_ind[j]); // 3.5% lower induction wire plane @ 2.2 us
 	 //htemp2->SetBinContent(j+1,ref_ele[j]);
      	 //htemp2->SetBinContent(j+1,ref_ele[j]*1.1); // for test purpose @ 2.0 us
-     	 //htemp2->SetBinContent(j+1,calib_ele_chan[chid][j]); // calibrated resp
+     	 htemp2->SetBinContent(j+1,calib_ele_chan.at(chid).at(j)); // calibrated resp
        }
      }
      htemp2->FFT(&hm2,"MAG");
