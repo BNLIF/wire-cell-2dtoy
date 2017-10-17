@@ -280,10 +280,18 @@ int main(int argc, char* argv[])
        // 		   << dead_clusters.at(j)->get_num_time_slices() << std::endl;
      }
    }
-
-   
-   
    cerr << em("form map between dead and live clusters ... ") << std::endl;
-  
+
+   // Start to add X, Y, Z points
+   // form boundaries of  bad cells ... 
    
+
+   cerr << em("Add X, Y, Z points");
+   
+   TFile *file1 = new TFile(Form("pr_%d_%d_%d.root",run_no,subrun_no,event_no),"RECREATE");
+   
+   
+   Trun->CloneTree()->Write();
+   file1->Write();
+   file1->Close();
 }
