@@ -15,7 +15,8 @@ namespace WireCell2dToy{
     uBooNE_light_reco(const char* root_file);
     ~uBooNE_light_reco();
 
-    void load_event(int eve_num);
+    void load_event_raw(int eve_num); // raw data from swizzler
+    void load_event(int eve_num); // from 'saturation' producer w/in uboonecode
     TH1F* get_raw_hist(int ch){return hraw[ch];};
     TH1F* get_decon_hist(int ch){return hdecon[ch];};
     TH1F* get_l1_hist(int ch){return hl1[ch];};
