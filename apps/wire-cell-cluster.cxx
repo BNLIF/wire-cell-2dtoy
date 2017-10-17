@@ -234,18 +234,18 @@ int main(int argc, char* argv[])
     ident++;
   }
 
-   std::cout << live_clusters.size() << std::endl;
-   for (size_t i=0;i!=live_clusters.size();i++){
-     std::cout << live_clusters.at(i)->get_cluster_id() << " " 
-	       << live_clusters.at(i)->get_num_mcells() << " "
-	       << live_clusters.at(i)->get_num_time_slices() << std::endl;
-   }
-   
-   std::cout << dead_clusters.size() << std::endl;
+   // std::cout << live_clusters.size() << std::endl;
+   // for (size_t i=0;i!=live_clusters.size();i++){
+   //   std::cout << live_clusters.at(i)->get_cluster_id() << " " 
+   // 	       << live_clusters.at(i)->get_num_mcells() << " "
+   // 	       << live_clusters.at(i)->get_num_time_slices() << std::endl;
+   // }
+   // std::cout << dead_clusters.size() << std::endl;
    for (size_t i=0;i!=dead_clusters.size();i++){
-     std::cout << dead_clusters.at(i)->get_cluster_id() << " " 
-	       << dead_clusters.at(i)->get_num_mcells() << " "
-	       << dead_clusters.at(i)->get_num_time_slices() << std::endl;
+     dead_clusters.at(i)->Remove_duplicated_mcells();
+     // std::cout << dead_clusters.at(i)->get_cluster_id() << " " 
+     // 	       << dead_clusters.at(i)->get_num_mcells() << " "
+     // 	       << dead_clusters.at(i)->get_num_time_slices() << std::endl;
    }
    
    cerr << em("load clusters from file") << endl;
