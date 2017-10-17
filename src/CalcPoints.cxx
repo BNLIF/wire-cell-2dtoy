@@ -658,6 +658,13 @@ void WireCell2dToy::calc_sampling_points(WireCell::GeomDataSource& gds, WireCell
     other_wires = wires_u;
   }
 
+  PointVector sampling_points;
+
+  
+  
+  if (sampling_points.size()>0)
+    mcell->AddSamplingPoints(sampling_points);
+  
   // std::cout << min_wires.size() << " " << max_wires.size() << " " << wires_u.size() << " " << wires_v.size() << " " << wires_w.size() << std::endl;
 
   
