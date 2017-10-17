@@ -1,4 +1,5 @@
 #include "WireCellSst/GeomDataSource.h"
+#include "WireCellData/PR3DCluster.h"
 #include "WireCellData/SlimMergeGeomCell.h"
 #include "WireCellData/TPCParams.h"
 #include "WireCellData/Singleton.h"
@@ -137,6 +138,10 @@ int main(int argc, char* argv[])
 
   // load cells ... 
   GeomCellSelection mcells;
+  PR3DClusterSelection live_clusters;
+  PR3DClusterSelection dead_clusters;
+  PR3DCluster *cluster;
+  int prev_cluster_id=-1;
   int ident = 0;
   for (int i=0;i!=TC->GetEntries();i++){
     TC->GetEntry(i);
@@ -173,9 +178,20 @@ int main(int argc, char* argv[])
       const GeomWire *wire = gds.by_planeindex(WirePlaneType_t(2),wire_index_w[i]);
       mcell->AddWire(wire,WirePlaneType_t(2),wire_charge_w[i],wire_charge_err_w[i]);
     }
+    mcells.push_back(mcell);
+
+    if (cluster_id != prev_cluster_id){
+      cluster = new PR3DCluster(cluster_id);
+      live_clusters.push_back(cluster);
+    }
+    cluster->AddCell(mcell,time_slice);
+
+    prev_cluster_id = cluster_id;
     ident++;
   }
+  //  std::cout << live_clusters.size() << std::endl;
 
+  prev_cluster_id = -1;
   // TDC
    for (int i=0;i!=TDC->GetEntries();i++){
     TDC->GetEntry(i);
@@ -204,8 +220,35 @@ int main(int argc, char* argv[])
       const GeomWire *wire = gds.by_planeindex(WirePlaneType_t(2),wire_index_w[i]);
       mcell->AddWire(wire,WirePlaneType_t(2));
     }
+    mcells.push_back(mcell);
+
+    if (cluster_id!=prev_cluster_id){
+      cluster = new PR3DCluster(cluster_id);
+      dead_clusters.push_back(cluster);
+    }
+    for (int i=0;i!=ntime_slice;i++){
+      cluster->AddCell(mcell,time_slices[i]);
+    }
+    
+    prev_cluster_id=cluster_id;
     ident++;
   }
-  
-  
+
+   std::cout << live_clusters.size() << std::endl;
+   for (size_t i=0;i!=live_clusters.size();i++){
+     std::cout << live_clusters.at(i)->get_cluster_id() << " " 
+	       << live_clusters.at(i)->get_num_mcells() << " "
+	       << live_clusters.at(i)->get_num_time_slices() << std::endl;
+   }
+   
+   std::cout << dead_clusters.size() << std::endl;
+   for (size_t i=0;i!=dead_clusters.size();i++){
+     std::cout << dead_clusters.at(i)->get_cluster_id() << " " 
+	       << dead_clusters.at(i)->get_num_mcells() << " "
+	       << dead_clusters.at(i)->get_num_time_slices() << std::endl;
+   }
+   
+   cerr << em("load clusters from file") << endl;
+
+   
 }
