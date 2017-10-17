@@ -289,6 +289,10 @@ int main(int argc, char* argv[])
      WireCell2dToy::calc_boundary_points_dead(gds,dead_clusters.at(j));
    }
    // form sampling points for the normal cells ...
+   for (size_t i=0; i!=live_clusters.size();i++){
+     WireCell2dToy::calc_sampling_points(gds,live_clusters.at(i));
+   }
+   
    
    
    cerr << em("Add X, Y, Z points");
@@ -326,11 +330,13 @@ int main(int argc, char* argv[])
    T_cluster->Branch("z",&z,"z/D");
    T_cluster->SetDirectory(file1);
 
+   // test ... 
    ncluster = 0;
    x=  0;
    y=0;
    z=0;
    T_cluster->Fill();
+   
    
    Trun->CloneTree()->Write();
    file1->Write();

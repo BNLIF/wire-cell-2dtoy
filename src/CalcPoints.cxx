@@ -609,5 +609,57 @@ void WireCell2dToy::calc_boundary_points_dead(WireCell::GeomDataSource& gds, Wir
 }
 
 void WireCell2dToy::calc_sampling_points(WireCell::GeomDataSource& gds, WireCell::SlimMergeGeomCell* mcell){
+  GeomWireSelection wires_u = mcell->get_uwires();
+  GeomWireSelection wires_v = mcell->get_vwires();
+  GeomWireSelection wires_w = mcell->get_wwires();
 
+  GeomWireSelection max_wires = wires_u;
+  WirePlaneType_t max_wire_plane_type = WirePlaneType_t(0);
+  GeomWireSelection min_wires = wires_v;
+  WirePlaneType_t min_wire_plane_type = WirePlaneType_t(1);
+  GeomWireSelection other_wires;
+  WirePlaneType_t other_wire_plane_type;
+  
+  if (wires_v.size() > max_wires.size()){
+    max_wires = wires_v;
+    max_wire_plane_type = WirePlaneType_t(1);
+  }
+  if (wires_w.size() > max_wires.size()){
+    max_wires = wires_w;
+    max_wire_plane_type = WirePlaneType_t(2);
+  }
+  
+  if (wires_u.size() < min_wires.size()){
+    min_wires = wires_u;
+    min_wire_plane_type = WirePlaneType_t(0);
+  }
+  if (wires_w.size() < min_wires.size()){
+    min_wires = wires_w;
+    min_wire_plane_type = WirePlaneType_t(2);
+  }
+
+  if (max_wire_plane_type==WirePlaneType_t(0) &&
+      min_wire_plane_type==WirePlaneType_t(1) ||
+      max_wire_plane_type==WirePlaneType_t(1) &&
+      min_wire_plane_type==WirePlaneType_t(0)){
+    other_wire_plane_type = WirePlaneType_t(2);
+    other_wires = wires_w;
+  }else if (max_wire_plane_type==WirePlaneType_t(0) &&
+	    min_wire_plane_type==WirePlaneType_t(2) ||
+	    max_wire_plane_type==WirePlaneType_t(2) &&
+	    min_wire_plane_type==WirePlaneType_t(0)){
+    other_wire_plane_type = WirePlaneType_t(1);
+    other_wires = wires_v;
+  }else if (max_wire_plane_type==WirePlaneType_t(2) &&
+	    min_wire_plane_type==WirePlaneType_t(1) ||
+	    max_wire_plane_type==WirePlaneType_t(1) &&
+	    min_wire_plane_type==WirePlaneType_t(2)){
+    other_wire_plane_type = WirePlaneType_t(0);
+    other_wires = wires_u;
+  }
+
+  // std::cout << min_wires.size() << " " << max_wires.size() << " " << wires_u.size() << " " << wires_v.size() << " " << wires_w.size() << std::endl;
+
+  
+  
 }
