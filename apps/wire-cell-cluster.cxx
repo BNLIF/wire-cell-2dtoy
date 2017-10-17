@@ -250,5 +250,40 @@ int main(int argc, char* argv[])
    
    cerr << em("load clusters from file") << endl;
 
+   // dead to live clusters mapping ... 
+   std::map<PR3DCluster*,std::vector<PR3DCluster*>> dead_live_cluster_mapping;
+   std::map<PR3DCluster*,std::vector<SMGCSelection>> dead_live_mcells_mapping;
+   
+   // form map between live and dead clusters ... 
+   for (size_t i = 0; i!=live_clusters.size(); i++){
+     for (size_t j = 0; j!= dead_clusters.size(); j++){
+       SMGCSelection mcells = (live_clusters.at(i))->Is_Connected(dead_clusters.at(j),2);
+       if (dead_live_cluster_mapping.find(dead_clusters.at(j))==dead_live_cluster_mapping.end()){
+	 std::vector<PR3DCluster*> temp_clusters;
+	 temp_clusters.push_back(live_clusters.at(i));
+	 dead_live_cluster_mapping[dead_clusters.at(j)] = temp_clusters;
+	 std::vector<SMGCSelection> temp_mcells;
+	 temp_mcells.push_back(mcells);
+	 dead_live_mcells_mapping[dead_clusters.at(j)] = temp_mcells;
+       }else{
+	 dead_live_cluster_mapping[dead_clusters.at(j)].push_back(live_clusters.at(i));
+	 dead_live_mcells_mapping[dead_clusters.at(j)].push_back(mcells);
+       }
+	   
+       // if (mcells.size()>0)
+       // 	 std::cout << mcells.size() << " " <<
+       // 	   live_clusters.at(i)->get_cluster_id() << " "
+       // 		   << live_clusters.at(i)->get_num_mcells() << " "
+       // 		   << live_clusters.at(i)->get_num_time_slices() << " " 
+       // 		   << dead_clusters.at(j)->get_cluster_id() << " "
+       // 		   << dead_clusters.at(j)->get_num_mcells() << " "
+       // 		   << dead_clusters.at(j)->get_num_time_slices() << std::endl;
+     }
+   }
+
+   
+   
+   cerr << em("form map between dead and live clusters ... ") << std::endl;
+  
    
 }
