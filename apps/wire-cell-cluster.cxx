@@ -1,4 +1,5 @@
 #include "WireCellSst/GeomDataSource.h"
+#include "WireCellData/SlimMergeGeomCell.h"
 #include "WireCellData/TPCParams.h"
 #include "WireCellData/Singleton.h"
 #include "WireCell2dToy/ExecMon.h"
@@ -134,7 +135,77 @@ int main(int argc, char* argv[])
   TDC->SetBranchAddress("wire_index_v",wire_index_v);
   TDC->SetBranchAddress("wire_index_w",wire_index_w);
 
-  
+  // load cells ... 
+  GeomCellSelection mcells;
+  int ident = 0;
+  for (int i=0;i!=TC->GetEntries();i++){
+    TC->GetEntry(i);
+    SlimMergeGeomCell *mcell = new SlimMergeGeomCell(ident);
+    mcell->SetTimeSlice(time_slice);
 
+    mcell->set_uq(uq);
+    mcell->set_vq(vq);
+    mcell->set_wq(wq);
+
+    mcell->set_udq(udq);
+    mcell->set_vdq(vdq);
+    mcell->set_wdq(wdq);
+
+    mcell->set_q(q);
+    if (flag_u==0){
+      mcell->add_bad_planes(WirePlaneType_t(0));
+    }
+    if (flag_v==0){
+      mcell->add_bad_planes(WirePlaneType_t(1));
+    }
+    if (flag_w==0){
+      mcell->add_bad_planes(WirePlaneType_t(2));
+    }
+    for (int i=0;i!=nwire_u;i++){
+      const GeomWire *wire = gds.by_planeindex(WirePlaneType_t(0),wire_index_u[i]);
+      mcell->AddWire(wire,WirePlaneType_t(0),wire_charge_u[i],wire_charge_err_u[i]);
+    }
+    for (int i=0;i!=nwire_v;i++){
+      const GeomWire *wire = gds.by_planeindex(WirePlaneType_t(1),wire_index_v[i]);
+      mcell->AddWire(wire,WirePlaneType_t(1),wire_charge_v[i],wire_charge_err_v[i]);
+    }
+    for (int i=0;i!=nwire_w;i++){
+      const GeomWire *wire = gds.by_planeindex(WirePlaneType_t(2),wire_index_w[i]);
+      mcell->AddWire(wire,WirePlaneType_t(2),wire_charge_w[i],wire_charge_err_w[i]);
+    }
+    ident++;
+  }
+
+  // TDC
+   for (int i=0;i!=TDC->GetEntries();i++){
+    TDC->GetEntry(i);
+
+    SlimMergeGeomCell *mcell = new SlimMergeGeomCell(ident);
+    mcell->SetTimeSlice(time_slices[0]);
+
+    if (flag_u==0){
+      mcell->add_bad_planes(WirePlaneType_t(0));
+    }
+    if (flag_v==0){
+      mcell->add_bad_planes(WirePlaneType_t(1));
+    }
+    if (flag_w==0){
+      mcell->add_bad_planes(WirePlaneType_t(2));
+    }
+    for (int i=0;i!=nwire_u;i++){
+      const GeomWire *wire = gds.by_planeindex(WirePlaneType_t(0),wire_index_u[i]);
+      mcell->AddWire(wire,WirePlaneType_t(0));
+    }
+    for (int i=0;i!=nwire_v;i++){
+      const GeomWire *wire = gds.by_planeindex(WirePlaneType_t(1),wire_index_v[i]);
+      mcell->AddWire(wire,WirePlaneType_t(1));
+    }
+    for (int i=0;i!=nwire_w;i++){
+      const GeomWire *wire = gds.by_planeindex(WirePlaneType_t(2),wire_index_w[i]);
+      mcell->AddWire(wire,WirePlaneType_t(2));
+    }
+    ident++;
+  }
+  
   
 }
