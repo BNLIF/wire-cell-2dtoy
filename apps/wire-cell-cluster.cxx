@@ -283,9 +283,11 @@ int main(int argc, char* argv[])
    cerr << em("form map between dead and live clusters ... ") << std::endl;
 
    // Start to add X, Y, Z points
-   // form boundaries of  bad cells ... 
-   
+   // form boundaries for the bad cells ... 
 
+   // form sampling points for the normal cells ...
+   
+   
    cerr << em("Add X, Y, Z points");
    
    TFile *file1 = new TFile(Form("pr_%d_%d_%d.root",run_no,subrun_no,event_no),"RECREATE");
