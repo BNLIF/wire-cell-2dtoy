@@ -4,6 +4,7 @@
 #include "WireCellData/TPCParams.h"
 #include "WireCellData/Singleton.h"
 #include "WireCell2dToy/ExecMon.h"
+#include "WireCell2dToy/CalcPoints.h"
 
 
 #include "TFile.h"
@@ -284,14 +285,52 @@ int main(int argc, char* argv[])
 
    // Start to add X, Y, Z points
    // form boundaries for the bad cells ... 
-
+   for (size_t j = 0; j!= dead_clusters.size(); j++){
+     WireCell2dToy::calc_boundary_points_dead(gds,dead_clusters.at(j));
+   }
    // form sampling points for the normal cells ...
    
    
    cerr << em("Add X, Y, Z points");
    
    TFile *file1 = new TFile(Form("pr_%d_%d_%d.root",run_no,subrun_no,event_no),"RECREATE");
+
+   TTree *t_bad = new TTree("T_bad","T_bad");
+   t_bad->SetDirectory(file1);
+   Int_t bad_npoints;
+   Double_t bad_y[100],bad_z[100];
+   t_bad->Branch("bad_npoints",&bad_npoints,"bad_npoints/I");
+   t_bad->Branch("bad_y",bad_y,"bad_y[bad_npoints]/D");
+   t_bad->Branch("bad_z",bad_z,"bad_z[bad_npoints]/D");
    
+   for (size_t j = 0; j!= dead_clusters.size(); j++){
+     SMGCSelection& mcells = dead_clusters.at(j)->get_mcells();
+     for (size_t i=0;i!=mcells.size();i++){
+       PointVector ps = mcells.at(i)->boundary();
+       bad_npoints = ps.size();
+      for (int j=0;j!=bad_npoints;j++){
+	bad_y[j] = ps.at(j).y/units::cm;
+	bad_z[j] = ps.at(j).z/units::cm;
+      }
+      t_bad->Fill();
+     }
+   }
+
+   TTree *T_cluster ;
+   Double_t x,y,z;
+   Int_t ncluster;
+   T_cluster = new TTree("T_cluster","T_cluster");
+   T_cluster->Branch("cluster_id",&ncluster,"cluster_id/I");
+   T_cluster->Branch("x",&x,"x/D");
+   T_cluster->Branch("y",&y,"y/D");
+   T_cluster->Branch("z",&z,"z/D");
+   T_cluster->SetDirectory(file1);
+
+   ncluster = 0;
+   x=  0;
+   y=0;
+   z=0;
+   T_cluster->Fill();
    
    Trun->CloneTree()->Write();
    file1->Write();

@@ -5,10 +5,10 @@
 #include "WireCellData/PR3DCluster.h"
 
 namespace WireCell2dToy{
-  void calc_boundary_points(WireCell::GeomDataSource& gds, WireCell::PR3DCluster* cluster);
+  void calc_boundary_points_dead(WireCell::GeomDataSource& gds, WireCell::PR3DCluster* cluster);
   void calc_sampling_points(WireCell::GeomDataSource& gds, WireCell::PR3DCluster* cluster);
 
-  void calc_boundary_points(WireCell::GeomDataSource& gds, WireCell::SlimMergeGeomCell* mcell);
+  void calc_boundary_points_dead(WireCell::GeomDataSource& gds, WireCell::SlimMergeGeomCell* mcell);
   void calc_sampling_points(WireCell::GeomDataSource& gds, WireCell::SlimMergeGeomCell* mcell);
   
 }
