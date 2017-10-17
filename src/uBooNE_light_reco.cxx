@@ -396,7 +396,7 @@ void WireCell2dToy::uBooNE_light_reco::Process_beam_wfs(){
       // if (content <0) content =0;
       //W(i) = content;
     }
-    int nbin_fit = vals_x.size();GetEntriesFast
+    int nbin_fit = vals_x.size();
     VectorXd W = VectorXd::Zero(nbin_fit);
     MatrixXd G = MatrixXd::Zero(nbin_fit,nbin_fit);
     
@@ -418,7 +418,7 @@ void WireCell2dToy::uBooNE_light_reco::Process_beam_wfs(){
     
     double lambda = 5;//1/2.;
     WireCell::LassoModel m2(lambda, 100000, 0.05);
-    m2.SetData(G, W);GetEntriesFast
+    m2.SetData(G, W);
     m2.Fit();
     VectorXd beta = m2.Getbeta();
     
@@ -573,8 +573,9 @@ std::pair<double,double> WireCell2dToy::uBooNE_light_reco::cal_mean_rms(TH1 *his
   delete h4;
   return std::make_pair(mean,rms);
 }
-
+/*
 void WireCell2dToy::uBooNE_light_reco::mergeRaw(Int_t nentries_hg, TH1S *h_hg, std::vector<short> *hg_chan, std::vector<double> *hg_timestamp,
 						Int_t nentries_lg, TH1S *h_lg, std::vector<short> *lg_chan, std::vector<double> *lg_timestamp,
-						bool beamDisc = true, std::vector<int> OpChanToOpDet){
+						bool beamDisc, std::vector<int> OpChanToOpDet){
 }
+*/

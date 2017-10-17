@@ -34,9 +34,9 @@ namespace WireCell2dToy{
     void Process_beam_wfs();
     void sort_flashes();
     std::pair<double,double> cal_mean_rms(TH1 *hist, int nbin=1500);
-    void mergeRaw(TH1S *h_hg, short hg_chan, double hg_timestamp,
+    /*void mergeRaw(TH1S *h_hg, short hg_chan, double hg_timestamp,
 		  Int_t nentries_lg, TH1S *h_lg, std::vector<short> *lg_chan, std::vector<double> *lg_timestamp,
-		  bool beamDisc = true, std::vector<int> OpChanToOpDet);
+		  bool beamDisc, std::vector<int> OpChanToOpDet); */
     
     TFile *file;
     TTree *T;
