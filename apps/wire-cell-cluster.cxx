@@ -312,14 +312,14 @@ int main(int argc, char* argv[])
      for (size_t i=0;i!=mcells.size();i++){
        PointVector ps = mcells.at(i)->boundary();
        bad_npoints = ps.size();
-      for (int j=0;j!=bad_npoints;j++){
-	bad_y[j] = ps.at(j).y/units::cm;
-	bad_z[j] = ps.at(j).z/units::cm;
-      }
-      t_bad->Fill();
+       for (int k=0;k!=bad_npoints;k++){
+	 bad_y[k] = ps.at(k).y/units::cm;
+	 bad_z[k] = ps.at(k).z/units::cm;
+       }
+       t_bad->Fill();
      }
    }
-
+   
    TTree *T_cluster ;
    Double_t x,y,z;
    Int_t ncluster;
@@ -331,12 +331,27 @@ int main(int argc, char* argv[])
    T_cluster->SetDirectory(file1);
 
    // test ... 
-   ncluster = 0;
-   x=  0;
-   y=0;
-   z=0;
-   T_cluster->Fill();
+   // ncluster = 0;
+   // x=  0;
+   // y=0;
+   // z=0;
+   // T_cluster->Fill();
    
+    for (size_t j = 0; j!= live_clusters.size(); j++){
+     SMGCSelection& mcells = live_clusters.at(j)->get_mcells();
+     ncluster = live_clusters.at(j)->get_cluster_id();
+     for (size_t i=0;i!=mcells.size();i++){
+       PointVector ps = mcells.at(i)->get_sampling_points();
+       int time_slice = mcells.at(i)->GetTimeSlice();
+       if (ps.size()==0) std::cout << "zero sampling points!" << std::endl;
+       for (int k=0;k!=ps.size();k++){
+	 x = time_slice*nrebin/2.*unit_dis/10. - frame_length/2.*unit_dis/10.;
+	 y = ps.at(k).y/units::cm;
+	 z = ps.at(k).z/units::cm;
+	 T_cluster->Fill();
+       }
+     }
+    }
    
    Trun->CloneTree()->Write();
    file1->Write();

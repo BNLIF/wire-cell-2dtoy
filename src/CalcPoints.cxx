@@ -659,8 +659,48 @@ void WireCell2dToy::calc_sampling_points(WireCell::GeomDataSource& gds, WireCell
   }
 
   PointVector sampling_points;
+  
+  float other_pitch = gds.pitch(other_wire_plane_type);
+  float dis_limit[2];
+  float tolerance = 0.1 * units::mm;
+  const GeomWire *other_wire_1 = other_wires.front();
+  const GeomWire *other_wire_2 = other_wires.back();
+  dis_limit[0] = gds.wire_dist(*other_wire_1)-other_pitch/2.-tolerance;
+  dis_limit[1] = gds.wire_dist(*other_wire_2)+other_pitch/2.+tolerance;
+
+  //std::cout << dis_limit[0] << " " << dis_limit[1] << std::endl;
 
   
+  
+  int max_step = std::max(4.0,max_wires.size()/12.);
+  int min_step = std::max(4.0,min_wires.size()/12.);
+  //std::cout << min_step << " " << max_step << std::endl;
+  GeomWireSetp max_wires_set;
+  GeomWireSetp min_wires_set;
+  max_wires_set.insert(max_wires.front());
+  for (size_t i=0;i<max_wires.size();i+=max_step){
+    max_wires_set.insert(max_wires.at(i));
+  }
+  max_wires_set.insert(max_wires.back());
+
+  min_wires_set.insert(min_wires.front());
+  for (size_t i=0;i<min_wires.size();i+=min_step){
+    min_wires_set.insert(min_wires.at(i));
+  }
+  min_wires_set.insert(min_wires.back());
+
+  for (auto it = max_wires_set.begin(); it!=max_wires_set.end(); it++){
+    for (auto it1 = min_wires_set.begin(); it1!=min_wires_set.end();it1++){
+      Vector point;
+      gds.crossing_point(*(*it),*(*it1),point);
+      float dis = gds.wire_dist(point,other_wire_plane_type);
+      if (dis>=dis_limit[0]&&dis<=dis_limit[1])
+	sampling_points.push_back(point);
+      //std::cout << "A: " <<dis_limit[0] << " " << dis << " " << dis_limit[1] << std::endl; 
+    }
+  }
+  
+  //std::cout << sampling_points.size() << " " << wires_u.size() <<  " " << wires_v.size() << " " << wires_w.size() << " " << max_wires.size() << " " << min_wires.size() << std::endl;
   
   if (sampling_points.size()>0)
     mcell->AddSamplingPoints(sampling_points);
