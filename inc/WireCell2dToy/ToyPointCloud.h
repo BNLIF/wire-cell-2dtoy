@@ -2,10 +2,10 @@
 #define WireCell2dToy_TOYPOINTCLOUD_H
 
 
-//#include "WireCellNanoflann/nanoflann.h" 
+#include "WireCellNanoflann/nanoflann.h" 
 #include "WireCellData/WCPointCloud.h"
-//#include "WireCellQuickhull/QuickHull.h"
-//#include "WireCellQuickhull/MathUtils.h"
+#include "WireCellQuickhull/QuickHull.h"
+#include "WireCellQuickhull/MathUtils.h"
 
 namespace WireCell2dToy{
   
