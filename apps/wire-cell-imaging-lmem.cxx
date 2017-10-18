@@ -2671,14 +2671,14 @@ int main(int argc, char* argv[])
   // end to group the dead cells ... 
   cerr << em("finish cluster dead region ... ") << std::endl;
 
-  for (auto it = cluster_set.begin();it!=cluster_set.end();it++){
-    for (auto it1 = dead_cluster_set.begin();it1!=dead_cluster_set.end();it1++){
-      GeomCellSelection mcells = (*it)->Is_Connected(*it1,2);
-      if (mcells.size()>0)
-  	std::cout << (*it)->get_id() << " " << (*it)->get_allcell().size() << " " << (*it1)->get_id() << " " << (*it1)->get_mcells().size() << " " << mcells.size() << std::endl;
-    }
-  }
-  cerr << em("form map between dead and live clusters ... ") << std::endl;
+  // for (auto it = cluster_set.begin();it!=cluster_set.end();it++){
+  //   for (auto it1 = dead_cluster_set.begin();it1!=dead_cluster_set.end();it1++){
+  //     GeomCellSelection mcells = (*it)->Is_Connected(*it1,2);
+  //     if (mcells.size()>0)
+  // 	std::cout << (*it)->get_id() << " " << (*it)->get_allcell().size() << " " << (*it1)->get_id() << " " << (*it1)->get_mcells().size() << " " << mcells.size() << std::endl;
+  //   }
+  // }
+  // cerr << em("form map between dead and live clusters ... ") << std::endl;
   
   if (save_file==1){
     Double_t x_save, y_save, z_save;
