@@ -9,10 +9,10 @@ void WireCell2dToy::calc_boundary_points_dead(WireCell::GeomDataSource& gds, Wir
   }
 }
 
-void WireCell2dToy::calc_sampling_points(WireCell::GeomDataSource& gds, WireCell::PR3DCluster* cluster){
+void WireCell2dToy::calc_sampling_points(WireCell::GeomDataSource& gds, WireCell::PR3DCluster* cluster, int nrebin, int frame_length, double unit_dis){
   SMGCSelection mcells = cluster->get_mcells();
   for (auto it = mcells.begin(); it!=mcells.end(); it++){
-    calc_sampling_points(gds,*it);
+    calc_sampling_points(gds,*it, nrebin, frame_length, unit_dis);
   }
 }
 
@@ -608,7 +608,7 @@ void WireCell2dToy::calc_boundary_points_dead(WireCell::GeomDataSource& gds, Wir
   
 }
 
-void WireCell2dToy::calc_sampling_points(WireCell::GeomDataSource& gds, WireCell::SlimMergeGeomCell* mcell){
+void WireCell2dToy::calc_sampling_points(WireCell::GeomDataSource& gds, WireCell::SlimMergeGeomCell* mcell, int nrebin, int frame_length, double unit_dis){
   GeomWireSelection wires_u = mcell->get_uwires();
   GeomWireSelection wires_v = mcell->get_vwires();
   GeomWireSelection wires_w = mcell->get_wwires();
@@ -694,8 +694,10 @@ void WireCell2dToy::calc_sampling_points(WireCell::GeomDataSource& gds, WireCell
       Vector point;
       gds.crossing_point(*(*it),*(*it1),point);
       float dis = gds.wire_dist(point,other_wire_plane_type);
-      if (dis>=dis_limit[0]&&dis<=dis_limit[1])
+      if (dis>=dis_limit[0]&&dis<=dis_limit[1]){
+	point.x = (mcell->GetTimeSlice()*nrebin/2.*unit_dis/10. - frame_length/2.*unit_dis/10.) * units::cm;
 	sampling_points.push_back(point);
+      }
       //std::cout << "A: " <<dis_limit[0] << " " << dis << " " << dis_limit[1] << std::endl; 
     }
   }

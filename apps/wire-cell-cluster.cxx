@@ -290,7 +290,8 @@ int main(int argc, char* argv[])
    }
    // form sampling points for the normal cells ...
    for (size_t i=0; i!=live_clusters.size();i++){
-     WireCell2dToy::calc_sampling_points(gds,live_clusters.at(i));
+     WireCell2dToy::calc_sampling_points(gds,live_clusters.at(i),nrebin, frame_length, unit_dis);
+     live_clusters.at(i)->Calc_PCA();
    }
    
    
@@ -345,9 +346,20 @@ int main(int argc, char* argv[])
        int time_slice = mcells.at(i)->GetTimeSlice();
        if (ps.size()==0) std::cout << "zero sampling points!" << std::endl;
        for (int k=0;k!=ps.size();k++){
-	 x = time_slice*nrebin/2.*unit_dis/10. - frame_length/2.*unit_dis/10.;
+	 x = ps.at(k).x/units::cm;//time_slice*nrebin/2.*unit_dis/10. - frame_length/2.*unit_dis/10.;
 	 y = ps.at(k).y/units::cm;
 	 z = ps.at(k).z/units::cm;
+	 T_cluster->Fill();
+       }
+     }
+     if (live_clusters.at(j)->get_num_mcells()>30){
+       // add PCA axis point
+       Vector center = live_clusters.at(j)->get_center();
+       Vector dir = live_clusters.at(j)->get_PCA_axis(0);
+       for (int i=-200;i!=200;i++){
+	 x = (center.x + dir.x *(i*units::cm) )/units::cm;
+	 y = (center.y + dir.y *(i*units::cm) )/units::cm;
+	 z = (center.z + dir.z *(i*units::cm) )/units::cm;
 	 T_cluster->Fill();
        }
      }
