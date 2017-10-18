@@ -296,7 +296,7 @@ int main(int argc, char* argv[])
    
    
    
-   cerr << em("Add X, Y, Z points");
+   cerr << em("Add X, Y, Z points") << std::endl;
    
    TFile *file1 = new TFile(Form("pr_%d_%d_%d.root",run_no,subrun_no,event_no),"RECREATE");
 
@@ -352,17 +352,17 @@ int main(int argc, char* argv[])
 	 T_cluster->Fill();
        }
      }
-     if (live_clusters.at(j)->get_num_mcells()>30){
-       // add PCA axis point
-       Vector center = live_clusters.at(j)->get_center();
-       Vector dir = live_clusters.at(j)->get_PCA_axis(0);
-       for (int i=-200;i!=200;i++){
-	 x = (center.x + dir.x *(i*units::cm) )/units::cm;
-	 y = (center.y + dir.y *(i*units::cm) )/units::cm;
-	 z = (center.z + dir.z *(i*units::cm) )/units::cm;
-	 T_cluster->Fill();
-       }
-     }
+     // if (live_clusters.at(j)->get_num_mcells()>30){
+     //   // add PCA axis point
+     //   Vector center = live_clusters.at(j)->get_center();
+     //   Vector dir = live_clusters.at(j)->get_PCA_axis(0);
+     //   for (int i=-200;i!=200;i++){
+     // 	 x = (center.x + dir.x *(i*units::cm) )/units::cm;
+     // 	 y = (center.y + dir.y *(i*units::cm) )/units::cm;
+     // 	 z = (center.z + dir.z *(i*units::cm) )/units::cm;
+     // 	 T_cluster->Fill();
+     //   }
+     // }
     }
    
    Trun->CloneTree()->Write();
