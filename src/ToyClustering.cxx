@@ -5,6 +5,8 @@ using namespace WireCell;
 void WireCell2dToy::Clustering_live_dead(WireCell::PR3DClusterSelection& live_clusters, WireCell::PR3DClusterSelection& dead_clusters, std::map<WireCell::PR3DCluster*,std::vector<WireCell::PR3DCluster*>>& dead_live_cluster_mapping, std::map<WireCell::PR3DCluster*,std::vector<WireCell::SMGCSelection>>& dead_live_mcells_mapping){
   std::set<std::pair<PR3DCluster*, PR3DCluster*>> tested_pairs;
   std::set<std::pair<PR3DCluster*, PR3DCluster*>> to_be_merged_pairs;
+
+  
   
   for (auto it = dead_live_cluster_mapping.begin(); it!= dead_live_cluster_mapping.end(); it++){
     PR3DCluster* the_dead_cluster = (*it).first;
