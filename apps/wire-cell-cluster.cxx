@@ -5,6 +5,7 @@
 #include "WireCellData/Singleton.h"
 #include "WireCell2dToy/ExecMon.h"
 #include "WireCell2dToy/CalcPoints.h"
+#include "WireCell2dToy/ToyClustering.h"
 
 
 #include "TFile.h"
@@ -248,6 +249,7 @@ int main(int argc, char* argv[])
      // 	       << dead_clusters.at(i)->get_num_mcells() << " "
      // 	       << dead_clusters.at(i)->get_num_time_slices() << std::endl;
    }
+  
    
    cerr << em("load clusters from file") << endl;
 
@@ -289,7 +291,9 @@ int main(int argc, char* argv[])
        // 		   << dead_clusters.at(j)->get_num_time_slices() << std::endl;
      }
    }
-   cerr << em("form map between dead and live clusters ... ") << std::endl;
+   
+   
+   cerr << em("form map for dead and live clusters ... ") << std::endl;
 
    // Start to add X, Y, Z points
    // form boundaries for the bad cells ... 
@@ -301,10 +305,13 @@ int main(int argc, char* argv[])
      WireCell2dToy::calc_sampling_points(gds,live_clusters.at(i),nrebin, frame_length, unit_dis);
      live_clusters.at(i)->Calc_PCA();
    }
-   
-   
-   
    cerr << em("Add X, Y, Z points") << std::endl;
+
+   WireCell2dToy::Clustering_live_dead(live_clusters, dead_clusters, dead_live_cluster_mapping, dead_live_mcells_mapping);
+
+   
+   cerr << em("Clustering live and dead clusters") << std::endl;
+
    
    TFile *file1 = new TFile(Form("pr_%d_%d_%d.root",run_no,subrun_no,event_no),"RECREATE");
 
@@ -349,55 +356,55 @@ int main(int argc, char* argv[])
    // z=0;
    // T_cluster->Fill();
    
-    // for (size_t j = 0; j!= live_clusters.size(); j++){
-    //  SMGCSelection& mcells = live_clusters.at(j)->get_mcells();
-    //  ncluster = live_clusters.at(j)->get_cluster_id();
-    //  for (size_t i=0;i!=mcells.size();i++){
-    //    PointVector ps = mcells.at(i)->get_sampling_points();
-    //    int time_slice = mcells.at(i)->GetTimeSlice();
-    //    if (ps.size()==0) std::cout << "zero sampling points!" << std::endl;
-    //    for (int k=0;k!=ps.size();k++){
-    // 	 x = ps.at(k).x/units::cm;//time_slice*nrebin/2.*unit_dis/10. - frame_length/2.*unit_dis/10.;
-    // 	 y = ps.at(k).y/units::cm;
-    // 	 z = ps.at(k).z/units::cm;
-    // 	 T_cluster->Fill();
-    //    }
-    //  }
-    //  // if (live_clusters.at(j)->get_num_mcells()>30){
-    //  //   // add PCA axis point
-    //  //   Vector center = live_clusters.at(j)->get_center();
-    //  //   Vector dir = live_clusters.at(j)->get_PCA_axis(0);
-    //  //   for (int i=-200;i!=200;i++){
-    //  // 	 x = (center.x + dir.x *(i*units::cm) )/units::cm;
-    //  // 	 y = (center.y + dir.y *(i*units::cm) )/units::cm;
-    //  // 	 z = (center.z + dir.z *(i*units::cm) )/units::cm;
-    //  // 	 T_cluster->Fill();
-    //  //   }
-    //  // }
-    // }
-
-   ncluster = 0;
-   for (auto it = dead_live_cluster_mapping.begin(); it!= dead_live_cluster_mapping.end(); it++){
-     std::vector<PR3DCluster*> clusters = (*it).second;
-     if (clusters.size()>1){
-       std::cout << clusters.size() << std::endl;
-       for (auto it1 = clusters.begin(); it1!=clusters.end(); it1++){
-   	 PR3DCluster* cluster = (*it1);
-	 ncluster = cluster->get_cluster_id();
-	 SMGCSelection& mcells = cluster->get_mcells();
-   	 for (size_t i=0;i!=mcells.size();i++){
-   	   PointVector ps = mcells.at(i)->get_sampling_points();
-   	   for (int k=0;k!=ps.size();k++){
-   	     x = ps.at(k).x/units::cm;//time_slice*nrebin/2.*unit_dis/10. - frame_length/2.*unit_dis/10.;
-   	     y = ps.at(k).y/units::cm;
-   	     z = ps.at(k).z/units::cm;
-   	     T_cluster->Fill();
-   	   }
-   	 }
+   for (size_t j = 0; j!= live_clusters.size(); j++){
+     SMGCSelection& mcells = live_clusters.at(j)->get_mcells();
+     ncluster = live_clusters.at(j)->get_cluster_id();
+     for (size_t i=0;i!=mcells.size();i++){
+       PointVector ps = mcells.at(i)->get_sampling_points();
+       int time_slice = mcells.at(i)->GetTimeSlice();
+       if (ps.size()==0) std::cout << "zero sampling points!" << std::endl;
+       for (int k=0;k!=ps.size();k++){
+    	 x = ps.at(k).x/units::cm;//time_slice*nrebin/2.*unit_dis/10. - frame_length/2.*unit_dis/10.;
+    	 y = ps.at(k).y/units::cm;
+    	 z = ps.at(k).z/units::cm;
+    	 T_cluster->Fill();
        }
      }
-     // ncluster++;
-   }
+     // if (live_clusters.at(j)->get_num_mcells()>30){
+     //   // add PCA axis point
+     //   Vector center = live_clusters.at(j)->get_center();
+     //   Vector dir = live_clusters.at(j)->get_PCA_axis(0);
+     //   for (int i=-200;i!=200;i++){
+     // 	 x = (center.x + dir.x *(i*units::cm) )/units::cm;
+     // 	 y = (center.y + dir.y *(i*units::cm) )/units::cm;
+     // 	 z = (center.z + dir.z *(i*units::cm) )/units::cm;
+     // 	 T_cluster->Fill();
+     //   }
+     // }
+    }
+
+   // ncluster = 0;
+   // for (auto it = dead_live_cluster_mapping.begin(); it!= dead_live_cluster_mapping.end(); it++){
+   //   std::vector<PR3DCluster*> clusters = (*it).second;
+   //   if (clusters.size()>1){
+   //     //std::cout << clusters.size() << std::endl;
+   //     for (auto it1 = clusters.begin(); it1!=clusters.end(); it1++){
+   // 	 PR3DCluster* cluster = (*it1);
+   // 	 ncluster = cluster->get_cluster_id();
+   // 	 SMGCSelection& mcells = cluster->get_mcells();
+   // 	 for (size_t i=0;i!=mcells.size();i++){
+   // 	   PointVector ps = mcells.at(i)->get_sampling_points();
+   // 	   for (int k=0;k!=ps.size();k++){
+   // 	     x = ps.at(k).x/units::cm;//time_slice*nrebin/2.*unit_dis/10. - frame_length/2.*unit_dis/10.;
+   // 	     y = ps.at(k).y/units::cm;
+   // 	     z = ps.at(k).z/units::cm;
+   // 	     T_cluster->Fill();
+   // 	   }
+   // 	 }
+   //     }
+   //   }
+   //   // ncluster++;
+   // }
    // for (auto it = dead_live_mcells_mapping.begin(); it!= dead_live_mcells_mapping.end(); it++){
    //   std::vector<std::vector<SlimMergeGeomCell*>> mcellss = (*it).second;
    //   // std::cout << mcellss.size() << std::endl;
