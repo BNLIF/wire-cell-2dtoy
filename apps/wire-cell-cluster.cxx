@@ -259,16 +259,24 @@ int main(int argc, char* argv[])
    for (size_t i = 0; i!=live_clusters.size(); i++){
      for (size_t j = 0; j!= dead_clusters.size(); j++){
        SMGCSelection mcells = (live_clusters.at(i))->Is_Connected(dead_clusters.at(j),2);
-       if (dead_live_cluster_mapping.find(dead_clusters.at(j))==dead_live_cluster_mapping.end()){
-	 std::vector<PR3DCluster*> temp_clusters;
-	 temp_clusters.push_back(live_clusters.at(i));
-	 dead_live_cluster_mapping[dead_clusters.at(j)] = temp_clusters;
-	 std::vector<SMGCSelection> temp_mcells;
-	 temp_mcells.push_back(mcells);
-	 dead_live_mcells_mapping[dead_clusters.at(j)] = temp_mcells;
-       }else{
-	 dead_live_cluster_mapping[dead_clusters.at(j)].push_back(live_clusters.at(i));
-	 dead_live_mcells_mapping[dead_clusters.at(j)].push_back(mcells);
+       int live_cluster_id = live_clusters.at(i)->get_cluster_id();
+       int dead_cluster_id = dead_clusters.at(j)->get_cluster_id();
+       // if (live_cluster_id==5 || live_cluster_id == 21 || live_cluster_id == 76){
+       // 	 if (dead_cluster_id==8 || dead_cluster_id==100)
+       // 	   std::cout << live_cluster_id << " " << dead_cluster_id << " " << mcells.size() << std::endl;
+       // }
+       if ( mcells.size()>0 ){
+	 if (dead_live_cluster_mapping.find(dead_clusters.at(j))==dead_live_cluster_mapping.end() ){
+	   std::vector<PR3DCluster*> temp_clusters;
+	   temp_clusters.push_back(live_clusters.at(i));
+	   dead_live_cluster_mapping[dead_clusters.at(j)] = temp_clusters;
+	   std::vector<SMGCSelection> temp_mcells;
+	   temp_mcells.push_back(mcells);
+	   dead_live_mcells_mapping[dead_clusters.at(j)] = temp_mcells;
+	 }else{
+	   dead_live_cluster_mapping[dead_clusters.at(j)].push_back(live_clusters.at(i));
+	   dead_live_mcells_mapping[dead_clusters.at(j)].push_back(mcells);
+	 }
        }
 	   
        // if (mcells.size()>0)
@@ -303,13 +311,16 @@ int main(int argc, char* argv[])
    TTree *t_bad = new TTree("T_bad","T_bad");
    t_bad->SetDirectory(file1);
    Int_t bad_npoints;
+   Int_t ncluster;
    Double_t bad_y[100],bad_z[100];
+   t_bad->Branch("cluster_id",&ncluster,"cluster_id/I");
    t_bad->Branch("bad_npoints",&bad_npoints,"bad_npoints/I");
    t_bad->Branch("bad_y",bad_y,"bad_y[bad_npoints]/D");
    t_bad->Branch("bad_z",bad_z,"bad_z[bad_npoints]/D");
    
    for (size_t j = 0; j!= dead_clusters.size(); j++){
      SMGCSelection& mcells = dead_clusters.at(j)->get_mcells();
+     ncluster = dead_clusters.at(j)->get_cluster_id();
      for (size_t i=0;i!=mcells.size();i++){
        PointVector ps = mcells.at(i)->boundary();
        bad_npoints = ps.size();
@@ -323,7 +334,7 @@ int main(int argc, char* argv[])
    
    TTree *T_cluster ;
    Double_t x,y,z;
-   Int_t ncluster;
+   
    T_cluster = new TTree("T_cluster","T_cluster");
    T_cluster->Branch("cluster_id",&ncluster,"cluster_id/I");
    T_cluster->Branch("x",&x,"x/D");
@@ -338,32 +349,74 @@ int main(int argc, char* argv[])
    // z=0;
    // T_cluster->Fill();
    
-    for (size_t j = 0; j!= live_clusters.size(); j++){
-     SMGCSelection& mcells = live_clusters.at(j)->get_mcells();
-     ncluster = live_clusters.at(j)->get_cluster_id();
-     for (size_t i=0;i!=mcells.size();i++){
-       PointVector ps = mcells.at(i)->get_sampling_points();
-       int time_slice = mcells.at(i)->GetTimeSlice();
-       if (ps.size()==0) std::cout << "zero sampling points!" << std::endl;
-       for (int k=0;k!=ps.size();k++){
-	 x = ps.at(k).x/units::cm;//time_slice*nrebin/2.*unit_dis/10. - frame_length/2.*unit_dis/10.;
-	 y = ps.at(k).y/units::cm;
-	 z = ps.at(k).z/units::cm;
-	 T_cluster->Fill();
+    // for (size_t j = 0; j!= live_clusters.size(); j++){
+    //  SMGCSelection& mcells = live_clusters.at(j)->get_mcells();
+    //  ncluster = live_clusters.at(j)->get_cluster_id();
+    //  for (size_t i=0;i!=mcells.size();i++){
+    //    PointVector ps = mcells.at(i)->get_sampling_points();
+    //    int time_slice = mcells.at(i)->GetTimeSlice();
+    //    if (ps.size()==0) std::cout << "zero sampling points!" << std::endl;
+    //    for (int k=0;k!=ps.size();k++){
+    // 	 x = ps.at(k).x/units::cm;//time_slice*nrebin/2.*unit_dis/10. - frame_length/2.*unit_dis/10.;
+    // 	 y = ps.at(k).y/units::cm;
+    // 	 z = ps.at(k).z/units::cm;
+    // 	 T_cluster->Fill();
+    //    }
+    //  }
+    //  // if (live_clusters.at(j)->get_num_mcells()>30){
+    //  //   // add PCA axis point
+    //  //   Vector center = live_clusters.at(j)->get_center();
+    //  //   Vector dir = live_clusters.at(j)->get_PCA_axis(0);
+    //  //   for (int i=-200;i!=200;i++){
+    //  // 	 x = (center.x + dir.x *(i*units::cm) )/units::cm;
+    //  // 	 y = (center.y + dir.y *(i*units::cm) )/units::cm;
+    //  // 	 z = (center.z + dir.z *(i*units::cm) )/units::cm;
+    //  // 	 T_cluster->Fill();
+    //  //   }
+    //  // }
+    // }
+
+   ncluster = 0;
+   for (auto it = dead_live_cluster_mapping.begin(); it!= dead_live_cluster_mapping.end(); it++){
+     std::vector<PR3DCluster*> clusters = (*it).second;
+     if (clusters.size()>1){
+       std::cout << clusters.size() << std::endl;
+       for (auto it1 = clusters.begin(); it1!=clusters.end(); it1++){
+   	 PR3DCluster* cluster = (*it1);
+	 ncluster = cluster->get_cluster_id();
+	 SMGCSelection& mcells = cluster->get_mcells();
+   	 for (size_t i=0;i!=mcells.size();i++){
+   	   PointVector ps = mcells.at(i)->get_sampling_points();
+   	   for (int k=0;k!=ps.size();k++){
+   	     x = ps.at(k).x/units::cm;//time_slice*nrebin/2.*unit_dis/10. - frame_length/2.*unit_dis/10.;
+   	     y = ps.at(k).y/units::cm;
+   	     z = ps.at(k).z/units::cm;
+   	     T_cluster->Fill();
+   	   }
+   	 }
        }
      }
-     // if (live_clusters.at(j)->get_num_mcells()>30){
-     //   // add PCA axis point
-     //   Vector center = live_clusters.at(j)->get_center();
-     //   Vector dir = live_clusters.at(j)->get_PCA_axis(0);
-     //   for (int i=-200;i!=200;i++){
-     // 	 x = (center.x + dir.x *(i*units::cm) )/units::cm;
-     // 	 y = (center.y + dir.y *(i*units::cm) )/units::cm;
-     // 	 z = (center.z + dir.z *(i*units::cm) )/units::cm;
-     // 	 T_cluster->Fill();
-     //   }
-     // }
-    }
+     // ncluster++;
+   }
+   // for (auto it = dead_live_mcells_mapping.begin(); it!= dead_live_mcells_mapping.end(); it++){
+   //   std::vector<std::vector<SlimMergeGeomCell*>> mcellss = (*it).second;
+   //   // std::cout << mcellss.size() << std::endl;
+   //   if (mcellss.size()>1){
+   //     for (auto it1 = mcellss.begin(); it1!=mcellss.end(); it1++){
+   // 	 std::vector<SlimMergeGeomCell*> mcells = (*it1);
+   // 	 for (size_t i=0;i!=mcells.size();i++){
+   // 	   PointVector ps = mcells.at(i)->get_sampling_points();
+   // 	   for (int k=0;k!=ps.size();k++){
+   // 	     x = ps.at(k).x/units::cm;//time_slice*nrebin/2.*unit_dis/10. - frame_length/2.*unit_dis/10.;
+   // 	     y = ps.at(k).y/units::cm;
+   // 	     z = ps.at(k).z/units::cm;
+   // 	     T_cluster->Fill();
+   // 	   }
+   // 	 }
+   //     }
+   //   }
+   //   ncluster++;
+   // }
    
    Trun->CloneTree()->Write();
    file1->Write();
