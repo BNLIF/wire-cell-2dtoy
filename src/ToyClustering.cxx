@@ -38,8 +38,10 @@ void WireCell2dToy::Clustering_live_dead(WireCell::PR3DClusterSelection& live_cl
 		Point mcell2_center = mcell_2->center();
 		//	std::cout << mcell1_center.x/units::cm << " " << mcell1_center.y/units::cm << " " << mcell1_center.z/units::cm << " " << mcell2_center.x/units::cm << " " << mcell2_center.y/units::cm << " " << mcell2_center.z/units::cm << std::endl;
 		// test both sides
+		std::pair<double,double> angles_1 = cluster_1->HoughTrans(mcell1_center,30*units::cm);
+		std::pair<double,double> angles_2 = cluster_2->HoughTrans(mcell2_center,30*units::cm);
 		
-
+		// std::cout << angles_1.first << " " << angles_1.second << " " << angles_2.first << " " << angles_2.second << std::endl;
 		
 	      }
 	      if (flag_merge) break;
