@@ -32,9 +32,14 @@ void WireCell2dToy::Clustering_live_dead(WireCell::PR3DClusterSelection& live_cl
 	    bool flag_merge = false;
 	    for (auto it1 = mcells_1.begin(); it1!= mcells_1.end(); it1++){
 	      SlimMergeGeomCell* mcell_1 = (*it1);
+	      Point mcell1_center = mcell_1->center();
 	      for (auto it2 = mcells_2.begin(); it2!=mcells_2.end(); it2++){
 		SlimMergeGeomCell* mcell_2 = (*it2);
+		Point mcell2_center = mcell_2->center();
+		//	std::cout << mcell1_center.x/units::cm << " " << mcell1_center.y/units::cm << " " << mcell1_center.z/units::cm << " " << mcell2_center.x/units::cm << " " << mcell2_center.y/units::cm << " " << mcell2_center.z/units::cm << std::endl;
 		// test both sides
+		
+
 		
 	      }
 	      if (flag_merge) break;
