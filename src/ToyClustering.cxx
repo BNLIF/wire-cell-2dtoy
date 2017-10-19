@@ -22,6 +22,8 @@ void WireCell2dToy::Clustering_live_dead(WireCell::PR3DClusterSelection& live_cl
 	  SMGCSelection mcells_2 = connected_live_mcells.at(j);
 
 	  if (tested_pairs.find(std::make_pair(cluster_1,cluster_2))==tested_pairs.end()){
+	    cluster_1->Create_point_cloud();
+	    cluster_2->Create_point_cloud();
 	    //std::cout << cluster_1->get_cluster_id() << " " << cluster_2->get_cluster_id() << std::endl;
 	    tested_pairs.insert(std::make_pair(cluster_1,cluster_2));
 	    tested_pairs.insert(std::make_pair(cluster_2,cluster_1));
