@@ -307,7 +307,7 @@ int main(int argc, char* argv[])
    }
    cerr << em("Add X, Y, Z points") << std::endl;
 
-   WireCell2dToy::Clustering_live_dead(live_clusters, dead_clusters, dead_live_cluster_mapping, dead_live_mcells_mapping);
+   WireCell2dToy::Clustering_live_dead(live_clusters, dead_clusters, dead_live_cluster_mapping, dead_live_mcells_mapping,gds);
 
    
    cerr << em("Clustering live and dead clusters") << std::endl;

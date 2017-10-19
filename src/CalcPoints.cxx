@@ -672,8 +672,8 @@ void WireCell2dToy::calc_sampling_points(WireCell::GeomDataSource& gds, WireCell
 
   
   
-  int max_step = std::max(4.0,max_wires.size()/12.);
-  int min_step = std::max(4.0,min_wires.size()/12.);
+  int max_step = std::max(2.0,max_wires.size()/12.);
+  int min_step = std::max(2.0,min_wires.size()/12.);
   //std::cout << min_step << " " << max_step << std::endl;
   GeomWireSetp max_wires_set;
   GeomWireSetp min_wires_set;
