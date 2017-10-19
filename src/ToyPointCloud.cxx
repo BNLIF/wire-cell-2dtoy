@@ -41,7 +41,7 @@ void WireCell2dToy::ToyPointCloud::build_kdtree_index(){
   index->buildIndex();
 }
 
-std::vector<std::pair<size_t,double>> WireCell2dToy::ToyPointCloud::get_closest(WireCell::Point& p, int N){
+std::vector<std::pair<size_t,double>> WireCell2dToy::ToyPointCloud::get_closest_index(WireCell::Point& p, int N){
   std::vector<size_t> ret_index(N);
   std::vector<double> out_dist_sqr(N);
   
@@ -62,7 +62,7 @@ std::vector<std::pair<size_t,double>> WireCell2dToy::ToyPointCloud::get_closest(
   return results;
 }
 
-std::vector<std::pair<size_t,double>> WireCell2dToy::ToyPointCloud::get_closest(WireCell::Point& p, double search_radius){
+std::vector<std::pair<size_t,double>> WireCell2dToy::ToyPointCloud::get_closest_index(WireCell::Point& p, double search_radius){
   double query_pt[3];
   query_pt[0] = p.x;
   query_pt[1] = p.y;
@@ -72,4 +72,63 @@ std::vector<std::pair<size_t,double>> WireCell2dToy::ToyPointCloud::get_closest(
   const size_t nMatches = index->radiusSearch(&query_pt[0], search_radius, ret_matches, params);
   
   return ret_matches;
+}
+
+std::map<WireCell::SlimMergeGeomCell*, Point> WireCell2dToy::ToyPointCloud::get_closest_mcell(WireCell::Point& p, int N){
+  std::vector<std::pair<size_t,double>> results = get_closest_index(p,N);
+  
+  std::map<WireCell::SlimMergeGeomCell*, Point> mcell_point_map;
+  std::map<WireCell::SlimMergeGeomCell*, double> mcell_dis_map;
+  
+  for (auto it = results.begin(); it!= results.end(); it++){
+    size_t index = (*it).first;
+    double dis = (*it).second;
+    SlimMergeGeomCell *mcell = cloud.pts[index].mcell;
+    Point p;
+    p.x = cloud.pts[index].x;
+    p.y = cloud.pts[index].y;
+    p.z = cloud.pts[index].z;
+    
+    if (mcell_dis_map.find(mcell)==mcell_dis_map.end()){
+      mcell_dis_map[mcell]=dis;
+      mcell_point_map[mcell] = p;
+    }else{
+      if (dis < mcell_dis_map[mcell]){
+	mcell_dis_map[mcell]=dis;
+	mcell_point_map[mcell]=p;
+      }
+    }
+  }
+  
+  return mcell_point_map;
+}
+
+
+std::map<WireCell::SlimMergeGeomCell*, Point> WireCell2dToy::ToyPointCloud::get_closest_mcell(WireCell::Point& p, double search_radius){
+  std::vector<std::pair<size_t,double>> results = get_closest_index(p,search_radius);
+  
+  std::map<WireCell::SlimMergeGeomCell*, Point> mcell_point_map;
+  std::map<WireCell::SlimMergeGeomCell*, double> mcell_dis_map;
+  
+  for (auto it = results.begin(); it!= results.end(); it++){
+    size_t index = (*it).first;
+    double dis = (*it).second;
+    SlimMergeGeomCell *mcell = cloud.pts[index].mcell;
+    Point p;
+    p.x = cloud.pts[index].x;
+    p.y = cloud.pts[index].y;
+    p.z = cloud.pts[index].z;
+    
+    if (mcell_dis_map.find(mcell)==mcell_dis_map.end()){
+      mcell_dis_map[mcell]=dis;
+      mcell_point_map[mcell] = p;
+    }else{
+      if (dis < mcell_dis_map[mcell]){
+	mcell_dis_map[mcell]=dis;
+	mcell_point_map[mcell]=p;
+      }
+    }
+  }
+  
+  return mcell_point_map;
 }

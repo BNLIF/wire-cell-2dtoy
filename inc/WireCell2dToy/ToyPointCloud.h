@@ -7,6 +7,8 @@
 #include "WireCellQuickhull/QuickHull.h"
 #include "WireCellQuickhull/MathUtils.h"
 
+#include  <map>
+
 typedef nanoflann::KDTreeSingleIndexAdaptor<
     nanoflann::L2_Simple_Adaptor<double, WireCell::WCPointCloud<double> > ,
     WireCell::WCPointCloud<double>,
@@ -23,8 +25,12 @@ namespace WireCell2dToy{
     void AddPoint(WireCell::Point& p, WireCell::SlimMergeGeomCell *mcell);
     void AddPoints(WireCell::PointVector& ps, WireCell::SlimMergeGeomCell *mcell);
     void build_kdtree_index();
-    std::vector<std::pair<size_t,double>> get_closest(WireCell::Point& p, int N);
-    std::vector<std::pair<size_t,double>> get_closest(WireCell::Point& p, double radius);
+    std::vector<std::pair<size_t,double>> get_closest_index(WireCell::Point& p, int N);
+    std::vector<std::pair<size_t,double>> get_closest_index(WireCell::Point& p, double radius);
+
+    std::map<WireCell::SlimMergeGeomCell*, WireCell::Point> get_closest_mcell(WireCell::Point& p, int N);
+
+    std::map<WireCell::SlimMergeGeomCell*, WireCell::Point> get_closest_mcell(WireCell::Point& p, double radius);
     
 
     
