@@ -15,7 +15,7 @@ int main(){
     pc.emplace_back(gRandom->Uniform(-100,100),gRandom->Uniform(-100,100),gRandom->Uniform(-100,100));
   }
 
-  quickhull::ConvexHull<float> hull = qh.getConvexHull(pc,false,false);
+  quickhull::ConvexHull<float> hull = qh.getConvexHull(pc,true,false);
   std::cout << hull.getIndexBuffer().size() << " " << hull.getVertexBuffer().size() << " " << pc.size() << std::endl;
 
   std::set<int> indices;

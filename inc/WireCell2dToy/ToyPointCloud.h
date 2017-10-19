@@ -32,7 +32,7 @@ namespace WireCell2dToy{
 
     std::map<WireCell::SlimMergeGeomCell*, WireCell::Point> get_closest_mcell(WireCell::Point& p, double radius);
     
-
+    std::vector<std::pair<WireCell::SlimMergeGeomCell*, WireCell::Point>> get_hull(); 
     
     
     
