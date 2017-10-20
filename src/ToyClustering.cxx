@@ -2,7 +2,17 @@
 
 using namespace WireCell;
 
-void WireCell2dToy::Clustering_live_dead(WireCell::PR3DClusterSelection& live_clusters, WireCell::PR3DClusterSelection& dead_clusters, WireCellSst::GeomDataSource& gds){
+void WireCell2dToy::Clustering_jump_gap_cosmics(WireCell::PR3DClusterSelection& live_clusters, double dis){
+  for (size_t i=0;i!=live_clusters.size();i++){
+    PR3DCluster* cluster_1 = live_clusters.at(i);
+    for (size_t j=i+1;j<live_clusters.size();j++){
+      PR3DCluster* cluster_2 = live_clusters.at(j);
+      
+    }
+  }
+}
+
+void WireCell2dToy::Clustering_live_dead(WireCell::PR3DClusterSelection& live_clusters, WireCell::PR3DClusterSelection& dead_clusters){
 
    // dead to live clusters mapping ... 
    std::map<PR3DCluster*,std::vector<PR3DCluster*>> dead_live_cluster_mapping;

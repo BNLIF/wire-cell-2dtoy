@@ -268,11 +268,15 @@ int main(int argc, char* argv[])
    cerr << em("Add X, Y, Z points") << std::endl;
 
    
-   WireCell2dToy::Clustering_live_dead(live_clusters, dead_clusters,gds);
+   WireCell2dToy::Clustering_live_dead(live_clusters, dead_clusters);
 
    
    cerr << em("Clustering live and dead clusters") << std::endl;
 
+   WireCell2dToy::Clustering_jump_gap_cosmics(live_clusters, 1*units::cm);
+   
+   cerr << em("Clustering to jump gap in cosmics") << std::endl;
+   
    
    TFile *file1 = new TFile(Form("pr_%d_%d_%d.root",run_no,subrun_no,event_no),"RECREATE");
 
