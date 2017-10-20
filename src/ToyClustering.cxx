@@ -7,10 +7,19 @@ void WireCell2dToy::Clustering_jump_gap_cosmics(WireCell::PR3DClusterSelection& 
     PR3DCluster* cluster_1 = live_clusters.at(i);
     for (size_t j=i+1;j<live_clusters.size();j++){
       PR3DCluster* cluster_2 = live_clusters.at(j);
+      std::pair<SlimMergeGeomCell*,SlimMergeGeomCell*> mcells = WireCell2dToy::Get_Closest_MCells_Clusters(cluster_1,cluster_2,dis);
       
     }
   }
 }
+
+std::pair<WireCell::SlimMergeGeomCell*, WireCell::SlimMergeGeomCell*> WireCell2dToy::Get_Closest_MCells_Clusters(WireCell::PR3DCluster *cluster1, WireCell::PR3DCluster *cluster2, double dis){
+  cluster1->Create_point_cloud();
+  cluster2->Create_point_cloud();
+
+  
+}
+
 
 void WireCell2dToy::Clustering_live_dead(WireCell::PR3DClusterSelection& live_clusters, WireCell::PR3DClusterSelection& dead_clusters){
 
