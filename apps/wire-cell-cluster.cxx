@@ -269,13 +269,21 @@ int main(int argc, char* argv[])
 
    
    WireCell2dToy::Clustering_live_dead(live_clusters, dead_clusters);
-
-   
    cerr << em("Clustering live and dead clusters") << std::endl;
 
    WireCell2dToy::Clustering_jump_gap_cosmics(live_clusters, 6*units::cm);
-   
    cerr << em("Clustering to jump gap in cosmics") << std::endl;
+
+   // Point p1(337.346*units::cm,87.0524*units::cm,697.899*units::cm);
+   // for (int i=0;i!=live_clusters.size();i++){
+   //   if (live_clusters.at(i)->get_cluster_id()==10){
+   //     live_clusters.at(i)->Create_point_cloud();
+   //     Point p = live_clusters.at(i)->calc_ave_pos(p1,30*units::cm);
+   //     std::cout << "R: " << p.x/units::cm << " " << p.y/units::cm << " " << p.z/units::cm << " " << sqrt(pow(p1.x-p.x,2)+pow(p1.y-p.y,2)+pow(p1.z-p.z,2))/units::cm << std::endl;
+   //   }
+   // }
+   
+   
    
    
    TFile *file1 = new TFile(Form("pr_%d_%d_%d.root",run_no,subrun_no,event_no),"RECREATE");

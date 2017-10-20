@@ -43,7 +43,7 @@ int main()
     std::cout << "knnSearch(): num_results=" << num_results << "\n";
     for (size_t i = 0; i < num_results; i++){
       // int abc = cloud.pts[ret_index[i]].mcell;
-      std::cout << "idx["<< i << "]=" << ret_index[i] << " dist["<< i << "]=" << out_dist_sqr[i] << " " << cloud.pts[ret_index[i]].mcell->GetIdent() << std::endl;
+      std::cout << "idx["<< i << "]=" << ret_index[i] << " dist["<< i << "]=" << out_dist_sqr[i] << " " << sqrt(pow(cloud.pts[ret_index[i]].x-0.5,2)+pow(cloud.pts[ret_index[i]].y-0.5,2)+pow(cloud.pts[ret_index[i]].z-0.5,2)) << " " << cloud.pts[ret_index[i]].mcell->GetIdent() << std::endl;
     }
     std::cout << "\n";
     
