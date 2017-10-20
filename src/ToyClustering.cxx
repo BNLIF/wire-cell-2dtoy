@@ -154,11 +154,72 @@ void WireCell2dToy::Clustering_live_dead(WireCell::PR3DClusterSelection& live_cl
     }
   }
   
+  std::vector<std::set<PR3DCluster*>> merge_clusters;
+  for (auto it = to_be_merged_pairs.begin(); it!=to_be_merged_pairs.end(); it++){
+    PR3DCluster *cluster1 = (*it).first;
+    PR3DCluster *cluster2 = (*it).second;
+    //std::cout << cluster1 << " " << cluster2 << " " << cluster1->get_cluster_id() << " " << cluster2->get_cluster_id() << std::endl;
+    
+    bool flag_new = true;
+    std::vector<std::set<PR3DCluster*>> temp_set;
+    for (auto it1 = merge_clusters.begin(); it1!=merge_clusters.end(); it1++){
+      std::set<PR3DCluster*>& clusters = (*it1);
+      if (clusters.find(cluster1)!=clusters.end() ||
+	  clusters.find(cluster2)!=clusters.end()){
+	clusters.insert(cluster1);
+	clusters.insert(cluster2);
+	flag_new = false;
+	temp_set.push_back(clusters);
+	//break;
+      }
+    }
+    if (flag_new){
+      std::set<PR3DCluster*> clusters;
+      clusters.insert(cluster1);
+      clusters.insert(cluster2);
+      merge_clusters.push_back(clusters);
+    }
+    if (temp_set.size()>1){
+      // merge them further ...
+      for (size_t i=1;i!=temp_set.size();i++){
+	for (auto it1 = temp_set.at(i).begin(); it1!= temp_set.at(i).end(); it1++){
+	  temp_set.at(0).insert(*it1);
+	}
+	merge_clusters.erase(find(merge_clusters.begin(),merge_clusters.end(),temp_set.at(i)));
+      }
+    }
+  }
+
+  // merge clusters into new clusters, delete old clusters 
+  for (auto it = merge_clusters.begin(); it!=merge_clusters.end();it++){
+    std::set<PR3DCluster*>& clusters = (*it);
+    PR3DCluster *ncluster = new PR3DCluster((*clusters.begin())->get_cluster_id());
+    live_clusters.push_back(ncluster);
+    for (auto it1 = clusters.begin(); it1!=clusters.end(); it1++){
+      PR3DCluster *ocluster = *(it1);
+      // std::cout << ocluster->get_cluster_id() << " ";
+      SMGCSelection& mcells = ocluster->get_mcells();
+      for (auto it2 = mcells.begin(); it2!=mcells.end(); it2++){
+  	SlimMergeGeomCell *mcell = (*it2);
+  	//std::cout << ocluster->get_cluster_id() << " " << mcell << std::endl;
+  	int time_slice = mcell->GetTimeSlice();
+  	ncluster->AddCell(mcell,time_slice);
+      }
+      live_clusters.erase(find(live_clusters.begin(), live_clusters.end(), ocluster));
+      delete ocluster;
+    }
+    //std::cout << std::endl;
+  }
+  
+  //std::cout << merge_clusters.size() << std::endl;
   
   //std::cout << to_be_merged_pairs.size() << std::endl;
-  // for (auto it = to_be_merged_pairs.begin(); it!=to_be_merged_pairs.end(); it++){
+  // 
   //   std::cout << "Pair: " << (*it).first->get_cluster_id() << " " << (*it).second->get_cluster_id() << std::endl;
   // }
+
+
+  
   
 }
 
