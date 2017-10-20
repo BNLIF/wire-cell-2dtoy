@@ -108,22 +108,34 @@ bool WireCell2dToy::Clustering_jump_gap_cosmics(WireCell::PR3DCluster *cluster1,
   }
   PointVector points;
   //std::cout << cluster1->get_cluster_id() << " " << cluster2->get_cluster_id() << " " << sqrt(pow(p1.x-p2.x,2)+pow(p1.y-p2.y,2)+pow(p1.z-p2.z,2))/units::cm<< std::endl;
+
+  bool flag_para_track = false;
+  bool flag_cal_dir = false;
+  double angle_cut=10;
+  double dis = sqrt(pow(p1.x-p2.x,2)+pow(p1.y-p2.y,2)+pow(p1.z-p2.z,2));
+  if (dis < 6*units::cm){
+    flag_para_track = true;
+    angle_cut = 10;
+    flag_cal_dir = true;
+  }// else if (dis < 25*units::cm){
+  //   flag_para_track = false;
+  //   angle_cut = 5;
+  //   flag_cal_dir = true;
+  // }
   
-  if (sqrt(pow(p1.x-p2.x,2)+pow(p1.y-p2.y,2)+pow(p1.z-p2.z,2)) < 6*units::cm){
+  
+  if (flag_cal_dir){
     // points.push_back(mcell1->center());
     // points.push_back(mcell2->center());
     points.push_back(cluster1->calc_ave_pos(p1,5*units::cm));
     points.push_back(cluster2->calc_ave_pos(p2,5*units::cm));
-    // points.push_back(cluster1->calc_ave_pos(p1,30*units::cm));
-    // points.push_back(cluster2->calc_ave_pos(p2,30*units::cm));
-
-
+    
     if (points.size()==2){
       for (int k=0;k!=1;k++){
 	Point mcell1_center = points.at(0+2*k);
 	Point mcell2_center = points.at(1+2*k);
 	
-	TVector3 dir1 = cluster1->calc_dir(mcell1_center,mcell1_center,30*units::cm);
+	TVector3 dir1 = cluster1->calc_PCA_dir(mcell1_center,30*units::cm);
 	TVector3 dir2 = cluster2->calc_dir(mcell1_center,mcell2_center,30*units::cm);
 	
 	TVector3 dir1_rot(dir1.Y(), dir1.Z(), dir1.X());
@@ -134,12 +146,12 @@ bool WireCell2dToy::Clustering_jump_gap_cosmics(WireCell::PR3DCluster *cluster1,
 	double theta2 = (dir2_rot.Theta()-3.1415926/2.)/3.1415926*180.;
 	double dphi = fabs(3.1415926 - fabs(dir1_rot.Phi()-dir2_rot.Phi()))/3.1415926*180.;
 	//std::cout << cluster1->get_cluster_id() << " " << cluster2->get_cluster_id() << " " << angle_diff1 << " " << theta1 << " " << theta2 << " " << dphi << " " << std::endl;
-	if (angle_diff1<10 ||
-	    fabs(theta1)<5 && fabs(theta2)<5 && fabs(theta1+theta2)<2.5 && dphi <36){
+	if (angle_diff1<angle_cut ||
+	    (fabs(theta1)<5 && fabs(theta2)<5 && fabs(theta1+theta2)<2.5 && dphi <30 && flag_para_track)){
 	  return true;
 	}
 	dir1 = cluster1->calc_dir(mcell2_center,mcell1_center,30*units::cm);
-	dir2 = cluster2->calc_dir(mcell2_center,mcell2_center,30*units::cm);
+	dir2 = cluster2->calc_PCA_dir(mcell2_center,30*units::cm);
 	angle_diff1 = (3.1415926-dir1.Angle(dir2))/3.1415926*180.;
 	dir1_rot.SetXYZ(dir1.Y(), dir1.Z(), dir1.X());
 	dir2_rot.SetXYZ(dir2.Y(), dir2.Z(), dir2.X());
@@ -147,8 +159,8 @@ bool WireCell2dToy::Clustering_jump_gap_cosmics(WireCell::PR3DCluster *cluster1,
 	theta2 = (dir2_rot.Theta()-3.1415926/2.)/3.1415926*180.;
 	dphi = fabs(3.1415926 - fabs(dir1_rot.Phi()-dir2_rot.Phi()))/3.1415926*180.;
 	//std::cout << cluster1->get_cluster_id() << " " << cluster2->get_cluster_id() << " " << angle_diff1 << " " << theta1 << " " << theta2 << " " << dphi << std::endl;
-	if (angle_diff1<10 ||
-	    fabs(theta1)<5 && fabs(theta2)<5 && fabs(theta1+theta2)<2.5 && dphi <36){
+	if (angle_diff1<angle_cut ||
+	    (fabs(theta1)<5 && fabs(theta2)<5 && fabs(theta1+theta2)<2.5 && dphi <30&&flag_para_track)){
 	  return true;
 	}
       }
