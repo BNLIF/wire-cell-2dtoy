@@ -199,7 +199,6 @@ void WireCell2dToy::Clustering_live_dead(WireCell::PR3DClusterSelection& live_cl
 	   dead_live_mcells_mapping[dead_clusters.at(j)].push_back(mcells);
 	 }
        }
-	   
        // if (mcells.size()>0)
        // 	 std::cout << mcells.size() << " " <<
        // 	   live_clusters.at(i)->get_cluster_id() << " "
@@ -214,7 +213,6 @@ void WireCell2dToy::Clustering_live_dead(WireCell::PR3DClusterSelection& live_cl
   std::set<std::pair<PR3DCluster*, PR3DCluster*>> tested_pairs;
   std::set<std::pair<PR3DCluster*, PR3DCluster*>> to_be_merged_pairs;
 
-  
   
   for (auto it = dead_live_cluster_mapping.begin(); it!= dead_live_cluster_mapping.end(); it++){
     PR3DCluster* the_dead_cluster = (*it).first;
@@ -232,84 +230,85 @@ void WireCell2dToy::Clustering_live_dead(WireCell::PR3DClusterSelection& live_cl
       
       for (size_t i=0; i!= connected_live_clusters.size(); i++){
         PR3DCluster* cluster_1 = connected_live_clusters.at(i);
-	//	std::cout << cluster_1->get_cluster_id() << " ";
 	SMGCSelection mcells_1 = connected_live_mcells.at(i);
 	for (size_t j=i+1;j<connected_live_clusters.size(); j++){
 	  PR3DCluster* cluster_2 = connected_live_clusters.at(j);
-	  SMGCSelection mcells_2 = connected_live_mcells.at(j);
-
+	  SMGCSelection mcells_2 = connected_live_mcells.at(j);	  
 	  if (tested_pairs.find(std::make_pair(cluster_1,cluster_2))==tested_pairs.end()){
 	    cluster_1->Create_point_cloud();
 	    cluster_2->Create_point_cloud();
-	    //std::cout << cluster_1->get_cluster_id() << " " << cluster_2->get_cluster_id() << std::endl;
+
 	    tested_pairs.insert(std::make_pair(cluster_1,cluster_2));
 	    tested_pairs.insert(std::make_pair(cluster_2,cluster_1));
 	    // starting the test ... 
 
 	    bool flag_merge = false;
-	    for (auto it1 = mcells_1.begin(); it1!= mcells_1.end(); it1++){
-	      SlimMergeGeomCell* mcell_1 = (*it1);
-	      Point mcell1_center = mcell_1->center();
-	      // double theta, phi;
-	      // std::pair<double,double> angles_1 = cluster_1->HoughTrans(mcell1_center,30*units::cm);
-	      // theta = 3.1415926 - angles_1.first;
-	      // phi = 3.1415926 + angles_1.second;
-	      TVector3 dir1 = cluster_1->calc_dir(mcell1_center,mcell1_center,30*units::cm);
-	      for (auto it2 = mcells_2.begin(); it2!=mcells_2.end(); it2++){
-		SlimMergeGeomCell* mcell_2 = (*it2);
-		Point mcell2_center = mcell_2->center();
-		TVector3 dir2 = cluster_2->calc_dir(mcell1_center,mcell2_center,30*units::cm);
-		double angle_diff = (3.1415926-dir1.Angle(dir2))/3.1415926*180.;
-		double dis = sqrt(pow(mcell1_center.x-mcell2_center.x,2)
-				  +pow(mcell1_center.y-mcell2_center.y,2)
-				  +pow(mcell1_center.z-mcell2_center.z,2));
-		// if (angle_diff < 30)
-		//	std::cout << "Xin1: " << cluster_1->get_cluster_id() << " " << cluster_2->get_cluster_id() << " " << angle_diff << " " << dis/units::cm << " " << mcells_1.size() << " " << mcells_2.size() << std::endl;
-		if (dis <= 3*units::cm && angle_diff <= 60 ||
-		      dis <= 10*units::cm && angle_diff <=20 ||
-		    angle_diff<10  ||
-		    mcells_1.size()==1 && mcells_2.size()==1 && dis < 15*units::cm){
-		  flag_merge = true;
-		  break;
-		}
-		// std::cout << mcell1_center.x/units::cm << " " << mcell1_center.y/units::cm << " " << mcell1_center.z/units::cm << " " << mcell2_center.x/units::cm << " " << mcell2_center.y/units::cm << " " << mcell2_center.z/units::cm << std::endl;
-		// if (cluster_1->get_cluster_id()==5 && cluster_2->get_cluster_id()==21)
-		//   std::cout << sqrt(pow(mcell2_center.x - mcell1_center.x,2)+pow(mcell2_center.y - mcell1_center.y,2)+pow(mcell2_center.z - mcell1_center.z,2)) << " " << (mcell2_center.x - mcell1_center.x)/sqrt(pow(mcell2_center.x - mcell1_center.x,2)+pow(mcell2_center.y - mcell1_center.y,2)+pow(mcell2_center.z - mcell1_center.z,2)) << " " << (mcell2_center.y - mcell1_center.y)/sqrt(pow(mcell2_center.x - mcell1_center.x,2)+pow(mcell2_center.y - mcell1_center.y,2)+pow(mcell2_center.z - mcell1_center.z,2)) << " " << (mcell2_center.z - mcell1_center.z)/sqrt(pow(mcell2_center.x - mcell1_center.x,2)+pow(mcell2_center.y - mcell1_center.y,2)+pow(mcell2_center.z - mcell1_center.z,2))  << " " << sin(theta)*cos(phi) << " " << sin(theta)*sin(phi) << " " << cos(theta) << std::endl;
-		// if (WireCell2dToy::IsCrossing(mcell1_center,theta,phi,mcell_2,gds)){
-		//   flag_merge = true;
-		//   break;
-		// }
-	      }
-	      if (flag_merge) break;
+	    
+	    // pick any point and merged cell in cluster1,
+	    SlimMergeGeomCell *prev_mcell1 = 0;
+	    SlimMergeGeomCell *prev_mcell2 = 0;
+	    SlimMergeGeomCell *mcell1 = mcells_1.at(0);
+	    Point p1 = mcell1->center();
+	    SlimMergeGeomCell *mcell2=0;
+	    Point p2;
+	    
+	    while(mcell1!=prev_mcell1 || mcell2!=prev_mcell2){
+	      prev_mcell1 = mcell1;
+	      prev_mcell2 = mcell2;
+	      
+	      // find the closest point and merged cell in cluster2
+	      std::pair<SlimMergeGeomCell*,Point> temp_results = cluster_2->get_closest_point_mcell(p1);
+	      p2 = temp_results.second;
+	      mcell2 = temp_results.first;
+	      // find the closest point and merged cell in cluster1
+	      temp_results = cluster_1->get_closest_point_mcell(p2);
+	      p1 = temp_results.second;
+	      mcell1 = temp_results.first;
+	      //  std::cout << mcell1 << " " << mcell2 << " " << sqrt(pow(p1.x-p2.x,2)+pow(p1.y-p2.y,2)+pow(p1.z-p2.z,2))/units::cm<< std::endl;
+	    }
+
+	    Point mcell1_center = cluster_1->calc_ave_pos(p1,5*units::cm);
+	    double theta, phi;
+	    std::pair<double,double> angles_1 = cluster_1->HoughTrans(mcell1_center,30*units::cm);
+	    theta = angles_1.first;
+	    phi = angles_1.second;
+	    TVector3 dir1(sin(theta)*cos(phi),sin(theta)*sin(phi),cos(theta)); 
+	     
+	    Point mcell2_center = cluster_2->calc_ave_pos(p2,5*units::cm);
+	    TVector3 dir2 = cluster_2->calc_dir(mcell1_center,mcell2_center,30*units::cm);
+	    double angle_diff = (3.1415926-dir1.Angle(dir2))/3.1415926*180.;
+	    double dis = sqrt(pow(p1.x-p2.x,2)
+			      +pow(p1.y-p2.y,2)
+			      +pow(p1.z-p2.z,2));
+	    // if (angle_diff < 30)
+	    //  std::cout << "Xin1: " << cluster_1->get_cluster_id() << " " << cluster_2->get_cluster_id() << " " << angle_diff << " " << dis/units::cm << " " << mcells_1.size() << " " << mcells_2.size() << std::endl;
+	    if (dis <= 3*units::cm && angle_diff <= 45 
+		|| dis <= 10*units::cm && angle_diff <=15 
+		|| angle_diff<5 
+		//  || mcells_1.size()==1 && mcells_2.size()==1 && dis < 15*units::cm
+		){
+	      flag_merge = true;
 	    }
 
 	    if (!flag_merge){
-	      for (auto it1 = mcells_2.begin(); it1!= mcells_2.end(); it1++){
-		SlimMergeGeomCell* mcell_1 = (*it1);
-		Point mcell1_center = mcell_1->center();
-		//double theta, phi;
-		TVector3 dir1 = cluster_1->calc_dir(mcell1_center,mcell1_center,30*units::cm);
-		for (auto it2 = mcells_1.begin(); it2!=mcells_1.end(); it2++){
-		  SlimMergeGeomCell* mcell_2 = (*it2);
-		  Point mcell2_center = mcell_2->center();
-		  TVector3 dir2 = cluster_2->calc_dir(mcell1_center,mcell2_center,30*units::cm);
-		  double angle_diff = (3.1415926-dir1.Angle(dir2))/3.1415926*180.;
-		  double dis = sqrt(pow(mcell1_center.x-mcell2_center.x,2)
-				    +pow(mcell1_center.y-mcell2_center.y,2)
-				    +pow(mcell1_center.z-mcell2_center.z,2));
-		  //  std::cout << "Xin2: " << cluster_1->get_cluster_id() << " " << cluster_2->get_cluster_id() << " " << angle_diff << " " << dis/units::cm << " " << mcells_1.size() << " " << mcells_2.size() << std::endl;
-		  if (dis <= 3*units::cm && angle_diff <= 60 ||
-		      dis <= 10*units::cm && angle_diff <=20 ||
-		      angle_diff<10  ||
-		      mcells_1.size()==1 && mcells_2.size()==1 && dis < 15*units::cm ){
-		    flag_merge = true;
-		    break;
-		  }
-		  //		  if (angle_diff < 30)
-		  // std::cout << "Xin: " << angle_diff << " " << dis/units::cm << std::endl;
-		  
-		}
-		if (flag_merge) break;
+	      angles_1 = cluster_2->HoughTrans(mcell2_center,30*units::cm);
+	      theta = angles_1.first;
+	      phi = angles_1.second;
+	      dir1.SetXYZ(sin(theta)*cos(phi),sin(theta)*sin(phi),cos(theta)); 
+	     
+	      dir2 = cluster_1->calc_dir(mcell2_center,mcell1_center,30*units::cm);
+	      angle_diff = (3.1415926-dir1.Angle(dir2))/3.1415926*180.;
+	      dis = sqrt(pow(p1.x-p2.x,2)
+			 +pow(p1.y-p2.y,2)
+			 +pow(p1.z-p2.z,2));
+	      // if (angle_diff < 30)
+	      //std::cout << "Xin2: " << cluster_1->get_cluster_id() << " " << cluster_2->get_cluster_id() << " " << angle_diff << " " << dis/units::cm << " " << mcells_1.size() << " " << mcells_2.size() << std::endl;
+	      if (dis <= 3*units::cm && angle_diff <= 45 
+		  || dis <= 10*units::cm && angle_diff <=15 
+		  || angle_diff<5  
+		  //  || mcells_1.size()==1 && mcells_2.size()==1 && dis < 15*units::cm
+		  ){
+		flag_merge = true;
 	      }
 	    }
 	    
