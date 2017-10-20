@@ -10,29 +10,50 @@ void WireCell2dToy::Clustering_jump_gap_cosmics(WireCell::PR3DClusterSelection& 
     for (size_t j=i+1;j<live_clusters.size();j++){
       PR3DCluster* cluster_2 = live_clusters.at(j);
       //std::cout << cluster_1->get_cluster_id() << " " << cluster_2->get_cluster_id() << std::endl;
-      SMGCSelection mcells = WireCell2dToy::Get_Closest_MCells_Clusters(cluster_1,cluster_2,dis);
-      if (mcells.size()==2){
+      PointVector points = WireCell2dToy::Get_Closest_MCells_Clusters(cluster_1,cluster_2,dis);
+      if (points.size()==2){
 
-	SlimMergeGeomCell* mcell_1 = mcells.at(0);
-	Point mcell1_center = mcell_1->center();
-	SlimMergeGeomCell* mcell_2 = mcells.at(1);
-	Point mcell2_center = mcell_2->center();
+	//	SlimMergeGeomCell* mcell_1 = mcells.at(0);
+	Point mcell1_center = points.at(0);
+	//SlimMergeGeomCell* mcell_2 = mcells.at(1);
+	Point mcell2_center = points.at(1);
 	
 	TVector3 dir1 = cluster_1->calc_dir(mcell1_center,mcell1_center,30*units::cm);
 	TVector3 dir2 = cluster_2->calc_dir(mcell1_center,mcell2_center,30*units::cm);
+
+	TVector3 dir1_rot(dir1.Y(), dir1.Z(), dir1.X());
+	TVector3 dir2_rot(dir2.Y(), dir2.Z(), dir2.X());
+	
 	double angle_diff1 = (3.1415926-dir1.Angle(dir2))/3.1415926*180.;
-	double angle_diff2=180;
-	if (angle_diff1<15){
+	double theta1 = (dir1_rot.Theta()-3.1415926/2.)/3.1415926*180.;
+	double theta2 = (dir2_rot.Theta()-3.1415926/2.)/3.1415926*180.;
+	double dphi = fabs(3.1415926 - fabs(dir1_rot.Phi()-dir2_rot.Phi()))/3.1415926*180.;
+	
+	//	std::cout << cluster_1->get_cluster_id() << " " << cluster_2->get_cluster_id() << " " << angle_diff1 << " " << theta1 << " " << theta2 << " " << dphi << std::endl;
+	
+	  
+	
+	if (angle_diff1<10 ||
+	    fabs(theta1)<5 && fabs(theta2)<5 && fabs(theta1+theta2)<2.5 && dphi <36){
 	  to_be_merged_pairs.insert(std::make_pair(cluster_1,cluster_2));
 	}else{
 	  dir1 = cluster_1->calc_dir(mcell2_center,mcell1_center,30*units::cm);
 	  dir2 = cluster_2->calc_dir(mcell2_center,mcell2_center,30*units::cm);
-	  angle_diff2 = (3.1415926-dir1.Angle(dir2))/3.1415926*180.;
-	  if (angle_diff2 < 15){
+	  angle_diff1 = (3.1415926-dir1.Angle(dir2))/3.1415926*180.;
+	  dir1_rot.SetXYZ(dir1.Y(), dir1.Z(), dir1.X());
+	  dir2_rot.SetXYZ(dir2.Y(), dir2.Z(), dir2.X());
+	  theta1 = (dir1_rot.Theta()-3.1415926/2.)/3.1415926*180.;
+	  theta2 = (dir2_rot.Theta()-3.1415926/2.)/3.1415926*180.;
+	  dphi = fabs(3.1415926 - fabs(dir1_rot.Phi()-dir2_rot.Phi()))/3.1415926*180.;
+	  // std::cout << cluster_1->get_cluster_id() << " " << cluster_2->get_cluster_id() << " " << angle_diff1 << " " << theta1 << " " << theta2 << " " << dphi << std::endl;
+	  if (angle_diff1<10 ||
+	      fabs(theta1)<5 && fabs(theta2)<5 && fabs(theta1+theta2)<2.5 && dphi <36){
 	    to_be_merged_pairs.insert(std::make_pair(cluster_1,cluster_2));
 	  }
 	}
-	std::cout << cluster_1->get_cluster_id() << " " << cluster_2->get_cluster_id() << " " << cluster_1->get_mcells().size() << " " << cluster_2->get_mcells().size() << " " << angle_diff1 << " " << angle_diff2 << std::endl;
+	
+	//	std::cout << cluster_1->get_cluster_id() << " " << cluster_2->get_cluster_id() << " " << angle_diff1 << " " << theta1 << " " << theta2 << " " << dphi << std::endl;
+	// std::cout << cluster_1->get_cluster_id() << " " << cluster_2->get_cluster_id() << " " << cluster_1->get_mcells().size() << " " << cluster_2->get_mcells().size() << " " << angle_diff1 << " " << angle1 << " " << angle2 << " " << angle_diff_y_z << " " <<angle_diff2 << std::endl;
       }
     }
   }
@@ -100,7 +121,7 @@ void WireCell2dToy::Clustering_jump_gap_cosmics(WireCell::PR3DClusterSelection& 
   
 }
 
-SMGCSelection WireCell2dToy::Get_Closest_MCells_Clusters(WireCell::PR3DCluster *cluster1, WireCell::PR3DCluster *cluster2, double dis){
+PointVector WireCell2dToy::Get_Closest_MCells_Clusters(WireCell::PR3DCluster *cluster1, WireCell::PR3DCluster *cluster2, double dis){
   cluster1->Create_point_cloud();
   cluster2->Create_point_cloud();
   
@@ -127,14 +148,16 @@ SMGCSelection WireCell2dToy::Get_Closest_MCells_Clusters(WireCell::PR3DCluster *
     
     //  std::cout << mcell1 << " " << mcell2 << " " << sqrt(pow(p1.x-p2.x,2)+pow(p1.y-p2.y,2)+pow(p1.z-p2.z,2))/units::cm<< std::endl;
   }
-  SMGCSelection mcells;
+  PointVector points;
   //std::cout << cluster1->get_cluster_id() << " " << cluster2->get_cluster_id() << " " << sqrt(pow(p1.x-p2.x,2)+pow(p1.y-p2.y,2)+pow(p1.z-p2.z,2))/units::cm<< std::endl;
   
   if (sqrt(pow(p1.x-p2.x,2)+pow(p1.y-p2.y,2)+pow(p1.z-p2.z,2)) < dis){
-    mcells.push_back(mcell1);
-    mcells.push_back(mcell2);
+    // points.push_back(mcell1->center());
+    // points.push_back(mcell2->center());
+    points.push_back(cluster1->calc_ave_pos(p1,5*units::cm));
+    points.push_back(cluster2->calc_ave_pos(p2,5*units::cm));
   }
-  return mcells;
+  return points;
   
 }
 
