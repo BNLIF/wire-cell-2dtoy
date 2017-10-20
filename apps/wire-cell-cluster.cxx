@@ -273,7 +273,7 @@ int main(int argc, char* argv[])
    
    cerr << em("Clustering live and dead clusters") << std::endl;
 
-   WireCell2dToy::Clustering_jump_gap_cosmics(live_clusters, 1*units::cm);
+   WireCell2dToy::Clustering_jump_gap_cosmics(live_clusters, 6*units::cm);
    
    cerr << em("Clustering to jump gap in cosmics") << std::endl;
    
