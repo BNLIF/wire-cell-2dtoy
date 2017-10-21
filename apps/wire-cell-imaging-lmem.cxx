@@ -137,11 +137,11 @@ int main(int argc, char* argv[])
   //   cout << "Enable Two Plane Reconstruction " << endl; 
   
   ExecMon em("starting");
-  cerr << em("load geometry") << endl;
+  cout << em("load geometry") << endl;
 
   WireCellSst::GeomDataSource gds(argv[1]);
   std::vector<double> ex = gds.extent();
-  cerr << "Extent: "
+  cout << "Extent: "
        << " x:" << ex[0]/units::mm << " mm"
        << " y:" << ex[1]/units::m << " m"
        << " z:" << ex[2]/units::m << " m"
@@ -204,7 +204,7 @@ int main(int argc, char* argv[])
   const char* root_file = argv[2];  
   int run_no, subrun_no, event_no;
   
-  cerr << em("load data") << endl;
+  cout << em("load data") << endl;
 
   // load Trun
   TFile *file1 = new TFile(root_file);
@@ -374,7 +374,7 @@ int main(int argc, char* argv[])
   //   std::cout << group.at(i).second << " " << group1.at(i).second << " " << group2.at(i).second << std::endl;
   // }
   
-  cerr << em("begin tiling") << endl;
+  cout << em("begin tiling") << endl;
 
   
   int ncount = 0;
@@ -478,7 +478,7 @@ int main(int argc, char* argv[])
     l1sp.AddWires(i,wires);
   }
 
-  cerr << em("finish initial tiling") << endl;
+  cout << em("finish initial tiling") << endl;
 
  
   
@@ -526,7 +526,7 @@ int main(int argc, char* argv[])
     }
   }
 
-  cerr << em("finish L1SP and retiling") << endl;
+  cout << em("finish L1SP and retiling") << endl;
   
   for (int i=start_num;i!=end_num+1;i++){
   
@@ -793,7 +793,7 @@ int main(int argc, char* argv[])
 
  
   
-  cerr << em("finish initial clustering") << endl;
+  cout << em("finish initial clustering") << endl;
 
   //return 0;
 
@@ -1239,7 +1239,7 @@ int main(int argc, char* argv[])
 	    << nmcell_before << " " << nmcell_after << " "
 	    << std::endl;
   
-  cerr << em("finish 1st round of deghosting") << endl;
+  cout << em("finish 1st round of deghosting") << endl;
   
   
   for (int i=start_num;i!=end_num+1;i++){
@@ -1274,7 +1274,7 @@ int main(int argc, char* argv[])
     }
     //Twc->Fill();
   }
-  // cerr << em("finish 1st round of solving") << endl;
+  // cout << em("finish 1st round of solving") << endl;
 
   // Int_t nc_mcells = 0;
   // for (int i=start_num; i!=end_num+1;i++){
@@ -1434,7 +1434,7 @@ int main(int argc, char* argv[])
   //   }
   // }
   // std::cout << nc_mcells << std::endl;
-  cerr << em("finish 2nd round of solving with connectivities") << endl;
+  cout << em("finish 2nd round of solving with connectivities") << endl;
 
   
   // delete clusters here ... 
@@ -2108,7 +2108,7 @@ int main(int argc, char* argv[])
   	    << nmcell_before << " " << nmcell_after << " "
   	    << std::endl;
   
-  cerr << em("finish 2nd round of clustering and deghosting") << std::endl;
+  cout << em("finish 2nd round of clustering and deghosting") << std::endl;
 
 
    for (int i=start_num;i!=end_num+1;i++){
@@ -2209,7 +2209,7 @@ int main(int argc, char* argv[])
      }
    }
    
-   cerr << em("finish the 2nd round of solving") << std::endl;
+   cout << em("finish the 2nd round of solving") << std::endl;
    
    
    nmcell_before = 0;
@@ -2602,7 +2602,7 @@ int main(int argc, char* argv[])
     
 
   
-  cerr << em("finish the local deghosting ... ") << std::endl;
+  cout << em("finish the local deghosting ... ") << std::endl;
 
    // try to group the dead cells ...
   for (int i=start_num;i!=end_num+1;i++){
@@ -2669,7 +2669,7 @@ int main(int argc, char* argv[])
   // }
   // std::cout << "Done ... " << std::endl;
   // end to group the dead cells ... 
-  cerr << em("finish cluster dead region ... ") << std::endl;
+  cout << em("finish cluster dead region ... ") << std::endl;
 
   // for (auto it = cluster_set.begin();it!=cluster_set.end();it++){
   //   for (auto it1 = dead_cluster_set.begin();it1!=dead_cluster_set.end();it1++){
@@ -2678,7 +2678,7 @@ int main(int argc, char* argv[])
   // 	std::cout << (*it)->get_id() << " " << (*it)->get_allcell().size() << " " << (*it1)->get_id() << " " << (*it1)->get_mcells().size() << " " << mcells.size() << std::endl;
   //   }
   // }
-  // cerr << em("form map between dead and live clusters ... ") << std::endl;
+  // cout << em("form map between dead and live clusters ... ") << std::endl;
   
   if (save_file==1){
     Double_t x_save, y_save, z_save;
