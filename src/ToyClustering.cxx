@@ -66,7 +66,7 @@ void WireCell2dToy::Clustering_jump_gap_cosmics(WireCell::PR3DClusterSelection& 
     live_clusters.push_back(ncluster);
     for (auto it1 = clusters.begin(); it1!=clusters.end(); it1++){
       PR3DCluster *ocluster = *(it1);
-      std::cout << ocluster->get_cluster_id() << " ";
+      // std::cout << ocluster->get_cluster_id() << " ";
       SMGCSelection& mcells = ocluster->get_mcells();
       for (auto it2 = mcells.begin(); it2!=mcells.end(); it2++){
   	SlimMergeGeomCell *mcell = (*it2);
@@ -77,7 +77,7 @@ void WireCell2dToy::Clustering_jump_gap_cosmics(WireCell::PR3DClusterSelection& 
       live_clusters.erase(find(live_clusters.begin(), live_clusters.end(), ocluster));
       delete ocluster;
     }
-    std::cout << std::endl;
+    //std::cout << std::endl;
   }
 
   
