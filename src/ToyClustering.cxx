@@ -197,14 +197,10 @@ bool WireCell2dToy::Clustering_jump_gap_cosmics(WireCell::PR3DCluster *cluster1,
     double para_angle_cut = 5.;
     double para_angle_cut_1 = 5;
     double point_angle_cut = 15;
-    // if (dis < 1*units::cm){
-    //   flag_dir = true;
-    //   angle_cut = 45;
-    // // }else if (dis < 2.5*units::cm){
-    // //   flag_dir = true;
-    // //   angle_cut = 20;
-    // }else
-    if (dis < 5*units::cm ){
+    if (dis < 2.5*units::cm){
+      flag_dir = true;
+      angle_cut = 15;
+    }else if (dis < 7.5*units::cm ){
       // normal case ..., allow for 3 cm gap, and 10 degree cut ...
       flag_dir = true;
       angle_cut = 10;
@@ -219,14 +215,13 @@ bool WireCell2dToy::Clustering_jump_gap_cosmics(WireCell::PR3DCluster *cluster1,
     if ((flag_prolonged_U||flag_prolonged_V||flag_perp)&&dis<45*units::cm){
       // normal case ..., allow for 45 cm gap
       flag_dir = true;
-      // if (dis < 1*units::cm){
-      //  	flag_dir = true;
-      //  	angle_cut = 45;
+      if (dis < 2.5*units::cm){
+	flag_dir = true;
+	angle_cut = 15;
       // // }else if (dis < 2.5*units::cm){
       // // 	flag_dir = true;
       // // 	angle_cut = 20;
-      // }else
-      if (dis < 5*units::cm){
+      }else if (dis < 7.5*units::cm){
 	angle_cut = 10;
       }else if (dis < 15*units::cm){
 	angle_cut = 7.5;
@@ -238,14 +233,13 @@ bool WireCell2dToy::Clustering_jump_gap_cosmics(WireCell::PR3DCluster *cluster1,
     
     if (flag_para){
       flag_dir = true;
-      // if (dis < 1*units::cm){
-      //  	flag_dir = true;
-      //  	angle_cut = 45;
+      if (dis < 2.5*units::cm){
+	flag_dir = true;
+	angle_cut = 15;
       // // }else if (dis < 2.5*units::cm){
       // // 	flag_dir = true;
       // // 	angle_cut = 20;
-      // }else
-      if (dis < 5*units::cm){
+      }else if (dis < 7.5*units::cm){
 	angle_cut = 10;
       }else if (dis < 15*units::cm){
 	angle_cut = 7.5;
@@ -266,9 +260,9 @@ bool WireCell2dToy::Clustering_jump_gap_cosmics(WireCell::PR3DCluster *cluster1,
       {
 	// also with a complicated structures ...
 	TVector3 dir1 = cluster1->VHoughTrans(cluster1_ave_pos,30*units::cm); // cluster 1 direction
-	TVector3 dir2 = cluster2->calc_dir(cluster1_ave_pos,cluster2_ave_pos,30*units::cm); // dir 2 --> 1
-	TVector3 dir2_1(cluster2_ave_pos.x-cluster1_ave_pos.x,cluster2_ave_pos.y-cluster1_ave_pos.y,cluster2_ave_pos.z-cluster1_ave_pos.z);
-	TVector3 dir2_2(mcell2_center.x - cluster1_ave_pos.x, mcell2_center.y - cluster1_ave_pos.y, mcell2_center.z - cluster1_ave_pos.z);
+	TVector3 dir2 = cluster2->VHoughTrans(cluster1_ave_pos,30*units::cm);// 
+	TVector3 dir2_1 = cluster2->calc_dir(cluster1_ave_pos,cluster2_ave_pos,30*units::cm); // dir 2 --> 1
+	TVector3 dir2_2 = cluster2->calc_dir(cluster1_ave_pos,mcell2_center,10*units::cm); // dir 2 --> 1
 	
 	TVector3 dir1_rot(dir1.Y(), dir1.Z(), dir1.X());
 	TVector3 dir2_rot(dir2.Y(), dir2.Z(), dir2.X());
@@ -281,10 +275,10 @@ bool WireCell2dToy::Clustering_jump_gap_cosmics(WireCell::PR3DCluster *cluster1,
 	double theta2 = (dir2_rot.Theta()-3.1415926/2.)/3.1415926*180.;
 	double dphi = fabs(3.1415926 - fabs(dir1_rot.Phi()-dir2_rot.Phi()))/3.1415926*180.;
 
-	// if (cluster1->get_cluster_id()==44|| cluster1->get_cluster_id()==104) 
+	// if (cluster1->get_cluster_id()==3|| cluster1->get_cluster_id()==27) 
 	//   std::cout << cluster1->get_cluster_id() << " " << cluster2->get_cluster_id() << " " << angle_diff1 << " " << angle_diff1_1 << " " << angle_diff1_2 << " " << theta1 << " " << theta2 << " " << dphi << " " << dis/units::cm << " " << cluster1->get_mcells().size() << " " << cluster2->get_mcells().size() << std::endl;
 	
-	if (angle_diff1 < angle_cut
+	if (angle_diff1 < angle_cut || angle_diff1_1 < angle_cut || angle_diff1_2 <angle_cut
 	    || (flag_para && fabs(theta1) < para_angle_cut_1 && fabs(theta2) < para_angle_cut_1 && fabs(theta1+theta2) < para_angle_cut_1/2. && dphi < para_angle_cut)
 	    //   || ((angle_diff1_1<point_angle_cut || angle_diff1_2 < point_angle_cut ) && dis < 3*units::cm)
 	    ){
@@ -294,9 +288,9 @@ bool WireCell2dToy::Clustering_jump_gap_cosmics(WireCell::PR3DCluster *cluster1,
       // reverse the test ...
       {
 	TVector3 dir1 = cluster2->VHoughTrans(cluster2_ave_pos,30*units::cm); // cluster 1 direction
-	TVector3 dir2 = cluster1->calc_dir(cluster2_ave_pos,cluster1_ave_pos,30*units::cm); // dir 2 --> 1
-	TVector3 dir2_1(cluster1_ave_pos.x-cluster2_ave_pos.x,cluster1_ave_pos.y-cluster2_ave_pos.y,cluster1_ave_pos.z-cluster2_ave_pos.z);
-	TVector3 dir2_2(mcell1_center.x - cluster2_ave_pos.x, mcell1_center.y - cluster2_ave_pos.y, mcell1_center.z - cluster2_ave_pos.z);
+	TVector3 dir2 = cluster1->VHoughTrans(cluster2_ave_pos,30*units::cm);//
+	TVector3 dir2_1 =  cluster1->calc_dir(cluster2_ave_pos,cluster1_ave_pos,30*units::cm); // dir 2 --> 1
+	TVector3 dir2_2 = cluster1->calc_dir(cluster2_ave_pos,mcell1_center,10*units::cm); // dir 2 --> 1
 	
 	TVector3 dir1_rot(dir1.Y(), dir1.Z(), dir1.X());
 	TVector3 dir2_rot(dir2.Y(), dir2.Z(), dir2.X());
@@ -309,11 +303,11 @@ bool WireCell2dToy::Clustering_jump_gap_cosmics(WireCell::PR3DCluster *cluster1,
 	double theta2 = (dir2_rot.Theta()-3.1415926/2.)/3.1415926*180.;
 	double dphi = fabs(3.1415926 - fabs(dir1_rot.Phi()-dir2_rot.Phi()))/3.1415926*180.;
 
-	// if (cluster1->get_cluster_id()==44 || cluster1->get_cluster_id()==104) 
-	//   std::cout << cluster1->get_cluster_id() << " " << cluster2->get_cluster_id() << " " << angle_diff1 << " " << angle_diff1_1 << " " << angle_diff1_2 << " " << theta1 << " " << theta2 << " " << dphi << " " << dis/units::cm << " " << cluster1->get_mcells().size() << " " << cluster2->get_mcells().size() << std::endl;
+	// if (cluster1->get_cluster_id()==3 || cluster1->get_cluster_id()==27 ) 
+	//   std::cout << cluster1->get_cluster_id() << " " << cluster2->get_cluster_id() << " " << angle_diff1 << " " << angle_diff1_1 << " " << angle_diff1_2 << " " << theta1 << " " << theta2 << " " << dphi << " " << dis/units::cm << " " << cluster1->get_mcells().size() << " " << cluster2->get_mcells().size() << std::endl;q
 	
 	
-	if (angle_diff1 < angle_cut
+	if (angle_diff1 < angle_cut || angle_diff1_1 < angle_cut || angle_diff1_2 < angle_cut
 	    || (flag_para && fabs(theta1) < para_angle_cut_1 && fabs(theta2) < para_angle_cut_1 && fabs(theta1+theta2) < para_angle_cut_1/2. && dphi < para_angle_cut)
 	    //  || ((angle_diff1_1<point_angle_cut || angle_diff1_2 < point_angle_cut) && dis < 3*units::cm)
 	    ){
