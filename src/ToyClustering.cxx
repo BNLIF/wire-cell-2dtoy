@@ -196,11 +196,12 @@ bool WireCell2dToy::Clustering_jump_gap_cosmics(WireCell::PR3DCluster *cluster1,
     double angle_cut=2.5;
     double para_angle_cut = 5.;
     double para_angle_cut_1 = 5;
-    double point_angle_cut = 15;
-    if (dis < 2.5*units::cm){
-      flag_dir = true;
-      angle_cut = 15;
-    }else if (dis < 7.5*units::cm ){
+    //    double point_angle_cut = 15;
+    // if (dis < 2.5*units::cm){
+    //   flag_dir = true;
+    //   angle_cut = 15;
+    // }else
+      if (dis < 5*units::cm ){
       // normal case ..., allow for 3 cm gap, and 10 degree cut ...
       flag_dir = true;
       angle_cut = 10;
@@ -215,13 +216,14 @@ bool WireCell2dToy::Clustering_jump_gap_cosmics(WireCell::PR3DCluster *cluster1,
     if ((flag_prolonged_U||flag_prolonged_V||flag_perp)&&dis<45*units::cm){
       // normal case ..., allow for 45 cm gap
       flag_dir = true;
-      if (dis < 2.5*units::cm){
-	flag_dir = true;
-	angle_cut = 15;
-      // // }else if (dis < 2.5*units::cm){
-      // // 	flag_dir = true;
-      // // 	angle_cut = 20;
-      }else if (dis < 7.5*units::cm){
+      // if (dis < 2.5*units::cm){
+      // 	flag_dir = true;
+      // 	angle_cut = 15;
+      // // // }else if (dis < 2.5*units::cm){
+      // // // 	flag_dir = true;
+      // // // 	angle_cut = 20;
+      // }else
+	if (dis < 5*units::cm){
 	angle_cut = 10;
       }else if (dis < 15*units::cm){
 	angle_cut = 7.5;
@@ -233,13 +235,14 @@ bool WireCell2dToy::Clustering_jump_gap_cosmics(WireCell::PR3DCluster *cluster1,
     
     if (flag_para){
       flag_dir = true;
-      if (dis < 2.5*units::cm){
-	flag_dir = true;
-	angle_cut = 15;
-      // // }else if (dis < 2.5*units::cm){
-      // // 	flag_dir = true;
-      // // 	angle_cut = 20;
-      }else if (dis < 7.5*units::cm){
+      // if (dis < 2.5*units::cm){
+      // 	flag_dir = true;
+      // 	angle_cut = 15;
+      // // // }else if (dis < 2.5*units::cm){
+      // // // 	flag_dir = true;
+      // // // 	angle_cut = 20;
+      // }else
+      if (dis < 5*units::cm){
 	angle_cut = 10;
       }else if (dis < 15*units::cm){
 	angle_cut = 7.5;
