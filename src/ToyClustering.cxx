@@ -260,8 +260,8 @@ bool WireCell2dToy::Clustering_jump_gap_cosmics(WireCell::PR3DCluster *cluster1,
       {
 	// also with a complicated structures ...
 	TVector3 dir1 = cluster1->VHoughTrans(cluster1_ave_pos,30*units::cm); // cluster 1 direction
-	TVector3 dir2 = cluster2->VHoughTrans(cluster1_ave_pos,30*units::cm);// 
-	TVector3 dir2_1 = cluster2->calc_dir(cluster1_ave_pos,cluster2_ave_pos,30*units::cm); // dir 2 --> 1
+	TVector3 dir2 = cluster2->calc_dir(cluster1_ave_pos,cluster2_ave_pos,30*units::cm); // dir 2 --> 1
+	TVector3 dir2_1 = cluster2->VHoughTrans(cluster1_ave_pos,30*units::cm);// 
 	TVector3 dir2_2 = cluster2->calc_dir(cluster1_ave_pos,mcell2_center,10*units::cm); // dir 2 --> 1
 	
 	TVector3 dir1_rot(dir1.Y(), dir1.Z(), dir1.X());
@@ -288,8 +288,8 @@ bool WireCell2dToy::Clustering_jump_gap_cosmics(WireCell::PR3DCluster *cluster1,
       // reverse the test ...
       {
 	TVector3 dir1 = cluster2->VHoughTrans(cluster2_ave_pos,30*units::cm); // cluster 1 direction
-	TVector3 dir2 = cluster1->VHoughTrans(cluster2_ave_pos,30*units::cm);//
-	TVector3 dir2_1 =  cluster1->calc_dir(cluster2_ave_pos,cluster1_ave_pos,30*units::cm); // dir 2 --> 1
+	TVector3 dir2 = cluster1->calc_dir(cluster2_ave_pos,cluster1_ave_pos,30*units::cm); // dir 2 --> 1
+	TVector3 dir2_1 = cluster1->VHoughTrans(cluster2_ave_pos,30*units::cm);//
 	TVector3 dir2_2 = cluster1->calc_dir(cluster2_ave_pos,mcell1_center,10*units::cm); // dir 2 --> 1
 	
 	TVector3 dir1_rot(dir1.Y(), dir1.Z(), dir1.X());
