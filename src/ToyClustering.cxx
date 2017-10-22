@@ -3,86 +3,88 @@
 using namespace WireCell;
 
 void WireCell2dToy::Clustering_jump_gap_cosmics(WireCell::PR3DClusterSelection& live_clusters){
-  std::set<std::pair<PR3DCluster*, PR3DCluster*>> to_be_merged_pairs;
-  
-  for (size_t i=0;i!=live_clusters.size();i++){
-    PR3DCluster* cluster_1 = live_clusters.at(i);
-    for (size_t j=i+1;j<live_clusters.size();j++){
-      PR3DCluster* cluster_2 = live_clusters.at(j);
-      //std::cout << cluster_1->get_cluster_id() << " " << cluster_2->get_cluster_id() << std::endl;
-      if (WireCell2dToy::Clustering_jump_gap_cosmics(cluster_1,cluster_2))
-	to_be_merged_pairs.insert(std::make_pair(cluster_1,cluster_2));
-      
-    }
-  }
-  
-  //to_be_merged_pairs.clear();
-  //std::cout << to_be_merged_pairs.size() << std::endl;
 
-
-    std::vector<std::set<PR3DCluster*>> merge_clusters;
-  for (auto it = to_be_merged_pairs.begin(); it!=to_be_merged_pairs.end(); it++){
-    PR3DCluster *cluster1 = (*it).first;
-    PR3DCluster *cluster2 = (*it).second;
-    //std::cout << cluster1 << " " << cluster2 << " " << cluster1->get_cluster_id() << " " << cluster2->get_cluster_id() << std::endl;
+  for (int kk=0;kk!=1;kk++){
+    std::set<std::pair<PR3DCluster*, PR3DCluster*>> to_be_merged_pairs;
     
-    bool flag_new = true;
-    std::vector<std::set<PR3DCluster*>> temp_set;
-    for (auto it1 = merge_clusters.begin(); it1!=merge_clusters.end(); it1++){
-      std::set<PR3DCluster*>& clusters = (*it1);
-      if (clusters.find(cluster1)!=clusters.end() ||
-	  clusters.find(cluster2)!=clusters.end()){
+    for (size_t i=0;i!=live_clusters.size();i++){
+      PR3DCluster* cluster_1 = live_clusters.at(i);
+      for (size_t j=i+1;j<live_clusters.size();j++){
+	PR3DCluster* cluster_2 = live_clusters.at(j);
+	//std::cout << cluster_1->get_cluster_id() << " " << cluster_2->get_cluster_id() << std::endl;
+	if (WireCell2dToy::Clustering_jump_gap_cosmics(cluster_1,cluster_2))
+	  to_be_merged_pairs.insert(std::make_pair(cluster_1,cluster_2));
+	
+      }
+    }
+    
+    //to_be_merged_pairs.clear();
+    //std::cout << to_be_merged_pairs.size() << std::endl;
+    
+    
+    std::vector<std::set<PR3DCluster*>> merge_clusters;
+    for (auto it = to_be_merged_pairs.begin(); it!=to_be_merged_pairs.end(); it++){
+      PR3DCluster *cluster1 = (*it).first;
+      PR3DCluster *cluster2 = (*it).second;
+      //std::cout << cluster1 << " " << cluster2 << " " << cluster1->get_cluster_id() << " " << cluster2->get_cluster_id() << std::endl;
+      
+      bool flag_new = true;
+      std::vector<std::set<PR3DCluster*>> temp_set;
+      for (auto it1 = merge_clusters.begin(); it1!=merge_clusters.end(); it1++){
+	std::set<PR3DCluster*>& clusters = (*it1);
+	if (clusters.find(cluster1)!=clusters.end() ||
+	    clusters.find(cluster2)!=clusters.end()){
+	  clusters.insert(cluster1);
+	  clusters.insert(cluster2);
+	  flag_new = false;
+	  temp_set.push_back(clusters);
+	  //break;
+	}
+      }
+      if (flag_new){
+	std::set<PR3DCluster*> clusters;
 	clusters.insert(cluster1);
 	clusters.insert(cluster2);
-	flag_new = false;
-	temp_set.push_back(clusters);
-	//break;
+	merge_clusters.push_back(clusters);
       }
-    }
-    if (flag_new){
-      std::set<PR3DCluster*> clusters;
-      clusters.insert(cluster1);
-      clusters.insert(cluster2);
-      merge_clusters.push_back(clusters);
-    }
-    if (temp_set.size()>1){
-      // merge them further ...
-      std::set<PR3DCluster*> clusters;
-      for (size_t i=0;i!=temp_set.size();i++){
-	for (auto it1 = temp_set.at(i).begin(); it1!= temp_set.at(i).end(); it1++){
-	  //std::cout << i << " " << (*it1) << " " << (*it1)->get_cluster_id()  << std::endl;
-	  clusters.insert(*it1);
+      if (temp_set.size()>1){
+	// merge them further ...
+	std::set<PR3DCluster*> clusters;
+	for (size_t i=0;i!=temp_set.size();i++){
+	  for (auto it1 = temp_set.at(i).begin(); it1!= temp_set.at(i).end(); it1++){
+	    //std::cout << i << " " << (*it1) << " " << (*it1)->get_cluster_id()  << std::endl;
+	    clusters.insert(*it1);
+	  }
+	  merge_clusters.erase(find(merge_clusters.begin(),merge_clusters.end(),temp_set.at(i)));
 	}
-	merge_clusters.erase(find(merge_clusters.begin(),merge_clusters.end(),temp_set.at(i)));
+	merge_clusters.push_back(clusters);
       }
-      merge_clusters.push_back(clusters);
     }
-  }
-
-  // merge clusters into new clusters, delete old clusters 
-  for (auto it = merge_clusters.begin(); it!=merge_clusters.end();it++){
-    std::set<PR3DCluster*>& clusters = (*it);
-    PR3DCluster *ncluster = new PR3DCluster((*clusters.begin())->get_cluster_id());
-    live_clusters.push_back(ncluster);
-    for (auto it1 = clusters.begin(); it1!=clusters.end(); it1++){
-      PR3DCluster *ocluster = *(it1);
-      // std::cout << ocluster->get_cluster_id() << " ";
-      SMGCSelection& mcells = ocluster->get_mcells();
-      for (auto it2 = mcells.begin(); it2!=mcells.end(); it2++){
-  	SlimMergeGeomCell *mcell = (*it2);
-  	//std::cout << ocluster->get_cluster_id() << " " << mcell << std::endl;
-  	int time_slice = mcell->GetTimeSlice();
-  	ncluster->AddCell(mcell,time_slice);
+    
+    // merge clusters into new clusters, delete old clusters 
+    for (auto it = merge_clusters.begin(); it!=merge_clusters.end();it++){
+      std::set<PR3DCluster*>& clusters = (*it);
+      PR3DCluster *ncluster = new PR3DCluster((*clusters.begin())->get_cluster_id());
+      live_clusters.push_back(ncluster);
+      for (auto it1 = clusters.begin(); it1!=clusters.end(); it1++){
+	PR3DCluster *ocluster = *(it1);
+	// std::cout << ocluster->get_cluster_id() << " ";
+	SMGCSelection& mcells = ocluster->get_mcells();
+	for (auto it2 = mcells.begin(); it2!=mcells.end(); it2++){
+	  SlimMergeGeomCell *mcell = (*it2);
+	  //std::cout << ocluster->get_cluster_id() << " " << mcell << std::endl;
+	  int time_slice = mcell->GetTimeSlice();
+	  ncluster->AddCell(mcell,time_slice);
+	}
+	live_clusters.erase(find(live_clusters.begin(), live_clusters.end(), ocluster));
+	delete ocluster;
       }
-      live_clusters.erase(find(live_clusters.begin(), live_clusters.end(), ocluster));
-      delete ocluster;
+      //std::cout << std::endl;
     }
-    //std::cout << std::endl;
-  }
-
-  
+    
+  }  
 }
-
+  
 bool WireCell2dToy::Clustering_jump_gap_cosmics(WireCell::PR3DCluster *cluster1, WireCell::PR3DCluster *cluster2){
   cluster1->Create_point_cloud();
   cluster2->Create_point_cloud();
@@ -197,16 +199,17 @@ bool WireCell2dToy::Clustering_jump_gap_cosmics(WireCell::PR3DCluster *cluster1,
     double para_angle_cut = 5.;
     double para_angle_cut_1 = 5;
     //    double point_angle_cut = 15;
-    if (dis < 2.5*units::cm){
-      flag_dir = true;
-      angle_cut = 20;
-    }else if (dis < 5*units::cm ){
+    // if (dis < 2.5*units::cm){
+    //   flag_dir = true;
+    //   angle_cut = 20;
+    // }else 
+	  if (dis < 5*units::cm ){
       // normal case ..., allow for 3 cm gap, and 10 degree cut ...
       flag_dir = true;
-      angle_cut = 15;
+      angle_cut = 10;
     }else if (dis < 15*units::cm){
       flag_dir = true;
-      angle_cut = 10;
+      angle_cut = 7.5;
     }else if (dis < 30*units::cm){
       flag_dir = true;
       angle_cut = 5.0;
@@ -215,16 +218,17 @@ bool WireCell2dToy::Clustering_jump_gap_cosmics(WireCell::PR3DCluster *cluster1,
     if ((flag_prolonged_U||flag_prolonged_V||flag_perp)&&dis<45*units::cm){
       // normal case ..., allow for 45 cm gap
       flag_dir = true;
-      if (dis < 2.5*units::cm){
-      	flag_dir = true;
-      	angle_cut = 20;
-      // // }else if (dis < 2.5*units::cm){
-      // // 	flag_dir = true;
-      // // 	angle_cut = 20;
-      }else if (dis < 5*units::cm){
-	angle_cut = 15;
-      }else if (dis < 15*units::cm){
+      // if (dis < 2.5*units::cm){
+      // 	flag_dir = true;
+      // 	angle_cut = 20;
+      // // // }else if (dis < 2.5*units::cm){
+      // // // 	flag_dir = true;
+      // // // 	angle_cut = 20;
+      // }else
+      if (dis < 5*units::cm){
 	angle_cut = 10;
+      }else if (dis < 15*units::cm){
+	angle_cut = 7.5;
       }else{
 	angle_cut = 5;
       }
@@ -233,16 +237,17 @@ bool WireCell2dToy::Clustering_jump_gap_cosmics(WireCell::PR3DCluster *cluster1,
     
     if (flag_para){
       flag_dir = true;
-      if (dis < 2.5*units::cm){
-      	flag_dir = true;
-      	angle_cut = 20;
-      // // }else if (dis < 2.5*units::cm){
-      // // 	flag_dir = true;
-      // // 	angle_cut = 20;
-      }else if (dis < 5*units::cm){
-	angle_cut = 15;
-      }else if (dis < 15*units::cm){
+      // if (dis < 2.5*units::cm){
+      // 	flag_dir = true;
+      // 	angle_cut = 20;
+      // // // }else if (dis < 2.5*units::cm){
+      // // // 	flag_dir = true;
+      // // // 	angle_cut = 20;
+      // }else
+      if (dis < 5*units::cm){
 	angle_cut = 10;
+      }else if (dis < 15*units::cm){
+	angle_cut = 7.5;
       }else{
 	angle_cut = 5;
       }
@@ -283,7 +288,7 @@ bool WireCell2dToy::Clustering_jump_gap_cosmics(WireCell::PR3DCluster *cluster1,
 	// if (cluster1->get_cluster_id()==142|| cluster2->get_cluster_id()==142) 
 	//   std::cout << cluster1->get_cluster_id() << " " << cluster2->get_cluster_id() << " " << angle_diff1 << " " << angle_diff1_1 << " " << angle_diff1_2 << " " << theta1 << " " << theta2 << " " << dphi << " " << dis/units::cm << " " << cluster1->get_mcells().size() << " " << cluster2->get_mcells().size() << std::endl;
 	
-	if ((angle_diff1 < angle_cut && angle_diff1_1<25 )|| angle_diff1_1 < angle_cut || (angle_diff1_2 <angle_cut && angle_diff1_1<25)
+	if ((angle_diff1 < angle_cut) || angle_diff1_1 < angle_cut || (angle_diff1_2 <angle_cut )
 	    || (flag_para && fabs(theta1) < para_angle_cut_1 && fabs(theta2) < para_angle_cut_1 && fabs(theta1+theta2) < para_angle_cut_1/2. && dphi < para_angle_cut)
 	    //   || ((angle_diff1_1<point_angle_cut || angle_diff1_2 < point_angle_cut ) && dis < 3*units::cm)
 	    ){
@@ -317,7 +322,7 @@ bool WireCell2dToy::Clustering_jump_gap_cosmics(WireCell::PR3DCluster *cluster1,
 	//   std::cout << cluster1->get_cluster_id() << " " << cluster2->get_cluster_id() << " " << angle_diff1 << " " << angle_diff1_1 << " " << angle_diff1_2 << " " << theta1 << " " << theta2 << " " << dphi << " " << dis/units::cm << " " << cluster1->get_mcells().size() << " " << cluster2->get_mcells().size() << std::endl;
 	
 	
-	if ((angle_diff1 < angle_cut && angle_diff1_1<25) || angle_diff1_1 < angle_cut || (angle_diff1_2 < angle_cut && angle_diff1_1<25)
+	if ((angle_diff1 < angle_cut ) || angle_diff1_1 < angle_cut || (angle_diff1_2 < angle_cut )
 	    || (flag_para && fabs(theta1) < para_angle_cut_1 && fabs(theta2) < para_angle_cut_1 && fabs(theta1+theta2) < para_angle_cut_1/2. && dphi < para_angle_cut)
 	    //  || ((angle_diff1_1<point_angle_cut || angle_diff1_2 < point_angle_cut) && dis < 3*units::cm)
 	    ){
@@ -429,12 +434,11 @@ void WireCell2dToy::Clustering_live_dead(WireCell::PR3DClusterSelection& live_cl
 	    }
 
 	    Point mcell1_center = cluster_1->calc_ave_pos(p1,5*units::cm);
-	    
 	    TVector3 dir1 = cluster_1->VHoughTrans(mcell1_center,30*units::cm);
 	    // test reversed direction
-	    TVector3 temp_dir1(mcell1_center.x-p1.x,mcell1_center.y-p1.y,mcell1_center.z-p1.z);
-	    if (temp_dir1.Angle(dir1)>135/180.*3.1415926)
-	      dir1.SetXYZ(-dir1.X(),-dir1.Y(),-dir1.Z());
+	    // TVector3 temp_dir1(mcell1_center.x-p1.x,mcell1_center.y-p1.y,mcell1_center.z-p1.z);
+	    // if (temp_dir1.Angle(dir1)>135/180.*3.1415926)
+	    //   dir1.SetXYZ(-dir1.X(),-dir1.Y(),-dir1.Z());
 	    
 	    Point mcell2_center = cluster_2->calc_ave_pos(p2,5*units::cm);
 	    TVector3 dir2 = cluster_2->calc_dir(mcell1_center,mcell2_center,30*units::cm);
@@ -445,7 +449,7 @@ void WireCell2dToy::Clustering_live_dead(WireCell::PR3DClusterSelection& live_cl
 	    // if (angle_diff < 30)
 	    //std::cout << "Xin1: " << cluster_1->get_cluster_id() << " " << cluster_2->get_cluster_id() << " " << angle_diff << " " << dis/units::cm << " " << mcells_1.size() << " " << mcells_2.size() << " " << dis/units::cm << " " << fabs(p1.x-p2.x)/units::cm<<
 	    // " " << p1.y/units::cm << " " << p1.z/units::cm << " " << p2.y/units::cm << " " << p2.z/units::cm << std::endl;
-	    if ( dis <= 3*units::cm  && angle_diff <= 45 
+	    if ( (dis <= 3*units::cm|| fabs(p1.x-p2.x)<0.5*units::cm)  && angle_diff <= 45 
 		|| dis <= 10*units::cm && angle_diff <=15 
 		|| angle_diff<5 
 		//  || mcells_1.size()==1 && mcells_2.size()==1 && dis < 15*units::cm
@@ -456,9 +460,9 @@ void WireCell2dToy::Clustering_live_dead(WireCell::PR3DClusterSelection& live_cl
 	    if (!flag_merge){
 	      dir1 = cluster_2->VHoughTrans(mcell2_center,30*units::cm);
 	      // test reversed direction
-	      TVector3 temp_dir1(mcell2_center.x-p2.x,mcell2_center.y-p2.y,mcell2_center.z-p2.z);
-	      if (temp_dir1.Angle(dir1)>135/180.*3.1415926)
-		dir1.SetXYZ(-dir1.X(),-dir1.Y(),-dir1.Z());
+	      // TVector3 temp_dir1(mcell2_center.x-p2.x,mcell2_center.y-p2.y,mcell2_center.z-p2.z);
+	      // if (temp_dir1.Angle(dir1)>135/180.*3.1415926)
+	      // 	dir1.SetXYZ(-dir1.X(),-dir1.Y(),-dir1.Z());
 	      
 	     
 	      dir2 = cluster_1->calc_dir(mcell2_center,mcell1_center,30*units::cm);
@@ -468,7 +472,7 @@ void WireCell2dToy::Clustering_live_dead(WireCell::PR3DClusterSelection& live_cl
 			 +pow(p1.z-p2.z,2));
 	      // if (angle_diff < 30)
 	      //std::cout << "Xin2: " << cluster_1->get_cluster_id() << " " << cluster_2->get_cluster_id() << " " << angle_diff << " " << dis/units::cm << " " << mcells_1.size() << " " << mcells_2.size() << " " << dis/units::cm << " " << fabs(p1.x-p2.x)/units::cm << std::endl;
-	      if ( dis <= 3*units::cm  && angle_diff <= 45 
+	      if ( (dis <= 3*units::cm || fabs(p1.x-p2.x)<0.5*units::cm) && angle_diff <= 45 
 		  || dis <= 10*units::cm && angle_diff <=15 
 		  || angle_diff<5  
 		  //  || mcells_1.size()==1 && mcells_2.size()==1 && dis < 15*units::cm
