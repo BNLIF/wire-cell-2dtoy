@@ -435,8 +435,10 @@ void WireCell2dToy::Clustering_live_dead(WireCell::PR3DClusterSelection& live_cl
 			      +pow(p1.y-p2.y,2)
 			      +pow(p1.z-p2.z,2));
 	    // if (angle_diff < 30)
-	    //  std::cout << "Xin1: " << cluster_1->get_cluster_id() << " " << cluster_2->get_cluster_id() << " " << angle_diff << " " << dis/units::cm << " " << mcells_1.size() << " " << mcells_2.size() << std::endl;
-	    if (dis <= 3*units::cm && angle_diff <= 45 
+	    //std::cout << "Xin1: " << cluster_1->get_cluster_id() << " " << cluster_2->get_cluster_id() << " " << angle_diff << " " << dis/units::cm << " " << mcells_1.size() << " " << mcells_2.size() << " " << dis/units::cm << " " << fabs(p1.x-p2.x)/units::cm<<
+	      " " << p1.y/units::cm << " " << p1.z/units::cm << " " << p2.y/units::cm << " " << p2.z/units::cm << std::endl;
+	    if (fabs(p1.x-p2.x)<0.5*units::cm && fabs(180-angle_diff)<15
+ 		|| (dis <= 3*units::cm || fabs(p1.x-p2.x)<=1*units::cm) && angle_diff <= 45 
 		|| dis <= 10*units::cm && angle_diff <=15 
 		|| angle_diff<5 
 		//  || mcells_1.size()==1 && mcells_2.size()==1 && dis < 15*units::cm
@@ -456,8 +458,9 @@ void WireCell2dToy::Clustering_live_dead(WireCell::PR3DClusterSelection& live_cl
 			 +pow(p1.y-p2.y,2)
 			 +pow(p1.z-p2.z,2));
 	      // if (angle_diff < 30)
-	      //std::cout << "Xin2: " << cluster_1->get_cluster_id() << " " << cluster_2->get_cluster_id() << " " << angle_diff << " " << dis/units::cm << " " << mcells_1.size() << " " << mcells_2.size() << std::endl;
-	      if (dis <= 3*units::cm && angle_diff <= 45 
+	      //std::cout << "Xin2: " << cluster_1->get_cluster_id() << " " << cluster_2->get_cluster_id() << " " << angle_diff << " " << dis/units::cm << " " << mcells_1.size() << " " << mcells_2.size() << " " << dis/units::cm << " " << fabs(p1.x-p2.x)/units::cm << std::endl;
+	      if ((fabs(p1.x-p2.x)<0.5*units::cm && fabs(180-angle_diff)<15
+		   || dis <= 3*units::cm|| fabs(p1.x-p2.x)<=1*units::cm) && angle_diff <= 45 
 		  || dis <= 10*units::cm && angle_diff <=15 
 		  || angle_diff<5  
 		  //  || mcells_1.size()==1 && mcells_2.size()==1 && dis < 15*units::cm
@@ -475,6 +478,8 @@ void WireCell2dToy::Clustering_live_dead(WireCell::PR3DClusterSelection& live_cl
       //  std::cout << std::endl;
     }
   }
+  
+  //to_be_merged_pairs.clear();
   
   std::vector<std::set<PR3DCluster*>> merge_clusters;
   for (auto it = to_be_merged_pairs.begin(); it!=to_be_merged_pairs.end(); it++){
