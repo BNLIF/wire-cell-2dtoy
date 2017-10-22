@@ -197,17 +197,16 @@ bool WireCell2dToy::Clustering_jump_gap_cosmics(WireCell::PR3DCluster *cluster1,
     double para_angle_cut = 5.;
     double para_angle_cut_1 = 5;
     //    double point_angle_cut = 15;
-    // if (dis < 2.5*units::cm){
-    //   flag_dir = true;
-    //   angle_cut = 15;
-    // }else
-      if (dis < 5*units::cm ){
+    if (dis < 2.5*units::cm){
+      flag_dir = true;
+      angle_cut = 20;
+    }else if (dis < 5*units::cm ){
       // normal case ..., allow for 3 cm gap, and 10 degree cut ...
       flag_dir = true;
-      angle_cut = 10;
+      angle_cut = 15;
     }else if (dis < 15*units::cm){
       flag_dir = true;
-      angle_cut = 7.5;
+      angle_cut = 10;
     }else if (dis < 30*units::cm){
       flag_dir = true;
       angle_cut = 5.0;
@@ -216,17 +215,16 @@ bool WireCell2dToy::Clustering_jump_gap_cosmics(WireCell::PR3DCluster *cluster1,
     if ((flag_prolonged_U||flag_prolonged_V||flag_perp)&&dis<45*units::cm){
       // normal case ..., allow for 45 cm gap
       flag_dir = true;
-      // if (dis < 2.5*units::cm){
-      // 	flag_dir = true;
-      // 	angle_cut = 15;
-      // // // }else if (dis < 2.5*units::cm){
-      // // // 	flag_dir = true;
-      // // // 	angle_cut = 20;
-      // }else
-	if (dis < 5*units::cm){
-	angle_cut = 10;
+      if (dis < 2.5*units::cm){
+      	flag_dir = true;
+      	angle_cut = 20;
+      // // }else if (dis < 2.5*units::cm){
+      // // 	flag_dir = true;
+      // // 	angle_cut = 20;
+      }else if (dis < 5*units::cm){
+	angle_cut = 15;
       }else if (dis < 15*units::cm){
-	angle_cut = 7.5;
+	angle_cut = 10;
       }else{
 	angle_cut = 5;
       }
@@ -235,17 +233,16 @@ bool WireCell2dToy::Clustering_jump_gap_cosmics(WireCell::PR3DCluster *cluster1,
     
     if (flag_para){
       flag_dir = true;
-      // if (dis < 2.5*units::cm){
-      // 	flag_dir = true;
-      // 	angle_cut = 15;
-      // // // }else if (dis < 2.5*units::cm){
-      // // // 	flag_dir = true;
-      // // // 	angle_cut = 20;
-      // }else
-      if (dis < 5*units::cm){
-	angle_cut = 10;
+      if (dis < 2.5*units::cm){
+      	flag_dir = true;
+      	angle_cut = 20;
+      // // }else if (dis < 2.5*units::cm){
+      // // 	flag_dir = true;
+      // // 	angle_cut = 20;
+      }else if (dis < 5*units::cm){
+	angle_cut = 15;
       }else if (dis < 15*units::cm){
-	angle_cut = 7.5;
+	angle_cut = 10;
       }else{
 	angle_cut = 5;
       }
@@ -263,6 +260,11 @@ bool WireCell2dToy::Clustering_jump_gap_cosmics(WireCell::PR3DCluster *cluster1,
       if (cluster1->get_point_cloud()->get_num_points()>60 || cluster2->get_mcells().size()>3){
 	// also with a complicated structures ...
 	TVector3 dir1 = cluster1->VHoughTrans(cluster1_ave_pos,30*units::cm); // cluster 1 direction
+	// need to be careful if this is reversed ...
+	// TVector3 temp_dir1(cluster1_ave_pos.x-p1.x,cluster1_ave_pos.y-p1.y,cluster1_ave_pos.z-p1.z);
+	// if (temp_dir1.Angle(dir1)>135/180.*3.1415926)
+	//   dir1.SetXYZ(-dir1.X(),-dir1.Y(),-dir1.Z());
+	
 	TVector3 dir2 = cluster2->calc_dir(cluster1_ave_pos,cluster2_ave_pos,30*units::cm); // dir 2 --> 1
 	TVector3 dir2_1 = cluster2->VHoughTrans(cluster1_ave_pos,30*units::cm);// 
 	TVector3 dir2_2 = cluster2->calc_dir(cluster1_ave_pos,mcell2_center,10*units::cm); // dir 2 --> 1
@@ -278,10 +280,10 @@ bool WireCell2dToy::Clustering_jump_gap_cosmics(WireCell::PR3DCluster *cluster1,
 	double theta2 = (dir2_rot.Theta()-3.1415926/2.)/3.1415926*180.;
 	double dphi = fabs(3.1415926 - fabs(dir1_rot.Phi()-dir2_rot.Phi()))/3.1415926*180.;
 
-	if (cluster1->get_cluster_id()==18|| cluster2->get_cluster_id()==18) 
-	  std::cout << cluster1->get_cluster_id() << " " << cluster2->get_cluster_id() << " " << angle_diff1 << " " << angle_diff1_1 << " " << angle_diff1_2 << " " << theta1 << " " << theta2 << " " << dphi << " " << dis/units::cm << " " << cluster1->get_mcells().size() << " " << cluster2->get_mcells().size() << std::endl;
+	// if (cluster1->get_cluster_id()==142|| cluster2->get_cluster_id()==142) 
+	//   std::cout << cluster1->get_cluster_id() << " " << cluster2->get_cluster_id() << " " << angle_diff1 << " " << angle_diff1_1 << " " << angle_diff1_2 << " " << theta1 << " " << theta2 << " " << dphi << " " << dis/units::cm << " " << cluster1->get_mcells().size() << " " << cluster2->get_mcells().size() << std::endl;
 	
-	if ((angle_diff1 < angle_cut && angle_diff1_1<20 )|| angle_diff1_1 < angle_cut || (angle_diff1_2 <angle_cut && angle_diff1_1<20)
+	if ((angle_diff1 < angle_cut && angle_diff1_1<25 )|| angle_diff1_1 < angle_cut || (angle_diff1_2 <angle_cut && angle_diff1_1<25)
 	    || (flag_para && fabs(theta1) < para_angle_cut_1 && fabs(theta2) < para_angle_cut_1 && fabs(theta1+theta2) < para_angle_cut_1/2. && dphi < para_angle_cut)
 	    //   || ((angle_diff1_1<point_angle_cut || angle_diff1_2 < point_angle_cut ) && dis < 3*units::cm)
 	    ){
@@ -291,6 +293,11 @@ bool WireCell2dToy::Clustering_jump_gap_cosmics(WireCell::PR3DCluster *cluster1,
       // reverse the test ...
       if (cluster2->get_point_cloud()->get_num_points()>60 || cluster2->get_mcells().size()>3){
 	TVector3 dir1 = cluster2->VHoughTrans(cluster2_ave_pos,30*units::cm); // cluster 1 direction
+	// need to be careful if this is reversed ...
+	// TVector3 temp_dir1(cluster2_ave_pos.x-p2.x,cluster2_ave_pos.y-p2.y,cluster2_ave_pos.z-p2.z);
+	// if (temp_dir1.Angle(dir1)>135/180.*3.1415926)
+	//   dir1.SetXYZ(-dir1.X(),-dir1.Y(),-dir1.Z());
+	
 	TVector3 dir2 = cluster1->calc_dir(cluster2_ave_pos,cluster1_ave_pos,30*units::cm); // dir 2 --> 1
 	TVector3 dir2_1 = cluster1->VHoughTrans(cluster2_ave_pos,30*units::cm);//
 	TVector3 dir2_2 = cluster1->calc_dir(cluster2_ave_pos,mcell1_center,10*units::cm); // dir 2 --> 1
@@ -306,11 +313,11 @@ bool WireCell2dToy::Clustering_jump_gap_cosmics(WireCell::PR3DCluster *cluster1,
 	double theta2 = (dir2_rot.Theta()-3.1415926/2.)/3.1415926*180.;
 	double dphi = fabs(3.1415926 - fabs(dir1_rot.Phi()-dir2_rot.Phi()))/3.1415926*180.;
 
-	if (cluster1->get_cluster_id()==18 || cluster2->get_cluster_id()==18 ) 
-	  std::cout << cluster1->get_cluster_id() << " " << cluster2->get_cluster_id() << " " << angle_diff1 << " " << angle_diff1_1 << " " << angle_diff1_2 << " " << theta1 << " " << theta2 << " " << dphi << " " << dis/units::cm << " " << cluster1->get_mcells().size() << " " << cluster2->get_mcells().size() << std::endl;
+	// if (cluster1->get_cluster_id()==142 || cluster2->get_cluster_id()==142 ) 
+	//   std::cout << cluster1->get_cluster_id() << " " << cluster2->get_cluster_id() << " " << angle_diff1 << " " << angle_diff1_1 << " " << angle_diff1_2 << " " << theta1 << " " << theta2 << " " << dphi << " " << dis/units::cm << " " << cluster1->get_mcells().size() << " " << cluster2->get_mcells().size() << std::endl;
 	
 	
-	if ((angle_diff1 < angle_cut && angle_diff1_1<20) || angle_diff1_1 < angle_cut || (angle_diff1_2 < angle_cut && angle_diff1_1<20)
+	if ((angle_diff1 < angle_cut && angle_diff1_1<25) || angle_diff1_1 < angle_cut || (angle_diff1_2 < angle_cut && angle_diff1_1<25)
 	    || (flag_para && fabs(theta1) < para_angle_cut_1 && fabs(theta2) < para_angle_cut_1 && fabs(theta1+theta2) < para_angle_cut_1/2. && dphi < para_angle_cut)
 	    //  || ((angle_diff1_1<point_angle_cut || angle_diff1_2 < point_angle_cut) && dis < 3*units::cm)
 	    ){
@@ -422,12 +429,13 @@ void WireCell2dToy::Clustering_live_dead(WireCell::PR3DClusterSelection& live_cl
 	    }
 
 	    Point mcell1_center = cluster_1->calc_ave_pos(p1,5*units::cm);
-	    double theta, phi;
-	    std::pair<double,double> angles_1 = cluster_1->HoughTrans(mcell1_center,30*units::cm);
-	    theta = angles_1.first;
-	    phi = angles_1.second;
-	    TVector3 dir1(sin(theta)*cos(phi),sin(theta)*sin(phi),cos(theta)); 
-	     
+	    
+	    TVector3 dir1 = cluster_1->VHoughTrans(mcell1_center,30*units::cm);
+	    // test reversed direction
+	    TVector3 temp_dir1(mcell1_center.x-p1.x,mcell1_center.y-p1.y,mcell1_center.z-p1.z);
+	    if (temp_dir1.Angle(dir1)>135/180.*3.1415926)
+	      dir1.SetXYZ(-dir1.X(),-dir1.Y(),-dir1.Z());
+	    
 	    Point mcell2_center = cluster_2->calc_ave_pos(p2,5*units::cm);
 	    TVector3 dir2 = cluster_2->calc_dir(mcell1_center,mcell2_center,30*units::cm);
 	    double angle_diff = (3.1415926-dir1.Angle(dir2))/3.1415926*180.;
@@ -437,8 +445,7 @@ void WireCell2dToy::Clustering_live_dead(WireCell::PR3DClusterSelection& live_cl
 	    // if (angle_diff < 30)
 	    //std::cout << "Xin1: " << cluster_1->get_cluster_id() << " " << cluster_2->get_cluster_id() << " " << angle_diff << " " << dis/units::cm << " " << mcells_1.size() << " " << mcells_2.size() << " " << dis/units::cm << " " << fabs(p1.x-p2.x)/units::cm<<
 	    // " " << p1.y/units::cm << " " << p1.z/units::cm << " " << p2.y/units::cm << " " << p2.z/units::cm << std::endl;
-	    if (fabs(p1.x-p2.x)<0.5*units::cm && fabs(180-angle_diff)<15
- 		|| (dis <= 3*units::cm || fabs(p1.x-p2.x)<=1*units::cm) && angle_diff <= 45 
+	    if ( dis <= 3*units::cm  && angle_diff <= 45 
 		|| dis <= 10*units::cm && angle_diff <=15 
 		|| angle_diff<5 
 		//  || mcells_1.size()==1 && mcells_2.size()==1 && dis < 15*units::cm
@@ -447,10 +454,12 @@ void WireCell2dToy::Clustering_live_dead(WireCell::PR3DClusterSelection& live_cl
 	    }
 
 	    if (!flag_merge){
-	      angles_1 = cluster_2->HoughTrans(mcell2_center,30*units::cm);
-	      theta = angles_1.first;
-	      phi = angles_1.second;
-	      dir1.SetXYZ(sin(theta)*cos(phi),sin(theta)*sin(phi),cos(theta)); 
+	      dir1 = cluster_2->VHoughTrans(mcell2_center,30*units::cm);
+	      // test reversed direction
+	      TVector3 temp_dir1(mcell2_center.x-p2.x,mcell2_center.y-p2.y,mcell2_center.z-p2.z);
+	      if (temp_dir1.Angle(dir1)>135/180.*3.1415926)
+		dir1.SetXYZ(-dir1.X(),-dir1.Y(),-dir1.Z());
+	      
 	     
 	      dir2 = cluster_1->calc_dir(mcell2_center,mcell1_center,30*units::cm);
 	      angle_diff = (3.1415926-dir1.Angle(dir2))/3.1415926*180.;
@@ -459,8 +468,7 @@ void WireCell2dToy::Clustering_live_dead(WireCell::PR3DClusterSelection& live_cl
 			 +pow(p1.z-p2.z,2));
 	      // if (angle_diff < 30)
 	      //std::cout << "Xin2: " << cluster_1->get_cluster_id() << " " << cluster_2->get_cluster_id() << " " << angle_diff << " " << dis/units::cm << " " << mcells_1.size() << " " << mcells_2.size() << " " << dis/units::cm << " " << fabs(p1.x-p2.x)/units::cm << std::endl;
-	      if ((fabs(p1.x-p2.x)<0.5*units::cm && fabs(180-angle_diff)<15
-		   || dis <= 3*units::cm|| fabs(p1.x-p2.x)<=1*units::cm) && angle_diff <= 45 
+	      if ( dis <= 3*units::cm  && angle_diff <= 45 
 		  || dis <= 10*units::cm && angle_diff <=15 
 		  || angle_diff<5  
 		  //  || mcells_1.size()==1 && mcells_2.size()==1 && dis < 15*units::cm
