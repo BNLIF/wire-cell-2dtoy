@@ -36,7 +36,7 @@ namespace WireCell2dToy{
    
 
    
-      ClassDef(BlobToyTiling,1);
+    ClassDef(BlobToyTiling,1);
   };
 }
 #endif

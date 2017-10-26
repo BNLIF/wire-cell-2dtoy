@@ -55,14 +55,20 @@ Int_t WireCell2dToy::uBooNEDataROI::find_ROI_end(TH1F *h1, Int_t bin, Double_t t
     }else{
       content = h1->GetBinContent(end+1);
     }
-    if (end == h1->GetNbinsX()) break;
+    if (end >= h1->GetNbinsX()-1) {
+      end = h1->GetNbinsX()-1;
+      break;
+    }
   }
 
   while(local_ave(h1,end+1,1) < local_ave(h1,end,1)+25){ // ||
   //while(local_ave(h1,end+1,1) < local_ave(h1,end,1)){ // ||
     //	(local_ave(h1,end+1,1) + local_ave(h1,end+2,1))*0.5 < local_ave(h1,end,1)	){
     end++;
-    if (end == h1->GetNbinsX()) break;
+    if (end >= h1->GetNbinsX()-1) {
+      end = h1->GetNbinsX()-1;
+      break;
+    }
   } 
   return end;
 }
@@ -78,7 +84,10 @@ Int_t WireCell2dToy::uBooNEDataROI::find_ROI_begin(TH1F *h1, Int_t bin, Double_t
     }else{
       content = h1->GetBinContent(begin+1);
     }
-    if (begin == 0) break;
+    if (begin <= 0) {
+      begin = 0;
+      break;
+    }
   }
   
   // calculate the local average
@@ -86,7 +95,10 @@ Int_t WireCell2dToy::uBooNEDataROI::find_ROI_begin(TH1F *h1, Int_t bin, Double_t
   while( local_ave(h1,begin-1,1) < local_ave(h1,begin,1)+25){// ||
     //	 (local_ave(h1,begin-2,1) + local_ave(h1,begin-1,1))*0.5 < local_ave(h1,begin,1)){
     begin --;
-    if (begin == 0) break;
+    if (begin <= 0) {
+      begin = 0;
+      break;
+    }
   }
   
   return begin;

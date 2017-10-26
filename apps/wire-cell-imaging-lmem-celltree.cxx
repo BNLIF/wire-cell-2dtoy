@@ -170,7 +170,7 @@ int main(int argc, char* argv[])
   int recon_threshold = 2000;
   int frame_length = 3200;
   int max_events = 100;
-  int eve_num;
+  int eve_num = atoi(argv[3]);
   int nrebin = 4;
 
   TPCParams& mp = Singleton<TPCParams>::Instance();
@@ -208,32 +208,34 @@ int main(int argc, char* argv[])
 
   // load Trun
   TFile *file1 = new TFile(root_file);
-  TTree *Trun = (TTree*)file1->Get("Trun");
-  
-  Trun->SetBranchAddress("eventNo",&event_no);
-  Trun->SetBranchAddress("runNo",&run_no);
-  Trun->SetBranchAddress("subRunNo",&subrun_no);
-  Trun->SetBranchAddress("unit_dis",&unit_dis);
-  Trun->SetBranchAddress("toffset_uv",&toffset_1);
-  Trun->SetBranchAddress("toffset_uw",&toffset_2);
-  Trun->SetBranchAddress("toffset_u",&toffset_3);
-  Trun->SetBranchAddress("total_time_bin",&total_time_bin);
-  Trun->SetBranchAddress("recon_threshold",&recon_threshold);
-  Trun->SetBranchAddress("frame_length",&frame_length);
-  Trun->SetBranchAddress("max_events",&max_events);
-  Trun->SetBranchAddress("eve_num",&eve_num);
-  Trun->SetBranchAddress("nrebin",&nrebin);
-  Trun->SetBranchAddress("threshold_u",&threshold_u);
-  Trun->SetBranchAddress("threshold_v",&threshold_v);
-  Trun->SetBranchAddress("threshold_w",&threshold_w);
-  Trun->SetBranchAddress("threshold_ug",&threshold_ug);
-  Trun->SetBranchAddress("threshold_vg",&threshold_vg);
-  Trun->SetBranchAddress("threshold_wg",&threshold_wg);
-  Trun->SetBranchAddress("time_offset",&time_offset);
-  
-  Trun->GetEntry(0);
+  TTree *T = (TTree*)file1->Get("/Event/Sim");
+  T->SetBranchAddress("eventNo",&event_no);
+  T->SetBranchAddress("runNo",&run_no);
+  T->SetBranchAddress("subRunNo",&subrun_no);
 
-  TTree *T_op = (TTree*)file1->Get("T_op");
+  std::vector<int> *badChannelList = new std::vector<int>;
+  T->SetBranchAddress("badChannelList",&badChannelList);
+  std::vector<double> *channelThreshold = new std::vector<double>;
+  T->SetBranchAddress("channelThreshold",&channelThreshold);
+  std::vector<int> *calibGaussian_channelId = new std::vector<int>;
+  std::vector<int> *calibWiener_channelId = new std::vector<int>;
+  std::vector<int> *raw_channelId = new std::vector<int>;
+  T->SetBranchAddress("calibGaussian_channelId",&calibGaussian_channelId);
+  T->SetBranchAddress("calibWiener_channelId",&calibWiener_channelId);
+  T->SetBranchAddress("raw_channelId",&raw_channelId);
+  TClonesArray* calibWiener_wf = new TClonesArray;
+  TClonesArray* calibGaussian_wf = new TClonesArray;
+  TClonesArray* raw_wf = new TClonesArray;
+  // TH1F  ... 
+  T->SetBranchAddress("calibWiener_wf",&calibWiener_wf);
+  T->SetBranchAddress("calibGaussian_wf",&calibGaussian_wf);
+  T->SetBranchAddress("raw_wf",&raw_wf);
+  
+  T->GetEntry(eve_num);
+  cout << "Run No: " << run_no << " " << subrun_no << " " << event_no << endl;
+
+
+  TTree *T_op = 0;//(TTree*)file1->Get("T_op");
   
   GeomWireSelection wires_u = gds.wires_in_plane(WirePlaneType_t(0));
   GeomWireSelection wires_v = gds.wires_in_plane(WirePlaneType_t(1));
@@ -242,33 +244,30 @@ int main(int argc, char* argv[])
   int nwire_u = wires_u.size();
   int nwire_v = wires_v.size();
   int nwire_w = wires_w.size();
-
-
-  cout << "Run No: " << run_no << " " << subrun_no << " " << event_no << endl;
+  
   ChirpMap uplane_map;
   ChirpMap vplane_map;
   ChirpMap wplane_map;
-  TTree *T_chirp = (TTree*)file1->Get("T_chirp");
+
   Int_t chid=0, plane=0;
-  Int_t start_time=0, end_time=0;
-  T_chirp->SetBranchAddress("chid",&chid);
-  T_chirp->SetBranchAddress("plane",&plane);
-  T_chirp->SetBranchAddress("start_time",&start_time);
-  T_chirp->SetBranchAddress("end_time",&end_time);
-  for (Int_t i=0;i!=T_chirp->GetEntries();i++){
-    T_chirp->GetEntry(i);
+  Int_t start_time=0, end_time=9594;
+
+  
+
+  
+  for (size_t i=0;i!=badChannelList->size();i++){
     std::pair<int,int> abc(start_time,end_time);
-    if (plane == 0){
+    chid = badChannelList->at(i);
+    if (chid < nwire_u){
       uplane_map[chid] = abc;
-    }else if (plane == 1){
+    }else if (chid < nwire_u + nwire_v){
       vplane_map[chid-nwire_u] = abc;
-    }else if (plane == 2){
+    }else if (chid < nwire_u + nwire_v + nwire_w){
       wplane_map[chid-nwire_u-nwire_v] = abc;
     }
   }
-  
-  
-  
+
+   //std::cout << uplane_map.size() << " " << vplane_map.size() << " " << wplane_map.size() << std::endl;
   
   std::vector<float> uplane_rms;
   std::vector<float> vplane_rms;
@@ -276,27 +275,74 @@ int main(int argc, char* argv[])
   // Note, there is a mismatch here
   // These RMS values are for single ticks
   // Later they are applied to the rebinned data
-  // Probably OK as the TPC signal processing already took care the fake hits ... 
-  TH1F *hu_threshold = (TH1F*)file1->Get("hu_threshold");
-  TH1F *hv_threshold = (TH1F*)file1->Get("hv_threshold");
-  TH1F *hw_threshold = (TH1F*)file1->Get("hw_threshold");
-  for (int i=0;i!=hu_threshold->GetNbinsX();i++){
-    uplane_rms.push_back(hu_threshold->GetBinContent(i+1));
+  // Probably OK as the TPC signal processing already took care the fake hits ...
+  for (size_t i=0; i!= channelThreshold->size(); i++){
+    if (i<nwire_u){
+      uplane_rms.push_back(channelThreshold->at(i));
+    }else if (i<nwire_u + nwire_v){
+      vplane_rms.push_back(channelThreshold->at(i));
+    }else if (i<nwire_u + nwire_v + nwire_w){
+      wplane_rms.push_back(channelThreshold->at(i));
+    }
   }
-  for (int i=0;i!=hv_threshold->GetNbinsX();i++){
-    vplane_rms.push_back(hv_threshold->GetBinContent(i+1));
-  }
-  for (int i=0;i!=hw_threshold->GetNbinsX();i++){
-    wplane_rms.push_back(hw_threshold->GetBinContent(i+1));
-  }
+
+  //  std::cout <<uplane_rms.size() << " " << vplane_rms.size() << " " << wplane_rms.size() << std::endl;
   
-  TH2F *hu_decon = (TH2F*)file1->Get("hu_decon");
-  TH2F *hv_decon = (TH2F*)file1->Get("hv_decon");
-  TH2F *hw_decon = (TH2F*)file1->Get("hw_decon");
+  const int nwindow_size = ((TH1F*)calibWiener_wf->At(0))->GetNbinsX();
+
   
-  TH2F *hu_decon_g = (TH2F*)file1->Get("hu_decon_g");
-  TH2F *hv_decon_g = (TH2F*)file1->Get("hv_decon_g");
-  TH2F *hw_decon_g = (TH2F*)file1->Get("hw_decon_g");
+  
+  TH2F *hu_decon = new TH2F("hu_decon","hu_decon",nwire_u,0,nwire_u,nwindow_size,0,nwindow_size);
+  TH2F *hv_decon = new TH2F("hv_decon","hv_decon",nwire_v,0,nwire_v,nwindow_size,0,nwindow_size);
+  TH2F *hw_decon = new TH2F("hw_decon","hw_decon",nwire_w,0,nwire_w,nwindow_size,0,nwindow_size);
+  
+  TH2F *hu_decon_g = new TH2F("hu_decon_g","hu_decon_g",nwire_u,0,nwire_u,nwindow_size,0,nwindow_size);
+  TH2F *hv_decon_g = new TH2F("hu_decon_g","hu_decon_g",nwire_v,0,nwire_v,nwindow_size,0,nwindow_size);
+  TH2F *hw_decon_g = new TH2F("hu_decon_g","hu_decon_g",nwire_w,0,nwire_w,nwindow_size,0,nwindow_size);
+  
+  for (size_t i=0;i!=calibWiener_channelId->size();i++){
+    int chid = calibWiener_channelId->at(i);
+    TH1F *htemp = (TH1F*)calibWiener_wf->At(i);
+    if (chid < nwire_u){
+      for (size_t j=0;j!=nwindow_size;j++){
+	hu_decon->SetBinContent(chid+1,j+1,htemp->GetBinContent(j+1));
+      }
+    }else if (chid < nwire_v+nwire_u){
+      for (size_t j=0;j!=nwindow_size;j++){
+	hv_decon->SetBinContent(chid-nwire_u+1,j+1,htemp->GetBinContent(j+1));
+      }
+    }else if (chid < nwire_w+nwire_v+nwire_u){
+      for (size_t j=0;j!=nwindow_size;j++){
+	hw_decon->SetBinContent(chid-nwire_u-nwire_v+1,j+1,htemp->GetBinContent(j+1));
+      }
+    }
+
+    chid = calibGaussian_channelId->at(i);
+    htemp = (TH1F*)calibGaussian_wf->At(i);
+    if (chid < nwire_u){
+      for (size_t j=0;j!=nwindow_size;j++){
+	hu_decon_g->SetBinContent(chid+1,j+1,htemp->GetBinContent(j+1));
+      }
+    }else if (chid < nwire_v+nwire_u){
+      for (size_t j=0;j!=nwindow_size;j++){
+	hv_decon_g->SetBinContent(chid-nwire_u+1,j+1,htemp->GetBinContent(j+1));
+      }
+    }else if (chid < nwire_w+nwire_v+nwire_u){
+      for (size_t j=0;j!=nwindow_size;j++){
+	hw_decon_g->SetBinContent(chid-nwire_u-nwire_v+1,j+1,htemp->GetBinContent(j+1));
+      }
+    }
+    
+  }
+
+  //std::cout << nwindow_size << std::endl;
+
+  //return 0;
+  
+
+
+  
+  
 
 
   // add a special treatment here ...
@@ -337,7 +383,19 @@ int main(int argc, char* argv[])
   WireCell2dToy::pdDataFDS roi_fds(gds,hu_decon,hv_decon,hw_decon,eve_num);
   roi_fds.jump(eve_num);
   
-  TH2F *hv_raw = (TH2F*)file1->Get("hv_raw");
+  TH2F *hv_raw = new TH2F("hv_raw","hv_raw",nwire_w,0,nwire_w,nwindow_size,0,nwindow_size);
+  for (size_t i=0;i!=raw_channelId->size();i++){
+    int chid = raw_channelId->at(i);
+    TH1F *htemp = (TH1F*)raw_wf->At(i);
+    if (chid < nwire_u){
+    }else if (chid < nwire_v+nwire_u){
+      for (size_t j=0;j!=nwindow_size;j++){
+	hv_raw->SetBinContent(chid-nwire_u+1,j+1,htemp->GetBinContent(j+1));
+      }
+    }else if (chid < nwire_w+nwire_v+nwire_u){
+    }
+  }
+  
   
   WireCell2dToy::uBooNE_L1SP l1sp(hv_raw,hv_decon,hv_decon_g,nrebin);
   
@@ -3073,7 +3131,41 @@ int main(int argc, char* argv[])
   if (T_op!=0){
     T_op->CloneTree()->Write();
   }
-  Trun->CloneTree()->Write();
+
+
+  TTree *Trun = new TTree("Trun","Trun");
+  Trun->SetDirectory(file);
+
+  int detector = 0; // MicroBooNE
+  Trun->Branch("detector",&detector,"detector/I");
+
+  Trun->Branch("eventNo",&event_no,"eventNo/I");
+  Trun->Branch("runNo",&run_no,"runNo/I");
+  Trun->Branch("subRunNo",&subrun_no,"runRunNo/I");
+  
+  Trun->Branch("unit_dis",&unit_dis,"unit_dis/F");
+  Trun->Branch("toffset_uv",&toffset_1,"toffset_uv/F");
+  Trun->Branch("toffset_uw",&toffset_2,"toffset_uw/F");
+  Trun->Branch("toffset_u",&toffset_3,"toffset_u/F");
+  Trun->Branch("total_time_bin",&total_time_bin,"total_time_bin/I");
+  Trun->Branch("recon_threshold",&recon_threshold,"recon_threshold/I");
+  Trun->Branch("frame_length",&frame_length,"frame_length/I");
+  Trun->Branch("max_events",&max_events,"max_events/I");
+  Trun->Branch("eve_num",&eve_num,"eve_num/I");
+  Trun->Branch("nrebin",&nrebin,"nrebin/I");
+  Trun->Branch("threshold_u",&threshold_u,"threshold_u/F");
+  Trun->Branch("threshold_v",&threshold_v,"threshold_v/F");
+  Trun->Branch("threshold_w",&threshold_w,"threshold_w/F");
+  Trun->Branch("threshold_ug",&threshold_ug,"threshold_ug/F");
+  Trun->Branch("threshold_vg",&threshold_vg,"threshold_vg/F");
+  Trun->Branch("threshold_wg",&threshold_wg,"threshold_wg/F");
+  Trun->Branch("time_offset",&time_offset,"time_offset/I");
+  
+  Trun->Fill();
+
+
+  
+  // Trun->CloneTree()->Write();
   file->Write();
   file->Close();
   
