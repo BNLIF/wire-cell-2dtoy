@@ -93,8 +93,8 @@ int main(int argc, char* argv[])
   T->SetBranchAddress("op_gainerror",&op_gainerror);
   T->SetBranchAddress("op_timestamp",&op_timestamp);
   T->SetBranchAddress("op_wf",&op_wf);
-  T->SetBranchAddress("triggerTime",&triggerTime);
   */
+  T->SetBranchAddress("triggerTime",&triggerTime);
   T->SetBranchStatus("eventNo",1);
   T->SetBranchAddress("eventNo" , &event_no);
   T->SetBranchStatus("runNo",1);
