@@ -108,11 +108,13 @@ int main(int argc, char* argv[])
   TTree *t1 = new TTree("T_data","T_data");
   t1->SetDirectory(file);
 
+  t1->Branch("op_gain",&op_gain);
+  t1->Branch("op_gainerror",&op_gainerror);
   t1->Branch("op_femch",&op_femch);
   t1->Branch("op_timestamp",&op_timestamp);
   t1->Branch("op_wf",&op_wf,256000,0);
   t1->Branch("triggerTime",&triggerTime);
-
+  
   t1->Branch("runNo",&run_no);
   t1->Branch("subRunNo",&subrun_no);
   t1->Branch("eventNo",&event_no);
