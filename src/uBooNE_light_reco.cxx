@@ -29,6 +29,21 @@ WireCell2dToy::uBooNE_light_reco::uBooNE_light_reco(const char* root_file){
   h_mult = new TH1F("h_mult","h_mult",250,0,250);
   h_l1_mult = new TH1F("h_l1_mult","h_l1_mult",250,0,250);
   h_l1_totPE = new TH1F("h_l1_totPE","h_l1_totPE",250,0,250);
+
+  fop_wf_beam = new TClonesArray("TH1S");
+  fop_femch_beam = new std::vector<short>;
+  fop_timestamp_beam = new std::vector<double>;
+  ctr_beam = 0;
+
+  fop_wf_cosmic = new TClonesArray("TH1S");
+  fop_femch_cosmic = new std::vector<short>;
+  fop_timestamp_cosmic = new std::vector<double>;
+  ctr_cosmic = 0;
+
+  fop_wf = new TClonesArray("TH1S");
+  fop_femch = new std::vector<short>;
+  fop_timestamp = new std::vector<double>;
+  ctr = 0;
 }
 
 WireCell2dToy::uBooNE_light_reco::~uBooNE_light_reco(){
@@ -45,6 +60,18 @@ WireCell2dToy::uBooNE_light_reco::~uBooNE_light_reco(){
   delete h_mult;
   delete h_l1_mult;
   delete h_l1_totPE;
+
+  delete fop_wf_beam;
+  delete fop_femch_beam;
+  delete fop_timestamp_beam;
+
+  delete fop_wf_cosmic;
+  delete fop_femch_cosmic;
+  delete fop_timestamp_cosmic;
+
+  delete fop_wf;
+  delete fop_femch;
+  delete fop_timestamp;
   
   delete T;
   delete file;
@@ -87,15 +114,96 @@ void WireCell2dToy::uBooNE_light_reco::load_event_raw(int eve_num){
   T->SetBranchAddress("triggerTime",&triggerTime);
 
   T->GetEntry(eve_num);
+
+  mergeRawBeam(beam_hg_wf, beam_hg_opch, beam_hg_timestamp,
+	       beam_lg_wf, beam_lg_opch, beam_lg_timestamp,
+	       true, opch_to_opdet, ctr_beam);
+
+  mergeRawCosmic(cosmic_hg_wf, cosmic_hg_opch, cosmic_hg_timestamp,
+		 cosmic_lg_wf, cosmic_lg_opch, cosmic_lg_timestamp,
+		 false, opch_to_opdet, ctr_cosmic);
+  
+  reorderMerged(fop_wf_beam, fop_femch_beam, fop_timestamp_beam,
+		fop_wf_cosmic, fop_femch_cosmic, fop_timestamp_cosmic);
+
+  std::vector<COphitSelection> ophits_group;
+  COphitSelection left_ophits;
+  
+  for (int i=32;i!=fop_femch->size();i++){
+    COphit *op_hit = new COphit(fop_femch->at(i), (TH1S*)fop_wf->At(i), fop_timestamp->at(i) - triggerTime, op_gain->at(fop_femch->at(i)), op_gainerror->at(fop_femch->at(i)));
+    if (op_hit->get_type()){
+      bool flag_used = false;
+      if (ophits_group.size()==0){
+	COphitSelection ophits;
+	ophits.push_back(op_hit);
+	ophits_group.push_back(ophits);
+	flag_used = true;
+      }else{
+	for (size_t j=0; j!=ophits_group.size();j++){
+	  for (size_t k=0; k!= ophits_group.at(j).size(); k++){
+	    if (fabs(op_hit->get_time() - ophits_group.at(j).at(k)->get_time()) < 0.1 ){
+	      ophits_group.at(j).push_back(op_hit);
+	      flag_used = true;
+	      break;
+	    }
+	  }
+	  if (flag_used)
+	    break;
+	}
+      }
+      if (!flag_used){
+	COphitSelection ophits;
+	ophits.push_back(op_hit);
+	ophits_group.push_back(ophits);
+      }
+    }else{
+      left_ophits.push_back(op_hit);
+    }
+  }
+
+  for (size_t i=0;i!=left_ophits.size();i++){
+    bool flag_used = false;
+    for (size_t j=0; j!=ophits_group.size();j++){
+      for (size_t k=0; k!= ophits_group.at(j).size(); k++){
+	if (fabs(left_ophits.at(i)->get_time() - ophits_group.at(j).at(k)->get_time())<0.1){
+	  ophits_group.at(j).push_back(left_ophits.at(i));
+	  flag_used = true;
+	  break;
+	}
+      }
+      if (flag_used)
+	break;
+    }
+  }
+
+  for (size_t j=0; j!=ophits_group.size();j++){
+    Opflash *flash = new Opflash(ophits_group.at(j));
+    cosmic_flashes.push_back(flash);
+  }
+ 
+  for (int i=0;i!=32;i++){
+    TH1S *hsignal = (TH1S*)fop_wf->At(i);
+    for (int j=0;j!=1500;j++){
+      hraw[i]->SetBinContent(j+1,hsignal->GetBinContent(j+1)-2050);
+    }
+    gain[i] = op_gain->at(i);
+    beam_dt[i] = fop_timestamp->at(i) - triggerTime;
+  }
+  
+  Process_beam_wfs();
+
+  sort_flashes();
 }
 
 void WireCell2dToy::uBooNE_light_reco::load_event(int eve_num){
-
   TClonesArray* op_wf = new TClonesArray;
-  std::vector<int> *op_femch = new std::vector<int>;
+  //std::vector<int> *op_femch = new std::vector<int>;
+  std::vector<short> *op_femch = new std::vector<short>;
   std::vector<double> *op_timestamp = new std::vector<double>;
-  std::vector<double> *op_gain = new std::vector<double>;
-  std::vector<double> *op_gainerror = new std::vector<double>;
+  //std::vector<double> *op_gain = new std::vector<double>;
+  //std::vector<double> *op_gainerror = new std::vector<double>;
+  std::vector<float> *op_gain = new std::vector<float>;
+  std::vector<float> *op_gainerror = new std::vector<float>;
   double triggerTime;
 
   T->SetBranchAddress("op_femch",&op_femch);
@@ -112,7 +220,7 @@ void WireCell2dToy::uBooNE_light_reco::load_event(int eve_num){
   T->SetBranchStatus("op_timestamp",1);
   T->SetBranchStatus("op_wf",1);
   T->SetBranchStatus("triggerTime",1);
-
+  
   //  std::cout << T->GetEntries() << std::endl;
   T->GetEntry(eve_num);
   //  std::cout << op_femch->size() << " " << op_gain->size() << std::endl;
@@ -573,9 +681,175 @@ std::pair<double,double> WireCell2dToy::uBooNE_light_reco::cal_mean_rms(TH1 *his
   delete h4;
   return std::make_pair(mean,rms);
 }
-/*
-void WireCell2dToy::uBooNE_light_reco::mergeRaw(Int_t nentries_hg, TH1S *h_hg, std::vector<short> *hg_chan, std::vector<double> *hg_timestamp,
-						Int_t nentries_lg, TH1S *h_lg, std::vector<short> *lg_chan, std::vector<double> *lg_timestamp,
-						bool beamDisc, std::vector<int> OpChanToOpDet){
+
+void WireCell2dToy::uBooNE_light_reco::mergeRawBeam(TClonesArray *hg_wf, std::vector<short> *hg_chan, std::vector<double> *hg_timestamp,
+						    TClonesArray *lg_wf, std::vector<short> *lg_chan, std::vector<double> *lg_timestamp,
+						    bool beamDisc, std::vector<int> *OpChanToOpDet, int ctr){
+  int discriminatorSizeCompare = 1000;
+  float tick = 0.0156;
+
+  Int_t nentries_hg = hg_wf->GetEntriesFast();
+  Int_t nentries_lg = lg_wf->GetEntriesFast();
+  
+  for(int i=0; i<nentries_hg; i++){
+    TH1S *h_hg = (TH1S*)hg_wf->At(i);
+    int nbins_hg = h_hg->GetNbinsX();
+    if( (hg_chan->at(i) >= 32 && hg_chan->at(i) <= 99) ) continue;
+    if(beamDisc == true && nbins_hg<discriminatorSizeCompare) continue;
+    if(beamDisc == false && nbins_hg>discriminatorSizeCompare) continue;
+    if(h_hg->GetMaximum() < 4095){
+      TH1S *htemp = new ((*fop_wf_beam)[ctr]) TH1S("","",nbins_hg,0,nbins_hg);
+      for(int k=1; k<nbins_hg; k++){
+	htemp->SetBinContent(k,h_hg->GetBinContent(k));
+      }
+      fop_timestamp_beam->push_back(hg_timestamp->at(i));
+      fop_femch_beam->push_back(hg_chan->at(i));
+      ctr++;
+    }
+    else if(h_hg->GetMaximum() >= 4095){
+      double hg_time = hg_timestamp->at(i);
+      int hg_opdet = hg_chan->at(i);
+      for(int j=0;j<nentries_lg; j++){
+	TH1S *h_lg = (TH1S*)lg_wf->At(j);
+	int nbins_lg = h_lg->GetNbinsX();
+	int lg_opdet = lg_chan->at(j)-100;	
+	if( (lg_chan->at(j) >= 132 && lg_chan->at(j) <= 199) ||
+	    (hg_opdet != lg_opdet) ) continue;
+	if(beamDisc == true && nbins_lg<discriminatorSizeCompare) continue;
+	if(beamDisc == false && nbins_lg>discriminatorSizeCompare) continue;
+	if( std::abs(hg_timestamp->at(i)-lg_timestamp->at(j)) > 5*tick) continue;
+	TH1S *htemp = new ((*fop_wf_beam)[ctr]) TH1S("","",nbins_hg,0,nbins_hg);
+	short baseline = 2050;
+	for(int k=1; k<nbins_hg; k++){
+	  short content = (short)(h_lg->GetBinContent(k)-baseline)*findScaling(lg_opdet) + baseline;
+	  htemp->SetBinContent(k,content);
+	}
+	fop_timestamp_beam->push_back(lg_timestamp->at(j));
+	fop_femch_beam->push_back(lg_chan->at(j)-100);
+	ctr++;
+      }
+    }
+  }
 }
-*/
+
+void WireCell2dToy::uBooNE_light_reco::mergeRawCosmic(TClonesArray *hg_wf, std::vector<short> *hg_chan, std::vector<double> *hg_timestamp,
+						    TClonesArray *lg_wf, std::vector<short> *lg_chan, std::vector<double> *lg_timestamp,
+						    bool beamDisc, std::vector<int> *OpChanToOpDet, int ctr){
+  int discriminatorSizeCompare = 1000;
+  float tick = 0.0156;
+
+  Int_t nentries_hg = hg_wf->GetEntriesFast();
+  Int_t nentries_lg = lg_wf->GetEntriesFast();
+  
+  for(int i=0; i<nentries_hg; i++){
+    TH1S *h_hg = (TH1S*)hg_wf->At(i);
+    int nbins_hg = h_hg->GetNbinsX();
+    if(beamDisc == true && nbins_hg<discriminatorSizeCompare) continue;
+    if(beamDisc == false && nbins_hg>discriminatorSizeCompare) continue;
+    if(h_hg->GetMaximum() < 4095){
+      TH1S *htemp = new ((*fop_wf_cosmic)[ctr]) TH1S("","",nbins_hg,0,nbins_hg);
+      for(int k=1; k<nbins_hg; k++){
+	htemp->SetBinContent(k,h_hg->GetBinContent(k));
+      }
+      fop_timestamp_cosmic->push_back(hg_timestamp->at(i));
+      //fop_femch_cosmic->push_back(OpChanToOpDet->at(hg_chan->at(i)));
+      fop_femch_cosmic->push_back(hg_chan->at(i)-200);
+      ctr++;
+    }
+    else if(h_hg->GetMaximum() >= 4095){
+      double hg_time = hg_timestamp->at(i);
+      //int hg_opdet = OpChanToOpDet->at(hg_chan->at(i));
+      int hg_opdet = hg_chan->at(i)-200;
+      for(int j=0;j<nentries_lg; j++){
+	TH1S *h_lg = (TH1S*)lg_wf->At(j);
+	int nbins_lg = h_lg->GetNbinsX();
+	//int lg_opdet = OpChanToOpDet->at(lg_chan->at(j));
+	int lg_opdet = lg_chan->at(j)-100;
+	if( (lg_chan->at(j) >= 132 && lg_chan->at(j) <= 199) ||
+	    (hg_opdet != lg_opdet) ) continue;
+	if(beamDisc == true && nbins_lg<discriminatorSizeCompare) continue;
+	if(beamDisc == false && nbins_lg>discriminatorSizeCompare) continue;
+	if( std::abs(hg_timestamp->at(i)-lg_timestamp->at(j)) > 5*tick) continue;
+	TH1S *htemp = new ((*fop_wf_cosmic)[ctr]) TH1S("","",nbins_hg,0,nbins_hg);
+	for(int k=1; k<nbins_hg; k++){
+	  short content = (short)(h_lg->GetBinContent(k)-h_lg->GetBinContent(1))*findScaling(lg_opdet) + h_lg->GetBinContent(1);
+	  htemp->SetBinContent(k,content);
+	}
+	fop_timestamp_cosmic->push_back(lg_timestamp->at(j));
+	//fop_femch_cosmic->push_back(OpChanToOpDet->at(lg_chan->at(j)));
+	fop_femch_cosmic->push_back(lg_chan->at(j)-100);
+	ctr++;
+      }
+    }
+  }
+}
+
+void WireCell2dToy::uBooNE_light_reco::reorderMerged(TClonesArray *beam_wf, std::vector<short> *beam_femch, std::vector<double> *beam_timestamp,
+						     TClonesArray *cosmic_wf, std::vector<short> *cosmic_femch, std::vector<double> *cosmic_timestamp){
+
+  int c = 0;
+  Int_t nbeamwfm = beam_wf->GetEntriesFast();
+  Int_t ncosmicwfm = cosmic_wf->GetEntriesFast();
+  
+  for(int z=0; z<32; z++){
+    for(int i=0; i<nbeamwfm; i++){
+      if(beam_femch->at(i) != z) continue;
+      TH1S *h = (TH1S*)beam_wf->At(i);
+      int nbins = h->GetNbinsX();
+      fop_femch->push_back(beam_femch->at(i));
+      fop_timestamp->push_back(beam_timestamp->at(i));
+      TH1S *h_temp = new((*fop_wf)[c]) TH1S("","",nbins,0,nbins);
+      for(int j=1; j<=nbins; j++){ h_temp->SetBinContent(j,h->GetBinContent(j)); }
+      c++;
+    }
+  }
+  
+  for(int z=0; z<32; z++){
+    for(int i=0; i<ncosmicwfm; i++){
+      if(cosmic_femch->at(i) != z) continue;
+      TH1S *h = (TH1S*)cosmic_wf->At(i);
+      int nbins = h->GetNbinsX();
+      fop_femch->push_back(cosmic_femch->at(i));
+      fop_timestamp->push_back(cosmic_timestamp->at(i));
+      TH1S *h_temp = new((*fop_wf)[c]) TH1S("","",nbins,0,nbins);
+      for(int b=1; b<=nbins; b++){ h_temp->SetBinContent(b,h->GetBinContent(b)); }
+      c++;
+    }
+  }
+}
+
+float WireCell2dToy::uBooNE_light_reco::findScaling(int opdet){
+  if(opdet == 0){ return 10.13; }
+  if(opdet == 1){ return 10.20; }
+  if(opdet == 2){ return 10.13; }
+  if(opdet == 3){ return 10.05; }
+  if(opdet == 4){ return 9.96; }
+  if(opdet == 5){ return 9.95; }
+  if(opdet == 6){ return 10.04; }
+  if(opdet == 7){ return 9.58; }
+  if(opdet == 8){ return 9.42; }
+  if(opdet == 9){ return 9.81; }
+  if(opdet == 10){ return 9.25; }
+  if(opdet == 11){ return 9.61; }
+  if(opdet == 12){ return 9.56; }
+  if(opdet == 13){ return 9.35; }
+  if(opdet == 14){ return 9.99; }
+  if(opdet == 15){ return 9.66; }
+  if(opdet == 16){ return 10.26; }
+  if(opdet == 17){ return 9.82; }
+  if(opdet == 18){ return 10.32; }
+  if(opdet == 19){ return 10.08; }
+  if(opdet == 20){ return 9.77; }
+  if(opdet == 21){ return 9.64; }
+  if(opdet == 22){ return 10.14; }
+  if(opdet == 23){ return 9.74; }
+  if(opdet == 24){ return 9.76; }
+  if(opdet == 25){ return 10.10; }
+  if(opdet == 26){ return 10.48; }
+  if(opdet == 27){ return 9.81; }
+  if(opdet == 28){ return 9.99; }
+  if(opdet == 29){ return 9.79; }
+  if(opdet == 30){ return 9.93; }
+  if(opdet == 31){ return 10.01; }
+  return 0;
+}

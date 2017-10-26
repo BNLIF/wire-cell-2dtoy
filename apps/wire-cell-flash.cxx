@@ -37,26 +37,65 @@ int main(int argc, char* argv[])
   int eve_num = atoi(argv[3]);
 
   WireCell2dToy::uBooNE_light_reco uboone_flash(root_file);
-  uboone_flash.load_event(eve_num);
-
+  //uboone_flash.load_event(eve_num);
+  uboone_flash.load_event_raw(eve_num);
+    
   TFile *file1 = new TFile(root_file);
   TTree *T = (TTree*)file1->Get("/Event/Sim");
+  
+  TClonesArray* cosmic_hg_wf = new TClonesArray;
+  TClonesArray* cosmic_lg_wf = new TClonesArray;
+  TClonesArray* beam_hg_wf = new TClonesArray;
+  TClonesArray* beam_lg_wf = new TClonesArray;
+  vector<short> *cosmic_hg_opch = new vector<short>;
+  vector<short> *cosmic_lg_opch = new vector<short>;
+  vector<short> *beam_hg_opch = new vector<short>;
+  vector<short> *beam_lg_opch = new vector<short>;
+  vector<double> *cosmic_hg_timestamp = new vector<double>;
+  vector<double> *cosmic_lg_timestamp = new vector<double>;
+  vector<double> *beam_hg_timestamp = new vector<double>;
+  vector<double> *beam_lg_timestamp = new vector<double>;
+  vector<short> *opch_to_opdet = new vector<short>; 
+  std::vector<float> *op_gain = new std::vector<float>;
+  std::vector<float> *op_gainerror = new std::vector<float>; 
+  double triggerTime;
+  /*
+  // for "saturation" waveforms
   TClonesArray* op_wf = new TClonesArray;
+  std::vector<short> *op_femch = new std::vector<short>;
   std::vector<int> *op_femch = new std::vector<int>;
   std::vector<double> *op_timestamp = new std::vector<double>;
   std::vector<double> *op_gain = new std::vector<double>;
   std::vector<double> *op_gainerror = new std::vector<double>;
+  std::vector<float> *op_gain = new std::vector<float>;
+  std::vector<float> *op_gainerror = new std::vector<float>; 
   double triggerTime;
-
+  */
   int event_no, run_no, subrun_no;
   
+  T->SetBranchAddress("cosmic_hg_wf",&cosmic_hg_wf);
+  T->SetBranchAddress("cosmic_lg_wf",&cosmic_lg_wf);
+  T->SetBranchAddress("beam_hg_wf",&beam_hg_wf);
+  T->SetBranchAddress("beam_lg_wf",&beam_lg_wf);
+  T->SetBranchAddress("cosmic_hg_opch",&cosmic_hg_opch);
+  T->SetBranchAddress("cosmic_lg_opch",&cosmic_lg_opch);
+  T->SetBranchAddress("beam_hg_opch",&beam_hg_opch);
+  T->SetBranchAddress("beam_lg_opch",&beam_lg_opch);
+  T->SetBranchAddress("cosmic_hg_timestamp",&cosmic_hg_timestamp);
+  T->SetBranchAddress("cosmic_lg_timestamp",&cosmic_lg_timestamp);
+  T->SetBranchAddress("beam_hg_timestamp",&beam_hg_timestamp);
+  T->SetBranchAddress("beam_lg_timestamp",&beam_lg_timestamp);
+  T->SetBranchAddress("opch_to_opdet",&opch_to_opdet); 
+  T->SetBranchAddress("op_gain",&op_gain);
+  T->SetBranchAddress("op_gainerror",&op_gainerror);
+  /*
   T->SetBranchAddress("op_femch",&op_femch);
   T->SetBranchAddress("op_gain",&op_gain);
   T->SetBranchAddress("op_gainerror",&op_gainerror);
   T->SetBranchAddress("op_timestamp",&op_timestamp);
   T->SetBranchAddress("op_wf",&op_wf);
   T->SetBranchAddress("triggerTime",&triggerTime);
-
+  */
   T->SetBranchStatus("eventNo",1);
   T->SetBranchAddress("eventNo" , &event_no);
   T->SetBranchStatus("runNo",1);
@@ -65,24 +104,36 @@ int main(int argc, char* argv[])
   T->SetBranchAddress("subRunNo", &subrun_no);
   
   T->GetEntry(eve_num);
-  
-  
+
   TFile *file = new TFile(Form("flash_%d_%d_%d.root",run_no, subrun_no, event_no),"RECREATE");
   TTree *t1 = new TTree("T_data","T_data");
   t1->SetDirectory(file);
   
-  t1->Branch("op_femch",&op_femch);
+  t1->Branch("cosmic_hg_wf",&cosmic_hg_wf, 25600,0);
+  t1->Branch("cosmic_lg_wf",&cosmic_lg_wf,25600,0);
+  t1->Branch("beam_hg_wf",&beam_hg_wf,25600,0);
+  t1->Branch("beam_lg_wf",&beam_lg_wf,25600,0);
+  t1->Branch("cosmic_hg_timestamp",&cosmic_hg_timestamp);
+  t1->Branch("cosmic_lg_timestamp",&cosmic_lg_timestamp);
+  t1->Branch("beam_hg_timestamp",&beam_hg_timestamp);
+  t1->Branch("beam_lg_timestamp",&beam_lg_timestamp);
+  t1->Branch("cosmic_hg_opch",&cosmic_hg_opch);
+  t1->Branch("cosmic_lg_opch",&cosmic_lg_opch);
+  t1->Branch("beam_hg_opch",&beam_hg_opch);
+  t1->Branch("beam_lg_opch",&beam_lg_opch);
+  t1->Branch("opch_to_opdet",&opch_to_opdet); 
   t1->Branch("op_gain",&op_gain);
   t1->Branch("op_gainerror",&op_gainerror);
-  t1->Branch("op_timestamp",&op_timestamp);
-  t1->Branch("op_wf",&op_wf,25600,0);
+  //t1->Branch("op_femch",&op_femch);
+  //t1->Branch("op_timestamp",&op_timestamp);
+  //t1->Branch("op_wf",&op_wf,25600,0);
   t1->Branch("triggerTime",&triggerTime);
   
   t1->Branch("runNo",&run_no);
   t1->Branch("subRunNo",&subrun_no);
   t1->Branch("eventNo",&event_no);
   t1->Fill();
-  
+
   TH2F *h1 = new TH2F("hraw","hraw",1500,0,1500,32,0,32);
   TH2F *h2 = new TH2F("hdecon","hdecon",250,0,250,32,0,32);
   TH2F *h3 = new TH2F("hl1","hl1",250,0,250,32,0,32);
@@ -155,9 +206,8 @@ int main(int argc, char* argv[])
     T_flash->Fill();
     
   }
-  
+
   file->Write();
   file->Close();
-  
   return 1;
 }

@@ -34,9 +34,15 @@ namespace WireCell2dToy{
     void Process_beam_wfs();
     void sort_flashes();
     std::pair<double,double> cal_mean_rms(TH1 *hist, int nbin=1500);
-    /*void mergeRaw(TH1S *h_hg, short hg_chan, double hg_timestamp,
-		  Int_t nentries_lg, TH1S *h_lg, std::vector<short> *lg_chan, std::vector<double> *lg_timestamp,
-		  bool beamDisc, std::vector<int> OpChanToOpDet); */
+    void mergeRawBeam(TClonesArray *hg_wf, std::vector<short> *hg_chan, std::vector<double> *hg_timestamp,
+		      TClonesArray *lg_wf, std::vector<short> *lg_chan, std::vector<double> *lg_timestamp,
+		      bool beamDisc, std::vector<int> *OpChanToOpDet, int ctr);
+    void mergeRawCosmic(TClonesArray *hg_wf, std::vector<short> *hg_chan, std::vector<double> *hg_timestamp,
+			TClonesArray *lg_wf, std::vector<short> *lg_chan, std::vector<double> *lg_timestamp,
+			bool beamDisc, std::vector<int> *OpChanToOpDet, int ctr); 
+    void reorderMerged(TClonesArray *beam_wf, std::vector<short> *beam_femch, std::vector<double> *beam_timestamp,
+		       TClonesArray *cosmic_wf, std::vector<short> *cosmic_femch, std::vector<double> *cosmic_timestamp);
+    float findScaling(int opdet);
     
     TFile *file;
     TTree *T;
@@ -56,7 +62,20 @@ namespace WireCell2dToy{
     TH1F *h_l1_mult;
     TH1F *h_l1_totPE;
     
-    
+    TClonesArray *fop_wf_beam;
+    std::vector<short> *fop_femch_beam;
+    std::vector<double> *fop_timestamp_beam;
+    int ctr_beam;
+
+    TClonesArray *fop_wf_cosmic;
+    std::vector<short> *fop_femch_cosmic;
+    std::vector<double> *fop_timestamp_cosmic;
+    int ctr_cosmic;
+
+    TClonesArray *fop_wf;
+    std::vector<short> *fop_femch;
+    std::vector<double> *fop_timestamp;
+    int ctr;
   };
 }
 
