@@ -21,6 +21,9 @@ namespace WireCell2dToy{
     TH1F* get_decon_hist(int ch){return hdecon[ch];};
     TH1F* get_l1_hist(int ch){return hl1[ch];};
 
+    TClonesArray* get_rawWfm(){return fop_wf;}
+    std::vector<short>* get_rawChan(){return fop_femch;}
+    std::vector<double>* get_rawTimestamp(){return fop_timestamp;}
     TH1F* get_totPE(){return h_totPE;};
     TH1F* get_mult(){return h_mult;};
     TH1F* get_l1_mult(){return h_l1_mult;};

@@ -59,14 +59,13 @@ int main(int argc, char* argv[])
   std::vector<float> *op_gain = new std::vector<float>;
   std::vector<float> *op_gainerror = new std::vector<float>; 
   double triggerTime;
-  /*
+  
   // for "saturation" waveforms
-  TClonesArray* op_wf = new TClonesArray;
+  TClonesArray* op_wf = new TClonesArray("TH1S");
   std::vector<short> *op_femch = new std::vector<short>;
-  std::vector<int> *op_femch = new std::vector<int>;
+  //std::vector<int> *op_femch = new std::vector<int>;
   std::vector<double> *op_timestamp = new std::vector<double>;
-  std::vector<double> *op_gain = new std::vector<double>;
-  std::vector<double> *op_gainerror = new std::vector<double>;
+  /*
   std::vector<float> *op_gain = new std::vector<float>;
   std::vector<float> *op_gainerror = new std::vector<float>; 
   double triggerTime;
@@ -108,30 +107,20 @@ int main(int argc, char* argv[])
   TFile *file = new TFile(Form("flash_%d_%d_%d.root",run_no, subrun_no, event_no),"RECREATE");
   TTree *t1 = new TTree("T_data","T_data");
   t1->SetDirectory(file);
-  
-  t1->Branch("cosmic_hg_wf",&cosmic_hg_wf, 25600,0);
-  t1->Branch("cosmic_lg_wf",&cosmic_lg_wf,25600,0);
-  t1->Branch("beam_hg_wf",&beam_hg_wf,25600,0);
-  t1->Branch("beam_lg_wf",&beam_lg_wf,25600,0);
-  t1->Branch("cosmic_hg_timestamp",&cosmic_hg_timestamp);
-  t1->Branch("cosmic_lg_timestamp",&cosmic_lg_timestamp);
-  t1->Branch("beam_hg_timestamp",&beam_hg_timestamp);
-  t1->Branch("beam_lg_timestamp",&beam_lg_timestamp);
-  t1->Branch("cosmic_hg_opch",&cosmic_hg_opch);
-  t1->Branch("cosmic_lg_opch",&cosmic_lg_opch);
-  t1->Branch("beam_hg_opch",&beam_hg_opch);
-  t1->Branch("beam_lg_opch",&beam_lg_opch);
-  t1->Branch("opch_to_opdet",&opch_to_opdet); 
-  t1->Branch("op_gain",&op_gain);
-  t1->Branch("op_gainerror",&op_gainerror);
-  //t1->Branch("op_femch",&op_femch);
-  //t1->Branch("op_timestamp",&op_timestamp);
-  //t1->Branch("op_wf",&op_wf,25600,0);
+
+  t1->Branch("op_femch",&op_femch);
+  t1->Branch("op_timestamp",&op_timestamp);
+  t1->Branch("op_wf",&op_wf,256000,0);
   t1->Branch("triggerTime",&triggerTime);
-  
+
   t1->Branch("runNo",&run_no);
   t1->Branch("subRunNo",&subrun_no);
   t1->Branch("eventNo",&event_no);
+
+  op_wf = uboone_flash.get_rawWfm();
+  op_femch = uboone_flash.get_rawChan();
+  op_timestamp = uboone_flash.get_rawTimestamp();
+
   t1->Fill();
 
   TH2F *h1 = new TH2F("hraw","hraw",1500,0,1500,32,0,32);
