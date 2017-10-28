@@ -1,5 +1,7 @@
 #include "WireCell2dToy/CalcPoints.h"
 
+//#include <tuple>
+
 using namespace WireCell;
 
 void WireCell2dToy::calc_boundary_points_dead(WireCell::GeomDataSource& gds, WireCell::PR3DCluster* cluster){
@@ -659,6 +661,7 @@ void WireCell2dToy::calc_sampling_points(WireCell::GeomDataSource& gds, WireCell
   }
 
   PointVector sampling_points;
+  std::vector<std::tuple<int,int,int>> sampling_points_wires;
   
   float other_pitch = gds.pitch(other_wire_plane_type);
   float dis_limit[2];
@@ -672,8 +675,8 @@ void WireCell2dToy::calc_sampling_points(WireCell::GeomDataSource& gds, WireCell
 
   
   
-  int max_step = std::max(2.0,max_wires.size()/12.);
-  int min_step = std::max(2.0,min_wires.size()/12.);
+  int max_step = std::max(3.0,max_wires.size()/12.);
+  int min_step = std::max(3.0,min_wires.size()/12.);
   //std::cout << min_step << " " << max_step << std::endl;
   GeomWireSetp max_wires_set;
   GeomWireSetp min_wires_set;
@@ -696,7 +699,42 @@ void WireCell2dToy::calc_sampling_points(WireCell::GeomDataSource& gds, WireCell
       float dis = gds.wire_dist(point,other_wire_plane_type);
       if (dis>=dis_limit[0]&&dis<=dis_limit[1]){
 	point.x = (mcell->GetTimeSlice()*nrebin/2.*unit_dis/10. - frame_length/2.*unit_dis/10.) * units::cm;
+
+	int index_u;
+	int index_v;
+	int index_w;
+	const GeomWire* wire_other = gds.closest(point,other_wire_plane_type);
+	if (max_wire_plane_type==WirePlaneType_t(0)){
+	  index_u = (*it)->index();
+	  if (min_wire_plane_type==WirePlaneType_t(1)){
+	    index_v = (*it1)->index();
+	    index_w = wire_other->index();
+	  }else{
+	    index_w = (*it1)->index();
+	    index_v = wire_other->index();
+	  }
+	}else if (max_wire_plane_type==WirePlaneType_t(1)){
+	  index_v = (*it)->index();
+	  if (min_wire_plane_type==WirePlaneType_t(0)){
+	    index_u = (*it1)->index();
+	    index_w = wire_other->index();
+	  }else{
+	    index_w = (*it1)->index();
+	    index_u = wire_other->index();
+	  }
+	}else{
+	  index_w = (*it)->index();
+	  if (min_wire_plane_type==WirePlaneType_t(0)){
+	    index_u = (*it1)->index();
+	    index_v = wire_other->index();
+	  }else if (min_wire_plane_type==WirePlaneType_t(1)){
+	    index_v = (*it1)->index();
+	    index_u = wire_other->index();
+	  }
+	}
 	sampling_points.push_back(point);
+	sampling_points_wires.push_back(std::make_tuple(index_u, index_v, index_w));
+	//std::cout << index_u << " " << index_v << " " <<index_w << std::endl;
       }
       //std::cout << "A: " <<dis_limit[0] << " " << dis << " " << dis_limit[1] << std::endl; 
     }
@@ -704,9 +742,13 @@ void WireCell2dToy::calc_sampling_points(WireCell::GeomDataSource& gds, WireCell
   
   //std::cout << sampling_points.size() << " " << wires_u.size() <<  " " << wires_v.size() << " " << wires_w.size() << " " << max_wires.size() << " " << min_wires.size() << std::endl;
   
-  if (sampling_points.size()>0)
+  if (sampling_points.size()>0){
     mcell->AddSamplingPoints(sampling_points);
-  
+    mcell->AddSamplingPointsWires(sampling_points_wires);
+    mcell->SetMaxWireInterval(max_wire_plane_type,max_step);
+    mcell->SetMinWireInterval(min_wire_plane_type,min_step);
+    // std::cout << max_wire_plane_type << " " << max_step << " " << min_wire_plane_type << " " << min_step << std::endl;
+  }
   // std::cout << min_wires.size() << " " << max_wires.size() << " " << wires_u.size() << " " << wires_v.size() << " " << wires_w.size() << std::endl;
 
   
