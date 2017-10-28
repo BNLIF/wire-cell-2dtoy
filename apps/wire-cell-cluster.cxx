@@ -278,8 +278,11 @@ int main(int argc, char* argv[])
      // live_clusters.at(i)->Create_point_cloud();
      // std::cout << i << " "<< live_clusters.at(i)->get_point_cloud()->get_num_points() << std::endl;
    //}
-   live_clusters.at(0)->Create_graph();
-   
+   for (size_t i=0;i!=live_clusters.size();i++){
+     std::cout << live_clusters.at(i)->get_mcells().size() << " " << live_clusters.at(i)->get_num_time_slices() << std::endl;
+     live_clusters.at(i)->Create_graph();
+   }
+   cerr << em("Create Graph in all clusters") << std::endl;
    
    // Point p1(337.346*units::cm,87.0524*units::cm,697.899*units::cm);
    // for (int i=0;i!=live_clusters.size();i++){
