@@ -46,6 +46,7 @@
 #include "WireCell2dToy/uBooNE_Data_ROI.h"
 #include "WireCell2dToy/uBooNE_Data_After_ROI.h"
 #include "WireCell2dToy/uBooNE_Data_After_ROI_gaus.h"
+#include "WireCell2dToy/ExecMon.h"
 
 #include "TApplication.h"
 #include "TCanvas.h"
@@ -65,7 +66,7 @@ using namespace std;
 int main(int argc, char* argv[])
 {
   if (argc < 4) {
-    cerr << "usage: wire-cell-uboone /path/to/ChannelWireGeometry.txt /path/to/celltree.root eve_num -t[0,1] -s[0,1,2]" << endl;
+    cout << "usage: wire-cell-uboone /path/to/ChannelWireGeometry.txt /path/to/celltree.root eve_num -t[0,1] -s[0,1,2]" << endl;
     return 1;
   }
 
@@ -98,10 +99,13 @@ int main(int argc, char* argv[])
   
   if (two_plane)
     cout << "Enable Two Plane Reconstruction " << endl; 
+
+  ExecMon em("starting");
+
   
   WireCellSst::GeomDataSource gds(argv[1]);
   std::vector<double> ex = gds.extent();
-  cerr << "Extent: "
+  cout << "Extent: "
        << " x:" << ex[0]/units::mm << " mm"
        << " y:" << ex[1]/units::m << " m"
        << " z:" << ex[2]/units::m << " m"
@@ -179,6 +183,8 @@ int main(int argc, char* argv[])
     if (save_file == 1)
       data_fds->Save();
   }
+
+  cout << em("noise filtering") << endl;
   
   run_no = data_fds->get_run_no();
   subrun_no = data_fds->get_subrun_no();
@@ -196,12 +202,17 @@ int main(int argc, char* argv[])
   cout << "Deconvolution with Wiener filter" << endl; 
   WireCell2dToy::uBooNEData2DDeconvolutionFDS *wien_fds = new WireCell2dToy::uBooNEData2DDeconvolutionFDS(*data_fds,gds,uplane_map, vplane_map, wplane_map,100,toffset_1,toffset_2,toffset_3);
   wien_fds->jump(eve_num);
+
+  cout << em("2D deconvolution") << endl;
+  
   WireCell2dToy::uBooNEDataROI *uboone_rois = new WireCell2dToy::uBooNEDataROI(*data_fds,*wien_fds,gds,uplane_map,vplane_map,wplane_map,lf_noisy_channels);
   WireCell2dToy::uBooNEDataAfterROI roi_fds(*wien_fds,gds,*uboone_rois,nrebin);
   roi_fds.jump(eve_num);
   WireCell2dToy::uBooNEDataAfterROI_Gaus roi_gaus_fds(wien_fds, &roi_fds,gds);
   roi_gaus_fds.jump(eve_num);
 
+  cout << em("ROI finder") << endl;
+  
   std::vector<float> uplane_rms = uboone_rois->get_uplane_rms();
   std::vector<float> vplane_rms = uboone_rois->get_vplane_rms();
   std::vector<float> wplane_rms = uboone_rois->get_wplane_rms();
@@ -456,7 +467,7 @@ int main(int argc, char* argv[])
   }
   
 
-
+  cout << em("save file") << endl;
 
   file->Write();
   file->Close();  
