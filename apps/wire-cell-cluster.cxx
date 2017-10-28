@@ -274,6 +274,12 @@ int main(int argc, char* argv[])
    WireCell2dToy::Clustering_jump_gap_cosmics(live_clusters);
    cerr << em("Clustering to jump gap in cosmics") << std::endl;
 
+   //for (size_t i=0;i!=live_clusters.size();i++){
+     // live_clusters.at(i)->Create_point_cloud();
+     // std::cout << i << " "<< live_clusters.at(i)->get_point_cloud()->get_num_points() << std::endl;
+   //}
+   live_clusters.at(0)->Create_graph();
+   
    
    // Point p1(337.346*units::cm,87.0524*units::cm,697.899*units::cm);
    // for (int i=0;i!=live_clusters.size();i++){
