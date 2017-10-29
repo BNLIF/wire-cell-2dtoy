@@ -284,6 +284,7 @@ int main(int argc, char* argv[])
      std::pair<WCPointCloud<double>::WCPoint,WCPointCloud<double>::WCPoint> wcps = live_clusters.at(i)->get_highest_lowest_wcps();
      live_clusters.at(i)->dijkstra_shortest_paths(wcps.first);
      live_clusters.at(i)->cal_shortest_path(wcps.second);
+     live_clusters.at(i)->fine_tracking();
      
    }
    
@@ -359,6 +360,8 @@ int main(int argc, char* argv[])
     	 T_cluster->Fill();
        }
      }
+
+     // save wcps
      std::list<WCPointCloud<double>::WCPoint>& wcps_list = live_clusters.at(j)->get_path_wcps();
      ncluster = -1 * ncluster-100;
      for (auto it = wcps_list.begin(); it!=wcps_list.end(); it++){
@@ -367,6 +370,18 @@ int main(int argc, char* argv[])
        z = (*it).z/units::cm;
        T_cluster->Fill();
      }
+
+     // // save mcells
+     // std::list<SlimMergeGeomCell*>& mcells_list = live_clusters.at(j)->get_path_mcells();
+     // ncluster = -1 * ncluster-100;
+     // for (auto it = mcells_list.begin(); it!=mcells_list.end(); it++){
+     //   Point p = (*it)->center();
+     //   x = p.x/units::cm;
+     //   y = p.y/units::cm;
+     //   z = p.z/units::cm;
+     //   T_cluster->Fill();
+     // }
+     
      
      // if (live_clusters.at(j)->get_num_mcells()>30){
      //   // add PCA axis point
