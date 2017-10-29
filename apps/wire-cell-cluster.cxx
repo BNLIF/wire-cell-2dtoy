@@ -268,17 +268,17 @@ int main(int argc, char* argv[])
    cerr << em("Add X, Y, Z points") << std::endl;
 
    
-   // WireCell2dToy::Clustering_live_dead(live_clusters, dead_clusters);
-   // cerr << em("Clustering live and dead clusters") << std::endl;
+   WireCell2dToy::Clustering_live_dead(live_clusters, dead_clusters);
+   cerr << em("Clustering live and dead clusters") << std::endl;
 
-   // WireCell2dToy::Clustering_jump_gap_cosmics(live_clusters);
-   // cerr << em("Clustering to jump gap in cosmics") << std::endl;
+   WireCell2dToy::Clustering_jump_gap_cosmics(live_clusters);
+   cerr << em("Clustering to jump gap in cosmics") << std::endl;
 
    //for (size_t i=0;i!=live_clusters.size();i++){
      // live_clusters.at(i)->Create_point_cloud();
      // std::cout << i << " "<< live_clusters.at(i)->get_point_cloud()->get_num_points() << std::endl;
    //}
-   for (size_t i=1;i!=2;i++){
+   for (size_t i=0;i!=live_clusters.size();i++){
      std::cout << live_clusters.at(i)->get_mcells().size() << " " << live_clusters.at(i)->get_num_time_slices() << std::endl;
      live_clusters.at(i)->Create_graph();
    }
