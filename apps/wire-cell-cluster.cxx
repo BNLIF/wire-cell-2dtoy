@@ -278,10 +278,16 @@ int main(int argc, char* argv[])
      // live_clusters.at(i)->Create_point_cloud();
      // std::cout << i << " "<< live_clusters.at(i)->get_point_cloud()->get_num_points() << std::endl;
    //}
-   for (size_t i=0;i!=live_clusters.size();i++){
+   for (size_t i=0;i!=1;i++){
      std::cout << live_clusters.at(i)->get_mcells().size() << " " << live_clusters.at(i)->get_num_time_slices() << std::endl;
      live_clusters.at(i)->Create_graph();
+     std::pair<WCPointCloud<double>::WCPoint,WCPointCloud<double>::WCPoint> wcps = live_clusters.at(i)->get_highest_lowest_wcps();
+     live_clusters.at(i)->dijkstra_shortest_paths(wcps.first);
+     live_clusters.at(i)->cal_shortest_path(wcps.second);
+     
    }
+   
+   
    cerr << em("Create Graph in all clusters") << std::endl;
    
    // Point p1(337.346*units::cm,87.0524*units::cm,697.899*units::cm);
@@ -353,6 +359,15 @@ int main(int argc, char* argv[])
     	 T_cluster->Fill();
        }
      }
+     std::list<WCPointCloud<double>::WCPoint>& wcps_list = live_clusters.at(j)->get_path_wcps();
+     ncluster = -1 * ncluster-100;
+     for (auto it = wcps_list.begin(); it!=wcps_list.end(); it++){
+       x = (*it).x/units::cm;
+       y = (*it).y/units::cm;
+       z = (*it).z/units::cm;
+       T_cluster->Fill();
+     }
+     
      // if (live_clusters.at(j)->get_num_mcells()>30){
      //   // add PCA axis point
      //   Vector center = live_clusters.at(j)->get_center();
