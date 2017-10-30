@@ -339,6 +339,12 @@ int main(int argc, char* argv[])
    T_cluster->Branch("z",&z,"z/D");
    T_cluster->SetDirectory(file1);
 
+   TTree *T_rec = new TTree("T_rec","T_rec");
+   T_rec->Branch("x",&x,"x/D");
+   T_rec->Branch("y",&y,"y/D");
+   T_rec->Branch("z",&z,"z/D");
+   T_rec->SetDirectory(file1);
+   
    // test ... 
    // ncluster = 0;
    // x=  0;
@@ -363,12 +369,12 @@ int main(int argc, char* argv[])
 
      // save wcps
      std::list<WCPointCloud<double>::WCPoint>& wcps_list = live_clusters.at(j)->get_path_wcps();
-     ncluster = -1 * ncluster-100;
+     //ncluster = -1 * ncluster-100;
      for (auto it = wcps_list.begin(); it!=wcps_list.end(); it++){
        x = (*it).x/units::cm;
        y = (*it).y/units::cm;
        z = (*it).z/units::cm;
-       T_cluster->Fill();
+       T_rec->Fill();
      }
 
      // // save mcells
