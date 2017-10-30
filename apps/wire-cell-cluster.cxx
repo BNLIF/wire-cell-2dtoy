@@ -311,7 +311,6 @@ int main(int argc, char* argv[])
      live_clusters.at(i)->fine_tracking(first_u_dis, first_v_dis, first_w_dis);
    }
    
-   
    cerr << em("Create Graph in all clusters") << std::endl;
    
    // Point p1(337.346*units::cm,87.0524*units::cm,697.899*units::cm);
@@ -367,6 +366,17 @@ int main(int argc, char* argv[])
    T_rec->Branch("y",&y,"y/D");
    T_rec->Branch("z",&z,"z/D");
    T_rec->SetDirectory(file1);
+
+   Double_t charge_save=1, ncharge_save=1, chi2_save=1, ndf_save=1;
+   TTree *t_rec_charge = new TTree("T_rec_charge","T_rec_charge");
+   t_rec_charge->SetDirectory(file1);
+   t_rec_charge->Branch("x",&x,"x/D");
+   t_rec_charge->Branch("y",&y,"y/D");
+   t_rec_charge->Branch("z",&z,"z/D");
+   t_rec_charge->Branch("q",&charge_save,"q/D");
+   t_rec_charge->Branch("nq",&ncharge_save,"nq/D");
+   t_rec_charge->Branch("chi2",&chi2_save,"chi2/D");
+   t_rec_charge->Branch("ndf",&ndf_save,"ndf/D");
    
    // test ... 
    // ncluster = 0;
@@ -399,6 +409,16 @@ int main(int argc, char* argv[])
        z = (*it).z/units::cm;
        T_rec->Fill();
      }
+
+     PointVector& pts = live_clusters.at(j)->get_fine_tracking_path();
+     for (size_t i=0; i!=pts.size(); i++){
+       x = pts.at(i).x/units::cm;
+       y = pts.at(i).y/units::cm;
+       z = pts.at(i).z/units::cm;
+       t_rec_charge->Fill();
+     }
+
+     
 
      // // save mcells
      // std::list<SlimMergeGeomCell*>& mcells_list = live_clusters.at(j)->get_path_mcells();
