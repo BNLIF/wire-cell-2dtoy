@@ -41,6 +41,18 @@ int main(int argc, char* argv[])
        << " " << gds.angle(WirePlaneType_t(1)) 
        << " " << gds.angle(WirePlaneType_t(2))
        << endl;
+
+
+
+  // test geometry ...
+  const GeomWire *uwire = gds.by_planeindex(WirePlaneType_t(0),0);
+  const GeomWire *vwire = gds.by_planeindex(WirePlaneType_t(1),0);
+  const GeomWire *wwire = gds.by_planeindex(WirePlaneType_t(2),0);
+  double first_u_dis = gds.wire_dist(*uwire) ;
+  double first_v_dis = gds.wire_dist(*vwire) ;
+  double first_w_dis = gds.wire_dist(*wwire) ; 
+  
+  
   TString filename = argv[2];
   TFile *file = new TFile(filename);
   TTree *Trun = (TTree*)file->Get("Trun");
@@ -70,11 +82,22 @@ int main(int argc, char* argv[])
   double pitch_w = gds.pitch(WirePlaneType_t(2));
   double time_slice_width = nrebin * unit_dis * 0.5 * units::mm;
 
+  double angle_u = gds.angle(WirePlaneType_t(0));
+  double angle_v = gds.angle(WirePlaneType_t(1));
+  double angle_w = gds.angle(WirePlaneType_t(2));
+
+  //std::cout << angle_u << " " << angle_v << " " << angle_w << std::endl;
+  
   mp.set_pitch_u(pitch_u);
   mp.set_pitch_v(pitch_v);
   mp.set_pitch_w(pitch_w);
+  mp.set_angle_u(angle_u);
+  mp.set_angle_v(angle_v);
+  mp.set_angle_w(angle_w);
   mp.set_ts_width(time_slice_width);
 
+  
+  
   // load mcell
   
   TTree *TC = (TTree*)file->Get("TC");
@@ -278,14 +301,14 @@ int main(int argc, char* argv[])
      // live_clusters.at(i)->Create_point_cloud();
      // std::cout << i << " "<< live_clusters.at(i)->get_point_cloud()->get_num_points() << std::endl;
    //}
+   
    for (size_t i=0;i!=1;i++){
      std::cout << live_clusters.at(i)->get_mcells().size() << " " << live_clusters.at(i)->get_num_time_slices() << std::endl;
      live_clusters.at(i)->Create_graph();
      std::pair<WCPointCloud<double>::WCPoint,WCPointCloud<double>::WCPoint> wcps = live_clusters.at(i)->get_highest_lowest_wcps();
      live_clusters.at(i)->dijkstra_shortest_paths(wcps.first);
      live_clusters.at(i)->cal_shortest_path(wcps.second);
-     live_clusters.at(i)->fine_tracking();
-     
+     live_clusters.at(i)->fine_tracking(first_u_dis, first_v_dis, first_w_dis);
    }
    
    
