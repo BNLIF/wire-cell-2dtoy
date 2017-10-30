@@ -303,7 +303,7 @@ int main(int argc, char* argv[])
    //}
    
    for (size_t i=0;i!=1;i++){
-     std::cout << live_clusters.at(i)->get_mcells().size() << " " << live_clusters.at(i)->get_num_time_slices() << std::endl;
+     //    std::cout << live_clusters.at(i)->get_mcells().size() << " " << live_clusters.at(i)->get_num_time_slices() << std::endl;
      live_clusters.at(i)->Create_graph();
      std::pair<WCPointCloud<double>::WCPoint,WCPointCloud<double>::WCPoint> wcps = live_clusters.at(i)->get_highest_lowest_wcps();
      live_clusters.at(i)->dijkstra_shortest_paths(wcps.first);
