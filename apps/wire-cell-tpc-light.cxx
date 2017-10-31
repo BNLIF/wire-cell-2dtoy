@@ -8,6 +8,9 @@
 #include "WireCell2dToy/ToyClustering.h"
 #include "WireCell2dToy/uBooNE_light_reco.h"
 
+#include "WireCell2dToy/ToyMatching.h"
+
+
 #include "TH1F.h"
 #include "TH2F.h"
 
@@ -385,7 +388,13 @@ int main(int argc, char* argv[])
    
    T->GetEntry(eve_num);
    
-   
+
+   // prepare light matching ....
+   WireCell::OpflashSelection& flashes = uboone_flash.get_flashes();
+   WireCell2dToy::tpc_light_match(4,group_clusters,flashes);
+   //
+
+
    
    TFile *file1 = new TFile(Form("match_%d_%d_%d.root",run_no,subrun_no,event_no),"RECREATE");
    
@@ -650,7 +659,7 @@ int main(int argc, char* argv[])
   T_flash->Branch("l1_fired_time",&l1_fired_time);
   T_flash->Branch("l1_fired_pe",&l1_fired_pe);
 
-  WireCell::OpflashSelection& flashes = uboone_flash.get_flashes();
+  
   for (auto it = flashes.begin(); it!=flashes.end(); it++){
     fired_channels.clear();
     
