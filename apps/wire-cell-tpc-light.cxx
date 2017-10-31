@@ -82,6 +82,8 @@ int main(int argc, char* argv[])
   Trun->SetBranchAddress("time_offset",&time_offset);
   Trun->GetEntry(0);
 
+  //std::cout << nrebin << " " << time_offset << std::endl;
+  
   // define singleton ... 
   TPCParams& mp = Singleton<TPCParams>::Instance();
   
@@ -391,7 +393,7 @@ int main(int argc, char* argv[])
 
    // prepare light matching ....
    WireCell::OpflashSelection& flashes = uboone_flash.get_flashes();
-   WireCell2dToy::tpc_light_match(4,group_clusters,flashes);
+   WireCell2dToy::tpc_light_match(time_offset,nrebin,group_clusters,flashes);
    cerr << em("TPC Light Matching") << std::endl;
    //
 
