@@ -24,7 +24,9 @@ int main(int argc, char* argv[])
     cerr << "usage: wire-cell-uboone /path/to/ChannelWireGeometry.txt /path/to/imaging.root light.root " << endl;
     return 1;
   }
+  TH1::AddDirectory(kFALSE);
 
+  
   ExecMon em("starting");
   cerr << em("load geometry") << endl;
 
@@ -300,6 +302,8 @@ int main(int argc, char* argv[])
    WireCell2dToy::Clustering_jump_gap_cosmics(live_clusters);
    cerr << em("Clustering to jump gap in cosmics") << std::endl;
 
+   
+   
    
    // for (size_t i=0;i!=live_clusters.size();i++){
    //   //    std::cout << live_clusters.at(i)->get_mcells().size() << " " << live_clusters.at(i)->get_num_time_slices() << std::endl;
