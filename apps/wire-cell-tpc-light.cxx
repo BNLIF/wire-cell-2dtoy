@@ -392,6 +392,7 @@ int main(int argc, char* argv[])
    // prepare light matching ....
    WireCell::OpflashSelection& flashes = uboone_flash.get_flashes();
    WireCell2dToy::tpc_light_match(4,group_clusters,flashes);
+   cerr << em("TPC Light Matching") << std::endl;
    //
 
 
