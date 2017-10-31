@@ -9,7 +9,8 @@ namespace WireCell2dToy{
   // bool IsCrossing(WireCell::Point& p, double theta, double phi, WireCell::SlimMergeGeomCell *mcell, WireCellSst::GeomDataSource& gds);
   void Clustering_jump_gap_cosmics(WireCell::PR3DClusterSelection& live_clusters);
   bool Clustering_jump_gap_cosmics(WireCell::PR3DCluster *cluster1, WireCell::PR3DCluster *cluster2);
-  
+
+  std::map<WireCell::PR3DCluster*,std::vector<std::pair<WireCell::PR3DCluster*,double>>> Clustering_isolated(WireCell::PR3DClusterSelection& live_clusters);
 }
 
 #endif

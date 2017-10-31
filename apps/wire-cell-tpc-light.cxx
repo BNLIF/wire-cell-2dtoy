@@ -303,7 +303,8 @@ int main(int argc, char* argv[])
    cerr << em("Clustering to jump gap in cosmics") << std::endl;
 
    // need to further cluster things ...
-
+   std::map<PR3DCluster*,std::vector<std::pair<PR3DCluster*,double>>> group_clusters =  WireCell2dToy::Clustering_isolated(live_clusters);
+   cerr << em("Clustering isolated") << std::endl;
    
    
    
@@ -323,71 +324,71 @@ int main(int argc, char* argv[])
    uboone_flash.load_event_raw(0);
    TFile *file2 = new TFile(root_file);
    TTree *T = (TTree*)file2->Get("/Event/Sim");
-
-    TClonesArray* cosmic_hg_wf = new TClonesArray;
-  TClonesArray* cosmic_lg_wf = new TClonesArray;
-  TClonesArray* beam_hg_wf = new TClonesArray;
-  TClonesArray* beam_lg_wf = new TClonesArray;
-  vector<short> *cosmic_hg_opch = new vector<short>;
-  vector<short> *cosmic_lg_opch = new vector<short>;
-  vector<short> *beam_hg_opch = new vector<short>;
-  vector<short> *beam_lg_opch = new vector<short>;
-  vector<double> *cosmic_hg_timestamp = new vector<double>;
-  vector<double> *cosmic_lg_timestamp = new vector<double>;
-  vector<double> *beam_hg_timestamp = new vector<double>;
-  vector<double> *beam_lg_timestamp = new vector<double>;
-  vector<short> *opch_to_opdet = new vector<short>; 
-  std::vector<float> *op_gain = new std::vector<float>;
-  std::vector<float> *op_gainerror = new std::vector<float>; 
-  double triggerTime;
-  
-  // for "saturation" waveforms
-  TClonesArray* op_wf = new TClonesArray("TH1S");
-  std::vector<short> *op_femch = new std::vector<short>;
-  //std::vector<int> *op_femch = new std::vector<int>;
-  std::vector<double> *op_timestamp = new std::vector<double>;
-  /*
-  std::vector<float> *op_gain = new std::vector<float>;
-  std::vector<float> *op_gainerror = new std::vector<float>; 
-  double triggerTime;
-  */
-  
-  T->SetBranchAddress("cosmic_hg_wf",&cosmic_hg_wf);
-  T->SetBranchAddress("cosmic_lg_wf",&cosmic_lg_wf);
-  T->SetBranchAddress("beam_hg_wf",&beam_hg_wf);
-  T->SetBranchAddress("beam_lg_wf",&beam_lg_wf);
-  T->SetBranchAddress("cosmic_hg_opch",&cosmic_hg_opch);
-  T->SetBranchAddress("cosmic_lg_opch",&cosmic_lg_opch);
-  T->SetBranchAddress("beam_hg_opch",&beam_hg_opch);
-  T->SetBranchAddress("beam_lg_opch",&beam_lg_opch);
-  T->SetBranchAddress("cosmic_hg_timestamp",&cosmic_hg_timestamp);
-  T->SetBranchAddress("cosmic_lg_timestamp",&cosmic_lg_timestamp);
-  T->SetBranchAddress("beam_hg_timestamp",&beam_hg_timestamp);
-  T->SetBranchAddress("beam_lg_timestamp",&beam_lg_timestamp);
-  T->SetBranchAddress("opch_to_opdet",&opch_to_opdet); 
-  T->SetBranchAddress("op_gain",&op_gain);
-  T->SetBranchAddress("op_gainerror",&op_gainerror);
-  /*
-  T->SetBranchAddress("op_femch",&op_femch);
-  T->SetBranchAddress("op_gain",&op_gain);
-  T->SetBranchAddress("op_gainerror",&op_gainerror);
-  T->SetBranchAddress("op_timestamp",&op_timestamp);
-  T->SetBranchAddress("op_wf",&op_wf);
-  */
-  T->SetBranchAddress("triggerTime",&triggerTime);
-  T->SetBranchStatus("eventNo",1);
-  T->SetBranchAddress("eventNo" , &event_no);
-  T->SetBranchStatus("runNo",1);
-  T->SetBranchAddress("runNo"   , &run_no);
-  T->SetBranchStatus("subRunNo",1);
-  T->SetBranchAddress("subRunNo", &subrun_no);
-  
-  T->GetEntry(eve_num);
+   
+   TClonesArray* cosmic_hg_wf = new TClonesArray;
+   TClonesArray* cosmic_lg_wf = new TClonesArray;
+   TClonesArray* beam_hg_wf = new TClonesArray;
+   TClonesArray* beam_lg_wf = new TClonesArray;
+   vector<short> *cosmic_hg_opch = new vector<short>;
+   vector<short> *cosmic_lg_opch = new vector<short>;
+   vector<short> *beam_hg_opch = new vector<short>;
+   vector<short> *beam_lg_opch = new vector<short>;
+   vector<double> *cosmic_hg_timestamp = new vector<double>;
+   vector<double> *cosmic_lg_timestamp = new vector<double>;
+   vector<double> *beam_hg_timestamp = new vector<double>;
+   vector<double> *beam_lg_timestamp = new vector<double>;
+   vector<short> *opch_to_opdet = new vector<short>; 
+   std::vector<float> *op_gain = new std::vector<float>;
+   std::vector<float> *op_gainerror = new std::vector<float>; 
+   double triggerTime;
+   
+   // for "saturation" waveforms
+   TClonesArray* op_wf = new TClonesArray("TH1S");
+   std::vector<short> *op_femch = new std::vector<short>;
+   //std::vector<int> *op_femch = new std::vector<int>;
+   std::vector<double> *op_timestamp = new std::vector<double>;
+   /*
+     std::vector<float> *op_gain = new std::vector<float>;
+     std::vector<float> *op_gainerror = new std::vector<float>; 
+     double triggerTime;
+   */
+   
+   T->SetBranchAddress("cosmic_hg_wf",&cosmic_hg_wf);
+   T->SetBranchAddress("cosmic_lg_wf",&cosmic_lg_wf);
+   T->SetBranchAddress("beam_hg_wf",&beam_hg_wf);
+   T->SetBranchAddress("beam_lg_wf",&beam_lg_wf);
+   T->SetBranchAddress("cosmic_hg_opch",&cosmic_hg_opch);
+   T->SetBranchAddress("cosmic_lg_opch",&cosmic_lg_opch);
+   T->SetBranchAddress("beam_hg_opch",&beam_hg_opch);
+   T->SetBranchAddress("beam_lg_opch",&beam_lg_opch);
+   T->SetBranchAddress("cosmic_hg_timestamp",&cosmic_hg_timestamp);
+   T->SetBranchAddress("cosmic_lg_timestamp",&cosmic_lg_timestamp);
+   T->SetBranchAddress("beam_hg_timestamp",&beam_hg_timestamp);
+   T->SetBranchAddress("beam_lg_timestamp",&beam_lg_timestamp);
+   T->SetBranchAddress("opch_to_opdet",&opch_to_opdet); 
+   T->SetBranchAddress("op_gain",&op_gain);
+   T->SetBranchAddress("op_gainerror",&op_gainerror);
+   /*
+     T->SetBranchAddress("op_femch",&op_femch);
+     T->SetBranchAddress("op_gain",&op_gain);
+     T->SetBranchAddress("op_gainerror",&op_gainerror);
+     T->SetBranchAddress("op_timestamp",&op_timestamp);
+     T->SetBranchAddress("op_wf",&op_wf);
+   */
+   T->SetBranchAddress("triggerTime",&triggerTime);
+   T->SetBranchStatus("eventNo",1);
+   T->SetBranchAddress("eventNo" , &event_no);
+   T->SetBranchStatus("runNo",1);
+   T->SetBranchAddress("runNo"   , &run_no);
+   T->SetBranchStatus("subRunNo",1);
+   T->SetBranchAddress("subRunNo", &subrun_no);
+   
+   T->GetEntry(eve_num);
    
    
    
    TFile *file1 = new TFile(Form("match_%d_%d_%d.root",run_no,subrun_no,event_no),"RECREATE");
-
+   
    TTree *t_bad = new TTree("T_bad","T_bad");
    t_bad->SetDirectory(file1);
    Int_t bad_npoints;
@@ -445,21 +446,44 @@ int main(int argc, char* argv[])
    // y=0;
    // z=0;
    // T_cluster->Fill();
-   
-   for (size_t j = 0; j!= live_clusters.size(); j++){
-     SMGCSelection& mcells = live_clusters.at(j)->get_mcells();
-     ncluster = live_clusters.at(j)->get_cluster_id();
-     for (size_t i=0;i!=mcells.size();i++){
-       PointVector ps = mcells.at(i)->get_sampling_points();
-       int time_slice = mcells.at(i)->GetTimeSlice();
-       if (ps.size()==0) std::cout << "zero sampling points!" << std::endl;
-       for (int k=0;k!=ps.size();k++){
-    	 x = ps.at(k).x/units::cm;//time_slice*nrebin/2.*unit_dis/10. - frame_length/2.*unit_dis/10.;
-    	 y = ps.at(k).y/units::cm;
-    	 z = ps.at(k).z/units::cm;
-    	 T_cluster->Fill();
+
+   for (auto it = group_clusters.begin(); it!= group_clusters.end(); it++){
+     PR3DClusterSelection temp_clusters;
+     temp_clusters.push_back(it->first);
+     for (auto it1 = it->second.begin(); it1!=it->second.end(); it1++){
+       temp_clusters.push_back((*it1).first);
+     }
+     for (size_t j = 0; j!= temp_clusters.size(); j++){
+       SMGCSelection& mcells = temp_clusters.at(j)->get_mcells();
+       ncluster = temp_clusters.at(j)->get_cluster_id();
+       for (size_t i=0;i!=mcells.size();i++){
+	 PointVector ps = mcells.at(i)->get_sampling_points();
+	 int time_slice = mcells.at(i)->GetTimeSlice();
+	 if (ps.size()==0) std::cout << "zero sampling points!" << std::endl;
+	 for (int k=0;k!=ps.size();k++){
+	   x = ps.at(k).x/units::cm;//time_slice*nrebin/2.*unit_dis/10. - frame_length/2.*unit_dis/10.;
+	   y = ps.at(k).y/units::cm;
+	   z = ps.at(k).z/units::cm;
+	   T_cluster->Fill();
+	 }
        }
      }
+   }
+   
+   for (size_t j = 0; j!= live_clusters.size(); j++){
+     // SMGCSelection& mcells = live_clusters.at(j)->get_mcells();
+     // ncluster = live_clusters.at(j)->get_cluster_id();
+     // for (size_t i=0;i!=mcells.size();i++){
+     //   PointVector ps = mcells.at(i)->get_sampling_points();
+     //   int time_slice = mcells.at(i)->GetTimeSlice();
+     //   if (ps.size()==0) std::cout << "zero sampling points!" << std::endl;
+     //   for (int k=0;k!=ps.size();k++){
+     // 	 x = ps.at(k).x/units::cm;//time_slice*nrebin/2.*unit_dis/10. - frame_length/2.*unit_dis/10.;
+     // 	 y = ps.at(k).y/units::cm;
+     // 	 z = ps.at(k).z/units::cm;
+     // 	 T_cluster->Fill();
+     //   }
+     // }
 
      // save wcps
      std::list<WCPointCloud<double>::WCPoint>& wcps_list = live_clusters.at(j)->get_path_wcps();
