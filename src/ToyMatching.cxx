@@ -14,15 +14,21 @@ using namespace Eigen;
 using namespace WireCell;
 
 int WireCell2dToy::convert_xyz_voxel_id(WireCell::Point &p){
+  // int voxel_x_id = std::round((p.x/units::cm+64.825-5.14667/2.)/5.14667);
+  // int voxel_y_id = std::round((p.y/units::cm+193-5.14667/2.)/5.14667);
+  // int voxel_z_id = std::round((p.z/units::cm+128.243-3.23122/2.)/3.23122);
+  
   int voxel_x_id = std::round((p.x/units::cm+64.825-5.14667/2.)/5.14667);
-  int voxel_y_id = std::round((p.y/units::cm+193-5.14667/2.)/5.14667);
-  int voxel_z_id = std::round((p.z/units::cm+128.243-3.23122/2.)/3.23122);
+  int voxel_y_id = std::round((p.y/units::cm+188.416-5.11698/2.)/5.11698);
+  int voxel_z_id = std::round((p.z/units::cm+88.3554-3.05768/2.)/3.05768);
+  
   if (voxel_x_id<0) voxel_x_id=0;
   if (voxel_x_id>=75) voxel_x_id=74;
   if (voxel_y_id<0) voxel_y_id=0;
   if (voxel_y_id>=75) voxel_y_id=74;
   if (voxel_z_id<0) voxel_z_id=0;
   if (voxel_z_id>=400) voxel_z_id=399;
+
   int voxel_id = voxel_z_id*75*75 + voxel_y_id*75 + voxel_x_id;
   return voxel_id;
 }
@@ -98,6 +104,8 @@ void WireCell2dToy::tpc_light_match(int time_offset, int nrebin, std::map<WireCe
   double low_x_cut = 0*units::cm;
   double low_x_cut_ext1 = - 2*units::cm;
 
+  double scaling_light_mag = 0.01;
+  
   int flash_num = 0;
   for (auto it1 =flashes.begin(); it1!=flashes.end(); it1++){
     Opflash *flash = (*it1);
@@ -121,12 +129,12 @@ void WireCell2dToy::tpc_light_match(int time_offset, int nrebin, std::map<WireCe
 	    last_pos_x-offset_x >= high_x_cut && last_pos_x-offset_x < high_x_cut + high_x_cut_ext1){
 	  flag_at_x_boundary = true;
 	}
-
+	
 	std::vector<double> pred_pmt_light;
 	//std::vector<double> pred_pmt_light1;
 	pred_pmt_light.resize(32,0);
 	//pred_pmt_light1.resize(32,0);
-
+	
 	PR3DClusterSelection temp_clusters;
 	// fill in stuff for the main cluster
 	temp_clusters.push_back(main_cluster);
@@ -166,14 +174,15 @@ void WireCell2dToy::tpc_light_match(int time_offset, int nrebin, std::map<WireCe
 	  }
 	}
 
-	
-
-	if (flag_at_x_boundary){
-	  for (size_t i=0;i!=32;i++){
-	    std::cout << flash_num << " " << cluster_id << " " << i << " " << flash->get_PE(i) << " " << flash->get_PE_err(i) << " " << pred_pmt_light.at(map_pmt_lib[i]) << " " <<  std::endl;
-	  }
+	for (size_t i=0;i!=32;i++){
+	  pred_pmt_light.at(i) *= scaling_light_mag;
 	}
 	
+	if (flag_at_x_boundary){
+	  //	  for (size_t i=0;i!=32;i++){
+	  //  std::cout << flash_num << " " << cluster_id << " " << i << " " << flash->get_PE(i) << " " << flash->get_PE_err(i) << " " << pred_pmt_light.at(map_pmt_lib[i]) << " " <<  std::endl;
+	  // }
+	}
       }
       cluster_id++;
     }
