@@ -447,15 +447,17 @@ int main(int argc, char* argv[])
    // z=0;
    // T_cluster->Fill();
 
+   ncluster = 0;
    for (auto it = group_clusters.begin(); it!= group_clusters.end(); it++){
      PR3DClusterSelection temp_clusters;
      temp_clusters.push_back(it->first);
      for (auto it1 = it->second.begin(); it1!=it->second.end(); it1++){
        temp_clusters.push_back((*it1).first);
+       //std::cout << (*it1).second/units::cm << std::endl;
      }
      for (size_t j = 0; j!= temp_clusters.size(); j++){
        SMGCSelection& mcells = temp_clusters.at(j)->get_mcells();
-       ncluster = temp_clusters.at(j)->get_cluster_id();
+       //ncluster = temp_clusters.at(0)->get_cluster_id();
        for (size_t i=0;i!=mcells.size();i++){
 	 PointVector ps = mcells.at(i)->get_sampling_points();
 	 int time_slice = mcells.at(i)->GetTimeSlice();
@@ -468,6 +470,7 @@ int main(int argc, char* argv[])
 	 }
        }
      }
+     ncluster ++;
    }
    
    for (size_t j = 0; j!= live_clusters.size(); j++){

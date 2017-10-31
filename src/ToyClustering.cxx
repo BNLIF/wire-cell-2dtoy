@@ -57,13 +57,18 @@ std::map<PR3DCluster*,std::vector<std::pair<PR3DCluster*,double>>> WireCell2dToy
 	min_dis_cluster = big_cluster;
       }
     }
-
-    if (results.find(min_dis_cluster)==results.end()){
-      std::vector<std::pair<PR3DCluster*,double>> temp;
-      temp.push_back(std::make_pair(curr_cluster,min_dis));
-      results[min_dis_cluster]=temp;
+    if (min_dis < 0.8*units::m){
+      if (results.find(min_dis_cluster)==results.end()){
+	std::vector<std::pair<PR3DCluster*,double>> temp;
+	temp.push_back(std::make_pair(curr_cluster,min_dis));
+	results[min_dis_cluster]=temp;
+      }else{
+	results[min_dis_cluster].push_back(std::make_pair(curr_cluster,min_dis));
+      }
     }else{
-      results[min_dis_cluster].push_back(std::make_pair(curr_cluster,min_dis));
+      big_clusters.push_back(curr_cluster);
+      std::vector<std::pair<PR3DCluster*,double>> temp;
+      results[curr_cluster] = temp;
     }
   }
   
