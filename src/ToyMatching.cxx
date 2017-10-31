@@ -39,6 +39,44 @@ void WireCell2dToy::tpc_light_match(int time_offset, int nrebin, std::map<WireCe
   T->SetBranchAddress("OpChannel",&OpChannel);
   T->SetBranchAddress("Visibility",&Visibility);
 
+  std::map<int,int> map_lib_pmt,map_pmt_lib;
+  map_lib_pmt[1]=2; map_pmt_lib[2]=1; 
+  map_lib_pmt[0]=4; map_pmt_lib[4]=0; 
+  map_lib_pmt[3]=0; map_pmt_lib[0]=3; 
+  map_lib_pmt[2]=5; map_pmt_lib[5]=2; 
+  map_lib_pmt[5]=1; map_pmt_lib[1]=5; 
+  map_lib_pmt[4]=6; map_pmt_lib[6]=4; 
+  map_lib_pmt[6]=3; map_pmt_lib[3]=6; 
+  
+  map_lib_pmt[9]=7; map_pmt_lib[7]=9; 
+  map_lib_pmt[7]=9; map_pmt_lib[9]=7; 
+  map_lib_pmt[8]=11; map_pmt_lib[11]=8; 
+  map_lib_pmt[11]=8; map_pmt_lib[8]=11;  
+  map_lib_pmt[10]=12; map_pmt_lib[12]=10; 
+  map_lib_pmt[12]=10; map_pmt_lib[10]=12; 
+
+  map_lib_pmt[14]=13; map_pmt_lib[13]=14;  
+  map_lib_pmt[13]=15; map_pmt_lib[15]=13; 
+  map_lib_pmt[15]=17; map_pmt_lib[17]=15; 
+  map_lib_pmt[17]=14; map_pmt_lib[14]=17; 
+  map_lib_pmt[16]=18; map_pmt_lib[18]=16; 
+  map_lib_pmt[18]=16; map_pmt_lib[16]=18; 
+
+  map_lib_pmt[21]=19; map_pmt_lib[19]=21; 
+  map_lib_pmt[22]=20; map_pmt_lib[20]=22; 
+  map_lib_pmt[19]=21; map_pmt_lib[21]=19; 
+  map_lib_pmt[20]=23; map_pmt_lib[23]=20; 
+  map_lib_pmt[23]=24; map_pmt_lib[24]=23; 
+  map_lib_pmt[24]=22; map_pmt_lib[22]=24; 
+
+  map_lib_pmt[26]=25; map_pmt_lib[25]=26; 
+  map_lib_pmt[25]=28; map_pmt_lib[28]=25; 
+  map_lib_pmt[27]=30; map_pmt_lib[30]=27; 
+  map_lib_pmt[28]=31; map_pmt_lib[31]=28; 
+  map_lib_pmt[31]=29; map_pmt_lib[29]=31; 
+  map_lib_pmt[30]=27; map_pmt_lib[27]=30; 
+  map_lib_pmt[29]=26; map_pmt_lib[26]=29; 
+  
   std::vector<std::list<std::pair<int,float>>> photon_library;
   photon_library.resize(400*75*75);
   for (int i=0;i!=T->GetEntries();i++){
@@ -85,7 +123,9 @@ void WireCell2dToy::tpc_light_match(int time_offset, int nrebin, std::map<WireCe
 	}
 
 	std::vector<double> pred_pmt_light;
+	//std::vector<double> pred_pmt_light1;
 	pred_pmt_light.resize(32,0);
+	//pred_pmt_light1.resize(32,0);
 
 	PR3DClusterSelection temp_clusters;
 	// fill in stuff for the main cluster
@@ -111,14 +151,15 @@ void WireCell2dToy::tpc_light_match(int time_offset, int nrebin, std::map<WireCe
 		p.y = pts.at(i).y;
 		p.z = pts.at(i).z;
 
-		if (flash_num==27&&flag_at_x_boundary){
-		  std::cout << p.x/units::cm << " " << p.y/units::cm << " " << p.z/units::cm << " "  << flash_num << " " << cluster_id << std::endl;
-		}
+		// if (flash_num==27&&flag_at_x_boundary){
+		//   std::cout << p.x/units::cm << " " << p.y/units::cm << " " << p.z/units::cm << " "  << flash_num << " " << cluster_id << std::endl;
+		// }
 		
 		int voxel_id = WireCell2dToy::convert_xyz_voxel_id(p);
 		std::list<std::pair<int,float>>& pmt_list = photon_library.at(voxel_id);
 		for (auto it5 = pmt_list.begin(); it5!=pmt_list.end(); it5++){
 		  pred_pmt_light.at(it5->first) += charge * it5->second;
+		  //pred_pmt_light1.at(it5->first) += charge * it5->second;
 		}
 	      }
 	    }
@@ -129,7 +170,7 @@ void WireCell2dToy::tpc_light_match(int time_offset, int nrebin, std::map<WireCe
 
 	if (flag_at_x_boundary){
 	  for (size_t i=0;i!=32;i++){
-	    std::cout << flash_num << " " << cluster_id << " " << i << " " << flash->get_PE(i) << " " << flash->get_PE_err(i) << " " << pred_pmt_light.at(i) << std::endl;
+	    std::cout << flash_num << " " << cluster_id << " " << i << " " << flash->get_PE(i) << " " << flash->get_PE_err(i) << " " << pred_pmt_light.at(map_pmt_lib[i]) << " " <<  std::endl;
 	  }
 	}
 	
