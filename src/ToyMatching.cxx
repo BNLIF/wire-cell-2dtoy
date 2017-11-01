@@ -37,7 +37,7 @@ int WireCell2dToy::convert_xyz_voxel_id(WireCell::Point &p){
 }
 
 
-void WireCell2dToy::tpc_light_match(int time_offset, int nrebin, std::map<WireCell::PR3DCluster*,std::vector<std::pair<WireCell::PR3DCluster*,double>>>& group_clusters, WireCell::OpflashSelection& flashes){
+std::vector<std::tuple<PR3DCluster*, Opflash*, double, std::vector<double>>> WireCell2dToy::tpc_light_match(int time_offset, int nrebin, std::map<WireCell::PR3DCluster*,std::vector<std::pair<WireCell::PR3DCluster*,double>>>& group_clusters, WireCell::OpflashSelection& flashes){
   TChain *T = new TChain("/pmtresponse/PhotonLibraryData","/pmtresponse/PhotonLibraryData");
   T->AddFile("./uboone_photon_library.root");
   //  std::cout << T->GetEntries();
@@ -106,6 +106,7 @@ void WireCell2dToy::tpc_light_match(int time_offset, int nrebin, std::map<WireCe
   double high_x_cut_ext1 = + 1*units::cm;
   double low_x_cut = 0*units::cm;
   double low_x_cut_ext1 = - 2*units::cm;
+  double low_x_cut_ext2 = +0.5*units::cm;
   double scaling_light_mag = 0.01;
 
 
@@ -154,8 +155,8 @@ void WireCell2dToy::tpc_light_match(int time_offset, int nrebin, std::map<WireCe
 	}
 	
 	// tracks ends at boundary ... 
-	if (first_pos_x-offset_x <=low_x_cut && first_pos_x-offset_x > low_x_cut + low_x_cut_ext1 ||
-	    last_pos_x-offset_x >= high_x_cut && last_pos_x-offset_x < high_x_cut + high_x_cut_ext1){
+	if (first_pos_x-offset_x <=low_x_cut + low_x_cut_ext2 && first_pos_x-offset_x > low_x_cut + low_x_cut_ext1 ||
+	    last_pos_x-offset_x >= high_x_cut-high_x_cut_ext1 && last_pos_x-offset_x < high_x_cut + high_x_cut_ext1){
 	  flag_at_x_boundary = true;
 	}
 	
@@ -238,7 +239,7 @@ void WireCell2dToy::tpc_light_match(int time_offset, int nrebin, std::map<WireCe
   double lambda = 0.25; // note the coefficient is all around 1
   //form matrix ...
   double fudge_factor1 = 0.05; // add 5% relative uncertainty for pe
-  double fudge_factor2 = 1.5; // double the original uncertainties
+  double fudge_factor2 = 1.5; // increase the original uncertainties by 50% ... 
   int num_unknowns = 0;
   //  int test_flash_id = 27;
   std::set<int> tpc_ids;
@@ -267,7 +268,7 @@ void WireCell2dToy::tpc_light_match(int time_offset, int nrebin, std::map<WireCe
 
   // require each TPC can be used once
   for (size_t i=0; i!= tpc_ids.size(); i++){
-    W(32*good_flashes.size()+i) = 10.;// 10% constraint ... 
+    W(32*good_flashes.size()+i) = 20.;// 10% constraint ... 
   }
   
   for (size_t i=0; i!= good_flashes.size(); i++){
@@ -288,7 +289,7 @@ void WireCell2dToy::tpc_light_match(int time_offset, int nrebin, std::map<WireCe
 	  G(32*i+k,total_pairs.end()-total_pairs.begin()) = 1./pe_err * map_flash_tpc_light_preds[flash].at(j).at(map_pmt_lib[k]);
 	}
 	// require each TPC can be used once
-	G(32*good_flashes.size()+map_tpc_index[map_flash_tpc_ids[flash].at(j)],total_pairs.end()-total_pairs.begin()) = 10.;// 10% 
+	G(32*good_flashes.size()+map_tpc_index[map_flash_tpc_ids[flash].at(j)],total_pairs.end()-total_pairs.begin()) = 20.;// 10% 
 	// require total TPC contribution to a flash is 1, not correct ... 
 	//G(33*i+32,total_pairs.end()-total_pairs.begin()) = 6.7; //15%
 	
@@ -310,10 +311,54 @@ void WireCell2dToy::tpc_light_match(int time_offset, int nrebin, std::map<WireCe
   }
   m2.Fit();
   VectorXd beta = m2.Getbeta();
+
+  std::map<int,std::pair<Opflash*,double>> matched_pairs;
+  // for each TPC object save the largest flash ...
   for (size_t i=0;i!=total_pairs.size();i++){
-    if(beta(i)!=0)
-      std::cout << i << " " <<  map_flash_index[total_pairs.at(i).first] << " " << total_pairs.at(i).second << " " << total_weights.at(i) << " " << beta(i)  << std::endl;
+    if(beta(i)!=0){
+      int tpc_index = total_pairs.at(i).second;
+      Opflash *flash = total_pairs.at(i).first;
+      if (matched_pairs.find(tpc_index)==matched_pairs.end()){
+	matched_pairs[tpc_index] = std::make_pair(flash,beta(i));
+      }else{
+	if (beta(i) > matched_pairs[tpc_index].second){
+	  matched_pairs[tpc_index] = std::make_pair(flash,beta(i));
+	}
+      }
+      //      std::cout << i << " " <<  map_flash_index[total_pairs.at(i).first] << " " << total_pairs.at(i).second << " " << total_weights.at(i) << " " << beta(i)  << std::endl;
+    }
   }
+
+  // for (auto it = matched_pairs.begin(); it!= matched_pairs.end(); it++){
+  //   std::cout << it->first << " " << map_flash_index[it->second.first] << " " << it->second.second << std::endl;
+  // }
+  
+  std::vector<std::tuple<PR3DCluster*, Opflash*, double, std::vector<double>>> results;
+  int cluster_id = 0;
+  for (auto it = group_clusters.begin(); it!=group_clusters.end(); it++){
+    PR3DCluster* main_cluster = it->first;
+    // std::cout << cluster_id << std::endl;
+    if (matched_pairs.find(cluster_id)!=matched_pairs.end()){
+      Opflash* flash = matched_pairs[cluster_id].first;
+      double strength = matched_pairs[cluster_id].second;
+
+      auto it1 = find(map_flash_tpc_ids[flash].begin(),map_flash_tpc_ids[flash].end(),cluster_id);
+      
+      std::vector<double> pmt_pred = map_flash_tpc_light_preds[flash].at(it1-map_flash_tpc_ids[flash].begin());
+      results.push_back(std::make_tuple(main_cluster,flash,strength, pmt_pred));
+    }else{
+      std::cout << "missing cluster: " << cluster_id << std::endl;
+      Opflash *flash = 0;
+      double strength  =0;
+      std::vector<double> pmt_pred; 
+      results.push_back(std::make_tuple(main_cluster,flash,strength, pmt_pred));
+    }
+    cluster_id ++;
+  }
+  return results;
+  
+ 
+  
   // double chi2_1 = 0, chi2_2 = 0;
   // for (size_t i=0;i!=33;i++){
   //   chi2_1 += pow(W(i)-G(i,14),2);

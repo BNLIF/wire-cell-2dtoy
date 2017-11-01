@@ -393,18 +393,61 @@ int main(int argc, char* argv[])
 
    // prepare light matching ....
    WireCell::OpflashSelection& flashes = uboone_flash.get_flashes();
-   WireCell2dToy::tpc_light_match(time_offset,nrebin,group_clusters,flashes);
+   
+   std::vector<std::tuple<WireCell::PR3DCluster*, WireCell::Opflash*, double, std::vector<double>>> matched_results = WireCell2dToy::tpc_light_match(time_offset,nrebin,group_clusters,flashes);
    cerr << em("TPC Light Matching") << std::endl;
    //
 
 
    
    TFile *file1 = new TFile(Form("match_%d_%d_%d.root",run_no,subrun_no,event_no),"RECREATE");
+   TTree *T_match = new TTree("T_match","T_match");
+   T_match->SetDirectory(file1);
+   Int_t ncluster=0;
+   Int_t flash_id;
+   Double_t strength;
+   Double_t pe_pred[32];
+   Double_t pe_meas[32];
+   Double_t pe_meas_err[32];
+   T_match->Branch("tpc_cluster_id",&ncluster,"tpc_cluster_id/I");
+   T_match->Branch("flash_id",&flash_id,"flash_id/I");
+   T_match->Branch("strength",&strength,"strength/D");
+   T_match->Branch("pe_pred",pe_pred,"pe_pred[32]/D");
+   T_match->Branch("pe_meas",pe_meas,"pe_meas[32]/D");
+   T_match->Branch("pe_meas_err",pe_meas_err,"pe_meas_err[32]/D");
+
+   for (auto it = matched_results.begin(); it!=matched_results.end(); it++){
+     Opflash *flash = std::get<1>(*it);
+     if (flash!=0){
+       auto it1 = find(flashes.begin(),flashes.end(),flash);
+       flash_id = it1 - flashes.begin();
+       strength = std::get<2>(*it);
+       std::vector<double> temp = std::get<3>(*it);
+       for (int i=0;i!=32;i++){
+     	 pe_pred[i] = temp.at(i);
+     	 pe_meas[i] = flash->get_PE(i);
+     	 pe_meas_err[i] = flash->get_PE_err(i);
+       }
+     }else{
+       flash_id = -1;
+       strength = 0;
+       for (int i=0;i!=32;i++){
+     	 pe_pred[i] = 0;
+     	 pe_meas[i] = 0;
+     	 pe_meas_err[i] = 0.;
+       }
+     }
+     T_match->Fill();
+     ncluster++;
+   }
+   
+   
+   
    
    TTree *t_bad = new TTree("T_bad","T_bad");
    t_bad->SetDirectory(file1);
    Int_t bad_npoints;
-   Int_t ncluster;
+   
    Double_t bad_y[100],bad_z[100];
    t_bad->Branch("cluster_id",&ncluster,"cluster_id/I");
    t_bad->Branch("bad_npoints",&bad_npoints,"bad_npoints/I");
@@ -459,11 +502,22 @@ int main(int argc, char* argv[])
    // z=0;
    // T_cluster->Fill();
 
+   
+   // note did not save the unmatched cluster ... 
    ncluster = 0;
-   for (auto it = group_clusters.begin(); it!= group_clusters.end(); it++){
+   for (auto it = matched_results.begin(); it!= matched_results.end(); it++){
+     PR3DCluster *main_cluster = std::get<0>(*it);
+     Opflash *flash = std::get<1>(*it);
+     double offset_x ;
+     if (flash!=0){
+       offset_x = (flash->get_time() - time_offset)*2./nrebin*time_slice_width;
+     }else{
+       offset_x = 0;
+     }
+   //   for (auto it = group_clusters.begin(); it!= group_clusters.end(); it++){
      PR3DClusterSelection temp_clusters;
-     temp_clusters.push_back(it->first);
-     for (auto it1 = it->second.begin(); it1!=it->second.end(); it1++){
+     temp_clusters.push_back(main_cluster);
+     for (auto it1 = group_clusters[main_cluster].begin(); it1!=group_clusters[main_cluster].end(); it1++){
        temp_clusters.push_back((*it1).first);
        //std::cout << (*it1).second/units::cm << std::endl;
      }
@@ -475,7 +529,7 @@ int main(int argc, char* argv[])
 	 int time_slice = mcells.at(i)->GetTimeSlice();
 	 if (ps.size()==0) std::cout << "zero sampling points!" << std::endl;
 	 for (int k=0;k!=ps.size();k++){
-	   x = ps.at(k).x/units::cm;//time_slice*nrebin/2.*unit_dis/10. - frame_length/2.*unit_dis/10.;
+	   x = (ps.at(k).x- offset_x)/units::cm ;
 	   y = ps.at(k).y/units::cm;
 	   z = ps.at(k).z/units::cm;
 	   T_cluster->Fill();
@@ -643,6 +697,7 @@ int main(int argc, char* argv[])
   TTree *T_flash = new TTree("T_flash","T_flash");
   T_flash->SetDirectory(file1);
   int type;
+  flash_id;
   double low_time, high_time;
   double time;
   double total_PE;
@@ -652,6 +707,7 @@ int main(int argc, char* argv[])
   std::vector<double> l1_fired_pe;
 
   T_flash->Branch("type",&type);
+  T_flash->Branch("flash_id",&flash_id);
   T_flash->Branch("low_time",&low_time);
   T_flash->Branch("high_time",&high_time);
   T_flash->Branch("time",&time);
@@ -665,7 +721,7 @@ int main(int argc, char* argv[])
   
   for (auto it = flashes.begin(); it!=flashes.end(); it++){
     fired_channels.clear();
-    
+    flash_id = it - flashes.begin();
     Opflash *flash = (*it);
     type = flash->get_type();
     low_time = flash->get_low_time();
