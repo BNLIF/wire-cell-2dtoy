@@ -29,6 +29,15 @@ int main(int argc, char* argv[])
   }
   TH1::AddDirectory(kFALSE);
 
+  int flag_pos_corr = 1; // correct X position after matching ... 
+  for(Int_t i = 1; i != argc; i++){
+     switch(argv[i][1]){
+     case 'c':
+       flag_pos_corr = atoi(&argv[i][2]); 
+       break;
+     }
+  }
+  
   
   ExecMon em("starting");
   cerr << em("load geometry") << endl;
@@ -514,6 +523,10 @@ int main(int argc, char* argv[])
      }else{
        offset_x = 0;
      }
+     
+     if (flag_pos_corr==0)
+       offset_x = 0;
+     
    //   for (auto it = group_clusters.begin(); it!= group_clusters.end(); it++){
      PR3DClusterSelection temp_clusters;
      temp_clusters.push_back(main_cluster);
