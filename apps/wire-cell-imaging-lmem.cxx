@@ -324,12 +324,23 @@ int main(int argc, char* argv[])
 	   wplane_map.find(i+1)!=wplane_map.end())
 	  ){
 	wplane_map[i] = wplane_map[i-1];
-	std::cout << "W plane (shorted): " << i << " added to bad chanel list" << std::endl;
+	std::cout << "W plane (shorted): " << i << " added to bad channel list" << std::endl;
 	for (int j=0;j!=hw_decon->GetNbinsY();j++){
 	  hw_decon->SetBinContent(i+1,j+1,0);
 	  hw_decon_g->SetBinContent(i+1,j+1,0);
 	}
       }
+    }
+  }
+  // V wire noisy channels 10 vetoed ...
+  for (int i=3686;i!=3697;i++){
+    if (vplane_map.find(i-2400)==vplane_map.end()){
+      vplane_map[i-2400] = std::make_pair(0,hv_decon->GetNbinsY()-1);
+      std::cout << "V plane (noisy): " << i -2400 << " added to bad channel list" << std::endl;
+    }
+    for (int j=0;j!=hv_decon->GetNbinsY();j++){
+      hv_decon->SetBinContent(i+1-2400,j+1,0);
+      hv_decon_g->SetBinContent(i+1-2400,j+1,0);
     }
   }
   //

@@ -378,6 +378,17 @@ int main(int argc, char* argv[])
       }
     }
   }
+  // V wire noisy channels 10 vetoed ...
+  for (int i=3686;i!=3697;i++){
+    if (vplane_map.find(i-2400)==vplane_map.end()){
+      vplane_map[i-2400] = std::make_pair(0,hv_decon->GetNbinsY()-1);
+      std::cout << "V plane (noisy): " << i -2400 << " added to bad channel list" << std::endl;
+    }
+    for (int j=0;j!=hv_decon->GetNbinsY();j++){
+      hv_decon->SetBinContent(i+1-2400,j+1,0);
+      hv_decon_g->SetBinContent(i+1-2400,j+1,0);
+    }
+  }
   //
 
   WireCell2dToy::pdDataFDS roi_fds(gds,hu_decon,hv_decon,hw_decon,eve_num);
