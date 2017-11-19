@@ -413,21 +413,94 @@ int main(int argc, char* argv[])
 
   bool flag_u = false;
   int prev_time = -1;
+  int n_cover = 0;
+  int n_fire = 0;
   
   for (size_t i=0;i!=summary_u.size();i++){
     int time = std::get<0>(summary_u.at(i));
     int ncover = std::get<1>(summary_u.at(i));
     float percentage = std::get<2>(summary_u.at(i));
+    
     if (time != prev_time+1){
+      //std::cout << n_cover << " " << n_fire << std::endl;
+      if (n_cover >=2 && n_fire>5)
+	flag_u = true;
       
-    }else{
-      
+      n_cover = 0;
+      n_fire = 0;
     }
-
+    //    std::cout << time << " " << ncover << " " << ncover*percentage << std::endl;
+    
+    if (ncover>1200. && (percentage > 0.25 || ncover *percentage > 200))
+      n_cover ++;
+    if (ncover*percentage>150)
+      n_fire ++;
     prev_time = time;
   }
+  if (n_cover >=2 && n_fire>5)
+    flag_u = true;
 
+  bool flag_v = false;
+  prev_time = -1;
+  n_cover = 0;
+  n_fire = 0;
   
+  for (size_t i=0;i!=summary_v.size();i++){
+    int time = std::get<0>(summary_v.at(i));
+    int ncover = std::get<1>(summary_v.at(i));
+    float percentage = std::get<2>(summary_v.at(i));
+    
+    if (time != prev_time+1){
+      //std::cout << n_cover << " " << n_fire << std::endl;
+      if (n_cover >=2 && n_fire>5)
+	flag_v = true;
+      
+      n_cover = 0;
+      n_fire = 0;
+    }
+    //    std::cout << time << " " << ncover << " " << ncover*percentage << std::endl;
+    
+    if (ncover>1200. && (percentage > 0.25 || ncover *percentage > 200))
+      n_cover ++;
+    if (ncover*percentage>150)
+      n_fire ++;
+    prev_time = time;
+  }
+  if (n_cover >=2 && n_fire>5)
+    flag_v = true;
+
+  bool flag_w = false;
+  prev_time = -1;
+  n_cover = 0;
+  n_fire = 0;
+  
+  for (size_t i=0;i!=summary_w.size();i++){
+    int time = std::get<0>(summary_w.at(i));
+    int ncover = std::get<1>(summary_w.at(i));
+    float percentage = std::get<2>(summary_w.at(i));
+    
+    if (time != prev_time+1){
+      //std::cout << n_cover << " " << n_fire << std::endl;
+      if (n_cover >=2 && n_fire>=3)
+	flag_w = true;
+      
+      n_cover = 0;
+      n_fire = 0;
+    }
+    //std::cout << time << " " << ncover << " " << ncover*percentage << std::endl;
+    
+    if (ncover>1800. && (percentage > 0.25 || ncover *percentage > 200))
+      n_cover ++;
+    if (ncover*percentage>150)
+      n_fire ++;
+    prev_time = time;
+  }
+  if (n_cover >=2 && n_fire>=3)
+    flag_w = true;
+  
+  std::cout << run_no << " " << subrun_no << " " << event_no << " " << flag_u << " " << flag_v << " " << flag_w << std::endl;
+  
+  //  std::cout << n_cover << " " << n_fire << std::endl;
   // ID the region ...
   
 }
