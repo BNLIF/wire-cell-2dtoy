@@ -280,6 +280,53 @@ int main(int argc, char* argv[])
   TH2F *hv_decon_g = (TH2F*)file1->Get("hv_decon_g");
   TH2F *hw_decon_g = (TH2F*)file1->Get("hw_decon_g");
 
+   // add a special treatment here ...
+  for (int i=296; i!=671;i++){
+    if (uplane_map.find(i)==uplane_map.end()){
+      if ((uplane_map.find(i-1)!=uplane_map.end() &&
+	   uplane_map.find(i+2)!=uplane_map.end()) ||
+	  (uplane_map.find(i-2)!=uplane_map.end() &&
+	   uplane_map.find(i+1)!=uplane_map.end())
+	  ){
+	std::cout << "U plane (shorted): " << i << " added to bad chanel list" << std::endl;
+	uplane_map[i] = uplane_map[i-1];
+	for (int j=0;j!=hu_decon->GetNbinsY();j++){
+	  hu_decon->SetBinContent(i+1,j+1,0);
+	  hu_decon_g->SetBinContent(i+1,j+1,0);
+	}
+      }
+    }
+  }
+  for (int i=2336;i!=2463;i++){
+    if (wplane_map.find(i)==wplane_map.end()){
+      if ((wplane_map.find(i-1)!=wplane_map.end() &&
+	   wplane_map.find(i+2)!=wplane_map.end()) ||
+	  (wplane_map.find(i-2)!=wplane_map.end() &&
+	   wplane_map.find(i+1)!=wplane_map.end())
+	  ){
+	wplane_map[i] = wplane_map[i-1];
+	std::cout << "W plane (shorted): " << i << " added to bad channel list" << std::endl;
+	for (int j=0;j!=hw_decon->GetNbinsY();j++){
+	  hw_decon->SetBinContent(i+1,j+1,0);
+	  hw_decon_g->SetBinContent(i+1,j+1,0);
+	}
+      }
+    }
+  }
+  // V wire noisy channels 10 vetoed ...
+  for (int i=3686;i!=3697;i++){
+    if (vplane_map.find(i-2400)==vplane_map.end()){
+      vplane_map[i-2400] = std::make_pair(0,hv_decon->GetNbinsY()-1);
+      std::cout << "V plane (noisy): " << i -2400 << " added to bad channel list" << std::endl;
+    }else{
+      vplane_map[i-2400] = std::make_pair(0,hv_decon->GetNbinsY()-1);
+    }
+    for (int j=0;j!=hv_decon->GetNbinsY();j++){
+      hv_decon->SetBinContent(i+1-2400,j+1,0);
+      hv_decon_g->SetBinContent(i+1-2400,j+1,0);
+    }
+  }
+  //
 
   WireCell2dToy::Noisy_Event_ID(hu_decon, hv_decon, hw_decon, hu_threshold, hv_threshold, hw_threshold);
   

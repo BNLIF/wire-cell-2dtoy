@@ -149,7 +149,7 @@ bool WireCell2dToy::Noisy_Event_ID(TH2F *hu_decon, TH2F *hv_decon, TH2F *hw_deco
     float percentage = std::get<2>(summary_u.at(i));
     
     if (time > prev_time+3){
-      if (n_cover >=2 && n_fire>5){
+      if (n_cover >=6 && n_fire>12 || n_cover >6 && n_fire > 8){
 	end_time = prev_time;
 	std::cout << "U: " << n_cover << " " << n_fire << " " << start_time << " " << end_time << std::endl;
 	flag_u = true;
@@ -169,7 +169,7 @@ bool WireCell2dToy::Noisy_Event_ID(TH2F *hu_decon, TH2F *hv_decon, TH2F *hw_deco
     prev_time = time;
   }
   
-  if (n_cover >=2 && n_fire>5){
+  if (n_cover >=6 && n_fire>12|| n_cover >6 && n_fire > 8){
     end_time = prev_time;
     flag_u = true;
     std::cout << "U: " << n_cover << " " << n_fire << " " << start_time << " " << end_time << std::endl;
@@ -189,7 +189,7 @@ bool WireCell2dToy::Noisy_Event_ID(TH2F *hu_decon, TH2F *hv_decon, TH2F *hw_deco
     
     if (time > prev_time+3){
       //std::cout << n_cover << " " << n_fire << std::endl;
-      if (n_cover >=2 && n_fire>5){
+      if (n_cover >=5 && n_fire>=7){
 	end_time = prev_time;
 	flag_v = true;
 	std::cout << "V: " << n_cover << " " << n_fire << " " << start_time << " " << prev_time << std::endl;
@@ -208,7 +208,7 @@ bool WireCell2dToy::Noisy_Event_ID(TH2F *hu_decon, TH2F *hv_decon, TH2F *hw_deco
       n_fire ++;
     prev_time = time;
   }
-  if (n_cover >=2 && n_fire>5){
+  if (n_cover >=5 && n_fire>=7){
     end_time = prev_time;
     flag_v = true;
     std::cout << "V: " << n_cover << " " << n_fire << " " << start_time << " " << end_time << std::endl;
