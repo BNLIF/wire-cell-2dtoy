@@ -328,6 +328,6 @@ int main(int argc, char* argv[])
   }
   //
 
-  WireCell2dToy::Noisy_Event_ID(hu_decon, hv_decon, hw_decon, hu_threshold, hv_threshold, hw_threshold);
+  WireCell2dToy::Noisy_Event_ID(hu_decon, hv_decon, hw_decon, hu_threshold, hv_threshold, hw_threshold, uplane_map, vplane_map, wplane_map, hu_decon_g, hv_decon_g, hw_decon_g);
   
 }
