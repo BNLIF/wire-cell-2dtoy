@@ -1,10 +1,10 @@
 #include "WireCell2dToy/ToyDataQuality.h"
 
-bool WireCell2dToy::Noisy_Event_ID(TH2F *hu_decon, TH2F *hv_decon, TH2F *hw_decon, TH1F *hu_threshold, TH1F *hv_threshold, TH1F *hw_threshold, WireCell::ChirpMap& uplane_map, WireCell::ChirpMap& vplane_map, WireCell::ChirpMap& wplane_map, TH2F *hu_decon_g, TH2F *hv_decon_g, TH2F *hw_decon_g){
+bool WireCell2dToy::Noisy_Event_ID(TH2F *hu_decon, TH2F *hv_decon, TH2F *hw_decon, TH1F *hu_threshold, TH1F *hv_threshold, TH1F *hw_threshold, WireCell::ChirpMap& uplane_map, WireCell::ChirpMap& vplane_map, WireCell::ChirpMap& wplane_map, TH2F *hu_decon_g, TH2F *hv_decon_g, TH2F *hw_decon_g, int nrebin, bool flag_corr){
 
   int nwire_u = hu_decon->GetNbinsX();
-  int nwire_v = hu_decon->GetNbinsX();
-  int nwire_w = hu_decon->GetNbinsX();
+  int nwire_v = hv_decon->GetNbinsX();
+  int nwire_w = hw_decon->GetNbinsX();
   
   // filter noisy events ... 
   int n_time_slice = hu_decon->GetNbinsY();
@@ -142,6 +142,11 @@ bool WireCell2dToy::Noisy_Event_ID(TH2F *hu_decon, TH2F *hv_decon, TH2F *hw_deco
   int n_fire = 0;
   int start_time =0;
   int end_time = 0;
+
+  std::vector<std::pair<int,int>> noisy_u;
+  std::vector<std::pair<int,int>> noisy_v;
+  std::vector<std::pair<int,int>> noisy_w;
+  
   
   for (size_t i=0;i!=summary_u.size();i++){
     int time = std::get<0>(summary_u.at(i));
@@ -152,6 +157,7 @@ bool WireCell2dToy::Noisy_Event_ID(TH2F *hu_decon, TH2F *hv_decon, TH2F *hw_deco
       if (n_cover >=6 && n_fire>12 || n_cover >6 && n_fire > 8){
 	end_time = prev_time;
 	std::cout << "U: " << n_cover << " " << n_fire << " " << start_time << " " << end_time << std::endl;
+	noisy_u.push_back(std::make_pair(start_time,end_time));
 	flag_u = true;
       }
       
@@ -173,6 +179,7 @@ bool WireCell2dToy::Noisy_Event_ID(TH2F *hu_decon, TH2F *hv_decon, TH2F *hw_deco
     end_time = prev_time;
     flag_u = true;
     std::cout << "U: " << n_cover << " " << n_fire << " " << start_time << " " << end_time << std::endl;
+    noisy_u.push_back(std::make_pair(start_time,end_time));
   }
 
   bool flag_v = false;
@@ -193,6 +200,7 @@ bool WireCell2dToy::Noisy_Event_ID(TH2F *hu_decon, TH2F *hv_decon, TH2F *hw_deco
 	end_time = prev_time;
 	flag_v = true;
 	std::cout << "V: " << n_cover << " " << n_fire << " " << start_time << " " << prev_time << std::endl;
+	noisy_v.push_back(std::make_pair(start_time,end_time));
       }
       
       n_cover = 0;
@@ -212,6 +220,7 @@ bool WireCell2dToy::Noisy_Event_ID(TH2F *hu_decon, TH2F *hv_decon, TH2F *hw_deco
     end_time = prev_time;
     flag_v = true;
     std::cout << "V: " << n_cover << " " << n_fire << " " << start_time << " " << end_time << std::endl;
+    noisy_v.push_back(std::make_pair(start_time,end_time));
   }
 
   bool flag_w = false;
@@ -232,6 +241,7 @@ bool WireCell2dToy::Noisy_Event_ID(TH2F *hu_decon, TH2F *hv_decon, TH2F *hw_deco
 	end_time = prev_time;
 	flag_w = true;
 	std::cout << "W: " << n_cover << " " << n_fire << " " << start_time << " " << end_time << std::endl;
+	noisy_w.push_back(std::make_pair(start_time,end_time));
       }
       
       n_cover = 0;
@@ -251,10 +261,90 @@ bool WireCell2dToy::Noisy_Event_ID(TH2F *hu_decon, TH2F *hv_decon, TH2F *hw_deco
     end_time = prev_time;
     flag_w = true;
     std::cout << "W: " << n_cover << " " << n_fire << " " << start_time << " " << end_time << std::endl;
+    noisy_w.push_back(std::make_pair(start_time,end_time));
   }
+
   
   std::cout << "Xin: " << " " << flag_u << " " << flag_v << " " << flag_w << std::endl;
+
+
+  if (flag_corr){
+    // ID the region ...
+    for (auto it = noisy_u.begin(); it!= noisy_u.end(); it++){
+      int start_time = (it->first-1) * nrebin+1;
+      int end_time = it->second * nrebin+1;
+      for (int i=0;i!=nwire_u;i++){
+	for (int j=start_time; j!=end_time;j++){
+	  hu_decon->SetBinContent(i+1, j+1, 0);
+	  hu_decon_g->SetBinContent(i+1, j+1, 0);
+	}
+	if (uplane_map.find(i)==uplane_map.end()){
+	  uplane_map[i] = std::make_pair(start_time,end_time);
+	}else{
+	  uplane_map[i] = std::make_pair(std::min(uplane_map[i].first,start_time),std::max(uplane_map[i].second,end_time));
+	}
+      }
+    }
+
+    for (auto it = noisy_v.begin(); it!=noisy_v.end(); it++){
+      bool flag_veto = false;
+      for (auto it1 = noisy_u.begin(); it1!=noisy_u.end(); it1++){
+	if ( it1->second >= it->first && it->second >= it1->first){
+	  flag_veto = true;
+	  break;
+	}
+      }
+      if (flag_veto){
+	int start_time = (it->first-1) * nrebin+1;
+	int end_time = it->second * nrebin+1;
+	for (int i=0;i!=nwire_v;i++){
+	  for (int j=start_time; j!=end_time;j++){
+	    hv_decon->SetBinContent(i+1, j+1, 0);
+	    hv_decon_g->SetBinContent(i+1, j+1, 0);
+	  }
+	  if (vplane_map.find(i)==vplane_map.end()){
+	    vplane_map[i] = std::make_pair(start_time,end_time);
+	  }else{
+	    vplane_map[i] = std::make_pair(std::min(vplane_map[i].first,start_time),std::max(vplane_map[i].second,end_time));
+	  }
+	}
+      }
+    }
+
+    for (auto it = noisy_w.begin(); it!=noisy_w.end(); it++){
+      bool flag_veto1 = false;
+      bool flag_veto2 = false;
+      for (auto it1 = noisy_u.begin(); it1!=noisy_u.end(); it1++){
+	if ( it1->second >= it->first && it->second >= it1->first){
+	  flag_veto1 = true;
+	  break;
+	}
+      }
+      for (auto it1 = noisy_v.begin(); it1!=noisy_v.end(); it1++){
+	if ( it1->second >= it->first && it->second >= it1->first){
+	  flag_veto2 = true;
+	  break;
+	}
+      }
+      if (flag_veto1 && flag_veto2){
+	int start_time = (it->first-1) * nrebin+1;
+	int end_time = it->second * nrebin+1;
+	for (int i=0;i!=nwire_w;i++){
+	  for (int j=start_time; j!=end_time;j++){
+	    hw_decon->SetBinContent(i+1, j+1, 0);
+	    hw_decon_g->SetBinContent(i+1, j+1, 0);
+	  }
+	  if (wplane_map.find(i)==wplane_map.end()){
+	    wplane_map[i] = std::make_pair(start_time,end_time);
+	  }else{
+	    wplane_map[i] = std::make_pair(std::min(wplane_map[i].first,start_time),std::max(wplane_map[i].second,end_time));
+	  }
+	}
+      }
+    }
+  }
+
+  return flag_u;
+  // std::cout << n_cover << " " << n_fire << std::endl;
   
-  //  std::cout << n_cover << " " << n_fire << std::endl;
-  // ID the region ...
 }

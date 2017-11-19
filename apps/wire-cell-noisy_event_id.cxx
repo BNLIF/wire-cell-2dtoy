@@ -328,6 +328,9 @@ int main(int argc, char* argv[])
   }
   //
 
-  WireCell2dToy::Noisy_Event_ID(hu_decon, hv_decon, hw_decon, hu_threshold, hv_threshold, hw_threshold, uplane_map, vplane_map, wplane_map, hu_decon_g, hv_decon_g, hw_decon_g);
+  std::cout << uplane_map.size() << " " << vplane_map.size() << " " << wplane_map.size() << std::endl;
   
+  WireCell2dToy::Noisy_Event_ID(hu_decon, hv_decon, hw_decon, hu_threshold, hv_threshold, hw_threshold, uplane_map, vplane_map, wplane_map, hu_decon_g, hv_decon_g, hw_decon_g, nrebin,true);
+
+  std::cout << uplane_map.size() << " " << vplane_map.size() << " " << wplane_map.size() << std::endl;
 }
