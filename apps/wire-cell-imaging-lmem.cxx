@@ -55,6 +55,8 @@
 #include "WireCell2dToy/pd_Data_FDS.h"
 #include "WireCell2dToy/uBooNE_Data_Error.h"
 #include "WireCell2dToy/ExecMon.h"
+#include "WireCell2dToy/ToyDataQuality.h"
+
 
 #include "TApplication.h"
 #include "TCanvas.h"
@@ -346,11 +348,14 @@ int main(int argc, char* argv[])
     }
   }
   //
+  TH2F *hv_raw = (TH2F*)file1->Get("hv_raw");
+
+  WireCell2dToy::Noisy_Event_ID(hu_decon, hv_decon, hw_decon, hu_threshold, hv_threshold, hw_threshold, uplane_map, vplane_map, wplane_map, hu_decon_g, hv_decon_g, hw_decon_g, nrebin, hv_raw, true);
 
   WireCell2dToy::pdDataFDS roi_fds(gds,hu_decon,hv_decon,hw_decon,eve_num);
   roi_fds.jump(eve_num);
   
-  TH2F *hv_raw = (TH2F*)file1->Get("hv_raw");
+  
   
   WireCell2dToy::uBooNE_L1SP l1sp(hv_raw,hv_decon,hv_decon_g,nrebin);
   

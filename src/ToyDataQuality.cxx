@@ -1,6 +1,6 @@
 #include "WireCell2dToy/ToyDataQuality.h"
 
-bool WireCell2dToy::Noisy_Event_ID(TH2F *hu_decon, TH2F *hv_decon, TH2F *hw_decon, TH1F *hu_threshold, TH1F *hv_threshold, TH1F *hw_threshold, WireCell::ChirpMap& uplane_map, WireCell::ChirpMap& vplane_map, WireCell::ChirpMap& wplane_map, TH2F *hu_decon_g, TH2F *hv_decon_g, TH2F *hw_decon_g, int nrebin, bool flag_corr){
+bool WireCell2dToy::Noisy_Event_ID(TH2F *hu_decon, TH2F *hv_decon, TH2F *hw_decon, TH1F *hu_threshold, TH1F *hv_threshold, TH1F *hw_threshold, WireCell::ChirpMap& uplane_map, WireCell::ChirpMap& vplane_map, WireCell::ChirpMap& wplane_map, TH2F *hu_decon_g, TH2F *hv_decon_g, TH2F *hw_decon_g, int nrebin, TH2F *hv_raw, bool flag_corr){
 
   int nwire_u = hu_decon->GetNbinsX();
   int nwire_v = hv_decon->GetNbinsX();
@@ -277,7 +277,7 @@ bool WireCell2dToy::Noisy_Event_ID(TH2F *hu_decon, TH2F *hv_decon, TH2F *hw_deco
       int start_time = (it->first-1) * nrebin+1;
       int end_time = it->second * nrebin+1;
       for (int i=0;i!=nwire_u;i++){
-	for (int j=start_time; j!=end_time;j++){
+	for (int j=it->first; j!=it->second+1;j++){
 	  hu_decon->SetBinContent(i+1, j+1, 0);
 	  hu_decon_g->SetBinContent(i+1, j+1, 0);
 	}
@@ -288,9 +288,12 @@ bool WireCell2dToy::Noisy_Event_ID(TH2F *hu_decon, TH2F *hv_decon, TH2F *hw_deco
 	}
       }
       for (int i=0;i!=nwire_v;i++){
-	for (int j=start_time; j!=end_time;j++){
+	for (int j=it->first; j!=it->second+1;j++){
 	  hv_decon->SetBinContent(i+1, j+1, 0);
 	  hv_decon_g->SetBinContent(i+1, j+1, 0);
+	  for (int k=0;k!=nrebin;k++){
+	    hv_raw->SetBinContent(i+1,nrebin*j+k+1,0);
+	  }
 	}
 	if (vplane_map.find(i)==vplane_map.end()){
 	  vplane_map[i] = std::make_pair(start_time,end_time);
@@ -299,7 +302,7 @@ bool WireCell2dToy::Noisy_Event_ID(TH2F *hu_decon, TH2F *hv_decon, TH2F *hw_deco
 	}
       }
       for (int i=0;i!=nwire_w;i++){
-	for (int j=start_time; j!=end_time;j++){
+	for (int j=it->first; j!=it->second+1;j++){
 	  hw_decon->SetBinContent(i+1, j+1, 0);
 	  hw_decon_g->SetBinContent(i+1, j+1, 0);
 	}
@@ -324,7 +327,7 @@ bool WireCell2dToy::Noisy_Event_ID(TH2F *hu_decon, TH2F *hv_decon, TH2F *hw_deco
       int end_time = it->second * nrebin+1;
 
       for (int i=0;i!=nwire_u;i++){
-	for (int j=start_time; j!=end_time;j++){
+	for (int j=it->first; j!=it->second+1;j++){
 	  hu_decon->SetBinContent(i+1, j+1, 0);
 	  hu_decon_g->SetBinContent(i+1, j+1, 0);
 	}
@@ -335,9 +338,12 @@ bool WireCell2dToy::Noisy_Event_ID(TH2F *hu_decon, TH2F *hv_decon, TH2F *hw_deco
 	}
       }
       for (int i=0;i!=nwire_v;i++){
-	for (int j=start_time; j!=end_time;j++){
+	for (int j=it->first; j!=it->second+1;j++){
 	  hv_decon->SetBinContent(i+1, j+1, 0);
 	  hv_decon_g->SetBinContent(i+1, j+1, 0);
+	  for (int k=0;k!=nrebin;k++){
+	    hv_raw->SetBinContent(i+1,nrebin*j+k+1,0);
+	  }
 	}
 	if (vplane_map.find(i)==vplane_map.end()){
 	  vplane_map[i] = std::make_pair(start_time,end_time);
@@ -346,7 +352,7 @@ bool WireCell2dToy::Noisy_Event_ID(TH2F *hu_decon, TH2F *hv_decon, TH2F *hw_deco
 	}
       }
       for (int i=0;i!=nwire_w;i++){
-	for (int j=start_time; j!=end_time;j++){
+	for (int j=it->first; j!=it->second+1;j++){
 	  hw_decon->SetBinContent(i+1, j+1, 0);
 	  hw_decon_g->SetBinContent(i+1, j+1, 0);
 	}
@@ -378,7 +384,7 @@ bool WireCell2dToy::Noisy_Event_ID(TH2F *hu_decon, TH2F *hv_decon, TH2F *hw_deco
       int start_time = (it->first-1) * nrebin+1;
       int end_time = it->second * nrebin+1;
       for (int i=0;i!=nwire_u;i++){
-	for (int j=start_time; j!=end_time;j++){
+	for (int j=it->first; j!=it->second+1;j++){
 	  hu_decon->SetBinContent(i+1, j+1, 0);
 	  hu_decon_g->SetBinContent(i+1, j+1, 0);
 	}
@@ -389,9 +395,12 @@ bool WireCell2dToy::Noisy_Event_ID(TH2F *hu_decon, TH2F *hv_decon, TH2F *hw_deco
 	}
       }
       for (int i=0;i!=nwire_v;i++){
-	for (int j=start_time; j!=end_time;j++){
+	for (int j=it->first; j!=it->second+1;j++){
 	  hv_decon->SetBinContent(i+1, j+1, 0);
 	  hv_decon_g->SetBinContent(i+1, j+1, 0);
+	  for (int k=0;k!=nrebin;k++){
+	    hv_raw->SetBinContent(i+1,nrebin*j+k+1,0);
+	  }
 	}
 	if (vplane_map.find(i)==vplane_map.end()){
 	  vplane_map[i] = std::make_pair(start_time,end_time);
@@ -400,7 +409,7 @@ bool WireCell2dToy::Noisy_Event_ID(TH2F *hu_decon, TH2F *hv_decon, TH2F *hw_deco
 	}
       }
       for (int i=0;i!=nwire_w;i++){
-	for (int j=start_time; j!=end_time;j++){
+	for (int j=it->first; j!=it->second+1;j++){
 	  hw_decon->SetBinContent(i+1, j+1, 0);
 	  hw_decon_g->SetBinContent(i+1, j+1, 0);
 	}

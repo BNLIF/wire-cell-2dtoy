@@ -329,9 +329,34 @@ int main(int argc, char* argv[])
   }
   //
 
-  std::cout << uplane_map.size() << " " << vplane_map.size() << " " << wplane_map.size() << std::endl;
-  
-  WireCell2dToy::Noisy_Event_ID(hu_decon, hv_decon, hw_decon, hu_threshold, hv_threshold, hw_threshold, uplane_map, vplane_map, wplane_map, hu_decon_g, hv_decon_g, hw_decon_g, nrebin,true);
+  //  std::cout << uplane_map.size() << " " << vplane_map.size() << " " << wplane_map.size() << std::endl;
 
-  std::cout << uplane_map.size() << " " << vplane_map.size() << " " << wplane_map.size() << std::endl;
+  TH2F *hv_raw = (TH2F*)file1->Get("hv_raw");
+  
+  WireCell2dToy::Noisy_Event_ID(hu_decon, hv_decon, hw_decon, hu_threshold, hv_threshold, hw_threshold, uplane_map, vplane_map, wplane_map, hu_decon_g, hv_decon_g, hw_decon_g, nrebin, hv_raw, true);
+
+  bool flag_save = true;
+  if (flag_save){
+    TFile *file1 = new TFile("temp.root","RECREATE");
+    hu_decon->SetDirectory(file1);
+    hv_decon->SetDirectory(file1);
+    hw_decon->SetDirectory(file1);
+
+    hu_decon_g->SetDirectory(file1);
+    hv_decon_g->SetDirectory(file1);
+    hw_decon_g->SetDirectory(file1);
+
+    hv_raw->SetDirectory(file1);
+
+    hu_threshold->SetDirectory(file1);
+    hv_threshold->SetDirectory(file1);
+    hw_threshold->SetDirectory(file1);
+
+    Trun->CloneTree()->Write();
+    T_chirp->CloneTree()->Write();
+    file1->Write();
+    file1->Close();
+  }
+  
+  //std::cout << uplane_map.size() << " " << vplane_map.size() << " " << wplane_map.size() << std::endl;
 }
