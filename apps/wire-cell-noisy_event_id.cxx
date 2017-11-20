@@ -54,7 +54,6 @@
 #include "WireCell2dToy/uBooNE_Data_After_ROI_gaus.h"
 #include "WireCell2dToy/pd_Data_FDS.h"
 #include "WireCell2dToy/uBooNE_Data_Error.h"
-#include "WireCell2dToy/ExecMon.h"
 #include "WireCell2dToy/ToyDataQuality.h"
 
 #include "TApplication.h"
@@ -118,8 +117,6 @@ int main(int argc, char* argv[])
   // if (two_plane)
   //   cout << "Enable Two Plane Reconstruction " << endl; 
   
-  ExecMon em("starting");
-  cout << em("load geometry") << endl;
 
   WireCellSst::GeomDataSource gds(argv[1]);
   std::vector<double> ex = gds.extent();
@@ -186,7 +183,6 @@ int main(int argc, char* argv[])
   const char* root_file = argv[2];  
   int run_no, subrun_no, event_no;
   
-  cout << em("load data") << endl;
 
   // load Trun
   TFile *file1 = new TFile(root_file);

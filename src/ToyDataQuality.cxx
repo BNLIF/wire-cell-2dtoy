@@ -1,6 +1,6 @@
 #include "WireCell2dToy/ToyDataQuality.h"
 
-bool WireCell2dToy::Noisy_Event_ID(TH2F *hu_decon, TH2F *hv_decon, TH2F *hw_decon, std::vector<float>& uplane_rms, std::vector<float>& vplane_rms, std::vector<float>& wplane_rms, WireCell::ChirpMap& uplane_map, WireCell::ChirpMap& vplane_map, WireCell::ChirpMap& wplane_map, TH2F *hu_decon_g, TH2F *hv_decon_g, TH2F *hw_decon_g, int nrebin, TH2F *hv_raw, bool flag_corr){
+int WireCell2dToy::Noisy_Event_ID(TH2F *hu_decon, TH2F *hv_decon, TH2F *hw_decon, std::vector<float>& uplane_rms, std::vector<float>& vplane_rms, std::vector<float>& wplane_rms, WireCell::ChirpMap& uplane_map, WireCell::ChirpMap& vplane_map, WireCell::ChirpMap& wplane_map, TH2F *hu_decon_g, TH2F *hv_decon_g, TH2F *hw_decon_g, int nrebin, TH2F *hv_raw, bool flag_corr){
 
   int nwire_u = hu_decon->GetNbinsX();
   int nwire_v = hv_decon->GetNbinsX();
@@ -270,12 +270,20 @@ bool WireCell2dToy::Noisy_Event_ID(TH2F *hu_decon, TH2F *hv_decon, TH2F *hw_deco
   
   std::cout << "Xin: " << " " << flag_u << " " << flag_v << " " << flag_w << std::endl;
 
-
+  
+  int min_time = 3180;
+  int max_time = 7870;
+  bool flag_active = false;
+    
   if (flag_corr){
     // ID the region ...
     for (auto it = noisy_u.begin(); it!= noisy_u.end(); it++){
       int start_time = (it->first-1) * nrebin+1;
       int end_time = it->second * nrebin+1;
+
+      if (end_time > min_time && start_time < max_time)
+	flag_active = true;
+      
       for (int i=0;i!=nwire_u;i++){
 	for (int j=it->first; j!=it->second+1;j++){
 	  hu_decon->SetBinContent(i+1, j+1, 0);
@@ -326,6 +334,9 @@ bool WireCell2dToy::Noisy_Event_ID(TH2F *hu_decon, TH2F *hv_decon, TH2F *hw_deco
       int start_time = (it->first-1) * nrebin+1;
       int end_time = it->second * nrebin+1;
 
+      if (end_time > min_time && start_time < max_time)
+	flag_active = true;
+      
       for (int i=0;i!=nwire_u;i++){
 	for (int j=it->first; j!=it->second+1;j++){
 	  hu_decon->SetBinContent(i+1, j+1, 0);
@@ -383,6 +394,10 @@ bool WireCell2dToy::Noisy_Event_ID(TH2F *hu_decon, TH2F *hv_decon, TH2F *hw_deco
       // if (flag_veto1 && flag_veto2){
       int start_time = (it->first-1) * nrebin+1;
       int end_time = it->second * nrebin+1;
+
+      if (end_time > min_time && start_time < max_time)
+	flag_active = true;
+      
       for (int i=0;i!=nwire_u;i++){
 	for (int j=it->first; j!=it->second+1;j++){
 	  hu_decon->SetBinContent(i+1, j+1, 0);
@@ -424,7 +439,15 @@ bool WireCell2dToy::Noisy_Event_ID(TH2F *hu_decon, TH2F *hv_decon, TH2F *hw_deco
     //}
   }
 
-  return (flag_u||flag_v||flag_w);
+  if (flag_u||flag_v||flag_w){
+    if (flag_active){
+      return 2;
+    }else{
+      return 1;
+    }
+  }else{
+    return 0;
+  }
   // std::cout << n_cover << " " << n_fire << std::endl;
   
 }
