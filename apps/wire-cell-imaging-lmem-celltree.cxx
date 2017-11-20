@@ -55,6 +55,7 @@
 #include "WireCell2dToy/pd_Data_FDS.h"
 #include "WireCell2dToy/uBooNE_Data_Error.h"
 #include "WireCell2dToy/ExecMon.h"
+#include "WireCell2dToy/ToyDataQuality.h"
 
 #include "TApplication.h"
 #include "TCanvas.h"
@@ -392,11 +393,8 @@ int main(int argc, char* argv[])
     }
   }
   //
+  TH2F *hv_raw = new TH2F("hv_raw","hv_raw",nwire_v,0,nwire_v,nwindow_size,0,nwindow_size);
 
-  WireCell2dToy::pdDataFDS roi_fds(gds,hu_decon,hv_decon,hw_decon,eve_num);
-  roi_fds.jump(eve_num);
-  
-  TH2F *hv_raw = new TH2F("hv_raw","hv_raw",nwire_w,0,nwire_w,nwindow_size,0,nwindow_size);
   for (size_t i=0;i!=raw_channelId->size();i++){
     int chid = raw_channelId->at(i);
     TH1F *htemp = (TH1F*)raw_wf->At(i);
@@ -408,6 +406,15 @@ int main(int argc, char* argv[])
     }else if (chid < nwire_w+nwire_v+nwire_u){
     }
   }
+
+  
+  WireCell2dToy::Noisy_Event_ID(hu_decon, hv_decon, hw_decon, uplane_rms, vplane_rms, wplane_rms, uplane_map, vplane_map, wplane_map, hu_decon_g, hv_decon_g, hw_decon_g, nrebin, hv_raw, true);
+  
+  WireCell2dToy::pdDataFDS roi_fds(gds,hu_decon,hv_decon,hw_decon,eve_num);
+  roi_fds.jump(eve_num);
+  
+  
+ 
   
   
   WireCell2dToy::uBooNE_L1SP l1sp(hv_raw,hv_decon,hv_decon_g,nrebin);

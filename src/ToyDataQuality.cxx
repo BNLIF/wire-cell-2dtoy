@@ -1,6 +1,6 @@
 #include "WireCell2dToy/ToyDataQuality.h"
 
-bool WireCell2dToy::Noisy_Event_ID(TH2F *hu_decon, TH2F *hv_decon, TH2F *hw_decon, TH1F *hu_threshold, TH1F *hv_threshold, TH1F *hw_threshold, WireCell::ChirpMap& uplane_map, WireCell::ChirpMap& vplane_map, WireCell::ChirpMap& wplane_map, TH2F *hu_decon_g, TH2F *hv_decon_g, TH2F *hw_decon_g, int nrebin, TH2F *hv_raw, bool flag_corr){
+bool WireCell2dToy::Noisy_Event_ID(TH2F *hu_decon, TH2F *hv_decon, TH2F *hw_decon, std::vector<float>& uplane_rms, std::vector<float>& vplane_rms, std::vector<float>& wplane_rms, WireCell::ChirpMap& uplane_map, WireCell::ChirpMap& vplane_map, WireCell::ChirpMap& wplane_map, TH2F *hu_decon_g, TH2F *hv_decon_g, TH2F *hw_decon_g, int nrebin, TH2F *hv_raw, bool flag_corr){
 
   int nwire_u = hu_decon->GetNbinsX();
   int nwire_v = hv_decon->GetNbinsX();
@@ -31,7 +31,7 @@ bool WireCell2dToy::Noisy_Event_ID(TH2F *hu_decon, TH2F *hv_decon, TH2F *hw_deco
       for (int k=0;k!=n_rebin;k++){
 	content += hu_decon->GetBinContent(j+1,i*n_rebin+1+k);
       }
-      float rms = hu_threshold->GetBinContent(j+1);
+      float rms = uplane_rms.at(j);
       if (!flag_roi){
 	if (content > rms){
 	  start = j;
@@ -53,7 +53,7 @@ bool WireCell2dToy::Noisy_Event_ID(TH2F *hu_decon, TH2F *hv_decon, TH2F *hw_deco
       for (int k=0;k!=n_rebin;k++){
 	content += hv_decon->GetBinContent(j+1,i*n_rebin+1+k);
       }
-      float rms = hv_threshold->GetBinContent(j+1);
+      float rms = vplane_rms.at(j);
       if (!flag_roi){
 	if (content > rms){
 	  start = j;
@@ -75,7 +75,7 @@ bool WireCell2dToy::Noisy_Event_ID(TH2F *hu_decon, TH2F *hv_decon, TH2F *hw_deco
       for (int k=0;k!=n_rebin;k++){
 	content += hw_decon->GetBinContent(j+1,i*n_rebin+1+k);
       }
-      float rms = hw_threshold->GetBinContent(j+1);
+      float rms = wplane_rms.at(j);
       if (!flag_roi){
 	if (content > rms){
 	  start = j;
