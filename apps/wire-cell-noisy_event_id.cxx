@@ -324,6 +324,7 @@ int main(int argc, char* argv[])
     for (int j=0;j!=hv_decon->GetNbinsY();j++){
       hv_decon->SetBinContent(i+1-2400,j+1,0);
       hv_decon_g->SetBinContent(i+1-2400,j+1,0);
+      
     }
   }
   //

@@ -8,8 +8,9 @@ bool WireCell2dToy::Noisy_Event_ID(TH2F *hu_decon, TH2F *hv_decon, TH2F *hw_deco
   
   // filter noisy events ... 
   int n_time_slice = hu_decon->GetNbinsY();
-  int length_cut = 10;
+  int length_cut = 3;
   int n_rebin = 1;
+  int time_cut = 3;
 
   std::vector<std::tuple<int,int,float>> summary_u;
   std::vector<std::tuple<int,int,float>> summary_v;
@@ -153,8 +154,9 @@ bool WireCell2dToy::Noisy_Event_ID(TH2F *hu_decon, TH2F *hv_decon, TH2F *hw_deco
     int ncover = std::get<1>(summary_u.at(i));
     float percentage = std::get<2>(summary_u.at(i));
     
-    if (time > prev_time+3){
-      if (n_cover >=6 && n_fire>12 || n_cover >6 && n_fire > 8){
+    if (time > prev_time+time_cut){
+      // std::cout << n_cover << " " << n_fire << std::endl;
+      if (n_cover >=12 && n_fire>=14 ){
 	end_time = prev_time;
 	std::cout << "U: " << n_cover << " " << n_fire << " " << start_time << " " << end_time << std::endl;
 	noisy_u.push_back(std::make_pair(start_time,end_time));
@@ -168,14 +170,14 @@ bool WireCell2dToy::Noisy_Event_ID(TH2F *hu_decon, TH2F *hv_decon, TH2F *hw_deco
     }
     // std::cout << time << " " << ncover << " " << ncover*percentage << std::endl;
     
-    if (ncover>1200. && (percentage > 0.25 || ncover *percentage > 200))
+    if (ncover>1200. && (percentage > 0.25 || ncover *percentage > 300))
       n_cover ++;
     if (ncover*percentage>150)
       n_fire ++;
     prev_time = time;
   }
-  
-  if (n_cover >=6 && n_fire>12|| n_cover >6 && n_fire > 8){
+  // std::cout << n_cover << " " << n_fire << std::endl;
+  if (n_cover >=12 && n_fire>=14){
     end_time = prev_time;
     flag_u = true;
     std::cout << "U: " << n_cover << " " << n_fire << " " << start_time << " " << end_time << std::endl;
@@ -194,9 +196,9 @@ bool WireCell2dToy::Noisy_Event_ID(TH2F *hu_decon, TH2F *hv_decon, TH2F *hw_deco
     int ncover = std::get<1>(summary_v.at(i));
     float percentage = std::get<2>(summary_v.at(i));
     
-    if (time > prev_time+3){
-      //std::cout << n_cover << " " << n_fire << std::endl;
-      if (n_cover >=5 && n_fire>=7){
+    if (time > prev_time+time_cut){
+      // std::cout << n_cover << " " << n_fire << std::endl;
+      if (n_cover >=12 && n_fire>=14){
 	end_time = prev_time;
 	flag_v = true;
 	std::cout << "V: " << n_cover << " " << n_fire << " " << start_time << " " << prev_time << std::endl;
@@ -208,15 +210,16 @@ bool WireCell2dToy::Noisy_Event_ID(TH2F *hu_decon, TH2F *hv_decon, TH2F *hw_deco
       start_time = time;
       end_time = time;
     }
-    //    std::cout << time << " " << ncover << " " << ncover*percentage << std::endl;
+    //std::cout << time << " " << ncover << " " << ncover*percentage << std::endl;
     
-    if (ncover>1200. && (percentage > 0.25 || ncover *percentage > 200))
+    if (ncover>1200. && (percentage > 0.25 || ncover *percentage > 300))
       n_cover ++;
     if (ncover*percentage>150)
       n_fire ++;
     prev_time = time;
   }
-  if (n_cover >=5 && n_fire>=7){
+  //std::cout << n_cover << " " << n_fire << std::endl;
+  if (n_cover >=12 && n_fire>=14){
     end_time = prev_time;
     flag_v = true;
     std::cout << "V: " << n_cover << " " << n_fire << " " << start_time << " " << end_time << std::endl;
@@ -235,9 +238,9 @@ bool WireCell2dToy::Noisy_Event_ID(TH2F *hu_decon, TH2F *hv_decon, TH2F *hw_deco
     int ncover = std::get<1>(summary_w.at(i));
     float percentage = std::get<2>(summary_w.at(i));
     
-    if (time > prev_time+3){
+    if (time > prev_time+time_cut){
       //std::cout << n_cover << " " << n_fire << std::endl;
-      if (n_cover >=2 && n_fire>=3){
+      if (n_cover >=12 && n_fire>=14){
 	end_time = prev_time;
 	flag_w = true;
 	std::cout << "W: " << n_cover << " " << n_fire << " " << start_time << " " << end_time << std::endl;
@@ -251,13 +254,13 @@ bool WireCell2dToy::Noisy_Event_ID(TH2F *hu_decon, TH2F *hv_decon, TH2F *hw_deco
     }
     //   std::cout << time << " " << ncover << " " << ncover*percentage << std::endl;
     
-    if (ncover>1800. && (percentage > 0.25 || ncover *percentage > 200))
+    if (ncover>1800. && (percentage > 0.2 || ncover *percentage > 360))
       n_cover ++;
-    if (ncover*percentage>150)
+    if (ncover*percentage>180)
       n_fire ++;
     prev_time = time;
   }
-  if (n_cover >=2 && n_fire>=3){
+  if (n_cover >=12 && n_fire>=14){
     end_time = prev_time;
     flag_w = true;
     std::cout << "W: " << n_cover << " " << n_fire << " " << start_time << " " << end_time << std::endl;
@@ -284,67 +287,135 @@ bool WireCell2dToy::Noisy_Event_ID(TH2F *hu_decon, TH2F *hv_decon, TH2F *hw_deco
 	  uplane_map[i] = std::make_pair(std::min(uplane_map[i].first,start_time),std::max(uplane_map[i].second,end_time));
 	}
       }
+      for (int i=0;i!=nwire_v;i++){
+	for (int j=start_time; j!=end_time;j++){
+	  hv_decon->SetBinContent(i+1, j+1, 0);
+	  hv_decon_g->SetBinContent(i+1, j+1, 0);
+	}
+	if (vplane_map.find(i)==vplane_map.end()){
+	  vplane_map[i] = std::make_pair(start_time,end_time);
+	}else{
+	  vplane_map[i] = std::make_pair(std::min(vplane_map[i].first,start_time),std::max(vplane_map[i].second,end_time));
+	}
+      }
+      for (int i=0;i!=nwire_w;i++){
+	for (int j=start_time; j!=end_time;j++){
+	  hw_decon->SetBinContent(i+1, j+1, 0);
+	  hw_decon_g->SetBinContent(i+1, j+1, 0);
+	}
+	if (wplane_map.find(i)==wplane_map.end()){
+	  wplane_map[i] = std::make_pair(start_time,end_time);
+	}else{
+	  wplane_map[i] = std::make_pair(std::min(wplane_map[i].first,start_time),std::max(wplane_map[i].second,end_time));
+	}
+      }
     }
 
     for (auto it = noisy_v.begin(); it!=noisy_v.end(); it++){
-      bool flag_veto = false;
-      for (auto it1 = noisy_u.begin(); it1!=noisy_u.end(); it1++){
-	if ( it1->second >= it->first && it->second >= it1->first){
-	  flag_veto = true;
-	  break;
+      // bool flag_veto = false;
+      // for (auto it1 = noisy_u.begin(); it1!=noisy_u.end(); it1++){
+      // 	if ( it1->second >= it->first && it->second >= it1->first){
+      // 	  flag_veto = true;
+      // 	  break;
+      // 	}
+      // }
+      // if (flag_veto){
+      int start_time = (it->first-1) * nrebin+1;
+      int end_time = it->second * nrebin+1;
+
+      for (int i=0;i!=nwire_u;i++){
+	for (int j=start_time; j!=end_time;j++){
+	  hu_decon->SetBinContent(i+1, j+1, 0);
+	  hu_decon_g->SetBinContent(i+1, j+1, 0);
+	}
+	if (uplane_map.find(i)==uplane_map.end()){
+	  uplane_map[i] = std::make_pair(start_time,end_time);
+	}else{
+	  uplane_map[i] = std::make_pair(std::min(uplane_map[i].first,start_time),std::max(uplane_map[i].second,end_time));
 	}
       }
-      if (flag_veto){
-	int start_time = (it->first-1) * nrebin+1;
-	int end_time = it->second * nrebin+1;
-	for (int i=0;i!=nwire_v;i++){
-	  for (int j=start_time; j!=end_time;j++){
-	    hv_decon->SetBinContent(i+1, j+1, 0);
-	    hv_decon_g->SetBinContent(i+1, j+1, 0);
-	  }
-	  if (vplane_map.find(i)==vplane_map.end()){
-	    vplane_map[i] = std::make_pair(start_time,end_time);
-	  }else{
-	    vplane_map[i] = std::make_pair(std::min(vplane_map[i].first,start_time),std::max(vplane_map[i].second,end_time));
-	  }
+      for (int i=0;i!=nwire_v;i++){
+	for (int j=start_time; j!=end_time;j++){
+	  hv_decon->SetBinContent(i+1, j+1, 0);
+	  hv_decon_g->SetBinContent(i+1, j+1, 0);
+	}
+	if (vplane_map.find(i)==vplane_map.end()){
+	  vplane_map[i] = std::make_pair(start_time,end_time);
+	}else{
+	  vplane_map[i] = std::make_pair(std::min(vplane_map[i].first,start_time),std::max(vplane_map[i].second,end_time));
 	}
       }
+      for (int i=0;i!=nwire_w;i++){
+	for (int j=start_time; j!=end_time;j++){
+	  hw_decon->SetBinContent(i+1, j+1, 0);
+	  hw_decon_g->SetBinContent(i+1, j+1, 0);
+	}
+	if (wplane_map.find(i)==wplane_map.end()){
+	  wplane_map[i] = std::make_pair(start_time,end_time);
+	}else{
+	  wplane_map[i] = std::make_pair(std::min(wplane_map[i].first,start_time),std::max(wplane_map[i].second,end_time));
+	}
+      }
+	//}
     }
 
     for (auto it = noisy_w.begin(); it!=noisy_w.end(); it++){
-      bool flag_veto1 = false;
-      bool flag_veto2 = false;
-      for (auto it1 = noisy_u.begin(); it1!=noisy_u.end(); it1++){
-	if ( it1->second >= it->first && it->second >= it1->first){
-	  flag_veto1 = true;
-	  break;
+      // bool flag_veto1 = false;
+      // bool flag_veto2 = false;
+      // for (auto it1 = noisy_u.begin(); it1!=noisy_u.end(); it1++){
+      // 	if ( it1->second >= it->first && it->second >= it1->first){
+      // 	  flag_veto1 = true;
+      // 	  break;
+      // 	}
+      // }
+      // for (auto it1 = noisy_v.begin(); it1!=noisy_v.end(); it1++){
+      // 	if ( it1->second >= it->first && it->second >= it1->first){
+      // 	  flag_veto2 = true;
+      // 	  break;
+      // 	}
+      // }
+      // if (flag_veto1 && flag_veto2){
+      int start_time = (it->first-1) * nrebin+1;
+      int end_time = it->second * nrebin+1;
+      for (int i=0;i!=nwire_u;i++){
+	for (int j=start_time; j!=end_time;j++){
+	  hu_decon->SetBinContent(i+1, j+1, 0);
+	  hu_decon_g->SetBinContent(i+1, j+1, 0);
+	}
+	if (uplane_map.find(i)==uplane_map.end()){
+	  uplane_map[i] = std::make_pair(start_time,end_time);
+	}else{
+	  uplane_map[i] = std::make_pair(std::min(uplane_map[i].first,start_time),std::max(uplane_map[i].second,end_time));
 	}
       }
-      for (auto it1 = noisy_v.begin(); it1!=noisy_v.end(); it1++){
-	if ( it1->second >= it->first && it->second >= it1->first){
-	  flag_veto2 = true;
-	  break;
+      for (int i=0;i!=nwire_v;i++){
+	for (int j=start_time; j!=end_time;j++){
+	  hv_decon->SetBinContent(i+1, j+1, 0);
+	  hv_decon_g->SetBinContent(i+1, j+1, 0);
+	}
+	if (vplane_map.find(i)==vplane_map.end()){
+	  vplane_map[i] = std::make_pair(start_time,end_time);
+	}else{
+	  vplane_map[i] = std::make_pair(std::min(vplane_map[i].first,start_time),std::max(vplane_map[i].second,end_time));
 	}
       }
-      if (flag_veto1 && flag_veto2){
-	int start_time = (it->first-1) * nrebin+1;
-	int end_time = it->second * nrebin+1;
-	for (int i=0;i!=nwire_w;i++){
-	  for (int j=start_time; j!=end_time;j++){
-	    hw_decon->SetBinContent(i+1, j+1, 0);
-	    hw_decon_g->SetBinContent(i+1, j+1, 0);
-	  }
-	  if (wplane_map.find(i)==wplane_map.end()){
-	    wplane_map[i] = std::make_pair(start_time,end_time);
-	  }else{
-	    wplane_map[i] = std::make_pair(std::min(wplane_map[i].first,start_time),std::max(wplane_map[i].second,end_time));
-	  }
+      for (int i=0;i!=nwire_w;i++){
+	for (int j=start_time; j!=end_time;j++){
+	  hw_decon->SetBinContent(i+1, j+1, 0);
+	  hw_decon_g->SetBinContent(i+1, j+1, 0);
+	}
+	if (wplane_map.find(i)==wplane_map.end()){
+	  wplane_map[i] = std::make_pair(start_time,end_time);
+	}else{
+	  wplane_map[i] = std::make_pair(std::min(wplane_map[i].first,start_time),std::max(wplane_map[i].second,end_time));
 	}
       }
     }
+    
+    //}
   }
 
-  return flag_u;
+  return (flag_u||flag_v||flag_w);
   // std::cout << n_cover << " " << n_fire << std::endl;
   
 }
