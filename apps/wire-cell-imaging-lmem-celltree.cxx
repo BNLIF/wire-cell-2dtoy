@@ -407,8 +407,7 @@ int main(int argc, char* argv[])
     }
   }
 
-  
-  WireCell2dToy::Noisy_Event_ID(hu_decon, hv_decon, hw_decon, uplane_rms, vplane_rms, wplane_rms, uplane_map, vplane_map, wplane_map, hu_decon_g, hv_decon_g, hw_decon_g, nrebin, hv_raw, true);
+  int tpc_status = WireCell2dToy::Noisy_Event_ID(hu_decon, hv_decon, hw_decon, uplane_rms, vplane_rms, wplane_rms, uplane_map, vplane_map, wplane_map, hu_decon_g, hv_decon_g, hw_decon_g, nrebin, hv_raw, true);
   
   WireCell2dToy::pdDataFDS roi_fds(gds,hu_decon,hv_decon,hw_decon,eve_num);
   roi_fds.jump(eve_num);
@@ -3180,6 +3179,7 @@ int main(int argc, char* argv[])
   Trun->Branch("threshold_vg",&threshold_vg,"threshold_vg/F");
   Trun->Branch("threshold_wg",&threshold_wg,"threshold_wg/F");
   Trun->Branch("time_offset",&time_offset,"time_offset/I");
+  Trun->Branch("tpc_status",&tpc_status,"tpc_status/I");
   
   Trun->Fill();
 
