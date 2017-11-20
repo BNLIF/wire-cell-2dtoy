@@ -86,7 +86,7 @@ int main(int argc, char* argv[])
   int nt_off2 = 0; // not used
   int solve_charge = 1; // not used
 
-  int save_file = 1; //
+  int save_file = 0; //
   // 1 for debug mode for bee ...
 
   for(Int_t i = 1; i != argc; i++){
@@ -109,11 +109,11 @@ int main(int argc, char* argv[])
      }
   }
 
-  if(save_file==1){
-    std::cout << "Save file for bee. " << std::endl;
-  }else if (save_file==0){
-    std::cout << "Save file for pattern recognition. " << std::endl;
-  }
+  // if(save_file==1){
+  //   std::cout << "Save file for bee. " << std::endl;
+  // }else if (save_file==0){
+  //   std::cout << "Save file for pattern recognition. " << std::endl;
+  // }
   
   // if (two_plane)
   //   cout << "Enable Two Plane Reconstruction " << endl; 
@@ -335,8 +335,8 @@ int main(int argc, char* argv[])
   
   WireCell2dToy::Noisy_Event_ID(hu_decon, hv_decon, hw_decon, uplane_rms, vplane_rms, wplane_rms, uplane_map, vplane_map, wplane_map, hu_decon_g, hv_decon_g, hw_decon_g, nrebin, hv_raw, true);
 
-  bool flag_save = true;
-  if (flag_save){
+  
+  if (save_file==1){
     TFile *file1 = new TFile("temp.root","RECREATE");
     hu_decon->SetDirectory(file1);
     hv_decon->SetDirectory(file1);
