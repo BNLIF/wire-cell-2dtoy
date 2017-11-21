@@ -1,42 +1,46 @@
 #include "WireCell2dToy/ToyDataQuality.h"
 
 void WireCell2dToy::Organize_Dead_Channels(WireCell::ChirpMap& uplane_map, WireCell::ChirpMap& vplane_map, WireCell::ChirpMap& wplane_map, int nbins, int n_div){
-  std::vector<int> boundaries;
-  for (int i=0;i!=n_div+1;i++){
-    boundaries.push_back(int(i*nbins/n_div));
-    //std::cout << boundaries.back() << std::endl;
+  std::vector<std::pair<int,int>> boundaries;
+  for (int i=0;i!=n_div;i++){
+    if (i==0){
+      boundaries.push_back(std::make_pair(int(i*nbins/n_div),int((i+1)*nbins/n_div)));
+    }else{
+      boundaries.push_back(std::make_pair(int(i*nbins/n_div+1),int((i+1)*nbins/n_div)));
+    }
   }
   
   for (auto it = uplane_map.begin(); it!=uplane_map.end(); it++){
     int start = it->second.first;
     int end = it->second.second;
     for (int i=0;i!=n_div;i++){
-      if (start >= boundaries.at(i) && start < boundaries.at(i+1))
-	it->second.first = boundaries.at(i);
-      if (end > boundaries.at(i) && end <= boundaries.at(i+1))
-	it->second.second = boundaries.at(i+1);
+      if (start >= boundaries.at(i).first && start <= boundaries.at(i).second)
+  	it->second.first = boundaries.at(i).first;
+      if (end >= boundaries.at(i).first && end <= boundaries.at(i).second)
+  	it->second.second = boundaries.at(i).second;
     }
   }
   for (auto it = vplane_map.begin(); it!=vplane_map.end(); it++){
     int start = it->second.first;
     int end = it->second.second;
     for (int i=0;i!=n_div;i++){
-      if (start >= boundaries.at(i) && start < boundaries.at(i+1))
-	it->second.first = boundaries.at(i);
-      if (end > boundaries.at(i) && end <= boundaries.at(i+1))
-	it->second.second = boundaries.at(i+1);
+      if (start >= boundaries.at(i).first && start <= boundaries.at(i).second)
+  	it->second.first = boundaries.at(i).first;
+      if (end >= boundaries.at(i).first && end <= boundaries.at(i).second)
+  	it->second.second = boundaries.at(i).second;
     }
   }
   for (auto it = wplane_map.begin(); it!=wplane_map.end(); it++){
     int start = it->second.first;
     int end = it->second.second;
     for (int i=0;i!=n_div;i++){
-      if (start >= boundaries.at(i) && start < boundaries.at(i+1))
-	it->second.first = boundaries.at(i);
-      if (end > boundaries.at(i) && end <= boundaries.at(i+1))
-	it->second.second = boundaries.at(i+1);
+      if (start >= boundaries.at(i).first && start <= boundaries.at(i).second)
+  	it->second.first = boundaries.at(i).first;
+      if (end >= boundaries.at(i).first && end <= boundaries.at(i).second)
+  	it->second.second = boundaries.at(i).second;
     }
   }
+  
 
   
   
