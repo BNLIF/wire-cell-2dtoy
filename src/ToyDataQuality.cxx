@@ -1,13 +1,17 @@
 #include "WireCell2dToy/ToyDataQuality.h"
 
-void WireCell2dToy::Organize_Dead_Channels(WireCell::ChirpMap& uplane_map, WireCell::ChirpMap& vplane_map, WireCell::ChirpMap& wplane_map, int nbins, int n_div){
+void WireCell2dToy::Organize_Dead_Channels(WireCell::ChirpMap& uplane_map, WireCell::ChirpMap& vplane_map, WireCell::ChirpMap& wplane_map, int nbins, int nrebin, int n_div){
   std::vector<std::pair<int,int>> boundaries;
+  
   for (int i=0;i!=n_div;i++){
     if (i==0){
-      boundaries.push_back(std::make_pair(int(i*nbins/n_div),int((i+1)*nbins/n_div)));
+      boundaries.push_back(std::make_pair(0,int(nbins/n_div/nrebin)*nrebin));
+    }else if (i==n_div-1){
+      boundaries.push_back(std::make_pair(int(i*nbins/n_div/nrebin+1)*nrebin,nbins));
     }else{
-      boundaries.push_back(std::make_pair(int(i*nbins/n_div+1),int((i+1)*nbins/n_div)));
+      boundaries.push_back(std::make_pair(int(i*nbins/n_div/nrebin+1)*nrebin,int((i+1)*nbins/n_div/nrebin)*nrebin));
     }
+    std::cout << boundaries.at(i).first << " " << boundaries.at(i).second << std::endl;
   }
   
   for (auto it = uplane_map.begin(); it!=uplane_map.end(); it++){
