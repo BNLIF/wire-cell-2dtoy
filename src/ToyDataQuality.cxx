@@ -4,11 +4,13 @@ void WireCell2dToy::Organize_Dead_Channels(WireCell::ChirpMap& uplane_map, WireC
   std::vector<int> boundaries;
   for (int i=0;i!=n_div+1;i++){
     boundaries.push_back(int(i*nbins/n_div));
+    //std::cout << boundaries.back() << std::endl;
   }
+  
   for (auto it = uplane_map.begin(); it!=uplane_map.end(); it++){
     int start = it->second.first;
     int end = it->second.second;
-    for (int i=0;i!=nbins;i++){
+    for (int i=0;i!=n_div;i++){
       if (start >= boundaries.at(i) && start < boundaries.at(i+1))
 	it->second.first = boundaries.at(i);
       if (end > boundaries.at(i) && end <= boundaries.at(i+1))
@@ -18,7 +20,7 @@ void WireCell2dToy::Organize_Dead_Channels(WireCell::ChirpMap& uplane_map, WireC
   for (auto it = vplane_map.begin(); it!=vplane_map.end(); it++){
     int start = it->second.first;
     int end = it->second.second;
-    for (int i=0;i!=nbins;i++){
+    for (int i=0;i!=n_div;i++){
       if (start >= boundaries.at(i) && start < boundaries.at(i+1))
 	it->second.first = boundaries.at(i);
       if (end > boundaries.at(i) && end <= boundaries.at(i+1))
@@ -28,13 +30,23 @@ void WireCell2dToy::Organize_Dead_Channels(WireCell::ChirpMap& uplane_map, WireC
   for (auto it = wplane_map.begin(); it!=wplane_map.end(); it++){
     int start = it->second.first;
     int end = it->second.second;
-    for (int i=0;i!=nbins;i++){
+    for (int i=0;i!=n_div;i++){
       if (start >= boundaries.at(i) && start < boundaries.at(i+1))
 	it->second.first = boundaries.at(i);
       if (end > boundaries.at(i) && end <= boundaries.at(i+1))
 	it->second.second = boundaries.at(i+1);
     }
   }
+
+  
+  
+  // for (auto it = vplane_map.begin(); it!=vplane_map.end(); it++){
+  //   int start = it->second.first;
+  //   int end = it->second.second;
+  //   std::cout << start << " " << end << std::endl;
+  // }
+  
+  
   
 }
 
