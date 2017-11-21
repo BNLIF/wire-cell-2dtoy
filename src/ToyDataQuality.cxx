@@ -1,5 +1,43 @@
 #include "WireCell2dToy/ToyDataQuality.h"
 
+void WireCell2dToy::Organize_Dead_Channels(WireCell::ChirpMap& uplane_map, WireCell::ChirpMap& vplane_map, WireCell::ChirpMap& wplane_map, int nbins, int n_div){
+  std::vector<int> boundaries;
+  for (int i=0;i!=n_div+1;i++){
+    boundaries.push_back(int(i*nbins/n_div));
+  }
+  for (auto it = uplane_map.begin(); it!=uplane_map.end(); it++){
+    int start = it->second.first;
+    int end = it->second.second;
+    for (int i=0;i!=nbins;i++){
+      if (start >= boundaries.at(i) && start < boundaries.at(i+1))
+	it->second.first = boundaries.at(i);
+      if (end > boundaries.at(i) && end <= boundaries.at(i+1))
+	it->second.second = boundaries.at(i+1);
+    }
+  }
+  for (auto it = vplane_map.begin(); it!=vplane_map.end(); it++){
+    int start = it->second.first;
+    int end = it->second.second;
+    for (int i=0;i!=nbins;i++){
+      if (start >= boundaries.at(i) && start < boundaries.at(i+1))
+	it->second.first = boundaries.at(i);
+      if (end > boundaries.at(i) && end <= boundaries.at(i+1))
+	it->second.second = boundaries.at(i+1);
+    }
+  }
+  for (auto it = wplane_map.begin(); it!=wplane_map.end(); it++){
+    int start = it->second.first;
+    int end = it->second.second;
+    for (int i=0;i!=nbins;i++){
+      if (start >= boundaries.at(i) && start < boundaries.at(i+1))
+	it->second.first = boundaries.at(i);
+      if (end > boundaries.at(i) && end <= boundaries.at(i+1))
+	it->second.second = boundaries.at(i+1);
+    }
+  }
+  
+}
+
 int WireCell2dToy::Noisy_Event_ID(TH2F *hu_decon, TH2F *hv_decon, TH2F *hw_decon, std::vector<float>& uplane_rms, std::vector<float>& vplane_rms, std::vector<float>& wplane_rms, WireCell::ChirpMap& uplane_map, WireCell::ChirpMap& vplane_map, WireCell::ChirpMap& wplane_map, TH2F *hu_decon_g, TH2F *hv_decon_g, TH2F *hw_decon_g, int nrebin, TH2F *hv_raw, bool flag_corr){
 
   int nwire_u = hu_decon->GetNbinsX();
