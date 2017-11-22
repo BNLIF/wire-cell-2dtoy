@@ -605,6 +605,17 @@ int main(int argc, char* argv[])
     }
   }
 
+  delete hu_decon;
+  delete hv_decon;
+  delete hw_decon;
+  delete hu_decon_g;
+  delete hv_decon_g;
+  delete hw_decon_g;
+  delete hv_raw;
+  // delete hu_threshold;
+  // delete hv_threshold;
+  // delete hw_threshold;
+
   cout << em("finish L1SP and retiling") << endl;
   
   for (int i=start_num;i!=end_num+1;i++){
