@@ -273,7 +273,7 @@ void WireCell2dToy::uBooNE_L1SP::L1_fit(int wire_index, int start_tick, int end_
     boundaries.push_back(nbin_fit);
     
     for (int i=0;i!=n_section;i++){
-      std::cout << i << " " << boundaries.at(i+1)  << " " <<  boundaries.at(i) << " " << boundaries.at(i+1)  - boundaries.at(i) << std::endl;
+      // std::cout << i << " " << boundaries.at(i+1)  << " " <<  boundaries.at(i) << " " << boundaries.at(i+1)  - boundaries.at(i) << std::endl;
       
       int temp_nbin_fit = boundaries.at(i+1)-boundaries.at(i);
       VectorXd W = VectorXd::Zero(temp_nbin_fit);
