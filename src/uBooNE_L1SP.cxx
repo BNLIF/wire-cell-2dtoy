@@ -259,11 +259,10 @@ void WireCell2dToy::uBooNE_L1SP::L1_fit(int wire_index, int start_tick, int end_
   }
 
   //std::cout << nbin_fit << " " << wire_index+2400 << " " << start_tick/4. << " " << (end_tick-start_tick)/4. << " " << temp_sum << " " << temp1_sum << " " << flag_l1 << std::endl;
-  // std::cout << flag_l1 << std::endl;
+  //  std::cout << flag_l1 << std::endl;
   //flag_l1 = 0;
   
   if (flag_l1==1){
-    
     int n_section = std::round(nbin_fit/120.);
     if (n_section ==0) n_section =1;
     std::vector<int> boundaries;
@@ -344,9 +343,13 @@ void WireCell2dToy::uBooNE_L1SP::L1_fit(int wire_index, int start_tick, int end_
     }
   }else if (flag_l1==2){
     for (int i=0;i<nbin_fit/nrebin;i++){
+      if (hv_decon->GetBinContent(wire_index+1,start_tick/nrebin+1+i)!=0 && init_time_slice_set.find(start_tick/nrebin+i)!=init_time_slice_set.end()){
+	  time_slice_set.insert(start_tick/nrebin+i);
+      }
       double content = 0;
       hv_decon->SetBinContent(wire_index+1,start_tick/nrebin+1+i,content);
       hv_decon_g->SetBinContent(wire_index+1,start_tick/nrebin+1+i,content);
+      
     }
   }
 }
