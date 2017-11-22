@@ -221,8 +221,9 @@ void WireCell2dToy::uBooNE_L1SP::Form_rois(int pad){
     }
 
     for (auto it = rois_save.begin(); it!=rois_save.end(); it++){
+      //if (it->second * nrebin + nrebin - it->first * nrebin < 150)
       L1_fit(wire_index, it->first * nrebin, it->second * nrebin + nrebin);
-      //   std::cout << wire_index << " " << it->first * nrebin << " " << it->second * nrebin + nrebin <<  " " << (it->second - it->first + 1) * nrebin << std::endl;
+      //std::cout << wire_index << " " << it->first * nrebin << " " << it->second * nrebin + nrebin <<  " " << (it->second - it->first + 1) * nrebin << std::endl;
     }
     
     // std::cout << wire_index << " " << rois_save.size() << std::endl;
@@ -233,28 +234,24 @@ void WireCell2dToy::uBooNE_L1SP::Form_rois(int pad){
 
 void WireCell2dToy::uBooNE_L1SP::L1_fit(int wire_index, int start_tick, int end_tick){
   const int nbin_fit = end_tick-start_tick;
-
   // std::cout << start_tick << " " << end_tick << std::endl;
   
   // fill the data ... 
-  VectorXd W = VectorXd::Zero(nbin_fit);
-
+  VectorXd init_W = VectorXd::Zero(nbin_fit);
+  VectorXd final_beta = VectorXd::Zero(nbin_fit*2);
+  
   double temp_sum = 0;
   double temp1_sum = 0;
   for (int i=0; i!= nbin_fit; i++){
-    W(i) = hv_raw->GetBinContent(wire_index+1,start_tick+i+1);
-    if (fabs(W(i))>6) {
-      temp_sum += W(i);
-      temp1_sum += fabs(W(i));
+    init_W(i) = hv_raw->GetBinContent(wire_index+1,start_tick+i+1);
+    if (fabs(init_W(i))>6) {
+      temp_sum += init_W(i);
+      temp1_sum += fabs(init_W(i));
     }
   }
-
-  
-
   
   int flag_l1 = 0; // do nothing
   // 1 do L1 
-
   if (temp_sum/(temp1_sum*90./nbin_fit)>0.2&& temp1_sum>160){
     flag_l1 = 1; // do L1 ...
   }else if (temp1_sum*90./nbin_fit < 50.){
@@ -262,41 +259,64 @@ void WireCell2dToy::uBooNE_L1SP::L1_fit(int wire_index, int start_tick, int end_
   }
 
   //std::cout << nbin_fit << " " << wire_index+2400 << " " << start_tick/4. << " " << (end_tick-start_tick)/4. << " " << temp_sum << " " << temp1_sum << " " << flag_l1 << std::endl;
-  
   // std::cout << flag_l1 << std::endl;
   //flag_l1 = 0;
   
   if (flag_l1==1){
-    //for matrix G
-    MatrixXd G = MatrixXd::Zero(nbin_fit, nbin_fit*2);
-    for (int i=0;i!=nbin_fit;i++){ 
-      // X 
-      Double_t t1 = i/2.; // us, measured time  
-      for (int j=0;j!=nbin_fit;j++){
-	// Y ... 
-	Double_t t2 = j/2.; // us, real signal time
-	double delta_t = t1 - t2;
-	if (delta_t >-15 && delta_t < 10){
-	  G(i,j) = gw->Eval(delta_t) *500;
-	  G(i,nbin_fit+j) = gv->Eval(delta_t)*500; 
+    
+    int n_section = std::round(nbin_fit/120.);
+    if (n_section ==0) n_section =1;
+    std::vector<int> boundaries;
+    for (int i=0;i!=n_section;i++){
+      boundaries.push_back(int(i * nbin_fit /n_section));
+    }
+    boundaries.push_back(nbin_fit);
+    
+    for (int i=0;i!=n_section;i++){
+      std::cout << i << " " << boundaries.at(i+1)  << " " <<  boundaries.at(i) << " " << boundaries.at(i+1)  - boundaries.at(i) << std::endl;
+      
+      int temp_nbin_fit = boundaries.at(i+1)-boundaries.at(i);
+      VectorXd W = VectorXd::Zero(temp_nbin_fit);
+      for (int j=0;j!=temp_nbin_fit;j++){
+	W(j) = init_W(boundaries.at(i)+j);
+      }
+            
+      //for matrix G
+      MatrixXd G = MatrixXd::Zero(temp_nbin_fit, temp_nbin_fit*2);
+      for (int i=0;i!=temp_nbin_fit;i++){ 
+	// X 
+	Double_t t1 = i/2.; // us, measured time  
+	for (int j=0;j!=temp_nbin_fit;j++){
+	  // Y ... 
+	  Double_t t2 = j/2.; // us, real signal time
+	  double delta_t = t1 - t2;
+	  if (delta_t >-15 && delta_t < 10){
+	    G(i,j) = gw->Eval(delta_t) *500;
+	    G(i,temp_nbin_fit+j) = gv->Eval(delta_t)*500; 
+	  }
 	}
       }
+      
+      double lambda = 5;//1/2.;
+      WireCell::LassoModel m2(lambda, 100000, 0.05);
+      m2.SetData(G, W);
+      m2.Fit();
+      VectorXd beta = m2.Getbeta();
+      for (int j=0;j!=temp_nbin_fit;j++){
+	final_beta(boundaries.at(i)+j) = beta(j);
+	final_beta(nbin_fit + boundaries.at(i)+j) = beta(temp_nbin_fit+j);
+      }
     }
-    
-    double lambda = 5;//1/2.;
-    WireCell::LassoModel m2(lambda, 100000, 0.05);
-    m2.SetData(G, W);
-    m2.Fit();
-    
-    VectorXd beta = m2.Getbeta();
-    
+
+
     double sum1 = 0;
     double sum2 = 0;
-    
     for (int i=0;i!=nbin_fit;i++){
-      sum1 += beta(i);
-      sum2 += beta(nbin_fit+i);
+      sum1 += final_beta(i);
+      sum2 += final_beta(nbin_fit+i);
     }
+    
+    
     
     //std::cout << sum1 << " " << sum2 << std::endl;
     
@@ -305,7 +325,7 @@ void WireCell2dToy::uBooNE_L1SP::L1_fit(int wire_index, int start_tick, int end_
       for (int i=0;i<nbin_fit/nrebin;i++){
 	double content = 0;
 	for (int j=0;j!=nrebin;j++){
-	  content += beta(nrebin*i+j) + beta(nbin_fit + nrebin*i + j) * 2.0;
+	  content += final_beta(nrebin*i+j) + final_beta(nbin_fit + nrebin*i + j) * 2.0;
 	}
 	content *= 500;
 
