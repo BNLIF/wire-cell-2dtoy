@@ -473,8 +473,8 @@ int main(int argc, char* argv[])
   WireCell2dToy::WireCellHolder WCholder;
 
   //add in cluster
-  Slim3DClusterSet cluster_set, cluster_delset;
-  Slim3DDeadClusterSet dead_cluster_set, dead_cluster_delset;
+  Slim3DClusterSet cluster_set, cluster_delset, cluster_set_save;
+  Slim3DDeadClusterSet dead_cluster_set, dead_cluster_delset, dead_cluster_set_save;
   
   int ncount_mcell = 0;
 
@@ -879,8 +879,19 @@ int main(int argc, char* argv[])
     // // display.draw_wires_charge(toytiling[i]->wcmap(),"Fsame",FI);
     // // display.draw_cells_charge(toytiling[i]->get_allcell(),"Fsame");
     //  theApp.Run();
+    for (auto it = cluster_set.begin();it!=cluster_set.end();it++){
+      std::set<SlimMergeGeomCell*>&  abc = ((*it)->get_ordercell()).back();
+      if (i - (*abc.begin())->GetTimeSlice()>1){
+	cluster_set_save.insert(*it);
+	cluster_set.erase(*it);
+      }
+    }
   }
-
+  for (auto it = cluster_set.begin();it!=cluster_set.end();it++){
+    cluster_set_save.insert(*it);
+  }
+  cluster_set = cluster_set_save;
+  cluster_set_save.clear();
  
   
   cout << em("finish initial clustering") << endl;
@@ -1538,7 +1549,7 @@ int main(int argc, char* argv[])
   w_2D_3D_clus_map.clear();
 
   {
-    Slim3DClusterSet temp_cluster_set, temp_cluster_delset;
+    Slim3DClusterSet temp_cluster_set, temp_cluster_delset, temp_cluster_set_save;
     // 2nd round of clustering
     for (int i=start_num; i!=end_num+1;i++){
       // if (i%400==0)
@@ -1597,15 +1608,28 @@ int main(int argc, char* argv[])
 	// ncount_mcell += allmcell.size();
 	// cout << i << " " << allmcell.size()  << " " << temp_cluster_set.size()  << endl;
       }
+      for (auto it = temp_cluster_set.begin();it!=temp_cluster_set.end();it++){
+	std::set<SlimMergeGeomCell*>&  abc = ((*it)->get_ordercell()).back();
+	if (i - (*abc.begin())->GetTimeSlice()>1){
+	  temp_cluster_set_save.insert(*it);
+	  temp_cluster_set.erase(*it);
+	}
+      }
     }
 
+    for (auto it = temp_cluster_set.begin();it!=temp_cluster_set.end();it++){
+      temp_cluster_set_save.insert(*it);
+    }
+    temp_cluster_set = cluster_set_save;
+    temp_cluster_set_save.clear();
+    
     for (auto it = temp_cluster_set.begin(); it!= temp_cluster_set.end(); it++){
       cluster_set.insert(*it);
     }
   }
 
   {
-    Slim3DClusterSet temp_cluster_set, temp_cluster_delset;
+    Slim3DClusterSet temp_cluster_set, temp_cluster_delset, temp_cluster_set_save;
     for (int i=start_num; i!=end_num+1;i++){
       //    if (i%400==0)
       // std::cout << "2nd Clustering (bad cells): " << i << std::endl;
@@ -1664,15 +1688,29 @@ int main(int argc, char* argv[])
 	// ncount_mcell += allmcell.size();
 	// cout << i << " " << allmcell.size()  << " " << temp_cluster_set.size()  << endl;
       }
+
+      for (auto it = temp_cluster_set.begin();it!=temp_cluster_set.end();it++){
+	std::set<SlimMergeGeomCell*>&  abc = ((*it)->get_ordercell()).back();
+	if (i - (*abc.begin())->GetTimeSlice()>1){
+	  temp_cluster_set_save.insert(*it);
+	  temp_cluster_set.erase(*it);
+	}
+      }
     }
 
+    for (auto it = temp_cluster_set.begin();it!=temp_cluster_set.end();it++){
+      temp_cluster_set_save.insert(*it);
+    }
+    temp_cluster_set = cluster_set_save;
+    temp_cluster_set_save.clear();
+    
     for (auto it = temp_cluster_set.begin(); it!= temp_cluster_set.end(); it++){
       cluster_set.insert(*it);
     }
   }
 
   {
-    Slim3DClusterSet temp_cluster_set, temp_cluster_delset;
+    Slim3DClusterSet temp_cluster_set, temp_cluster_delset, temp_cluster_set_save;
     for (int i=start_num; i!=end_num+1;i++){
       //    if (i%400==0)
       // std::cout << "2nd Clustering (bad cells): " << i << std::endl;
@@ -1731,15 +1769,29 @@ int main(int argc, char* argv[])
 	// ncount_mcell += allmcell.size();
 	// cout << i << " " << allmcell.size()  << " " << temp_cluster_set.size()  << endl;
       }
+
+      for (auto it = temp_cluster_set.begin();it!=temp_cluster_set.end();it++){
+	std::set<SlimMergeGeomCell*>&  abc = ((*it)->get_ordercell()).back();
+	if (i - (*abc.begin())->GetTimeSlice()>1){
+	  temp_cluster_set_save.insert(*it);
+	  temp_cluster_set.erase(*it);
+	}
+      }
     }
 
+    for (auto it = temp_cluster_set.begin();it!=temp_cluster_set.end();it++){
+      temp_cluster_set_save.insert(*it);
+    }
+    temp_cluster_set = cluster_set_save;
+    temp_cluster_set_save.clear();
+    
     for (auto it = temp_cluster_set.begin(); it!= temp_cluster_set.end(); it++){
       cluster_set.insert(*it);
     }
   }
 
   {
-    Slim3DClusterSet temp_cluster_set, temp_cluster_delset;
+    Slim3DClusterSet temp_cluster_set, temp_cluster_delset, temp_cluster_set_save;
     
     for (int i=start_num; i!=end_num+1;i++){
       //    if (i%400==0)
@@ -1799,7 +1851,21 @@ int main(int argc, char* argv[])
 	// ncount_mcell += allmcell.size();
 	// cout << i << " " << allmcell.size()  << " " << temp_cluster_set.size()  << endl;
       }
+
+      for (auto it = temp_cluster_set.begin();it!=temp_cluster_set.end();it++){
+	std::set<SlimMergeGeomCell*>&  abc = ((*it)->get_ordercell()).back();
+	if (i - (*abc.begin())->GetTimeSlice()>1){
+	  temp_cluster_set_save.insert(*it);
+	  temp_cluster_set.erase(*it);
+	}
+      }
     }
+
+    for (auto it = temp_cluster_set.begin();it!=temp_cluster_set.end();it++){
+      temp_cluster_set_save.insert(*it);
+    }
+    temp_cluster_set = cluster_set_save;
+    temp_cluster_set_save.clear();
     
     for (auto it = temp_cluster_set.begin(); it!= temp_cluster_set.end(); it++){
       cluster_set.insert(*it);
@@ -2738,8 +2804,21 @@ int main(int argc, char* argv[])
       }
     }
     //std::cout << i << " " << dead_cluster_set.size() << " " << allmcell.size() << std::endl;
+
+    for (auto it = dead_cluster_set.begin();it!=dead_cluster_set.end();it++){
+      if (i - ((*it)->get_cluster()).rbegin()->first >0){
+	dead_cluster_set_save.insert(*it);
+	dead_cluster_set.erase(*it);
+      }
+    }
   }
 
+  for (auto it = dead_cluster_set.begin();it!=dead_cluster_set.end();it++){
+    dead_cluster_set_save.insert(*it);
+  }
+  dead_cluster_set = dead_cluster_set_save;
+  dead_cluster_set_save.clear();
+  
   int cluster_id1 = 0;
   for (auto it = dead_cluster_set.begin();it!=dead_cluster_set.end();it++){
     (*it)->set_id(cluster_id1);
