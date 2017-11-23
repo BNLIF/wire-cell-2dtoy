@@ -4750,11 +4750,21 @@ WireCell2dToy::LowmemTiling::~LowmemTiling(){
   //   delete fired_wire_v.at(i);
   // }
   // fired_wire_v.clear();
-
+  
   // for (int i=0;i!=fired_wire_w.size();i++){
   //   delete fired_wire_w.at(i);
   // }
   // fired_wire_w.clear();
+  
+  for (auto it = wire_type_map.begin(); it!= wire_type_map.end();it++){
+    if (it->second)
+      delete it->first;
+  }
+  for (auto it = cell_wires_map.begin(); it!=cell_wires_map.end(); it++){
+    delete it->first;
+  }
+  
+  
 }
 
 WireCell::GeomWireSelection WireCell2dToy::LowmemTiling::wires(const WireCell::GeomCell& cell) const{

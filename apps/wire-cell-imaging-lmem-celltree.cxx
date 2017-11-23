@@ -494,6 +494,10 @@ int main(int argc, char* argv[])
   
   TFile *file = new TFile(Form("result_%d_%d_%d.root",run_no,subrun_no,event_no),"RECREATE");
 
+   if (T_op!=0){
+    T_op->CloneTree()->Write();
+  }
+  
   Int_t n_cells;
   Int_t n_good_wires;
   Int_t n_bad_wires;
@@ -585,7 +589,9 @@ int main(int argc, char* argv[])
       // 	  std::cout << "A: " << (*it1).second << std::endl;
       // }
       
-      lowmemtiling[time_slice]->reset_cells();
+      //lowmemtiling[time_slice]->reset_cells();
+      delete lowmemtiling[time_slice];
+      lowmemtiling[time_slice] = new WireCell2dToy::LowmemTiling(time_slice,nrebin,gds,WCholder);
       if (time_slice==start_num){
 	 lowmemtiling[time_slice]->init_bad_cells(uplane_map,vplane_map,wplane_map);
        }else{
@@ -616,6 +622,9 @@ int main(int argc, char* argv[])
   // delete hv_threshold;
   // delete hw_threshold;
 
+  file1->Close();
+  delete file1;
+  
   cout << em("finish L1SP and retiling") << endl;
   
   for (int i=start_num;i!=end_num+1;i++){
@@ -3239,9 +3248,7 @@ int main(int argc, char* argv[])
 
 
   
-  if (T_op!=0){
-    T_op->CloneTree()->Write();
-  }
+ 
 
 
   TTree *Trun = new TTree("Trun","Trun");
