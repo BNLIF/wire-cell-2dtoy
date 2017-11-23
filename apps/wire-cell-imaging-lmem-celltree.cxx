@@ -1620,7 +1620,7 @@ int main(int argc, char* argv[])
     for (auto it = temp_cluster_set.begin();it!=temp_cluster_set.end();it++){
       temp_cluster_set_save.insert(*it);
     }
-    temp_cluster_set = cluster_set_save;
+    temp_cluster_set = temp_cluster_set_save;
     temp_cluster_set_save.clear();
     
     for (auto it = temp_cluster_set.begin(); it!= temp_cluster_set.end(); it++){
@@ -1701,7 +1701,7 @@ int main(int argc, char* argv[])
     for (auto it = temp_cluster_set.begin();it!=temp_cluster_set.end();it++){
       temp_cluster_set_save.insert(*it);
     }
-    temp_cluster_set = cluster_set_save;
+    temp_cluster_set = temp_cluster_set_save;
     temp_cluster_set_save.clear();
     
     for (auto it = temp_cluster_set.begin(); it!= temp_cluster_set.end(); it++){
@@ -1782,7 +1782,7 @@ int main(int argc, char* argv[])
     for (auto it = temp_cluster_set.begin();it!=temp_cluster_set.end();it++){
       temp_cluster_set_save.insert(*it);
     }
-    temp_cluster_set = cluster_set_save;
+    temp_cluster_set = temp_cluster_set_save;
     temp_cluster_set_save.clear();
     
     for (auto it = temp_cluster_set.begin(); it!= temp_cluster_set.end(); it++){
@@ -1864,7 +1864,7 @@ int main(int argc, char* argv[])
     for (auto it = temp_cluster_set.begin();it!=temp_cluster_set.end();it++){
       temp_cluster_set_save.insert(*it);
     }
-    temp_cluster_set = cluster_set_save;
+    temp_cluster_set = temp_cluster_set_save;
     temp_cluster_set_save.clear();
     
     for (auto it = temp_cluster_set.begin(); it!= temp_cluster_set.end(); it++){
