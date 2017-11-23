@@ -2334,15 +2334,15 @@ GeomCellSelection WireCell2dToy::LowmemTiling::local_deghosting(std::set<SlimMer
 
 void WireCell2dToy::LowmemTiling::reset_cells(){
   // clean up all fired_wires
-  for (size_t i=0;i!=fired_wire_u.size();i++){
-    delete fired_wire_u.at(i);
-  }
-  for (size_t i=0;i!=fired_wire_v.size();i++){
-    delete fired_wire_v.at(i);
-  }
-  for (size_t i=0;i!=fired_wire_w.size();i++){
-    delete fired_wire_w.at(i);
-  }
+  // for (size_t i=0;i!=fired_wire_u.size();i++){
+  //   delete fired_wire_u.at(i);
+  // }
+  // for (size_t i=0;i!=fired_wire_v.size();i++){
+  //   delete fired_wire_v.at(i);
+  // }
+  // for (size_t i=0;i!=fired_wire_w.size();i++){
+  //   delete fired_wire_w.at(i);
+  // }
   fired_wire_u.clear(); // check
   fired_wire_v.clear(); // check
   fired_wire_w.clear(); // check
@@ -2353,15 +2353,15 @@ void WireCell2dToy::LowmemTiling::reset_cells(){
   bad_wire_w.clear();
   
   // clean up all good wire cells
-  for (size_t i=0;i!=three_good_wire_cells.size(); i++){
-    delete three_good_wire_cells.at(i);
-  }
-  for (size_t i=0;i!=two_good_wire_cells.size(); i++){
-    delete two_good_wire_cells.at(i);
-  }
-  for (size_t i=0;i!=one_good_wire_cells.size(); i++){
-    delete one_good_wire_cells.at(i);
-  }
+  // for (size_t i=0;i!=three_good_wire_cells.size(); i++){
+  //   delete three_good_wire_cells.at(i);
+  // }
+  // for (size_t i=0;i!=two_good_wire_cells.size(); i++){
+  //   delete two_good_wire_cells.at(i);
+  // }
+  // for (size_t i=0;i!=one_good_wire_cells.size(); i++){
+  //   delete one_good_wire_cells.at(i);
+  // }
   three_good_wire_cells.clear();
   two_good_wire_cells.clear();
   one_good_wire_cells.clear();
