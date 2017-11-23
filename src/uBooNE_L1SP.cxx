@@ -158,7 +158,7 @@ void WireCell2dToy::uBooNE_L1SP::Form_rois(int pad){
   
   for (auto it = init_map.begin(); it!=init_map.end(); it++){
     int wire_index = it->first;
-    std::set<int> time_slices_set = it->second;
+    std::set<int>& time_slices_set = it->second;
     std::vector<int> time_slices;
     std::copy(time_slices_set.begin(), time_slices_set.end(), std::back_inserter(time_slices));
     //  std::sort(time_slices.begin(), time_slices.end());

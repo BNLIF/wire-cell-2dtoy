@@ -11,14 +11,14 @@ WireCell2dToy::WireCellHolder::WireCellHolder(){
 }
 
 WireCell2dToy::WireCellHolder::~WireCellHolder(){
-  for (int i=0;i!=wires.size();i++){
-    delete wires.at(i);
-  }
-  wires.clear();
-  for (int i=0;i!=cells.size();i++){
-    delete cells.at(i);
-  }
-  cells.clear();
+  // for (int i=0;i!=wires.size();i++){
+  //   delete wires.at(i);
+  // }
+  // wires.clear();
+  // for (int i=0;i!=cells.size();i++){
+  //   delete cells.at(i);
+  // }
+  // cells.clear();
 }
 
 

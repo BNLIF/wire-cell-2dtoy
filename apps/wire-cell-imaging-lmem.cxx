@@ -509,7 +509,7 @@ int main(int argc, char* argv[])
     roi_gaus_fds.refresh(hu_decon_g,hv_decon_g,hw_decon_g,eve_num);
     error_fds.refresh(hu_decon_g, hv_decon_g, hw_decon_g, eve_num);
     
-    //cout << em("finish L1SP ") << endl;
+    cout << em("finish L1SP ") << endl;
     
     std::set<int> time_slice_set = l1sp.get_time_slice_set();
     for (auto it = time_slice_set.begin(); it!= time_slice_set.end(); it++){
@@ -1363,7 +1363,7 @@ int main(int argc, char* argv[])
     for (auto it = temp_cluster_set.begin();it!=temp_cluster_set.end();it++){
       temp_cluster_set_save.insert(*it);
     }
-    temp_cluster_set = cluster_set_save;
+    temp_cluster_set = temp_cluster_set_save;
     temp_cluster_set_save.clear();
     
     for (auto it = temp_cluster_set.begin(); it!= temp_cluster_set.end(); it++){
@@ -1444,7 +1444,7 @@ int main(int argc, char* argv[])
     for (auto it = temp_cluster_set.begin();it!=temp_cluster_set.end();it++){
       temp_cluster_set_save.insert(*it);
     }
-    temp_cluster_set = cluster_set_save;
+    temp_cluster_set = temp_cluster_set_save;
     temp_cluster_set_save.clear();
 
     for (auto it = temp_cluster_set.begin(); it!= temp_cluster_set.end(); it++){
@@ -1525,7 +1525,7 @@ int main(int argc, char* argv[])
     for (auto it = temp_cluster_set.begin();it!=temp_cluster_set.end();it++){
       temp_cluster_set_save.insert(*it);
     }
-    temp_cluster_set = cluster_set_save;
+    temp_cluster_set = temp_cluster_set_save;
     temp_cluster_set_save.clear();
     
     for (auto it = temp_cluster_set.begin(); it!= temp_cluster_set.end(); it++){
@@ -1608,7 +1608,7 @@ int main(int argc, char* argv[])
     for (auto it = temp_cluster_set.begin();it!=temp_cluster_set.end();it++){
       temp_cluster_set_save.insert(*it);
     }
-    temp_cluster_set = cluster_set_save;
+    temp_cluster_set = temp_cluster_set_save;
     temp_cluster_set_save.clear();
 
     

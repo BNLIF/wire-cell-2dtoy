@@ -24,8 +24,8 @@ GeomWireSelection WireCell2dToy::LowmemTiling::find_L1SP_wires(){
   for (auto it = two_good_wire_cells.begin(); it!= two_good_wire_cells.end(); it++){
     SlimMergeGeomCell *mcell = (SlimMergeGeomCell*)(*it);
     // loop through Y plane wires to find if a wire is inthe shorted region
-    GeomWireSelection wwires = mcell->get_wwires();
-    GeomWireSelection vwires = mcell->get_vwires();
+    GeomWireSelection& wwires = mcell->get_wwires();
+    GeomWireSelection& vwires = mcell->get_vwires();
     bool flag_save = false;
     for (auto it1 = wwires.begin(); it1!=wwires.end(); it1++){
       if ((*it1)->index()>=2336 && (*it1)->index()<=2463){
@@ -52,7 +52,7 @@ void WireCell2dToy::LowmemTiling::DivideWires(int wire_limit, int min_wire){
   // loop over all the parent wires,  pick up one parent wire
   for (auto it = pwire_wires_map.begin(); it!=pwire_wires_map.end(); it++){
     MergeGeomWire *pwire = (MergeGeomWire*)it->first;
-    GeomWireSelection wires = it->second;
+    GeomWireSelection& wires = it->second;
     if (!wire_type_map[pwire]) continue; // if the parent wire is bad, no need to do anything ...
     if (wires.size()<=1) continue; // if the number of wires are zero or one, no need to do anything
     // ensure the sorting is working ... 
@@ -260,9 +260,9 @@ void WireCell2dToy::LowmemTiling::DivideWires(int wire_limit, int min_wire){
 	      MergeGeomWire *pwire = (MergeGeomWire*)wire_pwire_map[old_wire];
 	      
 	      // create new mwires 
-	      GeomWireSelection uwires = new_cell->get_uwires();
-	      GeomWireSelection vwires = new_cell->get_vwires();
-	      GeomWireSelection wwires = new_cell->get_wwires();
+	      GeomWireSelection& uwires = new_cell->get_uwires();
+	      GeomWireSelection& vwires = new_cell->get_vwires();
+	      GeomWireSelection& wwires = new_cell->get_wwires();
 	      MergeGeomWire *mwire_u = new MergeGeomWire(0,uwires);
 	      MergeGeomWire *mwire_v = new MergeGeomWire(0,vwires);
 	      MergeGeomWire *mwire_w = new MergeGeomWire(0,wwires);
@@ -364,11 +364,11 @@ void WireCell2dToy::LowmemTiling::MergeWires(){
   // loop over parent wire maps, 
   for (auto it = pwire_wires_map.begin(); it!= pwire_wires_map.end(); it++){
     MergeGeomWire *pwire = (MergeGeomWire*)it->first;
-    GeomWireSelection allwires = it->second;
+    GeomWireSelection& allwires = it->second;
     if (wire_type_map[pwire]){
       //only do merge if the parent wire is good ...
       //while(further_mergewire(pwire_wires_map[pwire]));
-      GeomWireSelection wires = pwire_wires_map[pwire];
+      GeomWireSelection& wires = pwire_wires_map[pwire];
 
       // std::cout << wire_cells_map.size() << std::endl;
       // std::cout << "a: " << pwire_wires_map[pwire].size() << " " << wires.size() << " " << further_mergewire(wires)  << std::endl;
@@ -1418,7 +1418,7 @@ void WireCell2dToy::LowmemTiling::re_establish_maps(){
   for (auto it = cell_wires_map.begin(); it!=cell_wires_map.end(); it++){
     const GeomCell *mcell = it->first;
     all_cells.push_back(mcell);
-    GeomWireSelection wires = it->second;
+    GeomWireSelection& wires = it->second;
     for (auto it1 = wires.begin(); it1!=wires.end(); it1++){
       MergeGeomWire *mwire = (MergeGeomWire*)(*it1);
       MergeGeomWire *p_mwire = (MergeGeomWire*)wire_pwire_map[mwire];
@@ -1455,9 +1455,9 @@ void WireCell2dToy::LowmemTiling::re_establish_maps(){
     SlimMergeGeomCell *mcell = (SlimMergeGeomCell*)(*it);
 
       // create new mwires 
-    GeomWireSelection uwires = mcell->get_uwires();
-    GeomWireSelection vwires = mcell->get_vwires();
-    GeomWireSelection wwires = mcell->get_wwires();
+    GeomWireSelection& uwires = mcell->get_uwires();
+    GeomWireSelection& vwires = mcell->get_vwires();
+    GeomWireSelection& wwires = mcell->get_wwires();
     MergeGeomWire *mwire_u = new MergeGeomWire(0,uwires);
     MergeGeomWire *mwire_v = new MergeGeomWire(0,vwires);
     MergeGeomWire *mwire_w = new MergeGeomWire(0,wwires);
@@ -1531,9 +1531,9 @@ void WireCell2dToy::LowmemTiling::local_deghosting1(std::set<WireCell::SlimMerge
   std::map<const GeomWire*, float> wire_score_map;
   for (auto it = three_good_wire_cells.begin(); it!= three_good_wire_cells.end(); it++){
     SlimMergeGeomCell *mcell = (SlimMergeGeomCell*)(*it);
-    GeomWireSelection uwires = mcell->get_uwires();
-    GeomWireSelection vwires = mcell->get_vwires();
-    GeomWireSelection wwires = mcell->get_wwires();
+    GeomWireSelection& uwires = mcell->get_uwires();
+    GeomWireSelection& vwires = mcell->get_vwires();
+    GeomWireSelection& wwires = mcell->get_wwires();
 
     for(auto it1 = uwires.begin(); it1!=uwires.end(); it1++){
       if (wire_score_map.find(*it1)==wire_score_map.end()){
@@ -1559,9 +1559,9 @@ void WireCell2dToy::LowmemTiling::local_deghosting1(std::set<WireCell::SlimMerge
   }
   for (auto it = two_good_wire_cells.begin(); it!= two_good_wire_cells.end(); it++){
     SlimMergeGeomCell *mcell = (SlimMergeGeomCell*)(*it);
-    GeomWireSelection uwires = mcell->get_uwires();
-    GeomWireSelection vwires = mcell->get_vwires();
-    GeomWireSelection wwires = mcell->get_wwires();
+    GeomWireSelection& uwires = mcell->get_uwires();
+    GeomWireSelection& vwires = mcell->get_vwires();
+    GeomWireSelection& wwires = mcell->get_wwires();
     
     std::vector<WirePlaneType_t> bad_planes = mcell->get_bad_planes();
     bool flag_u = true, flag_v = true, flag_w = true;
@@ -1608,9 +1608,9 @@ void WireCell2dToy::LowmemTiling::local_deghosting1(std::set<WireCell::SlimMerge
   for (auto it = two_good_wire_cells.begin(); it!= two_good_wire_cells.end(); it++){
     SlimMergeGeomCell *mcell = (SlimMergeGeomCell*)(*it);
     
-    GeomWireSelection uwires = mcell->get_uwires();
-    GeomWireSelection vwires = mcell->get_vwires();
-    GeomWireSelection wwires = mcell->get_wwires();
+    GeomWireSelection& uwires = mcell->get_uwires();
+    GeomWireSelection& vwires = mcell->get_vwires();
+    GeomWireSelection& wwires = mcell->get_wwires();
     
     std::vector<WirePlaneType_t> bad_planes = mcell->get_bad_planes();
     bool flag_u = true, flag_v = true, flag_w = true;
@@ -1661,9 +1661,9 @@ void WireCell2dToy::LowmemTiling::local_deghosting1(std::set<WireCell::SlimMerge
   for (auto it = three_good_wire_cells.begin(); it!= three_good_wire_cells.end(); it++){
     SlimMergeGeomCell *mcell = (SlimMergeGeomCell*)(*it);
     
-    GeomWireSelection uwires = mcell->get_uwires();
-    GeomWireSelection vwires = mcell->get_vwires();
-    GeomWireSelection wwires = mcell->get_wwires();
+    GeomWireSelection& uwires = mcell->get_uwires();
+    GeomWireSelection& vwires = mcell->get_vwires();
+    GeomWireSelection& wwires = mcell->get_wwires();
     
     std::vector<WirePlaneType_t> bad_planes = mcell->get_bad_planes();
     bool flag_u = true, flag_v = true, flag_w = true;
@@ -1743,9 +1743,9 @@ void WireCell2dToy::LowmemTiling::local_deghosting1(std::set<WireCell::SlimMerge
     // gds.crossing_point(*uwire, *vwire, abc);
     // std::cout << abc.x/units::cm << " " << abc.y/units::cm << " " << abc.z/units::cm << std::endl;
     
-    GeomWireSelection uwires = mcell->get_uwires();
-    GeomWireSelection vwires = mcell->get_vwires();
-    GeomWireSelection wwires = mcell->get_wwires();
+    GeomWireSelection& uwires = mcell->get_uwires();
+    GeomWireSelection& vwires = mcell->get_vwires();
+    GeomWireSelection& wwires = mcell->get_wwires();
     
     GeomWireSelection mwires = cell_wires_map[mcell];
     std::vector<WirePlaneType_t> bad_planes = mcell->get_bad_planes();
@@ -1830,9 +1830,9 @@ GeomCellSelection WireCell2dToy::LowmemTiling::local_deghosting(std::set<SlimMer
   for (auto it = three_good_wire_cells.begin(); it!= three_good_wire_cells.end(); it++){
     SlimMergeGeomCell *mcell = (SlimMergeGeomCell*)(*it);
     if (good_mcells.find(mcell)!=good_mcells.end()){
-      GeomWireSelection uwires = mcell->get_uwires();
-      GeomWireSelection vwires = mcell->get_vwires();
-      GeomWireSelection wwires = mcell->get_wwires();
+      GeomWireSelection& uwires = mcell->get_uwires();
+      GeomWireSelection& vwires = mcell->get_vwires();
+      GeomWireSelection& wwires = mcell->get_wwires();
       for (auto it1 = uwires.begin(); it1!= uwires.end(); it1++){
 	used_uwires.insert(*it1);
       }
@@ -1869,9 +1869,9 @@ GeomCellSelection WireCell2dToy::LowmemTiling::local_deghosting(std::set<SlimMer
   for (auto it = two_good_wire_cells.begin(); it!= two_good_wire_cells.end(); it++){
     SlimMergeGeomCell *mcell = (SlimMergeGeomCell*)(*it);
     if (potential_good_mcells.find(mcell)==potential_good_mcells.end()){
-      GeomWireSelection uwires = mcell->get_uwires();
-      GeomWireSelection vwires = mcell->get_vwires();
-      GeomWireSelection wwires = mcell->get_wwires();
+      GeomWireSelection& uwires = mcell->get_uwires();
+      GeomWireSelection& vwires = mcell->get_vwires();
+      GeomWireSelection& wwires = mcell->get_wwires();
 
       std::vector<WirePlaneType_t> bad_planes = mcell->get_bad_planes();
       bool flag_u = true, flag_v = true, flag_w = true;
@@ -1936,9 +1936,9 @@ GeomCellSelection WireCell2dToy::LowmemTiling::local_deghosting(std::set<SlimMer
   std::map<const GeomWire*, float> wire_score_map;
   for (auto it = two_good_wire_cells.begin(); it!= two_good_wire_cells.end(); it++){
     SlimMergeGeomCell *mcell = (SlimMergeGeomCell*)(*it);
-    GeomWireSelection uwires = mcell->get_uwires();
-    GeomWireSelection vwires = mcell->get_vwires();
-    GeomWireSelection wwires = mcell->get_wwires();
+    GeomWireSelection& uwires = mcell->get_uwires();
+    GeomWireSelection& vwires = mcell->get_vwires();
+    GeomWireSelection& wwires = mcell->get_wwires();
     
     std::vector<WirePlaneType_t> bad_planes = mcell->get_bad_planes();
     bool flag_u = true, flag_v = true, flag_w = true;
@@ -1983,9 +1983,9 @@ GeomCellSelection WireCell2dToy::LowmemTiling::local_deghosting(std::set<SlimMer
   for (auto it = two_good_wire_cells.begin(); it!= two_good_wire_cells.end(); it++){
     SlimMergeGeomCell *mcell = (SlimMergeGeomCell*)(*it);
     
-    GeomWireSelection uwires = mcell->get_uwires();
-    GeomWireSelection vwires = mcell->get_vwires();
-    GeomWireSelection wwires = mcell->get_wwires();
+    GeomWireSelection& uwires = mcell->get_uwires();
+    GeomWireSelection& vwires = mcell->get_vwires();
+    GeomWireSelection& wwires = mcell->get_wwires();
     
     std::vector<WirePlaneType_t> bad_planes = mcell->get_bad_planes();
     bool flag_u = true, flag_v = true, flag_w = true;
@@ -2334,6 +2334,15 @@ GeomCellSelection WireCell2dToy::LowmemTiling::local_deghosting(std::set<SlimMer
 
 void WireCell2dToy::LowmemTiling::reset_cells(){
   // clean up all fired_wires
+  for (size_t i=0;i!=fired_wire_u.size();i++){
+    delete fired_wire_u.at(i);
+  }
+  for (size_t i=0;i!=fired_wire_v.size();i++){
+    delete fired_wire_v.at(i);
+  }
+  for (size_t i=0;i!=fired_wire_w.size();i++){
+    delete fired_wire_w.at(i);
+  }
   fired_wire_u.clear(); // check
   fired_wire_v.clear(); // check
   fired_wire_w.clear(); // check
@@ -2344,6 +2353,15 @@ void WireCell2dToy::LowmemTiling::reset_cells(){
   bad_wire_w.clear();
   
   // clean up all good wire cells
+  for (size_t i=0;i!=three_good_wire_cells.size(); i++){
+    delete three_good_wire_cells.at(i);
+  }
+  for (size_t i=0;i!=two_good_wire_cells.size(); i++){
+    delete two_good_wire_cells.at(i);
+  }
+  for (size_t i=0;i!=one_good_wire_cells.size(); i++){
+    delete one_good_wire_cells.at(i);
+  }
   three_good_wire_cells.clear();
   two_good_wire_cells.clear();
   one_good_wire_cells.clear();
@@ -2475,9 +2493,9 @@ void WireCell2dToy::LowmemTiling::init_good_cells(const WireCell::Slice& slice, 
 	    mcell->add_bad_planes(WirePlaneType_t(2));
 	    
   	    // create new mwires 
-	    GeomWireSelection uwires = mcell->get_uwires();
-	    GeomWireSelection vwires = mcell->get_vwires();
-	    GeomWireSelection wwires = mcell->get_wwires();
+	    GeomWireSelection& uwires = mcell->get_uwires();
+	    GeomWireSelection& vwires = mcell->get_vwires();
+	    GeomWireSelection& wwires = mcell->get_wwires();
 	    MergeGeomWire *mwire_u = new MergeGeomWire(0,uwires);
 	    MergeGeomWire *mwire_v = new MergeGeomWire(0,vwires);
 	    MergeGeomWire *mwire_w = new MergeGeomWire(0,wwires);
@@ -2553,9 +2571,9 @@ void WireCell2dToy::LowmemTiling::init_good_cells(const WireCell::Slice& slice, 
 	    two_good_wire_cells.push_back(mcell);
 	    mcell->add_bad_planes(WirePlaneType_t(1));
   	    // create new mwires 
-	    GeomWireSelection uwires = mcell->get_uwires();
-	    GeomWireSelection vwires = mcell->get_vwires();
-	    GeomWireSelection wwires = mcell->get_wwires();
+	    GeomWireSelection& uwires = mcell->get_uwires();
+	    GeomWireSelection& vwires = mcell->get_vwires();
+	    GeomWireSelection& wwires = mcell->get_wwires();
 	    MergeGeomWire *mwire_u = new MergeGeomWire(0,uwires);
 	    MergeGeomWire *mwire_v = new MergeGeomWire(0,vwires);
 	    MergeGeomWire *mwire_w = new MergeGeomWire(0,wwires);
@@ -2631,9 +2649,9 @@ void WireCell2dToy::LowmemTiling::init_good_cells(const WireCell::Slice& slice, 
 	    mcell->add_bad_planes(WirePlaneType_t(0));
 	    
   	    // create new mwires 
-	    GeomWireSelection uwires = mcell->get_uwires();
-	    GeomWireSelection vwires = mcell->get_vwires();
-	    GeomWireSelection wwires = mcell->get_wwires();
+	    GeomWireSelection& uwires = mcell->get_uwires();
+	    GeomWireSelection& vwires = mcell->get_vwires();
+	    GeomWireSelection& wwires = mcell->get_wwires();
 	    MergeGeomWire *mwire_u = new MergeGeomWire(0,uwires);
 	    MergeGeomWire *mwire_v = new MergeGeomWire(0,vwires);
 	    MergeGeomWire *mwire_w = new MergeGeomWire(0,wwires);
@@ -2752,9 +2770,9 @@ void WireCell2dToy::LowmemTiling::create_one_good_wire_cells(){
    // figure out the fired wires for each plane 
   std::set<const GeomWire*> fired_wires;
   for (int i = 0; i!= three_good_wire_cells.size(); i++){
-    GeomWireSelection uwires = ((SlimMergeGeomCell*)three_good_wire_cells.at(i))->get_uwires();
-    GeomWireSelection vwires = ((SlimMergeGeomCell*)three_good_wire_cells.at(i))->get_vwires();
-    GeomWireSelection wwires = ((SlimMergeGeomCell*)three_good_wire_cells.at(i))->get_wwires();
+    GeomWireSelection& uwires = ((SlimMergeGeomCell*)three_good_wire_cells.at(i))->get_uwires();
+    GeomWireSelection& vwires = ((SlimMergeGeomCell*)three_good_wire_cells.at(i))->get_vwires();
+    GeomWireSelection& wwires = ((SlimMergeGeomCell*)three_good_wire_cells.at(i))->get_wwires();
     for (int j=0;j!=uwires.size();j++){
       fired_wires.insert(uwires.at(j));
     }
@@ -2767,9 +2785,9 @@ void WireCell2dToy::LowmemTiling::create_one_good_wire_cells(){
   }
   
   for (int i=0; i!=two_good_wire_cells.size();i++){
-    GeomWireSelection uwires = ((SlimMergeGeomCell*)two_good_wire_cells.at(i))->get_uwires();
-    GeomWireSelection vwires = ((SlimMergeGeomCell*)two_good_wire_cells.at(i))->get_vwires();
-    GeomWireSelection wwires = ((SlimMergeGeomCell*)two_good_wire_cells.at(i))->get_wwires();
+    GeomWireSelection& uwires = ((SlimMergeGeomCell*)two_good_wire_cells.at(i))->get_uwires();
+    GeomWireSelection& vwires = ((SlimMergeGeomCell*)two_good_wire_cells.at(i))->get_vwires();
+    GeomWireSelection& wwires = ((SlimMergeGeomCell*)two_good_wire_cells.at(i))->get_wwires();
 
     GeomWireSelection wires;
     std::vector<WirePlaneType_t> bad_planes = ((SlimMergeGeomCell*)two_good_wire_cells.at(i))->get_bad_planes();
@@ -2955,9 +2973,9 @@ void WireCell2dToy::LowmemTiling::create_one_good_wire_cells(){
 	  mcell->add_bad_planes(WirePlaneType_t(2));
 
 	  // create new mwires 
-	  GeomWireSelection uwires = mcell->get_uwires();
-	  GeomWireSelection vwires = mcell->get_vwires();
-	  GeomWireSelection wwires = mcell->get_wwires();
+	  GeomWireSelection& uwires = mcell->get_uwires();
+	  GeomWireSelection& vwires = mcell->get_vwires();
+	  GeomWireSelection& wwires = mcell->get_wwires();
 	  MergeGeomWire *mwire_u = new MergeGeomWire(0,uwires);
 	  MergeGeomWire *mwire_v = new MergeGeomWire(0,vwires);
 	  MergeGeomWire *mwire_w = new MergeGeomWire(0,wwires);
@@ -3034,9 +3052,9 @@ void WireCell2dToy::LowmemTiling::create_one_good_wire_cells(){
 	  mcell->add_bad_planes(WirePlaneType_t(2));
 
 	    // create new mwires 
-	  GeomWireSelection uwires = mcell->get_uwires();
-	  GeomWireSelection vwires = mcell->get_vwires();
-	  GeomWireSelection wwires = mcell->get_wwires();
+	  GeomWireSelection& uwires = mcell->get_uwires();
+	  GeomWireSelection& vwires = mcell->get_vwires();
+	  GeomWireSelection& wwires = mcell->get_wwires();
 	  MergeGeomWire *mwire_u = new MergeGeomWire(0,uwires);
 	  MergeGeomWire *mwire_v = new MergeGeomWire(0,vwires);
 	  MergeGeomWire *mwire_w = new MergeGeomWire(0,wwires);
@@ -3111,9 +3129,9 @@ void WireCell2dToy::LowmemTiling::create_one_good_wire_cells(){
 	  mcell->add_bad_planes(WirePlaneType_t(1));
 
 	    // create new mwires 
-	  GeomWireSelection uwires = mcell->get_uwires();
-	  GeomWireSelection vwires = mcell->get_vwires();
-	  GeomWireSelection wwires = mcell->get_wwires();
+	  GeomWireSelection& uwires = mcell->get_uwires();
+	  GeomWireSelection& vwires = mcell->get_vwires();
+	  GeomWireSelection& wwires = mcell->get_wwires();
 	  MergeGeomWire *mwire_u = new MergeGeomWire(0,uwires);
 	  MergeGeomWire *mwire_v = new MergeGeomWire(0,vwires);
 	  MergeGeomWire *mwire_w = new MergeGeomWire(0,wwires);
@@ -3257,9 +3275,9 @@ GeomCellSelection WireCell2dToy::LowmemTiling::create_single_cells(){
 
 GeomCellSelection WireCell2dToy::LowmemTiling::create_single_cells(SlimMergeGeomCell *mcell){
   GeomCellSelection cells;
-  GeomWireSelection wire_u = mcell->get_uwires();
-  GeomWireSelection wire_v = mcell->get_vwires();
-  GeomWireSelection wire_w = mcell->get_wwires();
+  GeomWireSelection& wire_u = mcell->get_uwires();
+  GeomWireSelection& wire_v = mcell->get_vwires();
+  GeomWireSelection& wire_w = mcell->get_wwires();
   float tolerance = 0.1 * units::mm;
   float dis_u[3]={0.0},dis_v[3]={0.0},dis_w[3]={0.0},dis_puv[5]={0.0},dis_puw[5]={0.0},dis_pwv[5]={0.0};
   int ncell = 1;
