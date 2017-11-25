@@ -4,10 +4,14 @@
 #include "TMatrixD.h"
 #include "TVectorD.h"
 
+
 #include "WireCellData/GeomCell.h"
 #include "WireCellData/GeomWire.h"
 #include "WireCellData/MergeGeomCell.h"
 #include "WireCellData/MergeGeomWire.h"
+
+
+#include <Eigen/Dense>
 
 namespace WireCell2dToy{
   class MatrixSolver{
@@ -31,7 +35,7 @@ namespace WireCell2dToy{
     WireCell::GeomCellSelection get_all_cells();
     
   private:
-    void Direct_Solve();
+    //    void Direct_Solve();
         
     int solve_flag;
     double direct_chi2;
@@ -40,14 +44,21 @@ namespace WireCell2dToy{
     double L1_chi2_base, L1_chi2_penalty;
     int L1_ndf;
     
-    TMatrixD *MA, *MB, *MAT, *MBT;
-    TMatrixD *Vy, *VBy, *Vx, *VBy_inv, *Vx_inv;
+    /* TMatrixD *MA, *MB, *MAT, *MBT; */
+    /* TMatrixD *Vy, *VBy, *Vx, *VBy_inv, *Vx_inv; */
+    /* TMatrixD *MC, *MC_inv; */
 
-    TMatrixD *MC, *MC_inv;
-
-    TVectorD *Wy, *Cx, *dCx;
+    /* TMatrixD *UMA;  */
+    /* TVectorD *UMWy; */ 
+    double lambda;
+    double TOL;
+    float scale_factor;
     
+    TVectorD *Wy, *Cx, *dCx;
     TVectorD *MWy_pred, *MWy;
+
+    Eigen::VectorXd W;
+    Eigen::MatrixXd G;
     
     WireCell::CellIndexMap mcimap;
     WireCell::WireIndexMap mwimap, swimap;

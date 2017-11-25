@@ -65,11 +65,11 @@ namespace WireCell2dToy{
     
     void DivideWires(int wire_limit = 2, int min_wire = 2); // do one round of dividing for all planes
     
-    WireCell::GeomCellMap get_cell_wires_map(){
+    WireCell::GeomCellMap& get_cell_wires_map(){
       return cell_wires_map;
     }
     //map wire to cell
-    WireCell::GeomWireMap get_wire_cells_map(){
+    WireCell::GeomWireMap& get_wire_cells_map(){
       return wire_cells_map;
     }
     WireCell::GeomWireSelection get_all_good_wires();

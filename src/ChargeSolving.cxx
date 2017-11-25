@@ -58,8 +58,8 @@ void WireCell2dToy::ChargeSolving::init_cell_weight_map(float weight){
   GeomCellSelection& two_wire_cells = tiling.get_two_good_wire_cells();
   GeomCellSelection& three_wire_cells = tiling.get_three_good_wire_cells();
 
-  GeomCellMap cell_wire_map = tiling.get_cell_wires_map();
-  GeomWireMap wire_cell_map = tiling.get_wire_cells_map();
+  GeomCellMap& cell_wire_map = tiling.get_cell_wires_map();
+  GeomWireMap& wire_cell_map = tiling.get_wire_cells_map();
 
   for (auto it = three_wire_cells.begin(); it!=three_wire_cells.end(); it++){
     const GeomCell *mcell = (*it);
@@ -92,8 +92,8 @@ void WireCell2dToy::ChargeSolving::divide_groups(){
   GeomWireSelection good_wires = tiling.get_all_good_wires();
   GeomWireSelection bad_wires = tiling.get_all_bad_wires();
 
-  GeomCellMap cell_wire_map = tiling.get_cell_wires_map();
-  GeomWireMap wire_cell_map = tiling.get_wire_cells_map();
+  GeomCellMap& cell_wire_map = tiling.get_cell_wires_map();
+  GeomWireMap& wire_cell_map = tiling.get_wire_cells_map();
   
   // original cell/wire holders
   GeomCellSetp all_cells;

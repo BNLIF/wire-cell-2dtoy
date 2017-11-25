@@ -512,7 +512,7 @@ int main(int argc, char* argv[])
 
   cout << em("finish initial tiling") << endl;
 
-  if (1){
+  if (0){
     l1sp.AddWireTime_Raw();
     l1sp.Form_rois(6);
     
@@ -1106,8 +1106,8 @@ int main(int argc, char* argv[])
 
     // tiling after the firs round of deghosting ... 
     lowmemtiling[i]->MergeWires();
-    
-     // create individual cells ...
+       
+    // create individual cells ...
     //GeomCellSelection single_cells = lowmemtiling[i]->create_single_cells();
     time_slice = i;
     n_cells = lowmemtiling[i]->get_cell_wires_map().size();//get_all_cell_centers().size();
@@ -1170,13 +1170,17 @@ int main(int argc, char* argv[])
 	chargesolver[time_slice2]->add_back_connectivity(mcell2);
     }
   }
+
+  // cout << em("finish 1st solving") << endl;
   
   for (int i=start_num; i!=end_num+1;i++){
     if (i%400==0)
       std::cout << "1st Solving with connectivity: " << i << std::endl;
     chargesolver[i]->L1_resolve(9,3);
   }
-
+  
+  // cout << em("finish 1st solving with connectivities") << endl;
+   
   std::set<SlimMergeGeomCell*> potential_good_mcells, good_mcells;
   for (auto it = front_cell_map.begin(); it!=front_cell_map.end();it++){
     SlimMergeGeomCell *mcell1 = (SlimMergeGeomCell*) it->first;

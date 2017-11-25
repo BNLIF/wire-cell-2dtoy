@@ -1,8 +1,9 @@
 #include "WireCell2dToy/MatrixSolver.h"
 #include "TDecompChol.h"
+
 #include "WireCellRess/LassoModel.h"
 #include "WireCellRess/ElasticNetModel.h"
-#include <Eigen/Dense>
+
 
 using namespace Eigen;
 
@@ -54,19 +55,19 @@ WireCell2dToy::MatrixSolver::MatrixSolver(GeomCellSelection& allmcell, GeomWireS
 
   if (mcindex >0 ){
      //Construct Matrix
-    MA = new TMatrixD(mwindex,mcindex);
-    MB = new TMatrixD(mwindex,swindex);
-    MAT = new TMatrixD(mcindex,mwindex);
-    MBT = new TMatrixD(swindex,mwindex);
+    TMatrixD* MA = new TMatrixD(mwindex,mcindex);
+    TMatrixD* MB = new TMatrixD(mwindex,swindex);
+    TMatrixD* MAT = new TMatrixD(mcindex,mwindex);
+    TMatrixD* MBT = new TMatrixD(swindex,mwindex);
     
-    Vy = new TMatrixD(swindex,swindex);
-    VBy = new TMatrixD(mwindex,mwindex);
-    VBy_inv = new TMatrixD(mwindex,mwindex);
-    Vx = new TMatrixD(mcindex,mcindex);
-    Vx_inv = new TMatrixD(mcindex,mcindex);
+    TMatrixD* Vy = new TMatrixD(swindex,swindex);
+    TMatrixD* VBy = new TMatrixD(mwindex,mwindex);
+    TMatrixD* VBy_inv = new TMatrixD(mwindex,mwindex);
+    TMatrixD* Vx = new TMatrixD(mcindex,mcindex);
+    TMatrixD* Vx_inv = new TMatrixD(mcindex,mcindex);
     
-    MC = new TMatrixD(mcindex,mcindex);
-    MC_inv = new TMatrixD(mcindex,mcindex);
+    TMatrixD* MC = new TMatrixD(mcindex,mcindex);
+    TMatrixD* MC_inv = new TMatrixD(mcindex,mcindex);
     
     //Construct Vector
     Wy = new TVectorD(swindex);
@@ -76,6 +77,11 @@ WireCell2dToy::MatrixSolver::MatrixSolver(GeomCellSelection& allmcell, GeomWireS
     
     Cx = new TVectorD(mcindex);
     dCx = new TVectorD(mcindex);
+
+    // Int_t n_data = 0;
+    // Int_t irow[100000];
+    // Int_t icol[100000];
+    // Double_t data[100000];
     
     // fill in the matrix content ...
     for ( auto it = wire_charge_map.begin(); it != wire_charge_map.end(); it++){
@@ -128,6 +134,69 @@ WireCell2dToy::MatrixSolver::MatrixSolver(GeomCellSelection& allmcell, GeomWireS
     *MC = (*MAT) * (*VBy_inv) * (*MA);
 
     solve_flag = 0;
+
+
+
+    // regularization need to choose to balance the  chisquare and total charge
+    // calculate the total wire charge
+    float total_wire_charge = 0;
+    scale_factor = 1000;
+    *MWy = (*MB) * (*Wy);
+    for (int i=0; i!=mwindex;i++){
+      total_wire_charge += (*MWy)[i];
+    }
+    lambda = 3./total_wire_charge/2.*scale_factor; // guessed regularization strength
+    //std::cout << mwindex << " " << total_wire_charge/3. << std::endl;
+    
+    
+    // now try to make the equation ... 
+    // MWy - MA * C 
+    // decompose VBy_inv
+    // VBy_inv->Print();
+
+    TMatrixD *UMA = new TMatrixD(mwindex,mcindex);
+    TVectorD *UMWy = new TVectorD(mwindex);
+    
+    TDecompChol test(*VBy_inv);
+    test.Decompose();
+    TMatrixD U(mwindex,mwindex);
+    U =  test.GetU();
+    *UMA = U * (*MA);
+    U *= 1./scale_factor; // error needs to be scale down by 1000 ... 
+    *UMWy = U * (*MWy);
+    
+    //  std::cout << total_wire_charge/3./scale_factor/mcindex*0.005 << std::endl;
+    TOL = total_wire_charge/3./scale_factor/mcindex*0.005; //  0.5% charge stability ... 
+    //  TOL = 1e-3; // original 
+    
+    // fill in the results ...
+    W = VectorXd::Zero(mwindex);
+    G = MatrixXd::Zero(mwindex,mcindex);
+    for (int i=0; i!=mwindex; i++){
+      W(i) = (*UMWy)(i);
+      for (int j=0;j!=mcindex;j++){
+	G(i,j) = (*UMA)(i,j);
+      }
+    }
+    
+   
+    delete MA;
+    delete MB;
+    delete MAT;
+    delete MBT;
+    delete Vy;
+    delete VBy;
+    delete Vx;
+    delete VBy_inv;
+    delete Vx_inv;
+    delete MC;
+    delete MC_inv;
+
+    delete UMA;
+    delete UMWy;
+  
+
+
     
     // Use direct to solve ... 
     // double det;
@@ -153,49 +222,12 @@ WireCell2dToy::MatrixSolver::MatrixSolver(GeomCellSelection& allmcell, GeomWireS
   
 }
 void WireCell2dToy::MatrixSolver::L1_Solve(std::map<const GeomCell*, double>& cell_weight_map){
-  // regularization need to choose to balance the  chisquare and total charge
-  // calculate the total wire charge
-  float total_wire_charge = 0;
-  float scale_factor = 1000;
-  *MWy = (*MB) * (*Wy);
-  for (int i=0; i!=mwindex;i++){
-    total_wire_charge += (*MWy)[i];
-  }
-  double lambda = 3./total_wire_charge/2.*scale_factor; // guessed regularization strength
-  //std::cout << mwindex << " " << total_wire_charge/3. << std::endl;
-  
-  
-  //now try to make the equation ... 
-  // MWy - MA * C 
-  // decompose VBy_inv
-
-  //VBy_inv->Print();
-  
-  TDecompChol test(*VBy_inv);
-  test.Decompose();
-  TMatrixD U(mwindex,mwindex);
-  U =  test.GetU();
-  TMatrixD UMA = U * (*MA);
-  U *= 1./scale_factor; // error needs to be scale down by 1000 ... 
-  TVectorD UMWy = U * (*MWy);
-
-  //  std::cout << total_wire_charge/3./scale_factor/mcindex*0.005 << std::endl;
-  double TOL = total_wire_charge/3./scale_factor/mcindex*0.005; //  0.5% charge stability ... 
-  //TOL = 1e-3; // original 
-
+    
 
   // MA->Print();
   // UMA.Print();
   
-  // fill in the results ...
-  VectorXd W = VectorXd::Zero(mwindex);
-  MatrixXd G = MatrixXd::Zero(mwindex,mcindex);
-  for (int i=0; i!=mwindex; i++){
-    W(i) = UMWy(i);
-    for (int j=0;j!=mcindex;j++){
-      G(i,j) = UMA(i,j);
-    }
-  }
+  
 
   WireCell::LassoModel m2(lambda, 100000, TOL, true);
   m2.SetData(G, W);
@@ -256,56 +288,52 @@ double WireCell2dToy::MatrixSolver::get_mcell_charge(MergeGeomCell *mcell){
 }
 
 
-void WireCell2dToy::MatrixSolver::Direct_Solve(){
-  *MC_inv = *MC;
-  MC_inv->Invert();
-  *Cx = (*MC_inv) * (*MAT) * (*VBy_inv) * (*MB) * (*Wy);
+// void WireCell2dToy::MatrixSolver::Direct_Solve(){
+//   *MC_inv = *MC;
+//   MC_inv->Invert();
+//   *Cx = (*MC_inv) * (*MAT) * (*VBy_inv) * (*MB) * (*Wy);
   
-  *Vx_inv = (*MAT) * (*VBy_inv) * (*MA);
-  *Vx = *Vx_inv;
-  Vx->Invert();
+//   *Vx_inv = (*MAT) * (*VBy_inv) * (*MA);
+//   *Vx = *Vx_inv;
+//   Vx->Invert();
   
-  for (int i=0;i!=mcindex;i++){
-    (*dCx)[i] = sqrt( (*Vx)(i,i)) * 1000.;
-  }
+//   for (int i=0;i!=mcindex;i++){
+//     (*dCx)[i] = sqrt( (*Vx)(i,i)) * 1000.;
+//   }
   
-  TVectorD sol = (*MB) * (*Wy) - (*MA) * (*Cx);
-  TVectorD sol1 =  (*VBy_inv) * sol;
-  direct_chi2 = sol * (sol1)/1e6;
+//   TVectorD sol = (*MB) * (*Wy) - (*MA) * (*Cx);
+//   TVectorD sol1 =  (*VBy_inv) * sol;
+//   direct_chi2 = sol * (sol1)/1e6;
   
-  direct_ndf = mwindex - mcindex;
+//   direct_ndf = mwindex - mcindex;
   
-  // std::cout << chi2 << " " << ndf << std::endl;
-  // for (int i=0;i!=mcindex;i++){
-  //   std::cout << (*Cx)[i] << " " << (*dCx)[i] << std::endl;
-  // }
+//   // std::cout << chi2 << " " << ndf << std::endl;
+//   // for (int i=0;i!=mcindex;i++){
+//   //   std::cout << (*Cx)[i] << " " << (*dCx)[i] << std::endl;
+//   // }
 
-  // MA->Print();
-  *MWy = (*MB) * (*Wy);
-  *MWy_pred = (*MA)*(*Cx);
-  // for (int i=0;i!=mwindex;i++){
-  //   std::cout << (*MWy)[i] << std::endl;
-  // }
-  solve_flag = 1;
-}
+//   // MA->Print();
+//   *MWy = (*MB) * (*Wy);
+//   *MWy_pred = (*MA)*(*Cx);
+//   // for (int i=0;i!=mwindex;i++){
+//   //   std::cout << (*MWy)[i] << std::endl;
+//   // }
+//   solve_flag = 1;
+// }
 
 
 WireCell2dToy::MatrixSolver::~MatrixSolver(){
-  delete MA;
-  delete MB;
-  delete MAT;
-  delete MBT;
-  delete Vy;
-  delete VBy;
-  delete Vx;
-  delete VBy_inv;
-  delete Vx_inv;
-  delete MC;
-  delete MC_inv;
+  
+    
+
+
+
   delete Wy;
   delete Cx;
   delete dCx;
   delete MWy_pred;
   delete MWy;
+
+  
 }
 					   
