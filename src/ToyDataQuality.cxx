@@ -363,6 +363,103 @@ int WireCell2dToy::Noisy_Event_ID(TH2F *hu_decon, TH2F *hv_decon, TH2F *hw_decon
   
   std::cout << "Xin: " << " " << flag_u << " " << flag_v << " " << flag_w << std::endl;
 
+
+  //extend the window size ...
+  for (auto it=noisy_u.begin(); it!=noisy_u.end();it++){
+    int start_time = it->first; 
+    int end_time = it->second;
+
+    int min_start_time = start_time;
+    int max_end_time = end_time;
+
+    for (int i=0;i!=nwire_u;i++){
+      int j=start_time;
+      float content = hu_decon->GetBinContent(i+1,j+1);
+      while(content>0){
+	j--;
+	content = hu_decon->GetBinContent(i+1,j+1);
+      }
+      if (j < min_start_time) min_start_time = j;
+
+      j=end_time;
+      content = hu_decon->GetBinContent(i+1,j+1);
+      while(content>0){
+	j++;
+	content = hu_decon->GetBinContent(i+1,j+1);
+      }
+      if (j>max_end_time) max_end_time = j;
+    }
+    if (min_start_time <0) min_start_time =0;
+    if (max_end_time>=hu_decon->GetNbinsY()) max_end_time = hu_decon->GetNbinsY()-1;
+
+    it->first = min_start_time;
+    it->second = max_end_time;
+    //    std::cout << start_time << " " << end_time << " " << min_start_time << " " << max_end_time << std::endl;
+  }
+  for (auto it=noisy_v.begin(); it!=noisy_v.end();it++){
+    int start_time = it->first; 
+    int end_time = it->second;
+
+    int min_start_time = start_time;
+    int max_end_time = end_time;
+
+    for (int i=0;i!=nwire_v;i++){
+      int j=start_time;
+      float content = hv_decon->GetBinContent(i+1,j+1);
+      while(content>0){
+	j--;
+	content = hv_decon->GetBinContent(i+1,j+1);
+      }
+      if (j < min_start_time) min_start_time = j;
+
+      j=end_time;
+      content = hv_decon->GetBinContent(i+1,j+1);
+      while(content>0){
+	j++;
+	content = hv_decon->GetBinContent(i+1,j+1);
+      }
+      if (j>max_end_time) max_end_time = j;
+    }
+    if (min_start_time <0) min_start_time =0;
+    if (max_end_time>=hv_decon->GetNbinsY()) max_end_time = hv_decon->GetNbinsY()-1;
+
+    it->first = min_start_time;
+    it->second = max_end_time;
+    //    std::cout << start_time << " " << end_time << " " << min_start_time << " " << max_end_time << std::endl;
+  }
+  for (auto it=noisy_w.begin(); it!=noisy_w.end();it++){
+    int start_time = it->first; 
+    int end_time = it->second;
+
+    int min_start_time = start_time;
+    int max_end_time = end_time;
+
+    for (int i=0;i!=nwire_w;i++){
+      int j=start_time;
+      float content = hw_decon->GetBinContent(i+1,j+1);
+      while(content>0){
+	j--;
+	content = hw_decon->GetBinContent(i+1,j+1);
+      }
+      if (j < min_start_time) min_start_time = j;
+
+      j=end_time;
+      content = hw_decon->GetBinContent(i+1,j+1);
+      while(content>0){
+	j++;
+	content = hw_decon->GetBinContent(i+1,j+1);
+      }
+      if (j>max_end_time) max_end_time = j;
+    }
+    if (min_start_time <0) min_start_time =0;
+    if (max_end_time>=hw_decon->GetNbinsY()) max_end_time = hw_decon->GetNbinsY()-1;
+
+    it->first = min_start_time;
+    it->second = max_end_time;
+    //    std::cout << start_time << " " << end_time << " " << min_start_time << " " << max_end_time << std::endl;
+  }
+  
+  // finish it ... 
   
   int min_time = 3180;
   int max_time = 7870;
@@ -531,6 +628,49 @@ int WireCell2dToy::Noisy_Event_ID(TH2F *hu_decon, TH2F *hv_decon, TH2F *hw_decon
     
     //}
   }
+
+  // ID the entire region ...
+  {
+    int ntime = hu_decon->GetNbinsY();
+    float sum_total_u = 0;
+    float sum_fired_u = 0;
+    float sum_total_v = 0;
+    float sum_fired_v = 0;
+    float sum_total_w = 0;
+    float sum_fired_w = 0;
+    for (int i=0;i!=nwire_u;i++){
+      for (int j=0;j!=ntime;j++){
+	if (hu_decon->GetBinContent(i+1,j+1)>0)
+	  sum_fired_u ++;
+	sum_total_u++;
+      }
+    }
+    for (int i=0;i!=nwire_v;i++){
+      for (int j=0;j!=ntime;j++){
+	if (hv_decon->GetBinContent(i+1,j+1)>0)
+	  sum_fired_v ++;
+	sum_total_v ++;
+      }
+    }
+    for (int i=0;i!=nwire_w;i++){
+      for (int j=0;j!=ntime;j++){
+	if (hw_decon->GetBinContent(i+1,j+1)>0)
+	  sum_fired_w ++;
+	sum_total_w++;
+      }
+    }
+    if (sum_fired_u/sum_total_u + sum_fired_v/sum_total_v + sum_fired_w/sum_total_w > 0.045){
+      // zero all the files ...
+      hu_decon->Reset();
+      hv_decon->Reset();
+      hw_decon->Reset();
+      hv_raw->Reset();
+      
+      return 3;
+    }
+    //std::cout << sum_fired_u/sum_total_u << " " << sum_fired_v/sum_total_v << " " << sum_fired_w/sum_total_w << std::endl;
+  }
+  
 
   if (flag_u||flag_v||flag_w){
     if (flag_active){
