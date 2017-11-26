@@ -2714,7 +2714,7 @@ int main(int argc, char* argv[])
 	time_slice = mcell->GetTimeSlice();
 	q = chargesolver[time_slice]->get_mcell_charge(mcell);
 	
-	GeomCellMap cell_wires_map = lowmemtiling[time_slice]->get_cell_wires_map();
+	GeomCellMap& cell_wires_map = lowmemtiling[time_slice]->get_cell_wires_map();
 	WireCell::WireChargeMap& wire_charge = lowmemtiling[time_slice]->get_wire_charge_map();
 	WireCell::WireChargeMap& wire_charge_error = lowmemtiling[time_slice]->get_wire_charge_error_map();
 	for (auto it1 = cell_wires_map[mcell].begin(); it1!= cell_wires_map[mcell].end(); it1++){
@@ -2732,9 +2732,9 @@ int main(int argc, char* argv[])
 	}
 	
       
-	GeomWireSelection uwires = mcell->get_uwires();
-	GeomWireSelection vwires = mcell->get_vwires();
-	GeomWireSelection wwires = mcell->get_wwires();
+	GeomWireSelection& uwires = mcell->get_uwires();
+	GeomWireSelection& vwires = mcell->get_vwires();
+	GeomWireSelection& wwires = mcell->get_wwires();
 	nwire_u = uwires.size();
 	nwire_v = vwires.size();
 	nwire_w = wwires.size();
@@ -2797,10 +2797,10 @@ int main(int argc, char* argv[])
     
     for (auto it = dead_cluster_set.begin();it!=dead_cluster_set.end();it++){
       cluster_id = (*it)->get_id();
-      std::map<SlimMergeGeomCell*,std::set<int>> results = (*it)->get_mcell_time_map();
+      std::map<SlimMergeGeomCell*,std::set<int>>& results = (*it)->get_mcell_time_map();
       for (auto it1 = results.begin(); it1!=results.end(); it1++){
 	SlimMergeGeomCell* mcell = it1->first;
-	std::set<int> times = it1->second;
+	std::set<int>& times = it1->second;
 	ntime_slice = times.size();
 	int temp_num = 0;
 	for (auto it2 = times.begin(); it2!=times.end();it2++){
@@ -2808,9 +2808,9 @@ int main(int argc, char* argv[])
 	  temp_num ++;
 	}
 
-	GeomWireSelection uwires = mcell->get_uwires();
-    	GeomWireSelection vwires = mcell->get_vwires();
-    	GeomWireSelection wwires = mcell->get_wwires();
+	GeomWireSelection& uwires = mcell->get_uwires();
+    	GeomWireSelection& vwires = mcell->get_vwires();
+    	GeomWireSelection& wwires = mcell->get_wwires();
     	nwire_u = uwires.size();
     	nwire_v = vwires.size();
     	nwire_w = wwires.size();
