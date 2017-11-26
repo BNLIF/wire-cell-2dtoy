@@ -512,7 +512,7 @@ int main(int argc, char* argv[])
 
   cout << em("finish initial tiling") << endl;
 
-  if (0){
+  if (1){
     l1sp.AddWireTime_Raw();
     l1sp.Form_rois(6);
     
