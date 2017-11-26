@@ -487,8 +487,8 @@ int main(int argc, char* argv[])
       std::cout << "Tiling: " << i << std::endl;
 
     sds.jump(i);
-    WireCell::Slice slice = sds.get();
-    WireCell::Slice slice_err = sds.get_error();
+    WireCell::Slice& slice = sds.get();
+    WireCell::Slice& slice_err = sds.get_error();
     
     lowmemtiling[i] = new WireCell2dToy::LowmemTiling(i,nrebin,gds,WCholder);
     if (i==start_num){
@@ -522,15 +522,15 @@ int main(int argc, char* argv[])
     
     //    cout << em("finish L1SP ") << endl;
     
-    std::set<int> time_slice_set = l1sp.get_time_slice_set();
+    std::set<int>& time_slice_set = l1sp.get_time_slice_set();
     for (auto it = time_slice_set.begin(); it!= time_slice_set.end(); it++){
       int time_slice = *it;
       //std::cout << time_slice << std::endl;
       if (time_slice >= start_num && time_slice <=end_num){
 	
 	sds.jump(time_slice);
-	WireCell::Slice slice = sds.get();
-	WireCell::Slice slice_err = sds.get_error();
+	WireCell::Slice& slice = sds.get();
+	WireCell::Slice& slice_err = sds.get_error();
 	
 	// std::cout << lowmemtiling[time_slice]->get_wire_charge_error_map().size() << std::endl;
 	// WireCell::WireChargeMap& wire_charge_err_map = lowmemtiling[time_slice]->get_wire_charge_error_map();
@@ -583,7 +583,7 @@ int main(int argc, char* argv[])
   for (int i=start_num;i!=end_num+1;i++){
     
     // form clusters
-    WireCell::GeomCellMap cell_wires_map = lowmemtiling[i]->get_cell_wires_map();
+    WireCell::GeomCellMap& cell_wires_map = lowmemtiling[i]->get_cell_wires_map();
     GeomCellSelection allmcell;
     for (auto it=cell_wires_map.begin(); it!= cell_wires_map.end(); it++){
       SlimMergeGeomCell *mcell = (SlimMergeGeomCell*)it->first;
@@ -1201,7 +1201,7 @@ int main(int argc, char* argv[])
     }
   }
   for (int i=start_num;i!=end_num+1;i++){
-    WireCell::GeomCellMap cell_map = lowmemtiling[i]->get_cell_wires_map();
+    WireCell::GeomCellMap& cell_map = lowmemtiling[i]->get_cell_wires_map();
     for (auto it = cell_map.begin(); it!=cell_map.end(); it++){
       SlimMergeGeomCell *mcell = (SlimMergeGeomCell*) it->first;
       bool flag1 = chargesolver[i]->get_mcell_charge(mcell)>300;
@@ -1316,7 +1316,7 @@ int main(int argc, char* argv[])
       // if (i%400==0)
       //   std::cout << "2nd Clustering: " << i << std::endl;
       // form clusters
-      WireCell::GeomCellMap cell_wires_map = lowmemtiling[i]->get_cell_wires_map();
+      WireCell::GeomCellMap& cell_wires_map = lowmemtiling[i]->get_cell_wires_map();
       GeomCellSelection allmcell;
       for (auto it=cell_wires_map.begin(); it!= cell_wires_map.end(); it++){
 	SlimMergeGeomCell *mcell = (SlimMergeGeomCell*)it->first;
@@ -1396,7 +1396,7 @@ int main(int argc, char* argv[])
       // std::cout << "2nd Clustering (bad cells): " << i << std::endl;
       
       // form clusters
-      WireCell::GeomCellMap cell_wires_map = lowmemtiling[i]->get_cell_wires_map();
+      WireCell::GeomCellMap& cell_wires_map = lowmemtiling[i]->get_cell_wires_map();
       GeomCellSelection allmcell;
       for (auto it=cell_wires_map.begin(); it!= cell_wires_map.end(); it++){
 	SlimMergeGeomCell *mcell = (SlimMergeGeomCell*)it->first;
@@ -1477,7 +1477,7 @@ int main(int argc, char* argv[])
       // std::cout << "2nd Clustering (bad cells): " << i << std::endl;
       
       // form clusters
-      WireCell::GeomCellMap cell_wires_map = lowmemtiling[i]->get_cell_wires_map();
+      WireCell::GeomCellMap& cell_wires_map = lowmemtiling[i]->get_cell_wires_map();
       GeomCellSelection allmcell;
       for (auto it=cell_wires_map.begin(); it!= cell_wires_map.end(); it++){
 	SlimMergeGeomCell *mcell = (SlimMergeGeomCell*)it->first;
@@ -1559,7 +1559,7 @@ int main(int argc, char* argv[])
       // std::cout << "2nd Clustering (bad cells): " << i << std::endl;
       
       // form clusters
-      WireCell::GeomCellMap cell_wires_map = lowmemtiling[i]->get_cell_wires_map();
+      WireCell::GeomCellMap& cell_wires_map = lowmemtiling[i]->get_cell_wires_map();
       GeomCellSelection allmcell;
       for (auto it=cell_wires_map.begin(); it!= cell_wires_map.end(); it++){
 	SlimMergeGeomCell *mcell = (SlimMergeGeomCell*)it->first;
@@ -1961,7 +1961,7 @@ int main(int argc, char* argv[])
   }
   
   for (auto it = cluster_set.begin();it!=cluster_set.end();it++){
-    GeomCellSelection mcells =(*it)->get_allcell();
+    GeomCellSelection& mcells =(*it)->get_allcell();
     int num = 0;
     if ((*it)->get_projection(WirePlaneType_t(0))->get_number_time_slices()!=0) num++;
     if ((*it)->get_projection(WirePlaneType_t(1))->get_number_time_slices()!=0) num++;
@@ -2117,7 +2117,7 @@ int main(int argc, char* argv[])
      }
    }
    for (int i=start_num;i!=end_num+1;i++){
-     WireCell::GeomCellMap cell_map = lowmemtiling[i]->get_cell_wires_map();
+     WireCell::GeomCellMap& cell_map = lowmemtiling[i]->get_cell_wires_map();
      for (auto it = cell_map.begin(); it!=cell_map.end(); it++){
        SlimMergeGeomCell *mcell = (SlimMergeGeomCell*) it->first;
        bool flag1 = chargesolver[i]->get_mcell_charge(mcell)>300;
@@ -2241,7 +2241,7 @@ int main(int argc, char* argv[])
      }
    }
    for (int i=start_num;i!=end_num+1;i++){
-     WireCell::GeomCellMap cell_map = lowmemtiling[i]->get_cell_wires_map();
+     WireCell::GeomCellMap& cell_map = lowmemtiling[i]->get_cell_wires_map();
      for (auto it = cell_map.begin(); it!=cell_map.end(); it++){
        SlimMergeGeomCell *mcell = (SlimMergeGeomCell*) it->first;
        bool flag1 = chargesolver[i]->get_mcell_charge(mcell)>300;
@@ -2268,7 +2268,7 @@ int main(int argc, char* argv[])
      Slim3DClusterSet temp_cluster_set, temp_cluster_delset;
      // 2nd round of clustering
      for (int i=start_num; i!=end_num+1;i++){
-       WireCell::GeomCellMap cell_wires_map = lowmemtiling[i]->get_cell_wires_map();
+       WireCell::GeomCellMap& cell_wires_map = lowmemtiling[i]->get_cell_wires_map();
        GeomCellSelection allmcell;
        for (auto it=cell_wires_map.begin(); it!= cell_wires_map.end(); it++){
 	 SlimMergeGeomCell *mcell = (SlimMergeGeomCell*)it->first;
@@ -2373,9 +2373,9 @@ int main(int argc, char* argv[])
      
   cout << em("finish the local deghosting ... ") << std::endl;
 
-   // try to group the dead cells ...
+  // try to group the dead cells ...
   for (int i=start_num;i!=end_num+1;i++){
-    GeomCellSelection allmcell = lowmemtiling[i]->get_two_bad_wire_cells();
+    GeomCellSelection& allmcell = lowmemtiling[i]->get_two_bad_wire_cells();
     if (lowmemtiling[i]->get_regen_two_bad_wire_cells() || dead_cluster_set.empty()){
       if (dead_cluster_set.empty()){
 	Slim3DDeadCluster *cluster = new Slim3DDeadCluster(*((SlimMergeGeomCell*)allmcell[0]),i);

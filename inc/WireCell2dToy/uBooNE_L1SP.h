@@ -19,7 +19,7 @@ namespace WireCell2dToy{
     void Form_rois(int pad = 2);
     void L1_fit(int wire_index, int start_tick, int end_tick);
     
-    std::set<int> get_time_slice_set(){return time_slice_set;};
+    std::set<int>& get_time_slice_set(){return time_slice_set;};
     
   protected:
     TH2F *hv_raw;
