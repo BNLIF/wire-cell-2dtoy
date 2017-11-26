@@ -1520,9 +1520,7 @@ void WireCell2dToy::LowmemTiling::re_establish_maps(){
     }else{
       pwire_wires_map[wwire].push_back(mwire_w);
     }
-
     // std::cout << pwire_wires_map[uwire].size() << std::endl;
-    
   }
 }
 
@@ -1747,7 +1745,7 @@ void WireCell2dToy::LowmemTiling::local_deghosting1(std::set<WireCell::SlimMerge
     GeomWireSelection& vwires = mcell->get_vwires();
     GeomWireSelection& wwires = mcell->get_wwires();
     
-    GeomWireSelection mwires = cell_wires_map[mcell];
+    GeomWireSelection& mwires = cell_wires_map[mcell];
     std::vector<WirePlaneType_t> bad_planes = mcell->get_bad_planes();
     int count = 0;
     for (auto it1=mwires.begin(); it1!=mwires.end(); it1++){
@@ -1768,7 +1766,7 @@ void WireCell2dToy::LowmemTiling::local_deghosting1(std::set<WireCell::SlimMerge
 	  mcell_hwire = wwires.back()->index();
 	}
 	
-	GeomCellSelection cells = wire_cells_map[mwire];
+	GeomCellSelection& cells = wire_cells_map[mwire];
 	for (auto it2 = cells.begin(); it2 != cells.end(); it2++){
 	  SlimMergeGeomCell *mcell1 = (SlimMergeGeomCell*)(*it2);
 	  if (mcell1==mcell) continue;
