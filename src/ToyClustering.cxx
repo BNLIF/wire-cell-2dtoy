@@ -634,7 +634,6 @@ void WireCell2dToy::Clustering_live_dead(WireCell::PR3DClusterSelection& live_cl
 
 
   
-  
 }
 
 
@@ -673,9 +672,6 @@ void WireCell2dToy::Clustering_live_dead(WireCell::PR3DClusterSelection& live_cl
 //   // 	    << vwires.front()->index() << " " << vwire->index() << " " << vwires.back()->index() << " "
 //   // 	    << wwires.front()->index() << " " << wwire->index() << " " << wwires.back()->index() << " " << std::endl;
     
-  
-  
-
 //   if (uwire->index() >= uwires.front()->index() && uwire->index() <= uwires.back()->index() &&
 //       vwire->index() >= vwires.front()->index() && vwire->index() <= vwires.back()->index() &&
 //       wwire->index() >= wwires.front()->index() && wwire->index() <= wwires.back()->index()){

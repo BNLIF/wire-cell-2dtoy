@@ -95,7 +95,9 @@ int main(int argc, char* argv[])
   mp.set_angle_v(angle_v);
   mp.set_angle_w(angle_w);
   mp.set_ts_width(time_slice_width);
-
+  mp.set_first_u_dis(first_u_dis);
+  mp.set_first_v_dis(first_v_dis);
+  mp.set_first_w_dis(first_w_dis);
   
   
   // load mcell
@@ -308,7 +310,7 @@ int main(int argc, char* argv[])
      std::pair<WCPointCloud<double>::WCPoint,WCPointCloud<double>::WCPoint> wcps = live_clusters.at(i)->get_highest_lowest_wcps();
      live_clusters.at(i)->dijkstra_shortest_paths(wcps.first);
      live_clusters.at(i)->cal_shortest_path(wcps.second);
-     live_clusters.at(i)->fine_tracking(first_u_dis, first_v_dis, first_w_dis);
+     live_clusters.at(i)->fine_tracking();
    }
    
    cerr << em("Create Graph in all clusters") << std::endl;
