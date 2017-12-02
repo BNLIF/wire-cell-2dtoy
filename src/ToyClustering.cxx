@@ -2,6 +2,7 @@
 
 #include "WireCellData/TPCParams.h"
 #include "WireCellData/Singleton.h"
+#include "WireCellData/Line.h"
 
 using namespace WireCell;
 
@@ -551,8 +552,7 @@ void WireCell2dToy::Clustering_live_dead(WireCell::PR3DClusterSelection& live_cl
 	    double dis = sqrt(pow(p1.x-p2.x,2)+pow(p1.y-p2.y,2)+pow(p1.z-p2.z,2));
 
 	    //std::cout << cluster_1->get_cluster_id() << " " << cluster_2->get_cluster_id() << " " << flag_1 << " " << length_1/units::cm << " " << flag_2 << " " << length_2/units::cm << " " << dis/units::cm << std::endl;
-	    
-	    if (flag_1 && flag_2){ // both long tracks
+	    if (flag_1){
 	      cluster_1->dijkstra_shortest_paths(wcp1);
 	      TVector3 dir1 = cluster_1->VHoughTrans(p1,30*units::cm);
 	      Point p_test;
@@ -561,22 +561,35 @@ void WireCell2dToy::Clustering_live_dead(WireCell::PR3DClusterSelection& live_cl
 	      p_test.z = p1.z + dir1.Z()*30*units::cm;
 	      WCPointCloud<double>::WCPoint& wcp1_target = cloud_1->get_closest_wcpoint(p_test);
 	      cluster_1->cal_shortest_path(wcp1_target);
-	      cluster_1->fine_tracking(3);
+	      cluster_1->fine_tracking(4);
+	      if (!cluster_1->get_fine_tracking_flag()) flag_1 = false;
+	    }
 
-	      // PointVector& fine_p1 = cluster_1->get_fine_tracking_path();
-	      // for (size_t kk =0; kk!= fine_p1.size(); kk++){
-	      // 	std::cout << fine_p1.at(kk).x/units::cm << " " << fine_p1.at(kk).y/units::cm << " " << fine_p1.at(kk).z/units::cm << std::endl;
-	      // }
-	      // std::cout << std::endl;
-	      
+	    if (flag_2){
 	      cluster_2->dijkstra_shortest_paths(wcp2);
 	      TVector3 dir2 = cluster_2->VHoughTrans(p2,30*units::cm);
+	      Point p_test;
 	      p_test.x = p2.x + dir2.X()*30*units::cm;
 	      p_test.y = p2.y + dir2.Y()*30*units::cm;
 	      p_test.z = p2.z + dir2.Z()*30*units::cm;
 	      WCPointCloud<double>::WCPoint& wcp2_target = cloud_2->get_closest_wcpoint(p_test);
 	      cluster_2->cal_shortest_path(wcp2_target);
-	      cluster_2->fine_tracking(3);
+	      cluster_2->fine_tracking(4);
+	      if (!cluster_2->get_fine_tracking_flag()) flag_2 = false;
+	    }
+	    
+	    
+	    
+	    if (flag_1 && flag_2){ // both long tracks
+	      TVector3 dir_1 = cluster_1->get_ft_dir_end(3*units::cm,10*units::cm);
+	      Line l1(cluster_1->get_fine_tracking_path().at(0),dir_1);
+	      TVector3 dir_2 = cluster_2->get_ft_dir_end(3*units::cm,10*units::cm);
+	      Line l2(cluster_2->get_fine_tracking_path().at(0),dir_2);
+	      double dis1 = l1.closest_dis(l2);
+	      double angle_diff = (3.1415926-dir_1.Angle(dir_2))/3.1415926*180.;
+
+	      std::cout <<  angle_diff << " " << dis1/units::cm << " " << dis/units::cm << std::endl;
+
 	      
 	    }else if (flag_1 && !flag_2){// 1 is long, 2 is short
 
