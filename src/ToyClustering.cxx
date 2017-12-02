@@ -489,6 +489,8 @@ void WireCell2dToy::Clustering_live_dead(WireCell::PR3DClusterSelection& live_cl
 	//std::cout << length_1/units::cm << std::endl;
 	if (length_1 >= 6 *units::cm)
 	  flag_1 = true;
+	cluster_1->Create_point_cloud();
+	ToyPointCloud* cloud_1 = cluster_1->get_point_cloud();
 	
 	for (size_t j=i+1;j<connected_live_clusters.size(); j++){
 	  PR3DCluster* cluster_2 = connected_live_clusters.at(j);
@@ -496,14 +498,16 @@ void WireCell2dToy::Clustering_live_dead(WireCell::PR3DClusterSelection& live_cl
 	  std::vector<int> range_v2 = cluster_2->get_uvwt_range(); 
 	  bool flag_2 = false;
 	  float length_2 = sqrt(2./3. * (pow(pitch_u*range_v2.at(0),2) + pow(pitch_v*range_v2.at(1),2) + pow(pitch_w*range_v2.at(2),2)) + pow(time_slice_width*range_v2.at(3),2));
-	//std::cout << length_1/units::cm << std::endl;
+
+
+	  //std::cout << length_1/units::cm << std::endl;
 	if (length_2 >= 6 *units::cm)
 	  flag_2 = true;
-
+	cluster_2->Create_point_cloud();
+	ToyPointCloud* cloud_2 = cluster_2->get_point_cloud();
+	
 	  if (tested_pairs.find(std::make_pair(cluster_1,cluster_2))==tested_pairs.end()){
-	    cluster_1->Create_point_cloud();
-	    cluster_2->Create_point_cloud();
-
+	    
 	    tested_pairs.insert(std::make_pair(cluster_1,cluster_2));
 	    tested_pairs.insert(std::make_pair(cluster_2,cluster_1));
 	    // starting the test ... 
@@ -515,34 +519,65 @@ void WireCell2dToy::Clustering_live_dead(WireCell::PR3DClusterSelection& live_cl
 	    SlimMergeGeomCell *prev_mcell2 = 0;
 	    SlimMergeGeomCell *mcell1 = mcells_1.at(0);
 	    Point p1 = mcell1->center();
+	    WCPointCloud<double>::WCPoint wcp1 = cloud_1->get_closest_wcpoint(p1);
+		   
 	    SlimMergeGeomCell *mcell2=0;
 	    Point p2;
+	    WCPointCloud<double>::WCPoint wcp2;
 	    
 	    while(mcell1!=prev_mcell1 || mcell2!=prev_mcell2){
 	      prev_mcell1 = mcell1;
 	      prev_mcell2 = mcell2;
-	      
+
+	      wcp2 = cloud_2->get_closest_wcpoint(wcp1);
+	      mcell2 = wcp2.mcell;
+
+	      wcp1 = cloud_1->get_closest_wcpoint(wcp2);
+	      mcell1 = wcp1.mcell;
 	      // find the closest point and merged cell in cluster2
-	      std::pair<SlimMergeGeomCell*,Point> temp_results = cluster_2->get_closest_point_mcell(p1);
-	      p2 = temp_results.second;
-	      mcell2 = temp_results.first;
+	      // std::pair<SlimMergeGeomCell*,Point> temp_results = cluster_2->get_closest_point_mcell(p1);
+	      //p2 = temp_results.second;
+	      //mcell2 = temp_results.first;
 	      // find the closest point and merged cell in cluster1
-	      temp_results = cluster_1->get_closest_point_mcell(p2);
-	      p1 = temp_results.second;
-	      mcell1 = temp_results.first;
+	      //temp_results = cluster_1->get_closest_point_mcell(p2);
+	      // p1 = temp_results.second;
+	      //mcell1 = temp_results.first;
 	      //  std::cout << mcell1 << " " << mcell2 << " " << sqrt(pow(p1.x-p2.x,2)+pow(p1.y-p2.y,2)+pow(p1.z-p2.z,2))/units::cm<< std::endl;
 	    }
+	    p1.x = wcp1.x; p1.y = wcp1.y; p1.z = wcp1.z;
+	    p2.x = wcp2.x; p2.y = wcp2.y; p2.z = wcp2.z;
+	    
+	   
+	    double dis = sqrt(pow(p1.x-p2.x,2)+pow(p1.y-p2.y,2)+pow(p1.z-p2.z,2));
 
-	    // std::cout << cluster_1->get_cluster_id() << " " << cluster_2->get_cluster_id() << " " << flag_1 << " " << length_1/units::cm << " " << flag_2 << " " << length_2/units::cm << std::endl;
-	    double dis = sqrt(pow(p1.x-p2.x,2)
-	     		      +pow(p1.y-p2.y,2)
-	     		      +pow(p1.z-p2.z,2));
+	    //std::cout << cluster_1->get_cluster_id() << " " << cluster_2->get_cluster_id() << " " << flag_1 << " " << length_1/units::cm << " " << flag_2 << " " << length_2/units::cm << " " << dis/units::cm << std::endl;
 	    
 	    if (flag_1 && flag_2){ // both long tracks
-	      cluster_1->Create_graph();
-	      // cluster_1->dijkstra_shortest_paths(p1);
-	      // live_clusters.at(i)->cal_shortest_path(wcps.second);
-	      //   live_clusters.at(i)->fine_tracking();
+	      cluster_1->dijkstra_shortest_paths(wcp1);
+	      TVector3 dir1 = cluster_1->VHoughTrans(p1,30*units::cm);
+	      Point p_test;
+	      p_test.x = p1.x + dir1.X()*30*units::cm;
+	      p_test.y = p1.y + dir1.Y()*30*units::cm;
+	      p_test.z = p1.z + dir1.Z()*30*units::cm;
+	      WCPointCloud<double>::WCPoint& wcp1_target = cloud_1->get_closest_wcpoint(p_test);
+	      cluster_1->cal_shortest_path(wcp1_target);
+	      cluster_1->fine_tracking(3);
+
+	      // PointVector& fine_p1 = cluster_1->get_fine_tracking_path();
+	      // for (size_t kk =0; kk!= fine_p1.size(); kk++){
+	      // 	std::cout << fine_p1.at(kk).x/units::cm << " " << fine_p1.at(kk).y/units::cm << " " << fine_p1.at(kk).z/units::cm << std::endl;
+	      // }
+	      // std::cout << std::endl;
+	      
+	      cluster_2->dijkstra_shortest_paths(wcp2);
+	      TVector3 dir2 = cluster_2->VHoughTrans(p2,30*units::cm);
+	      p_test.x = p2.x + dir2.X()*30*units::cm;
+	      p_test.y = p2.y + dir2.Y()*30*units::cm;
+	      p_test.z = p2.z + dir2.Z()*30*units::cm;
+	      WCPointCloud<double>::WCPoint& wcp2_target = cloud_2->get_closest_wcpoint(p_test);
+	      cluster_2->cal_shortest_path(wcp2_target);
+	      cluster_2->fine_tracking(3);
+	      
 	    }else if (flag_1 && !flag_2){// 1 is long, 2 is short
 
 	    }else if (flag_2 && !flag_1){// 2 is long 1 is short
