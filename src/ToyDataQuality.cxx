@@ -659,7 +659,8 @@ int WireCell2dToy::Noisy_Event_ID(TH2F *hu_decon, TH2F *hv_decon, TH2F *hw_decon
 	sum_total_w++;
       }
     }
-    if (sum_fired_u/sum_total_u + sum_fired_v/sum_total_v + sum_fired_w/sum_total_w > 0.045){
+    if (sum_fired_u/sum_total_u + sum_fired_v/sum_total_v + sum_fired_w/sum_total_w > 0.048){
+      std::cout << "Too busy: " << sum_fired_u/sum_total_u << " " << sum_fired_v/sum_total_v << " " << sum_fired_w/sum_total_w << std::endl;
       // zero all the files ...
       hu_decon->Reset();
       hv_decon->Reset();
@@ -668,7 +669,7 @@ int WireCell2dToy::Noisy_Event_ID(TH2F *hu_decon, TH2F *hv_decon, TH2F *hw_decon
       
       return 3;
     }
-    //std::cout << sum_fired_u/sum_total_u << " " << sum_fired_v/sum_total_v << " " << sum_fired_w/sum_total_w << std::endl;
+    //
   }
   
 

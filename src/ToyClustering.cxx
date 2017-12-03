@@ -470,42 +470,31 @@ void WireCell2dToy::Clustering_live_dead(WireCell::PR3DClusterSelection& live_cl
     PR3DCluster* the_dead_cluster = (*it).first;
     std::vector<PR3DCluster*> connected_live_clusters = (*it).second;
     std::vector<SMGCSelection> connected_live_mcells = dead_live_mcells_mapping[the_dead_cluster];
-    if (connected_live_clusters.size()>1){
-      //      std::cout << the_dead_cluster->get_cluster_id() << " " << connected_live_clusters.size() << std::endl;
 
-      // std::cout << "Candidates: ";
+    if (connected_live_clusters.size()>1){
+
+      // // try to record the length of each blob ...
+      // std::vector<double> cluster_length_vec;
       // for (size_t i=0; i!= connected_live_clusters.size(); i++){
-      //   PR3DCluster* cluster_1 = connected_live_clusters.at(i);
-      // 	std::cout << cluster_1->get_cluster_id() << " ";
+      // 	PR3DCluster* cluster_1 = connected_live_clusters.at(i);
+      // 	std::vector<int> range_v1 = cluster_1->get_uvwt_range();
+      // 	// example ...
+      // 	double length_1 = sqrt(2./3. * (pow(pitch_u*range_v1.at(0),2) + pow(pitch_v*range_v1.at(1),2) + pow(pitch_w*range_v1.at(2),2)) + pow(time_slice_width*range_v1.at(3),2));
+      // 	cluster_length_vec.push_back(length_1);
       // }
-      // std::cout << std::endl;
       
       for (size_t i=0; i!= connected_live_clusters.size(); i++){
         PR3DCluster* cluster_1 = connected_live_clusters.at(i);
 	SMGCSelection mcells_1 = connected_live_mcells.at(i);
-	std::vector<int> range_v1 = cluster_1->get_uvwt_range();
-	bool flag_1 = false; // short track ... 
-	// hack for now
-	float length_1 = sqrt(2./3. * (pow(pitch_u*range_v1.at(0),2) + pow(pitch_v*range_v1.at(1),2) + pow(pitch_w*range_v1.at(2),2)) + pow(time_slice_width*range_v1.at(3),2));
-	//std::cout << length_1/units::cm << std::endl;
-	if (length_1 >= 6 *units::cm)
-	  flag_1 = true;
+	
 	cluster_1->Create_point_cloud();
 	ToyPointCloud* cloud_1 = cluster_1->get_point_cloud();
 	
 	for (size_t j=i+1;j<connected_live_clusters.size(); j++){
 	  PR3DCluster* cluster_2 = connected_live_clusters.at(j);
 	  SMGCSelection mcells_2 = connected_live_mcells.at(j);
-	  std::vector<int> range_v2 = cluster_2->get_uvwt_range(); 
-	  bool flag_2 = false;
-	  float length_2 = sqrt(2./3. * (pow(pitch_u*range_v2.at(0),2) + pow(pitch_v*range_v2.at(1),2) + pow(pitch_w*range_v2.at(2),2)) + pow(time_slice_width*range_v2.at(3),2));
-
-
-	  //std::cout << length_1/units::cm << std::endl;
-	if (length_2 >= 6 *units::cm)
-	  flag_2 = true;
-	cluster_2->Create_point_cloud();
-	ToyPointCloud* cloud_2 = cluster_2->get_point_cloud();
+	  cluster_2->Create_point_cloud();
+	  ToyPointCloud* cloud_2 = cluster_2->get_point_cloud();
 	
 	  if (tested_pairs.find(std::make_pair(cluster_1,cluster_2))==tested_pairs.end()){
 	    
@@ -551,104 +540,116 @@ void WireCell2dToy::Clustering_live_dead(WireCell::PR3DClusterSelection& live_cl
 	   
 	    double dis = sqrt(pow(p1.x-p2.x,2)+pow(p1.y-p2.y,2)+pow(p1.z-p2.z,2));
 
-	    //std::cout << cluster_1->get_cluster_id() << " " << cluster_2->get_cluster_id() << " " << flag_1 << " " << length_1/units::cm << " " << flag_2 << " " << length_2/units::cm << " " << dis/units::cm << std::endl;
-	    if (flag_1){
-	      cluster_1->dijkstra_shortest_paths(wcp1);
-	      TVector3 dir1 = cluster_1->VHoughTrans(p1,30*units::cm);
-	      Point p_test;
-	      p_test.x = p1.x + dir1.X()*30*units::cm;
-	      p_test.y = p1.y + dir1.Y()*30*units::cm;
-	      p_test.z = p1.z + dir1.Z()*30*units::cm;
-	      WCPointCloud<double>::WCPoint& wcp1_target = cloud_1->get_closest_wcpoint(p_test);
-	      cluster_1->cal_shortest_path(wcp1_target);
-	      cluster_1->fine_tracking(4);
-	      if (!cluster_1->get_fine_tracking_flag()) flag_1 = false;
-	    }
-
-	    if (flag_2){
-	      cluster_2->dijkstra_shortest_paths(wcp2);
-	      TVector3 dir2 = cluster_2->VHoughTrans(p2,30*units::cm);
-	      Point p_test;
-	      p_test.x = p2.x + dir2.X()*30*units::cm;
-	      p_test.y = p2.y + dir2.Y()*30*units::cm;
-	      p_test.z = p2.z + dir2.Z()*30*units::cm;
-	      WCPointCloud<double>::WCPoint& wcp2_target = cloud_2->get_closest_wcpoint(p_test);
-	      cluster_2->cal_shortest_path(wcp2_target);
-	      cluster_2->fine_tracking(4);
-	      if (!cluster_2->get_fine_tracking_flag()) flag_2 = false;
-	    }
 	    
-	    
-	    
-	    if (flag_1 && flag_2){ // both long tracks
-	      TVector3 dir_1 = cluster_1->get_ft_dir_end(3*units::cm,10*units::cm);
-	      Line l1(cluster_1->get_fine_tracking_path().at(0),dir_1);
-	      TVector3 dir_2 = cluster_2->get_ft_dir_end(3*units::cm,10*units::cm);
-	      Line l2(cluster_2->get_fine_tracking_path().at(0),dir_2);
-	      double dis1 = l1.closest_dis(l2);
-	      double angle_diff = (3.1415926-dir_1.Angle(dir_2))/3.1415926*180.;
+	    Point mcell1_center = cluster_1->calc_ave_pos(p1,5*units::cm);
+	    TVector3 dir1 = cluster_1->VHoughTrans(mcell1_center,30*units::cm);
+	    Point mcell2_center = cluster_2->calc_ave_pos(p2,5*units::cm);
+	    TVector3 dir2 = cluster_2->calc_dir(mcell1_center,mcell2_center,30*units::cm);
+	    // TVector3 dir3 = cluster_2->VHoughTrans(mcell2_center,30*units::cm);
+	    // TVector3 dir4 = cluster_1->calc_dir(mcell2_center,mcell1_center,30*units::cm);
 
-	      std::cout <<  angle_diff << " " << dis1/units::cm << " " << dis/units::cm << std::endl;
+	    double angle_diff1 = (3.1415926-dir1.Angle(dir2))/3.1415926*180.;
+	    // double angle_diff2 = (3.1415926-dir3.Angle(dir4))/3.1415926*180.;
+	    // double angle_diff3 = (3.1415926-dir1.Angle(dir3))/3.1415926*180.;
 
-	      
-	    }else if (flag_1 && !flag_2){// 1 is long, 2 is short
+	    // double length_1 = cluster_length_vec.at(i);
+	    // double length_2 = cluster_length_vec.at(j);
 
-	    }else if (flag_2 && !flag_1){// 2 is long 1 is short
-
-	    }else{ // both are short ...
-
-	    }
-	    
-
-	    // // Old merge code ... 
-	    // Point mcell1_center = cluster_1->calc_ave_pos(p1,5*units::cm);
-	    // TVector3 dir1 = cluster_1->VHoughTrans(mcell1_center,30*units::cm);
-	    // // test reversed direction
-	    // // TVector3 temp_dir1(mcell1_center.x-p1.x,mcell1_center.y-p1.y,mcell1_center.z-p1.z);
-	    // // if (temp_dir1.Angle(dir1)>135/180.*3.1415926)
-	    // //   dir1.SetXYZ(-dir1.X(),-dir1.Y(),-dir1.Z());
-	    
-	    // Point mcell2_center = cluster_2->calc_ave_pos(p2,5*units::cm);
-	    // TVector3 dir2 = cluster_2->calc_dir(mcell1_center,mcell2_center,30*units::cm);
-	    // double angle_diff = (3.1415926-dir1.Angle(dir2))/3.1415926*180.;
-	    // double dis = sqrt(pow(p1.x-p2.x,2)
-	    // 		      +pow(p1.y-p2.y,2)
-	    // 		      +pow(p1.z-p2.z,2));
-	    // // if (angle_diff < 30)
-	    // //std::cout << "Xin1: " << cluster_1->get_cluster_id() << " " << cluster_2->get_cluster_id() << " " << angle_diff << " " << dis/units::cm << " " << mcells_1.size() << " " << mcells_2.size() << " " << dis/units::cm << " " << fabs(p1.x-p2.x)/units::cm<<
-	    // // " " << p1.y/units::cm << " " << p1.z/units::cm << " " << p2.y/units::cm << " " << p2.z/units::cm << std::endl;
-	    // if ( (dis <= 3*units::cm|| fabs(p1.x-p2.x)<0.5*units::cm)  && angle_diff <= 45 
-	    // 	|| dis <= 10*units::cm && angle_diff <=15 
-	    // 	|| angle_diff<5 
-	    // 	//  || mcells_1.size()==1 && mcells_2.size()==1 && dis < 15*units::cm
-	    // 	){
-	    //   flag_merge = true;
-	    // }
-	    // if (!flag_merge){
-	    //   dir1 = cluster_2->VHoughTrans(mcell2_center,30*units::cm);
-	    //   // test reversed direction
-	    //   // TVector3 temp_dir1(mcell2_center.x-p2.x,mcell2_center.y-p2.y,mcell2_center.z-p2.z);
-	    //   // if (temp_dir1.Angle(dir1)>135/180.*3.1415926)
-	    //   // 	dir1.SetXYZ(-dir1.X(),-dir1.Y(),-dir1.Z());
-	    //   dir2 = cluster_1->calc_dir(mcell2_center,mcell1_center,30*units::cm);
-	    //   angle_diff = (3.1415926-dir1.Angle(dir2))/3.1415926*180.;
-	    //   dis = sqrt(pow(p1.x-p2.x,2)
-	    // 		 +pow(p1.y-p2.y,2)
-	    // 		 +pow(p1.z-p2.z,2));
-	    //   // if (angle_diff < 30)
-	    //   //std::cout << "Xin2: " << cluster_1->get_cluster_id() << " " << cluster_2->get_cluster_id() << " " << angle_diff << " " << dis/units::cm << " " << mcells_1.size() << " " << mcells_2.size() << " " << dis/units::cm << " " << fabs(p1.x-p2.x)/units::cm << std::endl;
-	    //   if ( (dis <= 3*units::cm || fabs(p1.x-p2.x)<0.5*units::cm) && angle_diff <= 45 
-	    // 	  || dis <= 10*units::cm && angle_diff <=15 
-	    // 	  || angle_diff<5  
-	    // 	  //  || mcells_1.size()==1 && mcells_2.size()==1 && dis < 15*units::cm
+	    // if (length_1 <= 12*units::cm && length_2 <=12*units::cm){
+	    //   // both are short
+	    //   if ((dis <= 3*units::cm|| fabs(p1.x-p2.x)<0.5*units::cm) && (angle_diff1 <= 45 || angle_diff2 <=45) ||
+	    // 	  (dis <=10*units::cm) && (angle_diff1<=15 || angle_diff2 <=15) ||
+	    // 	  (angle_diff1<5 || angle_diff2 < 5)
+	    // 	  ){
+	    // 	flag_merge = true;
+	    //   }
+	    // }else if (length_1 > 12*units::cm && length_2 <=12*units::cm){
+	    //   // one is short
+	    //   if ((dis <= 3*units::cm|| fabs(p1.x-p2.x)<0.5*units::cm)  && (angle_diff1 <= 45 || angle_diff2<=45)
+	    // 	  || dis <= 10*units::cm && (angle_diff1 <=15 ||angle_diff3 <=15)
+	    // 	  || (angle_diff1<5 || angle_diff3 <5))
+	    // 	flag_merge = true;
+	    // }else if (length_2 > 12*units::cm && length_1 <=12*units::cm){
+	    //   // one is short
+	    //   if ((dis <= 3*units::cm|| fabs(p1.x-p2.x)<0.5*units::cm)  && (angle_diff2 <= 45 || angle_diff2<=45) 
+	    // 	  || dis <= 10*units::cm && (angle_diff2 <=15 || angle_diff3 <=15)
+	    // 	  || (angle_diff2<5 || angle_diff3 < 5))
+	    // 	flag_merge = true;
+	    // }else{
+	    //   // both are long
+	    //   if ((dis <= 3*units::cm|| fabs(p1.x-p2.x)<0.5*units::cm) && (angle_diff1 <= 45 || angle_diff2 <=45) ||
+	    // 	  (dis <=10*units::cm) && (angle_diff1<=15 || angle_diff2 <=15) && angle_diff3 <= 15 ||
+	    // 	  (angle_diff1<5 || angle_diff2 < 5) && angle_diff3 < 10
 	    // 	  ){
 	    // 	flag_merge = true;
 	    //   }
 	    // }
-	    // end the old method ... 
 	    
-	    if (flag_merge)
+
+	    
+	    if ((dis <= 3*units::cm|| fabs(p1.x-p2.x)<0.5*units::cm)  && angle_diff1 <= 45
+	    	|| dis <= 10*units::cm && angle_diff1 <=15 
+	    	|| angle_diff1<5 ){
+	      //  || mcells_1.size()==1 && mcells_2.size()==1 && dis < 15*units::cm
+	      flag_merge = true;
+	    }else{
+	      dir1 = cluster_2->VHoughTrans(mcell2_center,30*units::cm);
+	      dir2 = cluster_1->calc_dir(mcell2_center,mcell1_center,30*units::cm);
+	      angle_diff1 = (3.1415926-dir1.Angle(dir2))/3.1415926*180.;
+	      if ((dis <= 3*units::cm|| fabs(p1.x-p2.x)<0.5*units::cm)  && angle_diff1 <= 45 
+	    	  || dis <= 10*units::cm && angle_diff1 <=15 
+	    	  || angle_diff1<5 )
+	    	flag_merge = true;
+	    }
+
+	    // if (flag_merge){
+	    //   if (length_1>12*units::cm && length_2>12*units::cm)
+	    //   std::cout << cluster_1->get_cluster_id() << " " << cluster_2->get_cluster_id() << " " << cluster_length_vec.at(i)/units::cm << " " << cluster_length_vec.at(j)/units::cm << " " << dis/units::cm << " " << fabs(p1.x-p2.x)/units::cm << " " << angle_diff1 << " " << angle_diff2 << " " << angle_diff3 << " " << std::endl;
+	    // }
+
+	    
+	    //std::cout << cluster_1->get_cluster_id() << " " << cluster_2->get_cluster_id() << " " << flag_1 << " " << length_1/units::cm << " " << flag_2 << " " << length_2/units::cm << " " << dis/units::cm << std::endl;
+	    // if (flag_1){
+	    //   cluster_1->dijkstra_shortest_paths(wcp1);
+	    //   TVector3 dir1 = cluster_1->VHoughTrans(p1,30*units::cm);
+	    //   Point p_test;
+	    //   p_test.x = p1.x + dir1.X()*30*units::cm;
+	    //   p_test.y = p1.y + dir1.Y()*30*units::cm;
+	    //   p_test.z = p1.z + dir1.Z()*30*units::cm;
+	    //   WCPointCloud<double>::WCPoint& wcp1_target = cloud_1->get_closest_wcpoint(p_test);
+	    //   cluster_1->cal_shortest_path(wcp1_target);
+	    //   cluster_1->fine_tracking(4);
+	    //   if (!cluster_1->get_fine_tracking_flag()) flag_1 = false;
+	    // }
+
+	    // if (flag_2){
+	    //   cluster_2->dijkstra_shortest_paths(wcp2);
+	    //   TVector3 dir2 = cluster_2->VHoughTrans(p2,30*units::cm);
+	    //   Point p_test;
+	    //   p_test.x = p2.x + dir2.X()*30*units::cm;
+	    //   p_test.y = p2.y + dir2.Y()*30*units::cm;
+	    //   p_test.z = p2.z + dir2.Z()*30*units::cm;
+	    //   WCPointCloud<double>::WCPoint& wcp2_target = cloud_2->get_closest_wcpoint(p_test);
+	    //   cluster_2->cal_shortest_path(wcp2_target);
+	    //   cluster_2->fine_tracking(4);
+	    //   if (!cluster_2->get_fine_tracking_flag()) flag_2 = false;
+	    // }
+	    // if (flag_1 && flag_2){ // both long tracks
+	    //   TVector3 dir_1 = cluster_1->get_ft_dir_end(3*units::cm,10*units::cm);
+	    //   Line l1(cluster_1->get_fine_tracking_path().at(0),dir_1);
+	    //   TVector3 dir_2 = cluster_2->get_ft_dir_end(3*units::cm,10*units::cm);
+	    //   Line l2(cluster_2->get_fine_tracking_path().at(0),dir_2);
+	    //   double dis1 = l1.closest_dis(l2);
+	    //   double angle_diff = (3.1415926-dir_1.Angle(dir_2))/3.1415926*180.;
+	    //   std::cout <<  angle_diff << " " << dis1/units::cm << " " << dis/units::cm << std::endl;
+	    // }else if (flag_1 && !flag_2){// 1 is long, 2 is short
+	    // }else if (flag_2 && !flag_1){// 2 is long 1 is short
+	    // }else{ // both are short ...
+	    // }
+	    
+	    if (flag_merge){
 	      to_be_merged_pairs.insert(std::make_pair(cluster_1,cluster_2));
+	    }
 	  }
 	}
       }
