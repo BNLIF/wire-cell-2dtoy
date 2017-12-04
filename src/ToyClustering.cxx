@@ -80,7 +80,27 @@ std::map<PR3DCluster*,std::vector<std::pair<PR3DCluster*,double>>> WireCell2dToy
 }
 
 void WireCell2dToy::Clustering_jump_gap_cosmics(WireCell::PR3DClusterSelection& live_clusters){
+  // include some parallel or prolonged, no need to do track fitting
+  Clustering_regular(live_clusters);
+  
+  //dedicated one dealing with prolonged track
+  Clustering_prolong(live_clusters);
 
+  //dedicated one dealing with parallel track
+  Clustering_parallel(live_clusters);
+}
+
+
+void WireCell2dToy::Clustering_prolong(WireCell::PR3DClusterSelection& live_clusters){
+
+}
+
+void WireCell2dToy::Clustering_parallel(WireCell::PR3DClusterSelection& live_clusters){
+
+}
+
+
+void WireCell2dToy::Clustering_regular(WireCell::PR3DClusterSelection& live_clusters){
   for (int kk=0;kk!=1;kk++){
     std::set<std::pair<PR3DCluster*, PR3DCluster*>> to_be_merged_pairs;
     
@@ -89,7 +109,7 @@ void WireCell2dToy::Clustering_jump_gap_cosmics(WireCell::PR3DClusterSelection& 
       for (size_t j=i+1;j<live_clusters.size();j++){
 	PR3DCluster* cluster_2 = live_clusters.at(j);
 	//std::cout << cluster_1->get_cluster_id() << " " << cluster_2->get_cluster_id() << std::endl;
-	if (WireCell2dToy::Clustering_jump_gap_cosmics(cluster_1,cluster_2))
+	if (WireCell2dToy::Clustering_1st_round(cluster_1,cluster_2))
 	  to_be_merged_pairs.insert(std::make_pair(cluster_1,cluster_2));
 	
       }
@@ -160,9 +180,11 @@ void WireCell2dToy::Clustering_jump_gap_cosmics(WireCell::PR3DClusterSelection& 
     }
     
   }  
+
 }
+
   
-bool WireCell2dToy::Clustering_jump_gap_cosmics(WireCell::PR3DCluster *cluster1, WireCell::PR3DCluster *cluster2){
+bool WireCell2dToy::Clustering_1st_round(WireCell::PR3DCluster *cluster1, WireCell::PR3DCluster *cluster2){
   cluster1->Create_point_cloud();
   cluster2->Create_point_cloud();
   
@@ -191,8 +213,6 @@ bool WireCell2dToy::Clustering_jump_gap_cosmics(WireCell::PR3DCluster *cluster1,
   }
   
   //std::cout << cluster1->get_cluster_id() << " " << cluster2->get_cluster_id() << " " << sqrt(pow(p1.x-p2.x,2)+pow(p1.y-p2.y,2)+pow(p1.z-p2.z,2))/units::cm<< std::endl;
-
-
   
   double dis = sqrt(pow(p1.x-p2.x,2)+pow(p1.y-p2.y,2)+pow(p1.z-p2.z,2));
 
@@ -280,7 +300,7 @@ bool WireCell2dToy::Clustering_jump_gap_cosmics(WireCell::PR3DCluster *cluster1,
     //   flag_dir = true;
     //   angle_cut = 20;
     // }else 
-	  if (dis < 5*units::cm ){
+    if (dis < 5*units::cm ){
       // normal case ..., allow for 3 cm gap, and 10 degree cut ...
       flag_dir = true;
       angle_cut = 10;
@@ -337,6 +357,7 @@ bool WireCell2dToy::Clustering_jump_gap_cosmics(WireCell::PR3DCluster *cluster1,
 	para_angle_cut = 30;
       }
     }
+
     
     if (flag_dir){
       if (cluster1->get_point_cloud()->get_num_points()>60 || cluster2->get_mcells().size()>3){
