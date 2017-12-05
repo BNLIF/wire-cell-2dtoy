@@ -13,7 +13,7 @@ namespace WireCell2dToy{
   void Clustering_jump_gap_cosmics(WireCell::PR3DClusterSelection& live_clusters);
 
   void Clustering_regular(WireCell::PR3DClusterSelection& live_clusters);
-  bool Clustering_1st_round(WireCell::PR3DCluster *cluster1, WireCell::PR3DCluster *cluster2);
+  bool Clustering_1st_round(WireCell::PR3DCluster *cluster1, WireCell::PR3DCluster *cluster2, double length_1, double length_2);
  
   
   void Clustering_prolong(WireCell::PR3DClusterSelection& live_clusters);

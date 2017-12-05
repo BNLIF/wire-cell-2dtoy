@@ -101,6 +101,25 @@ void WireCell2dToy::Clustering_parallel(WireCell::PR3DClusterSelection& live_clu
 
 
 void WireCell2dToy::Clustering_regular(WireCell::PR3DClusterSelection& live_clusters){
+  // calculate the length ...
+  TPCParams& mp = Singleton<TPCParams>::Instance();
+  double pitch_u = mp.get_pitch_u();
+  double pitch_v = mp.get_pitch_v();
+  double pitch_w = mp.get_pitch_w();
+  double angle_u = mp.get_angle_u();
+  double angle_v = mp.get_angle_v();
+  double angle_w = mp.get_angle_w();
+  double time_slice_width = mp.get_ts_width();
+  std::vector<double> cluster_length_vec;
+  //estimated length
+  for (size_t i=0; i!= live_clusters.size(); i++){
+    PR3DCluster* cluster_1 = live_clusters.at(i);
+    std::vector<int> range_v1 = cluster_1->get_uvwt_range();
+    double length_1 = sqrt(2./3. * (pow(pitch_u*range_v1.at(0),2) + pow(pitch_v*range_v1.at(1),2) + pow(pitch_w*range_v1.at(2),2)) + pow(time_slice_width*range_v1.at(3),2));
+    cluster_length_vec.push_back(length_1);
+  }
+  
+
   for (int kk=0;kk!=1;kk++){
     std::set<std::pair<PR3DCluster*, PR3DCluster*>> to_be_merged_pairs;
     
@@ -109,7 +128,7 @@ void WireCell2dToy::Clustering_regular(WireCell::PR3DClusterSelection& live_clus
       for (size_t j=i+1;j<live_clusters.size();j++){
 	PR3DCluster* cluster_2 = live_clusters.at(j);
 	//std::cout << cluster_1->get_cluster_id() << " " << cluster_2->get_cluster_id() << std::endl;
-	if (WireCell2dToy::Clustering_1st_round(cluster_1,cluster_2))
+	if (WireCell2dToy::Clustering_1st_round(cluster_1,cluster_2, cluster_length_vec.at(i),cluster_length_vec.at(j)))
 	  to_be_merged_pairs.insert(std::make_pair(cluster_1,cluster_2));
 	
       }
@@ -184,7 +203,7 @@ void WireCell2dToy::Clustering_regular(WireCell::PR3DClusterSelection& live_clus
 }
 
   
-bool WireCell2dToy::Clustering_1st_round(WireCell::PR3DCluster *cluster1, WireCell::PR3DCluster *cluster2){
+bool WireCell2dToy::Clustering_1st_round(WireCell::PR3DCluster *cluster1, WireCell::PR3DCluster *cluster2, double length_1, double length_2){
   cluster1->Create_point_cloud();
   cluster2->Create_point_cloud();
   
@@ -360,74 +379,104 @@ bool WireCell2dToy::Clustering_1st_round(WireCell::PR3DCluster *cluster1, WireCe
 
     
     if (flag_dir){
-      if (cluster1->get_point_cloud()->get_num_points()>60 || cluster2->get_mcells().size()>3){
-	// also with a complicated structures ...
-	TVector3 dir1 = cluster1->VHoughTrans(cluster1_ave_pos,30*units::cm); // cluster 1 direction
-	// need to be careful if this is reversed ...
-	// TVector3 temp_dir1(cluster1_ave_pos.x-p1.x,cluster1_ave_pos.y-p1.y,cluster1_ave_pos.z-p1.z);
-	// if (temp_dir1.Angle(dir1)>135/180.*3.1415926)
-	//   dir1.SetXYZ(-dir1.X(),-dir1.Y(),-dir1.Z());
-	
-	TVector3 dir2 = cluster2->calc_dir(cluster1_ave_pos,cluster2_ave_pos,30*units::cm); // dir 2 --> 1
-	TVector3 dir2_1 = cluster2->VHoughTrans(cluster1_ave_pos,30*units::cm);// 
-	TVector3 dir2_2 = cluster2->calc_dir(cluster1_ave_pos,mcell2_center,10*units::cm); // dir 2 --> 1
-	
-	TVector3 dir1_rot(dir1.Y(), dir1.Z(), dir1.X());
-	TVector3 dir2_rot(dir2.Y(), dir2.Z(), dir2.X());
-	
-	double angle_diff1 = (3.1415926-dir1.Angle(dir2))/3.1415926*180.;
-	double angle_diff1_1 = (3.1415926-dir1.Angle(dir2_1))/3.1415926*180.;
-	double angle_diff1_2 = (3.1415926-dir1.Angle(dir2_2))/3.1415926*180.;
-	
-	double theta1 = (dir1_rot.Theta()-3.1415926/2.)/3.1415926*180.;
-	double theta2 = (dir2_rot.Theta()-3.1415926/2.)/3.1415926*180.;
-	double dphi = fabs(3.1415926 - fabs(dir1_rot.Phi()-dir2_rot.Phi()))/3.1415926*180.;
+      bool flag_extend = false;
+      
+      // also with a complicated structures ...
+      TVector3 dir1 = cluster1->VHoughTrans(cluster1_ave_pos,30*units::cm); // cluster 1 direction based on hough
+      TVector3 dir1_1 = cluster1->VHoughTrans(p1,30*units::cm);
+      
+      TVector3 dir2 = cluster2->calc_dir(cluster1_ave_pos,cluster2_ave_pos,30*units::cm); // dir 2 --> 1
+      TVector3 dir2_1 = cluster2->VHoughTrans(cluster1_ave_pos,30*units::cm); // 
+      TVector3 dir2_2 = cluster2->calc_dir(cluster1_ave_pos,mcell2_center,10*units::cm); // dir 2 --> 1
+      
+      TVector3 dir3 = cluster2->VHoughTrans(cluster2_ave_pos,30*units::cm);
+      TVector3 dir3_1 = cluster2->VHoughTrans(p2,30*units::cm);
+      
+      TVector3 dir4 = cluster1->calc_dir(cluster2_ave_pos,cluster1_ave_pos,30*units::cm); // dir 2 --> 1
+      TVector3 dir4_1 = cluster1->VHoughTrans(cluster2_ave_pos,30*units::cm);//
+      TVector3 dir4_2 = cluster1->calc_dir(cluster2_ave_pos,mcell1_center,10*units::cm); // dir 2 --> 1
 
-	// if (cluster1->get_cluster_id()==142|| cluster2->get_cluster_id()==142) 
-	//   std::cout << cluster1->get_cluster_id() << " " << cluster2->get_cluster_id() << " " << angle_diff1 << " " << angle_diff1_1 << " " << angle_diff1_2 << " " << theta1 << " " << theta2 << " " << dphi << " " << dis/units::cm << " " << cluster1->get_mcells().size() << " " << cluster2->get_mcells().size() << std::endl;
 	
-	if ((angle_diff1 < angle_cut) || angle_diff1_1 < angle_cut || (angle_diff1_2 <angle_cut )
-	    || (flag_para && fabs(theta1) < para_angle_cut_1 && fabs(theta2) < para_angle_cut_1 && fabs(theta1+theta2) < para_angle_cut_1/2. && dphi < para_angle_cut)
-	    //   || ((angle_diff1_1<point_angle_cut || angle_diff1_2 < point_angle_cut ) && dis < 3*units::cm)
-	    ){
-	  return true;
-	}
-      }
-      // reverse the test ...
-      if (cluster2->get_point_cloud()->get_num_points()>60 || cluster2->get_mcells().size()>3){
-	TVector3 dir1 = cluster2->VHoughTrans(cluster2_ave_pos,30*units::cm); // cluster 1 direction
-	// need to be careful if this is reversed ...
-	// TVector3 temp_dir1(cluster2_ave_pos.x-p2.x,cluster2_ave_pos.y-p2.y,cluster2_ave_pos.z-p2.z);
-	// if (temp_dir1.Angle(dir1)>135/180.*3.1415926)
-	//   dir1.SetXYZ(-dir1.X(),-dir1.Y(),-dir1.Z());
-	
-	TVector3 dir2 = cluster1->calc_dir(cluster2_ave_pos,cluster1_ave_pos,30*units::cm); // dir 2 --> 1
-	TVector3 dir2_1 = cluster1->VHoughTrans(cluster2_ave_pos,30*units::cm);//
-	TVector3 dir2_2 = cluster1->calc_dir(cluster2_ave_pos,mcell1_center,10*units::cm); // dir 2 --> 1
-	
-	TVector3 dir1_rot(dir1.Y(), dir1.Z(), dir1.X());
-	TVector3 dir2_rot(dir2.Y(), dir2.Z(), dir2.X());
-	
-	double angle_diff1 = (3.1415926-dir1.Angle(dir2))/3.1415926*180.;
-	double angle_diff1_1 = (3.1415926-dir1.Angle(dir2_1))/3.1415926*180.;
-	double angle_diff1_2 = (3.1415926-dir1.Angle(dir2_2))/3.1415926*180.;
-	
-	double theta1 = (dir1_rot.Theta()-3.1415926/2.)/3.1415926*180.;
-	double theta2 = (dir2_rot.Theta()-3.1415926/2.)/3.1415926*180.;
-	double dphi = fabs(3.1415926 - fabs(dir1_rot.Phi()-dir2_rot.Phi()))/3.1415926*180.;
+      double angle_diff1 = (3.1415926-dir1.Angle(dir2))/3.1415926*180.;
+      double angle_diff1_1 = (3.1415926-dir1.Angle(dir2_1))/3.1415926*180.;
+      double angle_diff1_2 = (3.1415926-dir1.Angle(dir2_2))/3.1415926*180.;
 
-	// if (cluster1->get_cluster_id()==142 || cluster2->get_cluster_id()==142 ) 
-	//   std::cout << cluster1->get_cluster_id() << " " << cluster2->get_cluster_id() << " " << angle_diff1 << " " << angle_diff1_1 << " " << angle_diff1_2 << " " << theta1 << " " << theta2 << " " << dphi << " " << dis/units::cm << " " << cluster1->get_mcells().size() << " " << cluster2->get_mcells().size() << std::endl;
-	
-	
-	if ((angle_diff1 < angle_cut ) || angle_diff1_1 < angle_cut || (angle_diff1_2 < angle_cut )
-	    || (flag_para && fabs(theta1) < para_angle_cut_1 && fabs(theta2) < para_angle_cut_1 && fabs(theta1+theta2) < para_angle_cut_1/2. && dphi < para_angle_cut)
-	    //  || ((angle_diff1_1<point_angle_cut || angle_diff1_2 < point_angle_cut) && dis < 3*units::cm)
-	    ){
+      double angle_diff2 = (3.1415926-dir1.Angle(dir3))/3.1415926*180.;
+      double angle_diff2_1 = (3.1415926-dir1_1.Angle(dir3_1))/3.1415926*180.;
+      double angle_diff2_2 = (3.1415926-dir1.Angle(dir3_1))/3.1415926*180.;
+      double angle_diff2_3 = (3.1415926-dir1_1.Angle(dir3))/3.1415926*180.;
+      
+      if ((angle_diff1 < angle_cut) || angle_diff1_1 < angle_cut || (angle_diff1_2 <angle_cut)){
+	if (angle_diff2 < angle_cut || angle_diff2_1 < angle_cut || (angle_diff2_2 < angle_cut && length_1 >= length_2) || (angle_diff2_3 < angle_cut && length_1 <= length_2)){
 	  return true;
+	}else{
+	  if (length_2 < 12*units::cm)
+	    return true;
 	}
+	flag_extend = true;
       }
 
+      double angle_diff3 = (3.1415926-dir3.Angle(dir4))/3.1415926*180.;
+      double angle_diff3_1 = (3.1415926-dir3.Angle(dir4_1))/3.1415926*180.;
+      double angle_diff3_2 = (3.1415926-dir3.Angle(dir4_2))/3.1415926*180.;
+      
+      if ((angle_diff3 < angle_cut) || angle_diff3_1 < angle_cut || (angle_diff3_2 <angle_cut)){
+	if (angle_diff2 < angle_cut || angle_diff2_1 < angle_cut || (angle_diff2_2 < angle_cut && length_1 >= length_2) || (angle_diff2_3 < angle_cut && length_1 <= length_2)) {
+	  return true;
+	}else{
+	  if (length_1 < 12*units::cm)
+	    return true;
+	}
+	flag_extend = true;
+      }
+
+      if (flag_para){
+	TVector3 dir1_rot(dir1.Y(), dir1.Z(), dir1.X());
+	TVector3 dir1_1_rot(dir1_1.Y(), dir1_1.Z(), dir1_1.X());
+	TVector3 dir2_rot(dir2.Y(), dir2.Z(), dir2.X());
+	
+	double theta1_1 = (dir1_rot.Theta()-3.1415926/2.)/3.1415926*180.;
+	double theta1_2 = (dir2_rot.Theta()-3.1415926/2.)/3.1415926*180.;
+	double dphi1 = fabs(3.1415926 - fabs(dir1_rot.Phi()-dir2_rot.Phi()))/3.1415926*180.;
+	
+	TVector3 dir3_rot(dir3.Y(), dir3.Z(), dir3.X());
+	TVector3 dir3_1_rot(dir3_1.Y(), dir3_1.Z(), dir3_1.X());
+	TVector3 dir4_rot(dir4.Y(), dir4.Z(), dir4.X());
+	
+	double dphi3 = fabs(3.1415926 - fabs(dir1_rot.Phi()-dir3_rot.Phi()))/3.1415926*180.;
+	double dphi3_1 = fabs(3.1415926 - fabs(dir1_1_rot.Phi()-dir3_1_rot.Phi()))/3.1415926*180.;
+	double dphi3_2 = fabs(3.1415926 - fabs(dir1_1_rot.Phi()-dir3_rot.Phi()))/3.1415926*180.;
+	double dphi3_3 = fabs(3.1415926 - fabs(dir1_rot.Phi()-dir3_1_rot.Phi()))/3.1415926*180.;
+	
+	if ( (fabs(theta1_1) < para_angle_cut_1 && fabs(theta1_2) < para_angle_cut_1 && fabs(theta1_1+theta1_2) < para_angle_cut_1/2. && dphi1 < para_angle_cut)){
+	  if (dphi3 < para_angle_cut || dphi3_1 < para_angle_cut || (dphi3_2 < para_angle_cut && length_1 >= length_2) || (dphi3_3 < para_angle_cut && length_1 <= length_2)) {
+	    return true;
+	  }else{
+	    if (length_2 < 12*units::cm)
+	      return true;
+	  }
+	  flag_extend = true;
+	}
+
+	double theta2_1 = (dir3_rot.Theta()-3.1415926/2.)/3.1415926*180.;
+	double theta2_2 = (dir4_rot.Theta()-3.1415926/2.)/3.1415926*180.;
+	double dphi2 = fabs(3.1415926 - fabs(dir3_rot.Phi()-dir4_rot.Phi()))/3.1415926*180.;
+	
+	if (fabs(theta2_1) < para_angle_cut_1 && fabs(theta2_2) < para_angle_cut_1 && fabs(theta2_1+theta2_2) < para_angle_cut_1/2. && dphi2 < para_angle_cut){
+	  if (dphi3 < para_angle_cut || dphi3_1 < para_angle_cut || (dphi3_2 < para_angle_cut && length_1 >= length_2) || (dphi3_3 < para_angle_cut && length_1 <= length_2)) {
+	    return true;
+	  }else{
+	    if (length_1 < 12*units::cm)
+	      return true;
+	  }
+	  flag_extend = true;
+	}
+      }
+      
+      if (flag_extend){
+	
+      }
+      
     }
   } // dis cut
   return false;
