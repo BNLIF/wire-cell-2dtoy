@@ -100,7 +100,7 @@ void WireCell2dToy::Clustering_parallel(WireCell::PR3DClusterSelection& live_clu
 }
 
 
-void WireCell2dToy::Clustering_regular(WireCell::PR3DClusterSelection& live_clusters){
+void WireCell2dToy::Clustering_regular(WireCell::PR3DClusterSelection& live_clusters, double length_cut, bool flag_enable_extend){
   // calculate the length ...
   TPCParams& mp = Singleton<TPCParams>::Instance();
   double pitch_u = mp.get_pitch_u();
@@ -128,7 +128,7 @@ void WireCell2dToy::Clustering_regular(WireCell::PR3DClusterSelection& live_clus
       for (size_t j=i+1;j<live_clusters.size();j++){
 	PR3DCluster* cluster_2 = live_clusters.at(j);
 	//std::cout << cluster_1->get_cluster_id() << " " << cluster_2->get_cluster_id() << std::endl;
-	if (WireCell2dToy::Clustering_1st_round(cluster_1,cluster_2, cluster_length_vec.at(i),cluster_length_vec.at(j)))
+	if (WireCell2dToy::Clustering_1st_round(cluster_1,cluster_2, cluster_length_vec.at(i),cluster_length_vec.at(j), length_cut, flag_enable_extend))
 	  to_be_merged_pairs.insert(std::make_pair(cluster_1,cluster_2));
 	
       }
@@ -203,7 +203,7 @@ void WireCell2dToy::Clustering_regular(WireCell::PR3DClusterSelection& live_clus
 }
 
   
-bool WireCell2dToy::Clustering_1st_round(WireCell::PR3DCluster *cluster1, WireCell::PR3DCluster *cluster2, double length_1, double length_2){
+bool WireCell2dToy::Clustering_1st_round(WireCell::PR3DCluster *cluster1, WireCell::PR3DCluster *cluster2, double length_1, double length_2, double length_cut, bool flag_enable_extend){
   cluster1->Create_point_cloud();
   cluster2->Create_point_cloud();
   
@@ -243,7 +243,7 @@ bool WireCell2dToy::Clustering_1st_round(WireCell::PR3DCluster *cluster1, WireCe
   // }
   
   
-  if (dis < 45*units::cm){
+  if (dis < length_cut){
     Point mcell1_center = mcell1->center();
     Point mcell2_center = mcell2->center();
     Point cluster1_ave_pos = cluster1->calc_ave_pos(p1,5*units::cm);
@@ -473,7 +473,7 @@ bool WireCell2dToy::Clustering_1st_round(WireCell::PR3DCluster *cluster1, WireCe
 	}
       }
       
-      if (flag_extend){
+      if (flag_extend && flag_enable_extend){
 	
       }
       
