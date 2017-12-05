@@ -337,7 +337,7 @@ int main(int argc, char* argv[])
   //
   TH2F *hv_raw = (TH2F*)file1->Get("hv_raw");
   // V wire noisy channels 10 vetoed ...
-  for (int i=3686;i!=3697;i++){
+  for (int i=3684;i!=3699;i++){
     if (vplane_map.find(i-2400)==vplane_map.end()){
       vplane_map[i-2400] = std::make_pair(0,hv_raw->GetNbinsY()-1);
       std::cout << "V plane (noisy): " << i -2400 << " added to bad channel list" << std::endl;
@@ -347,6 +347,9 @@ int main(int argc, char* argv[])
     for (int j=0;j!=hv_decon->GetNbinsY();j++){
       hv_decon->SetBinContent(i+1-2400,j+1,0);
       hv_decon_g->SetBinContent(i+1-2400,j+1,0);
+    }
+    for (int j=0;j!=hv_raw->GetNbinsY();j++){
+      hv_raw->SetBinContent(i+1-2400,j+1,0);
     }
   }
   
