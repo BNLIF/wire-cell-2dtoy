@@ -81,26 +81,30 @@ std::map<PR3DCluster*,std::vector<std::pair<PR3DCluster*,double>>> WireCell2dToy
 
 void WireCell2dToy::Clustering_jump_gap_cosmics(WireCell::PR3DClusterSelection& live_clusters){
   // include some parallel or prolonged, no need to do track fitting
-  Clustering_regular(live_clusters);
+  std::map<PR3DCluster*,double> cluster_length_map;
+
+  Clustering_regular(live_clusters, cluster_length_map);
   
   //dedicated one dealing with prolonged track
-  Clustering_prolong(live_clusters);
+  Clustering_prolong(live_clusters, cluster_length_map);
 
   //dedicated one dealing with parallel track
-  Clustering_parallel(live_clusters);
+  Clustering_parallel(live_clusters, cluster_length_map);
 }
 
 
-void WireCell2dToy::Clustering_prolong(WireCell::PR3DClusterSelection& live_clusters){
+void WireCell2dToy::Clustering_prolong(WireCell::PR3DClusterSelection& live_clusters, std::map<PR3DCluster*,double>& cluster_length_map){
 
 }
 
-void WireCell2dToy::Clustering_parallel(WireCell::PR3DClusterSelection& live_clusters){
+void WireCell2dToy::Clustering_parallel(WireCell::PR3DClusterSelection& live_clusters, std::map<PR3DCluster*,double>& cluster_length_map){
 
 }
 
 
-void WireCell2dToy::Clustering_regular(WireCell::PR3DClusterSelection& live_clusters, double length_cut, bool flag_enable_extend){
+void WireCell2dToy::Clustering_regular(WireCell::PR3DClusterSelection& live_clusters, std::map<PR3DCluster*,double>& cluster_length_map, double length_cut, bool flag_enable_extend){
+  
+  
   // calculate the length ...
   TPCParams& mp = Singleton<TPCParams>::Instance();
   double pitch_u = mp.get_pitch_u();
@@ -117,6 +121,7 @@ void WireCell2dToy::Clustering_regular(WireCell::PR3DClusterSelection& live_clus
     std::vector<int> range_v1 = cluster_1->get_uvwt_range();
     double length_1 = sqrt(2./3. * (pow(pitch_u*range_v1.at(0),2) + pow(pitch_v*range_v1.at(1),2) + pow(pitch_w*range_v1.at(2),2)) + pow(time_slice_width*range_v1.at(3),2));
     cluster_length_vec.push_back(length_1);
+    cluster_length_map[cluster_1] = length_1;
   }
   
 
@@ -193,13 +198,19 @@ void WireCell2dToy::Clustering_regular(WireCell::PR3DClusterSelection& live_clus
 	  ncluster->AddCell(mcell,time_slice);
 	}
 	live_clusters.erase(find(live_clusters.begin(), live_clusters.end(), ocluster));
+	cluster_length_map.erase(ocluster);
 	delete ocluster;
       }
+
+      std::vector<int> range_v1 = ncluster->get_uvwt_range();
+      double length_1 = sqrt(2./3. * (pow(pitch_u*range_v1.at(0),2) + pow(pitch_v*range_v1.at(1),2) + pow(pitch_w*range_v1.at(2),2)) + pow(time_slice_width*range_v1.at(3),2));
+      cluster_length_map[ncluster] = length_1;
+      
       //std::cout << std::endl;
     }
     
   }  
-
+  //  return cluster_length_map;
 }
 
   
