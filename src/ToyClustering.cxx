@@ -134,7 +134,7 @@ void WireCell2dToy::Clustering_regular(WireCell::PR3DClusterSelection& live_clus
       }
     }
     
-    //to_be_merged_pairs.clear();
+    //    to_be_merged_pairs.clear();
     //std::cout << to_be_merged_pairs.size() << std::endl;
     
     
@@ -235,8 +235,7 @@ bool WireCell2dToy::Clustering_1st_round(WireCell::PR3DCluster *cluster1, WireCe
   
   double dis = sqrt(pow(p1.x-p2.x,2)+pow(p1.y-p2.y,2)+pow(p1.z-p2.z,2));
 
-  // if (cluster1->get_cluster_id()==106 || cluster1->get_cluster_id()==143 ||
-  //     cluster1->get_cluster_id()==214 || cluster1->get_cluster_id()==251){
+  // if (cluster1->get_cluster_id()==7){
   //   std::cout << cluster1->get_cluster_id() << " " << cluster2->get_cluster_id() << " " << dis/units::cm << " " << p1.x/units::cm << " " << p1.y/units::cm << " " << p1.z/units::cm <<
   //     " " << p2.x/units::cm << " " << p2.y/units::cm << " " << p2.z/units::cm <<
   //     std::endl;
@@ -472,8 +471,61 @@ bool WireCell2dToy::Clustering_1st_round(WireCell::PR3DCluster *cluster1, WireCe
 	  flag_extend = true;
 	}
       }
+
+      // if (cluster1->get_cluster_id()==7) 
+      // std::cout << cluster1->get_cluster_id() << " " << cluster2->get_cluster_id() << " " << dis/units::cm << " " << flag_para << " "<< flag_extend << " " << std::endl;
       
       if (flag_extend && flag_enable_extend){
+	// look use 1 to predict 2
+	// cluster1_ave_pos, dir1
+
+	// calculate the average distance
+	double ave_dis = sqrt(pow(cluster1_ave_pos.x-cluster2_ave_pos.x,2) + pow(cluster1_ave_pos.y-cluster2_ave_pos.y,2) + pow(cluster1_ave_pos.z-cluster2_ave_pos.z,2));
+	Point test_point;
+	double min_dis = 1e9, max_dis = -1e9;
+	for (int i=-5;i!=6;i++){
+	  test_point.x = cluster1_ave_pos.x - dir1.X() * (ave_dis +i*2*units::cm);
+	  test_point.y = cluster1_ave_pos.y - dir1.Y() * (ave_dis +i*2*units::cm);
+	  test_point.z = cluster1_ave_pos.z - dir1.Z() * (ave_dis +i*2*units::cm);
+
+	  std::pair<SlimMergeGeomCell*,Point> temp_results = cluster2->get_closest_point_mcell(test_point);
+	  //reuse this 
+	  Point test_point1 = temp_results.second;
+	  if (sqrt(pow(test_point1.x-test_point.x,2)+pow(test_point1.y-test_point.y,2)+pow(test_point1.z-test_point.z,2))<1.5*units::cm){
+	    double temp_dis = (test_point1.x - cluster1_ave_pos.x)*dir1.X() + (test_point1.y - cluster1_ave_pos.y)*dir1.Y() + (test_point1.z - cluster1_ave_pos.z)*dir1.Z();
+	    temp_dis *=-1;
+	    if (temp_dis < min_dis) min_dis = temp_dis;
+	    if (temp_dis > max_dis) max_dis = temp_dis;
+	  }
+	}
+	//	std::cout << cluster1->get_cluster_id() << " " << cluster2->get_cluster_id() << " " << min_dis/units::cm << " " << max_dis/units::cm << " " << length_2/units::cm << std::endl;
+	if ((max_dis - min_dis)>2.5*units::cm) return true;
+	
+	// look at the other side (repeat) 
+	// cluster2_ave_pos, dir2
+	min_dis = 1e9;
+	max_dis = -1e9;
+	for (int i=-5;i!=6;i++){
+	  test_point.x = cluster2_ave_pos.x - dir2.X() * (ave_dis +i*2*units::cm);
+	  test_point.y = cluster2_ave_pos.y - dir2.Y() * (ave_dis +i*2*units::cm);
+	  test_point.z = cluster2_ave_pos.z - dir2.Z() * (ave_dis +i*2*units::cm);
+
+	  std::pair<SlimMergeGeomCell*,Point> temp_results = cluster1->get_closest_point_mcell(test_point);
+	  //reuse this 
+	  Point test_point1 = temp_results.second;
+	  if (sqrt(pow(test_point1.x-test_point.x,2)+pow(test_point1.y-test_point.y,2)+pow(test_point1.z-test_point.z,2))<1.5*units::cm){
+	    double temp_dis = (test_point1.x - cluster2_ave_pos.x)*dir1.X() + (test_point1.y - cluster2_ave_pos.y)*dir1.Y() + (test_point1.z - cluster2_ave_pos.z)*dir1.Z();
+	    temp_dis *=-1;
+	    if (temp_dis < min_dis) min_dis = temp_dis;
+	    if (temp_dis > max_dis) max_dis = temp_dis;
+	  }
+	}
+	//std::cout << cluster1->get_cluster_id() << " " << cluster2->get_cluster_id() << " " << min_dis/units::cm << " " << max_dis/units::cm << " " << length_1/units::cm << std::endl;
+	if ((max_dis - min_dis)>2.5*units::cm) return true;
+	
+	// both side simutaneously? leave it for futhre
+
+
 	
       }
       
