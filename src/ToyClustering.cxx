@@ -347,6 +347,11 @@ bool WireCell2dToy::Clustering_2nd_round(WireCell::PR3DCluster *cluster1, WireCe
     {
       TVector3 tempV1(p2.x - p1.x, p2.y - p1.y, p2.z - p1.z);
       TVector3 tempV2(cluster2_ave_pos.x - cluster1_ave_pos.x, cluster2_ave_pos.y - cluster1_ave_pos.y, cluster2_ave_pos.z - cluster1_ave_pos.z);
+      
+      if (dis < 1.0*units::cm){
+	if (tempV1.Angle(tempV2) < 30/180.*3.1415926)
+	return true;
+      }
       double angle1 = tempV1.Angle(drift_dir);
       double angle4 = tempV2.Angle(drift_dir);
       
@@ -405,8 +410,7 @@ bool WireCell2dToy::Clustering_2nd_round(WireCell::PR3DCluster *cluster1, WireCe
 	      return true;
 	  }
 	}
-	if (dis < 0.5*units::cm)
-	  return true;
+	
       }
       
     }
