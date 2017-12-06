@@ -371,18 +371,35 @@ bool WireCell2dToy::Clustering_2nd_round(WireCell::PR3DCluster *cluster1, WireCe
       double angle1 = tempV1.Angle(U_dir);
       double angle2 = tempV1.Angle(V_dir);
 
+      // std::cout << cluster1->get_cluster_id() << " " << cluster2->get_cluster_id() << " " << angle1*180./3.1415926 << " " << angle2*180./3.1415926 << " " << dis/units::cm << " " << length_1/units::cm << " " << length_2/units::cm << std::endl;
+      
       if (angle1<5/180.*3.1415926 || (3.1415926-angle1)<5/180.*3.1415926 ||
 	  angle2<5/180.*3.1415926 || (3.1415926-angle2)<5/180.*3.1415926 ){
-	TVector3 dir1 = cluster1->VHoughTrans(p1,30*units::cm); // cluster 1 direction based on hough
-	TVector3 dir2 = cluster2->VHoughTrans(p2,30*units::cm); // cluster 1 direction based on hough
-	TVector3 dir3(p2.x-p1.x,p2.y-p1.y,p2.z-p1.z);
-	double angle3 = dir3.Angle(dir2);
-	double angle4 = 3.1415926-dir3.Angle(dir1);
 	if (length_1 > 10*units::cm || length_2 > 10*units::cm){
-	  if ((angle3<5/180.*3.1415926 || length_2<6*units::cm)&&(angle4<5/180.*3.1415926|| length_1<6*units::cm))
+	  TVector3 dir1 = cluster1->VHoughTrans(p1,30*units::cm); // cluster 1 direction based on hough
+	  TVector3 dir2 = cluster2->VHoughTrans(p2,30*units::cm); // cluster 1 direction based on hough
+	  TVector3 dir3(p2.x-p1.x,p2.y-p1.y,p2.z-p1.z);
+	  double angle3 = dir3.Angle(dir2);
+	  double angle4 = 3.1415926-dir3.Angle(dir1);
+	  if ((angle3<15/180.*3.1415926 || length_2<6*units::cm)&&(angle4<15/180.*3.1415926|| length_1<6*units::cm)&&dis<5*units::cm ||
+	      (angle3<10/180.*3.1415926 || length_2<6*units::cm)&&(angle4<10/180.*3.1415926|| length_1<6*units::cm)&&dis<15*units::cm ||
+	      (angle3<5/180.*3.1415926 || length_2<6*units::cm)&&(angle4<5/180.*3.1415926|| length_1<6*units::cm))
 	    return true;
 	}
-	
+      }else{
+	//regular cases
+	if (dis < 5*units::cm){
+	  if (length_1 > 10*units::cm || length_2 > 10*units::cm){
+	    TVector3 dir1 = cluster1->VHoughTrans(p1,30*units::cm); // cluster 1 direction based on hough
+	    TVector3 dir2 = cluster2->VHoughTrans(p2,30*units::cm); // cluster 1 direction based on hough
+	    TVector3 dir3(p2.x-p1.x,p2.y-p1.y,p2.z-p1.z);
+	    double angle3 = dir3.Angle(dir2);
+	    double angle4 = 3.1415926-dir3.Angle(dir1);
+	    //std::cout << angle3/3.1415926*180. << " " << angle4/3.1415926*180. << std::endl;
+	    if ((angle3<15/180.*3.1415926 || length_2<6*units::cm)&&(angle4<15/180.*3.1415926|| length_1<6*units::cm))
+	      return true;
+	  }
+	}
       }
       
     }
