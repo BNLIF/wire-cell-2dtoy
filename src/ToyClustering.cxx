@@ -90,6 +90,13 @@ void WireCell2dToy::Clustering_jump_gap_cosmics(WireCell::PR3DClusterSelection& 
 
   //dedicated one dealing with parallel track
   Clustering_parallel_prolong(live_clusters, cluster_length_map);
+
+  // for (auto it=cluster_length_map.begin(); it!=cluster_length_map.end(); it++){
+  //   if (it->second/units::cm>100)
+  //     std::cout << it->first->get_cluster_id() << " " << it->second/units::cm << std::endl;
+  // }
+
+  
 }
 
 
@@ -328,7 +335,7 @@ bool WireCell2dToy::Clustering_2nd_round(WireCell::PR3DCluster *cluster1, WireCe
 
   double dis = sqrt(pow(p1.x-p2.x,2)+pow(p1.y-p2.y,2)+pow(p1.z-p2.z,2));
   
-  if (dis < length_cut){
+  if (dis < 30 *units::cm || (dis <length_cut && length_1>25*units::cm && length_2>25*units::cm)){
     Point cluster1_ave_pos = cluster1->calc_ave_pos(p1,10*units::cm);
     Point cluster2_ave_pos = cluster2->calc_ave_pos(p2,10*units::cm);
 
@@ -377,8 +384,8 @@ bool WireCell2dToy::Clustering_2nd_round(WireCell::PR3DCluster *cluster1, WireCe
       double angle1 = tempV1.Angle(U_dir);
       double angle2 = tempV1.Angle(V_dir);
 
-      // if (cluster1->get_cluster_id()==264 || cluster2->get_cluster_id()==264)
-      // 	std::cout << cluster1->get_cluster_id() << " " << cluster2->get_cluster_id() << " " << angle1*180./3.1415926 << " " << angle2*180./3.1415926 << " " << dis/units::cm << " " << length_1/units::cm << " " << length_2/units::cm << std::endl;
+      // if (cluster1->get_cluster_id()==88 || cluster2->get_cluster_id()==88)
+      //  	std::cout << cluster1->get_cluster_id() << " " << cluster2->get_cluster_id() << " " << angle1*180./3.1415926 << " " << angle2*180./3.1415926 << " " << dis/units::cm << " " << length_1/units::cm << " " << length_2/units::cm << std::endl;
       
       if (angle1<10/180.*3.1415926 || (3.1415926-angle1)<10/180.*3.1415926 ||
 	  angle2<10/180.*3.1415926 || (3.1415926-angle2)<10/180.*3.1415926 ){
@@ -388,8 +395,8 @@ bool WireCell2dToy::Clustering_2nd_round(WireCell::PR3DCluster *cluster1, WireCe
 	  TVector3 dir3(p2.x-p1.x,p2.y-p1.y,p2.z-p1.z);
 	  double angle3 = dir3.Angle(dir2);
 	  double angle4 = 3.1415926-dir3.Angle(dir1);
-	  // if (cluster1->get_cluster_id()==264 || cluster2->get_cluster_id()==264)
-	  //  std::cout << angle3/3.1415926*180 << " " << angle4/3.1415926*180 << std::endl;
+	  // if (cluster1->get_cluster_id()==88 || cluster2->get_cluster_id()==88)
+	  //   std::cout << angle3/3.1415926*180 << " " << angle4/3.1415926*180 << std::endl;
 	  
 	  if ((angle3<25/180.*3.1415926 || length_2<8*units::cm)&&(angle4<25/180.*3.1415926|| length_1<8*units::cm)&&dis<5*units::cm ||
 	      (angle3<15/180.*3.1415926 || length_2<8*units::cm)&&(angle4<15/180.*3.1415926|| length_1<8*units::cm)&&dis<15*units::cm ||
