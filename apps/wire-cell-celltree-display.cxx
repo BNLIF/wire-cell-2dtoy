@@ -194,8 +194,10 @@ int main(int argc, char* argv[])
   hv_decon->SetDirectory(file);
   hw_decon->SetDirectory(file);
 
-  TH1F* signal = dynamic_cast<TH1F*>(calibWiener_esignal->At(0));
-  std::cout << signal->GetNbinsX() << " " << signal->GetBinContent(2398) << std::endl;
+  {
+    TH1F* signal = dynamic_cast<TH1F*>(calibWiener_esignal->At(0));
+    std::cout << signal->GetNbinsX() << " " << signal->GetBinContent(2398) << std::endl;
+  }
   
   for (size_t i=0; i!=calibWiener_channelid->size(); i++){
     int chid = calibWiener_channelid->at(i);
