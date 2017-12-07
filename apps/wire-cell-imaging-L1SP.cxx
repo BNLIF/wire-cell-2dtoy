@@ -291,7 +291,7 @@ int main(int argc, char* argv[])
   TH2F *hv_decon_g = (TH2F*)file1->Get("hv_decon_g");
   TH2F *hw_decon_g = (TH2F*)file1->Get("hw_decon_g");
 
-  WireCell2dToy::uBooNE_L1SP l1sp(hv_raw,hv_decon,hv_decon_g,nrebin);
+  WireCell2dToy::uBooNE_L1SP l1sp(hv_raw,hv_decon,hv_decon_g,nrebin,2.8);
   
   WireCell2dToy::pdDataFDS roi_gaus_fds(gds,hu_decon_g,hv_decon_g,hw_decon_g,eve_num);
   roi_gaus_fds.jump(eve_num);

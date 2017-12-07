@@ -291,7 +291,7 @@ void WireCell2dToy::uBooNE_L1SP::L1_fit(int wire_index, int start_tick, int end_
 	  // Y ... 
 	  Double_t t2 = j/2.; // us, real signal time
 	  double delta_t = t1 - t2;
-	  if (delta_t >-15 && delta_t < 10){
+	  if (delta_t >-15-time_offset && delta_t < 10-time_offset){
 	    G(i,j) = gw->Eval(delta_t) *500;
 	    G(i,temp_nbin_fit+j) = gv->Eval(delta_t)*500; 
 	  }
