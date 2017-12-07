@@ -214,23 +214,35 @@ int main(int argc, char* argv[])
   T->SetBranchAddress("runNo",&run_no);
   T->SetBranchAddress("subRunNo",&subrun_no);
 
-  std::vector<int> *badChannelList = new std::vector<int>;
-  T->SetBranchAddress("badChannelList",&badChannelList);
+  // std::vector<int> *badChannelList = new std::vector<int>;
+  // T->SetBranchAddress("badChannelList",&badChannelList);
+
+  std::vector<int> *badChannel = new std::vector<int>;
+  std::vector<int> *badBegin = new std::vector<int>;
+  std::vector<int> *badEnd = new std::vector<int>;
+  T->SetBranchAddress("badChannel",&badChannel);
+  T->SetBranchAddress("badBegin",&badBegin);
+  T->SetBranchAddress("badEnd",&badEnd);
+
+  Short_t nf_shift, nf_scale;
+  T->SetBranchAddress("nf_shift",&nf_shift);
+  T->SetBranchAddress("nf_scale",&nf_scale);
+  
   std::vector<double> *channelThreshold = new std::vector<double>;
   T->SetBranchAddress("channelThreshold",&channelThreshold);
   std::vector<int> *calibGaussian_channelId = new std::vector<int>;
   std::vector<int> *calibWiener_channelId = new std::vector<int>;
-  std::vector<int> *raw_channelId = new std::vector<int>;
+  std::vector<int> *nf_channelId = new std::vector<int>;
   T->SetBranchAddress("calibGaussian_channelId",&calibGaussian_channelId);
   T->SetBranchAddress("calibWiener_channelId",&calibWiener_channelId);
-  T->SetBranchAddress("raw_channelId",&raw_channelId);
+  T->SetBranchAddress("nf_channelId",&nf_channelId);
   TClonesArray* calibWiener_wf = new TClonesArray;
   TClonesArray* calibGaussian_wf = new TClonesArray;
-  TClonesArray* raw_wf = new TClonesArray;
+  TClonesArray* nf_wf = new TClonesArray;
   // TH1F  ... 
   T->SetBranchAddress("calibWiener_wf",&calibWiener_wf);
   T->SetBranchAddress("calibGaussian_wf",&calibGaussian_wf);
-  T->SetBranchAddress("raw_wf",&raw_wf);
+  T->SetBranchAddress("nf_wf",&nf_wf);
   
   T->GetEntry(eve_num);
   cout << "Run No: " << run_no << " " << subrun_no << " " << event_no << endl;
@@ -256,9 +268,9 @@ int main(int argc, char* argv[])
   
 
   
-  for (size_t i=0;i!=badChannelList->size();i++){
-    std::pair<int,int> abc(start_time,end_time);
-    chid = badChannelList->at(i);
+  for (size_t i=0;i!=badChannel->size();i++){
+    std::pair<int,int> abc(badBegin->at(i),badEnd->at(i));
+    chid = badChannel->at(i);
     if (chid < nwire_u){
       uplane_map[chid] = abc;
     }else if (chid < nwire_u + nwire_v){
@@ -268,7 +280,7 @@ int main(int argc, char* argv[])
     }
   }
 
-   //std::cout << uplane_map.size() << " " << vplane_map.size() << " " << wplane_map.size() << std::endl;
+  // std::cout << uplane_map.size() << " " << vplane_map.size() << " " << wplane_map.size() << std::endl;
   
   std::vector<float> uplane_rms;
   std::vector<float> vplane_rms;
@@ -380,14 +392,14 @@ int main(int argc, char* argv[])
     }
   }
   //
-  TH2F *hv_raw = new TH2F("hv_raw","hv_raw",nwire_v,0,nwire_v,nwindow_size,0,nwindow_size);
-  for (size_t i=0;i!=raw_channelId->size();i++){
-    int chid = raw_channelId->at(i);
-    TH1F *htemp = (TH1F*)raw_wf->At(i);
+  TH2F *hv_raw = new TH2F("hv_raw","hv_raw",nwire_v,0,nwire_v,nwindow_size*nrebin,0,nwindow_size*nrebin);
+  for (size_t i=0;i!=nf_channelId->size();i++){
+    int chid = nf_channelId->at(i);
+    TH1S *htemp = (TH1S*)nf_wf->At(i);
     if (chid < nwire_u){
     }else if (chid < nwire_v+nwire_u){
-      for (size_t j=0;j!=nwindow_size;j++){
-	hv_raw->SetBinContent(chid-nwire_u+1,j+1,htemp->GetBinContent(j+1));
+      for (size_t j=0;j!=nwindow_size*nrebin;j++){
+	hv_raw->SetBinContent(chid-nwire_u+1,j+1,(htemp->GetBinContent(j+1)+nf_shift)*1.0/nf_scale);
       }
     }else if (chid < nwire_w+nwire_v+nwire_u){
     }

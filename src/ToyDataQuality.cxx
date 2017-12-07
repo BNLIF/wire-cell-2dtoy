@@ -14,7 +14,7 @@ void WireCell2dToy::Organize_Dead_Channels(WireCell::ChirpMap& uplane_map, WireC
       boundaries.push_back(std::make_pair(int(i*nbins/n_div/nrebin+1)*nrebin,int((i+1)*nbins/n_div/nrebin)*nrebin));
     }
     
-    //  std::cout << boundaries.at(i).first << " " << boundaries.at(i).second << std::endl;
+    // std::cout << nrebin << " " << boundaries.at(i).first << " " << boundaries.at(i).second << std::endl;
   }
   
   for (auto it = uplane_map.begin(); it!=uplane_map.end(); it++){
