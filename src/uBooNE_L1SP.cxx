@@ -8,11 +8,12 @@
 using namespace Eigen;
 using namespace WireCell;
 
-WireCell2dToy::uBooNE_L1SP::uBooNE_L1SP(TH2F *hv_raw, TH2F *hv_decon, TH2F *hv_decon_g, int nrebin)
+WireCell2dToy::uBooNE_L1SP::uBooNE_L1SP(TH2F *hv_raw, TH2F *hv_decon, TH2F *hv_decon_g, int nrebin, double time_offset)
   : hv_raw(hv_raw)
   , hv_decon(hv_decon)
   , hv_decon_g(hv_decon_g)
   , nrebin(nrebin)
+  , time_offset(time_offset)
 {
   #include "data_70_2D_11.txt"
   TGraph **gv_2D_g = new TGraph*[11];
@@ -36,6 +37,7 @@ WireCell2dToy::uBooNE_L1SP::uBooNE_L1SP(TH2F *hv_raw, TH2F *hv_decon, TH2F *hv_d
   gw_2D_g[4] = new TGraph(5000,w_2D_g_4_x,w_2D_g_4_y);
   gw_2D_g[5] = new TGraph(5000,w_2D_g_5_x,w_2D_g_5_y);
   gw_2D_g[6] = new TGraph(5000,w_2D_g_6_x,w_2D_g_6_y);
+
   gw_2D_g[7] = new TGraph(5000,w_2D_g_7_x,w_2D_g_7_y);
   gw_2D_g[8] = new TGraph(5000,w_2D_g_8_x,w_2D_g_8_y);
   gw_2D_g[9] = new TGraph(5000,w_2D_g_9_x,w_2D_g_9_y);
@@ -53,14 +55,14 @@ WireCell2dToy::uBooNE_L1SP::uBooNE_L1SP(TH2F *hv_raw, TH2F *hv_decon, TH2F *hv_d
       y += gv_2D_g[j]->Eval(x) * 2;
     }
     y = y * scaling;
-    gv->SetPoint(i,x,y);
+    gv->SetPoint(i,x-time_offset,y);
     
     y = gw_2D_g[0]->Eval(x+3.0);
     for (Int_t j=1;j!=11;j++){
       y += gw_2D_g[j]->Eval(x+3.0) * 2;
     }
     y = y * scaling;
-    gw->SetPoint(i,x,y);
+    gw->SetPoint(i,x-time_offset,y);
   }
 
   for (int i=0;i!=11;i++){

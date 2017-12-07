@@ -9,7 +9,7 @@
 namespace WireCell2dToy{
   class uBooNE_L1SP {
   public:
-    uBooNE_L1SP(TH2F *hv_raw, TH2F* hv_decon, TH2F *hv_decon_g, int nrebin);
+    uBooNE_L1SP(TH2F *hv_raw, TH2F* hv_decon, TH2F *hv_decon_g, int nrebin, double time_offset = 0);
     ~uBooNE_L1SP();
 
     void AddWires(int time_slice, WireCell::GeomWireSelection& wires);
@@ -29,6 +29,8 @@ namespace WireCell2dToy{
 
     std::set<int> time_slice_set;
     std::set<int> init_time_slice_set;
+
+    double time_offset;
     
     int nrebin;
     // wire index --> time
