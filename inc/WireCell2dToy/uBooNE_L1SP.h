@@ -4,6 +4,7 @@
 #include "WireCellData/GeomWire.h"
 #include "TH2F.h"
 #include "TGraph.h"
+#include "TF1.h"
 
 
 namespace WireCell2dToy{
@@ -26,6 +27,7 @@ namespace WireCell2dToy{
     TH2F *hv_decon;
     TH2F *hv_decon_g;
     TGraph *gv, *gw;
+    TF1 *filter_g;
 
     std::set<int> time_slice_set;
     std::set<int> init_time_slice_set;

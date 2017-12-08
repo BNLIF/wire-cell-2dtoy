@@ -4,6 +4,7 @@
 #include "WireCellRess/ElasticNetModel.h"
 #include <Eigen/Dense>
 
+#include "TVirtualFFT.h"
 
 using namespace Eigen;
 using namespace WireCell;
@@ -71,11 +72,17 @@ WireCell2dToy::uBooNE_L1SP::uBooNE_L1SP(TH2F *hv_raw, TH2F *hv_decon, TH2F *hv_d
   }
   delete [] gv_2D_g;
   delete [] gw_2D_g;
+
+  filter_g = new TF1("filter_g","exp(-0.5*pow(x/[0],2))");
+  double par3[1]={1.11408e-01};
+  filter_g->SetParameters(par3);
+  
 }
 
 WireCell2dToy::uBooNE_L1SP::~uBooNE_L1SP(){
   delete gv;
   delete gw;
+  delete filter_g;
 }
 
 void WireCell2dToy::uBooNE_L1SP::AddWireTime_Raw(){
@@ -320,13 +327,82 @@ void WireCell2dToy::uBooNE_L1SP::L1_fit(int wire_index, int start_tick, int end_
     
     
     //std::cout << sum1 << " " << sum2 << std::endl;
+
+   
     
     if (sum1 >6 ){
+       
+      // add the software filter ... 
+      TH1F hl1_signal("hl1_signal","hl1_signal",nbin_fit,0,nbin_fit);
+      for (int j=0;j!=nbin_fit;j++){
+	hl1_signal.SetBinContent(j+1,final_beta(j)+final_beta(nbin_fit+j)*2.0);
+      }
+      
+      TH1F hl2_signal("hl2_signal","hl2_signal",nbin_fit,0,nbin_fit);
+      // faster ... 
+      Double_t smear_matrix[21]={0.000305453, 0.000978027, 0.00277049, 0.00694322, 0.0153945,
+				 0.0301973, 0.0524048, 0.0804588, 0.109289, 0.131334, 
+				 0.139629, 0.131334, 0.109289, 0.0804588, 0.0524048, 
+				 0.0301973, 0.0153945, 0.00694322, 0.00277049, 0.000978027,
+				 0.000305453};
+      for (int j=0;j!=nbin_fit;j++){
+	Double_t content = hl1_signal.GetBinContent(j+1);
+	if (content>0){
+	  for (int k=0;k!=21;k++){
+	    int bin = j+k-10;
+	    if (bin>=0&&bin<nbin_fit)
+	      hl2_signal.SetBinContent(bin+1,hl2_signal.GetBinContent(bin+1)+content*smear_matrix[k]);
+	  }
+	}
+      }
+      for (int j=0;j!=nbin_fit;j++){
+      	if (hl2_signal.GetBinContent(j+1)<50/500.){ // 50 electrons
+      	  hl1_signal.SetBinContent(j+1,0);
+      	}else{
+      	  hl1_signal.SetBinContent(j+1,hl2_signal.GetBinContent(j+1));
+      	}
+      }
+      
+      // // convolute a gaussian filter
+      // TH1 *hm = hl1_signal.FFT(0,"MAG");
+      // TH1 *hp = hl1_signal.FFT(0,"PH");
+      // Double_t value_re[1000],value_im[1000];
+      // Int_t nticks = nbin_fit;
+      // for (int j=0;j!=nticks;j++){
+      // 	Double_t freq=0;
+      // 	if (j < nticks/2.){
+      // 	  freq = j/(1.*nticks)*2.;
+      // 	}else{
+      // 	  freq = (nticks - j)/(1.*nticks)*2.;
+      // 	}
+	
+      // 	value_re[j] = hm->GetBinContent(j+1) * cos(hp->GetBinContent(j+1)) * filter_g->Eval(freq)/nticks;
+      // 	value_im[j] = hm->GetBinContent(j+1) * sin(hp->GetBinContent(j+1)) * filter_g->Eval(freq)/nticks;
+      // }
+      // TVirtualFFT *ifft = TVirtualFFT::FFT(1,&nticks,"C2R M K");
+      // ifft->SetPointsComplex(value_re,value_im);
+      // ifft->Transform();
+      // TH1 *fb = TH1::TransformHisto(ifft,0,"Re");
+      // for (int j=0;j!=nticks;j++){
+      // 	if (fb->GetBinContent(j+1)<50/500.){ // 50 electrons
+      // 	  hl1_signal.SetBinContent(j+1,0);
+      // 	}else{
+      // 	  hl1_signal.SetBinContent(j+1,fb->GetBinContent(j+1));
+      // 	}
+      // }
+      // delete hm;
+      // delete hp;
+      // delete fb;
+      // delete ifft;
+      // //
+
+      
       // replace it in the decon_v ...
       for (int i=0;i<nbin_fit/nrebin;i++){
 	double content = 0;
 	for (int j=0;j!=nrebin;j++){
-	  content += final_beta(nrebin*i+j) + final_beta(nbin_fit + nrebin*i + j) * 2.0;
+	  content += hl1_signal.GetBinContent(nrebin*i+j+1);
+	  //content += final_beta(nrebin*i+j) + final_beta(nbin_fit + nrebin*i + j) * 2.0;
 	}
 	content *= 500;
 
