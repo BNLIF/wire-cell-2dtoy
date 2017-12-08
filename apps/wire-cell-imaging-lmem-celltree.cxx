@@ -437,7 +437,7 @@ int main(int argc, char* argv[])
   // add a -2.8 us shift for L1SP to match with WCT SP ...
   // otherwise there could be a mismatch between WCT standard SP and WCP L1SP
   // minus 2.8 means shifting the decon results early by 2.8 us
-  WireCell2dToy::uBooNE_L1SP l1sp(hv_raw,hv_decon,hv_decon_g,nrebin,0);
+  WireCell2dToy::uBooNE_L1SP l1sp(hv_raw,hv_decon,hv_decon_g,nrebin,0.0);
   
   WireCell2dToy::pdDataFDS roi_gaus_fds(gds,hu_decon_g,hv_decon_g,hw_decon_g,eve_num);
   roi_gaus_fds.jump(eve_num);

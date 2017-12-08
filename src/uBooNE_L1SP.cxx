@@ -55,14 +55,14 @@ WireCell2dToy::uBooNE_L1SP::uBooNE_L1SP(TH2F *hv_raw, TH2F *hv_decon, TH2F *hv_d
     for (Int_t j=1;j!=11;j++){
       y += gv_2D_g[j]->Eval(x) * 2;
     }
-    y = y * scaling;
+    y = y * scaling/2.;
     gv->SetPoint(i,x-time_offset,y);
     
     y = gw_2D_g[0]->Eval(x+3.0);
     for (Int_t j=1;j!=11;j++){
       y += gw_2D_g[j]->Eval(x+3.0) * 2;
     }
-    y = y * scaling;
+    y = y * scaling/2.;
     gw->SetPoint(i,x-time_offset,y);
   }
 
