@@ -1112,11 +1112,13 @@ void WireCell2dToy::Clustering_live_dead(WireCell::PR3DClusterSelection& live_cl
 	    //   }
 	    // }
 	    
-
+	    // if (cluster_1->get_cluster_id()==10 || cluster_2->get_cluster_id()==10)
+	    //   std::cout << cluster_1->get_cluster_id() << " " << cluster_2->get_cluster_id() << " " << dis/units::cm << " " << angle_diff1 << std::endl;
+	    
 	    
 	    if ((dis <= 3*units::cm|| fabs(p1.x-p2.x)<0.5*units::cm)  && angle_diff1 <= 45
-	    	|| dis <= 10*units::cm && angle_diff1 <=15 
-	    	|| angle_diff1<10 && dis <= 45*units::cm
+	    	|| dis <= 15*units::cm && angle_diff1 <=20 
+	    	|| angle_diff1<16 && dis <= 60*units::cm
 		){
 	      //  || mcells_1.size()==1 && mcells_2.size()==1 && dis < 15*units::cm
 	      flag_merge = true;
@@ -1124,9 +1126,13 @@ void WireCell2dToy::Clustering_live_dead(WireCell::PR3DClusterSelection& live_cl
 	      dir1 = cluster_2->VHoughTrans(mcell2_center,30*units::cm);
 	      dir2 = cluster_1->calc_dir(mcell2_center,mcell1_center,30*units::cm);
 	      angle_diff1 = (3.1415926-dir1.Angle(dir2))/3.1415926*180.;
+
+	      // if (cluster_1->get_cluster_id()==10 || cluster_2->get_cluster_id()==10)
+	      // 	std::cout << angle_diff1 << std::endl;
+	      
 	      if ((dis <= 3*units::cm|| fabs(p1.x-p2.x)<0.5*units::cm)  && angle_diff1 <= 45 
-	    	  || dis <= 10*units::cm && angle_diff1 <=15 
-	    	  || angle_diff1<10 && dis <= 45*units::cm
+	    	  || dis <= 15*units::cm && angle_diff1 <=20 
+	    	  || angle_diff1<16 && dis <= 60*units::cm
 		  )
 	    	flag_merge = true;
 	    }
@@ -1186,7 +1192,7 @@ void WireCell2dToy::Clustering_live_dead(WireCell::PR3DClusterSelection& live_cl
     }
   }
   
-  //to_be_merged_pairs.clear();
+  // to_be_merged_pairs.clear();
   
   std::vector<std::set<PR3DCluster*>> merge_clusters;
   for (auto it = to_be_merged_pairs.begin(); it!=to_be_merged_pairs.end(); it++){
