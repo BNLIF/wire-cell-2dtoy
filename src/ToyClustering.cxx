@@ -429,8 +429,8 @@ bool WireCell2dToy::Clustering_3rd_round(WireCell::PR3DCluster *cluster1, WireCe
     TVector3 tempV1(p2.x - p1.x, p2.y - p1.y, p2.z - p1.z);
     TVector3 tempV2(cluster2_ave_pos.x - cluster1_ave_pos.x, cluster2_ave_pos.y - cluster1_ave_pos.y, cluster2_ave_pos.z - cluster1_ave_pos.z);
 
-    if (length_1 > 100*units::cm || length_2 > 100*units::cm)
-      //   std::cout << cluster1->get_cluster_id() << " " << cluster2->get_cluster_id() << " " << length_1/units::cm << " " << length_2/units::cm << " " <<  tempV1.Angle(tempV2)/3.1415926*180. << " " << cluster1->get_num_points(p1, 10*units::cm) << " " << cluster2->get_num_points(p2,10*units::cm) << std::endl;
+    // if (length_1 > 100*units::cm || length_2 > 100*units::cm)
+    //   std::cout << cluster1->get_cluster_id() << " " << cluster2->get_cluster_id() << " " << length_1/units::cm << " " << length_2/units::cm << " " <<  tempV1.Angle(tempV2)/3.1415926*180. << " " << cluster1->get_num_points(p1, 10*units::cm) << " " << cluster2->get_num_points(p2,10*units::cm) << std::endl;
 
     int num_p1 = cluster1->get_num_points(p1, 10*units::cm);
     int num_p2 = cluster2->get_num_points(p2, 10*units::cm);
