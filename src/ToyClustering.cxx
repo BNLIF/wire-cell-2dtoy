@@ -601,7 +601,7 @@ bool WireCell2dToy::Clustering_2nd_round(WireCell::PR3DCluster *cluster1, WireCe
 	      return true;
 	    }else{
 	      double angle7 = (3.1415926-dir1.Angle(dir2))/3.1415926*180.;
-	      if (angle7 < 30) return true;
+	      if (angle7 < 30 || fabs(angle5-3.1415926/2.)<5/180.*3.1415926 && fabs(angle6-3.1415926/2.)<5/180.*3.141592 && angle7 < 60) return true;
 	    }
 	  }
 	  if (fabs(angle3-3.1415926/2.)<7.5/180.*3.1415926 && dis < length_cut){
@@ -610,7 +610,7 @@ bool WireCell2dToy::Clustering_2nd_round(WireCell::PR3DCluster *cluster1, WireCe
 	      return true;
 	    }else{
 	      double angle7 = (3.1415926-dir1.Angle(dir2))/3.1415926*180.;
-	      if (angle7 < 30) return true;
+	      if (angle7 < 30 || fabs(angle5-3.1415926/2.)<5/180.*3.1415926 && fabs(angle6-3.1415926/2.)<5/180.*3.141592 && angle7 < 60) return true;
 	    }
 	  }
 	}
