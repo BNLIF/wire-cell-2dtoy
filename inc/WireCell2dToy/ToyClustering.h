@@ -15,8 +15,8 @@ namespace WireCell2dToy{
   void Clustering_regular(WireCell::PR3DClusterSelection& live_clusters,  std::map<WireCell::PR3DCluster*,double>& cluster_length_map, double length_cut = 45*units::cm, bool flag_enable_extend = true);
   bool Clustering_1st_round(WireCell::PR3DCluster *cluster1, WireCell::PR3DCluster *cluster2, double length_1, double length_2, double length_cut = 45*units::cm, bool flag_enable_extend = true);
  
-  void Clustering_parallel_prolong(WireCell::PR3DClusterSelection& live_clusters, std::map<WireCell::PR3DCluster*,double>& cluster_length_map, double length_cut = 30*units::cm);
-  bool Clustering_2nd_round(WireCell::PR3DCluster *cluster1, WireCell::PR3DCluster *cluster2, double length_1, double length_2, double length_cut = 30*units::cm);
+  void Clustering_parallel_prolong(WireCell::PR3DClusterSelection& live_clusters, std::map<WireCell::PR3DCluster*,double>& cluster_length_map, double length_cut = 35*units::cm);
+  bool Clustering_2nd_round(WireCell::PR3DCluster *cluster1, WireCell::PR3DCluster *cluster2, double length_1, double length_2, double length_cut = 35*units::cm);
 
   void Clustering_close(WireCell::PR3DClusterSelection& live_clusters, std::map<WireCell::PR3DCluster*,double>& cluster_length_map, double length_cut = 1*units::cm);
   bool Clustering_3rd_round(WireCell::PR3DCluster *cluster1, WireCell::PR3DCluster *cluster2, double length_1, double length_2, double length_cut = 1*units::cm);
