@@ -475,8 +475,8 @@ bool WireCell2dToy::Clustering_3rd_round(WireCell::PR3DCluster *cluster1, WireCe
 
     
     //if (length_1 > 100*units::cm || length_2 > 100*units::cm)
-    // if (cluster1->get_cluster_id()==5 || cluster2->get_cluster_id()==5 ||
-    // 	cluster1->get_cluster_id()==28 || cluster2->get_cluster_id()==28) 
+    // if (cluster1->get_cluster_id()==52 || cluster2->get_cluster_id()==52 ||
+    // 	cluster1->get_cluster_id()==73 || cluster2->get_cluster_id()==73) 
     //   std::cout << cluster1->get_cluster_id() << " " << cluster2->get_cluster_id() << " " << dis/units::cm << " " << length_1/units::cm << " " << length_2/units::cm << " " <<  tempV1.Angle(tempV2)/3.1415926*180. << " " << num_p1 << " " << num_tp1 << " " << num_p2 << " " << num_tp2  << std::endl;
     
 
@@ -484,24 +484,25 @@ bool WireCell2dToy::Clustering_3rd_round(WireCell::PR3DCluster *cluster1, WireCe
     
     if (length_1 < 12 *units::cm && num_p1 > 0.5*num_tp1   || length_2 < 12*units::cm && num_p2 > 0.5*num_tp2  )
       return true;
-    
-    double angle5 = tempV1.Angle(tempV2);
-    if (angle5 < 30/180.*3.1415926)
-      return true;
-    
-    
-    if (angle5 < 90/180.*3.1415926 && (num_p1 > 50 && num_p2 > 50))
-      return true;
-    
-    
-    TVector3 dir1 = cluster1->VHoughTrans(p1,30*units::cm); // cluster 1 direction based on hough
-    TVector3 dir2 = cluster2->VHoughTrans(p2,30*units::cm); // cluster 1 direction based on hough
-    
-    if ((3.1415926 - dir1.Angle(dir2))/3.1415926*180 < 30 &&
-    	(3.1415926 - dir1.Angle(tempV1)/3.1415926*180. < 60 &&
-    	 dir2.Angle(tempV1)/3.1415926*180.<60 ))
-      return true;
-    
+
+    if ((num_p1 > 20 || num_p1 > 0.25*num_tp1 ) && (num_p2 > 20 || num_p2 > 0.25*num_tp2)){
+      double angle5 = tempV1.Angle(tempV2);
+      if (angle5 < 30/180.*3.1415926)
+	return true;
+      
+      
+      if (angle5 < 90/180.*3.1415926 && (num_p1 > 50 && num_p2 > 50))
+	return true;
+      
+      
+      TVector3 dir1 = cluster1->VHoughTrans(p1,30*units::cm); // cluster 1 direction based on hough
+      TVector3 dir2 = cluster2->VHoughTrans(p2,30*units::cm); // cluster 1 direction based on hough
+      
+      if ((3.1415926 - dir1.Angle(dir2))/3.1415926*180 < 30 &&
+	  (3.1415926 - dir1.Angle(tempV1)/3.1415926*180. < 60 &&
+	   dir2.Angle(tempV1)/3.1415926*180.<60 ))
+	return true;
+    }
   }
   
   return false;
@@ -924,6 +925,8 @@ bool WireCell2dToy::Clustering_1st_round(WireCell::PR3DCluster *cluster1, WireCe
 	}
       }
 
+      
+      
       // if (cluster1->get_cluster_id()==7) 
       // std::cout << cluster1->get_cluster_id() << " " << cluster2->get_cluster_id() << " " << dis/units::cm << " " << flag_para << " "<< flag_extend << " " << std::endl;
       
