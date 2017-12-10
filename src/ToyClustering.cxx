@@ -490,7 +490,6 @@ bool WireCell2dToy::Clustering_3rd_round(WireCell::PR3DCluster *cluster1, WireCe
       if (angle5 < 30/180.*3.1415926)
 	return true;
       
-      
       if (angle5 < 90/180.*3.1415926 && (num_p1 > 50 && num_p2 > 50))
 	return true;
       
@@ -565,10 +564,14 @@ bool WireCell2dToy::Clustering_2nd_round(WireCell::PR3DCluster *cluster1, WireCe
       double angle1 = tempV1.Angle(drift_dir);
       double angle4 = tempV2.Angle(drift_dir);
 
-      // if (cluster1->get_cluster_id()==59 || cluster2->get_cluster_id()==59)
-      //  	std::cout << cluster1->get_cluster_id() << " " << cluster2->get_cluster_id() << " " << length_1/units::cm << " " << length_2/units::cm << " " <<  angle1/3.1415926*180. << " " << angle4/3.1415926*180. <<  std::endl;
+      // if (cluster1->get_cluster_id()==7 || cluster2->get_cluster_id()==7 || 
+      // 	  cluster1->get_cluster_id()==9 || cluster2->get_cluster_id()==9)
+      //  	std::cout << cluster1->get_cluster_id() << " " << cluster2->get_cluster_id() << " " << length_1/units::cm << " " << length_2/units::cm << " " << dis/units::cm << " " <<  angle1/3.1415926*180. << " " << angle4/3.1415926*180. <<  std::endl;
       
-      if (fabs(angle1-3.1415926/2.)<10/180.*3.1415926 && fabs(angle4-3.1415926/2.)<5/180.*3.1415926){
+      if ( (fabs(angle1-3.1415926/2.)<10/180.*3.1415926 && dis > 10*units::cm ||
+	    fabs(angle1-3.1415926/2.)<20/180.*3.1415926 && dis > 3*units::cm ||
+	    fabs(angle1-3.1415926/2.)<45/180.*3.1415926 && dis <=3*units::cm)
+	   && fabs(angle4-3.1415926/2.)<5/180.*3.1415926){
 
 	TVector3 dir1 = cluster1->VHoughTrans(p1,30*units::cm); // cluster 1 direction based on hough
 	TVector3 dir2 = cluster2->VHoughTrans(p2,30*units::cm); // cluster 1 direction based on hough
@@ -583,7 +586,7 @@ bool WireCell2dToy::Clustering_2nd_round(WireCell::PR3DCluster *cluster1, WireCe
 	  double angle2 = tempV1.Angle(U_dir);
 	  double angle3 = tempV1.Angle(V_dir);
 	  
-	  // if (cluster1->get_cluster_id()==59 || cluster2->get_cluster_id()==59)
+	  // if (cluster1->get_cluster_id()==7 || cluster2->get_cluster_id()==7)
 	  //   std::cout << angle2/3.1415926*180. << " " << angle3/3.1415926*180. << " " << dis/units::cm << " " << length_cut/units::cm << std::endl;
 	  
 	  if (fabs(angle2-3.1415926/2.)<7.5/180.*3.1415926 && dis < length_cut){
@@ -605,18 +608,18 @@ bool WireCell2dToy::Clustering_2nd_round(WireCell::PR3DCluster *cluster1, WireCe
       double angle1 = tempV1.Angle(U_dir);
       double angle2 = tempV1.Angle(V_dir);
 
-      // if (cluster1->get_cluster_id()==88 || cluster2->get_cluster_id()==88)
-      //  	std::cout << cluster1->get_cluster_id() << " " << cluster2->get_cluster_id() << " " << angle1*180./3.1415926 << " " << angle2*180./3.1415926 << " " << dis/units::cm << " " << length_1/units::cm << " " << length_2/units::cm << std::endl;
+      // if (cluster1->get_cluster_id()==52 || cluster2->get_cluster_id()==52)
+      // 	std::cout << cluster1->get_cluster_id() << " " << cluster2->get_cluster_id() << " " << angle1*180./3.1415926 << " " << angle2*180./3.1415926 << " " << dis/units::cm << " " << length_1/units::cm << " " << length_2/units::cm << std::endl;
       
-      if (angle1<10/180.*3.1415926 || (3.1415926-angle1)<10/180.*3.1415926 ||
-	  angle2<10/180.*3.1415926 || (3.1415926-angle2)<10/180.*3.1415926 ){
+      if (angle1<15/180.*3.1415926 || (3.1415926-angle1)<15/180.*3.1415926 ||
+	  angle2<15/180.*3.1415926 || (3.1415926-angle2)<15/180.*3.1415926 ){
 	if (length_1 > 10*units::cm || length_2 > 10*units::cm){
 	  TVector3 dir1 = cluster1->VHoughTrans(p1,30*units::cm); // cluster 1 direction based on hough
 	  TVector3 dir2 = cluster2->VHoughTrans(p2,30*units::cm); // cluster 1 direction based on hough
 	  TVector3 dir3(p2.x-p1.x,p2.y-p1.y,p2.z-p1.z);
 	  double angle3 = dir3.Angle(dir2);
 	  double angle4 = 3.1415926-dir3.Angle(dir1);
-	  // if (cluster1->get_cluster_id()==88 || cluster2->get_cluster_id()==88)
+	  // if (cluster1->get_cluster_id()==52 || cluster2->get_cluster_id()==52)
 	  //   std::cout << angle3/3.1415926*180 << " " << angle4/3.1415926*180 << std::endl;
 	  
 	  if ((angle3<25/180.*3.1415926 || length_2<8*units::cm)&&(angle4<25/180.*3.1415926|| length_1<8*units::cm)&&dis<5*units::cm ||
@@ -1174,7 +1177,7 @@ void WireCell2dToy::Clustering_live_dead(WireCell::PR3DClusterSelection& live_cl
 	      if (fabs(angle1-3.1415926/2.)<5/180.*3.1415926 &&
 		  fabs(angle2-3.1415926/2.)<5/180.*3.1415926 &&
 		  fabs(angle3-3.1415926/2.)<5/180.*3.1415926 ){
-		if (  dis < 25*units::cm)
+		if (  dis < 20*units::cm)
 		  flag_merge = true;
 		flag_para = true;
 	      }
