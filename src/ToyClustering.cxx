@@ -461,7 +461,7 @@ bool WireCell2dToy::Clustering_3rd_round(WireCell::PR3DCluster *cluster1, WireCe
   //  return false;
 
   
-  if (dis < length_cut){
+  if (dis < length_cut && (length_2 >=12*units::cm || length_1 >=12*units::cm)){
     Point cluster1_ave_pos = cluster1->calc_ave_pos(p1,10*units::cm);
     Point cluster2_ave_pos = cluster2->calc_ave_pos(p2,10*units::cm);
 
@@ -475,13 +475,14 @@ bool WireCell2dToy::Clustering_3rd_round(WireCell::PR3DCluster *cluster1, WireCe
 
     
     //if (length_1 > 100*units::cm || length_2 > 100*units::cm)
-    // if (cluster1->get_cluster_id()==55 || cluster2->get_cluster_id()==55 || length_1 > 100*units::cm || length_2 > 100*units::cm) 
-       //std::cout << cluster1->get_cluster_id() << " " << cluster2->get_cluster_id() << " " << dis/units::cm << " " << length_1/units::cm << " " << length_2/units::cm << " " <<  tempV1.Angle(tempV2)/3.1415926*180. << " " << num_p1 << " " << num_tp1 << " " << num_p2 << " " << num_tp2  << std::endl;
+    // if (cluster1->get_cluster_id()==5 || cluster2->get_cluster_id()==5 ||
+    // 	cluster1->get_cluster_id()==28 || cluster2->get_cluster_id()==28) 
+    //   std::cout << cluster1->get_cluster_id() << " " << cluster2->get_cluster_id() << " " << dis/units::cm << " " << length_1/units::cm << " " << length_2/units::cm << " " <<  tempV1.Angle(tempV2)/3.1415926*180. << " " << num_p1 << " " << num_tp1 << " " << num_p2 << " " << num_tp2  << std::endl;
     
 
     
     
-    if (length_1 < 12 *units::cm && num_p1 > 0.5*num_tp1 || length_2 < 12*units::cm && num_p2 > 0.5*num_tp2)
+    if (length_1 < 12 *units::cm && num_p1 > 0.5*num_tp1   || length_2 < 12*units::cm && num_p2 > 0.5*num_tp2  )
       return true;
     
     double angle5 = tempV1.Angle(tempV2);
@@ -497,8 +498,8 @@ bool WireCell2dToy::Clustering_3rd_round(WireCell::PR3DCluster *cluster1, WireCe
     TVector3 dir2 = cluster2->VHoughTrans(p2,30*units::cm); // cluster 1 direction based on hough
     
     if ((3.1415926 - dir1.Angle(dir2))/3.1415926*180 < 30 &&
-	(3.1415926 - dir1.Angle(tempV1)/3.1415926*180. < 60 &&
-	 dir2.Angle(tempV1)/3.1415926*180.<60 ))
+    	(3.1415926 - dir1.Angle(tempV1)/3.1415926*180. < 60 &&
+    	 dir2.Angle(tempV1)/3.1415926*180.<60 ))
       return true;
     
   }
