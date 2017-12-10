@@ -474,9 +474,9 @@ bool WireCell2dToy::Clustering_3rd_round(WireCell::PR3DCluster *cluster1, WireCe
     int num_tp2 = cluster2->get_num_points();
 
     
-    //if (length_1 > 100*units::cm || length_2 > 100*units::cm)
-    // if (cluster1->get_cluster_id()==52 || cluster2->get_cluster_id()==52 ||
-    // 	cluster1->get_cluster_id()==73 || cluster2->get_cluster_id()==73) 
+    // if ((length_1 > 100*units::cm || length_2 > 100*units::cm)
+    // 	&&(cluster1->get_cluster_id()==13 || cluster2->get_cluster_id()==13 ||
+    // 	   cluster1->get_cluster_id()==32 || cluster2->get_cluster_id()==32) )
     //   std::cout << cluster1->get_cluster_id() << " " << cluster2->get_cluster_id() << " " << dis/units::cm << " " << length_1/units::cm << " " << length_2/units::cm << " " <<  tempV1.Angle(tempV2)/3.1415926*180. << " " << num_p1 << " " << num_tp1 << " " << num_p2 << " " << num_tp2  << std::endl;
     
 
@@ -487,10 +487,16 @@ bool WireCell2dToy::Clustering_3rd_round(WireCell::PR3DCluster *cluster1, WireCe
 
     if ((num_p1 > 20 || num_p1 > 0.25*num_tp1 ) && (num_p2 > 20 || num_p2 > 0.25*num_tp2)){
       double angle5 = tempV1.Angle(tempV2);
+
+      // if ((length_1 > 100*units::cm || length_2 > 100*units::cm)
+      // 	&&(cluster1->get_cluster_id()==13 || cluster2->get_cluster_id()==13 ||
+      // 	   cluster1->get_cluster_id()==32 || cluster2->get_cluster_id()==32) )
+      // std::cout << angle5 << std::endl;
+      
       if (angle5 < 30/180.*3.1415926)
 	return true;
       
-      if (angle5 < 90/180.*3.1415926 && (num_p1 > 50 && num_p2 > 50))
+      if (angle5 < 90/180.*3.1415926 && (num_p1 > 75 && num_p2 > 75) )
 	return true;
       
       
@@ -591,17 +597,27 @@ bool WireCell2dToy::Clustering_2nd_round(WireCell::PR3DCluster *cluster1, WireCe
 	  
 	  if (fabs(angle2-3.1415926/2.)<7.5/180.*3.1415926 && dis < length_cut){
 	    flag_para_U = true;
-	    return true;
+	    if (length_1 < 25*units::cm || length_2 < 25*units::cm){
+	      return true;
+	    }else{
+	      double angle7 = (3.1415926-dir1.Angle(dir2))/3.1415926*180.;
+	      if (angle7 < 30) return true;
+	    }
 	  }
 	  if (fabs(angle3-3.1415926/2.)<7.5/180.*3.1415926 && dis < length_cut){
 	    flag_para_V = true;
-	    return true;
+	    if (length_1 < 25*units::cm || length_2 < 25*units::cm){
+	      return true;
+	    }else{
+	      double angle7 = (3.1415926-dir1.Angle(dir2))/3.1415926*180.;
+	      if (angle7 < 30) return true;
+	    }
 	  }
 	}
       }
     }
     
-    
+    //return false;
     
     {
       TVector3 tempV1(0, p2.y - p1.y, p2.z - p1.z);
