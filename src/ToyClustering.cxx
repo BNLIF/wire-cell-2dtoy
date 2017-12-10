@@ -559,18 +559,22 @@ bool WireCell2dToy::Clustering_2nd_round(WireCell::PR3DCluster *cluster1, WireCe
       double angle1 = tempV1.Angle(drift_dir);
       double angle4 = tempV2.Angle(drift_dir);
 
-      // if (cluster1->get_cluster_id()==55 || cluster2->get_cluster_id()==55)
-      // 	std::cout << cluster1->get_cluster_id() << " " << cluster2->get_cluster_id() << " " << length_1/units::cm << " " << length_2/units::cm << " " <<  angle1/3.1415926*180. << " " << angle4/3.1415926*180. <<  std::endl;
+      // if (cluster1->get_cluster_id()==59 || cluster2->get_cluster_id()==59)
+      //  	std::cout << cluster1->get_cluster_id() << " " << cluster2->get_cluster_id() << " " << length_1/units::cm << " " << length_2/units::cm << " " <<  angle1/3.1415926*180. << " " << angle4/3.1415926*180. <<  std::endl;
       
       if (fabs(angle1-3.1415926/2.)<10/180.*3.1415926 && fabs(angle4-3.1415926/2.)<5/180.*3.1415926){
 	flag_para = true;
 	double angle2 = tempV1.Angle(U_dir);
 	double angle3 = tempV1.Angle(V_dir);
-	if (fabs(angle2-3.1415926/2.)<5/180.*3.1415926 && dis < length_cut){
+
+	// if (cluster1->get_cluster_id()==59 || cluster2->get_cluster_id()==59)
+	//   std::cout << angle2/3.1415926*180. << " " << angle3/3.1415926*180. << " " << dis/units::cm << " " << length_cut/units::cm << std::endl;
+	
+	if (fabs(angle2-3.1415926/2.)<7.5/180.*3.1415926 && dis < length_cut){
 	  flag_para_U = true;
 	  return true;
 	}
-	if (fabs(angle3-3.1415926/2.)<5/180.*3.1415926 && dis < length_cut){
+	if (fabs(angle3-3.1415926/2.)<7.5/180.*3.1415926 && dis < length_cut){
 	  flag_para_V = true;
 	  return true;
 	}
