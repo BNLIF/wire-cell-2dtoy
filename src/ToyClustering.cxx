@@ -1007,12 +1007,13 @@ bool WireCell2dToy::Clustering_1st_round(WireCell::PR3DCluster *cluster1, WireCe
       
      // if (cluster1->get_cluster_id()==133 || cluster2->get_cluster_id()==133) 
      // 	    std::cout << cluster1->get_cluster_id() << " " << cluster2->get_cluster_id() << " " << dis/units::cm << " " << flag_para << " "<< flag_para_U << " " << flag_para_V << " " << flag_prolonged_U << " " << flag_prolonged_V << " " << flag_extend << " " << std::endl;
-     
+
+      
       
       if (flag_extend && flag_enable_extend ){
  	// when to extend???
 	
-	if ((flag_para && (flag_para_U || flag_para_V || dis < 15*units::cm)) || (!flag_para && (flag_prolonged_U || flag_prolonged_V || dis < 15 *units::cm))){
+	if ((flag_para && (flag_para_U || flag_para_V || dis < 10*units::cm)) || (!flag_para && (flag_prolonged_U || flag_prolonged_V || dis < 10*units::cm))){
 	  // look use 1 to predict 2
 	  // cluster1_ave_pos, dir1
 	  // calculate the average distance
