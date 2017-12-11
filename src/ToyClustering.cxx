@@ -1268,14 +1268,14 @@ void WireCell2dToy::Clustering_live_dead(WireCell::PR3DClusterSelection& live_cl
 	      	if ((dis <= 3*units::cm)  && ((angle_diff1 <= 45 || angle_diff2<=45) ||
 					      (flag_para && (angle_diff1 <= 90 || angle_diff2 <=90 ))) 
 	      	    || dis <= 15*units::cm && (angle_diff1 <=20)
-	      	    || (angle_diff1<10 && dis <= 60*units::cm))
+	      	    || (angle_diff1<16 && dis <= 60*units::cm))
 	      	  flag_merge = true;
 	      }else if (length_2 > 12*units::cm && length_1 <=12*units::cm){
 	      	// one is short
 	      	if ((dis <= 3*units::cm)  && ((angle_diff2 <= 45 || angle_diff2<=45) ||
 					      (flag_para && (angle_diff1 <= 90 || angle_diff2 <=90 ))) 	      
 	      	    || dis <= 15*units::cm && (angle_diff2 <=20)
-	      	    || (angle_diff2<10 && dis <= 60*units::cm))
+	      	    || (angle_diff2<16 && dis <= 60*units::cm))
 	      	  flag_merge = true;
 	      }else{
 	      	// both are long
@@ -1289,9 +1289,12 @@ void WireCell2dToy::Clustering_live_dead(WireCell::PR3DClusterSelection& live_cl
 	      }
 	    }
 
-	    // if (cluster_1->get_cluster_id()==249 || cluster_2->get_cluster_id()==249 ||
-	    //  	cluster_1->get_cluster_id()==207 || cluster_2->get_cluster_id()==207 )
-	    //   std::cout << cluster_1->get_cluster_id() << " " << cluster_2->get_cluster_id() << " " << dis/units::cm << " "  << cluster_length_vec.at(i)/units::cm << " " << cluster_length_vec.at(j)/units::cm << " " << angle_diff1 << " " << angle_diff2 << " " << flag_para << " " << flag_merge << " " << angle1 << " " << angle2 << " " << angle3 << std::endl;
+	    // flag_merge = false;
+	    
+	     // if (cluster_1->get_cluster_id()==4 || cluster_2->get_cluster_id()==4 ||
+	    // 	 cluster_1->get_cluster_id()==72 || cluster_2->get_cluster_id()==72 )
+	    // //if (cluster_length_vec.at(i)/units::cm>25 && cluster_length_vec.at(j)/units::cm > 25)
+	    //    std::cout << cluster_1->get_cluster_id() << " " << cluster_2->get_cluster_id() << " " << dis/units::cm << " "  << cluster_length_vec.at(i)/units::cm << " " << cluster_length_vec.at(j)/units::cm << " " << angle_diff1 << " " << angle_diff2 << " " << flag_para << " " << flag_merge << " " << angle1 << " " << angle2 << " " << angle3 << " " << dir2.X() << " " << dir2.Y() << " " << dir2.Z() << std::endl;
 		// " " << dir1.X() << " " << dir1.Y() << " " << dir1.Z() <<  " " << dir2.X() << " " << dir2.Y() << " " << dir2.Z() << " " << mcell1_center.x/units::cm << " " << mcell1_center.y/units::cm << " " << mcell1_center.z/units::cm << " " << mcell2_center.x/units::cm << " " << mcell2_center.y/units::cm << " " << mcell2_center.z/units::cm << std::endl;
 	    
 	    
