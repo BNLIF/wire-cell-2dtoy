@@ -10,6 +10,7 @@ using namespace WireCell;
 #include "ToyClustering_reg.h"
 #include "ToyClustering_para_prol.h"
 #include "ToyClustering_close.h"
+#include "ToyClustering_extend.h"
 #include "ToyClustering_isolated.h"
 
 
@@ -25,8 +26,10 @@ void WireCell2dToy::Clustering_jump_gap_cosmics(WireCell::PR3DClusterSelection& 
   //clustering close distance ones ... 
   Clustering_close(live_clusters, cluster_length_map,1.2*units::cm);
 
+  //extend the track ... 
+  Clustering_extend(live_clusters, cluster_length_map);
 
-
+  
   
   // for (auto it=cluster_length_map.begin(); it!=cluster_length_map.end(); it++){
   //   if (it->second/units::cm>100)
