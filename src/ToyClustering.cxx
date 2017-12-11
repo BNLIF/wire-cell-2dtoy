@@ -672,7 +672,7 @@ bool WireCell2dToy::Clustering_2nd_round(WireCell::PR3DCluster *cluster1, WireCe
 	  
 	  if ((angle3<25/180.*3.1415926 || length_2<8*units::cm)&&(angle4<25/180.*3.1415926|| length_1<8*units::cm)&&dis<5*units::cm ||
 	      (angle3<15/180.*3.1415926 || length_2<8*units::cm)&&(angle4<15/180.*3.1415926|| length_1<8*units::cm)&&dis<15*units::cm ||
-	      (angle3<5/180.*3.1415926 || length_2<8*units::cm)&&(angle4<5/180.*3.1415926|| length_1<8*units::cm))
+	      (angle3<7.5/180.*3.1415926 || length_2<8*units::cm)&&(angle4<7.5/180.*3.1415926|| length_1<8*units::cm))
 	    return true;
 	}
       }else{
@@ -1258,14 +1258,14 @@ void WireCell2dToy::Clustering_live_dead(WireCell::PR3DClusterSelection& live_cl
 	      	if ((dis <= 3*units::cm)  && ((angle_diff1 <= 45 || angle_diff2<=45) ||
 					      (flag_para && (angle_diff1 <= 90 || angle_diff2 <=90 ))) 
 	      	    || dis <= 15*units::cm && (angle_diff1 <=20)
-	      	    || (angle_diff1<16 && dis <= 60*units::cm))
+	      	    || (angle_diff1<10 && dis <= 60*units::cm))
 	      	  flag_merge = true;
 	      }else if (length_2 > 12*units::cm && length_1 <=12*units::cm){
 	      	// one is short
 	      	if ((dis <= 3*units::cm)  && ((angle_diff2 <= 45 || angle_diff2<=45) ||
 					      (flag_para && (angle_diff1 <= 90 || angle_diff2 <=90 ))) 	      
 	      	    || dis <= 15*units::cm && (angle_diff2 <=20)
-	      	    || (angle_diff2<16 && dis <= 60*units::cm))
+	      	    || (angle_diff2<10 && dis <= 60*units::cm))
 	      	  flag_merge = true;
 	      }else{
 	      	// both are long
