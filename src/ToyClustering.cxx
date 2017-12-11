@@ -601,7 +601,7 @@ bool WireCell2dToy::Clustering_2nd_round(WireCell::PR3DCluster *cluster1, WireCe
 	    flag_para_U = true;
 	    //return true;
 	    
-	    if (length_1 < 25*units::cm || length_2 < 25*units::cm || dis < 2*units::cm){
+	    if ((length_1 < 25*units::cm || length_2 < 25*units::cm) && fabs(angle2-3.1415926/2.)<5.0/180.*3.1415926 || dis < 2*units::cm){
 	      // for short distance one
 	      return true;
 	    }else if (dis < 15*units::cm && (length_1 < 60*units::cm || length_2 < 60*units::cm)&&
@@ -612,7 +612,7 @@ bool WireCell2dToy::Clustering_2nd_round(WireCell::PR3DCluster *cluster1, WireCe
 	      // parallel case
 	      return true;
 	    }else{
-	      // general case ... 
+	      // general case ... (not sure how useful though ...)
 	      double angle7 = (3.1415926-dir1.Angle(dir2))/3.1415926*180.;
 	      if (angle7 < 30 ||
 		  fabs(angle5-3.1415926/2.)<5/180.*3.1415926 && fabs(angle6-3.1415926/2.)<5/180.*3.141592 && angle7 < 60)
@@ -625,7 +625,7 @@ bool WireCell2dToy::Clustering_2nd_round(WireCell::PR3DCluster *cluster1, WireCe
 	    flag_para_V = true;
 	    //return true;
 	    
-	    if (length_1 < 25*units::cm || length_2 < 25*units::cm || dis < 2*units::cm){
+	    if ((length_1 < 25*units::cm || length_2 < 25*units::cm) && fabs(angle2-3.1415926/2.)<5.0/180.*3.1415926  || dis < 2*units::cm){
 	      return true;
 	    }else if (dis < 15*units::cm && fabs(angle3-3.1415926/2.)<2.5/180.*3.1415926 && (length_1 < 60*units::cm || length_2 < 60*units::cm) ){
 	      return true;
@@ -667,7 +667,6 @@ bool WireCell2dToy::Clustering_2nd_round(WireCell::PR3DCluster *cluster1, WireCe
 
 	  // if (angle1p<15/180.*3.1415926 || (3.1415926-angle1p)<15/180.*3.1415926 )
 	  //   std::cout << cluster1->get_cluster_id() << " " << cluster2->get_cluster_id() << " " << angle3/3.1415926*180. << " " << angle4/3.1415926*180. << " " << dis/units::cm << std::endl;
-	  
 	  // if (cluster1->get_cluster_id()==52 || cluster2->get_cluster_id()==52)
 	  //   std::cout << angle3/3.1415926*180 << " " << angle4/3.1415926*180 << std::endl;
 	  
@@ -913,20 +912,24 @@ bool WireCell2dToy::Clustering_1st_round(WireCell::PR3DCluster *cluster1, WireCe
       TVector3 dir4_2 = cluster1->calc_dir(cluster2_ave_pos,mcell1_center,10*units::cm); // dir 2 --> 1
 
 	
-      double angle_diff1 = (3.1415926-dir1.Angle(dir2))/3.1415926*180.;
-      double angle_diff1_1 = (3.1415926-dir1.Angle(dir2_1))/3.1415926*180.;
-      double angle_diff1_2 = (3.1415926-dir1.Angle(dir2_2))/3.1415926*180.;
+      double angle_diff1 = (3.1415926-dir1.Angle(dir2))/3.1415926*180.; // 1 to 1->2
+      double angle_diff1_1 = (3.1415926-dir1.Angle(dir2_1))/3.1415926*180.; // 1 to 2
+      double angle_diff1_2 = (3.1415926-dir1.Angle(dir2_2))/3.1415926*180.; // 1 to 1->2
 
-      double angle_diff2 = (3.1415926-dir1.Angle(dir3))/3.1415926*180.;
-      double angle_diff2_1 = (3.1415926-dir1_1.Angle(dir3_1))/3.1415926*180.;
-      double angle_diff2_2 = (3.1415926-dir1.Angle(dir3_1))/3.1415926*180.;
+      double angle_diff2 = (3.1415926-dir1.Angle(dir3))/3.1415926*180.;  // 1 to 2
+      double angle_diff2_1 = (3.1415926-dir1_1.Angle(dir3_1))/3.1415926*180.; // 1 to 2
+      double angle_diff2_2 = (3.1415926-dir1.Angle(dir3_1))/3.1415926*180.; // 1 to 
       double angle_diff2_3 = (3.1415926-dir1_1.Angle(dir3))/3.1415926*180.;
+
       
+      
+      // possible match
       if ((angle_diff1 < angle_cut) || angle_diff1_1 < angle_cut || (angle_diff1_2 <angle_cut)){
+	// direction match 
 	if (angle_diff2 < angle_cut || angle_diff2_1 < angle_cut || (angle_diff2_2 < angle_cut && length_1 >= length_2) || (angle_diff2_3 < angle_cut && length_1 <= length_2)){
 	  return true;
 	}else{
-	  if (length_2 < 12*units::cm)
+	  if (length_2 < 12*units::cm && dis < 2*units::cm) //small and very close
 	    return true;
 	}
 	flag_extend = true;
@@ -940,13 +943,13 @@ bool WireCell2dToy::Clustering_1st_round(WireCell::PR3DCluster *cluster1, WireCe
 	if (angle_diff2 < angle_cut || angle_diff2_1 < angle_cut || (angle_diff2_2 < angle_cut && length_1 >= length_2) || (angle_diff2_3 < angle_cut && length_1 <= length_2)) {
 	  return true;
 	}else{
-	  if (length_1 < 12*units::cm)
+	  if (length_1 < 12*units::cm && dis < 2*units::cm) // small and very close
 	    return true;
 	}
 	flag_extend = true;
       }
 
-      //return false;
+      
 
       if (flag_para && (flag_para_U || flag_para_V)){
 	TVector3 dir1_rot(dir1.Y(), dir1.Z(), dir1.X());
@@ -970,7 +973,7 @@ bool WireCell2dToy::Clustering_1st_round(WireCell::PR3DCluster *cluster1, WireCe
 	  if (dphi3 < para_angle_cut || dphi3_1 < para_angle_cut || (dphi3_2 < para_angle_cut && length_1 >= length_2) || (dphi3_3 < para_angle_cut && length_1 <= length_2)) {
 	    return true;
 	  }else{
-	    if (length_2 < 12*units::cm)
+	    if (length_2 < 12*units::cm && dis < 2 *units::cm) // very close and small
 	      return true;
 	  }
 	  flag_extend = true;
@@ -984,7 +987,7 @@ bool WireCell2dToy::Clustering_1st_round(WireCell::PR3DCluster *cluster1, WireCe
 	  if (dphi3 < para_angle_cut || dphi3_1 < para_angle_cut || (dphi3_2 < para_angle_cut && length_1 >= length_2) || (dphi3_3 < para_angle_cut && length_1 <= length_2)) {
 	    return true;
 	  }else{
-	    if (length_1 < 12*units::cm)
+	    if (length_1 < 12*units::cm && dis < 2 *units::cm) // very close and small
 	      return true;
 	  }
 	  flag_extend = true;
@@ -999,8 +1002,6 @@ bool WireCell2dToy::Clustering_1st_round(WireCell::PR3DCluster *cluster1, WireCe
       
       if (flag_extend && flag_enable_extend ){
  	// when to extend???
-
-	 
 	
 	if ((flag_para && (flag_para_U || flag_para_V || dis < 15*units::cm)) || (!flag_para && (flag_prolonged_U || flag_prolonged_V || dis < 15 *units::cm))){
 	  // look use 1 to predict 2
@@ -1210,8 +1211,8 @@ void WireCell2dToy::Clustering_live_dead(WireCell::PR3DClusterSelection& live_cl
 	    TVector3 dir3 = cluster_2->VHoughTrans(mcell2_center,30*units::cm);
 	    TVector3 dir4 = cluster_1->calc_dir(mcell2_center,mcell1_center,30*units::cm);
 	    
-      	    double angle_diff1 = (3.1415926-dir1.Angle(dir2))/3.1415926*180.;
-	    double angle_diff2 = (3.1415926-dir3.Angle(dir4))/3.1415926*180.;
+      	    double angle_diff1 = (3.1415926-dir1.Angle(dir2))/3.1415926*180.; // 1 to 2
+	    double angle_diff2 = (3.1415926-dir3.Angle(dir4))/3.1415926*180.; // 2 to 1
       	    // double angle_diff3 = (3.1415926-dir1.Angle(dir3))/3.1415926*180.;
 
 	    double length_1 = cluster_length_vec.at(i);
@@ -1227,10 +1228,11 @@ void WireCell2dToy::Clustering_live_dead(WireCell::PR3DClusterSelection& live_cl
 	      if (fabs(angle1-3.1415926/2.)<5/180.*3.1415926 &&
 		  fabs(angle2-3.1415926/2.)<5/180.*3.1415926 &&
 		  fabs(angle3-3.1415926/2.)<5/180.*3.1415926 ){
-		if (  dis < 20*units::cm)
+		if (  dis < 20*units::cm)  // if parallel and close ...
 		  flag_merge = true;
 	      }
 
+	      // if parallel
 	      if ((fabs(angle1-3.1415926/2.)<7.5/180.*3.1415926 ||
 		   fabs(angle2-3.1415926/2.)<7.5/180.*3.1415926 ||
 		   fabs(angle3-3.1415926/2.)<7.5/180.*3.1415926) &&
