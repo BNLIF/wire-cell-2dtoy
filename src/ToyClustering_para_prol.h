@@ -176,7 +176,7 @@ bool WireCell2dToy::Clustering_2nd_round(WireCell::PR3DCluster *cluster1, WireCe
 	    flag_para_U = true;
 	    //return true;
 	    
-	    if ((length_1 < 25*units::cm || length_2 < 25*units::cm) && fabs(angle2-3.1415926/2.)<5.0/180.*3.1415926  && dis < 15* units::cm || dis < 2*units::cm){
+	    if ((length_1 < 25*units::cm || length_2 < 25*units::cm) && fabs(angle2-3.1415926/2.)<5.0/180.*3.1415926  && dis < 15* units::cm || dis < 3*units::cm){
 	      // for short or small distance one
 	      return true;
 	    }else if (dis < 15*units::cm && (length_1 < 60*units::cm || length_2 < 60*units::cm) &&
@@ -186,14 +186,17 @@ bool WireCell2dToy::Clustering_2nd_round(WireCell::PR3DCluster *cluster1, WireCe
 	    }else if (fabs(angle2-3.1415926/2.)<2.5/180.*3.1415926 && fabs(angle5-3.1415926/2.)<5/180.*3.1415926 && fabs(angle6-3.1415926/2.)<5/180.*3.141592 ){
 	      // parallel case, but exclude both very long tracks
 	      if (length_1 < 60*units::cm || length_2 < 60*units::cm){
+	      	return true;
+	      }else if (dis <5*units::cm){
 		return true;
 	      }else{
-		double angle7 = (3.1415926-dir1.Angle(dir2))/3.1415926*180.;
-		double angle8 = (3.1415926-dir1.Angle(tempV1))/3.1415926*180.; // dir1 = -p1, tempV1 = p2 - p1
-		double angle9 = dir2.Angle(tempV1)/3.1415926*180.; // dir2 = -p2
-		if (angle7 < 60 && angle8 < 60 && angle9 < 60)
-		  return true;
+	      	double angle7 = (3.1415926-dir1.Angle(dir2))/3.1415926*180.;
+	      	double angle8 = (3.1415926-dir1.Angle(tempV1))/3.1415926*180.; // dir1 = -p1, tempV1 = p2 - p1
+	      	double angle9 = dir2.Angle(tempV1)/3.1415926*180.; // dir2 = -p2
+	      	if (angle7 < 30 && angle8 < 30 && angle9 < 30)
+	      	  return true;
 	      }
+	      
 	    }else{
 	      // general case ... (not sure how useful though ...)
 	      double angle7 = (3.1415926-dir1.Angle(dir2))/3.1415926*180.;
@@ -201,7 +204,7 @@ bool WireCell2dToy::Clustering_2nd_round(WireCell::PR3DCluster *cluster1, WireCe
 	      double angle9 = dir2.Angle(tempV1)/3.1415926*180.; // dir2 = -p2
 	      if ((angle7 < 30 && angle8 < 30 && angle9 < 30 ||
 		  fabs(angle5-3.1415926/2.)<5/180.*3.1415926 && fabs(angle6-3.1415926/2.)<5/180.*3.141592 &&
-		   angle7 < 60 && angle8 < 60 && angle9 < 60) && dis <= 20*units::cm)
+		   angle7 < 45 && angle8 < 45 && angle9 < 45) && dis < 20*units::cm)
 		return true;
 	    }
 	  }
