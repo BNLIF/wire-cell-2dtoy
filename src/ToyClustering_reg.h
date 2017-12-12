@@ -208,24 +208,49 @@ bool WireCell2dToy::Clustering_1st_round(WireCell::PR3DCluster *cluster1, WireCe
       TVector3 tempV3(0, mcell2_center.y - cluster1_ave_pos.y, mcell2_center.z - cluster1_ave_pos.z);
       TVector3 tempV4(0, cluster2_ave_pos.y - cluster1_ave_pos.y, cluster2_ave_pos.z - cluster1_ave_pos.z);
 
+      TVector3 tempV5;
       double angle1 = tempV1.Angle(U_dir);
+      tempV5.SetXYZ(fabs(mcell2_center.x - mcell1_center.x),sin(angle1),0);
+      angle1 = tempV5.Angle(drift_dir);
+      
       double angle2 = tempV2.Angle(U_dir);
+      tempV5.SetXYZ(fabs(cluster2_ave_pos.x - mcell1_center.x),sin(angle2),0);
+      angle2 = tempV5.Angle(drift_dir);
+      
       double angle3 = tempV3.Angle(U_dir);
+      tempV5.SetXYZ(fabs(mcell2_center.x - cluster1_ave_pos.x),sin(angle3),0);
+      angle3 = tempV5.Angle(drift_dir);
+
       double angle4 = tempV4.Angle(U_dir);
-      if (angle1<5/180.*3.1415926 || (3.1415926-angle1)<5/180.*3.1415926
-	  ||angle2<5/180.*3.1415926 || (3.1415926-angle2)<5/180.*3.1415926
-	  ||angle3<5/180.*3.1415926 || (3.1415926-angle3)<5/180.*3.1415926
-	  ||angle4<5/180.*3.1415926 || (3.1415926-angle4)<5/180.*3.1415926)
+      tempV5.SetXYZ(fabs(cluster2_ave_pos.x - cluster1_ave_pos.x),sin(angle4),0);
+      angle4 = tempV5.Angle(drift_dir);
+
+      if (angle1<5/180.*3.1415926 
+	  ||angle2<5/180.*3.1415926 
+	  ||angle3<5/180.*3.1415926
+	  ||angle4<5/180.*3.1415926  )
 	flag_prolonged_U = true;
       
       angle1 = tempV1.Angle(V_dir);
+      tempV5.SetXYZ(fabs(mcell2_center.x - mcell1_center.x),sin(angle1),0);
+      angle1 = tempV5.Angle(drift_dir);
+      
       angle2 = tempV2.Angle(V_dir);
+      tempV5.SetXYZ(fabs(cluster2_ave_pos.x - mcell1_center.x),sin(angle2),0);
+      angle2 = tempV5.Angle(drift_dir);
+      
       angle3 = tempV3.Angle(V_dir);
+      tempV5.SetXYZ(fabs(mcell2_center.x - cluster1_ave_pos.x),sin(angle3),0);
+      angle3 = tempV5.Angle(drift_dir);
+      
       angle4 = tempV4.Angle(V_dir);
-      if (angle1<5/180.*3.1415926 || (3.1415926-angle1)<5/180.*3.1415926
-	  ||angle2<5/180.*3.1415926 || (3.1415926-angle2)<5/180.*3.1415926
-	  ||angle3<5/180.*3.1415926 || (3.1415926-angle3)<5/180.*3.1415926
-	  ||angle4<5/180.*3.1415926 || (3.1415926-angle4)<5/180.*3.1415926)
+      tempV5.SetXYZ(fabs(cluster2_ave_pos.x - cluster1_ave_pos.x),sin(angle4),0);
+      angle4 = tempV5.Angle(drift_dir);
+
+      if (angle1<5/180.*3.1415926 
+	  ||angle2<5/180.*3.1415926 
+	  ||angle3<5/180.*3.1415926 
+	  ||angle4<5/180.*3.1415926 )
 	flag_prolonged_V = true;
     }
     

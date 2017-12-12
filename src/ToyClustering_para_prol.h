@@ -126,8 +126,8 @@ bool WireCell2dToy::Clustering_2nd_round(WireCell::PR3DCluster *cluster1, WireCe
     Point cluster2_ave_pos = cluster2->calc_ave_pos(p2,10*units::cm);
 
     bool flag_para = false;
-    bool flag_prolonged_U = false;
-    bool flag_prolonged_V = false;
+    /* bool flag_prolonged_U = false; */
+    /* bool flag_prolonged_V = false; */
     bool flag_para_U = false;
     bool flag_para_V = false;
     // parallel case 1 and perpendicular case 2 
@@ -228,17 +228,25 @@ bool WireCell2dToy::Clustering_2nd_round(WireCell::PR3DCluster *cluster1, WireCe
     // look at prolonged case ... (add W case) 
     {
       TVector3 tempV1(0, p2.y - p1.y, p2.z - p1.z);
+      TVector3 tempV5;
       double angle1 = tempV1.Angle(U_dir);
+      tempV5.SetXYZ(fabs(p2.x-p1.x),sin(angle1),0);
+      angle1 = tempV5.Angle(drift_dir);
+      
       double angle2 = tempV1.Angle(V_dir);
+      tempV5.SetXYZ(fabs(p2.x-p1.x),sin(angle2),0);
+      angle2 = tempV5.Angle(drift_dir);
+
       double angle1p = tempV1.Angle(W_dir);
+      tempV5.SetXYZ(fabs(p2.x-p1.x),sin(angle1p),0);
+      angle1p = tempV5.Angle(drift_dir);
 
       // if (cluster1->get_cluster_id()==52 || cluster2->get_cluster_id()==52)
       // 	std::cout << cluster1->get_cluster_id() << " " << cluster2->get_cluster_id() << " " << angle1*180./3.1415926 << " " << angle2*180./3.1415926 << " " << dis/units::cm << " " << length_1/units::cm << " " << length_2/units::cm << std::endl;
       
-      if (angle1<15/180.*3.1415926 || (3.1415926-angle1)<15/180.*3.1415926 ||
-	  angle2<15/180.*3.1415926 || (3.1415926-angle2)<15/180.*3.1415926 ||
-	  angle1p<15/180.*3.1415926 || (3.1415926-angle1p)<15/180.*3.1415926 
-	  ){
+      if (angle1<7.5/180.*3.1415926  ||
+	  angle2<7.5/180.*3.1415926  ||
+	  angle1p<7.5/180.*3.1415926 ){
 	if (length_1 > 10*units::cm || length_2 > 10*units::cm){
 	  TVector3 dir1 = cluster1->VHoughTrans(p1,30*units::cm); // cluster 1 direction based on hough
 	  TVector3 dir2 = cluster2->VHoughTrans(p2,30*units::cm); // cluster 1 direction based on hough
