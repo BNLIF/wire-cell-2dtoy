@@ -18,16 +18,17 @@ void WireCell2dToy::Clustering_jump_gap_cosmics(WireCell::PR3DClusterSelection& 
   // include some parallel or prolonged, no need to do track fitting
   std::map<PR3DCluster*,double> cluster_length_map;
 
-  Clustering_regular(live_clusters, cluster_length_map);
+  Clustering_regular(live_clusters, cluster_length_map,45*units::cm,false);
+  Clustering_regular(live_clusters, cluster_length_map,30*units::cm,true); // do extension
   
   //dedicated one dealing with parallel track
-  Clustering_parallel_prolong(live_clusters, cluster_length_map);
+  Clustering_parallel_prolong(live_clusters, cluster_length_map,35*units::cm);
 
   //clustering close distance ones ... 
   Clustering_close(live_clusters, cluster_length_map,1.2*units::cm);
 
-  //extend the track ... 
-  Clustering_extend(live_clusters, cluster_length_map);
+  // //extend the track ... 
+  // Clustering_extend(live_clusters, cluster_length_map);
 
   
   

@@ -436,12 +436,18 @@ bool WireCell2dToy::Clustering_1st_round(WireCell::PR3DCluster *cluster1, WireCe
      // if (cluster1->get_cluster_id()==133 || cluster2->get_cluster_id()==133) 
      // 	    std::cout << cluster1->get_cluster_id() << " " << cluster2->get_cluster_id() << " " << dis/units::cm << " " << flag_para << " "<< flag_para_U << " " << flag_para_V << " " << flag_prolonged_U << " " << flag_prolonged_V << " " << flag_extend << " " << std::endl;
 
-      
-      
+            
       if (flag_extend && flag_enable_extend ){
  	// when to extend???
+
+	 
+	/* if (cluster1->get_cluster_id()==12 || cluster2->get_cluster_id()==12 || */
+	/*     cluster1->get_cluster_id()==13 || cluster2->get_cluster_id()==13 )  */
+	/*   std::cout << cluster1->get_cluster_id() << " " << cluster2->get_cluster_id() << " " << dis/units::cm << " " << flag_para << " "<< flag_para_U << " " << flag_para_V << " " << flag_prolonged_U << " " << flag_prolonged_V << " " << flag_extend << " " << std::endl; */
+	/* return false; */
 	
-	if ((flag_para && (flag_para_U || flag_para_V || dis < 10*units::cm)) || (!flag_para && (flag_prolonged_U || flag_prolonged_V || dis < 10*units::cm))){
+	if ((flag_para && (flag_para_U || flag_para_V || dis < 10*units::cm)) ||
+	    (!flag_para && (flag_prolonged_U || flag_prolonged_V || dis < 10*units::cm))){
 	  // look use 1 to predict 2
 	  // cluster1_ave_pos, dir1
 	  // calculate the average distance
@@ -464,6 +470,11 @@ bool WireCell2dToy::Clustering_1st_round(WireCell::PR3DCluster *cluster1, WireCe
 	    }
 	  }
 	  //	std::cout << cluster1->get_cluster_id() << " " << cluster2->get_cluster_id() << " " << min_dis/units::cm << " " << max_dis/units::cm << " " << length_2/units::cm << std::endl;
+
+	  /* if (cluster1->get_cluster_id()==12 || cluster2->get_cluster_id()==12 || */
+	  /*   cluster1->get_cluster_id()==13 || cluster2->get_cluster_id()==13 )  */
+	  /* std::cout << max_dis - min_dis << std::endl; */
+	  
 	  if ((max_dis - min_dis)>2.5*units::cm) return true;
 	  
 	  // look at the other side (repeat) 
@@ -486,6 +497,10 @@ bool WireCell2dToy::Clustering_1st_round(WireCell::PR3DCluster *cluster1, WireCe
 	    }
 	  }
 	  //std::cout << cluster1->get_cluster_id() << " " << cluster2->get_cluster_id() << " " << min_dis/units::cm << " " << max_dis/units::cm << " " << length_1/units::cm << std::endl;
+
+	  /* if (cluster1->get_cluster_id()==12 || cluster2->get_cluster_id()==12 || */
+	  /*   cluster1->get_cluster_id()==13 || cluster2->get_cluster_id()==13 )  */
+	  /* std::cout << max_dis - min_dis << std::endl; */
 	  if ((max_dis - min_dis)>2.5*units::cm) return true;
 	  
 	  // both side simutaneously? leave it for futhre
