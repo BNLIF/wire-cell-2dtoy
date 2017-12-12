@@ -233,8 +233,8 @@ void WireCell2dToy::Clustering_live_dead(WireCell::PR3DClusterSelection& live_cl
 	    if (!flag_merge){
 	      if (length_1 <= 12*units::cm && length_2 <=12*units::cm){
 	    	// both are short
-	    	if ((dis <= 3*units::cm) && ((angle_diff1 <= 45 || angle_diff2 <=45) ||
-					     (flag_para && (angle_diff1 <= 90 || angle_diff2 <=90 ))) ||
+	    	if ((dis <= 3*units::cm) && ((angle_diff1 <= 45 || angle_diff2 <=45) || (flag_para && (angle_diff1 <= 90 || angle_diff2 <=90 ))) ||
+		    (dis <= 5*units::cm) && (angle_diff1 <= 30 || angle_diff2 <=30)  ||
 	    	    (dis <=15*units::cm) && (angle_diff1<=15 || angle_diff2 <=15) ||
 	    	    (dis <=60*units::cm) && (angle_diff1<5 || angle_diff2 < 5)
 	    	    ){
@@ -242,22 +242,22 @@ void WireCell2dToy::Clustering_live_dead(WireCell::PR3DClusterSelection& live_cl
 	    	}
 	      } else if (length_1 > 12*units::cm && length_2 <=12*units::cm){
 	      	// one is short
-	      	if ((dis <= 3*units::cm)  && ((angle_diff1 <= 45 || angle_diff2<=45) ||
-					      (flag_para && (angle_diff1 <= 90 || angle_diff2 <=90 ))) 
+	      	if ((dis <= 3*units::cm)  && ((angle_diff1 <= 45 || angle_diff2<=45) || (flag_para && (angle_diff1 <= 90 || angle_diff2 <=90 )))
+		    || dis <= 5*units::cm && angle_diff1 <=30
 	      	    || dis <= 15*units::cm && (angle_diff1 <=20)
 	      	    || (angle_diff1<16 && dis <= 60*units::cm))
 	      	  flag_merge = true;
 	      }else if (length_2 > 12*units::cm && length_1 <=12*units::cm){
 	      	// one is short
-	      	if ((dis <= 3*units::cm)  && ((angle_diff2 <= 45 || angle_diff2<=45) ||
-					      (flag_para && (angle_diff1 <= 90 || angle_diff2 <=90 ))) 	      
+	      	if ((dis <= 3*units::cm)  && ((angle_diff2 <= 45 || angle_diff2<=45) || (flag_para && (angle_diff1 <= 90 || angle_diff2 <=90 )))
+		    || dis <=5*units::cm && angle_diff2 <=30
 	      	    || dis <= 15*units::cm && (angle_diff2 <=20)
 	      	    || (angle_diff2<16 && dis <= 60*units::cm))
 	      	  flag_merge = true;
 	      }else{
 	      	// both are long
-	      	if ((dis <= 3*units::cm) && ((angle_diff1 <= 45 || angle_diff2 <=45) ||
-					     (flag_para && (angle_diff1 <= 90 || angle_diff2 <=90 ))) 	      || 
+	      	if ((dis <= 3*units::cm) && ((angle_diff1 <= 45 || angle_diff2 <=45) || (flag_para && (angle_diff1 <= 90 || angle_diff2 <=90 ))) ||
+		    dis <=5*units::cm && (angle_diff1 <=30 || angle_diff2 <=30) ||
 	      	    (dis <=15*units::cm) && (angle_diff1<=20 || angle_diff2 <=20)  ||
 	      	    (angle_diff1<16 || angle_diff2 < 16) && (dis <=60*units::cm)
 	      	    ){
