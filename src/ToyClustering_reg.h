@@ -284,6 +284,18 @@ bool WireCell2dToy::Clustering_1st_round(WireCell::PR3DCluster *cluster1, WireCe
       double angle_diff3 = (3.1415926 - dir1.Angle(dir3))/3.1415926*180;
       double angle_diff3_1 = (3.1415926 - dir1_1.Angle(dir3_1))/3.1415926*180.;
 
+      if (dis<=3*units::cm){
+	if ((angle_diff3 < angle_cut*1.5 || angle_diff3_1 < angle_cut*1.5) &&
+	    ((angle_diff1 < angle_cut*4.5 || angle_diff1_1 < angle_cut*4.5 || length_1 < 12*units::cm) &&
+	     (angle_diff2 < angle_cut*4.5 || angle_diff2_1 < angle_cut*4.5 || length_2 < 12*units::cm) ) )
+	  return true;
+	if ((angle_diff3 < angle_cut*1.5 || angle_diff3_1 < angle_cut*1.5) ||
+	    (angle_diff1 < angle_cut*1.5 || angle_diff1_1 < angle_cut*1.5) ||
+	    (angle_diff2 < angle_cut*1.5 || angle_diff2_1 < angle_cut*1.5))
+	  flag_extend = true;
+      }
+
+      
       if (angle_diff1 < angle_cut || angle_diff1_1 < angle_cut){ // possible match 
 	if (length_2 < 12*units::cm && dis < 2*units::cm) //small and very close
 	  return true;
@@ -303,6 +315,7 @@ bool WireCell2dToy::Clustering_1st_round(WireCell::PR3DCluster *cluster1, WireCe
 	flag_extend = true;
       }
 
+      
       
       if (flag_para && (flag_para_U || flag_para_V || flag_para_W)){
 	
@@ -350,7 +363,9 @@ bool WireCell2dToy::Clustering_1st_round(WireCell::PR3DCluster *cluster1, WireCe
 	}
 	
       }
+
       
+     
       
       
       if (flag_extend && flag_enable_extend ){
@@ -379,7 +394,7 @@ bool WireCell2dToy::Clustering_1st_round(WireCell::PR3DCluster *cluster1, WireCe
       	      if (temp_dis > max_dis) max_dis = temp_dis;
       	    }
       	  }
-      	  //	std::cout << cluster1->get_cluster_id() << " " << cluster2->get_cluster_id() << " " << min_dis/units::cm << " " << max_dis/units::cm << " " << length_2/units::cm << std::endl;
+	  // std::cout << cluster1->get_cluster_id() << " " << cluster2->get_cluster_id() << " " << min_dis/units::cm << " " << max_dis/units::cm << " " << length_2/units::cm << std::endl;
 	  
 	  
 	  
@@ -404,7 +419,7 @@ bool WireCell2dToy::Clustering_1st_round(WireCell::PR3DCluster *cluster1, WireCe
       	      if (temp_dis > max_dis) max_dis = temp_dis;
       	    }
       	  }
-      	  //std::cout << cluster1->get_cluster_id() << " " << cluster2->get_cluster_id() << " " << min_dis/units::cm << " " << max_dis/units::cm << " " << length_1/units::cm << std::endl;
+	  // std::cout << cluster1->get_cluster_id() << " " << cluster2->get_cluster_id() << " " << min_dis/units::cm << " " << max_dis/units::cm << " " << length_1/units::cm << std::endl;
 
 
       	  if ((max_dis - min_dis)>2.5*units::cm) return true;
