@@ -107,5 +107,52 @@ void WireCell2dToy::Clustering_extend(WireCell::PR3DClusterSelection& live_clust
 }
 
 bool WireCell2dToy::Clustering_4th_round(WireCell::PR3DCluster *cluster1, WireCell::PR3DCluster *cluster2, double length_1, double length_2, double length_cut){
+
+  cluster1->Create_point_cloud();
+  cluster2->Create_point_cloud();
+  
+  // pick any point and merged cell in cluster1,
+  SlimMergeGeomCell *prev_mcell1 = 0;
+  SlimMergeGeomCell *prev_mcell2 = 0;
+  SlimMergeGeomCell *mcell1 = cluster1->get_mcells().at(0);
+  Point p1 = mcell1->center();
+  SlimMergeGeomCell *mcell2=0;
+  Point p2;
+
+  while(mcell1!=prev_mcell1 || mcell2!=prev_mcell2){
+    prev_mcell1 = mcell1;
+    prev_mcell2 = mcell2;
+    
+    // find the closest point and merged cell in cluster2
+    std::pair<SlimMergeGeomCell*,Point> temp_results = cluster2->get_closest_point_mcell(p1);
+    p2 = temp_results.second;
+    mcell2 = temp_results.first;
+    // find the closest point and merged cell in cluster1
+    temp_results = cluster1->get_closest_point_mcell(p2);
+    p1 = temp_results.second;
+    mcell1 = temp_results.first;
+  }
+  
+  //std::cout << cluster1->get_cluster_id() << " " << cluster2->get_cluster_id() << " " << sqrt(pow(p1.x-p2.x,2)+pow(p1.y-p2.y,2)+pow(p1.z-p2.z,2))/units::cm<< std::endl;
+  
+  double dis = sqrt(pow(p1.x-p2.x,2)+pow(p1.y-p2.y,2)+pow(p1.z-p2.z,2));
+
+  // if (cluster1->get_cluster_id()==7){
+  //   std::cout << cluster1->get_cluster_id() << " " << cluster2->get_cluster_id() << " " << dis/units::cm << " " << p1.x/units::cm << " " << p1.y/units::cm << " " << p1.z/units::cm <<
+  //     " " << p2.x/units::cm << " " << p2.y/units::cm << " " << p2.z/units::cm <<
+  //     std::endl;
+  // }
+  
+  
+  if (dis < length_cut){
+    Point cluster1_ave_pos = cluster1->calc_ave_pos(p1,5*units::cm);
+    Point cluster2_ave_pos = cluster2->calc_ave_pos(p2,5*units::cm);
+
+    TVector3 dir1 = cluster1->VHoughTrans(cluster1_ave_pos,30*units::cm);
+    TVector3 dir2 = cluster2->VHoughTrans(cluster2_ave_pos,30*units::cm);
+
+  }
+
+
   return false;
 }
