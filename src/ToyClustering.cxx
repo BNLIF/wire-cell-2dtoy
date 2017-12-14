@@ -14,6 +14,140 @@ using namespace WireCell;
 #include "ToyClustering_isolated.h"
 
 
+double WireCell2dToy::Find_Closeset_Points(WireCell::PR3DCluster *cluster1, WireCell::PR3DCluster *cluster2,double length_1, double length_2, double length_cut, SlimMergeGeomCell *mcell1_save, SlimMergeGeomCell *mcell2_save, Point& p1_save, Point &p2_save){
+  double dis_save = 1e9;
+
+  // pick the first point from the small one
+  SlimMergeGeomCell *prev_mcell1 = 0;
+  SlimMergeGeomCell *prev_mcell2 = 0;
+  SlimMergeGeomCell *mcell1 = 0; 
+  Point p1;//
+  SlimMergeGeomCell *mcell2=0;
+  Point p2;
+  double dis;
+
+  if (length_1 < length_2){
+    mcell1 = *(cluster1->get_time_cells_set_map().begin()->second.begin());
+    p1 = mcell1->center();
+
+    while(mcell1!=prev_mcell1 || mcell2!=prev_mcell2){
+      prev_mcell1 = mcell1;
+      prev_mcell2 = mcell2;
+      
+      // find the closest point and merged cell in cluster2
+      std::pair<SlimMergeGeomCell*,Point> temp_results = cluster2->get_closest_point_mcell(p1);
+      p2 = temp_results.second;
+      mcell2 = temp_results.first;
+      // find the closest point and merged cell in cluster1
+      temp_results = cluster1->get_closest_point_mcell(p2);
+      p1 = temp_results.second;
+      mcell1 = temp_results.first;
+    }
+    dis = sqrt(pow(p1.x-p2.x,2)+pow(p1.y-p2.y,2)+pow(p1.z-p2.z,2));
+
+    if (dis < dis_save){
+      dis_save = dis;
+      mcell1_save = mcell1;
+      mcell2_save = mcell2;
+      p1_save = p1;
+      p2_save = p2;
+    }
+
+    prev_mcell1 = 0;
+    prev_mcell2 = 0;
+
+    mcell1 = *(cluster1->get_time_cells_set_map().rbegin()->second.begin());
+    p1 = mcell1->center();
+
+    while(mcell1!=prev_mcell1 || mcell2!=prev_mcell2){
+      prev_mcell1 = mcell1;
+      prev_mcell2 = mcell2;
+      
+      // find the closest point and merged cell in cluster2
+      std::pair<SlimMergeGeomCell*,Point> temp_results = cluster2->get_closest_point_mcell(p1);
+      p2 = temp_results.second;
+      mcell2 = temp_results.first;
+      // find the closest point and merged cell in cluster1
+      temp_results = cluster1->get_closest_point_mcell(p2);
+      p1 = temp_results.second;
+      mcell1 = temp_results.first;
+    }
+    dis = sqrt(pow(p1.x-p2.x,2)+pow(p1.y-p2.y,2)+pow(p1.z-p2.z,2));
+
+    if (dis < dis_save){
+      dis_save = dis;
+      mcell1_save = mcell1;
+      mcell2_save = mcell2;
+      p1_save = p1;
+      p2_save = p2;
+    }
+    
+  }else{
+
+    mcell2 = *(cluster2->get_time_cells_set_map().begin()->second.begin());
+    p2 = mcell2->center();
+
+    while(mcell1!=prev_mcell1 || mcell2!=prev_mcell2){
+      prev_mcell1 = mcell1;
+      prev_mcell2 = mcell2;
+      
+      // find the closest point and merged cell in cluster2
+      std::pair<SlimMergeGeomCell*,Point> temp_results = cluster1->get_closest_point_mcell(p2);
+      p1 = temp_results.second;
+      mcell1 = temp_results.first;
+      // find the closest point and merged cell in cluster1
+      temp_results = cluster2->get_closest_point_mcell(p1);
+      p2 = temp_results.second;
+      mcell2 = temp_results.first;
+    }
+    dis = sqrt(pow(p1.x-p2.x,2)+pow(p1.y-p2.y,2)+pow(p1.z-p2.z,2));
+
+    if (dis < dis_save){
+      dis_save = dis;
+      mcell1_save = mcell1;
+      mcell2_save = mcell2;
+      p1_save = p1;
+      p2_save = p2;
+    }
+
+    
+    prev_mcell1 = 0;
+    prev_mcell2 = 0;
+    
+
+    mcell2 = *(cluster2->get_time_cells_set_map().rbegin()->second.begin());
+    p2 = mcell2->center();
+
+    while(mcell1!=prev_mcell1 || mcell2!=prev_mcell2){
+      prev_mcell1 = mcell1;
+      prev_mcell2 = mcell2;
+      
+      // find the closest point and merged cell in cluster2
+      std::pair<SlimMergeGeomCell*,Point> temp_results = cluster1->get_closest_point_mcell(p2);
+      p1 = temp_results.second;
+      mcell1 = temp_results.first;
+      // find the closest point and merged cell in cluster1
+      temp_results = cluster2->get_closest_point_mcell(p1);
+      p2 = temp_results.second;
+      mcell2 = temp_results.first;
+    }
+    dis = sqrt(pow(p1.x-p2.x,2)+pow(p1.y-p2.y,2)+pow(p1.z-p2.z,2));
+
+    if (dis < dis_save){
+      dis_save = dis;
+      mcell1_save = mcell1;
+      mcell2_save = mcell2;
+      p1_save = p1;
+      p2_save = p2;
+    }
+    
+  }
+  
+  
+  return dis_save;
+}
+
+
 void WireCell2dToy::Clustering_jump_gap_cosmics(WireCell::PR3DClusterSelection& live_clusters){
   // include some parallel or prolonged, no need to do track fitting
   std::map<PR3DCluster*,double> cluster_length_map;

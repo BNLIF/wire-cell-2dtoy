@@ -97,26 +97,32 @@ bool WireCell2dToy::Clustering_3rd_round(WireCell::PR3DCluster *cluster1, WireCe
    // pick any point and merged cell in cluster1,
   SlimMergeGeomCell *prev_mcell1 = 0;
   SlimMergeGeomCell *prev_mcell2 = 0;
-  SlimMergeGeomCell *mcell1 = cluster1->get_mcells().front();
-  Point p1 = mcell1->center();
+  SlimMergeGeomCell *mcell1 = 0; 
+  Point p1;//
   SlimMergeGeomCell *mcell2=0;
   Point p2;
+  double dis = Find_Closeset_Points(cluster1, cluster2, length_1, length_2, length_cut, mcell1, mcell2, p1,p2);
 
-  while(mcell1!=prev_mcell1 || mcell2!=prev_mcell2){
-    prev_mcell1 = mcell1;
-    prev_mcell2 = mcell2;
+  
+  /* mcell1 = cluster1->get_mcells().front(); */
+  /* p1 = mcell1->center(); */
+  /* while(mcell1!=prev_mcell1 || mcell2!=prev_mcell2){ */
+  /*   prev_mcell1 = mcell1; */
+  /*   prev_mcell2 = mcell2; */
     
-    // find the closest point and merged cell in cluster2
-    std::pair<SlimMergeGeomCell*,Point> temp_results = cluster2->get_closest_point_mcell(p1);
-    p2 = temp_results.second;
-    mcell2 = temp_results.first;
-    // find the closest point and merged cell in cluster1
-    temp_results = cluster1->get_closest_point_mcell(p2);
-    p1 = temp_results.second;
-    mcell1 = temp_results.first;
-  }
-  double dis = sqrt(pow(p1.x-p2.x,2)+pow(p1.y-p2.y,2)+pow(p1.z-p2.z,2));
+  /*    // find the closest point and merged cell in cluster2 */
+  /*   std::pair<SlimMergeGeomCell*,Point> temp_results = cluster2->get_closest_point_mcell(p1); */
+  /*   p2 = temp_results.second; */
+  /*   mcell2 = temp_results.first; */
+  /*   // find the closest point and merged cell in cluster1 */
+  /*   temp_results = cluster1->get_closest_point_mcell(p2); */
+  /*   p1 = temp_results.second; */
+  /*    mcell1 = temp_results.first; */
+  /* } */
+  /* dis = sqrt(pow(p1.x-p2.x,2)+pow(p1.y-p2.y,2)+pow(p1.z-p2.z,2)); */
 
+
+  
   // {
   //   SlimMergeGeomCell *prev_mcell1_test = 0;
   //   SlimMergeGeomCell *prev_mcell2_test = 0;
@@ -148,8 +154,8 @@ bool WireCell2dToy::Clustering_3rd_round(WireCell::PR3DCluster *cluster1, WireCe
   //   }
   // }
   
-  /* if (length_1 > 25*units::cm && length_2 > 25*units::cm && dis < 5*units::cm)   */
-  /*   std::cout << cluster1->get_cluster_id() << " " << cluster2->get_cluster_id() << " " << length_1/units::cm << " " << length_2/units::cm << " " << dis/units::cm << std::endl;   */
+  /* if ((length_1 > 150*units::cm || length_2 > 150*units::cm) && dis < 20*units::cm) */
+  /*   std::cout << cluster1->get_cluster_id() << " " << cluster2->get_cluster_id() << " " << length_1/units::cm << " " << length_2/units::cm << " " << dis/units::cm << std::endl; */
   
   /* return false; */
 

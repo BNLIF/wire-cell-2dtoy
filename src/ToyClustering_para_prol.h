@@ -95,26 +95,28 @@ bool WireCell2dToy::Clustering_2nd_round(WireCell::PR3DCluster *cluster1, WireCe
   // pick any point and merged cell in cluster1,
   SlimMergeGeomCell *prev_mcell1 = 0;
   SlimMergeGeomCell *prev_mcell2 = 0;
-  SlimMergeGeomCell *mcell1 = cluster1->get_mcells().at(0);
-  Point p1 = mcell1->center();
+  SlimMergeGeomCell *mcell1 = 0;//cluster1->get_mcells().at(0);
+  Point p1;// = mcell1->center();
   SlimMergeGeomCell *mcell2=0;
   Point p2;
 
-  while(mcell1!=prev_mcell1 || mcell2!=prev_mcell2){
-    prev_mcell1 = mcell1;
-    prev_mcell2 = mcell2;
-    
-    // find the closest point and merged cell in cluster2
-    std::pair<SlimMergeGeomCell*,Point> temp_results = cluster2->get_closest_point_mcell(p1);
-    p2 = temp_results.second;
-    mcell2 = temp_results.first;
-    // find the closest point and merged cell in cluster1
-    temp_results = cluster1->get_closest_point_mcell(p2);
-    p1 = temp_results.second;
-    mcell1 = temp_results.first;
-  }
+  double dis = Find_Closeset_Points(cluster1, cluster2, length_1, length_2, length_cut, mcell1, mcell2, p1,p2);
 
-  double dis = sqrt(pow(p1.x-p2.x,2)+pow(p1.y-p2.y,2)+pow(p1.z-p2.z,2));
+  /* while(mcell1!=prev_mcell1 || mcell2!=prev_mcell2){ */
+  /*   prev_mcell1 = mcell1; */
+  /*   prev_mcell2 = mcell2; */
+    
+  /*   // find the closest point and merged cell in cluster2 */
+  /*   std::pair<SlimMergeGeomCell*,Point> temp_results = cluster2->get_closest_point_mcell(p1); */
+  /*   p2 = temp_results.second; */
+  /*   mcell2 = temp_results.first; */
+  /*   // find the closest point and merged cell in cluster1 */
+  /*   temp_results = cluster1->get_closest_point_mcell(p2); */
+  /*   p1 = temp_results.second; */
+  /*   mcell1 = temp_results.first; */
+  /* } */
+
+  /* double dis = sqrt(pow(p1.x-p2.x,2)+pow(p1.y-p2.y,2)+pow(p1.z-p2.z,2)); */
 
   // if (cluster1->get_cluster_id()==66 || cluster2->get_cluster_id()==66)
   /* if (length_1 > 50*units::cm && length_2 > 50*units::cm && dis < 5*units::cm) */

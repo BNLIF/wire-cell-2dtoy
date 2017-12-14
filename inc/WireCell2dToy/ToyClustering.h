@@ -12,6 +12,9 @@ namespace WireCell2dToy{
   
   void Clustering_jump_gap_cosmics(WireCell::PR3DClusterSelection& live_clusters);
 
+  double Find_Closeset_Points(WireCell::PR3DCluster *cluster1, WireCell::PR3DCluster *cluster2,double length_1, double length_2, double length_cut, WireCell::SlimMergeGeomCell *mcell1, WireCell::SlimMergeGeomCell *mcell2, WireCell::Point& p1, WireCell::Point &p2);
+  
+
   void Clustering_regular(WireCell::PR3DClusterSelection& live_clusters,  std::map<WireCell::PR3DCluster*,double>& cluster_length_map, double length_cut = 45*units::cm, bool flag_enable_extend = true);
   bool Clustering_1st_round(WireCell::PR3DCluster *cluster1, WireCell::PR3DCluster *cluster2, double length_1, double length_2, double length_cut = 45*units::cm, bool flag_enable_extend = true);
  
