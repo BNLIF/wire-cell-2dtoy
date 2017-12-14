@@ -34,7 +34,7 @@ void WireCell2dToy::Clustering_regular(WireCell::PR3DClusterSelection& live_clus
       }
     }
     
-    //    to_be_merged_pairs.clear();
+    // to_be_merged_pairs.clear();
     //std::cout << to_be_merged_pairs.size() << std::endl;
     
     
@@ -148,6 +148,7 @@ bool WireCell2dToy::Clustering_1st_round(WireCell::PR3DCluster *cluster1, WireCe
     bool flag_para_W = false;
     bool flag_regular = false;
     bool flag_extend = false;
+    bool flag_force_extend = false;
 
     // pronlonged case for U 3 and V 4 ...
     TVector3 drift_dir(1,0,0);
@@ -182,15 +183,23 @@ bool WireCell2dToy::Clustering_1st_round(WireCell::PR3DCluster *cluster1, WireCe
       double angle4_1 = dir2.Angle(V_dir);
       double angle5_1 = dir2.Angle(W_dir);
       
-      if (fabs(angle3-3.1415926/2.)<7.5/180.*3.1415926 || fabs(angle3_1-3.1415926/2.)<7.5/180.*3.1415926 )
+      if (fabs(angle3-3.1415926/2.)<7.5/180.*3.1415926 || fabs(angle3_1-3.1415926/2.)<7.5/180.*3.1415926 || ((fabs(angle3-3.1415926/2.)<15/180.*3.1415926 || fabs(angle3_1-3.1415926/2.)<15/180.*3.1415926)&&dis < 6*units::cm))
 	flag_para_U = true;
       
-      if (fabs(angle4-3.1415926/2.)<7.5/180.*3.1415926 || fabs(angle4_1-3.1415926/2.)<7.5/180.*3.1415926 )
+      if (fabs(angle4-3.1415926/2.)<7.5/180.*3.1415926 || fabs(angle4_1-3.1415926/2.)<7.5/180.*3.1415926 || ((fabs(angle4-3.1415926/2.)<15/180.*3.1415926 || fabs(angle4_1-3.1415926/2.)<15/180.*3.1415926)&&dis < 6*units::cm))
 	flag_para_V = true;
       
-      if (fabs(angle5-3.1415926/2.)<7.5/180.*3.1415926 || fabs(angle5_1-3.1415926/2.)<7.5/180.*3.1415926 )
+      if (fabs(angle5-3.1415926/2.)<7.5/180.*3.1415926 || fabs(angle5_1-3.1415926/2.)<7.5/180.*3.1415926 || ((fabs(angle5-3.1415926/2.)<15/180.*3.1415926 || fabs(angle5_1-3.1415926/2.)<15/180.*3.1415926)&&dis < 6*units::cm))
 	flag_para_W = true;
+
+      /* if (dis < 10*units::cm && (length_1 > 50*units::cm && length_2 > 50*units::cm)) */
+      /* 	std::cout << cluster1->get_cluster_id() << " " << cluster2->get_cluster_id() << " " << dis/units::cm << " " << length_1/units::cm << " " << length_2/units::cm << " " << */
+      /* 	 fabs(angle3-3.1415926/2.)/3.1415926*180. << " " << fabs(angle3_1-3.1415926/2.)/3.1415926*180. << std::endl; */
     }
+
+   
+    
+    
     
     
     // prolonged case
@@ -334,7 +343,23 @@ bool WireCell2dToy::Clustering_1st_round(WireCell::PR3DCluster *cluster1, WireCe
 	double dangle5 = dangle3 - dangle2;
 	double dangle5_1 = dangle3_1 - dangle2_1;
 
-      
+	
+	/* if (flag_para && dis < 10*units::cm && (length_1 > 50*units::cm || length_2 > 50*units::cm)) */
+	/*   std::cout << cluster1->get_cluster_id() << " " << cluster2->get_cluster_id() << " " << dis/units::cm << " " << length_1/units::cm << " " << length_2/units::cm << " " */
+	/*     << dangle1 << " " << dangle1_1 << " " << dangle2 << " " << dangle2_1 << " " << dangle4 */
+	/*     << " " << dangle4_1 << " " << angle_diff3 << " " << angle_diff3_1 << " " << */
+	/*     angle_diff1 << " "<< angle_diff1_1 << " " << angle_diff2 << " " << angle_diff2_1 << " " */
+	/* 	    << flag_para << " " << flag_para_U << " " << flag_para_V  */
+	/* 	    << std::endl; */
+
+	
+	if ((fabs(dangle1) < 2.5 || fabs(dangle1_1) < 2.5) &&
+	    (fabs(dangle2) < 2.5 || fabs(dangle2_1) < 2.5) &&
+	    (fabs(dangle3) < 2.5 || fabs(dangle3_1) < 2.5) &&
+	    (length_1 > 25*units::cm && length_2 > 25*units::cm))
+	  flag_force_extend = true;
+	
+	
 	if ( (fabs(dangle1) < para_angle_cut_1 || fabs(dangle1_1) < para_angle_cut_1) &&
 	     (fabs(dangle2) < para_angle_cut_1 || fabs(dangle2_1) < para_angle_cut_1) &&
 	     (fabs(dangle4) < para_angle_cut_1/2. || fabs(dangle4_1) < para_angle_cut_1/2.) &&
@@ -346,6 +371,7 @@ bool WireCell2dToy::Clustering_1st_round(WireCell::PR3DCluster *cluster1, WireCe
 	    return true;
 	  
 	  flag_extend = true;
+	  
 	}
 	     
 	
@@ -368,7 +394,7 @@ bool WireCell2dToy::Clustering_1st_round(WireCell::PR3DCluster *cluster1, WireCe
      
       
       
-      if (flag_extend && flag_enable_extend ){
+      if (flag_extend && flag_enable_extend || flag_force_extend){
       	// when to extend???
 		
       	if ((flag_para && (flag_para_U || flag_para_V || flag_para_W || dis < 10*units::cm)) ||
