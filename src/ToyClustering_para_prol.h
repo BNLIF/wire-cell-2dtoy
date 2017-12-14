@@ -146,10 +146,12 @@ bool WireCell2dToy::Clustering_2nd_round(WireCell::PR3DCluster *cluster1, WireCe
       double angle1 = tempV1.Angle(drift_dir);
       double angle4 = tempV2.Angle(drift_dir);
 
-       if (length_1 > 50*units::cm && length_2 > 50*units::cm && dis < 5*units::cm)
-      // if (cluster1->get_cluster_id()==7 || cluster2->get_cluster_id()==7 || 
-      // 	  cluster1->get_cluster_id()==9 || cluster2->get_cluster_id()==9)
-	 //std::cout << cluster1->get_cluster_id() << " " << cluster2->get_cluster_id() << " " << length_1/units::cm << " " << length_2/units::cm << " " << dis/units::cm << " " <<  angle1/3.1415926*180. << " " << angle4/3.1415926*180. <<  std::endl;
+      /* if ((length_1 > 50*units::cm && length_2 > 50*units::cm) && dis < 5*units::cm) */
+      /* // if (cluster1->get_cluster_id()==7 || cluster2->get_cluster_id()==7 ||  */
+      /* // 	  cluster1->get_cluster_id()==9 || cluster2->get_cluster_id()==9) */
+      /* 	 std::cout << cluster1->get_cluster_id() << " " << cluster2->get_cluster_id() << " " << length_1/units::cm << " " << length_2/units::cm << " " << dis/units::cm << " " <<  angle1/3.1415926*180. << " " << angle4/3.1415926*180. <<  std::endl; */
+
+      /* return false; */
 
       // looks like a parallel case
       if ( (fabs(angle1-3.1415926/2.)<10/180.*3.1415926 && dis > 10*units::cm ||
@@ -170,9 +172,9 @@ bool WireCell2dToy::Clustering_2nd_round(WireCell::PR3DCluster *cluster1, WireCe
 	  double angle2 = tempV1.Angle(U_dir);
 	  double angle3 = tempV1.Angle(V_dir);
 
-	  /* if (length_1 > 50*units::cm && length_2 > 50*units::cm && dis < 5*units::cm) */
-	  /* // if (cluster1->get_cluster_id()==7 || cluster2->get_cluster_id()==7) */
-	  /*   std::cout << angle2/3.1415926*180. << " " << angle3/3.1415926*180. << " " << dis/units::cm << " " << length_cut/units::cm << std::endl; */
+	  //if ((length_1 > 50*units::cm || length_2 > 50*units::cm) && dis < 5*units::cm)
+	  // if (cluster1->get_cluster_id()==7 || cluster2->get_cluster_id()==7)
+	  //std::cout << angle2/3.1415926*180. << " " << angle3/3.1415926*180. << " " << dis/units::cm << " " << length_cut/units::cm << std::endl;
 
 	  // look at parallel U
 	  if ((fabs(angle2-3.1415926/2.)<7.5/180.*3.1415926 || (fabs(angle2-3.1415926/2.)<15/180.*3.1415926)&&dis <3*units::cm)&& dis < length_cut){
