@@ -173,13 +173,12 @@ bool WireCell2dToy::Clustering_3rd_round(WireCell::PR3DCluster *cluster1, WireCe
     int num_tp2 = cluster2->get_num_points();
 
     
-    /* if ((length_1 > 50*units::cm && length_2 > 50*units::cm)&&dis < 1*units::cm) */
+    /* if ((length_1 > 150*units::cm || length_2 > 150*units::cm)&&dis < 1*units::cm) */
     /* // // // 	&&(cluster1->get_cluster_id()==13 || cluster2->get_cluster_id()==13 || */
     /* // // // 	   cluster1->get_cluster_id()==32 || cluster2->get_cluster_id()==32) ) */
     /*   std::cout << cluster1->get_cluster_id() << " " << cluster2->get_cluster_id() << " " << dis/units::cm << " " << length_1/units::cm << " " << length_2/units::cm << " " <<  tempV1.Angle(tempV2)/3.1415926*180. << " " << num_p1 << " " << num_tp1 << " " << num_p2 << " " << num_tp2  << std::endl;// */
     
-    /* if (length_1 < 12*units::cm && num_p1<=0.5*num_tp1 || length_2 < 12*units::cm && num_p2<=0.5*num_tp2) */
-    /*   return false; */
+    
     
    
     // one small the other one is big 
@@ -229,8 +228,11 @@ bool WireCell2dToy::Clustering_3rd_round(WireCell::PR3DCluster *cluster1, WireCe
 	     dir4.Angle(tempV2)/3.1415926*180.<15 ||
 	    (3.1415926 - dir3.Angle(dir4))/3.1415926*180 < 15)
 	  return true;
+
+	if (dis<0.6*units::cm && ((3.1415926 - dir3.Angle(tempV2))/3.1415926*180. < 45 && dir4.Angle(tempV2)/3.1415926*180. < 90 || (3.1415926 - dir3.Angle(tempV2))/3.1415926*180. < 90 && dir4.Angle(tempV2)/3.1415926*180. < 45))
+	  return true;
 	
-	/* if (length_1 > 50*units::cm && length_2 > 50*units::cm && dis < 1*units::cm) */
+	/* if (length_1 > 25*units::cm && length_2 > 250*units::cm && dis < 1*units::cm) */
 	/*   std::cout << cluster1->get_cluster_id() << " " << cluster2->get_cluster_id() << " " << length_1/units::cm << " " << length_2/units::cm << " " << dis/units::cm << " " << num_p1 << " " << num_tp1 << " " << num_p2 << " " << num_tp2 << " " << angle5/3.1415926*180. << " " << (3.1415926 - dir1.Angle(dir2))/3.1415926*180  << " " << (3.1415926 - dir1.Angle(tempV1))/3.1415926*180. << " " << dir2.Angle(tempV1)/3.1415926*180. << " " << */
 	/*     (3.1415926 - dir3.Angle(dir4))/3.1415926*180  << " " << */
 	/*     (3.1415926 - dir3.Angle(tempV2))/3.1415926*180. << " " << */
