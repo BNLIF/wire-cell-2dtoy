@@ -178,7 +178,8 @@ bool WireCell2dToy::Clustering_3rd_round(WireCell::PR3DCluster *cluster1, WireCe
     /* // // // 	   cluster1->get_cluster_id()==32 || cluster2->get_cluster_id()==32) ) */
     /*   std::cout << cluster1->get_cluster_id() << " " << cluster2->get_cluster_id() << " " << dis/units::cm << " " << length_1/units::cm << " " << length_2/units::cm << " " <<  tempV1.Angle(tempV2)/3.1415926*180. << " " << num_p1 << " " << num_tp1 << " " << num_p2 << " " << num_tp2  << std::endl;// */
     
-
+    if (length_1 < 12*units::cm && num_p1<=0.5*num_tp1 || length_2 < 12*units::cm && num_p2<=0.5*num_tp2)
+      return false;
     
    
     // one small the other one is big 
@@ -192,10 +193,10 @@ bool WireCell2dToy::Clustering_3rd_round(WireCell::PR3DCluster *cluster1, WireCe
     if ((num_p1 > 25 || num_p1 > 0.25*num_tp1 ) && (num_p2 > 25 || num_p2 > 0.25*num_tp2)){
       double angle5 = tempV1.Angle(tempV2);
       
-      // if ((length_1 > 100*units::cm || length_2 > 100*units::cm)
-      // 	&&(cluster1->get_cluster_id()==13 || cluster2->get_cluster_id()==13 ||
-      // 	   cluster1->get_cluster_id()==32 || cluster2->get_cluster_id()==32) )
-      // std::cout << angle5 << std::endl;
+      /* if ((length_1 > 100*units::cm || length_2 > 100*units::cm) */
+      /* 	&&(cluster1->get_cluster_id()==13 || cluster2->get_cluster_id()==13 || */
+      /* 	   cluster1->get_cluster_id()==32 || cluster2->get_cluster_id()==32) ) */
+      /* std::cout << angle5 << std::endl; */
 
        
       

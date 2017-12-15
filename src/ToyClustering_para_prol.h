@@ -171,12 +171,15 @@ bool WireCell2dToy::Clustering_2nd_round(WireCell::PR3DCluster *cluster1, WireCe
 	    fabs(angle5-3.1415926/2.)<20/180.*3.1415926 && fabs(angle6-3.1415926/2.)<5/180.*3.1415926){
 	
 	  flag_para = true;
+	  
+	  if (dis >=length_1 && dis >= length_2 && flag_para) return false;
+	   
 	  double angle2 = tempV1.Angle(U_dir);
 	  double angle3 = tempV1.Angle(V_dir);
 
-	  //if ((length_1 > 50*units::cm || length_2 > 50*units::cm) && dis < 5*units::cm)
-	  // if (cluster1->get_cluster_id()==7 || cluster2->get_cluster_id()==7)
-	  //std::cout << angle2/3.1415926*180. << " " << angle3/3.1415926*180. << " " << dis/units::cm << " " << length_cut/units::cm << std::endl;
+	  /* if ((length_1 > 100*units::cm || length_2 > 100*units::cm) && dis < 50*units::cm &&( cluster1->get_cluster_id()==50 || cluster2->get_cluster_id()==50)) */
+	  /* // if (cluster1->get_cluster_id()==7 || cluster2->get_cluster_id()==7) */
+	  /*   std::cout << cluster1->get_cluster_id() << " " << cluster2->get_cluster_id() << " " << (angle2-3.1415926/2.)/3.1415926*180. << " " << (angle3-3.1415926/2.)/3.1415926*180. << " " << (angle5-3.1415926/2.)/3.1415926*180. << " " << (angle6-3.1415926/2.)/3.1415926*180. << " " << dis/units::cm << " " << length_cut/units::cm << " " << length_1 / units::cm << " " << length_2 /units::cm << std::endl; */
 
 	  // look at parallel U
 	  if ((fabs(angle2-3.1415926/2.)<7.5/180.*3.1415926 || (fabs(angle2-3.1415926/2.)<15/180.*3.1415926)&&dis <6*units::cm)&& dis < length_cut){
@@ -185,6 +188,8 @@ bool WireCell2dToy::Clustering_2nd_round(WireCell::PR3DCluster *cluster1, WireCe
 	    
 	    if ((length_1 < 25*units::cm || length_2 < 25*units::cm) && fabs(angle2-3.1415926/2.)<5.0/180.*3.1415926  && dis < 15* units::cm || dis < 3*units::cm){
 	      // for short or small distance one
+	      return true;
+	    }else if (fabs(angle6-3.1415926/2.)/3.1415926*180.<1 && fabs(angle5-3.1415926/2.)/3.1415926*180.<1 && fabs(angle2-3.1415926/2.)<5.0/180.*3.1415926 && dis < 20*units::cm && (length_1 < 50*units::cm || length_2 < 50*units::cm)){
 	      return true;
 	    }else if (dis < 15*units::cm && (length_1 < 60*units::cm || length_2 < 60*units::cm) &&
 		      fabs(angle2-3.1415926/2.)<2.5/180.*3.1415926){
@@ -222,6 +227,8 @@ bool WireCell2dToy::Clustering_2nd_round(WireCell::PR3DCluster *cluster1, WireCe
 	    //return true;
 	    
 	    if ((length_1 < 25*units::cm || length_2 < 25*units::cm) && fabs(angle3-3.1415926/2.)<5.0/180.*3.1415926 && dis < 15* units::cm || dis < 2*units::cm){
+	      return true;
+	    }else if (fabs(angle6-3.1415926/2.)/3.1415926*180.<1 && fabs(angle5-3.1415926/2.)/3.1415926*180.<1 && fabs(angle3-3.1415926/2.)<5.0/180.*3.1415926 && dis < 20*units::cm && (length_1 < 50*units::cm || length_2 < 50*units::cm)){
 	      return true;
 	    }else if (dis < 15*units::cm && fabs(angle3-3.1415926/2.)<2.5/180.*3.1415926 && (length_1 < 60*units::cm || length_2 < 60*units::cm) ){
 	      return true;
