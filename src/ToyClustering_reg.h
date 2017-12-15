@@ -179,7 +179,7 @@ bool WireCell2dToy::Clustering_1st_round(WireCell::PR3DCluster *cluster1, WireCe
       flag_para = true;
 
 
-      if (dis >=length_1 && dis >= length_2 && flag_para) return false;
+      if (dis >=3*length_1 && dis >= 3*length_2 && flag_para) return false;
 
       
       double angle3 = dir2_1.Angle(U_dir);
