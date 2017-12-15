@@ -173,6 +173,9 @@ bool WireCell2dToy::Clustering_1st_round(WireCell::PR3DCluster *cluster1, WireCe
     
     double angle1 = dir2_1.Angle(drift_dir);
     double angle2 = dir2.Angle(drift_dir);
+
+    double angle3, angle4, angle5;
+    double angle3_1, angle4_1, angle5_1;
     
     if (fabs(angle1-3.1415926/2.)<7.5/180.*3.1415926 ||
 	fabs(angle2-3.1415926/2.)<7.5/180.*3.1415926){
@@ -182,13 +185,13 @@ bool WireCell2dToy::Clustering_1st_round(WireCell::PR3DCluster *cluster1, WireCe
       if (dis >=3*length_1 && dis >= 3*length_2 && flag_para) return false;
 
       
-      double angle3 = dir2_1.Angle(U_dir);
-      double angle4 = dir2_1.Angle(V_dir);
-      double angle5 = dir2_1.Angle(W_dir);
+      angle3 = dir2_1.Angle(U_dir);
+      angle4 = dir2_1.Angle(V_dir);
+      angle5 = dir2_1.Angle(W_dir);
       
-      double angle3_1 = dir2.Angle(U_dir);
-      double angle4_1 = dir2.Angle(V_dir);
-      double angle5_1 = dir2.Angle(W_dir);
+      angle3_1 = dir2.Angle(U_dir);
+      angle4_1 = dir2.Angle(V_dir);
+      angle5_1 = dir2.Angle(W_dir);
       
       if (fabs(angle3-3.1415926/2.)<7.5/180.*3.1415926 || fabs(angle3_1-3.1415926/2.)<7.5/180.*3.1415926 || ((fabs(angle3-3.1415926/2.)<15/180.*3.1415926 || fabs(angle3_1-3.1415926/2.)<15/180.*3.1415926)&&dis < 6*units::cm))
 	flag_para_U = true;
@@ -353,14 +356,40 @@ bool WireCell2dToy::Clustering_1st_round(WireCell::PR3DCluster *cluster1, WireCe
 	double dangle5_1 = dangle3_1 - dangle2_1;
 
 	
-	/* if (dis < 10*units::cm && (length_1 > 50*units::cm && length_2 > 50*units::cm))  */
+	/* if (flag_para_V && (length_1 > 30*units::cm && length_2 > 30*units::cm)) */
 	/*   std::cout << cluster1->get_cluster_id() << " " << cluster2->get_cluster_id() << " " << dis/units::cm << " " << length_1/units::cm << " " << length_2/units::cm << " " */
-	/*     << dangle1 << " " << dangle1_1 << " " << dangle2 << " " << dangle2_1 << " " << dangle4 */
-	/*     << " " << dangle4_1 << " " << angle_diff3 << " " << angle_diff3_1 << " " << */
-	/*     angle_diff1 << " "<< angle_diff1_1 << " " << angle_diff2 << " " << angle_diff2_1 << " " */
-	/* 	    << flag_para << " " << flag_para_U << " " << flag_para_V */
-	/* 	    << std::endl; */
+	/*     //	    << dangle1 << " " << dangle1_1 << " " << dangle2 << " " << dangle2_1 << " " << dangle4 */
+	/*     //	    << " " << dangle4_1 << " " << angle_diff3 << " " << angle_diff3_1 << " " << */
+	/*     //   angle_diff1 << " "<< angle_diff1_1 << " " << angle_diff2 << " " << angle_diff2_1 << " " */
+	/*     //	    << flag_para << " " << flag_para_U << " " << flag_para_V << " " << angle1 << " " << angle2  << " " << angle3 << " " << angle3_1 << " " << angle4 << " " << angle4_1 */
+	/* 	    << (flag_para_U || flag_para_V) << " "  */
+	/* 	    << (fabs(angle3-3.1415926/2.)/3.1415926*180 < 5 || fabs(angle4-3.1415926/2.)/3.1415926*180 < 5) << " "  // along U or V very much */
+	/* 	    << (fabs(angle1-3.1415926/2.)/3.1415926*180<5 && fabs(angle2-3.1415926/2.)/3.1415926*180<5) << " " */
+	/* 	    << (dis<35*units::cm && (length_1 <35*units::cm || length_2 < 35*units::cm)) << " "  // parallel case *\/ */
+	/* 	    << (angle_diff2 < 60 || angle_diff2_1 < 60) << " " */
+	/* 	    << (angle_diff1 < 60 || angle_diff1_1 < 60) << " " */
+	/* 	    << (angle_diff3 < 90 || angle_diff3_1 < 90) << " " // angle almost the same */
+	/* 	    << (dangle4 < 5 && dangle4_1<5 || dangle5<5 && dangle5_1 <5) << " " */
+	/* 	    << dangle1 << " " << dangle1_1 << " " << dangle2 << " " << dangle2_1 */
+	/* 	    << " " << dangle3 << " " << dangle3_1 << " " */
+	  
+	    
+	/*     	    << std::endl; */
+	//return false;
 
+	if ((flag_para_U || flag_para_V) &&
+	    (fabs(angle3-3.1415926/2.)/3.1415926*180 < 5 || fabs(angle4-3.1415926/2.)/3.1415926*180 < 5) && // along U or V very much
+	    (fabs(angle1-3.1415926/2.)/3.1415926*180<5 && fabs(angle2-3.1415926/2.)/3.1415926*180<5) && (dis<35*units::cm && (length_1 <35*units::cm || length_2 < 35*units::cm)) && // parallel case
+	    (angle_diff2 < 60 || angle_diff2_1 < 60 || length_1 < 12*units::cm) &&
+	    (angle_diff1 < 60 || angle_diff1_1 < 60 || length_2 < 12*units::cm ) &&
+	    (angle_diff3 < 90 || angle_diff3_1 < 90 || length_1<12*units::cm || length_2 < 12*units::cm) && // angle is close
+	    (fabs(dangle4) < 5 && fabs(dangle4_1)<5 || fabs(dangle5)<5 && fabs(dangle5_1) <5) &&
+	    (fabs(dangle1) < 10 || fabs(dangle1_1) < 10) &&
+	    (fabs(dangle3) < 10 || fabs(dangle3_1) < 10) //small angle close to parallel
+	    && flag_enable_extend
+	    )
+	  return true;
+	
 	
 	if ((fabs(dangle1) < 2.5 || fabs(dangle1_1) < 2.5) &&
 	    (fabs(dangle2) < 2.5 || fabs(dangle2_1) < 2.5) &&
