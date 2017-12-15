@@ -347,12 +347,12 @@ bool WireCell2dToy::Clustering_1st_round(WireCell::PR3DCluster *cluster1, WireCe
 	double dangle5_1 = dangle3_1 - dangle2_1;
 
 	
-	/* if (flag_para && dis < 10*units::cm && (length_1 > 50*units::cm || length_2 > 50*units::cm)) */
+	/* if (dis < 10*units::cm && (length_1 > 50*units::cm && length_2 > 50*units::cm))  */
 	/*   std::cout << cluster1->get_cluster_id() << " " << cluster2->get_cluster_id() << " " << dis/units::cm << " " << length_1/units::cm << " " << length_2/units::cm << " " */
 	/*     << dangle1 << " " << dangle1_1 << " " << dangle2 << " " << dangle2_1 << " " << dangle4 */
 	/*     << " " << dangle4_1 << " " << angle_diff3 << " " << angle_diff3_1 << " " << */
 	/*     angle_diff1 << " "<< angle_diff1_1 << " " << angle_diff2 << " " << angle_diff2_1 << " " */
-	/* 	    << flag_para << " " << flag_para_U << " " << flag_para_V  */
+	/* 	    << flag_para << " " << flag_para_U << " " << flag_para_V */
 	/* 	    << std::endl; */
 
 	
@@ -390,12 +390,15 @@ bool WireCell2dToy::Clustering_1st_round(WireCell::PR3DCluster *cluster1, WireCe
 	    
 	    flag_extend = true;
 	  }
+
+	  if (dis<5*units::cm && length_1 > 25*units::cm && length_2 > 25*units::cm)
+	    flag_extend = true;
 	}
       }
 
       
-      /* if ( (cluster1->get_cluster_id()==46 || cluster2->get_cluster_id()==46) && (cluster1->get_cluster_id()==55 || cluster2->get_cluster_id()==55))  */
-      /*  	std::cout << cluster1->get_cluster_id() << " " << cluster2->get_cluster_id() << " " << dis/units::cm << " " << length_1/units::cm << " " << length_2/units::cm << " " << flag_force_extend << std::endl; */
+      /* if (dis < 10*units::cm && (length_1 > 50*units::cm && length_2 > 50*units::cm)) */
+      /*  	std::cout << cluster1->get_cluster_id() << " " << cluster2->get_cluster_id() << " " << dis/units::cm << " " << length_1/units::cm << " " << length_2/units::cm << " " << flag_extend << " " << flag_force_extend << std::endl; */
       
       
       if (flag_extend && flag_enable_extend || flag_force_extend){
