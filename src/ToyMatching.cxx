@@ -107,7 +107,7 @@ std::vector<std::tuple<PR3DCluster*, Opflash*, double, std::vector<double>>> Wir
   double low_x_cut = 0*units::cm;
   double low_x_cut_ext1 = - 2*units::cm;
   double low_x_cut_ext2 = +0.5*units::cm;
-  double scaling_light_mag = 0.01;
+  double scaling_light_mag = 0.01 * 1.5;
 
 
   std::vector<Opflash*> good_flashes; // save flashes 
@@ -195,7 +195,7 @@ std::vector<std::tuple<PR3DCluster*, Opflash*, double, std::vector<double>>> Wir
 		int voxel_id = WireCell2dToy::convert_xyz_voxel_id(p);
 		std::list<std::pair<int,float>>& pmt_list = photon_library.at(voxel_id);
 		for (auto it5 = pmt_list.begin(); it5!=pmt_list.end(); it5++){
-		  pred_pmt_light.at(it5->first) += charge * it5->second;
+		  pred_pmt_light.at(map_lib_pmt[it5->first]) += charge * it5->second;
 		  //pred_pmt_light1.at(it5->first) += charge * it5->second;
 		}
 	      }
@@ -286,7 +286,8 @@ std::vector<std::tuple<PR3DCluster*, Opflash*, double, std::vector<double>>> Wir
 	for (size_t k=0;k!=32;k++){
 	  double pe = flash->get_PE(k);
 	  double pe_err = sqrt(pow(flash->get_PE_err(k)*fudge_factor2,2) + pow(pe*fudge_factor1,2));
-	  G(32*i+k,total_pairs.end()-total_pairs.begin()) = 1./pe_err * map_flash_tpc_light_preds[flash].at(j).at(map_pmt_lib[k]);
+	  //G(32*i+k,total_pairs.end()-total_pairs.begin()) = 1./pe_err * map_flash_tpc_light_preds[flash].at(j).at(map_pmt_lib[k]);
+	  G(32*i+k,total_pairs.end()-total_pairs.begin()) = 1./pe_err * map_flash_tpc_light_preds[flash].at(j).at(k);
 	}
 	// require each TPC can be used once
 	G(32*good_flashes.size()+map_tpc_index[map_flash_tpc_ids[flash].at(j)],total_pairs.end()-total_pairs.begin()) = 20.;// 10% 
