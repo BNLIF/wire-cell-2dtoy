@@ -180,10 +180,10 @@ bool WireCell2dToy::Clustering_3rd_round(WireCell::PR3DCluster *cluster1, WireCe
     std::pair<int,int> num_ps_1 = cluster1->get_num_points(p1,dir1);
     std::pair<int,int> num_ps_2 = cluster2->get_num_points(p2,dir2);
 
-    	/* if ((length_1 > 25*units::cm && length_2 > 25*units::cm) && dis < 5*units::cm) */
-	/*   std::cout << cluster1->get_cluster_id() << " " << cluster2->get_cluster_id() << " " << length_1/units::cm << " " << length_2/units::cm << " " << dis/units::cm << " " << num_ps_1.first << " " << num_ps_1.second << " " << num_ps_2.first << " " << num_ps_2.second << std::endl; */
+    /* if ((length_1 > 25*units::cm && length_2 > 25*units::cm) && dis < 5*units::cm) */
+    /*   std::cout << cluster1->get_cluster_id() << " " << cluster2->get_cluster_id() << " " << length_1/units::cm << " " << length_2/units::cm << " " << dis/units::cm << " " << num_ps_1.first << " " << num_ps_1.second << " " << num_ps_2.first << " " << num_ps_2.second << std::endl; */
 
-
+    
     
     if ((num_ps_1.second < num_ps_1.first * 0.01 || num_ps_1.second <=3) &&
 	(num_ps_2.second < num_ps_2.first * 0.01 || num_ps_2.second <=3) ||

@@ -218,40 +218,45 @@ bool WireCell2dToy::Clustering_1st_round(WireCell::PR3DCluster *cluster1, WireCe
     TVector3 tempV5;
     
     double angle6 = tempV3.Angle(U_dir);
-    tempV5.SetXYZ(fabs(p2.x-p1.x),sin(angle6),0);
+    tempV5.SetXYZ(fabs(p2.x-p1.x),sqrt(pow(p2.y - p1.y,2)+pow(p2.z - p1.z,2))*sin(angle6),0);
     angle6 = tempV5.Angle(drift_dir);
     
     double angle7 = tempV3.Angle(V_dir);
-    tempV5.SetXYZ(fabs(p2.x-p1.x),sin(angle7),0);
+    tempV5.SetXYZ(fabs(p2.x-p1.x),sqrt(pow(p2.y - p1.y,2)+pow(p2.z - p1.z,2))*sin(angle7),0);
     angle7 = tempV5.Angle(drift_dir);
     
     double angle8 = tempV3.Angle(W_dir);
-    tempV5.SetXYZ(fabs(p2.x-p1.x),sin(angle8),0);
+    tempV5.SetXYZ(fabs(p2.x-p1.x),sqrt(pow(p2.y - p1.y,2)+pow(p2.z - p1.z,2))*sin(angle8),0);
     angle8 = tempV5.Angle(drift_dir);
     
     double angle6_1 = tempV4.Angle(U_dir);
-    tempV5.SetXYZ(fabs(cluster2_ave_pos.x-cluster1_ave_pos.x),sin(angle6_1),0);
+    tempV5.SetXYZ(fabs(cluster2_ave_pos.x-cluster1_ave_pos.x),sqrt(pow(cluster2_ave_pos.y-cluster1_ave_pos.y,2)+pow(cluster2_ave_pos.z-cluster1_ave_pos.z,2))*sin(angle6_1),0);
     angle6_1 = tempV5.Angle(drift_dir);
     double angle7_1 = tempV4.Angle(V_dir);
-    tempV5.SetXYZ(fabs(cluster2_ave_pos.x-cluster1_ave_pos.x),sin(angle7_1),0);
+    tempV5.SetXYZ(fabs(cluster2_ave_pos.x-cluster1_ave_pos.x),sqrt(pow(cluster2_ave_pos.y-cluster1_ave_pos.y,2)+pow(cluster2_ave_pos.z-cluster1_ave_pos.z,2))*sin(angle7_1),0);
     angle7_1 = tempV5.Angle(drift_dir);
     
     double angle8_1 = tempV4.Angle(W_dir);
-    tempV5.SetXYZ(fabs(cluster2_ave_pos.x-cluster1_ave_pos.x),sin(angle8_1),0);
+    tempV5.SetXYZ(fabs(cluster2_ave_pos.x-cluster1_ave_pos.x),sqrt(pow(cluster2_ave_pos.y-cluster1_ave_pos.y,2)+pow(cluster2_ave_pos.z-cluster1_ave_pos.z,2))*sin(angle8_1),0);
     angle8_1 = tempV5.Angle(drift_dir);
     
-    if (angle6<7.5/180.*3.1415926  ||
-	angle6_1<7.5/180.*3.1415926 )
+    if (angle6<15/180.*3.1415926  ||
+	angle6_1<15/180.*3.1415926 )
       flag_prolong_U = true;
     
-    if (angle7<7.5/180.*3.1415926  ||
-	angle7_1<7.5/180.*3.1415926 )
+    if (angle7<15/180.*3.1415926  ||
+	angle7_1<15/180.*3.1415926 )
       flag_prolong_V = true;
     
-    if (angle8<7.5/180.*3.1415926  ||
-	angle8_1<7.5/180.*3.1415926 )
+    if (angle8<15/180.*3.1415926  ||
+	angle8_1<15/180.*3.1415926 )
       flag_prolong_W = true;
     
+
+    /* if ( (cluster1->get_cluster_id()==12 || cluster2->get_cluster_id()==12) && (cluster1->get_cluster_id()==105 || cluster2->get_cluster_id()==105)) */
+    /*   	std::cout << cluster1->get_cluster_id() << " " << cluster2->get_cluster_id() << " " << dis/units::cm << " " << length_1/units::cm << " " << length_2/units::cm << " " <<flag_prolong_U << " " << flag_prolong_V << " " << flag_prolong_W << " " << angle6/3.1415926*180. << " " << angle6_1/3.1415926*180. << " " << angle7/3.1415926*180. << " " << angle7_1/3.1415926*180.  << " " << angle8/3.1415926*180. << " " << angle8_1/3.1415926*180.  <<std::endl; */
+    
+
     
     
     // regular case
@@ -265,7 +270,7 @@ bool WireCell2dToy::Clustering_1st_round(WireCell::PR3DCluster *cluster1, WireCe
       double para_angle_cut_1 = 5;
 
       if (dis < 5*units::cm){
-	angle_cut = 10;
+	angle_cut = 15;
       }else if (dis < 15*units::cm){
 	angle_cut = 7.5;
       }else{
@@ -302,6 +307,10 @@ bool WireCell2dToy::Clustering_1st_round(WireCell::PR3DCluster *cluster1, WireCe
       double angle_diff3 = (3.1415926 - dir1.Angle(dir3))/3.1415926*180;
       double angle_diff3_1 = (3.1415926 - dir1_1.Angle(dir3_1))/3.1415926*180.;
 
+      /* if ( (cluster1->get_cluster_id()==12 || cluster2->get_cluster_id()==12) && (cluster1->get_cluster_id()==105 || cluster2->get_cluster_id()==105)) */
+      /* 	std::cout << cluster1->get_cluster_id() << " " << cluster2->get_cluster_id() << " " << dis/units::cm << " " << length_1/units::cm << " " << length_2/units::cm << " " << angle_diff1 << " " <<angle_diff1_1 << " " << angle_diff2 << " " << angle_diff2_1 << " " << angle_diff3 << " " << angle_diff3_1 << " " << std::endl; */
+      
+      
       if (dis<=3*units::cm){
 	if ((angle_diff3 < angle_cut*1.5 || angle_diff3_1 < angle_cut*1.5) &&
 	    ((angle_diff1 < angle_cut*4.5 || angle_diff1_1 < angle_cut*4.5 || length_1 < 12*units::cm) &&
