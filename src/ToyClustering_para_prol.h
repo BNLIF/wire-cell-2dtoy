@@ -272,26 +272,27 @@ bool WireCell2dToy::Clustering_2nd_round(WireCell::PR3DCluster *cluster1, WireCe
 	  angle2<15/180.*3.1415926  ||
 	  angle1p<15/180.*3.1415926 ){
 	if (length_1 > 10*units::cm || length_2 > 10*units::cm){
-	  TVector3 dir1 = cluster1->VHoughTrans(p1,30*units::cm); // cluster 1 direction based on hough
-	  TVector3 dir2 = cluster2->VHoughTrans(p2,30*units::cm); // cluster 1 direction based on hough
+	  TVector3 dir1 = cluster1->VHoughTrans(p1,60*units::cm); // cluster 1 direction based on hough
+	  TVector3 dir2 = cluster2->VHoughTrans(p2,60*units::cm); // cluster 1 direction based on hough
 	  TVector3 dir3(p2.x-p1.x,p2.y-p1.y,p2.z-p1.z);
 	  double angle3 = dir3.Angle(dir2);
 	  double angle4 = 3.1415926-dir3.Angle(dir1);
 
 	  /* if (cluster1->get_cluster_id()==12 || cluster2->get_cluster_id()==12) */
 	  /*   std::cout << cluster1->get_cluster_id() << " " << cluster2->get_cluster_id() << " " << angle1*180./3.1415926 << " " << angle2*180./3.1415926 << " " << dis/units::cm << " " << length_1/units::cm << " " << length_2/units::cm << " " << angle3/3.1415826*180. << " " << angle4/3.1415926*180. << std::endl; */
-	  
 	  // if (angle1p<15/180.*3.1415926 || (3.1415926-angle1p)<15/180.*3.1415926 )
 	  //   std::cout << cluster1->get_cluster_id() << " " << cluster2->get_cluster_id() << " " << angle3/3.1415926*180. << " " << angle4/3.1415926*180. << " " << dis/units::cm << std::endl;
 	  // if (cluster1->get_cluster_id()==52 || cluster2->get_cluster_id()==52)
 	  //   std::cout << angle3/3.1415926*180 << " " << angle4/3.1415926*180 << std::endl;
-	  
-	  if ((angle3<25/180.*3.1415926 || length_2<8*units::cm)&&(angle4<25/180.*3.1415926|| length_1<8*units::cm)&&dis<5*units::cm ||
-	      (angle3<15/180.*3.1415926 || length_2<8*units::cm)&&(angle4<15/180.*3.1415926|| length_1<8*units::cm)&&dis<15*units::cm ||
-	      (angle3<7.5/180.*3.1415926 || length_2<8*units::cm)&&(angle4<7.5/180.*3.1415926|| length_1<8*units::cm) ||
+	  if ((angle3<25/180.*3.1415926 || length_2<12*units::cm)&&(angle4<25/180.*3.1415926|| length_1<12*units::cm)&&dis<5*units::cm ||
+	      (angle3<15/180.*3.1415926 || length_2<12*units::cm)&&(angle4<15/180.*3.1415926|| length_1<12*units::cm)&&dis<15*units::cm ||
+	      (angle3<7.5/180.*3.1415926 || length_2<12*units::cm)&&(angle4<7.5/180.*3.1415926|| length_1<12*units::cm) ||
 	      (angle3+angle4 < 15/180.*3.1415926 && angle3 < 10/180.*3.1415926 && angle4 < 10/180.*3.1415926)
 	      )
 	    return true;
+
+	 
+	      
 	}
       }else{
 	//regular cases (only for very short distance ... )
