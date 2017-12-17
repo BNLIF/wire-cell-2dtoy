@@ -177,8 +177,8 @@ bool WireCell2dToy::Clustering_1st_round(WireCell::PR3DCluster *cluster1, WireCe
     double angle3, angle4, angle5;
     double angle3_1, angle4_1, angle5_1;
     
-    if (fabs(angle1-3.1415926/2.)<7.5/180.*3.1415926 ||
-	fabs(angle2-3.1415926/2.)<7.5/180.*3.1415926){
+    if ((fabs(angle1-3.1415926/2.)<7.5/180.*3.1415926 ||
+	 fabs(angle2-3.1415926/2.)<7.5/180.*3.1415926) && dis < 45*units::cm){
       flag_para = true;
 
 
@@ -270,7 +270,7 @@ bool WireCell2dToy::Clustering_1st_round(WireCell::PR3DCluster *cluster1, WireCe
       double para_angle_cut_1 = 5;
 
       if (dis < 5*units::cm){
-	angle_cut = 15;
+	angle_cut = 12;
       }else if (dis < 15*units::cm){
 	angle_cut = 7.5;
       }else{
