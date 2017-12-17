@@ -124,7 +124,7 @@ bool WireCell2dToy::Clustering_2nd_round(WireCell::PR3DCluster *cluster1, WireCe
   /*     dis/units::cm << " " << length_1/units::cm << " " << length_2/units::cm << " " << length_cut/units::cm << std::endl; */
   
   
-  if (dis < length_cut || (dis < 80*units::cm && length_1>25*units::cm && length_2>25*units::cm)){
+  if (dis < length_cut || (dis < 80*units::cm && length_1 >20*units::cm && length_2>25*units::cm)){
     Point cluster1_ave_pos = cluster1->calc_ave_pos(p1,10*units::cm);
     Point cluster2_ave_pos = cluster2->calc_ave_pos(p2,10*units::cm);
 
