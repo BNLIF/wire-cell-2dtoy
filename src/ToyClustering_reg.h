@@ -11,13 +11,14 @@ void WireCell2dToy::Clustering_regular(WireCell::PR3DClusterSelection& live_clus
   double time_slice_width = mp.get_ts_width();
   //std::vector<double> cluster_length_vec;
   //estimated length
-  for (size_t i=0; i!= live_clusters.size(); i++){
-    PR3DCluster* cluster_1 = live_clusters.at(i);
-    std::vector<int> range_v1 = cluster_1->get_uvwt_range();
-    double length_1 = sqrt(2./3. * (pow(pitch_u*range_v1.at(0),2) + pow(pitch_v*range_v1.at(1),2) + pow(pitch_w*range_v1.at(2),2)) + pow(time_slice_width*range_v1.at(3),2));
-    //cluster_length_vec.push_back(length_1);
-    cluster_length_map[cluster_1] = length_1;
-  }
+  if (cluster_length_map.size()==0)
+    for (size_t i=0; i!= live_clusters.size(); i++){
+      PR3DCluster* cluster_1 = live_clusters.at(i);
+      std::vector<int> range_v1 = cluster_1->get_uvwt_range();
+      double length_1 = sqrt(2./3. * (pow(pitch_u*range_v1.at(0),2) + pow(pitch_v*range_v1.at(1),2) + pow(pitch_w*range_v1.at(2),2)) + pow(time_slice_width*range_v1.at(3),2));
+      //cluster_length_vec.push_back(length_1);
+      cluster_length_map[cluster_1] = length_1;
+    }
   
 
   for (int kk=0;kk!=1;kk++){

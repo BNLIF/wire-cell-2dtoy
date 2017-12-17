@@ -9,6 +9,15 @@ void WireCell2dToy::Clustering_close(WireCell::PR3DClusterSelection& live_cluste
   double angle_w = mp.get_angle_w();
   double time_slice_width = mp.get_ts_width();
   
+  if (cluster_length_map.size()==0)
+    for (size_t i=0; i!= live_clusters.size(); i++){
+      PR3DCluster* cluster_1 = live_clusters.at(i);
+      std::vector<int> range_v1 = cluster_1->get_uvwt_range();
+      double length_1 = sqrt(2./3. * (pow(pitch_u*range_v1.at(0),2) + pow(pitch_v*range_v1.at(1),2) + pow(pitch_w*range_v1.at(2),2)) + pow(time_slice_width*range_v1.at(3),2));
+      //cluster_length_vec.push_back(length_1);
+      cluster_length_map[cluster_1] = length_1;
+    }
+  
   
   std::set<std::pair<PR3DCluster*, PR3DCluster*>> to_be_merged_pairs;
   for (size_t i=0;i!=live_clusters.size();i++){
