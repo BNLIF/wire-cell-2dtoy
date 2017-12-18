@@ -164,6 +164,7 @@ void WireCell2dToy::Clustering_jump_gap_cosmics(WireCell::PR3DClusterSelection& 
   //extend the track ... 
   Clustering_extend(live_clusters, cluster_length_map,1,150*units::cm);
   Clustering_extend(live_clusters, cluster_length_map,2,30*units::cm);
+  Clustering_extend(live_clusters, cluster_length_map,3,15*units::cm);
   
   
   // for (auto it=cluster_length_map.begin(); it!=cluster_length_map.end(); it++){

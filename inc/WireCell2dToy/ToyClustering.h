@@ -27,6 +27,7 @@ namespace WireCell2dToy{
   void Clustering_extend(WireCell::PR3DClusterSelection& live_clusters, std::map<WireCell::PR3DCluster*,double>& cluster_length_map, int flag, double length_cut = 150*units::cm);
   bool Clustering_4th_prol(WireCell::PR3DCluster *cluster1, WireCell::PR3DCluster *cluster2, double length_2, WireCell::Point& earliest_p, TVector3& dir_earlp, double length_cut);
   bool Clustering_4th_para(WireCell::PR3DCluster *cluster1, WireCell::PR3DCluster *cluster2, double length_2, WireCell::Point& earliest_p, TVector3& dir_earlp, double length_cut);
+  bool Clustering_4th_reg(WireCell::PR3DCluster *cluster1, WireCell::PR3DCluster *cluster2, double length_2, WireCell::Point p1, double length_cut);
   
   
   //void Clustering_prolong(WireCell::PR3DClusterSelection& live_clusters, std::map<WireCell::PR3DCluster*,double>& cluster_length_map, double length_cut = 45*units::cm);

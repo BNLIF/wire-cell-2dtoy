@@ -352,7 +352,19 @@ int main(int argc, char* argv[])
       hv_raw->SetBinContent(i+1-2400,j+1,0);
     }
   }
-  
+  // U wire plane bad channels
+  for (int i=2160;i!=2176;i++){
+    if (uplane_map.find(i)==uplane_map.end()){
+      uplane_map[i] = std::make_pair(0,hv_raw->GetNbinsY()-1);
+      std::cout << "U plane (bad): " << i << " added to bad channel list" << std::endl;
+    }else{
+      uplane_map[i] = std::make_pair(0,hv_raw->GetNbinsY()-1);
+    }
+    for (int j=0;j!=hu_decon->GetNbinsY();j++){
+      hu_decon->SetBinContent(i+1,j+1,0);
+      hu_decon_g->SetBinContent(i+1,j+1,0);
+    }
+  }
 
   WireCell2dToy::Noisy_Event_ID(hu_decon, hv_decon, hw_decon, uplane_rms, vplane_rms, wplane_rms, uplane_map, vplane_map, wplane_map, hu_decon_g, hv_decon_g, hw_decon_g, nrebin, hv_raw, true);
   WireCell2dToy::Organize_Dead_Channels(uplane_map, vplane_map, wplane_map, hv_raw->GetNbinsY()-1,nrebin);
