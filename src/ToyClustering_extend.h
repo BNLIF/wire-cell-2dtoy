@@ -242,12 +242,14 @@ bool WireCell2dToy::Clustering_4th_prol(WireCell::PR3DCluster *cluster_1, PR3DCl
   if (dis < length_cut){
     TVector3 dir_bp(p2.x-earliest_p.x,p2.y-earliest_p.y,p2.z-earliest_p.z);
     double angle_diff = (3.1415926-dir_bp.Angle( dir_earlp))/3.1415926*180.;
-    if ( (angle_diff < 3 || dis * sin(angle_diff/180.*3.1415926) < 6*units::cm)){
+    if ( (angle_diff < 3 || angle_diff>177 || git status
+	  dis * sin(angle_diff/180.*3.1415926) < 6*units::cm)){
       if (length_2<10*units::cm){
 	return true;
       }else{
 	TVector3 dir = cluster_2->VHoughTrans(p2,60*units::cm);
-	if ((3.14151926-dir.Angle(dir_earlp))/3.1415926*180.<5.)
+	if ((3.14151926-dir.Angle(dir_earlp))/3.1415926*180.<5. ||
+	    dir.Angle(dir_earlp)/3.1415926*180.<5.)
 	  return true;
       }
     }
