@@ -1,4 +1,4 @@
-void WireCell2dToy::Clustering_extend(WireCell::PR3DClusterSelection& live_clusters, std::map<PR3DCluster*,double>& cluster_length_map, double para_length_cut, double prol_length_cut){
+void WireCell2dToy::Clustering_extend(WireCell::PR3DClusterSelection& live_clusters, std::map<PR3DCluster*,double>& cluster_length_map, int flag,  double length_cut){
   
    // calculate the length ...
   TPCParams& mp = Singleton<TPCParams>::Instance();
@@ -38,56 +38,15 @@ void WireCell2dToy::Clustering_extend(WireCell::PR3DClusterSelection& live_clust
       bool flag_para = false;
       bool flag_prol = false;
 
-      if (!flag_para && !flag_prol){
-	std::pair<WCPointCloud<double>::WCPoint,WCPointCloud<double>::WCPoint> hl_ps = cluster_1->get_highest_lowest_wcps();
-	// find highest point
-	highest_p.x = hl_ps.first.x;
-	highest_p.y = hl_ps.first.y;
-	highest_p.z = hl_ps.first.z;
-	
-	TVector3 dir_highp = cluster_1->VHoughTrans(highest_p,60*units::cm);
-	
-	// find lowest point
-	lowest_p.x = hl_ps.second.x;
-	lowest_p.y = hl_ps.second.y;
-	lowest_p.z = hl_ps.second.z;
-
-	TVector3 dir_lowp = cluster_1->VHoughTrans(lowest_p, 60*units::cm);
-	
-	/* if (fabs(dir_highp.Angle(drift_dir)-3.1415926/2.)<5./180.*3.1415926){ */
-	/*   flag_para = true; */
-
-	/*   for (size_t j=0;j!=live_clusters.size();j++){ */
-	/*     PR3DCluster* cluster_2 = live_clusters.at(j); */
-	/*     if (cluster_2 == cluster_1) continue; */
-	/*     std::pair<SlimMergeGeomCell*,Point> temp_results = cluster_2->get_closest_point_mcell(highest_p); */
-	/*     Point p2 = temp_results.second; */
-	/*     double dis = sqrt(pow(highest_p.x-p2.x,2) + pow(highest_p.y-p2.y,2)+pow(highest_p.z-p2.z,2)); */
-	/*     if (dis < para_length_cut){ */
-	      
-	/*     } */
-	/*   } */
-	/* }else{ */
-
-	/* } */
-	
-	/* if (fabs(dir_lowp.Angle(drift_dir)-3.1415926/2.)<5./180.*3.1415926 ){ */
-	/*   flag_para = true; */
-
-	/* }else{ */
-
-	/* } */
-      }
-
-      if (!flag_para && !flag_prol){
+      if (flag==1){// prolong case ... 
 	std::pair<WCPointCloud<double>::WCPoint,WCPointCloud<double>::WCPoint> el_ps = cluster_1->get_earliest_latest_wcps();
 	// find earliest point
 	earliest_p.x = el_ps.first.x;
 	earliest_p.y = el_ps.first.y;
 	earliest_p.z = el_ps.first.z;
-
+	
 	TVector3 dir_earlp = cluster_1->VHoughTrans(earliest_p,60*units::cm);
-
+	
 	TVector3 tempV5,tempV1;
 	tempV1.SetXYZ(0,dir_earlp.Y(),dir_earlp.Z());
 	double angle1 = tempV1.Angle(U_dir);
@@ -130,10 +89,11 @@ void WireCell2dToy::Clustering_extend(WireCell::PR3DClusterSelection& live_clust
 
 	
 	if (angle1 <5./180.*3.1415926 || angle2 < 5./180.*3.1415926 || angle3 < 5./180.*3.1415926){
+	  flag_prol = true;
 	  for (size_t j=0;j!=live_clusters.size();j++){
 	    PR3DCluster* cluster_2 = live_clusters.at(j);
 	    if (cluster_2 == cluster_1) continue;
-	    if (Clustering_4th_prol(cluster_1,cluster_2,cluster_length_map[cluster_2],earliest_p,dir_earlp,prol_length_cut))
+	    if (Clustering_4th_prol(cluster_1,cluster_2,cluster_length_map[cluster_2],earliest_p,dir_earlp,length_cut))
 	      to_be_merged_pairs.insert(std::make_pair(cluster_1,cluster_2));
 	  }
 	}
@@ -141,17 +101,69 @@ void WireCell2dToy::Clustering_extend(WireCell::PR3DClusterSelection& live_clust
    
 
 	if (angle4<5./180.*3.1415926 || angle5 < 5./180.*3.1415926 || angle6 < 5./180.*3.1415926){
+	  flag_prol = true;
 	  for (size_t j=0;j!=live_clusters.size();j++){
 	    PR3DCluster* cluster_2 = live_clusters.at(j);
 	    if (cluster_2 == cluster_1) continue;
-	    if (Clustering_4th_prol(cluster_1,cluster_2,cluster_length_map[cluster_2],latest_p,dir_latep,prol_length_cut))
+	    if (Clustering_4th_prol(cluster_1,cluster_2,cluster_length_map[cluster_2],latest_p,dir_latep,length_cut))
 	      to_be_merged_pairs.insert(std::make_pair(cluster_1,cluster_2));
 	  }
 	}
+      }else if (flag==2){ // parallel case
+	
+	std::pair<WCPointCloud<double>::WCPoint,WCPointCloud<double>::WCPoint> hl_ps = cluster_1->get_highest_lowest_wcps();
+	// find highest point
+	highest_p.x = hl_ps.first.x;
+	highest_p.y = hl_ps.first.y;
+	highest_p.z = hl_ps.first.z;
 
+	highest_p = cluster_1->calc_ave_pos(highest_p,100);
+	
+	TVector3 dir_highp = cluster_1->VHoughTrans(highest_p,100*units::cm);
+	
+	// find lowest point
+	lowest_p.x = hl_ps.second.x;
+	lowest_p.y = hl_ps.second.y;
+	lowest_p.z = hl_ps.second.z;
 
+	lowest_p = cluster_1->calc_ave_pos(lowest_p,5*units::cm);
+	
+	TVector3 dir_lowp = cluster_1->VHoughTrans(lowest_p, 100);
+
+	//	std::cout << cluster_1->get_cluster_id() << " " << cluster_length_map[cluster_1]/units::cm << " " << fabs(dir_highp.Angle(drift_dir)-3.1415926/2.)/3.1415926*180. << " " << fabs(dir_lowp.Angle(drift_dir)-3.1415926/2.)/3.1415926*180. << " " << std::endl; 
+	
+	 if (fabs(dir_highp.Angle(drift_dir)-3.1415926/2.)<5./180.*3.1415926){ 
+	   flag_para = true; 
+
+	   for (size_t j=0;j!=live_clusters.size();j++){
+	     PR3DCluster* cluster_2 = live_clusters.at(j);
+	     if (cluster_2 == cluster_1) continue;
+	     if (Clustering_4th_para(cluster_1,cluster_2,cluster_length_map[cluster_2],highest_p,dir_highp,length_cut))
+	       to_be_merged_pairs.insert(std::make_pair(cluster_1,cluster_2));
+	   }
+	 } 
+	
+	 if (fabs(dir_lowp.Angle(drift_dir)-3.1415926/2.)<5./180.*3.1415926 ){ 
+	   flag_para = true; 
+
+	   for (size_t j=0;j!=live_clusters.size();j++){
+	     PR3DCluster* cluster_2 = live_clusters.at(j);
+	     if (cluster_2 == cluster_1) continue;
+	     if (Clustering_4th_para(cluster_1,cluster_2,cluster_length_map[cluster_2],lowest_p,dir_lowp,length_cut))
+	       to_be_merged_pairs.insert(std::make_pair(cluster_1,cluster_2));
+	   }
+	   
+	 }
+	 
+      }else if (flag==3){ // regular case ...
 	
       }
+      
+      
+
+    
+
+      
       
     }
   }
@@ -233,6 +245,50 @@ void WireCell2dToy::Clustering_extend(WireCell::PR3DClusterSelection& live_clust
 }
 
 
+bool WireCell2dToy::Clustering_4th_para(WireCell::PR3DCluster *cluster_1, WireCell::PR3DCluster *cluster_2, double length_2, WireCell::Point& earliest_p, TVector3& dir_earlp, double length_cut){
+  cluster_2->Create_point_cloud();
+ 
+  std::pair<SlimMergeGeomCell*,Point> temp_results = cluster_2->get_closest_point_mcell(earliest_p);
+  Point p2 = temp_results.second;
+
+  double dis = sqrt(pow(earliest_p.x-p2.x,2) + pow(earliest_p.y-p2.y,2)+pow(earliest_p.z-p2.z,2));
+  
+  
+  if (dis < length_cut){
+    
+    Point test_point; 
+    double min_dis = 1e9, max_dis = -1e9;
+    
+    for (int i=-5;i!=10;i++){ 
+ 	test_point.x = earliest_p.x - dir_earlp.X() * (dis +i*2*units::cm); 
+ 	test_point.y = earliest_p.y - dir_earlp.Y() * (dis +i*2*units::cm); 
+ 	test_point.z = earliest_p.z - dir_earlp.Z() * (dis +i*2*units::cm); 
+	
+ 	std::pair<SlimMergeGeomCell*,Point> temp_results = cluster_2->get_closest_point_mcell(test_point); 
+ 	//reuse this 
+ 	Point test_point1 = temp_results.second;
+
+	/* std::cout << test_point.x/units::cm << " " << test_point.y/units::cm << " " << test_point.z/units::cm << " " << test_point1.x/units::cm << " " << test_point1.y/units::cm << " " << test_point1.z/units::cm << " " << sqrt(pow(test_point1.x-test_point.x,2)+pow(test_point1.y-test_point.y,2)+pow(test_point1.z-test_point.z,2))/units::cm << std::endl; */
+	
+ 	if (sqrt(pow(test_point1.x-test_point.x,2)+pow(test_point1.y-test_point.y,2)+pow(test_point1.z-test_point.z,2))<1.5*units::cm){ 
+ 	  double temp_dis = (test_point1.x - earliest_p.x)*dir_earlp.X() + (test_point1.y - earliest_p.y)*dir_earlp.Y() + (test_point1.z - earliest_p.z)*dir_earlp.Z(); 
+ 	  temp_dis *=-1; 
+ 	  if (temp_dis < min_dis) min_dis = temp_dis; 
+ 	  if (temp_dis > max_dis) max_dis = temp_dis; 
+ 	} 
+    }
+
+    
+    /* std::cout << cluster_1->get_cluster_id() << " " << length_2/units::cm << " " << max_dis/units::cm << " " << min_dis/units::cm << " " << dis/units::cm << " " << dir_earlp.X() << " " << dir_earlp.Y() << " " << dir_earlp.Z() << std::endl;  */
+
+    
+    if ((max_dis - min_dis)>2.5*units::cm) return true; 
+    
+  }
+  return false;
+}
+
+
 bool WireCell2dToy::Clustering_4th_prol(WireCell::PR3DCluster *cluster_1, PR3DCluster *cluster_2, double length_2, Point& earliest_p, TVector3& dir_earlp, double length_cut){
   cluster_2->Create_point_cloud();
  
@@ -242,7 +298,7 @@ bool WireCell2dToy::Clustering_4th_prol(WireCell::PR3DCluster *cluster_1, PR3DCl
   if (dis < length_cut){
     TVector3 dir_bp(p2.x-earliest_p.x,p2.y-earliest_p.y,p2.z-earliest_p.z);
     double angle_diff = (3.1415926-dir_bp.Angle( dir_earlp))/3.1415926*180.;
-    if ( (angle_diff < 3 || angle_diff>177 || git status
+    if ( (angle_diff < 3 || angle_diff>177 || 
 	  dis * sin(angle_diff/180.*3.1415926) < 6*units::cm)){
       if (length_2<10*units::cm){
 	return true;
