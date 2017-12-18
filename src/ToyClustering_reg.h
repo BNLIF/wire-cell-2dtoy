@@ -263,6 +263,7 @@ bool WireCell2dToy::Clustering_1st_round(WireCell::PR3DCluster *cluster1, WireCe
     // regular case
     
     if (dis <= 15*units::cm) flag_regular = true;
+    if (dis <= 25*units::cm && length_1 > 30*units::cm && length_2 > 30*units::cm) flag_regular = true;
     
     if ((flag_para_U || flag_para_V || flag_para_W) && flag_para ||
 	flag_prolong_U || flag_prolong_V || flag_prolong_W || flag_regular){
