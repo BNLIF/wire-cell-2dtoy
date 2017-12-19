@@ -161,10 +161,14 @@ void WireCell2dToy::Clustering_jump_gap_cosmics(WireCell::PR3DClusterSelection& 
   //clustering close distance ones ... 
   Clustering_close(live_clusters, cluster_length_map,1.2*units::cm);
 
-  //extend the track ... 
+  //extend the track ...
+  // deal with prolong case
   Clustering_extend(live_clusters, cluster_length_map,1,150*units::cm);
+
+  // deal with parallel case 
   Clustering_extend(live_clusters, cluster_length_map,2,30*units::cm);
-  
+
+  // extension 
   Clustering_extend(live_clusters, cluster_length_map,3,15*units::cm);
   
   

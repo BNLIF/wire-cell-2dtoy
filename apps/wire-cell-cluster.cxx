@@ -288,10 +288,22 @@ int main(int argc, char* argv[])
    // form sampling points for the normal cells ...
    for (size_t i=0; i!=live_clusters.size();i++){
      WireCell2dToy::calc_sampling_points(gds,live_clusters.at(i),nrebin, frame_length, unit_dis);
-     live_clusters.at(i)->Calc_PCA();
+     // live_clusters.at(i)->Calc_PCA();
    }
    cerr << em("Add X, Y, Z points") << std::endl;
 
+   // create global point cloud and mcell to cluster map ...
+   ToyPointCloud *global_point_cloud =  new ToyPointCloud();
+   std::map<SlimMergeGeomCell*,PR3DCluster*> mcell_cluster_map;
+   for (size_t i=0;i!=live_clusters.size();i++){
+     live_clusters.at(i)->Create_point_cloud(global_point_cloud);
+     live_clusters.at(i)->Update_mcell_cluster_map(mcell_cluster_map);
+   }
+   global_point_cloud->build_kdtree_index();
+
+   // std::cout << mcell_cluster_map.size() << " " << global_point_cloud->get_num_points() << std::endl;
+   
+   cerr << em("Build global and local point clouds") << std::endl;
    
    WireCell2dToy::Clustering_live_dead(live_clusters, dead_clusters);
    cerr << em("Clustering live and dead clusters") << std::endl;
