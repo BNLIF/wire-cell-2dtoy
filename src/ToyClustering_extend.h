@@ -355,7 +355,7 @@ bool WireCell2dToy::Clustering_4th_reg(WireCell::PR3DCluster *cluster_1, WireCel
     
     
     if ((max_dis - min_dis)>2.5*units::cm) return true;
-  }else if (dis < 5 * length_cut && length_2 < 40*units::cm){
+  }else if (dis < 2 * length_cut && length_2 < 40*units::cm){
     TVector3 drift_dir(1,0,0);
     // pronlonged case for U 3 and V 4 ...
     TVector3 U_dir(0,cos(60./180.*3.1415926),sin(60./180.*3.1415926));
