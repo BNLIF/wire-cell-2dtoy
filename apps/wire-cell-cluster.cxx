@@ -305,10 +305,10 @@ int main(int argc, char* argv[])
    
    cerr << em("Build global and local point clouds") << std::endl;
    
-   WireCell2dToy::Clustering_live_dead(live_clusters, dead_clusters);
-   cerr << em("Clustering live and dead clusters") << std::endl;
+   // WireCell2dToy::Clustering_live_dead(live_clusters, dead_clusters);
+   // cerr << em("Clustering live and dead clusters") << std::endl;
 
-   WireCell2dToy::Clustering_jump_gap_cosmics(live_clusters);
+   WireCell2dToy::Clustering_jump_gap_cosmics(live_clusters, dead_clusters);
    cerr << em("Clustering to jump gap in cosmics") << std::endl;
 
 
