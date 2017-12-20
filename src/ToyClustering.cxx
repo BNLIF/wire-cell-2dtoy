@@ -184,13 +184,11 @@ void WireCell2dToy::Clustering_jump_gap_cosmics(WireCell::PR3DClusterSelection& 
   Clustering_regular(live_clusters, cluster_length_map,cluster_connected_dead,60*units::cm,false);
   Clustering_regular(live_clusters, cluster_length_map,cluster_connected_dead,30*units::cm,true); // do extension
 
-  // std::cout << cluster_connected_dead.size() << std::endl;
+
   
   //dedicated one dealing with parallel and prolonged track
   Clustering_parallel_prolong(live_clusters, cluster_length_map,cluster_connected_dead,35*units::cm);
-
-  //  std::cout << cluster_connected_dead.size() << std::endl;
-
+  
   //clustering close distance ones ... 
   Clustering_close(live_clusters, cluster_length_map,cluster_connected_dead,1.2*units::cm);
 
@@ -203,7 +201,7 @@ void WireCell2dToy::Clustering_jump_gap_cosmics(WireCell::PR3DClusterSelection& 
   Clustering_extend(live_clusters, cluster_length_map,cluster_connected_dead,2,30*units::cm);
   // extension regular case
   Clustering_extend(live_clusters, cluster_length_map,cluster_connected_dead,3,15*units::cm);
-   // extension ones connected to dead region ...
+  // extension ones connected to dead region ...
   Clustering_extend(live_clusters, cluster_length_map,cluster_connected_dead,4,60*units::cm);
   
 

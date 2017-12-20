@@ -300,13 +300,8 @@ int main(int argc, char* argv[])
      live_clusters.at(i)->Update_mcell_cluster_map(mcell_cluster_map);
    }
    global_point_cloud->build_kdtree_index();
-
-   // std::cout << mcell_cluster_map.size() << " " << global_point_cloud->get_num_points() << std::endl;
-   
    cerr << em("Build global and local point clouds") << std::endl;
    
-   // WireCell2dToy::Clustering_live_dead(live_clusters, dead_clusters);
-   // cerr << em("Clustering live and dead clusters") << std::endl;
 
    WireCell2dToy::Clustering_jump_gap_cosmics(live_clusters, dead_clusters);
    cerr << em("Clustering to jump gap in cosmics") << std::endl;

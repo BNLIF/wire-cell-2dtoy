@@ -311,25 +311,79 @@ bool WireCell2dToy::Clustering_4th_dead(WireCell::PR3DCluster *cluster_1, WireCe
   double dis = Find_Closeset_Points(cluster_1, cluster_2, length_1, length_2, length_cut, mcell1, mcell2, p1,p2);
   
   if (dis < length_cut || (length_2 > 50*units::cm && dis < 80*units::cm)){
-    Point cluster1_ave_pos = cluster_1->calc_ave_pos(p1,5*units::cm);
-    Point cluster2_ave_pos = cluster_2->calc_ave_pos(p2,5*units::cm);
-    TVector3 dir1 = cluster_1->VHoughTrans(cluster1_ave_pos,60*units::cm);
-    TVector3 dir3 = cluster_2->VHoughTrans(cluster2_ave_pos,60*units::cm);
-    TVector3 dir2(cluster2_ave_pos.x - cluster1_ave_pos.x+1e-9, cluster2_ave_pos.y - cluster1_ave_pos.y+1e-9, cluster2_ave_pos.z - cluster1_ave_pos.z+1e-9); // 2-1
 
-    double angle1 = (3.1415926-dir1.Angle(dir2))/3.1415926*180.;
-    double angle2 = dir3.Angle(dir2)/3.1415926*180.;
-    double angle3 = (3.1415926-dir1.Angle(dir3))/3.1415926*180.;
+    for (int i=0;i!=3;i++){
+      Point cluster1_ave_pos; 
+      Point cluster2_ave_pos; 
+      
+      TVector3 dir1; 
+      TVector3 dir3; 
+      TVector3 dir2;
 
-    /* if (length_2/units::cm > 50) */
-    /* 	std::cout << cluster_1->get_cluster_id() << " " << cluster_2->get_cluster_id() << " " << length_1/units::cm << " " << length_2/units::cm << " " << angle1 << " " << angle2 << " " << angle3 << std::endl; */
-    /* return false; */
-    
-    if (length_2 <=10*units::cm){
-      if (angle1 < 15 && (angle2 < 60 || length_2 < 5*units::cm)) return true;
-    }else{
-      if (angle1 < 15 && angle2 <15 && angle3 < 25)
-	return true;
+      	/* if (length_2/units::cm > 50) */
+	/*   std::cout << cluster_1->get_cluster_id() << " " << cluster_2->get_cluster_id() << " " << length_1/units::cm << " " << length_2/units::cm << " " <<  " "  << std::endl; */
+      
+      if (i==0){
+	cluster1_ave_pos = cluster_1->calc_ave_pos(p1,5*units::cm);
+	cluster2_ave_pos = cluster_2->calc_ave_pos(p2,5*units::cm);
+	
+	dir1 = cluster_1->VHoughTrans(cluster1_ave_pos,60*units::cm);
+	dir3 = cluster_2->VHoughTrans(cluster2_ave_pos,60*units::cm);
+	dir2.SetXYZ(cluster2_ave_pos.x - cluster1_ave_pos.x+1e-9, cluster2_ave_pos.y - cluster1_ave_pos.y+1e-9, cluster2_ave_pos.z - cluster1_ave_pos.z+1e-9); // 2-1
+      }else if (i==1){
+	cluster1_ave_pos = cluster_1->calc_ave_pos(p1,5*units::cm);
+	dir1 = cluster_1->VHoughTrans(cluster1_ave_pos,60*units::cm);
+
+	TVector3 dir_test(dir1);
+	dir_test.SetMag(1);
+	dir_test *= -1;
+
+	std::pair<Point, double> temp_results = cluster_2->get_closest_point_along_vec(cluster1_ave_pos, dir_test, dis*2, 5*units::cm, 15, 10*units::cm);
+
+	/* if (length_2/units::cm > 50 &&  cluster_1->get_cluster_id()==13 && cluster_2->get_cluster_id()==75) */
+	/*   std::cout << cluster_1->get_cluster_id() << " " << cluster_2->get_cluster_id() << " " << length_1/units::cm << " " << length_2/units::cm << " " <<  " a " << temp_results.second/units::cm << " " << cluster1_ave_pos.x/units::cm << " " << cluster1_ave_pos.y/units::cm << " " << cluster1_ave_pos.z/units::cm << " " << temp_results.first.x/units::cm << " " << temp_results.first.y/units::cm << " " << temp_results.first.z/units::cm << " " << dir_test.X() << " " << dir_test.Y() << " " << dir_test.Z() << " " << dis/units::cm << " " << std::endl; */
+      
+	
+	if (temp_results.second < 100*units::cm){
+	  cluster2_ave_pos = cluster_2->calc_ave_pos(temp_results.first,5*units::cm);
+	  dir3 = cluster_2->VHoughTrans(cluster2_ave_pos,60*units::cm);
+	  dir2.SetXYZ(cluster2_ave_pos.x - cluster1_ave_pos.x+1e-9, cluster2_ave_pos.y - cluster1_ave_pos.y+1e-9, cluster2_ave_pos.z - cluster1_ave_pos.z+1e-9); // 2-1
+	}else{
+	  continue;
+	}
+      }else if (i==2){
+	cluster2_ave_pos = cluster_2->calc_ave_pos(p2,5*units::cm);
+	dir3 = cluster_2->VHoughTrans(cluster2_ave_pos,60*units::cm);
+
+	TVector3 dir_test(dir3);
+	dir_test.SetMag(1);
+	dir_test *= -1;
+	
+	std::pair<Point, double> temp_results = cluster_1->get_closest_point_along_vec(cluster2_ave_pos, dir_test, dis*2, 5*units::cm, 15, 10*units::cm);
+
+	/* if (length_2/units::cm > 50 &&  cluster_1->get_cluster_id()==13 && cluster_2->get_cluster_id()==75) */
+	/*   std::cout << cluster_1->get_cluster_id() << " " << cluster_2->get_cluster_id() << " " << length_1/units::cm << " " << length_2/units::cm << " " <<  " b " << temp_results.second/units::cm << " " << cluster2_ave_pos.x/units::cm << " " << cluster2_ave_pos.y/units::cm << " " << cluster2_ave_pos.z/units::cm << " " << temp_results.first.x/units::cm << " " << temp_results.first.y/units::cm << " " << temp_results.first.z/units::cm <<std::endl; */
+
+	
+	if (temp_results.second < 100*units::cm){
+	  cluster1_ave_pos = cluster_1->calc_ave_pos(temp_results.first,5*units::cm);
+	  dir1 = cluster_1->VHoughTrans(cluster1_ave_pos,60*units::cm);
+	  dir2.SetXYZ(cluster2_ave_pos.x - cluster1_ave_pos.x+1e-9, cluster2_ave_pos.y - cluster1_ave_pos.y+1e-9, cluster2_ave_pos.z - cluster1_ave_pos.z+1e-9); // 2-1
+	}else{
+	  continue;
+	}
+      }
+      
+      double angle1 = (3.1415926-dir1.Angle(dir2))/3.1415926*180.;
+      double angle2 = dir3.Angle(dir2)/3.1415926*180.;
+      double angle3 = (3.1415926-dir1.Angle(dir3))/3.1415926*180.;
+      
+      if (length_2 <=10*units::cm){
+	if (angle1 < 15 && (angle2 < 60 || length_2 < 5*units::cm)) return true;
+      }else{
+	if (angle1 < 15 && angle2 <15 && angle3 < 25)
+	  return true;
+      }
     }
   }
   

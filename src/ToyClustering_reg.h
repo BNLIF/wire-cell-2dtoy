@@ -20,15 +20,18 @@ void WireCell2dToy::Clustering_regular(WireCell::PR3DClusterSelection& live_clus
       cluster_length_map[cluster_1] = length_1;
     }
   
-
+  double internal_length_cut = 10 *units::cm;
+  if (flag_enable_extend)
+    internal_length_cut = 20*units::cm;
+  
   for (int kk=0;kk!=1;kk++){
     std::set<std::pair<PR3DCluster*, PR3DCluster*>> to_be_merged_pairs;
     for (size_t i=0;i!=live_clusters.size();i++){
       PR3DCluster* cluster_1 = live_clusters.at(i);
-      if (cluster_length_map[cluster_1] < 10*units::cm) continue;
+      if (cluster_length_map[cluster_1] < internal_length_cut) continue;
       for (size_t j=i+1;j<live_clusters.size();j++){
 	PR3DCluster* cluster_2 = live_clusters.at(j);
-	if (cluster_length_map[cluster_2] < 10*units::cm) continue;
+	if (cluster_length_map[cluster_2] < internal_length_cut) continue;
 	//std::cout << cluster_1->get_cluster_id() << " " << cluster_2->get_cluster_id() << std::endl;
 	if (WireCell2dToy::Clustering_1st_round(cluster_1,cluster_2, cluster_length_map[cluster_1], cluster_length_map[cluster_2], length_cut, flag_enable_extend))
 	  to_be_merged_pairs.insert(std::make_pair(cluster_1,cluster_2));
