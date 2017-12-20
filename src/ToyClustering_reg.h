@@ -1,4 +1,4 @@
-void WireCell2dToy::Clustering_regular(WireCell::PR3DClusterSelection& live_clusters, std::map<PR3DCluster*,double>& cluster_length_map, double length_cut, bool flag_enable_extend){
+void WireCell2dToy::Clustering_regular(WireCell::PR3DClusterSelection& live_clusters, std::map<PR3DCluster*,double>& cluster_length_map, std::set<WireCell::PR3DCluster*>& cluster_connected_dead, double length_cut, bool flag_enable_extend){
   
   // calculate the length ...
   TPCParams& mp = Singleton<TPCParams>::Instance();
@@ -83,6 +83,9 @@ void WireCell2dToy::Clustering_regular(WireCell::PR3DClusterSelection& live_clus
       std::set<PR3DCluster*>& clusters = (*it);
       PR3DCluster *ncluster = new PR3DCluster((*clusters.begin())->get_cluster_id());
       live_clusters.push_back(ncluster);
+
+      bool flag_connected_to_dead = false;
+      
       for (auto it1 = clusters.begin(); it1!=clusters.end(); it1++){
 	PR3DCluster *ocluster = *(it1);
 	// std::cout << ocluster->get_cluster_id() << " ";
@@ -95,9 +98,18 @@ void WireCell2dToy::Clustering_regular(WireCell::PR3DClusterSelection& live_clus
 	}
 	live_clusters.erase(find(live_clusters.begin(), live_clusters.end(), ocluster));
 	cluster_length_map.erase(ocluster);
+
+	if (cluster_connected_dead.find(ocluster)!=cluster_connected_dead.end()){
+	  
+	  flag_connected_to_dead = true;
+	  cluster_connected_dead.erase(ocluster);
+	}
 	delete ocluster;
       }
 
+      if (flag_connected_to_dead)
+	cluster_connected_dead.insert(ncluster);
+      
       std::vector<int> range_v1 = ncluster->get_uvwt_range();
       double length_1 = sqrt(2./3. * (pow(pitch_u*range_v1.at(0),2) + pow(pitch_v*range_v1.at(1),2) + pow(pitch_w*range_v1.at(2),2)) + pow(time_slice_width*range_v1.at(3),2));
       cluster_length_map[ncluster] = length_1;

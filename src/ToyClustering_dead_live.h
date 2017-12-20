@@ -61,10 +61,14 @@ void WireCell2dToy::Clustering_live_dead(WireCell::PR3DClusterSelection& live_cl
       /* } */
       
       for (size_t i=0; i!= connected_live_clusters.size(); i++){
+	
+	
         PR3DCluster* cluster_1 = connected_live_clusters.at(i);
       	SMGCSelection mcells_1 = connected_live_mcells.at(i);
 	cluster_1->Create_point_cloud();
       	ToyPointCloud* cloud_1 = cluster_1->get_point_cloud();
+
+	cluster_connected_dead.insert(cluster_1);
 	
       	for (size_t j=i+1;j<connected_live_clusters.size(); j++){
       	  PR3DCluster* cluster_2 = connected_live_clusters.at(j);
@@ -309,11 +313,13 @@ void WireCell2dToy::Clustering_live_dead(WireCell::PR3DClusterSelection& live_cl
       }
       live_clusters.erase(find(live_clusters.begin(), live_clusters.end(), ocluster));
       cluster_length_map.erase(ocluster);
+      cluster_connected_dead.erase(ocluster);
       delete ocluster;
     }
     std::vector<int> range_v1 = ncluster->get_uvwt_range();
     double length_1 = sqrt(2./3. * (pow(pitch_u*range_v1.at(0),2) + pow(pitch_v*range_v1.at(1),2) + pow(pitch_w*range_v1.at(2),2)) + pow(time_slice_width*range_v1.at(3),2));
     cluster_length_map[ncluster] = length_1;
+    cluster_connected_dead.insert(ncluster);
     //std::cout << std::endl;
   }
   

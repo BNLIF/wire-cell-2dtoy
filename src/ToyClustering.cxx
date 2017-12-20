@@ -177,28 +177,36 @@ void WireCell2dToy::Clustering_jump_gap_cosmics(WireCell::PR3DClusterSelection& 
   
   // cluster live dead ...
   Clustering_live_dead(live_clusters, dead_clusters, cluster_length_map, cluster_connected_dead);
+
+  // std::cout << cluster_connected_dead.size() << std::endl;
   
   // first round clustering
-  Clustering_regular(live_clusters, cluster_length_map,60*units::cm,false);
-  Clustering_regular(live_clusters, cluster_length_map,30*units::cm,true); // do extension
+  Clustering_regular(live_clusters, cluster_length_map,cluster_connected_dead,60*units::cm,false);
+  Clustering_regular(live_clusters, cluster_length_map,cluster_connected_dead,30*units::cm,true); // do extension
+
+  // std::cout << cluster_connected_dead.size() << std::endl;
   
-  // //dedicated one dealing with parallel and prolonged track
-  // Clustering_parallel_prolong(live_clusters, cluster_length_map,35*units::cm);
+  //dedicated one dealing with parallel and prolonged track
+  Clustering_parallel_prolong(live_clusters, cluster_length_map,cluster_connected_dead,35*units::cm);
 
-  // //clustering close distance ones ... 
-  // Clustering_close(live_clusters, cluster_length_map,1.2*units::cm);
+  //  std::cout << cluster_connected_dead.size() << std::endl;
 
-  // //extend the track ...
-  // // deal with prolong case
-  // Clustering_extend(live_clusters, cluster_length_map,1,150*units::cm);
+  //clustering close distance ones ... 
+  Clustering_close(live_clusters, cluster_length_map,cluster_connected_dead,1.2*units::cm);
 
-  // // deal with parallel case 
-  // Clustering_extend(live_clusters, cluster_length_map,2,30*units::cm);
+  // std::cout << cluster_connected_dead.size() << std::endl;
 
-  // // extension 
-  // Clustering_extend(live_clusters, cluster_length_map,3,15*units::cm);
+  //extend the track ...
+  // deal with prolong case
+  Clustering_extend(live_clusters, cluster_length_map,cluster_connected_dead,1,150*units::cm);
+
+  // deal with parallel case 
+  Clustering_extend(live_clusters, cluster_length_map,cluster_connected_dead,2,30*units::cm);
+
+  // extension 
+  Clustering_extend(live_clusters, cluster_length_map,cluster_connected_dead,3,15*units::cm);
   
-  
+  //std::cout << cluster_connected_dead.size() << std::endl;
   
   
 }
