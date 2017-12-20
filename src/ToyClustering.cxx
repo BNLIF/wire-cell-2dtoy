@@ -205,10 +205,7 @@ void WireCell2dToy::Clustering_live_dead(WireCell::PR3DClusterSelection& live_cl
        SMGCSelection mcells = (live_clusters.at(i))->Is_Connected(dead_clusters.at(j),2);
        int live_cluster_id = live_clusters.at(i)->get_cluster_id();
        int dead_cluster_id = dead_clusters.at(j)->get_cluster_id();
-       // if (live_cluster_id==5 || live_cluster_id == 21 || live_cluster_id == 76){
-       // 	 if (dead_cluster_id==8 || dead_cluster_id==100)
-       // 	   std::cout << live_cluster_id << " " << dead_cluster_id << " " << mcells.size() << std::endl;
-       // }
+
        if ( mcells.size()>0 ){
 	 if (dead_live_cluster_mapping.find(dead_clusters.at(j))==dead_live_cluster_mapping.end() ){
 	   std::vector<PR3DCluster*> temp_clusters;
@@ -222,14 +219,6 @@ void WireCell2dToy::Clustering_live_dead(WireCell::PR3DClusterSelection& live_cl
 	   dead_live_mcells_mapping[dead_clusters.at(j)].push_back(mcells);
 	 }
        }
-       // if (mcells.size()>0)
-       // 	 std::cout << mcells.size() << " " <<
-       // 	   live_clusters.at(i)->get_cluster_id() << " "
-       // 		   << live_clusters.at(i)->get_num_mcells() << " "
-       // 		   << live_clusters.at(i)->get_num_time_slices() << " " 
-       // 		   << dead_clusters.at(j)->get_cluster_id() << " "
-       // 		   << dead_clusters.at(j)->get_num_mcells() << " "
-       // 		   << dead_clusters.at(j)->get_num_time_slices() << std::endl;
      }
    }
   
@@ -253,37 +242,11 @@ void WireCell2dToy::Clustering_live_dead(WireCell::PR3DClusterSelection& live_cl
       	double length_1 = sqrt(2./3. * (pow(pitch_u*range_v1.at(0),2) + pow(pitch_v*range_v1.at(1),2) + pow(pitch_w*range_v1.at(2),2)) + pow(time_slice_width*range_v1.at(3),2));
       	cluster_length_vec.push_back(length_1);
       }
-
-      // for (size_t i=0; i!= connected_live_clusters.size(); i++){
-      //   PR3DCluster* cluster_1 = connected_live_clusters.at(i);
-      // 	for (size_t j=i+1;j<connected_live_clusters.size(); j++){
-      // 	  PR3DCluster* cluster_2 = connected_live_clusters.at(j);
-      // 	  if (tested_pairs.find(std::make_pair(cluster_1,cluster_2))==tested_pairs.end()){
-	    
-      // 	    tested_pairs.insert(std::make_pair(cluster_1,cluster_2));
-      // 	    tested_pairs.insert(std::make_pair(cluster_2,cluster_1));
-      // 	    bool flag_merge = false;
-
-      // 	    flag_merge = Clustering_1st_round(cluster_1, cluster_2, cluster_length_vec.at(i), cluster_length_vec.at(j), 60*units::cm) ||
-      // 	      Clustering_2nd_round(cluster_1, cluster_2, cluster_length_vec.at(i), cluster_length_vec.at(j), 60*units::cm);
-	    
-
-      // 	    if (flag_merge){
-      // 	      to_be_merged_pairs.insert(std::make_pair(cluster_1,cluster_2));
-      // 	    }
-	    
-      // 	  }
-      // 	}
-      // }
-      
-
-
       
       for (size_t i=0; i!= connected_live_clusters.size(); i++){
         PR3DCluster* cluster_1 = connected_live_clusters.at(i);
       	SMGCSelection mcells_1 = connected_live_mcells.at(i);
-	
-      	cluster_1->Create_point_cloud();
+	cluster_1->Create_point_cloud();
       	ToyPointCloud* cloud_1 = cluster_1->get_point_cloud();
 	
       	for (size_t j=i+1;j<connected_live_clusters.size(); j++){
@@ -293,8 +256,7 @@ void WireCell2dToy::Clustering_live_dead(WireCell::PR3DClusterSelection& live_cl
       	  ToyPointCloud* cloud_2 = cluster_2->get_point_cloud();
 	
       	  if (tested_pairs.find(std::make_pair(cluster_1,cluster_2))==tested_pairs.end()){
-	    
-      	    tested_pairs.insert(std::make_pair(cluster_1,cluster_2));
+	    tested_pairs.insert(std::make_pair(cluster_1,cluster_2));
       	    tested_pairs.insert(std::make_pair(cluster_2,cluster_1));
       	    // starting the test ... 
 
@@ -323,21 +285,25 @@ void WireCell2dToy::Clustering_live_dead(WireCell::PR3DClusterSelection& live_cl
 	    }
       	    p1.x = wcp1.x; p1.y = wcp1.y; p1.z = wcp1.z;
       	    p2.x = wcp2.x; p2.y = wcp2.y; p2.z = wcp2.z;
-	    
-	   
-      	    double dis = sqrt(pow(p1.x-p2.x,2)+pow(p1.y-p2.y,2)+pow(p1.z-p2.z,2));
+	    double dis = sqrt(pow(p1.x-p2.x,2)+pow(p1.y-p2.y,2)+pow(p1.z-p2.z,2));
 
 	    
       	    Point mcell1_center = cluster_1->calc_ave_pos(p1,5*units::cm);
       	    TVector3 dir1 = cluster_1->VHoughTrans(mcell1_center,30*units::cm);
+	    
       	    Point mcell2_center = cluster_2->calc_ave_pos(p2,5*units::cm);
-      	    TVector3 dir2 = cluster_2->calc_dir(mcell1_center,mcell2_center,30*units::cm);
 	    TVector3 dir3 = cluster_2->VHoughTrans(mcell2_center,30*units::cm);
-	    TVector3 dir4 = cluster_1->calc_dir(mcell2_center,mcell1_center,30*units::cm);
+	    
+
+	    TVector3 dir2 (mcell2_center.x - mcell1_center.x, mcell2_center.y - mcell1_center.y, mcell2_center.z - mcell1_center.z);
+	    TVector3 dir4 (mcell1_center.x - mcell2_center.x, mcell1_center.y - mcell2_center.y, mcell1_center.z - mcell2_center.z);
+	    
+	    // TVector3 dir2 = cluster_2->calc_dir(mcell1_center,mcell2_center,30*units::cm);
+	    // TVector3 dir4 = cluster_1->calc_dir(mcell2_center,mcell1_center,30*units::cm);
 	    
       	    double angle_diff1 = (3.1415926-dir1.Angle(dir2))/3.1415926*180.; // 1 to 2
 	    double angle_diff2 = (3.1415926-dir3.Angle(dir4))/3.1415926*180.; // 2 to 1
-      	    // double angle_diff3 = (3.1415926-dir1.Angle(dir3))/3.1415926*180.;
+      	    double angle_diff3 = (3.1415926-dir1.Angle(dir3))/3.1415926*180.; // 1 to 2
 
 	    double length_1 = cluster_length_vec.at(i);
 	    double length_2 = cluster_length_vec.at(j);
@@ -352,71 +318,67 @@ void WireCell2dToy::Clustering_live_dead(WireCell::PR3DClusterSelection& live_cl
 	      if (fabs(angle1-3.1415926/2.)<5/180.*3.1415926 &&
 		  fabs(angle2-3.1415926/2.)<5/180.*3.1415926 &&
 		  fabs(angle3-3.1415926/2.)<5/180.*3.1415926 ){
-		if (  dis < 20*units::cm)  // if parallel and close ...
+		if (dis < 10*units::cm)  // if very parallel and close, merge any way
 		  flag_merge = true;
 	      }
 
 	      // if parallel
-	      if ((fabs(angle1-3.1415926/2.)<7.5/180.*3.1415926 ||
-		   fabs(angle2-3.1415926/2.)<7.5/180.*3.1415926 ||
+	      if (fabs(angle2-3.1415926/2.)<7.5/180.*3.1415926 &&
+		  (fabs(angle1-3.1415926/2.)<7.5/180.*3.1415926 ||
 		   fabs(angle3-3.1415926/2.)<7.5/180.*3.1415926) &&
 		  fabs(angle1-3.1415926/2.)+fabs(angle2-3.1415926/2.)+fabs(angle3-3.1415926/2.) < 25/180.*3.1415926)
 		flag_para = true;
-	      
 	    }
 
 	    
-	    
+	    // divide into four cases, according to length ... 
 	    if (!flag_merge){
 	      if (length_1 <= 12*units::cm && length_2 <=12*units::cm){
 	    	// both are short
-	    	if ((dis <= 3*units::cm) && ((angle_diff1 <= 45 || angle_diff2 <=45) || (flag_para && (angle_diff1 <= 90 || angle_diff2 <=90 ))) ||
-		    (dis <= 5*units::cm) && (angle_diff1 <= 30 || angle_diff2 <=30)  ||
-	    	    (dis <=15*units::cm) && (angle_diff1<=15 || angle_diff2 <=15) ||
-	    	    (dis <=60*units::cm) && (angle_diff1<5 || angle_diff2 < 5)
+	    	if ((dis <= 3*units::cm) && ((angle_diff1 <= 45 || angle_diff2 <=45) && (angle_diff3 < 60) ||
+					     (flag_para && (angle_diff1 <= 90 || angle_diff2 <=90) && angle_diff3 < 120)) ||
+	    	    (dis <= 5*units::cm) && (angle_diff1 <= 30 || angle_diff2 <=30) && angle_diff3 < 45 ||
+	    	    (dis <=15*units::cm) && (angle_diff1<=15 || angle_diff2 <=15) && angle_diff3 < 20||
+	    	    (dis <=60*units::cm) && (angle_diff1<5 || angle_diff2 < 5) && angle_diff3 < 10
 	    	    ){
 	    	  flag_merge = true;
 	    	}
 	      } else if (length_1 > 12*units::cm && length_2 <=12*units::cm){
 	      	// one is short
-	      	if ((dis <= 3*units::cm)  && ((angle_diff1 <= 45 || angle_diff2<=45) || (flag_para && (angle_diff1 <= 90 || angle_diff2 <=90 )))
-		    || dis <= 5*units::cm && angle_diff1 <=30
-	      	    || dis <= 15*units::cm && (angle_diff1 <=20)
-	      	    || (angle_diff1<16 && dis <= 60*units::cm))
+	      	if ((dis <= 3*units::cm)  && ((angle_diff1 <= 45 || angle_diff2<=45) && (angle_diff3 < 60) ||
+					      (flag_para && (angle_diff1 <= 90 || angle_diff2 <=90 )&& angle_diff3 < 120))
+	    	    || dis <= 5*units::cm && angle_diff1 <=30 && angle_diff3 < 60
+	      	    || dis <= 15*units::cm && (angle_diff1 <=20) && angle_diff3 < 40
+	      	    || (angle_diff1<16 && dis <= 60*units::cm && angle_diff3 < 20))
 	      	  flag_merge = true;
 	      }else if (length_2 > 12*units::cm && length_1 <=12*units::cm){
 	      	// one is short
-	      	if ((dis <= 3*units::cm)  && ((angle_diff2 <= 45 || angle_diff2<=45) || (flag_para && (angle_diff1 <= 90 || angle_diff2 <=90 )))
-		    || dis <=5*units::cm && angle_diff2 <=30
-	      	    || dis <= 15*units::cm && (angle_diff2 <=20)
-	      	    || (angle_diff2<16 && dis <= 60*units::cm))
+	      	if ((dis <= 3*units::cm)  && ((angle_diff2 <= 45 || angle_diff2<=45) && (angle_diff3 < 60)||
+					      (flag_para && (angle_diff1 <= 90 || angle_diff2 <=90 )&& angle_diff3 < 120))
+	    	    || dis <=5*units::cm && angle_diff2 <=30  && angle_diff3 < 60
+	      	    || dis <= 15*units::cm && (angle_diff2 <=20) && angle_diff3 < 40
+	      	    || (angle_diff2<16 && dis <= 60*units::cm&& angle_diff3 < 20))
 	      	  flag_merge = true;
 	      }else{
 	      	// both are long
-	      	if ((dis <= 3*units::cm) && ((angle_diff1 <= 45 || angle_diff2 <=45) || (flag_para && (angle_diff1 <= 90 || angle_diff2 <=90 ))) ||
-		    dis <=5*units::cm && (angle_diff1 <=30 || angle_diff2 <=30) ||
-	      	    (dis <=15*units::cm) && (angle_diff1<=20 || angle_diff2 <=20)  ||
-	      	    (angle_diff1<16 || angle_diff2 < 16) && (dis <=60*units::cm)
+	      	if ((dis <= 3*units::cm) && ((angle_diff1 <= 45 || angle_diff2 <=45) && (angle_diff3 < 60) ||
+					     (flag_para && (angle_diff1 <= 90 || angle_diff2 <=90 )&& angle_diff3 < 120)) ||
+	    	    dis <=5*units::cm && (angle_diff1 <=30 || angle_diff2 <=30) && angle_diff3 < 45 ||
+	      	    (dis <=15*units::cm) && (angle_diff1<=20 || angle_diff2 <=20) && angle_diff3<30  ||
+	      	    (angle_diff1<16 || angle_diff2 < 16) && (dis <=60*units::cm) && angle_diff3 < 20 
 	      	    ){
 	      	  flag_merge = true;
 	      	}
 	      }
 	    }
-
+	    
 	    // flag_merge = false;
 	    
-	     // if (cluster_1->get_cluster_id()==4 || cluster_2->get_cluster_id()==4 ||
-	    // 	 cluster_1->get_cluster_id()==72 || cluster_2->get_cluster_id()==72 )
-	    // //if (cluster_length_vec.at(i)/units::cm>25 && cluster_length_vec.at(j)/units::cm > 25)
-	    //    std::cout << cluster_1->get_cluster_id() << " " << cluster_2->get_cluster_id() << " " << dis/units::cm << " "  << cluster_length_vec.at(i)/units::cm << " " << cluster_length_vec.at(j)/units::cm << " " << angle_diff1 << " " << angle_diff2 << " " << flag_para << " " << flag_merge << " " << angle1 << " " << angle2 << " " << angle3 << " " << dir2.X() << " " << dir2.Y() << " " << dir2.Z() << std::endl;
-		// " " << dir1.X() << " " << dir1.Y() << " " << dir1.Z() <<  " " << dir2.X() << " " << dir2.Y() << " " << dir2.Z() << " " << mcell1_center.x/units::cm << " " << mcell1_center.y/units::cm << " " << mcell1_center.z/units::cm << " " << mcell2_center.x/units::cm << " " << mcell2_center.y/units::cm << " " << mcell2_center.z/units::cm << std::endl;
+	    if (flag_merge){
+      	      to_be_merged_pairs.insert(std::make_pair(cluster_1,cluster_2));
+      	    }
 	    
 	    
-	     
-      	    // if (flag_merge){
-      	    //   if (length_1>12*units::cm && length_2>12*units::cm)
-      	    //   std::cout << cluster_1->get_cluster_id() << " " << cluster_2->get_cluster_id() << " " << cluster_length_vec.at(i)/units::cm << " " << cluster_length_vec.at(j)/units::cm << " " << dis/units::cm << " " << fabs(p1.x-p2.x)/units::cm << " " << angle_diff1 << " " << angle_diff2 << " " << angle_diff3 << " " << std::endl;
-      	    // }
 
 	    
       	    //std::cout << cluster_1->get_cluster_id() << " " << cluster_2->get_cluster_id() << " " << flag_1 << " " << length_1/units::cm << " " << flag_2 << " " << length_2/units::cm << " " << dis/units::cm << std::endl;
@@ -458,9 +420,7 @@ void WireCell2dToy::Clustering_live_dead(WireCell::PR3DClusterSelection& live_cl
       	    // }else{ // both are short ...
       	    // }
 	    
-      	    if (flag_merge){
-      	      to_be_merged_pairs.insert(std::make_pair(cluster_1,cluster_2));
-      	    }
+      	    
       	  }
       	}
       }
