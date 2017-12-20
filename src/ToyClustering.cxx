@@ -287,96 +287,103 @@ void WireCell2dToy::Clustering_live_dead(WireCell::PR3DClusterSelection& live_cl
       	    p2.x = wcp2.x; p2.y = wcp2.y; p2.z = wcp2.z;
 	    double dis = sqrt(pow(p1.x-p2.x,2)+pow(p1.y-p2.y,2)+pow(p1.z-p2.z,2));
 
-	    
-      	    Point mcell1_center = cluster_1->calc_ave_pos(p1,5*units::cm);
-      	    TVector3 dir1 = cluster_1->VHoughTrans(mcell1_center,30*units::cm);
-	    
-      	    Point mcell2_center = cluster_2->calc_ave_pos(p2,5*units::cm);
-	    TVector3 dir3 = cluster_2->VHoughTrans(mcell2_center,30*units::cm);
-	    
 
-	    TVector3 dir2 (mcell2_center.x - mcell1_center.x, mcell2_center.y - mcell1_center.y, mcell2_center.z - mcell1_center.z);
-	    TVector3 dir4 (mcell1_center.x - mcell2_center.x, mcell1_center.y - mcell2_center.y, mcell1_center.z - mcell2_center.z);
-	    
-	    // TVector3 dir2 = cluster_2->calc_dir(mcell1_center,mcell2_center,30*units::cm);
-	    // TVector3 dir4 = cluster_1->calc_dir(mcell2_center,mcell1_center,30*units::cm);
-	    
-      	    double angle_diff1 = (3.1415926-dir1.Angle(dir2))/3.1415926*180.; // 1 to 2
-	    double angle_diff2 = (3.1415926-dir3.Angle(dir4))/3.1415926*180.; // 2 to 1
-      	    double angle_diff3 = (3.1415926-dir1.Angle(dir3))/3.1415926*180.; // 1 to 2
+	    if (dis < 60*units::cm){
+	      double length_1 = cluster_length_vec.at(i);
+	      double length_2 = cluster_length_vec.at(j);
+	      
+	      Point mcell1_center, mcell2_center;
+	      TVector3 dir1, dir3;
 
-	    double length_1 = cluster_length_vec.at(i);
-	    double length_2 = cluster_length_vec.at(j);
-	    bool flag_para =false;
-	    double angle1, angle2, angle3;
-	    {
-	      // deal with parallel live dead merge ... 
-	      TVector3 drift_dir(1,0,0);
-	      angle1 = dir1.Angle(drift_dir); // cluster 1
-	      angle2 = dir2.Angle(drift_dir); // cluster 1 to cluster 2 
-	      angle3 = dir3.Angle(drift_dir); // cluster 2 
-	      if (fabs(angle1-3.1415926/2.)<5/180.*3.1415926 &&
-		  fabs(angle2-3.1415926/2.)<5/180.*3.1415926 &&
-		  fabs(angle3-3.1415926/2.)<5/180.*3.1415926 ){
-		if (dis < 10*units::cm)  // if very parallel and close, merge any way
-		  flag_merge = true;
+	       
+	     
+	      mcell1_center = cluster_1->calc_ave_pos(p1,5*units::cm);
+	      dir1 = cluster_1->VHoughTrans(mcell1_center,30*units::cm);
+	      
+	      mcell2_center = cluster_2->calc_ave_pos(p2,5*units::cm);
+	      dir3 = cluster_2->VHoughTrans(mcell2_center,30*units::cm);
+	      
+	      
+	      TVector3 dir2 (mcell2_center.x - mcell1_center.x, mcell2_center.y - mcell1_center.y, mcell2_center.z - mcell1_center.z);
+	      TVector3 dir4 (mcell1_center.x - mcell2_center.x, mcell1_center.y - mcell2_center.y, mcell1_center.z - mcell2_center.z);
+		
+		
+	      double angle_diff1 = (3.1415926-dir1.Angle(dir2))/3.1415926*180.; // 1 to 2
+	      double angle_diff2 = (3.1415926-dir3.Angle(dir4))/3.1415926*180.; // 2 to 1
+	      double angle_diff3 = (3.1415926-dir1.Angle(dir3))/3.1415926*180.; // 1 to 2
+	      
+	      
+	      bool flag_para =false;
+	      double angle1, angle2, angle3;
+	      {
+		// deal with parallel live dead merge ... 
+		TVector3 drift_dir(1,0,0);
+		angle1 = dir1.Angle(drift_dir); // cluster 1
+		angle2 = dir2.Angle(drift_dir); // cluster 1 to cluster 2 
+		angle3 = dir3.Angle(drift_dir); // cluster 2 
+		if (fabs(angle1-3.1415926/2.)<5/180.*3.1415926 &&
+		    fabs(angle2-3.1415926/2.)<5/180.*3.1415926 &&
+		    fabs(angle3-3.1415926/2.)<5/180.*3.1415926 ){
+		  if (dis < 10*units::cm)  // if very parallel and close, merge any way
+		    flag_merge = true;
+		}
+		
+		// if parallel
+		if (fabs(angle2-3.1415926/2.)<7.5/180.*3.1415926 &&
+		    (fabs(angle1-3.1415926/2.)<7.5/180.*3.1415926 ||
+		     fabs(angle3-3.1415926/2.)<7.5/180.*3.1415926) &&
+		    fabs(angle1-3.1415926/2.)+fabs(angle2-3.1415926/2.)+fabs(angle3-3.1415926/2.) < 25/180.*3.1415926)
+		  flag_para = true;
 	      }
-
-	      // if parallel
-	      if (fabs(angle2-3.1415926/2.)<7.5/180.*3.1415926 &&
-		  (fabs(angle1-3.1415926/2.)<7.5/180.*3.1415926 ||
-		   fabs(angle3-3.1415926/2.)<7.5/180.*3.1415926) &&
-		  fabs(angle1-3.1415926/2.)+fabs(angle2-3.1415926/2.)+fabs(angle3-3.1415926/2.) < 25/180.*3.1415926)
-		flag_para = true;
-	    }
-
-	    
-	    // divide into four cases, according to length ... 
-	    if (!flag_merge){
-	      if (length_1 <= 12*units::cm && length_2 <=12*units::cm){
-	    	// both are short
-	    	if ((dis <= 3*units::cm) && ((angle_diff1 <= 45 || angle_diff2 <=45) && (angle_diff3 < 60) ||
-					     (flag_para && (angle_diff1 <= 90 || angle_diff2 <=90) && angle_diff3 < 120)) ||
-	    	    (dis <= 5*units::cm) && (angle_diff1 <= 30 || angle_diff2 <=30) && angle_diff3 < 45 ||
-	    	    (dis <=15*units::cm) && (angle_diff1<=15 || angle_diff2 <=15) && angle_diff3 < 20||
-	    	    (dis <=60*units::cm) && (angle_diff1<5 || angle_diff2 < 5) && angle_diff3 < 10
-	    	    ){
-	    	  flag_merge = true;
-	    	}
-	      } else if (length_1 > 12*units::cm && length_2 <=12*units::cm){
-	      	// one is short
-	      	if ((dis <= 3*units::cm)  && ((angle_diff1 <= 45 || angle_diff2<=45) && (angle_diff3 < 60) ||
-					      (flag_para && (angle_diff1 <= 90 || angle_diff2 <=90 )&& angle_diff3 < 120))
-	    	    || dis <= 5*units::cm && angle_diff1 <=30 && angle_diff3 < 60
-	      	    || dis <= 15*units::cm && (angle_diff1 <=20) && angle_diff3 < 40
-	      	    || (angle_diff1<16 && dis <= 60*units::cm && angle_diff3 < 20))
-	      	  flag_merge = true;
-	      }else if (length_2 > 12*units::cm && length_1 <=12*units::cm){
-	      	// one is short
-	      	if ((dis <= 3*units::cm)  && ((angle_diff2 <= 45 || angle_diff2<=45) && (angle_diff3 < 60)||
-					      (flag_para && (angle_diff1 <= 90 || angle_diff2 <=90 )&& angle_diff3 < 120))
-	    	    || dis <=5*units::cm && angle_diff2 <=30  && angle_diff3 < 60
-	      	    || dis <= 15*units::cm && (angle_diff2 <=20) && angle_diff3 < 40
-	      	    || (angle_diff2<16 && dis <= 60*units::cm&& angle_diff3 < 20))
-	      	  flag_merge = true;
-	      }else{
-	      	// both are long
-	      	if ((dis <= 3*units::cm) && ((angle_diff1 <= 45 || angle_diff2 <=45) && (angle_diff3 < 60) ||
-					     (flag_para && (angle_diff1 <= 90 || angle_diff2 <=90 )&& angle_diff3 < 120)) ||
-	    	    dis <=5*units::cm && (angle_diff1 <=30 || angle_diff2 <=30) && angle_diff3 < 45 ||
-	      	    (dis <=15*units::cm) && (angle_diff1<=20 || angle_diff2 <=20) && angle_diff3<30  ||
-	      	    (angle_diff1<16 || angle_diff2 < 16) && (dis <=60*units::cm) && angle_diff3 < 20 
-	      	    ){
-	      	  flag_merge = true;
-	      	}
+	      
+	      
+	      // divide into four cases, according to length ... 
+	      if (!flag_merge){
+		if (length_1 <= 12*units::cm && length_2 <=12*units::cm){
+		  // both are short
+		  if ((dis <= 3*units::cm) && ((angle_diff1 <= 45 || angle_diff2 <=45) && (angle_diff3 < 60) ||
+					       (flag_para && (angle_diff1 <= 90 || angle_diff2 <=90) && angle_diff3 < 120)) ||
+		      (dis <= 5*units::cm) && (angle_diff1 <= 30 || angle_diff2 <=30) && angle_diff3 < 45 ||
+		      (dis <=15*units::cm) && (angle_diff1<=15 || angle_diff2 <=15) && angle_diff3 < 20||
+		      (dis <=60*units::cm) && (angle_diff1<5 || angle_diff2 < 5) && angle_diff3 < 10
+		      ){
+		    flag_merge = true;
+		  }
+		} else if (length_1 > 12*units::cm && length_2 <=12*units::cm){
+		  // one is short
+		  if ((dis <= 3*units::cm)  && ((angle_diff1 <= 45 || angle_diff2<=45) && (angle_diff3 < 60) ||
+						(flag_para && (angle_diff1 <= 90 || angle_diff2 <=90 )&& angle_diff3 < 120))
+		      || dis <= 5*units::cm && angle_diff1 <=30 && angle_diff3 < 60
+		      || dis <= 15*units::cm && (angle_diff1 <=20) && angle_diff3 < 40
+		      || (angle_diff1<16 && dis <= 60*units::cm && angle_diff3 < 20))
+		    flag_merge = true;
+		}else if (length_2 > 12*units::cm && length_1 <=12*units::cm){
+		  // one is short
+		  if ((dis <= 3*units::cm)  && ((angle_diff2 <= 45 || angle_diff2<=45) && (angle_diff3 < 60)||
+						(flag_para && (angle_diff1 <= 90 || angle_diff2 <=90 )&& angle_diff3 < 120))
+		      || dis <=5*units::cm && angle_diff2 <=30  && angle_diff3 < 60
+		      || dis <= 15*units::cm && (angle_diff2 <=20) && angle_diff3 < 40
+		      || (angle_diff2<16 && dis <= 60*units::cm&& angle_diff3 < 20))
+		    flag_merge = true;
+		}else{
+		  // both are long
+		  if ((dis <= 3*units::cm) && ((angle_diff1 <= 45 || angle_diff2 <=45) && (angle_diff3 < 60) ||
+					       (flag_para && (angle_diff1 <= 90 || angle_diff2 <=90 )&& angle_diff3 < 120)) ||
+		      dis <=5*units::cm && (angle_diff1 <=30 || angle_diff2 <=30) && angle_diff3 < 45 ||
+		      (dis <=15*units::cm) && (angle_diff1<=20 || angle_diff2 <=20) && angle_diff3<30  ||
+		      (angle_diff1<16 || angle_diff2 < 16) && (dis <=60*units::cm) && angle_diff3 < 20 
+		      ){
+		    flag_merge = true;
+		  }
+		}
+	      }
+	      	    
+	      if (flag_merge){
+		to_be_merged_pairs.insert(std::make_pair(cluster_1,cluster_2));
 	      }
 	    }
+	      
 	    
-	    // flag_merge = false;
-	    
-	    if (flag_merge){
-      	      to_be_merged_pairs.insert(std::make_pair(cluster_1,cluster_2));
-      	    }
 	    
 	    
 
