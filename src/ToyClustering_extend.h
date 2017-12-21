@@ -407,12 +407,6 @@ bool WireCell2dToy::Clustering_4th_reg(WireCell::PR3DCluster *cluster_1, WireCel
   
   double dis = sqrt(pow(p1.x-p2.x,2) + pow(p1.y-p2.y,2)+pow(p1.z-p2.z,2));
 
-  /* SlimMergeGeomCell *mcell1 = 0; */
-  /* SlimMergeGeomCell *mcell2=0; */
-  /* Point p2; */
-  /* double dis = Find_Closeset_Points(cluster1, cluster2, length_1, length_2, length_cut, mcell1, mcell2, p1,p2); */
-
-  
   
   if (dis < length_cut && length_2 >= 40*units::cm){
 
