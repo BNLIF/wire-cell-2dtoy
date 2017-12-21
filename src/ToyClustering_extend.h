@@ -422,7 +422,7 @@ bool WireCell2dToy::Clustering_4th_dead(WireCell::PR3DCluster *cluster_1, WireCe
 	Point test_point;
 	double min_dis = 1e9, max_dis = -1e9;
 
-	if (fabs(ave_dir.Angle(drift_dir)-3.1415926/2.)/3.1415926*180. > 7.5  && ave_dis < 45*units::cm){
+	if (fabs(ave_dir.Angle(drift_dir)-3.1415926/2.)/3.1415926*180. > 7.5  && ave_dis < 30*units::cm){
 	  
 	  if (i==1){
 	    for (int k=-5;k!=10;k++){
