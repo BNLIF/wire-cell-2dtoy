@@ -6,6 +6,11 @@
 
 namespace WireCell2dToy{
   double Find_Closeset_Points(WireCell::PR3DCluster *cluster1, WireCell::PR3DCluster *cluster2,double length_1, double length_2, double length_cut, WireCell::SlimMergeGeomCell *mcell1, WireCell::SlimMergeGeomCell *mcell2, WireCell::Point& p1, WireCell::Point &p2);
+
+  
+  double cal_proj_angle_diff(TVector3& dir1, TVector3& dir2, double plane_angle);
+  bool is_angle_consistent(TVector3& dir1, TVector3& dir2, bool same_direction, double angle_cut, double angle_u, double angle_v, double angle_w);
+  
   
   void Clustering_jump_gap_cosmics(WireCell::PR3DClusterSelection& live_clusters, WireCell::PR3DClusterSelection& dead_clusters);
 

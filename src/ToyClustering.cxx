@@ -16,6 +16,39 @@ using namespace std;
 
 #include "WireCell2dToy/ExecMon.h"
 
+double WireCell2dToy::cal_proj_angle_diff(TVector3& dir1, TVector3& dir2, double plane_angle){
+  TVector3 temp_dir1;
+  TVector3 temp_dir2;
+
+  temp_dir1.SetXYZ(dir1.X(),0,-sin(plane_angle)*dir1.Y()+cos(plane_angle)*dir1.Z());
+  temp_dir2.SetXYZ(dir2.X(),0,-sin(plane_angle)*dir2.Y()+cos(plane_angle)*dir2.Z());
+  
+  return temp_dir1.Angle(temp_dir2);
+}
+
+bool WireCell2dToy::is_angle_consistent(TVector3& dir1, TVector3& dir2, bool same_direction, double angle_cut, double uplane_angle, double vplane_angle, double wplane_angle){
+  double angle_u = WireCell2dToy::cal_proj_angle_diff(dir1,dir2,uplane_angle);
+  double angle_v = WireCell2dToy::cal_proj_angle_diff(dir1,dir2,vplane_angle);
+  double angle_w = WireCell2dToy::cal_proj_angle_diff(dir1,dir2,wplane_angle);
+  int num = 0;
+  //input is degrees ...
+  angle_cut *= 3.1415926/180.;
+  
+  if (same_direction){
+    if (angle_u <= angle_cut) num++;
+    if (angle_v <= angle_cut) num++;
+    if (angle_w <= angle_cut) num++;
+  }else{
+    if ((3.1415926-angle_u) <= angle_cut) num++;
+    if ((3.1415926-angle_v) <= angle_cut) num++;
+    if ((3.1415926-angle_w) <= angle_cut) num++;
+  }
+  
+  if (num>=2 ) return true;
+  return false;
+}
+
+
 double WireCell2dToy::Find_Closeset_Points(WireCell::PR3DCluster *cluster1, WireCell::PR3DCluster *cluster2,double length_1, double length_2, double length_cut, SlimMergeGeomCell *mcell1_save, SlimMergeGeomCell *mcell2_save, Point& p1_save, Point &p2_save){
   double dis_save = 1e9;
 
@@ -185,7 +218,7 @@ void WireCell2dToy::Clustering_jump_gap_cosmics(WireCell::PR3DClusterSelection& 
   // cluster live dead ...
   Clustering_live_dead(live_clusters, dead_clusters, cluster_length_map, cluster_connected_dead);
 
-  //cerr << em("live dead") << endl;
+  // cerr << em("live dead") << endl;
 
   // std::cout << cluster_connected_dead.size() << std::endl;
   
@@ -195,18 +228,18 @@ void WireCell2dToy::Clustering_jump_gap_cosmics(WireCell::PR3DClusterSelection& 
   // cerr << em("1st regular") << endl;
   Clustering_regular(live_clusters, cluster_length_map,cluster_connected_dead,30*units::cm,true); // do extension
 
-  // cerr << em("2nd regular") << endl;
+  //cerr << em("2nd regular") << endl;
 
   
    //dedicated one dealing with parallel and prolonged track
   Clustering_parallel_prolong(live_clusters, cluster_length_map,cluster_connected_dead,35*units::cm);
 
-  // cerr << em("parallel prolong") << endl;
+  //cerr << em("parallel prolong") << endl;
   
   //clustering close distance ones ... 
   Clustering_close(live_clusters, cluster_length_map,cluster_connected_dead,1.2*units::cm);
 
-  // cerr << em("close") << endl;
+  //cerr << em("close") << endl;
 
   // std::cout << cluster_connected_dead.size() << std::endl;
 
@@ -214,12 +247,12 @@ void WireCell2dToy::Clustering_jump_gap_cosmics(WireCell::PR3DClusterSelection& 
   //extend the track ...
   // deal with prolong case
   Clustering_extend(live_clusters, cluster_length_map,cluster_connected_dead,1,150*units::cm);
-  // cerr << em("extend prolong") << endl;
+  //cerr << em("extend prolong") << endl;
   // deal with parallel case 
   Clustering_extend(live_clusters, cluster_length_map,cluster_connected_dead,2,30*units::cm);
+  //cerr << em("extend parallel") << endl;
   
   for (int i=0;i!=2;i++){
-    // cerr << em("extend parallel") << endl;
     // extension regular case
     Clustering_extend(live_clusters, cluster_length_map,cluster_connected_dead,3,15*units::cm);
     //cerr << em("extend regular") << endl;
