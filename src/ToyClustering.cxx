@@ -252,7 +252,7 @@ void WireCell2dToy::Clustering_jump_gap_cosmics(WireCell::PR3DClusterSelection& 
   Clustering_extend(live_clusters, cluster_length_map,cluster_connected_dead,2,30*units::cm);
   //cerr << em("extend parallel") << endl;
   
-  for (int i=0;i!=2;i++){
+  for (int i=0;i!=3;i++){
     // extension regular case
     Clustering_extend(live_clusters, cluster_length_map,cluster_connected_dead,3,15*units::cm);
     //cerr << em("extend regular") << endl;

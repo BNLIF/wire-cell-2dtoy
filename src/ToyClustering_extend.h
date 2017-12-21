@@ -335,8 +335,8 @@ bool WireCell2dToy::Clustering_4th_dead(WireCell::PR3DCluster *cluster_1, WireCe
 	cluster1_ave_pos = cluster_1->calc_ave_pos(p1,5*units::cm);
 	cluster2_ave_pos = cluster_2->calc_ave_pos(p2,5*units::cm);
 	
-	dir1 = cluster_1->VHoughTrans(cluster1_ave_pos,60*units::cm);
-	dir3 = cluster_2->VHoughTrans(cluster2_ave_pos,60*units::cm);
+	dir1 = cluster_1->VHoughTrans(cluster1_ave_pos,100*units::cm);
+	dir3 = cluster_2->VHoughTrans(cluster2_ave_pos,100*units::cm);
 	dir2.SetXYZ(cluster2_ave_pos.x - cluster1_ave_pos.x+1e-9, cluster2_ave_pos.y - cluster1_ave_pos.y+1e-9, cluster2_ave_pos.z - cluster1_ave_pos.z+1e-9); // 2-1
       }else if (i==1){
 	cluster1_ave_pos = cluster_1->calc_ave_pos(p1,5*units::cm);
@@ -354,7 +354,7 @@ bool WireCell2dToy::Clustering_4th_dead(WireCell::PR3DCluster *cluster_1, WireCe
 	
 	if (temp_results.second < 100*units::cm){
 	  cluster2_ave_pos = cluster_2->calc_ave_pos(temp_results.first,5*units::cm);
-	  dir3 = cluster_2->VHoughTrans(cluster2_ave_pos,60*units::cm);
+	  dir3 = cluster_2->VHoughTrans(cluster2_ave_pos,100*units::cm);
 	  dir2.SetXYZ(cluster2_ave_pos.x - cluster1_ave_pos.x+1e-9, cluster2_ave_pos.y - cluster1_ave_pos.y+1e-9, cluster2_ave_pos.z - cluster1_ave_pos.z+1e-9); // 2-1
 	  
 	}else{
@@ -362,7 +362,7 @@ bool WireCell2dToy::Clustering_4th_dead(WireCell::PR3DCluster *cluster_1, WireCe
 	}
       }else if (i==2){
 	cluster2_ave_pos = cluster_2->calc_ave_pos(p2,5*units::cm);
-	dir3 = cluster_2->VHoughTrans(cluster2_ave_pos,60*units::cm);
+	dir3 = cluster_2->VHoughTrans(cluster2_ave_pos,100*units::cm);
 
 	TVector3 dir_test(dir3);
 	dir_test.SetMag(1);
