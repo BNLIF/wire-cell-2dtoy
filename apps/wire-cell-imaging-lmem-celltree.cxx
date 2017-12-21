@@ -434,7 +434,39 @@ int main(int argc, char* argv[])
       hu_decon_g->SetBinContent(i+1,j+1,0);
     }
   }
+  
+  for (auto it = uplane_map.begin(); it!=uplane_map.end(); it++){
+    int ch = it->first;
+    int start = it->second.first/nrebin;
+    int end = it->second.second/nrebin;
+    for (int j=start; j!=end+1;j++){
+      hu_decon->SetBinContent(ch+1,j+1,0);
+      hu_decon_g->SetBinContent(ch+1,j+1,0);
+    }
+  }
+  for (auto it = vplane_map.begin(); it!=vplane_map.end(); it++){
+    int ch = it->first;
+    int start = it->second.first/nrebin;
+    int end = it->second.second/nrebin;
+    for (int j=start; j!=end+1;j++){
+      hv_decon->SetBinContent(ch+1,j+1,0);
+      hv_decon_g->SetBinContent(ch+1,j+1,0);
+    }
+    for (int j=it->second.first;j!=it->second.second;j++){
+      hv_raw->SetBinContent(ch+1,j+1,0);
+    }
+  }
+  for (auto it = wplane_map.begin(); it!=wplane_map.end(); it++){
+    int ch = it->first;
+    int start = it->second.first/nrebin;
+    int end = it->second.second/nrebin;
+    for (int j=start; j!=end+1;j++){
+      hw_decon->SetBinContent(ch+1,j+1,0);
+      hw_decon_g->SetBinContent(ch+1,j+1,0);
+    }
+  }
 
+  
   
 
   int tpc_status = WireCell2dToy::Noisy_Event_ID(hu_decon, hv_decon, hw_decon, uplane_rms, vplane_rms, wplane_rms, uplane_map, vplane_map, wplane_map, hu_decon_g, hv_decon_g, hw_decon_g, nrebin, hv_raw, true);
