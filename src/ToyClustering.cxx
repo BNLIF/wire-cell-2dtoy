@@ -210,13 +210,15 @@ void WireCell2dToy::Clustering_jump_gap_cosmics(WireCell::PR3DClusterSelection& 
 
   // std::cout << cluster_connected_dead.size() << std::endl;
 
+  
+  //extend the track ...
+  // deal with prolong case
+  Clustering_extend(live_clusters, cluster_length_map,cluster_connected_dead,1,150*units::cm);
+  // cerr << em("extend prolong") << endl;
+  // deal with parallel case 
+  Clustering_extend(live_clusters, cluster_length_map,cluster_connected_dead,2,30*units::cm);
+  
   for (int i=0;i!=2;i++){
-    //extend the track ...
-    // deal with prolong case
-    Clustering_extend(live_clusters, cluster_length_map,cluster_connected_dead,1,150*units::cm);
-    // cerr << em("extend prolong") << endl;
-    // deal with parallel case 
-    Clustering_extend(live_clusters, cluster_length_map,cluster_connected_dead,2,30*units::cm);
     // cerr << em("extend parallel") << endl;
     // extension regular case
     Clustering_extend(live_clusters, cluster_length_map,cluster_connected_dead,3,15*units::cm);
