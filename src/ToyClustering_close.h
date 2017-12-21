@@ -22,8 +22,10 @@ void WireCell2dToy::Clustering_close(WireCell::PR3DClusterSelection& live_cluste
   std::set<std::pair<PR3DCluster*, PR3DCluster*>> to_be_merged_pairs;
   for (size_t i=0;i!=live_clusters.size();i++){
     PR3DCluster* cluster_1 = live_clusters.at(i);
+    //    if (cluster_length_map[cluster_1] < 3*units::cm) continue;
     for (size_t j=i+1;j<live_clusters.size();j++){
       PR3DCluster* cluster_2 = live_clusters.at(j);
+      //if (cluster_length_map[cluster_2] < 3*units::cm) continue;
       if (WireCell2dToy::Clustering_3rd_round(cluster_1,cluster_2, cluster_length_map[cluster_1], cluster_length_map[cluster_2], length_cut))
 	to_be_merged_pairs.insert(std::make_pair(cluster_1,cluster_2));
     }

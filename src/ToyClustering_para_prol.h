@@ -105,8 +105,13 @@ void WireCell2dToy::Clustering_parallel_prolong(WireCell::PR3DClusterSelection& 
 
 
 bool WireCell2dToy::Clustering_2nd_round(WireCell::PR3DCluster *cluster1, WireCell::PR3DCluster *cluster2, double length_1, double length_2, double length_cut){
+
+  if (length_1 < 10*units::cm && length_2 < 10*units::cm) return false;
+  
   cluster1->Create_point_cloud();
   cluster2->Create_point_cloud();
+
+
   
   // pick any point and merged cell in cluster1,
   SlimMergeGeomCell *prev_mcell1 = 0;
@@ -118,7 +123,7 @@ bool WireCell2dToy::Clustering_2nd_round(WireCell::PR3DCluster *cluster1, WireCe
 
   double dis = Find_Closeset_Points(cluster1, cluster2, length_1, length_2, length_cut, mcell1, mcell2, p1,p2);
   
-  if (dis < length_cut || (dis < 80*units::cm && length_1 +length_2 > 50*units::cm && length_1>15*units::cm && length_2 > 15*units::cm)){
+  if ((dis < length_cut || (dis < 80*units::cm && length_1 +length_2 > 50*units::cm && length_1>15*units::cm && length_2 > 15*units::cm))){
     Point cluster1_ave_pos = cluster1->calc_ave_pos(p1,10*units::cm);
     Point cluster2_ave_pos = cluster2->calc_ave_pos(p2,10*units::cm);
 
@@ -266,7 +271,7 @@ bool WireCell2dToy::Clustering_2nd_round(WireCell::PR3DCluster *cluster1, WireCe
       }else{
       	//regular cases (only for very short distance ... )
       	if (dis < 5*units::cm){
-      	  if (length_1 > 10*units::cm && length_2 > 10*units::cm){
+      	  if (length_1 > 10*units::cm && length_2 >10*units::cm){
       	    TVector3 dir1 = cluster1->VHoughTrans(p1,30*units::cm); // cluster 1 direction based on hough
       	    TVector3 dir2 = cluster2->VHoughTrans(p2,30*units::cm); // cluster 1 direction based on hough
       	    TVector3 dir3(p2.x-p1.x,p2.y-p1.y,p2.z-p1.z);

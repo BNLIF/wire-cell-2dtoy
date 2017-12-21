@@ -21,6 +21,8 @@ void WireCell2dToy::Clustering_regular(WireCell::PR3DClusterSelection& live_clus
     }
   
   double internal_length_cut = 10 *units::cm;
+  if (flag_enable_extend)
+    internal_length_cut = 15 *units::cm;
   
   for (int kk=0;kk!=1;kk++){
     std::set<std::pair<PR3DCluster*, PR3DCluster*>> to_be_merged_pairs;

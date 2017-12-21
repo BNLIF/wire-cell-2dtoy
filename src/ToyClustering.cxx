@@ -5,6 +5,7 @@
 #include "WireCellData/Line.h"
 
 using namespace WireCell;
+using namespace std;
 
 #include "ToyClustering_dead_live.h"
 #include "ToyClustering_reg.h"
@@ -13,6 +14,7 @@ using namespace WireCell;
 #include "ToyClustering_extend.h"
 #include "ToyClustering_isolated.h"
 
+#include "WireCell2dToy/ExecMon.h"
 
 double WireCell2dToy::Find_Closeset_Points(WireCell::PR3DCluster *cluster1, WireCell::PR3DCluster *cluster2,double length_1, double length_2, double length_cut, SlimMergeGeomCell *mcell1_save, SlimMergeGeomCell *mcell2_save, Point& p1_save, Point &p2_save){
   double dis_save = 1e9;
@@ -149,6 +151,11 @@ double WireCell2dToy::Find_Closeset_Points(WireCell::PR3DCluster *cluster1, Wire
 
 
 void WireCell2dToy::Clustering_jump_gap_cosmics(WireCell::PR3DClusterSelection& live_clusters, WireCell::PR3DClusterSelection& dead_clusters){
+
+  
+  ExecMon em("starting");
+
+
   // include some parallel or prolonged, no need to do track fitting
   std::map<PR3DCluster*,double> cluster_length_map;
 
@@ -178,31 +185,53 @@ void WireCell2dToy::Clustering_jump_gap_cosmics(WireCell::PR3DClusterSelection& 
   // cluster live dead ...
   Clustering_live_dead(live_clusters, dead_clusters, cluster_length_map, cluster_connected_dead);
 
+  cerr << em("live dead") << endl;
+
   // std::cout << cluster_connected_dead.size() << std::endl;
   
   // first round clustering
   Clustering_regular(live_clusters, cluster_length_map,cluster_connected_dead,60*units::cm,false);
-  // Clustering_regular(live_clusters, cluster_length_map,cluster_connected_dead,30*units::cm,true); // do extension
 
+  cerr << em("1st regular") << endl;
+  
+  
+  Clustering_regular(live_clusters, cluster_length_map,cluster_connected_dead,30*units::cm,true); // do extension
+
+  cerr << em("2nd regular") << endl;
 
   
    //dedicated one dealing with parallel and prolonged track
   Clustering_parallel_prolong(live_clusters, cluster_length_map,cluster_connected_dead,35*units::cm);
+
+  cerr << em("parallel prolong") << endl;
   
   //clustering close distance ones ... 
   Clustering_close(live_clusters, cluster_length_map,cluster_connected_dead,1.2*units::cm);
+
+  cerr << em("close") << endl;
 
   // std::cout << cluster_connected_dead.size() << std::endl;
 
   //extend the track ...
   // deal with prolong case
   Clustering_extend(live_clusters, cluster_length_map,cluster_connected_dead,1,150*units::cm);
+
+  cerr << em("extend prolong") << endl;
+    
   // deal with parallel case 
   Clustering_extend(live_clusters, cluster_length_map,cluster_connected_dead,2,30*units::cm);
+
+  cerr << em("extend parallel") << endl;
+  
   // extension regular case
   Clustering_extend(live_clusters, cluster_length_map,cluster_connected_dead,3,15*units::cm);
+
+  cerr << em("extend regular") << endl;
+  
   // extension ones connected to dead region ...
   Clustering_extend(live_clusters, cluster_length_map,cluster_connected_dead,4,60*units::cm);
+
+  cerr << em("extend dead") << endl;
   
 
   
