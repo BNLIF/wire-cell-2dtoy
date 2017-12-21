@@ -1,4 +1,4 @@
-void WireCell2dToy::Clustering_extend(WireCell::PR3DClusterSelection& live_clusters, std::map<PR3DCluster*,double>& cluster_length_map, std::set<WireCell::PR3DCluster*>& cluster_connected_dead, int flag,  double length_cut){
+void WireCell2dToy::Clustering_extend(WireCell::PR3DClusterSelection& live_clusters, std::map<PR3DCluster*,double>& cluster_length_map, std::set<WireCell::PR3DCluster*>& cluster_connected_dead, int flag,  double length_cut, int num_try){
   
    // calculate the length ...
   TPCParams& mp = Singleton<TPCParams>::Instance();
@@ -33,7 +33,7 @@ void WireCell2dToy::Clustering_extend(WireCell::PR3DClusterSelection& live_clust
     PR3DCluster* cluster_1 = live_clusters.at(i);
     cluster_1->Create_point_cloud();
 
-    if (cluster_length_map[cluster_1] > 40*units::cm){
+    if (cluster_length_map[cluster_1] > 40*units::cm + num_try * 10*units::cm){
       Point highest_p, lowest_p, earliest_p, latest_p;
       bool flag_para = false;
       bool flag_prol = false;
@@ -335,49 +335,54 @@ bool WireCell2dToy::Clustering_4th_dead(WireCell::PR3DCluster *cluster_1, WireCe
 	cluster1_ave_pos = cluster_1->calc_ave_pos(p1,5*units::cm);
 	cluster2_ave_pos = cluster_2->calc_ave_pos(p2,5*units::cm);
 	
-	dir1 = cluster_1->VHoughTrans(cluster1_ave_pos,100*units::cm);
-	dir3 = cluster_2->VHoughTrans(cluster2_ave_pos,100*units::cm);
+	dir1 = cluster_1->VHoughTrans(cluster1_ave_pos,80*units::cm);
+	dir3 = cluster_2->VHoughTrans(cluster2_ave_pos,80*units::cm);
 	dir2.SetXYZ(cluster2_ave_pos.x - cluster1_ave_pos.x+1e-9, cluster2_ave_pos.y - cluster1_ave_pos.y+1e-9, cluster2_ave_pos.z - cluster1_ave_pos.z+1e-9); // 2-1
-      }else if (i==1){
-	cluster1_ave_pos = cluster_1->calc_ave_pos(p1,5*units::cm);
-	dir1 = cluster_1->VHoughTrans(cluster1_ave_pos,60*units::cm);
-
-	TVector3 dir_test(dir1);
-	dir_test.SetMag(1);
-	dir_test *= -1;
-
-	std::pair<Point, double> temp_results = cluster_2->get_closest_point_along_vec(cluster1_ave_pos, dir_test, dis*2, 5*units::cm, 15, 10*units::cm);
-
-	/* if ( length_1>200*units::cm)  */
-	/*   std::cout << cluster_1->get_cluster_id() << " " << cluster_2->get_cluster_id() << " " << length_1/units::cm << " " << length_2/units::cm << " " <<  " a " << temp_results.second/units::cm << " " << cluster1_ave_pos.x/units::cm << " " << cluster1_ave_pos.y/units::cm << " " << cluster1_ave_pos.z/units::cm << " " << temp_results.first.x/units::cm << " " << temp_results.first.y/units::cm << " " << temp_results.first.z/units::cm << " " << dir_test.X() << " " << dir_test.Y() << " " << dir_test.Z() << " " << dis/units::cm << " " << std::endl;  */
-      
-	
-	if (temp_results.second < 100*units::cm){
-	  cluster2_ave_pos = cluster_2->calc_ave_pos(temp_results.first,5*units::cm);
-	  dir3 = cluster_2->VHoughTrans(cluster2_ave_pos,100*units::cm);
-	  dir2.SetXYZ(cluster2_ave_pos.x - cluster1_ave_pos.x+1e-9, cluster2_ave_pos.y - cluster1_ave_pos.y+1e-9, cluster2_ave_pos.z - cluster1_ave_pos.z+1e-9); // 2-1
+      }else if (i==1 ){
+	if (length_2 >= 15*units::cm){
+	  cluster1_ave_pos = cluster_1->calc_ave_pos(p1,5*units::cm);
+	  dir1 = cluster_1->VHoughTrans(cluster1_ave_pos,80*units::cm);
 	  
+	  TVector3 dir_test(dir1);
+	  dir_test.SetMag(1);
+	  dir_test *= -1;
+	  
+	  std::pair<Point, double> temp_results = cluster_2->get_closest_point_along_vec(cluster1_ave_pos, dir_test, dis*2, 5*units::cm, 15, 10*units::cm);
+	  
+	  /* if ( length_1>200*units::cm)  */
+	  /*   std::cout << cluster_1->get_cluster_id() << " " << cluster_2->get_cluster_id() << " " << length_1/units::cm << " " << length_2/units::cm << " " <<  " a " << temp_results.second/units::cm << " " << cluster1_ave_pos.x/units::cm << " " << cluster1_ave_pos.y/units::cm << " " << cluster1_ave_pos.z/units::cm << " " << temp_results.first.x/units::cm << " " << temp_results.first.y/units::cm << " " << temp_results.first.z/units::cm << " " << dir_test.X() << " " << dir_test.Y() << " " << dir_test.Z() << " " << dis/units::cm << " " << std::endl;  */
+	  
+	  
+	  if (temp_results.second < 100*units::cm){
+	    cluster2_ave_pos = cluster_2->calc_ave_pos(temp_results.first,5*units::cm);
+	    dir3 = cluster_2->VHoughTrans(cluster2_ave_pos,80*units::cm);
+	    dir2.SetXYZ(cluster2_ave_pos.x - cluster1_ave_pos.x+1e-9, cluster2_ave_pos.y - cluster1_ave_pos.y+1e-9, cluster2_ave_pos.z - cluster1_ave_pos.z+1e-9); // 2-1
+	    
+	  }else{
+	    continue;
+	  }
 	}else{
 	  continue;
 	}
       }else if (i==2){
-	cluster2_ave_pos = cluster_2->calc_ave_pos(p2,5*units::cm);
-	dir3 = cluster_2->VHoughTrans(cluster2_ave_pos,100*units::cm);
-
-	TVector3 dir_test(dir3);
-	dir_test.SetMag(1);
-	dir_test *= -1;
-	
-	std::pair<Point, double> temp_results = cluster_1->get_closest_point_along_vec(cluster2_ave_pos, dir_test, dis*2, 5*units::cm, 15, 10*units::cm);
-
-
-
-	
-	if (temp_results.second < 100*units::cm){
-	  cluster1_ave_pos = cluster_1->calc_ave_pos(temp_results.first,5*units::cm);
-	  dir1 = cluster_1->VHoughTrans(cluster1_ave_pos,60*units::cm);
-	  dir2.SetXYZ(cluster2_ave_pos.x - cluster1_ave_pos.x+1e-9, cluster2_ave_pos.y - cluster1_ave_pos.y+1e-9, cluster2_ave_pos.z - cluster1_ave_pos.z+1e-9); // 2-1
+	if (length_2 >=15*units::cm){
+	  cluster2_ave_pos = cluster_2->calc_ave_pos(p2,5*units::cm);
+	  dir3 = cluster_2->VHoughTrans(cluster2_ave_pos,80*units::cm);
 	  
+	  TVector3 dir_test(dir3);
+	  dir_test.SetMag(1);
+	  dir_test *= -1;
+	  
+	  std::pair<Point, double> temp_results = cluster_1->get_closest_point_along_vec(cluster2_ave_pos, dir_test, dis*2, 5*units::cm, 15, 10*units::cm);
+	  
+	  if (temp_results.second < 100*units::cm){
+	    cluster1_ave_pos = cluster_1->calc_ave_pos(temp_results.first,5*units::cm);
+	    dir1 = cluster_1->VHoughTrans(cluster1_ave_pos,80*units::cm);
+	    dir2.SetXYZ(cluster2_ave_pos.x - cluster1_ave_pos.x+1e-9, cluster2_ave_pos.y - cluster1_ave_pos.y+1e-9, cluster2_ave_pos.z - cluster1_ave_pos.z+1e-9); // 2-1
+	    
+	  }else{
+	    continue;
+	  }
 	}else{
 	  continue;
 	}
@@ -392,7 +397,9 @@ bool WireCell2dToy::Clustering_4th_dead(WireCell::PR3DCluster *cluster_1, WireCe
       if (fabs(ave_dir.Angle(drift_dir)-3.1415926/2.)/3.1415926*180.>7.5){
 	// non-parallel case ... 
 	if (WireCell2dToy::is_angle_consistent(dir1,dir2,false,15,angle_u,angle_v,angle_w)){
-	  if (length_2 < 8*units::cm) 
+	  if (length_2 < 8*units::cm)
+	    return true;
+	  if (length_2 < 15*units::cm && WireCell2dToy::is_angle_consistent(dir1,dir2,false,7.5,angle_u,angle_v,angle_w)) 
 	    return true; 
 	  if (WireCell2dToy::is_angle_consistent(dir3,dir2,true,15,angle_u,angle_v,angle_w)){
 	    return true;
@@ -414,8 +421,6 @@ bool WireCell2dToy::Clustering_4th_dead(WireCell::PR3DCluster *cluster_1, WireCe
 	double ave_dis = sqrt(pow(cluster1_ave_pos.x-cluster2_ave_pos.x,2) + pow(cluster1_ave_pos.y-cluster2_ave_pos.y,2) + pow(cluster1_ave_pos.z-cluster2_ave_pos.z,2));
 	Point test_point;
 	double min_dis = 1e9, max_dis = -1e9;
-	
-	
 
 	if (fabs(ave_dir.Angle(drift_dir)-3.1415926/2.)/3.1415926*180. > 7.5  && ave_dis < 45*units::cm){
 	  

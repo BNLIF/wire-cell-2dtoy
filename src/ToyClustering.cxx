@@ -254,10 +254,10 @@ void WireCell2dToy::Clustering_jump_gap_cosmics(WireCell::PR3DClusterSelection& 
   
   for (int i=0;i!=3;i++){
     // extension regular case
-    Clustering_extend(live_clusters, cluster_length_map,cluster_connected_dead,3,15*units::cm);
+    Clustering_extend(live_clusters, cluster_length_map,cluster_connected_dead,3,15*units::cm,i);
     //cerr << em("extend regular") << endl;
     // extension ones connected to dead region ...
-    Clustering_extend(live_clusters, cluster_length_map,cluster_connected_dead,4,60*units::cm);
+    Clustering_extend(live_clusters, cluster_length_map,cluster_connected_dead,4,60*units::cm,i);
     
     //cerr << em("extend dead") << endl;
   }
