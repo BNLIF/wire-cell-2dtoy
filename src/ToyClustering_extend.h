@@ -33,7 +33,7 @@ void WireCell2dToy::Clustering_extend(WireCell::PR3DClusterSelection& live_clust
     PR3DCluster* cluster_1 = live_clusters.at(i);
     cluster_1->Create_point_cloud();
 
-    if (cluster_length_map[cluster_1] > 60*units::cm){
+    if (cluster_length_map[cluster_1] > 40*units::cm){
       Point highest_p, lowest_p, earliest_p, latest_p;
       bool flag_para = false;
       bool flag_prol = false;
