@@ -384,7 +384,7 @@ int main(int argc, char* argv[])
       hv_decon->SetBinContent(ch+1,j+1,0);
       hv_decon_g->SetBinContent(ch+1,j+1,0);
     }
-    for (int j=it->second.first;j!=it->second.second;j++){
+    for (int j=it->second.first;j!=it->second.second+1;j++){
       hv_raw->SetBinContent(ch+1,j+1,0);
     }
   }
