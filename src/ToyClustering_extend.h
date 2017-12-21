@@ -460,7 +460,7 @@ bool WireCell2dToy::Clustering_4th_reg(WireCell::PR3DCluster *cluster_1, WireCel
   double dis = sqrt(pow(p1.x-p2.x,2) + pow(p1.y-p2.y,2)+pow(p1.z-p2.z,2));
 
   
-  if (dis < length_cut && length_2 >= 40*units::cm){
+  if (dis < length_cut && (length_2 >= 40*units::cm || dis < 3*units::cm)){
 
     Point cluster1_ave_pos = cluster_1->calc_ave_pos(p1,5*units::cm);
     Point cluster2_ave_pos = cluster_2->calc_ave_pos(p2,5*units::cm);

@@ -193,8 +193,6 @@ void WireCell2dToy::Clustering_jump_gap_cosmics(WireCell::PR3DClusterSelection& 
   Clustering_regular(live_clusters, cluster_length_map,cluster_connected_dead,60*units::cm,false);
 
   // cerr << em("1st regular") << endl;
-  
-  
   Clustering_regular(live_clusters, cluster_length_map,cluster_connected_dead,30*units::cm,true); // do extension
 
   // cerr << em("2nd regular") << endl;
@@ -212,27 +210,22 @@ void WireCell2dToy::Clustering_jump_gap_cosmics(WireCell::PR3DClusterSelection& 
 
   // std::cout << cluster_connected_dead.size() << std::endl;
 
-  //extend the track ...
-  // deal with prolong case
-  Clustering_extend(live_clusters, cluster_length_map,cluster_connected_dead,1,150*units::cm);
-
-  // cerr << em("extend prolong") << endl;
+  for (int i=0;i!=2;i++){
+    //extend the track ...
+    // deal with prolong case
+    Clustering_extend(live_clusters, cluster_length_map,cluster_connected_dead,1,150*units::cm);
+    // cerr << em("extend prolong") << endl;
+    // deal with parallel case 
+    Clustering_extend(live_clusters, cluster_length_map,cluster_connected_dead,2,30*units::cm);
+    // cerr << em("extend parallel") << endl;
+    // extension regular case
+    Clustering_extend(live_clusters, cluster_length_map,cluster_connected_dead,3,15*units::cm);
+    //cerr << em("extend regular") << endl;
+    // extension ones connected to dead region ...
+    Clustering_extend(live_clusters, cluster_length_map,cluster_connected_dead,4,60*units::cm);
     
-  // deal with parallel case 
-  Clustering_extend(live_clusters, cluster_length_map,cluster_connected_dead,2,30*units::cm);
-
-  // cerr << em("extend parallel") << endl;
-  
-  // extension regular case
-  Clustering_extend(live_clusters, cluster_length_map,cluster_connected_dead,3,15*units::cm);
-
-  //cerr << em("extend regular") << endl;
-  
-  // extension ones connected to dead region ...
-  Clustering_extend(live_clusters, cluster_length_map,cluster_connected_dead,4,60*units::cm);
-
-  //cerr << em("extend dead") << endl;
-  
+    //cerr << em("extend dead") << endl;
+  }
 
   
   
