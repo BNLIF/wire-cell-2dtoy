@@ -424,9 +424,9 @@ bool WireCell2dToy::Clustering_4th_dead(WireCell::PR3DCluster *cluster_1, WireCe
       if (fabs(ave_dir.Angle(drift_dir)-3.1415926/2.)/3.1415926*180.>7.5){
       	// non-parallel case ...
       	if (WireCell2dToy::is_angle_consistent(dir1,dir2,false,10,angle_u,angle_v,angle_w)){
-      	  if (length_2 < 8*units::cm&& WireCell2dToy::is_angle_consistent(dir1,dir2,false,5,angle_u,angle_v,angle_w,3))
+      	  if (length_2 < 8*units::cm&& WireCell2dToy::is_angle_consistent(dir1,dir2,false,5,angle_u,angle_v,angle_w))
       	    return true;
-      	  if (length_2 < 15*units::cm && WireCell2dToy::is_angle_consistent(dir1,dir2,false,7.5,angle_u,angle_v,angle_w,3))
+      	  if (length_2 < 15*units::cm && WireCell2dToy::is_angle_consistent(dir1,dir2,false,7.5,angle_u,angle_v,angle_w))
       	    return true;
       	  if (WireCell2dToy::is_angle_consistent(dir3,dir2,true,10,angle_u,angle_v,angle_w)){
       	    return true;
