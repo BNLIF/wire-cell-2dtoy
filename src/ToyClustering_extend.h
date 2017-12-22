@@ -28,12 +28,16 @@ void WireCell2dToy::Clustering_extend(WireCell::PR3DClusterSelection& live_clust
 
   std::set<PR3DCluster*> used_clusters;
   std::set<std::pair<PR3DCluster*, PR3DCluster*>> to_be_merged_pairs;
+
+  int length_1_cut = 40*units::cm + num_try * 10*units::cm;
+
+  if (flag==1) length_1_cut = 20*units::cm + num_try*10*units::cm; //prolong case
   
   for (size_t i=0;i!=live_clusters.size();i++){
     PR3DCluster* cluster_1 = live_clusters.at(i);
     cluster_1->Create_point_cloud();
 
-    if (cluster_length_map[cluster_1] > 40*units::cm + num_try * 10*units::cm){
+    if (cluster_length_map[cluster_1] > length_1_cut){
       Point highest_p, lowest_p, earliest_p, latest_p;
       bool flag_para = false;
       bool flag_prol = false;
