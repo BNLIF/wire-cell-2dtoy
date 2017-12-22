@@ -215,9 +215,10 @@ void WireCell2dToy::Clustering_jump_gap_cosmics(WireCell::PR3DClusterSelection& 
   }
   
   
-  // cluster live dead ...
+  //cluster live dead ...
   Clustering_live_dead(live_clusters, dead_clusters, cluster_length_map, cluster_connected_dead);
-
+  // try to do the large ones immediate ... 
+  Clustering_extend(live_clusters, cluster_length_map,cluster_connected_dead,4,60*units::cm,0,15*units::cm);
   // cerr << em("live dead") << endl;
 
   // std::cout << cluster_connected_dead.size() << std::endl;
@@ -249,6 +250,8 @@ void WireCell2dToy::Clustering_jump_gap_cosmics(WireCell::PR3DClusterSelection& 
   int num_try =3;
   // for very busy events do less ... 
   if (live_clusters.size() > 1100 ) num_try = 1;
+
+  
   
   for (int i=0;i!= num_try ;i++){
     //extend the track ...

@@ -135,8 +135,12 @@ void WireCell2dToy::Clustering_live_dead(WireCell::PR3DClusterSelection& live_cl
 	      
 	      
 	      bool flag_para =false;
+
+	      
+
+	      
 	      double angle1, angle2, angle3;
-	      {
+	      if (!flag_merge){
 		// deal with parallel live dead merge ... 
 		TVector3 drift_dir(1,0,0);
 		angle1 = dir1.Angle(drift_dir); // cluster 1
@@ -153,13 +157,22 @@ void WireCell2dToy::Clustering_live_dead(WireCell::PR3DClusterSelection& live_cl
 		if (fabs(angle2-3.1415926/2.)<7.5/180.*3.1415926 &&
 		    (fabs(angle1-3.1415926/2.)<7.5/180.*3.1415926 ||
 		     fabs(angle3-3.1415926/2.)<7.5/180.*3.1415926) &&
-		    fabs(angle1-3.1415926/2.)+fabs(angle2-3.1415926/2.)+fabs(angle3-3.1415926/2.) < 25/180.*3.1415926)
+		    fabs(angle1-3.1415926/2.)+fabs(angle2-3.1415926/2.)+fabs(angle3-3.1415926/2.) < 25/180.*3.1415926){
 		  flag_para = true;
+		  if (WireCell2dToy::is_angle_consistent(dir1,dir2,false,15,angle_u,angle_v,angle_w,3) && WireCell2dToy::is_angle_consistent(dir3,dir2,true,15,angle_u,angle_v,angle_w,3))
+		    flag_merge = true;
+		}else{
+		  if (WireCell2dToy::is_angle_consistent(dir1,dir2,false,10,angle_u,angle_v,angle_w) && WireCell2dToy::is_angle_consistent(dir3,dir2,true,10,angle_u,angle_v,angle_w))
+		    flag_merge = true;
+		}
 	      }
 	      
 	      
 	      // divide into four cases, according to length ... 
 	      if (!flag_merge){
+		
+	
+		
 		if (length_1 <= 12*units::cm && length_2 <=12*units::cm){
 		  // both are short
 		  if ((dis <= 3*units::cm) && ((angle_diff1 <= 45 || angle_diff2 <=45) && (angle_diff3 < 60) ||
