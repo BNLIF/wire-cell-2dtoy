@@ -139,7 +139,7 @@ void WireCell2dToy::Clustering_extend(WireCell::PR3DClusterSelection& live_clust
 	   for (size_t j=0;j!=live_clusters.size();j++){
 	     PR3DCluster* cluster_2 = live_clusters.at(j);
 	     if (cluster_2 == cluster_1) continue;
-	     if (Clustering_4th_para(cluster_1,cluster_2,cluster_length_map[cluster_2],highest_p,dir_highp,length_cut))
+	     if (Clustering_4th_para(cluster_1,cluster_2,cluster_length_map[cluster_1],cluster_length_map[cluster_2],highest_p,dir_highp,length_cut))
 	       to_be_merged_pairs.insert(std::make_pair(cluster_1,cluster_2));
 	   }
 	 }/* else if (fabs(dir_highp_1.Angle(drift_dir)-3.1415926/2.)<5/180.*3.1415926){ */
@@ -157,7 +157,7 @@ void WireCell2dToy::Clustering_extend(WireCell::PR3DClusterSelection& live_clust
 	   for (size_t j=0;j!=live_clusters.size();j++){
 	     PR3DCluster* cluster_2 = live_clusters.at(j);
 	     if (cluster_2 == cluster_1) continue;
-	     if (Clustering_4th_para(cluster_1,cluster_2,cluster_length_map[cluster_2],lowest_p,dir_lowp,length_cut))
+	     if (Clustering_4th_para(cluster_1,cluster_2,cluster_length_map[cluster_1],cluster_length_map[cluster_2],lowest_p,dir_lowp,length_cut))
 	       to_be_merged_pairs.insert(std::make_pair(cluster_1,cluster_2));
 	   }
 	   
@@ -719,7 +719,7 @@ bool WireCell2dToy::Clustering_4th_reg(WireCell::PR3DCluster *cluster_1, WireCel
 
 
 
-bool WireCell2dToy::Clustering_4th_para(WireCell::PR3DCluster *cluster_1, WireCell::PR3DCluster *cluster_2, double length_2, WireCell::Point& earliest_p, TVector3& dir_earlp, double length_cut){
+bool WireCell2dToy::Clustering_4th_para(WireCell::PR3DCluster *cluster_1, WireCell::PR3DCluster *cluster_2, double length_1, double length_2, WireCell::Point& earliest_p, TVector3& dir_earlp, double length_cut){
   cluster_2->Create_point_cloud();
  
   std::pair<SlimMergeGeomCell*,Point> temp_results = cluster_2->get_closest_point_mcell(earliest_p);
@@ -728,7 +728,7 @@ bool WireCell2dToy::Clustering_4th_para(WireCell::PR3DCluster *cluster_1, WireCe
   double dis = sqrt(pow(earliest_p.x-p2.x,2) + pow(earliest_p.y-p2.y,2)+pow(earliest_p.z-p2.z,2));
   
   
-  if (dis < length_cut){
+  if (dis < length_cut ){
     
     Point test_point; 
     double min_dis = 1e9, max_dis = -1e9;

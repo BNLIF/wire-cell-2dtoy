@@ -231,7 +231,7 @@ void WireCell2dToy::Clustering_jump_gap_cosmics(WireCell::PR3DClusterSelection& 
   //cerr << em("2nd regular") << endl;
 
   
-   //dedicated one dealing with parallel and prolonged track
+  //dedicated one dealing with parallel and prolonged track
   Clustering_parallel_prolong(live_clusters, cluster_length_map,cluster_connected_dead,35*units::cm);
 
   //cerr << em("parallel prolong") << endl;
