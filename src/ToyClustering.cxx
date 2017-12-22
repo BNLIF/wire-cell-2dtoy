@@ -186,7 +186,7 @@ double WireCell2dToy::Find_Closeset_Points(WireCell::PR3DCluster *cluster1, Wire
 void WireCell2dToy::Clustering_jump_gap_cosmics(WireCell::PR3DClusterSelection& live_clusters, WireCell::PR3DClusterSelection& dead_clusters){
 
   
-  // ExecMon em("starting");
+  //  ExecMon em("starting");
 
 
   // include some parallel or prolonged, no need to do track fitting
@@ -225,42 +225,46 @@ void WireCell2dToy::Clustering_jump_gap_cosmics(WireCell::PR3DClusterSelection& 
   // first round clustering
   Clustering_regular(live_clusters, cluster_length_map,cluster_connected_dead,60*units::cm,false);
 
-  // cerr << em("1st regular") << endl;
+  //  cerr << em("1st regular") << endl;
   Clustering_regular(live_clusters, cluster_length_map,cluster_connected_dead,30*units::cm,true); // do extension
 
-  //cerr << em("2nd regular") << endl;
+  // cerr << em("2nd regular") << endl;
 
   
   //dedicated one dealing with parallel and prolonged track
   Clustering_parallel_prolong(live_clusters, cluster_length_map,cluster_connected_dead,35*units::cm);
 
-  //cerr << em("parallel prolong") << endl;
+  // cerr << em("parallel prolong") << endl;
   
   //clustering close distance ones ... 
   Clustering_close(live_clusters, cluster_length_map,cluster_connected_dead,1.2*units::cm);
 
-  //cerr << em("close") << endl;
+  // cerr << em("close") << endl;
 
   // std::cout << cluster_connected_dead.size() << std::endl;
 
   
- 
+  //std::cout << "Num. of clusters: " << live_clusters.size() << std::endl;
+
+  int num_try =3;
+  // for very busy events do less ... 
+  if (live_clusters.size() > 1100 ) num_try = 1;
   
-  for (int i=0;i!=3;i++){
+  for (int i=0;i!= num_try ;i++){
     //extend the track ...
     // deal with prolong case
     Clustering_extend(live_clusters, cluster_length_map,cluster_connected_dead,1,150*units::cm,i);
-    //cerr << em("extend prolong") << endl;
+    //  cerr << em("extend prolong") << endl;
     // deal with parallel case 
     Clustering_extend(live_clusters, cluster_length_map,cluster_connected_dead,2,30*units::cm,i);
-  //cerr << em("extend parallel") << endl;
+    // cerr << em("extend parallel") << endl;
     // extension regular case
     Clustering_extend(live_clusters, cluster_length_map,cluster_connected_dead,3,15*units::cm,i);
-    //cerr << em("extend regular") << endl;
+    //  cerr << em("extend regular") << endl;
     // extension ones connected to dead region ...
     Clustering_extend(live_clusters, cluster_length_map,cluster_connected_dead,4,60*units::cm,i);
     
-    //cerr << em("extend dead") << endl;
+    //  cerr << em("extend dead") << endl;
   }
 
   
