@@ -501,8 +501,8 @@ bool WireCell2dToy::Clustering_4th_reg(WireCell::PR3DCluster *cluster_1, WireCel
   std::pair<SlimMergeGeomCell*,Point> temp_results = cluster_2->get_closest_point_mcell(p1);
   Point p2 = temp_results.second;
 
-  /* temp_results = cluster_1->get_closest_point_mcell(p2); */
-  /* p1 = temp_results.second; */
+  temp_results = cluster_1->get_closest_point_mcell(p2);
+  p1 = temp_results.second;
   /* temp_results = cluster_2->get_closest_point_mcell(p1); */
   /* p2 = temp_results.second; */
   
@@ -658,7 +658,7 @@ bool WireCell2dToy::Clustering_4th_reg(WireCell::PR3DCluster *cluster_1, WireCel
 	  }
 	}
       }
-
+      
       
     }
   }
