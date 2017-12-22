@@ -9,7 +9,7 @@ namespace WireCell2dToy{
 
   
   double cal_proj_angle_diff(TVector3& dir1, TVector3& dir2, double plane_angle);
-  bool is_angle_consistent(TVector3& dir1, TVector3& dir2, bool same_direction, double angle_cut, double angle_u, double angle_v, double angle_w);
+  bool is_angle_consistent(TVector3& dir1, TVector3& dir2, bool same_direction, double angle_cut, double angle_u, double angle_v, double angle_w, int num_cut = 2);
   
   
   void Clustering_jump_gap_cosmics(WireCell::PR3DClusterSelection& live_clusters, WireCell::PR3DClusterSelection& dead_clusters);

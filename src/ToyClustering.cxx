@@ -26,7 +26,7 @@ double WireCell2dToy::cal_proj_angle_diff(TVector3& dir1, TVector3& dir2, double
   return temp_dir1.Angle(temp_dir2);
 }
 
-bool WireCell2dToy::is_angle_consistent(TVector3& dir1, TVector3& dir2, bool same_direction, double angle_cut, double uplane_angle, double vplane_angle, double wplane_angle){
+bool WireCell2dToy::is_angle_consistent(TVector3& dir1, TVector3& dir2, bool same_direction, double angle_cut, double uplane_angle, double vplane_angle, double wplane_angle, int num_cut){
   double angle_u = WireCell2dToy::cal_proj_angle_diff(dir1,dir2,uplane_angle);
   double angle_v = WireCell2dToy::cal_proj_angle_diff(dir1,dir2,vplane_angle);
   double angle_w = WireCell2dToy::cal_proj_angle_diff(dir1,dir2,wplane_angle);
@@ -44,7 +44,7 @@ bool WireCell2dToy::is_angle_consistent(TVector3& dir1, TVector3& dir2, bool sam
     if ((3.1415926-angle_w) <= angle_cut) num++;
   }
   
-  if (num>=2 ) return true;
+  if (num>=num_cut ) return true;
   return false;
 }
 
