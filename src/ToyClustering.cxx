@@ -237,8 +237,8 @@ void WireCell2dToy::Clustering_jump_gap_cosmics(WireCell::PR3DClusterSelection& 
   Clustering_close(live_clusters, cluster_length_map,cluster_connected_dead,1.2*units::cm);
   // cerr << em("close") << endl;
 
-  // std::cout << cluster_connected_dead.size() << std::endl;
-  // std::cout << "Num. of clusters: " << live_clusters.size() << std::endl;
+  // // std::cout << cluster_connected_dead.size() << std::endl;
+  // // std::cout << "Num. of clusters: " << live_clusters.size() << std::endl;
 
   int num_try =3;
   // for very busy events do less ... 
