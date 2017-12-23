@@ -125,8 +125,8 @@ void WireCell2dToy::Clustering_extend(WireCell::PR3DClusterSelection& live_clust
 	highest_p.x = hl_ps.first.x;
 	highest_p.y = hl_ps.first.y;
 	highest_p.z = hl_ps.first.z;
-
-	highest_p = cluster_1->calc_ave_pos(highest_p,100);
+	
+	highest_p = cluster_1->calc_ave_pos(highest_p,50);
 	
 	TVector3 dir_highp = cluster_1->VHoughTrans(highest_p,100*units::cm);
 	//TVector3 dir_highp_1 = cluster_1->VHoughTrans(highest_p,25*units::cm);
@@ -135,11 +135,12 @@ void WireCell2dToy::Clustering_extend(WireCell::PR3DClusterSelection& live_clust
 	lowest_p.y = hl_ps.second.y;
 	lowest_p.z = hl_ps.second.z;
 
-	lowest_p = cluster_1->calc_ave_pos(lowest_p,100);
+	lowest_p = cluster_1->calc_ave_pos(lowest_p,50);
 	
 	TVector3 dir_lowp = cluster_1->VHoughTrans(lowest_p, 100*units::cm);
 	//TVector3 dir_lowp_1 = cluster_1->VHoughTrans(lowest_p, 25*units::cm);
 
+	
 	//	std::cout << cluster_1->get_cluster_id() << " " << cluster_length_map[cluster_1]/units::cm << " " << fabs(dir_highp.Angle(drift_dir)-3.1415926/2.)/3.1415926*180. << " " << fabs(dir_lowp.Angle(drift_dir)-3.1415926/2.)/3.1415926*180. << " " << fabs(dir_highp_1.Angle(drift_dir)-3.1415926/2.)/3.1415926*180. << " " << fabs(dir_lowp_1.Angle(drift_dir)-3.1415926/2.)/3.1415926*180. <<std::endl; 
 	
 	 if (fabs(dir_highp.Angle(drift_dir)-3.1415926/2.)<5/180.*3.1415926){ 
@@ -330,8 +331,11 @@ bool WireCell2dToy::Clustering_4th_dead(WireCell::PR3DCluster *cluster_1, WireCe
   double dis = Find_Closeset_Points(cluster_1, cluster_2, length_1, length_2, length_cut, mcell1, mcell2, p1,p2);
 
   //  if (length_2 < 10*units::cm && dis >20*units::cm) return false;
+
+  /* if (length_1> 100*units::cm && length_2>100*units::cm) */
+  /*   std::cout << cluster_1->get_cluster_id() << " " << cluster_2->get_cluster_id() << " " << length_1/units::cm << " " << length_2/units::cm << " " << dis/units::cm << " " << std::endl; */
   
-  if (dis < length_cut || (length_2 > 50*units::cm && dis < 80*units::cm)){
+  if ((dis < length_cut || (length_2 > 50*units::cm && dis < 80*units::cm))&&dis > 10*units::cm){
 
     Point cluster1_ave_pos_save;
     Point cluster2_ave_pos_save;
@@ -797,9 +801,9 @@ bool WireCell2dToy::Clustering_4th_para(WireCell::PR3DCluster *cluster_1, WireCe
  	} 
     }
 
-    
-    /* std::cout << cluster_1->get_cluster_id() << " " << length_2/units::cm << " " << max_dis/units::cm << " " << min_dis/units::cm << " " << dis/units::cm << " " << dir_earlp.X() << " " << dir_earlp.Y() << " " << dir_earlp.Z() << std::endl;  */
-
+    /* if (length_2 > 50*units::cm ) */
+    /*   std::cout << cluster_1->get_cluster_id() << " " << cluster_2->get_cluster_id() << " " << length_1/units::cm << " " << length_2/units::cm << " " << max_dis/units::cm << " " << min_dis/units::cm << " " << dis/units::cm << " " << dir_earlp.X() << " " << dir_earlp.Y() << " " << dir_earlp.Z() << " " << earliest_p.x/units::cm << " " << earliest_p.y/units::cm << " " << earliest_p.z/units::cm << " " << p2.x/units::cm << " " << p2.y/units::cm << " " << p2.z/units::cm << std::endl; */
+    /* return false; */
     
     if ((max_dis - min_dis)>2.5*units::cm) return true; 
     
