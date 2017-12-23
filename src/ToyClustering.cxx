@@ -218,21 +218,14 @@ void WireCell2dToy::Clustering_jump_gap_cosmics(WireCell::PR3DClusterSelection& 
   //cluster live dead ...
   Clustering_live_dead(live_clusters, dead_clusters, cluster_length_map, cluster_connected_dead);
   // try to do the large ones immediate ... 
-  Clustering_extend(live_clusters, cluster_length_map,cluster_connected_dead,4,60*units::cm,0,15*units::cm,1);
-  
+  Clustering_extend(live_clusters, cluster_length_map,cluster_connected_dead,4,60*units::cm,0,15*units::cm,1);  
   // cerr << em("live dead") << endl;
 
-  // std::cout << cluster_connected_dead.size() << std::endl;
   
   // first round clustering
   Clustering_regular(live_clusters, cluster_length_map,cluster_connected_dead,60*units::cm,false);
- 
   //  cerr << em("1st regular") << endl;
   Clustering_regular(live_clusters, cluster_length_map,cluster_connected_dead,30*units::cm,true); // do extension
-
-  
-
-  
   // cerr << em("2nd regular") << endl;
 
   
@@ -242,20 +235,14 @@ void WireCell2dToy::Clustering_jump_gap_cosmics(WireCell::PR3DClusterSelection& 
   
   //clustering close distance ones ... 
   Clustering_close(live_clusters, cluster_length_map,cluster_connected_dead,1.2*units::cm);
-
   // cerr << em("close") << endl;
 
   // std::cout << cluster_connected_dead.size() << std::endl;
-
-  
-  //std::cout << "Num. of clusters: " << live_clusters.size() << std::endl;
+  // std::cout << "Num. of clusters: " << live_clusters.size() << std::endl;
 
   int num_try =3;
   // for very busy events do less ... 
   if (live_clusters.size() > 1100 ) num_try = 1;
-
-  
-  
   for (int i=0;i!= num_try ;i++){
     //extend the track ...
     // deal with prolong case
@@ -264,11 +251,14 @@ void WireCell2dToy::Clustering_jump_gap_cosmics(WireCell::PR3DClusterSelection& 
     // deal with parallel case 
     Clustering_extend(live_clusters, cluster_length_map,cluster_connected_dead,2,30*units::cm,0);
     // cerr << em("extend parallel") << endl;
+    
     // extension regular case
     Clustering_extend(live_clusters, cluster_length_map,cluster_connected_dead,3,15*units::cm,0);
+   
     //  cerr << em("extend regular") << endl;
     // extension ones connected to dead region ...
     Clustering_extend(live_clusters, cluster_length_map,cluster_connected_dead,4,60*units::cm,i);
+   
     
     //  cerr << em("extend dead") << endl;
   }
