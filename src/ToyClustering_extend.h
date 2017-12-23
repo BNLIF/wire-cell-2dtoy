@@ -663,14 +663,13 @@ bool WireCell2dToy::Clustering_4th_reg(WireCell::PR3DCluster *cluster_1, WireCel
       
       /* if (cluster_1->get_cluster_id()== 11 ) */
       /*   std::cout  << cluster_1->get_cluster_id() << " " << cluster_2->get_cluster_id() << " " << angle4 << " " << angle5 << " " << dis/units::cm << " " << length_2/units::cm << std::endl; */
-
       // return false;
       
       if (flag_para){
-  	if (angle4 < 30 && (length_2 < 12*units::cm || angle5 < 60))
+  	if (angle4 < 30 && (length_2 < 12*units::cm && fabs(angle5-90.)>30 || angle5 < 60))
   	  return true;
       }else if (flag_prol){
-  	if (angle4 < 25 && (length_2 < 15*units::cm || angle5 < 25))
+  	if (angle4 < 25 && (length_2 < 15*units::cm && fabs(angle5-90.)>30 || angle5 < 25))
   	  return true;
       }
 
