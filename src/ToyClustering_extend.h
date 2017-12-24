@@ -564,7 +564,7 @@ bool WireCell2dToy::Clustering_4th_reg(WireCell::PR3DCluster *cluster_1, WireCel
   /*   std::cout  << cluster_1->get_cluster_id() << " " << cluster_2->get_cluster_id() << " " <<  " " << dis/units::cm << " " << length_1/units::cm << " " << length_2/units::cm << " "  << std::endl; */
   /* return false; */
 
-  if (dis1 > 15*units::cm && dis < 3*units::cm) return false;
+  if (dis1 > 15*units::cm && dis < 3*units::cm && length_2 > 80*units::cm &&length_1>80*units::cm) return false;
   
   if (dis < length_cut && (length_2 >= 40*units::cm || dis < 3*units::cm)){
 
