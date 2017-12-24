@@ -544,17 +544,17 @@ bool WireCell2dToy::Clustering_4th_reg(WireCell::PR3DCluster *cluster_1, WireCel
     Point cluster2_ave_pos = cluster_2->calc_ave_pos(p2,5*units::cm);
     TVector3 dir1;
     
-    if (cluster_1->get_num_points(cluster1_ave_pos, 30*units::cm)>50){
+    if (cluster_1->get_num_points(cluster1_ave_pos, 30*units::cm)>50 && length_1 < 120*units::cm){
       dir1 = cluster_1->VHoughTrans(cluster1_ave_pos,30*units::cm);
     }else{
-      dir1 = cluster_1->VHoughTrans(cluster1_ave_pos,60*units::cm);
+      dir1 = cluster_1->VHoughTrans(cluster1_ave_pos,80*units::cm);
     }
 
     TVector3 dir3;
-    if (cluster_2->get_num_points(cluster2_ave_pos, 30*units::cm)>50){
+    if (cluster_2->get_num_points(cluster2_ave_pos, 30*units::cm)>50&&length_2 < 120*units::cm){
       dir3 = cluster_2->VHoughTrans(cluster2_ave_pos,30*units::cm);
     }else{
-      dir3 = cluster_2->VHoughTrans(cluster2_ave_pos,60*units::cm);
+      dir3 = cluster_2->VHoughTrans(cluster2_ave_pos,80*units::cm);
     }
 
     TVector3 dir2(cluster2_ave_pos.x - cluster1_ave_pos.x,

@@ -22,10 +22,10 @@ void WireCell2dToy::Clustering_close(WireCell::PR3DClusterSelection& live_cluste
   std::set<std::pair<PR3DCluster*, PR3DCluster*>> to_be_merged_pairs;
   for (size_t i=0;i!=live_clusters.size();i++){
     PR3DCluster* cluster_1 = live_clusters.at(i);
-    //    if (cluster_length_map[cluster_1] < 3*units::cm) continue;
+    if (cluster_length_map[cluster_1] < 1.5*units::cm) continue;
     for (size_t j=i+1;j<live_clusters.size();j++){
       PR3DCluster* cluster_2 = live_clusters.at(j);
-      //if (cluster_length_map[cluster_2] < 3*units::cm) continue;
+      if (cluster_length_map[cluster_2] < 1.5*units::cm) continue;
       if (WireCell2dToy::Clustering_3rd_round(cluster_1,cluster_2, cluster_length_map[cluster_1], cluster_length_map[cluster_2], length_cut))
 	to_be_merged_pairs.insert(std::make_pair(cluster_1,cluster_2));
     }
@@ -125,6 +125,9 @@ bool WireCell2dToy::Clustering_3rd_round(WireCell::PR3DCluster *cluster1, WireCe
   TVector3 dir1, dir2;
   int num_p1, num_p2, num_tp1, num_tp2;
 
+  
+
+  
   if (dis < 2.0*units::cm && (length_2 >=12*units::cm || length_1 >=12*units::cm)){
     dir1 = cluster1->VHoughTrans(p1,50*units::cm); // cluster 1 direction based on hough
     dir2 = cluster2->VHoughTrans(p2,50*units::cm); // cluster 1 direction based on hough
@@ -148,7 +151,8 @@ bool WireCell2dToy::Clustering_3rd_round(WireCell::PR3DCluster *cluster1, WireCe
 	return true;
     }
   }
-  
+
+  //if (length_1 < 60*units::cm || length_2<60*units::cm) return false;
   
   if (dis < length_cut && (length_2 >=12*units::cm || length_1 >=12*units::cm)){
     Point cluster1_ave_pos = cluster1->calc_ave_pos(p1,10*units::cm);
@@ -156,7 +160,12 @@ bool WireCell2dToy::Clustering_3rd_round(WireCell::PR3DCluster *cluster1, WireCe
 
     TVector3 tempV1(p2.x - p1.x, p2.y - p1.y, p2.z - p1.z);
     TVector3 tempV2(cluster2_ave_pos.x - cluster1_ave_pos.x, cluster2_ave_pos.y - cluster1_ave_pos.y, cluster2_ave_pos.z - cluster1_ave_pos.z);
-       
+
+    /* if (length_1 > 150*units::cm || length_2 > 150*units::cm) */
+    /*   std::cout << cluster1->get_cluster_id() << " " << cluster2->get_cluster_id() << " " << length_1/units::cm << " " << length_2/units::cm << " " << num_p1 << " " << num_p2 << " " << num_tp1 << " " << num_tp2 << std::endl; */
+
+    /* return false; */
+    
     // one small the other one is big 
     if (length_1 < 12 *units::cm && num_p1 > 0.5*num_tp1 && (num_p2> 50 || num_p2 > 0.25*num_tp2) ||
 	length_2 < 12*units::cm && num_p2 > 0.5*num_tp2 && (num_p1>50 || num_p1 > 0.25*num_tp1) )
@@ -174,6 +183,9 @@ bool WireCell2dToy::Clustering_3rd_round(WireCell::PR3DCluster *cluster1, WireCe
 	if (angle5 < 90/180.*3.1415926 && (num_p1 > 50 && num_p2 > 50) && (num_p1>75 || num_p2>75))
 	  return true;
       }
+
+      
+      
       
       if ((length_1 < 60*units::cm || num_p1 >40) && (length_2 < 60*units::cm || num_p2 > 40)){
 	
