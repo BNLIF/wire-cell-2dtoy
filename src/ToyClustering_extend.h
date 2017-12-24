@@ -156,9 +156,14 @@ void WireCell2dToy::Clustering_extend(WireCell::PR3DClusterSelection& live_clust
 
 	   for (size_t j=0;j!=live_clusters.size();j++){
 	     PR3DCluster* cluster_2 = live_clusters.at(j);
+	     if (used_clusters.find(cluster_2)!=used_clusters.end()) continue;
 	     if (cluster_2==cluster_1) continue;
-	     if (Clustering_4th_para(cluster_1,cluster_2,cluster_length_map[cluster_1],cluster_length_map[cluster_2],highest_p,dir_highp,length_cut))
+	     
+	     if (Clustering_4th_para(cluster_1,cluster_2,cluster_length_map[cluster_1],cluster_length_map[cluster_2],highest_p,dir_highp,length_cut)){
 	       to_be_merged_pairs.insert(std::make_pair(cluster_1,cluster_2));
+	       if (cluster_length_map[cluster_2]<15*units::cm)
+		 used_clusters.insert(cluster_2);
+	     }
 	   }
 	 }/* else if (fabs(dir_highp_1.Angle(drift_dir)-3.1415926/2.)<5/180.*3.1415926){ */
 	 /*   for (size_t j=0;j!=live_clusters.size();j++){ */
