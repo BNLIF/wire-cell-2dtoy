@@ -20,14 +20,26 @@ void WireCell2dToy::Clustering_close(WireCell::PR3DClusterSelection& live_cluste
   
   
   std::set<std::pair<PR3DCluster*, PR3DCluster*>> to_be_merged_pairs;
+  std::set<PR3DCluster*> used_clusters;
+  
   for (size_t i=0;i!=live_clusters.size();i++){
     PR3DCluster* cluster_1 = live_clusters.at(i);
     if (cluster_length_map[cluster_1] < 1.5*units::cm) continue;
+    if (used_clusters.find(cluster_1)!=used_clusters.end()) continue;
     for (size_t j=i+1;j<live_clusters.size();j++){
       PR3DCluster* cluster_2 = live_clusters.at(j);
+      if (used_clusters.find(cluster_2)!=used_clusters.end()) continue;
       if (cluster_length_map[cluster_2] < 1.5*units::cm) continue;
-      if (WireCell2dToy::Clustering_3rd_round(cluster_1,cluster_2, cluster_length_map[cluster_1], cluster_length_map[cluster_2], length_cut))
+      if (WireCell2dToy::Clustering_3rd_round(cluster_1,cluster_2, cluster_length_map[cluster_1], cluster_length_map[cluster_2], length_cut)){
 	to_be_merged_pairs.insert(std::make_pair(cluster_1,cluster_2));
+	if (cluster_length_map[cluster_1] < 5*units::cm){
+	  used_clusters.insert(cluster_1);
+	  break;
+	}
+	if (cluster_length_map[cluster_2] < 5*units::cm){
+	  used_clusters.insert(cluster_2);
+	}
+      }
     }
   }
   
@@ -139,8 +151,15 @@ bool WireCell2dToy::Clustering_3rd_round(WireCell::PR3DCluster *cluster1, WireCe
     num_p2 = cluster2->get_num_points(p2, 10*units::cm);
     num_tp1 = cluster1->get_num_points();
     num_tp2 = cluster2->get_num_points();
+
+    
     
     if (length_1 > 25*units::cm && length_2 > 25*units::cm){
+      /* if (length_1 > 60*units::cm && length_2 > 60*units::cm ){ */
+      /* 	//if (num_ps_1.second > num_ps_1.first * 0.05 || num_ps_2.second > num_ps_2.first * 0.05) */
+      /* 	return false; */
+      /* } */
+
       if ((num_ps_1.second < num_ps_1.first * 0.02 || num_ps_1.second <=3) &&
 	  (num_ps_2.second < num_ps_2.first * 0.02 || num_ps_2.second <=3) ||
 	  (num_ps_1.second < num_ps_1.first * 0.035 || num_ps_1.second <=6) &&
@@ -152,7 +171,7 @@ bool WireCell2dToy::Clustering_3rd_round(WireCell::PR3DCluster *cluster1, WireCe
     }
   }
 
-  //if (length_1 < 60*units::cm || length_2<60*units::cm) return false;
+  
   
   if (dis < length_cut && (length_2 >=12*units::cm || length_1 >=12*units::cm)){
     Point cluster1_ave_pos = cluster1->calc_ave_pos(p1,10*units::cm);
@@ -163,7 +182,6 @@ bool WireCell2dToy::Clustering_3rd_round(WireCell::PR3DCluster *cluster1, WireCe
 
     /* if (length_1 > 150*units::cm || length_2 > 150*units::cm) */
     /*   std::cout << cluster1->get_cluster_id() << " " << cluster2->get_cluster_id() << " " << length_1/units::cm << " " << length_2/units::cm << " " << num_p1 << " " << num_p2 << " " << num_tp1 << " " << num_tp2 << std::endl; */
-
     /* return false; */
     
     // one small the other one is big 
