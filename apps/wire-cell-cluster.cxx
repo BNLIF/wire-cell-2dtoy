@@ -99,6 +99,11 @@ int main(int argc, char* argv[])
   mp.set_first_v_dis(first_v_dis);
   mp.set_first_w_dis(first_w_dis);
   
+
+
+  std::set<int> dead_u_index;
+  std::set<int> dead_v_index;
+  std::set<int> dead_w_index;
   
   // load mcell
   
@@ -118,7 +123,7 @@ int main(int argc, char* argv[])
   Double_t wire_charge_err_u[2400];
   Double_t wire_charge_err_v[2400];
   Double_t wire_charge_err_w[2400];
-
+  
   TC->SetBranchAddress("cluster_id",&cluster_id);
   TC->SetBranchAddress("time_slice",&time_slice);
   TC->SetBranchAddress("q",&q);
@@ -186,12 +191,21 @@ int main(int argc, char* argv[])
     mcell->set_q(q);
     if (flag_u==0){
       mcell->add_bad_planes(WirePlaneType_t(0));
+      for (int i=0;i!=nwire_u;i++){
+	dead_u_index.insert(wire_index_u[i]);
+      }
     }
     if (flag_v==0){
       mcell->add_bad_planes(WirePlaneType_t(1));
+      for (int i=0;i!=nwire_v;i++){
+	dead_v_index.insert(wire_index_v[i]);
+      }
     }
     if (flag_w==0){
       mcell->add_bad_planes(WirePlaneType_t(2));
+      for (int i=0;i!=nwire_w;i++){
+	dead_w_index.insert(wire_index_w[i]);
+      }
     }
     for (int i=0;i!=nwire_u;i++){
       const GeomWire *wire = gds.by_planeindex(WirePlaneType_t(0),wire_index_u[i]);
@@ -228,12 +242,21 @@ int main(int argc, char* argv[])
 
     if (flag_u==0){
       mcell->add_bad_planes(WirePlaneType_t(0));
+      for (int i=0;i!=nwire_u;i++){
+	dead_u_index.insert(wire_index_u[i]);
+      }
     }
     if (flag_v==0){
       mcell->add_bad_planes(WirePlaneType_t(1));
+      for (int i=0;i!=nwire_v;i++){
+	dead_v_index.insert(wire_index_v[i]);
+      }
     }
     if (flag_w==0){
       mcell->add_bad_planes(WirePlaneType_t(2));
+      for (int i=0;i!=nwire_w;i++){
+	dead_w_index.insert(wire_index_w[i]);
+      }
     }
     for (int i=0;i!=nwire_u;i++){
       const GeomWire *wire = gds.by_planeindex(WirePlaneType_t(0),wire_index_u[i]);
