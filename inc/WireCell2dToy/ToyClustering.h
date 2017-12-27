@@ -43,8 +43,8 @@ namespace WireCell2dToy{
   
   //void Clustering_prolong(WireCell::PR3DClusterSelection& live_clusters, std::map<WireCell::PR3DCluster*,double>& cluster_length_map, double length_cut = 45*units::cm);
 
-
   
+  void Clustering_separate(WireCell::PR3DClusterSelection& live_clusters, std::map<WireCell::PR3DCluster*,double>& cluster_length_map);
   
   
 
