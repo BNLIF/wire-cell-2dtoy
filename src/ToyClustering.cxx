@@ -183,7 +183,7 @@ double WireCell2dToy::Find_Closeset_Points(WireCell::PR3DCluster *cluster1, Wire
 }
 
 
-void WireCell2dToy::Clustering_jump_gap_cosmics(WireCell::PR3DClusterSelection& live_clusters, WireCell::PR3DClusterSelection& dead_clusters){
+void WireCell2dToy::Clustering_jump_gap_cosmics(WireCell::PR3DClusterSelection& live_clusters, WireCell::PR3DClusterSelection& dead_clusters, std::set<int>& dead_u_index, std::set<int>& dead_v_index, std::set<int>& dead_w_index){
 
   
   //  ExecMon em("starting");
@@ -265,6 +265,9 @@ void WireCell2dToy::Clustering_jump_gap_cosmics(WireCell::PR3DClusterSelection& 
     
     //  cerr << em("extend dead") << endl;
   }
+
+
+  // prepare for separating the connected pieces ... 
 
   
   

@@ -335,7 +335,7 @@ int main(int argc, char* argv[])
    // WireCell2dToy::Clustering_live_dead(live_clusters, dead_clusters);
    // cerr << em("Clustering live and dead clusters") << std::endl;
 
-   WireCell2dToy::Clustering_jump_gap_cosmics(live_clusters, dead_clusters);
+   WireCell2dToy::Clustering_jump_gap_cosmics(live_clusters, dead_clusters,dead_u_index, dead_v_index, dead_w_index);
    cerr << em("Clustering to jump gap in cosmics") << std::endl;
 
    // need to further cluster things ...
