@@ -129,6 +129,7 @@ void WireCell2dToy::Clustering_separate(WireCell::PR3DClusterSelection& live_clu
 	  }
 
 	   int num_outside_points = 0;
+	   int num_outx_points = 0;
 	   std::vector<WCPointCloud<double>::WCPoint> independent_points;
 	   for (size_t j=0;j!=hy_points.size();j++){
 	     bool flag_save = true;
@@ -143,7 +144,10 @@ void WireCell2dToy::Clustering_separate(WireCell::PR3DClusterSelection& live_clu
 		   hy_points.at(j).z < 10*units::cm || hy_points.at(j).z > 1027*units::cm ||
 		   hy_points.at(j).x < -1*units::cm || hy_points.at(j).x > 257*units::cm )
 		 num_outside_points ++;
+	       if (hy_points.at(j).x < -1*units::cm || hy_points.at(j).x > 257*units::cm )
+		 num_outx_points++;
 	     }
+	     
 	   }
 	   for (size_t j=0;j!=ly_points.size();j++){
 	     bool flag_save = true;
@@ -158,6 +162,8 @@ void WireCell2dToy::Clustering_separate(WireCell::PR3DClusterSelection& live_clu
 		   ly_points.at(j).z < 10*units::cm || ly_points.at(j).z > 1027*units::cm ||
 		   ly_points.at(j).x < -1*units::cm || ly_points.at(j).x > 257*units::cm )
 		 num_outside_points ++;
+	       if (ly_points.at(j).x < -1*units::cm || ly_points.at(j).x > 257*units::cm )
+		 num_outx_points++;
 	     }
 	   }
 	   for (size_t j=0;j!=hz_points.size();j++){
@@ -173,6 +179,8 @@ void WireCell2dToy::Clustering_separate(WireCell::PR3DClusterSelection& live_clu
 		   hz_points.at(j).z < 10*units::cm || hz_points.at(j).z > 1027*units::cm ||
 		   hz_points.at(j).x < -1*units::cm || hz_points.at(j).x > 257*units::cm )
 		 num_outside_points ++;
+	       if (hz_points.at(j).x < -1*units::cm || hz_points.at(j).x > 257*units::cm )
+		 num_outx_points ++;
 	     }
 	   }
 	   for (size_t j=0;j!=lz_points.size();j++){
@@ -188,6 +196,8 @@ void WireCell2dToy::Clustering_separate(WireCell::PR3DClusterSelection& live_clu
 		   lz_points.at(j).z < 10*units::cm || lz_points.at(j).z > 1027*units::cm ||
 		   lz_points.at(j).x < -1*units::cm || lz_points.at(j).x > 257*units::cm )
 		 num_outside_points ++;
+	       if (lz_points.at(j).x < -1*units::cm || lz_points.at(j).x > 257*units::cm )
+		 num_outx_points++;
 	     }
 	   }
 	   for (size_t j=0;j!=hx_points.size();j++){
@@ -203,6 +213,8 @@ void WireCell2dToy::Clustering_separate(WireCell::PR3DClusterSelection& live_clu
 		   hx_points.at(j).z < 10*units::cm || hx_points.at(j).z > 1027*units::cm ||
 		   hx_points.at(j).x < -1*units::cm || hx_points.at(j).x > 257*units::cm )
 		 num_outside_points ++;
+	       if (hx_points.at(j).x < -1*units::cm || hx_points.at(j).x > 257*units::cm )
+		 num_outx_points++;
 	     }
 	   }
 	   for (size_t j=0;j!=lx_points.size();j++){
@@ -218,6 +230,8 @@ void WireCell2dToy::Clustering_separate(WireCell::PR3DClusterSelection& live_clu
 		   lx_points.at(j).z < 10*units::cm || lx_points.at(j).z > 1027*units::cm ||
 		   lx_points.at(j).x < -1*units::cm || lx_points.at(j).x > 257*units::cm )
 		 num_outside_points ++;
+	       if (lx_points.at(j).x < -1*units::cm || lx_points.at(j).x > 257*units::cm )
+		 num_outx_points++;
 	     }
 	   }
 	  
@@ -244,7 +258,7 @@ void WireCell2dToy::Clustering_separate(WireCell::PR3DClusterSelection& live_clu
 	  
 	   std::cout <<  cluster->get_cluster_id() << " " << hy_points.size() << " " << ly_points.size() << " " << hz_points.size() << " " << lz_points.size() <<  " " << hx_points.size() << " " << lz_points.size() << " " << num_outside_points << " " << independent_points.size() << " " << num_far_points << std::endl;
 
-	   if (num_outside_points > 0 && (independent_points.size()>2 ||
+	   if ((num_outside_points > 1 || num_outx_points>0) && (independent_points.size()>2 ||
 					  independent_points.size()==2 && num_far_points > 0)){
 	     std::cout << "Separate cluster " << cluster->get_cluster_id() << std::endl;
 	     
