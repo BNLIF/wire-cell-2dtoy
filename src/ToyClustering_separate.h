@@ -139,7 +139,9 @@ void WireCell2dToy::Clustering_separate(WireCell::PR3DClusterSelection& live_clu
 	     }
 	     if (flag_save){
 	       independent_points.push_back(hy_points.at(j));
-	       if (hy_points.at(j).y > 106.5*units::cm)
+	       if (hy_points.at(j).y > 106.5*units::cm || hy_points.at(j).y <-106.5*units::cm ||
+		   hy_points.at(j).z < 10*units::cm || hy_points.at(j).z > 1027*units::cm ||
+		   hy_points.at(j).x < -1*units::cm || hy_points.at(j).x > 257*units::cm )
 		 num_outside_points ++;
 	     }
 	   }
@@ -152,7 +154,9 @@ void WireCell2dToy::Clustering_separate(WireCell::PR3DClusterSelection& live_clu
 	     }
 	     if (flag_save){
 	       independent_points.push_back(ly_points.at(j));
-	       if (ly_points.at(j).y < -106.5*units::cm)
+	       if (ly_points.at(j).y > 106.5*units::cm || ly_points.at(j).y <-106.5*units::cm ||
+		   ly_points.at(j).z < 10*units::cm || ly_points.at(j).z > 1027*units::cm ||
+		   ly_points.at(j).x < -1*units::cm || ly_points.at(j).x > 257*units::cm )
 		 num_outside_points ++;
 	     }
 	   }
@@ -165,7 +169,9 @@ void WireCell2dToy::Clustering_separate(WireCell::PR3DClusterSelection& live_clu
 	     }
 	     if (flag_save){
 	       independent_points.push_back(hz_points.at(j));
-	       if (hz_points.at(j).z > 1027*units::cm)
+	       if (hz_points.at(j).y > 106.5*units::cm || hz_points.at(j).y <-106.5*units::cm ||
+		   hz_points.at(j).z < 10*units::cm || hz_points.at(j).z > 1027*units::cm ||
+		   hz_points.at(j).x < -1*units::cm || hz_points.at(j).x > 257*units::cm )
 		 num_outside_points ++;
 	     }
 	   }
@@ -178,7 +184,9 @@ void WireCell2dToy::Clustering_separate(WireCell::PR3DClusterSelection& live_clu
 	     }
 	     if (flag_save){
 	       independent_points.push_back(lz_points.at(j));
-	       if (lz_points.at(j).z < 10*units::cm)
+	       if (lz_points.at(j).y > 106.5*units::cm || lz_points.at(j).y <-106.5*units::cm ||
+		   lz_points.at(j).z < 10*units::cm || lz_points.at(j).z > 1027*units::cm ||
+		   lz_points.at(j).x < -1*units::cm || lz_points.at(j).x > 257*units::cm )
 		 num_outside_points ++;
 	     }
 	   }
@@ -191,7 +199,9 @@ void WireCell2dToy::Clustering_separate(WireCell::PR3DClusterSelection& live_clu
 	     }
 	     if (flag_save){
 	       independent_points.push_back(hx_points.at(j));
-	       if (hx_points.at(j).x > 257*units::cm)
+	       if (hx_points.at(j).y > 106.5*units::cm || hx_points.at(j).y <-106.5*units::cm ||
+		   hx_points.at(j).z < 10*units::cm || hx_points.at(j).z > 1027*units::cm ||
+		   hx_points.at(j).x < -1*units::cm || hx_points.at(j).x > 257*units::cm )
 		 num_outside_points ++;
 	     }
 	   }
@@ -204,7 +214,9 @@ void WireCell2dToy::Clustering_separate(WireCell::PR3DClusterSelection& live_clu
 	     }
 	     if (flag_save){
 	       independent_points.push_back(lx_points.at(j));
-	       if (lz_points.at(j).z < -1*units::cm)
+	       if (lx_points.at(j).y > 106.5*units::cm || lx_points.at(j).y <-106.5*units::cm ||
+		   lx_points.at(j).z < 10*units::cm || lx_points.at(j).z > 1027*units::cm ||
+		   lx_points.at(j).x < -1*units::cm || lx_points.at(j).x > 257*units::cm )
 		 num_outside_points ++;
 	     }
 	   }
@@ -235,6 +247,8 @@ void WireCell2dToy::Clustering_separate(WireCell::PR3DClusterSelection& live_clu
 	   if (num_outside_points > 0 && (independent_points.size()>2 ||
 					  independent_points.size()==2 && num_far_points > 0)){
 	     std::cout << "Separate cluster " << cluster->get_cluster_id() << std::endl;
+	     
+	     
 	     // separate ... 
 	   }
 	   /* std::cout << << " Xin " << cluster_length_map[cluster]/units::cm << " " << boundary_points.size() << " " << cluster->get_PCA_value(0) << " " << cluster->get_PCA_value(1)/cluster->get_PCA_value(0) << " " << cluster->get_PCA_value(2)/cluster->get_PCA_value(0) << " " << dir1.Angle(drift_dir) << " " << dir2.Angle(drift_dir) << " " << dir3.Angle(drift_dir) << std::endl;   */
