@@ -233,10 +233,10 @@ void WireCell2dToy::Clustering_separate(WireCell::PR3DClusterSelection& live_clu
 		TVector3 dir_3 = dir_2 - dir_1 * dir_2.Mag() * cos(angle_12);
 		double angle_3 = dir_3.Angle(drift_dir);
 		if (fabs(angle_3-3.1415926/2.)/3.1415926*180.<7.5){
-		  if (fabs(dir_3.X()/units::cm)>25*units::cm)
+		  if (fabs(dir_3.X()/units::cm)>20*units::cm)
 		    num_far_points ++;
 		}else{
-		  if (dir_3.Mag() > 40*units::cm)
+		  if (dir_3.Mag() > 30*units::cm)
 		    num_far_points ++;
 		}
 	     }

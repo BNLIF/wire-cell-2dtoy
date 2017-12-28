@@ -23,7 +23,7 @@ int main(int argc, char* argv[])
   }
 
   ExecMon em("starting");
-  cerr << em("load geometry") << endl;
+  //cerr << em("load geometry") << endl;
 
   WireCellSst::GeomDataSource gds(argv[1]);
   std::vector<double> ex = gds.extent();
@@ -299,7 +299,7 @@ int main(int argc, char* argv[])
    }
   
    
-   cerr << em("load clusters from file") << endl;
+   //   cerr << em("load clusters from file") << endl;
 
   
 
@@ -313,7 +313,7 @@ int main(int argc, char* argv[])
      WireCell2dToy::calc_sampling_points(gds,live_clusters.at(i),nrebin, frame_length, unit_dis);
      // live_clusters.at(i)->Calc_PCA();
    }
-   cerr << em("Add X, Y, Z points") << std::endl;
+   //cerr << em("Add X, Y, Z points") << std::endl;
 
    // create global point cloud and mcell to cluster map ...
    ToyPointCloud *global_point_cloud =  new ToyPointCloud();
