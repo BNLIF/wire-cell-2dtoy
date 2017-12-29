@@ -256,13 +256,71 @@ void WireCell2dToy::Clustering_separate(WireCell::PR3DClusterSelection& live_clu
 	     }
 	   }
 	  
-	   std::cout <<  cluster->get_cluster_id() << " " << hy_points.size() << " " << ly_points.size() << " " << hz_points.size() << " " << lz_points.size() <<  " " << hx_points.size() << " " << lz_points.size() << " " << num_outside_points << " " << independent_points.size() << " " << num_far_points << std::endl;
+	   std::cout <<  cluster->get_cluster_id() << " " << hy_points.size() << " " << ly_points.size() << " " << hz_points.size() << " " << lz_points.size() <<  " " << hx_points.size() << " " << lz_points.size() << " " << num_outside_points << " " << num_outx_points << " " << independent_points.size() << " " << num_far_points << std::endl;
 
 	   if ((num_outside_points > 1 || num_outx_points>0) && (independent_points.size()>2 ||
 					  independent_points.size()==2 && num_far_points > 0)){
 	     std::cout << "Separate cluster " << cluster->get_cluster_id() << std::endl;
+
+	     WCPointCloud<double>::WCPoint start_wcpoint = independent_points.at(0);
+	     WCPointCloud<double>::WCPoint end_wcpoint;
+	     Point end_point;
+	     Point start_point(start_wcpoint.x, start_wcpoint.y, start_wcpoint.z);
+	     TVector3 dir = cluster->VHoughTrans(start_point,100*units::cm);
+	     dir.SetMag(1);
 	     
+	     WCPointCloud<double>::WCPoint temp_end_wcpoint;
+	     double temp_far_dis = 0;
+	     double temp_far_dis_cut = 0;
+	     for (size_t j=0; j!=boundary_points.size(); j++){
+	       TVector3 dir1(boundary_points.at(j).x - start_point.x, boundary_points.at(j).y - start_point.y, boundary_points.at(j).z - start_point.z);
+
+	       double dis1 = dir1.Dot(dir);
+	       double dis2 = dir1.Cross(dir).Mag();
+
+	       if (dis2 < 30*units::cm && dis2 < dis1 * tan(15/180.*3.1415926)){
+		 if (dis1>temp_far_dis_cut){
+		   temp_far_dis_cut = dis1;
+		   end_wcpoint = boundary_points.at(j);
+		 }
+	       }
+	       if (dis1 - dis2 > temp_far_dis){
+		 temp_far_dis = dis1 - dis2;
+		 temp_end_wcpoint = boundary_points.at(j);
+	       }
+	     }
+
+	     TVector3 dir1(temp_end_wcpoint.x - start_point.x, temp_end_wcpoint.y - start_point.y, temp_end_wcpoint.z - start_point.z);
+	     end_point.x = temp_end_wcpoint.x;
+	     end_point.y = temp_end_wcpoint.y;
+	     end_point.z = temp_end_wcpoint.z;
+	     TVector3 dir2 = cluster->VHoughTrans(end_point,100*units::cm);
+
+	     TVector3 dir3(end_wcpoint.x - start_point.x, end_wcpoint.y - start_point.y, end_wcpoint.z - start_point.z);
+	     end_point.x = end_wcpoint.x;
+	     end_point.y = end_wcpoint.y;
+	     end_point.z = end_wcpoint.z;
+	     TVector3 dir4 = cluster->VHoughTrans(end_point,100*units::cm);
+	     double angle1 = dir1.Angle(dir)/3.1415926*180.;
+	     double angle2 = (3.1415926-dir2.Angle(dir))/3.1415926*180.;
+	     double angle3 = dir3.Angle(dir)/3.1415926*180.;
+	     double angle4 = (3.1415926-dir4.Angle(dir))/3.1415926*180.;
 	     
+	     if (temp_far_dis > temp_far_dis_cut && angle1 <15 && angle2 <15 ||
+		 (angle3+ angle4) < (angle1+angle2)){
+	       end_wcpoint = temp_end_wcpoint;
+	     }
+	     
+	     cluster->dijkstra_shortest_paths(start_wcpoint);
+	     cluster->cal_shortest_path(end_wcpoint);
+	     
+	     std::list<WCPointCloud<double>::WCPoint>& path_wcps = cluster->get_path_wcps();
+	     std::vector<int> flag_pts;
+	     flag_pts.resize(cloud->get_cloud().pts.size(),0);
+	     
+	     // for (auto it = path_wcps.begin(); it!=path_wcps.end();it++){
+	     // std::cout << (*it).x/units::cm << " " << (*it).y/units::cm << " " << (*it).z/units::cm << std::endl;
+	     // }
 	     // separate ... 
 	   }
 	   /* std::cout << << " Xin " << cluster_length_map[cluster]/units::cm << " " << boundary_points.size() << " " << cluster->get_PCA_value(0) << " " << cluster->get_PCA_value(1)/cluster->get_PCA_value(0) << " " << cluster->get_PCA_value(2)/cluster->get_PCA_value(0) << " " << dir1.Angle(drift_dir) << " " << dir2.Angle(drift_dir) << " " << dir3.Angle(drift_dir) << std::endl;   */
