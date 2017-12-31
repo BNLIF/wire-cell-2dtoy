@@ -335,7 +335,6 @@ std::pair<WireCell::PR3DCluster*, WireCell::PR3DCluster*> WireCell2dToy::Separat
   /*     (angle3+ angle4) < (angle1+angle2)){ */
   /*   end_wcpoint = temp_end_wcpoint; */
   /* } */
-
   /* std::cout << start_point.x/units::cm << " " << start_point.y/units::cm << " " << start_point.z/units::cm << " " << temp_far_dis/units::cm << " " << temp_far_dis_cut/units::cm << " " << angle1 << " " << angle2 << " " << angle3 << " " << angle4 << std::endl; */
 
   
@@ -388,7 +387,7 @@ std::pair<WireCell::PR3DCluster*, WireCell::PR3DCluster*> WireCell2dToy::Separat
     test_p.z = cloud->get_cloud().pts[j].z;
     std::pair<int,double> temp_results = temp_cloud->get_closest_2d_dis(test_p,0);
     double dis = temp_results.second;
-    if (dis <= 1.2*units::cm){
+    if (dis <= 1.5*units::cm){
       flag_u_pts.at(cloud->get_cloud().pts[j].index) = true;
     }
     if (dis <= 3.6*units::cm){
@@ -396,7 +395,7 @@ std::pair<WireCell::PR3DCluster*, WireCell::PR3DCluster*> WireCell2dToy::Separat
     }
     temp_results = temp_cloud->get_closest_2d_dis(test_p,1);
     dis = temp_results.second;
-    if (dis <= 1.2*units::cm){
+    if (dis <= 1.5*units::cm){
       flag_v_pts.at(cloud->get_cloud().pts[j].index) = true;
     }
     if (dis <= 3.6*units::cm){
@@ -404,17 +403,17 @@ std::pair<WireCell::PR3DCluster*, WireCell::PR3DCluster*> WireCell2dToy::Separat
     }
     temp_results = temp_cloud->get_closest_2d_dis(test_p,2);
     dis = temp_results.second;
-    if (dis <= 1.2*units::cm){
+    if (dis <= 1.5*units::cm){
       flag_w_pts.at(cloud->get_cloud().pts[j].index) = true;
     }
     if (dis <= 3.6*units::cm){
       flag1_w_pts.at(cloud->get_cloud().pts[j].index) = true;
     }
-    /* if (fabs(test_p.y-20*units::cm)<2*units::cm && fabs(test_p.z-232*units::cm)<2*units::cm && fabs(test_p.x - 216*units::cm) < 2*units::cm){ */
+    /* if (fabs(test_p.y-76.7*units::cm)<2*units::cm && fabs(test_p.z-328.9*units::cm)<2*units::cm && fabs(test_p.x - 132.8*units::cm) < 2*units::cm){ */
     /*   std::pair<int,double> temp0 = temp_cloud->get_closest_2d_dis(test_p,0); */
     /*   std::pair<int,double> temp1 = temp_cloud->get_closest_2d_dis(test_p,1); */
     /*   std::pair<int,double> temp2 = temp_cloud->get_closest_2d_dis(test_p,2); */
-    /*   std::cout << test_p.x/units::cm << " " << test_p.y/units::cm << " " << test_p.z/units::cm << " " << flag_u_pts.at(cloud->get_cloud().pts[j].index) << " " << flag_v_pts.at(cloud->get_cloud().pts[j].index) << " " << flag_w_pts.at(cloud->get_cloud().pts[j].index) << " " << flag1_u_pts.at(cloud->get_cloud().pts[j].index) << " " << flag1_v_pts.at(cloud->get_cloud().pts[j].index) << " " << flag1_w_pts.at(cloud->get_cloud().pts[j].index) << " " << temp0.second/units::cm << " " << pts[temp0.first].x/units::cm << " " << pts[temp0.first].y/units::cm << " " << pts[temp0.first].z/units::cm << " " << std::endl; */
+    /*   std::cout << test_p.x/units::cm << " " << test_p.y/units::cm << " " << test_p.z/units::cm << " " << flag_u_pts.at(cloud->get_cloud().pts[j].index) << " " << flag_v_pts.at(cloud->get_cloud().pts[j].index) << " " << flag_w_pts.at(cloud->get_cloud().pts[j].index) << " " << flag1_u_pts.at(cloud->get_cloud().pts[j].index) << " " << flag1_v_pts.at(cloud->get_cloud().pts[j].index) << " " << flag1_w_pts.at(cloud->get_cloud().pts[j].index) << " " << temp0.second/units::cm << " " << pts[temp0.first].x/units::cm << " " << pts[temp0.first].y/units::cm << " " << pts[temp0.first].z/units::cm << " " << cloud->get_cloud().pts[j].mcell->GetTimeSlice() << std::endl; */
     /* } */
   }
 
@@ -467,9 +466,13 @@ std::pair<WireCell::PR3DCluster*, WireCell::PR3DCluster*> WireCell2dToy::Separat
 
   for (auto it=mcells.begin(); it!=mcells.end(); it++){
     SlimMergeGeomCell *mcell = *it;
-    if (mcell_np_map[mcell] > 0.75 * mcell->get_sampling_points().size() ||
+    /* if (fabs(mcell->get_sampling_points().front().x-132.12*units::cm)<0.1*units::mm) */
+    /*   std::cout << mcell_np_map[mcell] << " a " << mcell->get_sampling_points().size() << */
+    /* 	" " << mcell->get_uwires().size() << " " <<  mcell->get_vwires().size() << " " <<  mcell->get_wwires().size() << std::endl; */
+    
+    if (mcell_np_map[mcell] > 0.5 * mcell->get_sampling_points().size() ||
 	mcell_np_map[mcell] > 0.25 * mcell->get_sampling_points().size() && 
-	mcell->get_uwires().size() + mcell->get_vwires().size() +  mcell->get_wwires().size() < 20){
+	mcell->get_uwires().size() + mcell->get_vwires().size() +  mcell->get_wwires().size() < 25){
       cluster1->AddCell(mcell,mcell->GetTimeSlice());
     }else{
       cluster2->AddCell(mcell,mcell->GetTimeSlice());
