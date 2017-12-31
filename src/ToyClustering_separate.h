@@ -251,7 +251,7 @@ bool WireCell2dToy::NeedSeparate_2(WireCell::PR3DCluster* cluster, TVector3& dri
     }
   }
   
-  //std::cout <<  cluster->get_cluster_id() << " " << hy_points.size() << " " << ly_points.size() << " " << hz_points.size() << " " << lz_points.size() <<  " " << hx_points.size() << " " << lz_points.size() << " " << num_outside_points << " " << num_outx_points << " " << independent_points.size() << " " << num_far_points << std::endl;
+  // std::cout <<  cluster->get_cluster_id() << " " << hy_points.size() << " " << ly_points.size() << " " << hz_points.size() << " " << lz_points.size() <<  " " << hx_points.size() << " " << lz_points.size() << " " << num_outside_points << " " << num_outx_points << " " << independent_points.size() << " " << num_far_points << std::endl;
   
   if ((num_outside_points > 1 || num_outx_points>0) && (independent_points.size()>2 ||
 							independent_points.size()==2 && num_far_points > 0))
@@ -296,8 +296,10 @@ std::pair<WireCell::PR3DCluster*, WireCell::PR3DCluster*> WireCell2dToy::Separat
 
   // std::cout << start_point.x/units::cm << " " << start_point.y/units::cm << " " << start_point.z/units::cm << " " << start_wcpoint.x/units::cm << " " << start_wcpoint.y/units::cm << " " << start_wcpoint.z/units::cm << " " << end_wcpoint.x/units::cm << " " << end_wcpoint.y/units::cm << " " << end_wcpoint.z/units::cm << " " << dir.X() << " " << dir.Y() << " " << dir.Z() << std::endl;
   
-  //Point end_point;
+  /* Point end_point; */
+  /* WCPointCloud<double>::WCPoint end_wcpoint; */
   /* WCPointCloud<double>::WCPoint temp_end_wcpoint; */
+  
   /* double temp_far_dis = 0; */
   /* double temp_far_dis_cut = 0; */
   /* for (size_t j=0; j!=boundary_points.size(); j++){ */
@@ -338,7 +340,7 @@ std::pair<WireCell::PR3DCluster*, WireCell::PR3DCluster*> WireCell2dToy::Separat
   /*     (angle3+ angle4) < (angle1+angle2)){ */
   /*   end_wcpoint = temp_end_wcpoint; */
   /* } */
-  /* std::cout << start_point.x/units::cm << " " << start_point.y/units::cm << " " << start_point.z/units::cm << " " << temp_far_dis/units::cm << " " << temp_far_dis_cut/units::cm << " " << angle1 << " " << angle2 << " " << angle3 << " " << angle4 << std::endl; */
+  /* /\* std::cout << start_point.x/units::cm << " " << start_point.y/units::cm << " " << start_point.z/units::cm << " " << temp_far_dis/units::cm << " " << temp_far_dis_cut/units::cm << " " << angle1 << " " << angle2 << " " << angle3 << " " << angle4 << std::endl; *\/ */
 
   
   cluster->dijkstra_shortest_paths(start_wcpoint);
@@ -524,7 +526,7 @@ void WireCell2dToy::Clustering_separate(WireCell::PR3DClusterSelection& live_clu
 
 
 	  
-	  std::vector<PR3DCluster*> temp_del_clusters; 
+	  std::vector<PR3DCluster*> temp_del_clusters;
 	  PR3DCluster* cluster2 = sep_clusters.second;
 	  std::vector<int> range_v1 = cluster2->get_uvwt_range();
 	  double length_1 = sqrt(2./3. * (pow(pitch_u*range_v1.at(0),2) + pow(pitch_v*range_v1.at(1),2) + pow(pitch_w*range_v1.at(2),2)) + pow(time_slice_width*range_v1.at(3),2));
