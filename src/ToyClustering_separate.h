@@ -1,3 +1,6 @@
+#include <boost/graph/connected_components.hpp>
+
+
 bool WireCell2dToy::NeedSeparate_1(WireCell::PR3DCluster* cluster, TVector3& drift_dir){
   // get the main axis
   cluster->Calc_PCA();
@@ -559,13 +562,18 @@ void WireCell2dToy::Clustering_separate(WireCell::PR3DClusterSelection& live_clu
 	      }
 	    }
 	  }
-	    
+	  
+	  // temporary
+	  std::vector<PR3DCluster*> final_sep_clusters = Separate_2(final_sep_cluster);
+	  for (auto it = final_sep_clusters.begin(); it!=final_sep_clusters.end(); it++){
+	    new_clusters.push_back(*it);
+	  }
+	  temp_del_clusters.push_back(final_sep_cluster);
 	  
 	  for (auto it = temp_del_clusters.begin(); it!= temp_del_clusters.end(); it++){
 	    delete *it;
 	  }
-	  // temporary
-	  new_clusters.push_back(final_sep_cluster);
+	  
 	}
       }
     }
@@ -590,4 +598,161 @@ void WireCell2dToy::Clustering_separate(WireCell::PR3DClusterSelection& live_clu
      PR3DCluster *cluster = live_clusters.at(i);
      cluster->set_cluster_id(i+1);
    }
+}
+
+
+std::vector<WireCell::PR3DCluster*> WireCell2dToy::Separate_2(WireCell::PR3DCluster* cluster, double dis_cut){
+  
+  std::map<int,SMGCSet>& time_cells_set_map = cluster->get_time_cells_set_map();
+  SMGCSelection mcells = cluster->get_mcells();
+  
+  
+  std::vector<int> time_slices;
+  for (auto it1 = time_cells_set_map.begin(); it1!=time_cells_set_map.end(); it1++){
+    time_slices.push_back((*it1).first);
+  }
+  
+  std::vector<std::pair<SlimMergeGeomCell*,SlimMergeGeomCell*>> connected_mcells;
+  for (size_t i=0; i!= time_slices.size(); i++){
+    SMGCSet& mcells_set = time_cells_set_map[time_slices.at(i)];
+    
+    // create graph for points in mcell inside the same time slice
+    if (mcells_set.size()>=2){
+      for (auto it2 = mcells_set.begin(); it2!=mcells_set.end();it2++){
+    	SlimMergeGeomCell *mcell1 = *it2;
+    	auto it2p = it2;
+    	if (it2p!=mcells_set.end()){
+    	  it2p++;
+    	  for (auto it3 = it2p; it3!=mcells_set.end(); it3++){
+    	    SlimMergeGeomCell *mcell2 = *(it3);
+	    if (mcell1->Overlap_fast(mcell2,5))
+		connected_mcells.push_back(std::make_pair(mcell1,mcell2));
+    	  }
+    	}
+      }
+    }
+    // create graph for points between connected mcells in adjacent time slices + 1, if not, + 2
+    std::vector<SMGCSet> vec_mcells_set;
+    if (i+1 < time_slices.size()){
+      if (time_slices.at(i+1)-time_slices.at(i)==1){
+    	vec_mcells_set.push_back(time_cells_set_map[time_slices.at(i+1)]);
+    	if (i+2 < time_slices.size())
+    	  if (time_slices.at(i+2)-time_slices.at(i)==2)
+    	    vec_mcells_set.push_back(time_cells_set_map[time_slices.at(i+2)]);
+      }else if (time_slices.at(i+1) - time_slices.at(i)==2){
+    	vec_mcells_set.push_back(time_cells_set_map[time_slices.at(i+1)]);
+      }
+    }
+    bool flag = false;
+    for (size_t j=0; j!=vec_mcells_set.size(); j++){
+      if (flag) break;
+      SMGCSet& next_mcells_set = vec_mcells_set.at(j);
+      for (auto it1 = mcells_set.begin(); it1!= mcells_set.end(); it1++){
+    	SlimMergeGeomCell *mcell1 = (*it1);
+    	for (auto it2 = next_mcells_set.begin(); it2!=next_mcells_set.end(); it2++){
+    	  SlimMergeGeomCell *mcell2 = (*it2);
+    	  if (mcell1->Overlap_fast(mcell2,2)){
+    	    flag = true;
+    	    connected_mcells.push_back(std::make_pair(mcell1,mcell2));
+    	  }
+    	}
+      }
+    }
+  }
+
+  // form ...
+  
+  const int N = mcells.size();
+  MCUGraph *graph = new MCUGraph(N);
+  
+  std::map<SlimMergeGeomCell*, int> mcell_index_map;
+  for (size_t i=0;i!=mcells.size();i++){
+    SlimMergeGeomCell *curr_mcell = mcells.at(i);
+    mcell_index_map[curr_mcell] = i;
+    
+    auto v = vertex(i, *graph); // retrieve vertex descriptor
+    (*graph)[v].index = i;
+  }
+  
+  for (auto it=connected_mcells.begin(); it!=connected_mcells.end(); it++){
+    int index1 = mcell_index_map[it->first];
+    int index2 = mcell_index_map[it->second];
+    auto edge = add_edge(index1,index2,*graph);
+    if (edge.second){
+      (*graph)[edge.first].dist = 1;
+    }
+  }
+
+  {
+    std::vector<int> component(num_vertices(*graph));
+    const int num = connected_components(*graph,&component[0]);
+
+    if (num > 1){
+      std::vector<ToyPointCloud*> pt_clouds;
+      std::vector<std::vector<int>> vec_vec(num);
+      for (int j=0;j!=num;j++){
+	ToyPointCloud *pt_cloud = new ToyPointCloud();
+	pt_clouds.push_back(pt_cloud);
+      }
+      std::vector<int>::size_type i;
+      for (i=0;i!=component.size(); ++i){
+	vec_vec.at(component[i]).push_back(i);
+	SlimMergeGeomCell *mcell = mcells.at(i);
+	pt_clouds.at(component[i])->AddPoints(mcell->get_sampling_points());
+      }
+      for (int j=0;j!=num;j++){
+	pt_clouds.at(j)->build_kdtree_index();
+      }
+      
+      for (int j=0;j!=num;j++){
+	for (int k=j+1;k!=num;k++){
+	  std::tuple<int,int,double> temp_results = pt_clouds.at(j)->get_closest_points(pt_clouds.at(k));
+	  if (std::get<2>(temp_results)<dis_cut){
+	    int index1 = vec_vec[j].front();
+	    int index2 = vec_vec[k].front();
+	    auto edge = add_edge(index1,index2,*graph);
+	    if (edge.second){
+	      (*graph)[edge.first].dist = 1;
+	    }
+	  }
+	}
+      }
+      
+      
+      for (int j=0;j!=num;j++){
+	delete pt_clouds.at(j);
+      }
+    }
+
+    //std::cout << num << std::endl;
+    
+  }
+
+
+  std::vector<WireCell::PR3DCluster*> final_clusters;
+  {
+    std::vector<int> component(num_vertices(*graph));
+    const int num = connected_components(*graph,&component[0]);
+    final_clusters.resize(num);
+    for (size_t i=0;i!=num;i++){
+      final_clusters.at(i) = new PR3DCluster(i);
+    }
+    
+    std::vector<int>::size_type i;
+    for (i=0;i!=component.size(); ++i){
+      SlimMergeGeomCell *mcell = mcells.at(i);
+      final_clusters[component[i]]->AddCell(mcell,mcell->GetTimeSlice());
+    }
+  }
+
+
+  
+  delete graph;
+  
+ 
+  
+
+
+  
+  return final_clusters;
 }
