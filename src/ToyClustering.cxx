@@ -268,14 +268,12 @@ void WireCell2dToy::Clustering_jump_gap_cosmics(WireCell::PR3DClusterSelection& 
     //  cerr << em("extend dead") << endl;
   }
   cerr << em("first round of clustering") << std::endl;
-
+  
   // prepare for separating the connected pieces ... 
   Clustering_separate(live_clusters,cluster_length_map);
-
-
   cerr << em("separate clusters") << std::endl;
   
-  //std::cout << cluster_connected_dead.size() << std::endl;
+
   
   
 }

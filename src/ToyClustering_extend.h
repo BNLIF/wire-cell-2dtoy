@@ -356,6 +356,8 @@ bool WireCell2dToy::Clustering_4th_dead(WireCell::PR3DCluster *cluster_1, WireCe
   /* if (length_1> 100*units::cm && length_2>100*units::cm) */
   /*   std::cout << cluster_1->get_cluster_id() << " " << cluster_2->get_cluster_id() << " " << length_1/units::cm << " " << length_2/units::cm << " " << dis/units::cm << " " << std::endl; */
 
+  /* if (dis < 5*units::cm && fabs(length_1-110*units::cm)<2*units::cm && fabs(length_2-33*units::cm) < 2*units::cm) */
+  /*     std::cout << cluster_1->get_cluster_id() << " " << cluster_2->get_cluster_id() << " " << length_1/units::cm << " " << length_2/units::cm << " " << num_dead_try << " " << p1.x/units::cm << " " << p1.y/units::cm << " " << p1.z/units::cm << " " << p2.x/units::cm << " " << p2.y/units::cm << " " << p2.z/units::cm << " " << dis/units::cm << std::endl; */
   
   if ((dis < length_cut || (length_2 > 50*units::cm && dis < 80*units::cm))){
 
@@ -371,10 +373,7 @@ bool WireCell2dToy::Clustering_4th_dead(WireCell::PR3DCluster *cluster_1, WireCe
       TVector3 dir1; 
       TVector3 dir3; 
       TVector3 dir2;
-      
-     
-
-      
+            
       
       if (i==0){
 	cluster1_ave_pos = cluster_1->calc_ave_pos(p1,5*units::cm);
@@ -474,12 +473,14 @@ bool WireCell2dToy::Clustering_4th_dead(WireCell::PR3DCluster *cluster_1, WireCe
       /* if ( length_2 > 100*units::cm && length_1>100*units::cm) */
       /* 	  std::cout << cluster_1->get_cluster_id() << " " << cluster_2->get_cluster_id() << " " << length_1/units::cm << " " << length_2/units::cm << " " <<  angle1 << " " << angle2 << " " << angle3 << " "  << WireCell2dToy::is_angle_consistent(dir1,dir2,false,10,angle_u,angle_v,angle_w) << " " << WireCell2dToy::is_angle_consistent(dir3,dir2,true,10,angle_u,angle_v,angle_w) << std::endl; */
 
-
+      /* if (dis < 5*units::cm && fabs(length_1-110*units::cm)<2*units::cm && fabs(length_2-33*units::cm) < 2*units::cm) */
+      /* 	std::cout << angle1 << " " << angle2 << " " << angle3 << std::endl; */
       
       if (length_2 <=10*units::cm){
 	if (angle1 < 15 && (angle2 < 60 || length_2 < 5*units::cm)) return true;
       }else{
-	if (angle1 < 15 && angle2 <15 && angle3 < 25)
+	if (angle1 < 15 && angle2 <15 && angle3 < 25 ||
+	    angle3 < 10 && (angle1 + angle2) <50.)
 	  return true;
 
 	double ave_dis = sqrt(pow(cluster1_ave_pos.x-cluster2_ave_pos.x,2) + pow(cluster1_ave_pos.y-cluster2_ave_pos.y,2) + pow(cluster1_ave_pos.z-cluster2_ave_pos.z,2));
