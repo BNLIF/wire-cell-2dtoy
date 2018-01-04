@@ -245,16 +245,16 @@ bool WireCell2dToy::JudgeSeparateDec_2(WireCell::PR3DCluster* cluster, TVector3&
       TVector3 dir_3 = dir_2 - dir_1 * dir_2.Mag() * cos(angle_12);
       double angle_3 = dir_3.Angle(drift_dir);
       if (fabs(angle_3-3.1415926/2.)/3.1415926*180.<7.5){
-	if (fabs(dir_3.X()/units::cm)>20*units::cm)
+	if (fabs(dir_3.X()/units::cm)>14*units::cm)
 	  num_far_points ++;
       }else{
-	if (dir_3.Mag() > 30*units::cm)
+	if (dir_3.Mag() > 20*units::cm)
 	  num_far_points ++;
       }
     }
   }
   
-  // std::cout <<  cluster->get_cluster_id() << " " << hy_points.size() << " " << ly_points.size() << " " << hz_points.size() << " " << lz_points.size() <<  " " << hx_points.size() << " " << lz_points.size() << " " << num_outside_points << " " << num_outx_points << " " << independent_points.size() << " " << num_far_points << std::endl;
+  //  std::cout <<  cluster->get_cluster_id() << " " << hy_points.size() << " " << ly_points.size() << " " << hz_points.size() << " " << lz_points.size() <<  " " << hx_points.size() << " " << lz_points.size() << " " << num_outside_points << " " << num_outx_points << " " << independent_points.size() << " " << num_far_points << std::endl;
   
   if ((num_outside_points > 1 || num_outx_points>0) && (independent_points.size()>2 ||
 							independent_points.size()==2 && num_far_points > 0))
@@ -571,6 +571,7 @@ void WireCell2dToy::Clustering_separate(WireCell::PR3DClusterSelection& live_clu
     if (cluster_length_map[cluster]> 100*units::cm){
       std::vector<WCPointCloud<double>::WCPoint> boundary_points;
       std::vector<WCPointCloud<double>::WCPoint> independent_points;
+      //std::cout << cluster->get_cluster_id() << " " << WireCell2dToy::JudgeSeparateDec_1(cluster,drift_dir)  << " " << std::endl;
       if (WireCell2dToy::JudgeSeparateDec_1(cluster,drift_dir) &&
 	  WireCell2dToy::JudgeSeparateDec_2(cluster,drift_dir,boundary_points,independent_points)){
 	std::cout << "Separate cluster " << cluster->get_cluster_id() << std::endl;
