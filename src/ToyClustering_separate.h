@@ -598,6 +598,8 @@ void WireCell2dToy::Clustering_separate(WireCell::PR3DClusterSelection& live_clu
 	  independent_points.clear();
 	  if (WireCell2dToy::JudgeSeparateDec_1(cluster2,drift_dir) &&
 	      WireCell2dToy::JudgeSeparateDec_2(cluster2,drift_dir,boundary_points,independent_points)){
+
+	    // std::cout << "Separate 2nd level" << std::endl;
 	    
 	    std::vector<PR3DCluster*>  sep_clusters = WireCell2dToy::Separate_1(cluster2,boundary_points,independent_points);
 	    PR3DCluster* cluster3 = sep_clusters.at(0);
@@ -612,11 +614,13 @@ void WireCell2dToy::Clustering_separate(WireCell::PR3DClusterSelection& live_clu
 	    range_v1 = cluster4->get_uvwt_range();
 	    length_1 = sqrt(2./3. * (pow(pitch_u*range_v1.at(0),2) + pow(pitch_v*range_v1.at(1),2) + pow(pitch_w*range_v1.at(2),2)) + pow(time_slice_width*range_v1.at(3),2));
 
-	    if (length_1 > 150*units::cm){
+	    if (length_1 > 100*units::cm){
 	      boundary_points.clear();
 	      independent_points.clear();
 	      if (WireCell2dToy::JudgeSeparateDec_1(cluster4,drift_dir) &&
 		  WireCell2dToy::JudgeSeparateDec_2(cluster4,drift_dir,boundary_points,independent_points)){
+		//	std::cout << "Separate 3rd level" << std::endl;
+		
 		std::vector<PR3DCluster*>  sep_clusters = WireCell2dToy::Separate_1(cluster4,boundary_points,independent_points);
 		PR3DCluster* cluster5 = sep_clusters.at(0);
 		new_clusters.push_back(cluster5);
@@ -634,13 +638,18 @@ void WireCell2dToy::Clustering_separate(WireCell::PR3DClusterSelection& live_clu
 	// temporary
 	range_v1 = final_sep_cluster->get_uvwt_range();
 	length_1 = sqrt(2./3. * (pow(pitch_u*range_v1.at(0),2) + pow(pitch_v*range_v1.at(1),2) + pow(pitch_w*range_v1.at(2),2)) + pow(time_slice_width*range_v1.at(3),2));
+
+	//	std::cout << length_1/units::cm << std::endl;
 	
-	if (length_1 > 100*units::cm){
+	if (length_1 > 60*units::cm){
 	  boundary_points.clear();
 	  independent_points.clear();
 	  WireCell2dToy::JudgeSeparateDec_1(final_sep_cluster,drift_dir);
 	  WireCell2dToy::JudgeSeparateDec_2(final_sep_cluster,drift_dir,boundary_points,independent_points);
 	  if (independent_points.size() > 0){
+
+	    // std::cout << "Separate final one" << std::endl;
+	    
 	    std::vector<PR3DCluster*> sep_clusters = WireCell2dToy::Separate_1(final_sep_cluster,boundary_points,independent_points);
 	    PR3DCluster* cluster5 = sep_clusters.at(0);
 	    new_clusters.push_back(cluster5);
