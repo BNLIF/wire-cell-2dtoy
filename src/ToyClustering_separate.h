@@ -274,17 +274,31 @@ std::vector<WireCell::PR3DCluster*> WireCell2dToy::Separate_1(WireCell::PR3DClus
   double angle_v = mp.get_angle_v();
   double angle_w = mp.get_angle_w();
   double time_slice_width = mp.get_ts_width();
-  
+
+  TVector3 dir_drift(1,0,0);
+  TVector3 dir_cosmic(0,1,0);
+  TVector3 dir_beam(0,0,1);
   
   ToyPointCloud *temp_cloud = new ToyPointCloud(angle_u,angle_v,angle_w);
   
   ToyPointCloud* cloud = cluster->get_point_cloud();
 
   Point cluster_center(cluster->get_center().x, cluster->get_center().y, cluster->get_center().z);
-  
-  TVector3 main_dir;
 
+  //std::cout << cluster->get_PCA_value(0) << " " << cluster->get_PCA_value(1) << " " << cluster->get_PCA_value(2) << " " << cluster->get_PCA_axis(0) << " " << cluster->get_PCA_axis(1) << std::endl;
+  
+  TVector3 main_dir,second_dir;
   main_dir.SetXYZ(cluster->get_PCA_axis(0).x,cluster->get_PCA_axis(0).y,cluster->get_PCA_axis(0).z);
+  second_dir.SetXYZ(cluster->get_PCA_axis(1).x,cluster->get_PCA_axis(1).y,cluster->get_PCA_axis(1).z);
+
+  // special case, if one of the cosmic is very close to the beam direction
+  if ( cluster->get_PCA_value(1) > 0.08 * cluster->get_PCA_value(0) &&
+       fabs(main_dir.Angle(dir_beam)-3.1415926/2.) > 75/180.*3.1415926 &&
+       fabs(second_dir.Angle(dir_cosmic)-3.1415926/2.) > 60/180.*3.1415926){
+    main_dir = second_dir;
+  }
+  //  std::cout << main_dir.Angle(dir_beam)/3.1415926*180. << " " << second_dir.Angle(dir_cosmic)/3.1415926*180. << " " << independent_points.size() << " " << std::endl;
+  
   main_dir.SetMag(1);
   if (main_dir.Y()>0) main_dir *= -1;
     //  std::cout << cluster->get_PCA_value(0) << " " << cluster->get_PCA_value(1) << " " << cluster->get_PCA_value(2) << std::endl;
@@ -577,6 +591,7 @@ void WireCell2dToy::Clustering_separate(WireCell::PR3DClusterSelection& live_clu
       if (WireCell2dToy::JudgeSeparateDec_1(cluster,drift_dir) &&
 	  WireCell2dToy::JudgeSeparateDec_2(cluster,drift_dir,boundary_points,independent_points)){
 	std::cout << "Separate cluster " << cluster->get_cluster_id() << std::endl;
+	
 	
 	std::vector<PR3DCluster*> sep_clusters = WireCell2dToy::Separate_1(cluster,boundary_points,independent_points);
 	PR3DCluster* cluster1 = sep_clusters.at(0);
