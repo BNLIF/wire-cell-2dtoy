@@ -12,9 +12,11 @@ bool WireCell2dToy::JudgeSeparateDec_1(WireCell::PR3DCluster* cluster, TVector3&
   double angle2 = fabs(dir3.Angle(drift_dir)-3.1415926/2.)/3.1415926*180.;
   double ratio1 = cluster->get_PCA_value(1)/cluster->get_PCA_value(0) ;
   double ratio2 = cluster->get_PCA_value(2)/cluster->get_PCA_value(0) ;
+
+  //std::cout << " " << ratio1 << " " << ratio2 << " " << angle1 << " " << angle2 << std::endl;
   
   if (ratio1 > pow(10,exp(1.38115-1.19312*pow(angle1,1./3.))-2.2) ||
-      ratio2 > pow(10,exp(1.38115-1.19312*pow(angle2,1./3.))-2.2))
+      ratio2 > pow(10,exp(1.38115-1.19312*pow(angle2,1./3.))-2.2) || ratio1 > 0.75)
     return true;
   return false;
 }
@@ -254,7 +256,7 @@ bool WireCell2dToy::JudgeSeparateDec_2(WireCell::PR3DCluster* cluster, TVector3&
     }
   }
   
-  //  std::cout <<  cluster->get_cluster_id() << " " << hy_points.size() << " " << ly_points.size() << " " << hz_points.size() << " " << lz_points.size() <<  " " << hx_points.size() << " " << lz_points.size() << " " << num_outside_points << " " << num_outx_points << " " << independent_points.size() << " " << num_far_points << std::endl;
+  //std::cout <<  cluster->get_cluster_id() << " " << hy_points.size() << " " << ly_points.size() << " " << hz_points.size() << " " << lz_points.size() <<  " " << hx_points.size() << " " << lz_points.size() << " " << num_outside_points << " " << num_outx_points << " " << independent_points.size() << " " << num_far_points << std::endl;
   
   if ((num_outside_points > 1 || num_outx_points>0) && (independent_points.size()>2 ||
 							independent_points.size()==2 && num_far_points > 0))
@@ -322,14 +324,14 @@ std::vector<WireCell::PR3DCluster*> WireCell2dToy::Separate_1(WireCell::PR3DClus
 
   TVector3 test_dir(end_wcpoint.x - start_wcpoint.x, end_wcpoint.y - start_wcpoint.y, end_wcpoint.z - start_wcpoint.z);
   
-  //std::cout  << " " << start_wcpoint.x/units::cm << " " << start_wcpoint.y/units::cm << " " << start_wcpoint.z/units::cm << " " << end_wcpoint.x/units::cm << " " << end_wcpoint.y/units::cm << " " << end_wcpoint.z/units::cm << " " << dir.X() << " " << dir.Y() << " " << dir.Z() << std::endl;
+  // std::cout  << " XQ1 " << start_wcpoint.x/units::cm << " " << start_wcpoint.y/units::cm << " " << start_wcpoint.z/units::cm << " " << end_wcpoint.x/units::cm << " " << end_wcpoint.y/units::cm << " " << end_wcpoint.z/units::cm << " " << dir.X() << " " << dir.Y() << " " << dir.Z() << std::endl;
   
   if (fabs(test_dir.Angle(drift_dir)-3.1415926/2.)<2.0*3.1415926/180.){
     cluster->adjust_wcpoints_parallel(start_wcpoint,end_wcpoint);
     // std::cout << "Parallel Case! " << " " << fabs(test_dir.Angle(drift_dir)-3.1415926/2.)/3.1415926*180. << std::endl;
   }
   
-  //std::cout  << " " << start_wcpoint.x/units::cm << " " << start_wcpoint.y/units::cm << " " << start_wcpoint.z/units::cm << " " << end_wcpoint.x/units::cm << " " << end_wcpoint.y/units::cm << " " << end_wcpoint.z/units::cm << " " << dir.X() << " " << dir.Y() << " " << dir.Z() << std::endl;
+  //std::cout  << " XQ " << start_wcpoint.x/units::cm << " " << start_wcpoint.y/units::cm << " " << start_wcpoint.z/units::cm << " " << end_wcpoint.x/units::cm << " " << end_wcpoint.y/units::cm << " " << end_wcpoint.z/units::cm << " " << dir.X() << " " << dir.Y() << " " << dir.Z() << std::endl;
   
 
   
@@ -385,7 +387,7 @@ std::vector<WireCell::PR3DCluster*> WireCell2dToy::Separate_1(WireCell::PR3DClus
     if (dis <= 1.5*units::cm){
       flag_u_pts.at(cloud->get_cloud().pts[j].index) = true;
     }
-    if (dis <= 3.6*units::cm){
+    if (dis <= 5.0*units::cm){
       flag1_u_pts.at(cloud->get_cloud().pts[j].index) = true;
     }
     temp_results = temp_cloud->get_closest_2d_dis(test_p,1);
@@ -393,7 +395,7 @@ std::vector<WireCell::PR3DCluster*> WireCell2dToy::Separate_1(WireCell::PR3DClus
     if (dis <= 1.5*units::cm){
       flag_v_pts.at(cloud->get_cloud().pts[j].index) = true;
     }
-    if (dis <= 3.6*units::cm){
+    if (dis <= 5.0*units::cm){
       flag1_v_pts.at(cloud->get_cloud().pts[j].index) = true;
     }
     temp_results = temp_cloud->get_closest_2d_dis(test_p,2);
@@ -401,7 +403,7 @@ std::vector<WireCell::PR3DCluster*> WireCell2dToy::Separate_1(WireCell::PR3DClus
     if (dis <= 1.5*units::cm){
       flag_w_pts.at(cloud->get_cloud().pts[j].index) = true;
     }
-    if (dis <= 3.6*units::cm){
+    if (dis <= 5.0*units::cm){
       flag1_w_pts.at(cloud->get_cloud().pts[j].index) = true;
     }
     /* if (fabs(test_p.y-76.7*units::cm)<2*units::cm && fabs(test_p.z-328.9*units::cm)<2*units::cm && fabs(test_p.x - 132.8*units::cm) < 2*units::cm){ */
@@ -414,27 +416,27 @@ std::vector<WireCell::PR3DCluster*> WireCell2dToy::Separate_1(WireCell::PR3DClus
 
   // special treatment of first and last point
   {
-    std::vector<size_t> indices = cloud->get_closest_2d_index(pts.front(),2.4*units::cm,0);
+    std::vector<size_t> indices = cloud->get_closest_2d_index(pts.front(),3.0*units::cm,0);
     for (size_t k=0;k!=indices.size();k++){
       flag_u_pts.at(indices.at(k)) = true;
     }
-    indices = cloud->get_closest_2d_index(pts.front(),2.4*units::cm,1);
+    indices = cloud->get_closest_2d_index(pts.front(),3.0*units::cm,1);
     for (size_t k=0;k!=indices.size();k++){
       flag_v_pts.at(indices.at(k)) = true;
     }
-    indices = cloud->get_closest_2d_index(pts.front(),2.4*units::cm,2);
+    indices = cloud->get_closest_2d_index(pts.front(),3.0*units::cm,2);
     for (size_t k=0;k!=indices.size();k++){
       flag_w_pts.at(indices.at(k)) = true;
     }
-    indices = cloud->get_closest_2d_index(pts.back(),2.4*units::cm,0);
+    indices = cloud->get_closest_2d_index(pts.back(),3.0*units::cm,0);
     for (size_t k=0;k!=indices.size();k++){
       flag_u_pts.at(indices.at(k)) = true;
     }
-    indices = cloud->get_closest_2d_index(pts.back(),2.4*units::cm,1);
+    indices = cloud->get_closest_2d_index(pts.back(),3.0*units::cm,1);
     for (size_t k=0;k!=indices.size();k++){
       flag_v_pts.at(indices.at(k)) = true;
     }
-    indices = cloud->get_closest_2d_index(pts.back(),2.4*units::cm,2);
+    indices = cloud->get_closest_2d_index(pts.back(),3.0*units::cm,2);
     for (size_t k=0;k!=indices.size();k++){
       flag_w_pts.at(indices.at(k)) = true;
     }
