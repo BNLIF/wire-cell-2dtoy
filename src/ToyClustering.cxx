@@ -13,6 +13,7 @@ using namespace std;
 #include "ToyClustering_close.h"
 #include "ToyClustering_extend.h"
 #include "ToyClustering_separate.h"
+#include "ToyClustering_deghost.h"
 
 #include "ToyClustering_isolated.h"
 
@@ -272,9 +273,16 @@ void WireCell2dToy::Clustering_jump_gap_cosmics(WireCell::PR3DClusterSelection& 
   // prepare for separating the connected pieces ... 
   Clustering_separate(live_clusters,cluster_length_map);
   cerr << em("separate clusters") << std::endl;
-  
 
+
+  // prepare for deghosting and clustering along track
+  Clustering_deghost(live_clusters,cluster_length_map);
+  cerr << em("deghost clusters") << std::endl;
   
+  for (size_t i=0;i!=live_clusters.size();i++){
+    PR3DCluster *cluster = live_clusters.at(i);
+    cluster->set_cluster_id(i+1);
+  }
   
 }
 

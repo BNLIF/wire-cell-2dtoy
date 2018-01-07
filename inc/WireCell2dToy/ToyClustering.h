@@ -50,7 +50,9 @@ namespace WireCell2dToy{
   std::vector<WireCell::PR3DCluster*> Separate_1(WireCell::PR3DCluster* cluster,std::vector<WireCell::WCPointCloud<double>::WCPoint>& boundary_points, std::vector<WireCell::WCPointCloud<double>::WCPoint>& independent_points);
 
   std::vector<WireCell::PR3DCluster*> Separate_2(WireCell::PR3DCluster* cluster, double dis_cut = 5*units::cm);
-  
+
+
+  void Clustering_deghost(WireCell::PR3DClusterSelection& live_clusters, std::map<WireCell::PR3DCluster*,double>& cluster_length_map);
   
 
   std::map<WireCell::PR3DCluster*,std::vector<std::pair<WireCell::PR3DCluster*,double>>> Clustering_isolated(WireCell::PR3DClusterSelection& live_clusters);
