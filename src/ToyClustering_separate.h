@@ -1,5 +1,11 @@
 #include <boost/graph/connected_components.hpp>
 
+bool sortbysec(const std::pair<PR3DCluster*,double> &a,
+	       const std::pair<PR3DCluster*,double> &b){
+  return (a.second > b.second);
+}
+
+
 
 bool WireCell2dToy::JudgeSeparateDec_1(WireCell::PR3DCluster* cluster, TVector3& drift_dir){
   // get the main axis
@@ -588,118 +594,146 @@ void WireCell2dToy::Clustering_separate(WireCell::PR3DClusterSelection& live_clu
       std::vector<WCPointCloud<double>::WCPoint> boundary_points;
       std::vector<WCPointCloud<double>::WCPoint> independent_points;
       //std::cout << cluster->get_cluster_id() << " " << WireCell2dToy::JudgeSeparateDec_1(cluster,drift_dir)  << " " << std::endl;
-      if (WireCell2dToy::JudgeSeparateDec_1(cluster,drift_dir) &&
-	  WireCell2dToy::JudgeSeparateDec_2(cluster,drift_dir,boundary_points,independent_points)){
-	std::cout << "Separate cluster " << cluster->get_cluster_id() << std::endl;
-	
-	
-	std::vector<PR3DCluster*> sep_clusters = WireCell2dToy::Separate_1(cluster,boundary_points,independent_points);
-	PR3DCluster* cluster1 = sep_clusters.at(0);
-	new_clusters.push_back(cluster1);
-	del_clusters.push_back(cluster);
-	for (size_t k=2;k<sep_clusters.size();k++){
-	  new_clusters.push_back(sep_clusters.at(k));
-	}
-	
-	
-	std::vector<PR3DCluster*> temp_del_clusters;
-	PR3DCluster* cluster2 = sep_clusters.at(1);
-	std::vector<int> range_v1 = cluster2->get_uvwt_range();
-	double length_1 = sqrt(2./3. * (pow(pitch_u*range_v1.at(0),2) + pow(pitch_v*range_v1.at(1),2) + pow(pitch_w*range_v1.at(2),2)) + pow(time_slice_width*range_v1.at(3),2));
-	
-	PR3DCluster* final_sep_cluster = cluster2;
-	
+      if (WireCell2dToy::JudgeSeparateDec_2(cluster,drift_dir,boundary_points,independent_points)){
+	if (WireCell2dToy::JudgeSeparateDec_1(cluster,drift_dir)){
+	  std::cout << "Separate cluster " << cluster->get_cluster_id() << std::endl;
 	  
-	if (length_1 > 100*units::cm){
-	  boundary_points.clear();
-	  independent_points.clear();
-	  if (WireCell2dToy::JudgeSeparateDec_1(cluster2,drift_dir) &&
-	      WireCell2dToy::JudgeSeparateDec_2(cluster2,drift_dir,boundary_points,independent_points)){
-
-	    // std::cout << "Separate 2nd level" << std::endl;
-	    
-	    std::vector<PR3DCluster*>  sep_clusters = WireCell2dToy::Separate_1(cluster2,boundary_points,independent_points);
-	    PR3DCluster* cluster3 = sep_clusters.at(0);
-	    new_clusters.push_back(cluster3);
-	    temp_del_clusters.push_back(cluster2);
-	    for (size_t k=2;k<sep_clusters.size();k++){
-	      new_clusters.push_back(sep_clusters.at(k));
-	    }
-	    
-	    PR3DCluster* cluster4 = sep_clusters.at(1);
-	    final_sep_cluster = cluster4;
-	    range_v1 = cluster4->get_uvwt_range();
-	    length_1 = sqrt(2./3. * (pow(pitch_u*range_v1.at(0),2) + pow(pitch_v*range_v1.at(1),2) + pow(pitch_w*range_v1.at(2),2)) + pow(time_slice_width*range_v1.at(3),2));
-
-	    if (length_1 > 100*units::cm){
-	      boundary_points.clear();
-	      independent_points.clear();
-	      if (WireCell2dToy::JudgeSeparateDec_1(cluster4,drift_dir) &&
-		  WireCell2dToy::JudgeSeparateDec_2(cluster4,drift_dir,boundary_points,independent_points)){
-		//	std::cout << "Separate 3rd level" << std::endl;
-		
-		std::vector<PR3DCluster*>  sep_clusters = WireCell2dToy::Separate_1(cluster4,boundary_points,independent_points);
-		PR3DCluster* cluster5 = sep_clusters.at(0);
-		new_clusters.push_back(cluster5);
-		temp_del_clusters.push_back(cluster4);
-		for (size_t k=2;k<sep_clusters.size();k++){
-		  new_clusters.push_back(sep_clusters.at(k));
+	  
+	  std::vector<PR3DCluster*> sep_clusters = WireCell2dToy::Separate_1(cluster,boundary_points,independent_points);
+	  PR3DCluster* cluster1 = sep_clusters.at(0);
+	  new_clusters.push_back(cluster1);
+	  del_clusters.push_back(cluster);
+	  for (size_t k=2;k<sep_clusters.size();k++){
+	    new_clusters.push_back(sep_clusters.at(k));
+	  }
+	  
+	  
+	  std::vector<PR3DCluster*> temp_del_clusters;
+	  PR3DCluster* cluster2 = sep_clusters.at(1);
+	  std::vector<int> range_v1 = cluster2->get_uvwt_range();
+	  double length_1 = sqrt(2./3. * (pow(pitch_u*range_v1.at(0),2) + pow(pitch_v*range_v1.at(1),2) + pow(pitch_w*range_v1.at(2),2)) + pow(time_slice_width*range_v1.at(3),2));
+	  
+	  PR3DCluster* final_sep_cluster = cluster2;
+	  
+	  
+	  if (length_1 > 100*units::cm){
+	    boundary_points.clear();
+	    independent_points.clear();
+	    if (WireCell2dToy::JudgeSeparateDec_1(cluster2,drift_dir) &&
+		WireCell2dToy::JudgeSeparateDec_2(cluster2,drift_dir,boundary_points,independent_points)){
+	      
+	      // std::cout << "Separate 2nd level" << std::endl;
+	      
+	      std::vector<PR3DCluster*>  sep_clusters = WireCell2dToy::Separate_1(cluster2,boundary_points,independent_points);
+	      PR3DCluster* cluster3 = sep_clusters.at(0);
+	      new_clusters.push_back(cluster3);
+	      temp_del_clusters.push_back(cluster2);
+	      for (size_t k=2;k<sep_clusters.size();k++){
+		new_clusters.push_back(sep_clusters.at(k));
+	      }
+	      
+	      PR3DCluster* cluster4 = sep_clusters.at(1);
+	      final_sep_cluster = cluster4;
+	      range_v1 = cluster4->get_uvwt_range();
+	      length_1 = sqrt(2./3. * (pow(pitch_u*range_v1.at(0),2) + pow(pitch_v*range_v1.at(1),2) + pow(pitch_w*range_v1.at(2),2)) + pow(time_slice_width*range_v1.at(3),2));
+	      
+	      if (length_1 > 100*units::cm){
+		boundary_points.clear();
+		independent_points.clear();
+		if (WireCell2dToy::JudgeSeparateDec_1(cluster4,drift_dir) &&
+		    WireCell2dToy::JudgeSeparateDec_2(cluster4,drift_dir,boundary_points,independent_points)){
+		  //	std::cout << "Separate 3rd level" << std::endl;
+		  
+		  std::vector<PR3DCluster*>  sep_clusters = WireCell2dToy::Separate_1(cluster4,boundary_points,independent_points);
+		  PR3DCluster* cluster5 = sep_clusters.at(0);
+		  new_clusters.push_back(cluster5);
+		  temp_del_clusters.push_back(cluster4);
+		  for (size_t k=2;k<sep_clusters.size();k++){
+		    new_clusters.push_back(sep_clusters.at(k));
+		  }
+		  PR3DCluster* cluster6 = sep_clusters.at(1);
+		  final_sep_cluster = cluster6;
 		}
-		PR3DCluster* cluster6 = sep_clusters.at(1);
-		final_sep_cluster = cluster6;
 	      }
 	    }
 	  }
-	}
+	  
+	  // temporary
+	  range_v1 = final_sep_cluster->get_uvwt_range();
+	  length_1 = sqrt(2./3. * (pow(pitch_u*range_v1.at(0),2) + pow(pitch_v*range_v1.at(1),2) + pow(pitch_w*range_v1.at(2),2)) + pow(time_slice_width*range_v1.at(3),2));
+	  
+	  //	std::cout << length_1/units::cm << std::endl;
+	  
+	  if (length_1 > 60*units::cm){
+	    boundary_points.clear();
+	    independent_points.clear();
+	    WireCell2dToy::JudgeSeparateDec_1(final_sep_cluster,drift_dir);
+	    WireCell2dToy::JudgeSeparateDec_2(final_sep_cluster,drift_dir,boundary_points,independent_points);
+	    if (independent_points.size() > 0){
+	      
+	      // std::cout << "Separate final one" << std::endl;
+	      
+	      std::vector<PR3DCluster*> sep_clusters = WireCell2dToy::Separate_1(final_sep_cluster,boundary_points,independent_points);
+	      PR3DCluster* cluster5 = sep_clusters.at(0);
+	      new_clusters.push_back(cluster5);
+	      temp_del_clusters.push_back(final_sep_cluster);
+	      for (size_t k=2;k<sep_clusters.size();k++){
+		new_clusters.push_back(sep_clusters.at(k));
+	      }
+	      
+	      PR3DCluster* cluster6 = sep_clusters.at(1);
+	      final_sep_cluster = cluster6;
+	    }	    
+	  }
+	  
+	  std::vector<PR3DCluster*> final_sep_clusters = Separate_2(final_sep_cluster);
+	  for (auto it = final_sep_clusters.begin(); it!=final_sep_clusters.end(); it++){
+	    new_clusters.push_back(*it);
+	  }
+	  temp_del_clusters.push_back(final_sep_cluster);
+	  
+	  
+	  /* int num_mcells = 0; */
+	  /* for (size_t i=0;i!=new_clusters.size();i++){ */
+	  /*   num_mcells += new_clusters.at(i)->get_num_mcells(); */
+	  /* } */
+	  //std::cout << cluster->get_num_mcells() << " " << num_mcells << std::endl; 
+	  
+	  
+	  
+	  for (auto it = temp_del_clusters.begin(); it!= temp_del_clusters.end(); it++){
+	    delete *it;
+	  }
+	}else{
+	  std::cout << "Stripping Cluster " <<   cluster->get_cluster_id() << std::endl;
 
-	// temporary
-	range_v1 = final_sep_cluster->get_uvwt_range();
-	length_1 = sqrt(2./3. * (pow(pitch_u*range_v1.at(0),2) + pow(pitch_v*range_v1.at(1),2) + pow(pitch_w*range_v1.at(2),2)) + pow(time_slice_width*range_v1.at(3),2));
-
-	//	std::cout << length_1/units::cm << std::endl;
-	
-	if (length_1 > 60*units::cm){
-	  boundary_points.clear();
-	  independent_points.clear();
-	  WireCell2dToy::JudgeSeparateDec_1(final_sep_cluster,drift_dir);
-	  WireCell2dToy::JudgeSeparateDec_2(final_sep_cluster,drift_dir,boundary_points,independent_points);
-	  if (independent_points.size() > 0){
-
-	    // std::cout << "Separate final one" << std::endl;
-	    
-	    std::vector<PR3DCluster*> sep_clusters = WireCell2dToy::Separate_1(final_sep_cluster,boundary_points,independent_points);
-	    PR3DCluster* cluster5 = sep_clusters.at(0);
-	    new_clusters.push_back(cluster5);
-	    temp_del_clusters.push_back(final_sep_cluster);
-	    for (size_t k=2;k<sep_clusters.size();k++){
-	      new_clusters.push_back(sep_clusters.at(k));
-	    }
-	    
-	    PR3DCluster* cluster6 = sep_clusters.at(1);
-	    final_sep_cluster = cluster6;
-	  }	    
+	  std::vector<PR3DCluster*> sep_clusters = WireCell2dToy::Separate_1(cluster,boundary_points,independent_points);
+	  
+	  PR3DCluster* cluster1 = sep_clusters.at(0);
+	  new_clusters.push_back(cluster1);
+	  del_clusters.push_back(cluster);
+	  for (size_t k=2;k<sep_clusters.size();k++){
+	    new_clusters.push_back(sep_clusters.at(k));
+	  }
+	  	  
+	  std::vector<PR3DCluster*> temp_del_clusters;
+	  PR3DCluster* cluster2 = sep_clusters.at(1);
+	  std::vector<int> range_v1 = cluster2->get_uvwt_range();
+	  double length_1 = sqrt(2./3. * (pow(pitch_u*range_v1.at(0),2) + pow(pitch_v*range_v1.at(1),2) + pow(pitch_w*range_v1.at(2),2)) + pow(time_slice_width*range_v1.at(3),2));
+	  PR3DCluster* final_sep_cluster = cluster2;
+	  
+	  std::vector<PR3DCluster*> final_sep_clusters = Separate_2(final_sep_cluster);
+	  for (auto it = final_sep_clusters.begin(); it!=final_sep_clusters.end(); it++){
+	    new_clusters.push_back(*it);
+	  }
+	  temp_del_clusters.push_back(final_sep_cluster);
+	  
+	  for (auto it = temp_del_clusters.begin(); it!= temp_del_clusters.end(); it++){
+	    delete *it;
+	  }
+	  
 	}
-	
-	std::vector<PR3DCluster*> final_sep_clusters = Separate_2(final_sep_cluster);
-	for (auto it = final_sep_clusters.begin(); it!=final_sep_clusters.end(); it++){
-	  new_clusters.push_back(*it);
-	}
-	temp_del_clusters.push_back(final_sep_cluster);
-	
-	
-	/* int num_mcells = 0; */
-	/* for (size_t i=0;i!=new_clusters.size();i++){ */
-	/*   num_mcells += new_clusters.at(i)->get_num_mcells(); */
-	/* } */
-	//std::cout << cluster->get_num_mcells() << " " << num_mcells << std::endl; 
-	
-	   
-	
-	for (auto it = temp_del_clusters.begin(); it!= temp_del_clusters.end(); it++){
-	  delete *it;
-	}
-	
-      }
+      } // else ... 
     }
   }
   
@@ -716,12 +750,26 @@ void WireCell2dToy::Clustering_separate(WireCell::PR3DClusterSelection& live_clu
     live_clusters.erase(find(live_clusters.begin(), live_clusters.end(), ocluster));
     delete ocluster;
   }
+
+  // sort the clusters length ...
+  std::vector<std::pair<PR3DCluster*,double>> temp_pair_vec;
+  for (auto it = cluster_length_map.begin(); it!=cluster_length_map.end();it++){
+    temp_pair_vec.push_back(std::make_pair(it->first, it->second));
+  }
+  sort(temp_pair_vec.begin(), temp_pair_vec.end(), sortbysec);
+  live_clusters.clear();
+  for (auto it = temp_pair_vec.begin(); it!=temp_pair_vec.end();it++){
+    live_clusters.push_back(it->first);
+  }
+  // sort by length ... 
   
+  for (size_t i=0;i!=live_clusters.size();i++){
+    PR3DCluster *cluster = live_clusters.at(i);
+    cluster->set_cluster_id(i+1);
+  }
   
-   for (size_t i=0;i!=live_clusters.size();i++){
-     PR3DCluster *cluster = live_clusters.at(i);
-     cluster->set_cluster_id(i+1);
-   }
+   //std::cout << live_clusters.size() << " " << cluster_length_map.size() << std::endl;
+   
 }
 
 
