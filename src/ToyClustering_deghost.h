@@ -3,7 +3,7 @@
 using namespace WireCell;
 
 
-void WireCell2dToy::Clustering_deghost(WireCell::PR3DClusterSelection& live_clusters, std::map<WireCell::PR3DCluster*,double>& cluster_length_map){
+void WireCell2dToy::Clustering_deghost(WireCell::PR3DClusterSelection& live_clusters, std::map<WireCell::PR3DCluster*,double>& cluster_length_map, std::set<int>& dead_u_index, std::set<int>& dead_v_index, std::set<int>& dead_w_index){
   
   // sort the clusters length ...
   {
@@ -46,8 +46,11 @@ void WireCell2dToy::Clustering_deghost(WireCell::PR3DClusterSelection& live_clus
 	global_skeleton_cloud.AddPoints(live_clusters.at(i),1);
       }
     }else{ 
-      // start the process to add things in ... 
-    } 
+      // start the process to add things in and perform deghosting ... 
+
+      
+      
+    }
   }
 
   Point p(0,0,0);

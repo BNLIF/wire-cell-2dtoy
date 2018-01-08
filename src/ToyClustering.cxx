@@ -276,7 +276,7 @@ void WireCell2dToy::Clustering_jump_gap_cosmics(WireCell::PR3DClusterSelection& 
 
 
   // prepare for deghosting and clustering along track
-  Clustering_deghost(live_clusters,cluster_length_map);
+  Clustering_deghost(live_clusters,cluster_length_map, dead_u_index, dead_v_index, dead_w_index);
   cerr << em("deghost clusters") << std::endl;
   
   for (size_t i=0;i!=live_clusters.size();i++){
