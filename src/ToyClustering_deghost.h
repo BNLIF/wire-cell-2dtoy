@@ -50,9 +50,127 @@ void WireCell2dToy::Clustering_deghost(WireCell::PR3DClusterSelection& live_clus
       }
     }else{ 
       // start the process to add things in and perform deghosting ... 
+      PR3DCluster* cluster = live_clusters.at(i);
+      cluster->Create_point_cloud();
+      WireCell::WCPointCloud<double>& cloud = cluster->get_point_cloud()->get_cloud();
+
+      int num_total_points = cloud.pts.size(); // total number of points
+      int num_dead[3]={0,0,0}; // dead wires in each view 
+      int num_unique[3]={0,0,0}; // points that are unique (not agree with any other clusters)
+      std::map<PR3DCluster*, int> map_cluster_num[3];
+
+      double dis_cut = 1.2*units::cm;
       
-      // two cases, merge clusters or remove clusters
+      for (size_t i=0;i!=num_total_points;i++){
+	Point test_point(cloud.pts.at(i).x,cloud.pts.at(i).y,cloud.pts.at(i).z);
+	if (dead_u_index.find(cloud.pts.at(i).index_u)==dead_u_index.end()){
+	  std::tuple<double, PR3DCluster*, size_t> results = global_point_cloud.get_closest_2d_point_info(test_point, 0);
+	  if (std::get<0>(results)<=dis_cut){
+	    if (map_cluster_num[0].find(std::get<1>(results))==map_cluster_num[0].end()){
+	      map_cluster_num[0][std::get<1>(results)] = 1;
+	    }else{
+	      map_cluster_num[0][std::get<1>(results)] ++;
+	    }
+	  }else{
+	    results = global_skeleton_cloud.get_closest_2d_point_info(test_point, 0);
+	    if (std::get<0>(results)<=dis_cut*2){
+	      if (map_cluster_num[0].find(std::get<1>(results))==map_cluster_num[0].end()){
+		map_cluster_num[0][std::get<1>(results)] = 1;
+	      }else{
+		map_cluster_num[0][std::get<1>(results)] ++;
+	      }
+	    }else{
+	      num_unique[0]++;
+	    }
+	  }
+	}else{
+	  num_dead[0]++;
+	}
+
+
+	if (dead_v_index.find(cloud.pts.at(i).index_v)==dead_v_index.end()){
+	  std::tuple<double, PR3DCluster*, size_t> results = global_point_cloud.get_closest_2d_point_info(test_point, 1);
+	  if (std::get<0>(results)<=dis_cut){
+	    if (map_cluster_num[1].find(std::get<1>(results))==map_cluster_num[1].end()){
+	      map_cluster_num[1][std::get<1>(results)] = 1;
+	    }else{
+	      map_cluster_num[1][std::get<1>(results)] ++;
+	    }
+	  }else{
+	    results = global_skeleton_cloud.get_closest_2d_point_info(test_point, 1);
+	    if (std::get<0>(results)<=dis_cut*2){
+	      if (map_cluster_num[1].find(std::get<1>(results))==map_cluster_num[1].end()){
+		map_cluster_num[1][std::get<1>(results)] = 1;
+	      }else{
+		map_cluster_num[1][std::get<1>(results)] ++;
+	      }
+	    }else{
+	      num_unique[1]++;
+	    }
+	  }
+	}else{
+	  num_dead[1]++;
+	}
+
+
+
+	if (dead_w_index.find(cloud.pts.at(i).index_w)==dead_w_index.end()){
+	  std::tuple<double, PR3DCluster*, size_t> results = global_point_cloud.get_closest_2d_point_info(test_point, 2);
+	  if (std::get<0>(results)<=dis_cut){
+	    if (map_cluster_num[2].find(std::get<1>(results))==map_cluster_num[2].end()){
+	      map_cluster_num[2][std::get<1>(results)] = 1;
+	    }else{
+	      map_cluster_num[2][std::get<1>(results)] ++;
+	    }
+	  }else{
+	    results = global_skeleton_cloud.get_closest_2d_point_info(test_point, 2);
+	    if (std::get<0>(results)<=dis_cut*2){
+	      if (map_cluster_num[2].find(std::get<1>(results))==map_cluster_num[2].end()){
+		map_cluster_num[2][std::get<1>(results)] = 1;
+	      }else{
+		map_cluster_num[2][std::get<1>(results)] ++;
+	      }
+	    }else{
+	      num_unique[2]++;
+	    }
+	  }
+	}else{
+	  num_dead[2]++;
+	}
+	
+      }
+
+      bool flag_save = false;
       
+      if (num_unique[0] <= 0.1 * (num_total_points - num_dead[0]) &&
+	  num_unique[1] <= 0.1 * (num_total_points - num_dead[1]) &&
+	  num_unique[2] <= 0.1 * (num_total_points - num_dead[2]) &&
+	  (num_unique[0] + num_unique[1] + num_unique[2]) <= 0.05 * (num_total_points - num_dead[0] + num_total_points - num_dead[1] + num_total_points - num_dead[2]) &&
+	   (num_unique[0] + num_unique[1] + num_unique[2])  <= 50 ){
+	flag_save = false;
+	to_be_removed_clusters.push_back(cluster);
+	//std::cout << cluser->get_cluster_id() << " " << num_dead[0] << " " << num_dead[1] << " " << num_dead[2] << " " << num_unique[0]/(num_total_points - num_dead[0]+1e-9) << " " << num_unique[1]/(num_total_points - num_dead[1]+1e-9) << " " << num_unique[2]/(num_total_points - num_dead[2]+1e-9) << " " << num_unique[0]+num_unique[1] + num_unique[2] << " " << (num_unique[0]+num_unique[1] + num_unique[2])/(num_total_points - num_dead[0] + num_total_points - num_dead[1] + num_total_points - num_dead[2]+1e-9) << " " << num_total_points << std::endl;
+      }else{
+	//	if (num_dead[0] + num_dead[1] + num_dead[2] >0)
+	std::cout <<  cluster->get_cluster_id() << " " << num_dead[0] << " " << num_dead[1] << " " << num_dead[2] << " " << num_unique[0]/(num_total_points - num_dead[0]+1e-9) << " " << num_unique[1]/(num_total_points - num_dead[1]+1e-9) << " " << num_unique[2]/(num_total_points - num_dead[2]+1e-9) << " " << num_unique[0]+num_unique[1] + num_unique[2] << " " << (num_unique[0]+num_unique[1] + num_unique[2])/(num_total_points - num_dead[0] + num_total_points - num_dead[1] + num_total_points - num_dead[2]+1e-9) << " " << num_total_points << std::endl;
+
+
+		  
+	
+	// two cases, merge clusters or remove clusters
+	flag_save = true;
+      }
+
+
+      if (flag_save){
+	live_clusters.at(i)->Create_point_cloud();
+	global_point_cloud.AddPoints(live_clusters.at(i),0);
+	if (cluster_length_map[live_clusters.at(i)]>30*units::cm){
+	  live_clusters.at(i)->Construct_skeleton();
+	  global_skeleton_cloud.AddPoints(live_clusters.at(i),1);
+	}
+      }
+     
     }
   }
 
