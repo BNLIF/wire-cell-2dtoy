@@ -14,8 +14,10 @@ void WireCell2dToy::Clustering_deghost(WireCell::PR3DClusterSelection& live_clus
     }
   }
 
-
-  
+  // Create two point clouds ... 
+  // One for the points ... point --> index --> cluster (vector) ...
+  // The other for the skeleton of each track ...  point --> index --> cluster (vector)
+  // Both cloud needs to be dynamic, keep adding things into it as we improve the knowledge
   
   
 }
