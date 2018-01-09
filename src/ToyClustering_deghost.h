@@ -188,7 +188,7 @@ void WireCell2dToy::Clustering_deghost(WireCell::PR3DClusterSelection& live_clus
 	      flag_remove = true;
 	    }
 	  }else{
-	    if (num_total_points == num_dead[2]){
+	    if (num_total_points == num_dead[2] && max_cluster_u!=0){
 	      to_be_merged_pairs.insert(std::make_pair(cluster,max_cluster_u));
 	    }else{
 	      flag_remove = true;
@@ -203,7 +203,7 @@ void WireCell2dToy::Clustering_deghost(WireCell::PR3DClusterSelection& live_clus
 	      flag_remove = true;
 	    }
 	  }else{
-	    if (num_total_points == num_dead[1]){
+	    if (num_total_points == num_dead[1] && max_cluster_u!=0){
 	      to_be_merged_pairs.insert(std::make_pair(cluster,max_cluster_u));
 	    }else{
 	      flag_remove = true;
@@ -217,7 +217,7 @@ void WireCell2dToy::Clustering_deghost(WireCell::PR3DClusterSelection& live_clus
 	      flag_remove = true;
 	    }
 	  }else{
-	    if (num_total_points == num_dead[0]){
+	    if (num_total_points == num_dead[0] && max_cluster_w!=0){
 	      to_be_merged_pairs.insert(std::make_pair(cluster,max_cluster_w));
 	    }else{
 	      flag_remove = true;
