@@ -118,9 +118,9 @@ int main(int argc, char* argv[])
   mp.set_first_v_dis(first_v_dis);
   mp.set_first_w_dis(first_w_dis);
   
-  std::set<int> dead_u_index;
-  std::set<int> dead_v_index;
-  std::set<int> dead_w_index;
+  std::map<int,std::pair<double,double>> dead_u_index;
+  std::map<int,std::pair<double,double>> dead_v_index;
+  std::map<int,std::pair<double,double>> dead_w_index;
   // load mcell
   
   TTree *TC = (TTree*)file->Get("TC");
@@ -205,22 +205,50 @@ int main(int argc, char* argv[])
     mcell->set_wdq(wdq);
 
     mcell->set_q(q);
+
+    double temp_x = (time_slice*nrebin/2.*unit_dis/10. - frame_length/2.*unit_dis/10.) * units::cm;
+
+    
     if (flag_u==0){
       mcell->add_bad_planes(WirePlaneType_t(0));
       for (int i=0;i!=nwire_u;i++){
-	dead_u_index.insert(wire_index_u[i]);
+	if (dead_u_index.find(wire_index_u[i])==dead_u_index.end()){
+	  dead_u_index[wire_index_u[i]] = std::make_pair(temp_x-0.1*units::cm,temp_x+0.1*units::cm);
+	}else{
+	  if (temp_x-0.1*units::cm < dead_u_index[wire_index_u[i]].first){
+	    dead_u_index[wire_index_u[i]].first = temp_x-0.1*units::cm;
+	  }else if (temp_x+0.1*units::cm > dead_u_index[wire_index_u[i]].second){
+	    dead_u_index[wire_index_u[i]].second = temp_x + 0.1*units::cm;
+	  }
+	}
       }
     }
     if (flag_v==0){
       mcell->add_bad_planes(WirePlaneType_t(1));
       for (int i=0;i!=nwire_v;i++){
-	dead_v_index.insert(wire_index_v[i]);
+	if (dead_v_index.find(wire_index_v[i])==dead_v_index.end()){
+	  dead_v_index[wire_index_v[i]] = std::make_pair(temp_x-0.1*units::cm,temp_x+0.1*units::cm);
+	}else{
+	  if (temp_x-0.1*units::cm < dead_v_index[wire_index_v[i]].first){
+	    dead_v_index[wire_index_v[i]].first = temp_x-0.1*units::cm;
+	  }else if (temp_x+0.1*units::cm > dead_v_index[wire_index_v[i]].second){
+	    dead_v_index[wire_index_v[i]].second = temp_x + 0.1*units::cm;
+	  }
+	}
       }
     }
     if (flag_w==0){
       mcell->add_bad_planes(WirePlaneType_t(2));
       for (int i=0;i!=nwire_w;i++){
-	dead_w_index.insert(wire_index_w[i]);
+	if (dead_w_index.find(wire_index_w[i])==dead_w_index.end()){
+	  dead_w_index[wire_index_w[i]] = std::make_pair(temp_x-0.1*units::cm,temp_x+0.1*units::cm);
+	}else{
+	  if (temp_x-0.1*units::cm < dead_w_index[wire_index_w[i]].first){
+	    dead_w_index[wire_index_w[i]].first = temp_x-0.1*units::cm;
+	  }else if (temp_x+0.1*units::cm > dead_w_index[wire_index_w[i]].second){
+	    dead_w_index[wire_index_w[i]].second = temp_x + 0.1*units::cm;
+	  }
+	}
       }
     }
     for (int i=0;i!=nwire_u;i++){
@@ -258,21 +286,21 @@ int main(int argc, char* argv[])
 
     if (flag_u==0){
       mcell->add_bad_planes(WirePlaneType_t(0));
-      for (int i=0;i!=nwire_u;i++){
-	dead_u_index.insert(wire_index_u[i]);
-      }
+      // for (int i=0;i!=nwire_u;i++){
+      // 	dead_u_index.insert(wire_index_u[i]);
+      // }
     }
     if (flag_v==0){
       mcell->add_bad_planes(WirePlaneType_t(1));
-      for (int i=0;i!=nwire_v;i++){
-	dead_v_index.insert(wire_index_v[i]);
-      }
+      // for (int i=0;i!=nwire_v;i++){
+      // 	dead_v_index.insert(wire_index_v[i]);
+      // }
     }
     if (flag_w==0){
       mcell->add_bad_planes(WirePlaneType_t(2));
-      for (int i=0;i!=nwire_w;i++){
-	dead_w_index.insert(wire_index_w[i]);
-      }
+      // for (int i=0;i!=nwire_w;i++){
+      // 	dead_w_index.insert(wire_index_w[i]);
+      // }
     }
     for (int i=0;i!=nwire_u;i++){
       const GeomWire *wire = gds.by_planeindex(WirePlaneType_t(0),wire_index_u[i]);
