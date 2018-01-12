@@ -146,10 +146,10 @@ bool WireCell2dToy::JudgeSeparateDec_2(WireCell::PR3DCluster* cluster, TVector3&
     }
     if (flag_save){
       independent_points.push_back(hy_points.at(j));
-      if (hy_points.at(j).y > 106.5*units::cm || hy_points.at(j).y <-106.5*units::cm)
+      if (hy_points.at(j).y > 104*units::cm || hy_points.at(j).y <-104*units::cm)
 	independent_surfaces.insert(0);
-      if (hy_points.at(j).y > 106.5*units::cm || hy_points.at(j).y <-106.5*units::cm ||
-	  hy_points.at(j).z < 10*units::cm || hy_points.at(j).z > 1027*units::cm ||
+      if (hy_points.at(j).y > 104*units::cm || hy_points.at(j).y <-104*units::cm ||
+	  hy_points.at(j).z < 12*units::cm || hy_points.at(j).z > 1025*units::cm ||
 	  hy_points.at(j).x < -1*units::cm || hy_points.at(j).x > 257*units::cm )
 	num_outside_points ++;
       if (hy_points.at(j).x < -1*units::cm || hy_points.at(j).x > 257*units::cm )
@@ -166,10 +166,10 @@ bool WireCell2dToy::JudgeSeparateDec_2(WireCell::PR3DCluster* cluster, TVector3&
     }
     if (flag_save){
       independent_points.push_back(ly_points.at(j));
-      if (ly_points.at(j).y > 106.5*units::cm || ly_points.at(j).y <-106.5*units::cm)
+      if (ly_points.at(j).y > 104*units::cm || ly_points.at(j).y <-104*units::cm)
 	independent_surfaces.insert(1);
-      if (ly_points.at(j).y > 106.5*units::cm || ly_points.at(j).y <-106.5*units::cm ||
-	  ly_points.at(j).z < 10*units::cm || ly_points.at(j).z > 1027*units::cm ||
+      if (ly_points.at(j).y > 104*units::cm || ly_points.at(j).y <-104*units::cm ||
+	  ly_points.at(j).z < 12*units::cm || ly_points.at(j).z > 1025*units::cm ||
 	  ly_points.at(j).x < -1*units::cm || ly_points.at(j).x > 257*units::cm )
 	num_outside_points ++;
       if (ly_points.at(j).x < -1*units::cm || ly_points.at(j).x > 257*units::cm )
@@ -185,10 +185,10 @@ bool WireCell2dToy::JudgeSeparateDec_2(WireCell::PR3DCluster* cluster, TVector3&
     }
     if (flag_save){
       independent_points.push_back(hz_points.at(j));
-      if (hz_points.at(j).z < 10*units::cm || hz_points.at(j).z > 1027*units::cm)
+      if (hz_points.at(j).z < 12*units::cm || hz_points.at(j).z > 1025*units::cm)
 	independent_surfaces.insert(2);
-      if (hz_points.at(j).y > 106.5*units::cm || hz_points.at(j).y <-106.5*units::cm ||
-	  hz_points.at(j).z < 10*units::cm || hz_points.at(j).z > 1027*units::cm ||
+      if (hz_points.at(j).y > 104*units::cm || hz_points.at(j).y <-104*units::cm ||
+	  hz_points.at(j).z < 12*units::cm || hz_points.at(j).z > 1025*units::cm ||
 	  hz_points.at(j).x < -1*units::cm || hz_points.at(j).x > 257*units::cm )
 	num_outside_points ++;
       if (hz_points.at(j).x < -1*units::cm || hz_points.at(j).x > 257*units::cm )
@@ -204,10 +204,10 @@ bool WireCell2dToy::JudgeSeparateDec_2(WireCell::PR3DCluster* cluster, TVector3&
     }
     if (flag_save){
       independent_points.push_back(lz_points.at(j));
-      if (lz_points.at(j).z < 10*units::cm || lz_points.at(j).z > 1027*units::cm)
+      if (lz_points.at(j).z < 12*units::cm || lz_points.at(j).z > 1025*units::cm)
 	independent_surfaces.insert(3);
-      if (lz_points.at(j).y > 106.5*units::cm || lz_points.at(j).y <-106.5*units::cm ||
-	  lz_points.at(j).z < 10*units::cm || lz_points.at(j).z > 1027*units::cm ||
+      if (lz_points.at(j).y > 104*units::cm || lz_points.at(j).y <-104*units::cm ||
+	  lz_points.at(j).z < 12*units::cm || lz_points.at(j).z > 1025*units::cm ||
 	  lz_points.at(j).x < -1*units::cm || lz_points.at(j).x > 257*units::cm )
 	num_outside_points ++;
       if (lz_points.at(j).x < -1*units::cm || lz_points.at(j).x > 257*units::cm )
@@ -224,8 +224,8 @@ bool WireCell2dToy::JudgeSeparateDec_2(WireCell::PR3DCluster* cluster, TVector3&
     if (flag_save){
       independent_points.push_back(hx_points.at(j));
       
-      if (hx_points.at(j).y > 106.5*units::cm || hx_points.at(j).y <-106.5*units::cm ||
-	  hx_points.at(j).z < 10*units::cm || hx_points.at(j).z > 1027*units::cm ||
+      if (hx_points.at(j).y > 104*units::cm || hx_points.at(j).y <-104*units::cm ||
+	  hx_points.at(j).z < 12*units::cm || hx_points.at(j).z > 1025*units::cm ||
 	  hx_points.at(j).x < -1*units::cm || hx_points.at(j).x > 257*units::cm )
 	num_outside_points ++;
       if (hx_points.at(j).x < -1*units::cm || hx_points.at(j).x > 257*units::cm ){
@@ -244,8 +244,8 @@ bool WireCell2dToy::JudgeSeparateDec_2(WireCell::PR3DCluster* cluster, TVector3&
     if (flag_save){
       independent_points.push_back(lx_points.at(j));
   
-      if (lx_points.at(j).y > 106.5*units::cm || lx_points.at(j).y <-106.5*units::cm ||
-	  lx_points.at(j).z < 10*units::cm || lx_points.at(j).z > 1027*units::cm ||
+      if (lx_points.at(j).y > 104*units::cm || lx_points.at(j).y <-104*units::cm ||
+	  lx_points.at(j).z < 12*units::cm || lx_points.at(j).z > 1025*units::cm ||
 	  lx_points.at(j).x < -1*units::cm || lx_points.at(j).x > 257*units::cm )
 	num_outside_points ++;
       if (lx_points.at(j).x < -1*units::cm || lx_points.at(j).x > 257*units::cm ){
@@ -276,7 +276,7 @@ bool WireCell2dToy::JudgeSeparateDec_2(WireCell::PR3DCluster* cluster, TVector3&
     }
   }
   
-  //std::cout <<  cluster->get_cluster_id() << " " << hy_points.size() << " " << ly_points.size() << " " << hz_points.size() << " " << lz_points.size() <<  " " << hx_points.size() << " " << lz_points.size() << " " << num_outside_points << " " << num_outx_points << " " << independent_points.size() << " " << num_far_points << " " << independent_surfaces.size() << std::endl;
+  // std::cout <<  cluster->get_cluster_id() << " " << hy_points.size() << " " << ly_points.size() << " " << hz_points.size() << " " << lz_points.size() <<  " " << hx_points.size() << " " << lz_points.size() << " " << num_outside_points << " " << num_outx_points << " " << independent_points.size() << " " << num_far_points << " " << independent_surfaces.size() << std::endl;
   /* for (auto it=independent_surfaces.begin(); it!=independent_surfaces.end(); it++){ */
   /*   std::cout << (*it) << std::endl; */
   /* } */
