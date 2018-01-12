@@ -269,25 +269,27 @@ void WireCell2dToy::Clustering_jump_gap_cosmics(WireCell::PR3DClusterSelection& 
     //  cerr << em("extend dead") << endl;
   }
   cerr << em("first round of clustering") << std::endl;
+
+  for (size_t i=0;i!=live_clusters.size();i++){
+    PR3DCluster *cluster = live_clusters.at(i);
+    cluster->set_cluster_id(i+1);
+  }
   
   // prepare for separating the connected pieces ... 
   Clustering_separate(live_clusters,cluster_length_map);
   cerr << em("separate clusters") << std::endl;
 
 
-  // for (size_t i=0;i!=live_clusters.size();i++){
-  //   PR3DCluster *cluster = live_clusters.at(i);
-  //   cluster->set_cluster_id(i+1);
-  // }
+ 
 
   // prepare for deghosting and clustering along track
   Clustering_deghost(live_clusters,cluster_length_map, dead_u_index, dead_v_index, dead_w_index);
   cerr << em("deghost clusters") << std::endl;
   
-  for (size_t i=0;i!=live_clusters.size();i++){
-    PR3DCluster *cluster = live_clusters.at(i);
-    cluster->set_cluster_id(i+1);
-  }
+  // for (size_t i=0;i!=live_clusters.size();i++){
+  //   PR3DCluster *cluster = live_clusters.at(i);
+  //   cluster->set_cluster_id(i+1);
+  // }
 
   
   
