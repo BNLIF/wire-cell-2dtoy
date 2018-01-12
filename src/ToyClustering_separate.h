@@ -38,7 +38,7 @@ bool WireCell2dToy::JudgeSeparateDec_2(WireCell::PR3DCluster* cluster, TVector3&
   std::vector<WCPointCloud<double>::WCPoint> hx_points;
   std::vector<WCPointCloud<double>::WCPoint> lx_points;
 
-
+  std::set<int> independent_surfaces;
   	
   for (size_t j=0;j!=boundary_points.size();j++){
     if (j==0){
@@ -146,6 +146,7 @@ bool WireCell2dToy::JudgeSeparateDec_2(WireCell::PR3DCluster* cluster, TVector3&
     }
     if (flag_save){
       independent_points.push_back(hy_points.at(j));
+      independent_surfaces.insert(0);
       if (hy_points.at(j).y > 106.5*units::cm || hy_points.at(j).y <-106.5*units::cm ||
 	  hy_points.at(j).z < 10*units::cm || hy_points.at(j).z > 1027*units::cm ||
 	  hy_points.at(j).x < -1*units::cm || hy_points.at(j).x > 257*units::cm )
@@ -164,6 +165,7 @@ bool WireCell2dToy::JudgeSeparateDec_2(WireCell::PR3DCluster* cluster, TVector3&
     }
     if (flag_save){
       independent_points.push_back(ly_points.at(j));
+      independent_surfaces.insert(1);
       if (ly_points.at(j).y > 106.5*units::cm || ly_points.at(j).y <-106.5*units::cm ||
 	  ly_points.at(j).z < 10*units::cm || ly_points.at(j).z > 1027*units::cm ||
 	  ly_points.at(j).x < -1*units::cm || ly_points.at(j).x > 257*units::cm )
@@ -181,6 +183,7 @@ bool WireCell2dToy::JudgeSeparateDec_2(WireCell::PR3DCluster* cluster, TVector3&
     }
     if (flag_save){
       independent_points.push_back(hz_points.at(j));
+      independent_surfaces.insert(2);
       if (hz_points.at(j).y > 106.5*units::cm || hz_points.at(j).y <-106.5*units::cm ||
 	  hz_points.at(j).z < 10*units::cm || hz_points.at(j).z > 1027*units::cm ||
 	  hz_points.at(j).x < -1*units::cm || hz_points.at(j).x > 257*units::cm )
@@ -198,6 +201,7 @@ bool WireCell2dToy::JudgeSeparateDec_2(WireCell::PR3DCluster* cluster, TVector3&
     }
     if (flag_save){
       independent_points.push_back(lz_points.at(j));
+      independent_surfaces.insert(3);
       if (lz_points.at(j).y > 106.5*units::cm || lz_points.at(j).y <-106.5*units::cm ||
 	  lz_points.at(j).z < 10*units::cm || lz_points.at(j).z > 1027*units::cm ||
 	  lz_points.at(j).x < -1*units::cm || lz_points.at(j).x > 257*units::cm )
@@ -215,6 +219,7 @@ bool WireCell2dToy::JudgeSeparateDec_2(WireCell::PR3DCluster* cluster, TVector3&
     }
     if (flag_save){
       independent_points.push_back(hx_points.at(j));
+      independent_surfaces.insert(4);
       if (hx_points.at(j).y > 106.5*units::cm || hx_points.at(j).y <-106.5*units::cm ||
 	  hx_points.at(j).z < 10*units::cm || hx_points.at(j).z > 1027*units::cm ||
 	  hx_points.at(j).x < -1*units::cm || hx_points.at(j).x > 257*units::cm )
@@ -232,6 +237,7 @@ bool WireCell2dToy::JudgeSeparateDec_2(WireCell::PR3DCluster* cluster, TVector3&
     }
     if (flag_save){
       independent_points.push_back(lx_points.at(j));
+      independent_surfaces.insert(5);
       if (lx_points.at(j).y > 106.5*units::cm || lx_points.at(j).y <-106.5*units::cm ||
 	  lx_points.at(j).z < 10*units::cm || lx_points.at(j).z > 1027*units::cm ||
 	  lx_points.at(j).x < -1*units::cm || lx_points.at(j).x > 257*units::cm )
@@ -244,7 +250,7 @@ bool WireCell2dToy::JudgeSeparateDec_2(WireCell::PR3DCluster* cluster, TVector3&
   int num_far_points = 0;
   
   
-  if (independent_points.size()==2){
+  if (independent_points.size()==2&&independent_surfaces.size()>1){
     TVector3 dir_1(independent_points.at(1).x - independent_points.at(0).x, independent_points.at(1).y - independent_points.at(0).y, independent_points.at(1).z - independent_points.at(0).z);
     dir_1.SetMag(1);
     for (size_t j=0;j!=boundary_points.size();j++){
@@ -264,8 +270,10 @@ bool WireCell2dToy::JudgeSeparateDec_2(WireCell::PR3DCluster* cluster, TVector3&
   
   //std::cout <<  cluster->get_cluster_id() << " " << hy_points.size() << " " << ly_points.size() << " " << hz_points.size() << " " << lz_points.size() <<  " " << hx_points.size() << " " << lz_points.size() << " " << num_outside_points << " " << num_outx_points << " " << independent_points.size() << " " << num_far_points << std::endl;
   
-  if ((num_outside_points > 1 || num_outx_points>0) && (independent_points.size()>2 ||
-							independent_points.size()==2 && num_far_points > 0))
+  if ((num_outside_points > 1 && independent_surfaces.size()>1
+       || num_outx_points>0) &&
+      (independent_points.size()>2 ||
+       independent_points.size()==2 && num_far_points > 0))
     return true;
   return false;
 }
