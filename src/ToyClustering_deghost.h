@@ -297,7 +297,7 @@ void WireCell2dToy::Clustering_deghost(WireCell::PR3DClusterSelection& live_clus
 
 	    //   std::cout << cluster->get_cluster_id() << " " << (num_unique[0]+num_unique[1] + num_unique[2])/(num_total_points - num_dead[0] + num_total_points - num_dead[1] + num_total_points - num_dead[2]+1e-9) << " " << (max_value_u+max_value_v+max_value_w)/(num_total_points  + num_total_points  + num_total_points +1e-9) << std::endl;
 
-	    if ((max_value_u+max_value_v+max_value_w)/(num_total_points  + num_total_points  + num_total_points +1e-9)>0.25){
+	    if ((max_value_u+max_value_v+max_value_w)/(num_total_points  + num_total_points  + num_total_points +1e-9)>0.25 ){
 	      flag_save = false;
 	      if(max_cluster_u!=0){
 		to_be_merged_pairs.insert(std::make_pair(cluster,max_cluster_u));
