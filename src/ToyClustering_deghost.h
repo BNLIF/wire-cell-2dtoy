@@ -257,14 +257,78 @@ void WireCell2dToy::Clustering_deghost(WireCell::PR3DClusterSelection& live_clus
 
 	//to_be_removed_clusters.push_back(cluster);
 
-	/* if (!flag_remove) */
-	/*   std::cout << cluster->get_cluster_id() << " " << num_dead[0] << " " << num_dead[1] << " " << num_dead[2] << " " << num_unique[0]/(num_total_points - num_dead[0]+1e-9) << " " << num_unique[1]/(num_total_points - num_dead[1]+1e-9) << " " << num_unique[2]/(num_total_points - num_dead[2]+1e-9) << " " << num_unique[0]+num_unique[1] + num_unique[2] << " " << (num_unique[0]+num_unique[1] + num_unique[2])/(num_total_points - num_dead[0] + num_total_points - num_dead[1] + num_total_points - num_dead[2]+1e-9) << " " << num_total_points << std::endl; */
+	/* std::cout << cluster->get_cluster_id() << " " << num_dead[0] << " " << num_dead[1] << " " << num_dead[2] << " " << num_unique[0]/(num_total_points - num_dead[0]+1e-9) << " " << num_unique[1]/(num_total_points - num_dead[1]+1e-9) << " " << num_unique[2]/(num_total_points - num_dead[2]+1e-9) << " " << num_unique[0]+num_unique[1] + num_unique[2] << " " << (num_unique[0]+num_unique[1] + num_unique[2])/(num_total_points - num_dead[0] + num_total_points - num_dead[1] + num_total_points - num_dead[2]+1e-9) << " " << num_total_points << std::endl;  */
       }else{
-	if (num_dead[0] + num_dead[1] + num_dead[2] >0)
-	  //  std::cout <<  cluster->get_cluster_id() << " " << num_dead[0] << " " << num_dead[1] << " " << num_dead[2] << " " << num_unique[0]/(num_total_points - num_dead[0]+1e-9) << " " << num_unique[1]/(num_total_points - num_dead[1]+1e-9) << " " << num_unique[2]/(num_total_points - num_dead[2]+1e-9) << " " << num_unique[0]+num_unique[1] + num_unique[2] << " " << (num_unique[0]+num_unique[1] + num_unique[2])/(num_total_points - num_dead[0] + num_total_points - num_dead[1] + num_total_points - num_dead[2]+1e-9) << " " << num_total_points << std::endl;
+	/* if (num_dead[0] + num_dead[1] + num_dead[2] >0) */
+	//	std::cout <<  cluster->get_cluster_id() << " " << num_dead[0] << " " << num_dead[1] << " " << num_dead[2] << " " << num_unique[0]/(num_total_points - num_dead[0]+1e-9) << " " << num_unique[1]/(num_total_points - num_dead[1]+1e-9) << " " << num_unique[2]/(num_total_points - num_dead[2]+1e-9) << " " << num_unique[0]+num_unique[1] + num_unique[2] << " " << (num_unique[0]+num_unique[1] + num_unique[2])/(num_total_points - num_dead[0] + num_total_points - num_dead[1] + num_total_points - num_dead[2]+1e-9) << " " << num_total_points << std::endl;
+
+	flag_save = true;
+	if ((num_unique[0]+num_unique[1] + num_unique[2])/(num_total_points - num_dead[0] + num_total_points - num_dead[1] + num_total_points - num_dead[2]+1e-9)>0.15){
+	  PR3DCluster *max_cluster_u = 0, *max_cluster_v=0, *max_cluster_w=0;
+	  int max_value_u = 0, max_value_v = 0, max_value_w = 0;
+	  for (auto it = map_cluster_num[0].begin(); it!=map_cluster_num[0].end(); it++){
+	    if (it->second > max_value_u){
+	      max_value_u = it->second;
+	      max_cluster_u = it->first;
+	    }
+	  }
+	  for (auto it = map_cluster_num[1].begin(); it!=map_cluster_num[1].end(); it++){
+	    if (it->second > max_value_v){
+	      max_value_v = it->second;
+	      max_cluster_v = it->first;
+	    }
+	  }
+	  for (auto it = map_cluster_num[2].begin(); it!=map_cluster_num[2].end(); it++){
+	    if (it->second > max_value_w){
+	      max_value_w = it->second;
+	      max_cluster_w = it->first;
+	    }
+	  }
+
+	/* std::cout << max_cluster_u << " " << max_value_u/(num_total_points-num_dead[0]+1e-9) << " " */
+	/* 	  << max_cluster_v << " " << max_value_v/(num_total_points-num_dead[1]+1e-9) << " " */
+	/* 	  << max_cluster_w << " " << max_value_w/(num_total_points-num_dead[2]+1e-9) << std::endl; */
+	  
+	  
+	  if ( (max_cluster_u==max_cluster_v && max_cluster_v == max_cluster_w) ||
+	       (max_cluster_u==max_cluster_v && max_cluster_w==0) ||
+	       (max_cluster_w==max_cluster_v && max_cluster_u==0) ||
+	       (max_cluster_u==max_cluster_w && max_cluster_v==0) ){
+
+	    //   std::cout << cluster->get_cluster_id() << " " << (num_unique[0]+num_unique[1] + num_unique[2])/(num_total_points - num_dead[0] + num_total_points - num_dead[1] + num_total_points - num_dead[2]+1e-9) << " " << (max_value_u+max_value_v+max_value_w)/(num_total_points  + num_total_points  + num_total_points +1e-9) << std::endl;
+
+	    if ((max_value_u+max_value_v+max_value_w)/(num_total_points  + num_total_points  + num_total_points +1e-9)>0.25){
+	      flag_save = false;
+	      if(max_cluster_u!=0){
+		to_be_merged_pairs.insert(std::make_pair(cluster,max_cluster_u));
+	      }else if (max_cluster_v!=0){
+		to_be_merged_pairs.insert(std::make_pair(cluster,max_cluster_v));
+	      }else if (max_cluster_w!=0){
+		to_be_merged_pairs.insert(std::make_pair(cluster,max_cluster_w));
+	      }
+	    }
+	  }else if (max_cluster_u==max_cluster_v && max_cluster_u!=0){
+	    if ((max_value_u+max_value_v+map_cluster_num[2][max_cluster_u])/(num_total_points  + num_total_points  + num_total_points +1e-9)>0.25){
+	      flag_save = false;
+	      to_be_merged_pairs.insert(std::make_pair(cluster,max_cluster_u));
+	    }
+	  }else if (max_cluster_v==max_cluster_w && max_cluster_v!=0){
+	    if ((map_cluster_num[0][max_cluster_v]+max_value_v+max_value_w)/(num_total_points  + num_total_points  + num_total_points +1e-9)>0.25){
+	      flag_save = false;
+	      to_be_merged_pairs.insert(std::make_pair(cluster,max_cluster_v));
+	    }
+	  }else if (max_cluster_u==max_cluster_w && max_cluster_w!=0){
+	    if ((max_value_u+map_cluster_num[1][max_cluster_w]+max_value_w)/(num_total_points  + num_total_points  + num_total_points +1e-9)>0.25){
+	      flag_save = false;
+	      to_be_merged_pairs.insert(std::make_pair(cluster,max_cluster_w));
+	    }
+	  }
+
+	  
+	}
 	
 	// two cases, merge clusters or remove clusters
-	flag_save = true;
+	
       }
 
 
