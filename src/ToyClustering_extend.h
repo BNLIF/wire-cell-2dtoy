@@ -473,8 +473,9 @@ bool WireCell2dToy::Clustering_4th_dead(WireCell::PR3DCluster *cluster_1, WireCe
       /* if ( length_2 > 100*units::cm && length_1>100*units::cm) */
       /* 	  std::cout << cluster_1->get_cluster_id() << " " << cluster_2->get_cluster_id() << " " << length_1/units::cm << " " << length_2/units::cm << " " <<  angle1 << " " << angle2 << " " << angle3 << " "  << WireCell2dToy::is_angle_consistent(dir1,dir2,false,10,angle_u,angle_v,angle_w) << " " << WireCell2dToy::is_angle_consistent(dir3,dir2,true,10,angle_u,angle_v,angle_w) << std::endl; */
 
-      /* if (dis < 5*units::cm && fabs(length_1-267*units::cm)<2*units::cm && fabs(length_2 - 11*units::cm) < 1*units::cm) */
-      /* 	std::cout << angle1 << " " << angle2 << " " << angle3 << std::endl; */
+      /* if (dis > 25*units::cm && length_2 < 10*units::cm) */
+      /* 	std::cout << cluster_1->get_cluster_id() << " " << cluster_2->get_cluster_id() << " " << dis/units::cm << " " << length_1/units::cm << " " << length_2/units::cm << */
+      /* 	  " " << angle1 << " " << angle2 << " " << angle3 << " " << cluster2_ave_pos.x/units::cm << " " << cluster2_ave_pos.y/units::cm << " " << cluster2_ave_pos.z/units::cm << std::endl; */
     
       
       if (length_2 <=10*units::cm){

@@ -61,7 +61,9 @@ bool WireCell2dToy::JudgeSeparateDec_2(WireCell::PR3DCluster* cluster, TVector3&
     }
   }
   
-  
+  bool flag_outx = false;
+  if (hx_points.at(0).x > 257*units::cm || lx_points.at(0).x<-1*units::cm)
+    flag_outx = true;
   
   
   if (hy_points.at(0).y > 101.5*units::cm){
@@ -140,7 +142,7 @@ bool WireCell2dToy::JudgeSeparateDec_2(WireCell::PR3DCluster* cluster, TVector3&
   for (size_t j=0;j!=hy_points.size();j++){
     if (hy_points.at(j).x >=0*units::cm && hy_points.at(j).x <=256*units::cm &&
 	hy_points.at(j).y >=-99.5*units::cm && hy_points.at(j).y <=101.5*units::cm &&
-	hy_points.at(j).z >= 15*units::cm && hy_points.at(j).z <= 1022*units::cm)
+	hy_points.at(j).z >= 15*units::cm && hy_points.at(j).z <= 1022*units::cm && (!flag_outx))
       continue;
     
     bool flag_save = true;
@@ -178,7 +180,7 @@ bool WireCell2dToy::JudgeSeparateDec_2(WireCell::PR3DCluster* cluster, TVector3&
   for (size_t j=0;j!=ly_points.size();j++){
     if (ly_points.at(j).x >=0*units::cm && ly_points.at(j).x <=256*units::cm &&
 	ly_points.at(j).y >=-99.5*units::cm && ly_points.at(j).y <=101.5*units::cm &&
-	ly_points.at(j).z >= 15*units::cm && ly_points.at(j).z <= 1022*units::cm)
+	ly_points.at(j).z >= 15*units::cm && ly_points.at(j).z <= 1022*units::cm&& (!flag_outx))
       continue;
 
     
@@ -219,7 +221,7 @@ bool WireCell2dToy::JudgeSeparateDec_2(WireCell::PR3DCluster* cluster, TVector3&
 
     if (hz_points.at(j).x >=0*units::cm && hz_points.at(j).x <=256*units::cm &&
 	hz_points.at(j).y >=-99.5*units::cm && hz_points.at(j).y <=101.5*units::cm &&
-	hz_points.at(j).z >= 15*units::cm && hz_points.at(j).z <= 1022*units::cm)
+	hz_points.at(j).z >= 15*units::cm && hz_points.at(j).z <= 1022*units::cm&& (!flag_outx))
       continue;
     
     bool flag_save = true;
@@ -258,7 +260,7 @@ bool WireCell2dToy::JudgeSeparateDec_2(WireCell::PR3DCluster* cluster, TVector3&
 
     if (lz_points.at(j).x >=0*units::cm && lz_points.at(j).x <=256*units::cm &&
 	lz_points.at(j).y >=-99.5*units::cm && lz_points.at(j).y <=101.5*units::cm &&
-	lz_points.at(j).z >= 15*units::cm && lz_points.at(j).z <= 1022*units::cm)
+	lz_points.at(j).z >= 15*units::cm && lz_points.at(j).z <= 1022*units::cm&& (!flag_outx))
       continue;
     
     bool flag_save = true;
@@ -298,7 +300,7 @@ bool WireCell2dToy::JudgeSeparateDec_2(WireCell::PR3DCluster* cluster, TVector3&
 
     if (hx_points.at(j).x >=0*units::cm && hx_points.at(j).x <=256*units::cm &&
 	hx_points.at(j).y >=-99.5*units::cm && hx_points.at(j).y <=101.5*units::cm &&
-	hx_points.at(j).z >= 15*units::cm && hx_points.at(j).z <= 1022*units::cm)
+	hx_points.at(j).z >= 15*units::cm && hx_points.at(j).z <= 1022*units::cm&& (!flag_outx))
       continue;
     
     bool flag_save = true;
@@ -339,7 +341,7 @@ bool WireCell2dToy::JudgeSeparateDec_2(WireCell::PR3DCluster* cluster, TVector3&
 
     if (lx_points.at(j).x >=0*units::cm && lx_points.at(j).x <=256*units::cm &&
 	lx_points.at(j).y >=-99.5*units::cm && lx_points.at(j).y <=101.5*units::cm &&
-	lx_points.at(j).z >= 15*units::cm && lx_points.at(j).z <= 1022*units::cm)
+	lx_points.at(j).z >= 15*units::cm && lx_points.at(j).z <= 1022*units::cm&& (!flag_outx))
       continue;
     
     bool flag_save = true;
@@ -381,7 +383,7 @@ bool WireCell2dToy::JudgeSeparateDec_2(WireCell::PR3DCluster* cluster, TVector3&
   int num_far_points = 0;
   
   
-  if (independent_points.size()==2&&independent_surfaces.size()>1){
+  if (independent_points.size()==2&&(independent_surfaces.size()>1 || flag_outx)){
     TVector3 dir_1(independent_points.at(1).x - independent_points.at(0).x, independent_points.at(1).y - independent_points.at(0).y, independent_points.at(1).z - independent_points.at(0).z);
     dir_1.SetMag(1);
     for (size_t j=0;j!=boundary_points.size();j++){
@@ -409,6 +411,7 @@ bool WireCell2dToy::JudgeSeparateDec_2(WireCell::PR3DCluster* cluster, TVector3&
 		       (independent_points.at(1).y + independent_points.at(0).y)/2.,
 		       (independent_points.at(1).z + independent_points.at(0).z)/2.);
     double middle_dis = cloud->get_closest_dis(middle_point);
+    // std::cout << middle_dis/units::cm << " " << num_far_points << std::endl;
     if (middle_dis > 25*units::cm){
       num_far_points = 0;
     }
@@ -419,7 +422,7 @@ bool WireCell2dToy::JudgeSeparateDec_2(WireCell::PR3DCluster* cluster, TVector3&
   
   
   
-  // std::cout <<  cluster->get_cluster_id() << " " << hy_points.size() << " " << ly_points.size() << " " << hz_points.size() << " " << lz_points.size() <<  " " << hx_points.size() << " " << lz_points.size() << " " << num_outside_points << " " << num_outx_points << " " << independent_points.size() << " " << num_far_points << " " << independent_surfaces.size() << std::endl;
+  std::cout <<  cluster->get_cluster_id() << " " << hy_points.size() << " " << ly_points.size() << " " << hz_points.size() << " " << lz_points.size() <<  " " << hx_points.size() << " " << lz_points.size() << " " << num_outside_points << " " << num_outx_points << " " << independent_points.size() << " " << num_far_points << " " << independent_surfaces.size() << std::endl;
   /* for (auto it=independent_surfaces.begin(); it!=independent_surfaces.end(); it++){ */
   /*   std::cout << (*it) << std::endl; */
   /* } */
