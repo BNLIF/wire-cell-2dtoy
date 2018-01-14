@@ -500,12 +500,28 @@ std::vector<WireCell::PR3DCluster*> WireCell2dToy::Separate_1(WireCell::PR3DClus
    
   WCPointCloud<double>::WCPoint start_wcpoint = independent_points.at(min_index);
   Point start_point(start_wcpoint.x, start_wcpoint.y, start_wcpoint.z);
-  TVector3 dir = cluster->VHoughTrans(start_point,100*units::cm);
+
+  
+  TVector3 dir; 
+  {
+    TVector3 drift_dir(1,0,0);
+    dir  = cluster->VHoughTrans(start_point,100*units::cm);
+    TVector3 dir1 = cluster->VHoughTrans(start_point,30*units::cm);
+    if (dir.Angle(dir1) > 20*3.1415926/180.){
+      if (fabs(dir.Angle(drift_dir)-3.1415926/2.)<5*3.1415926/180. ||
+	  fabs(dir1.Angle(drift_dir)-3.1415926/2.)<5*3.1415926/180.){
+	dir  = cluster->VHoughTrans(start_point,200*units::cm);
+      }else{
+	dir = dir1;
+      }
+    }
+  }
   dir.SetMag(1);
 
+  
   TVector3 drift_dir(1,0,0);
 
-  // std::cout  << " " << start_wcpoint.x/units::cm << " " << start_wcpoint.y/units::cm << " " << start_wcpoint.z/units::cm << " " <<  " " << dir.X() << " " << dir.Y() << " " << dir.Z() << std::endl;
+  std::cout  << " " << start_wcpoint.x/units::cm << " " << start_wcpoint.y/units::cm << " " << start_wcpoint.z/units::cm << " " <<  " " << dir.X() << " " << dir.Y() << " " << dir.Z() << std::endl;
 
   
   TVector3 inv_dir = dir * (-1);
@@ -514,14 +530,14 @@ std::vector<WireCell::PR3DCluster*> WireCell2dToy::Separate_1(WireCell::PR3DClus
 
   TVector3 test_dir(end_wcpoint.x - start_wcpoint.x, end_wcpoint.y - start_wcpoint.y, end_wcpoint.z - start_wcpoint.z);
   
-  //std::cout  << " XQ1 " << start_wcpoint.x/units::cm << " " << start_wcpoint.y/units::cm << " " << start_wcpoint.z/units::cm << " " << end_wcpoint.x/units::cm << " " << end_wcpoint.y/units::cm << " " << end_wcpoint.z/units::cm << " " << dir.X() << " " << dir.Y() << " " << dir.Z() << std::endl;
+  // std::cout  << " XQ1 " << start_wcpoint.x/units::cm << " " << start_wcpoint.y/units::cm << " " << start_wcpoint.z/units::cm << " " << end_wcpoint.x/units::cm << " " << end_wcpoint.y/units::cm << " " << end_wcpoint.z/units::cm << " " << dir.X() << " " << dir.Y() << " " << dir.Z() << " " << fabs(test_dir.Angle(drift_dir)-3.1415926/2.)/3.1415926*180. << std::endl;
   
-  if (fabs(test_dir.Angle(drift_dir)-3.1415926/2.)<2.0*3.1415926/180.){
+  if (fabs(test_dir.Angle(drift_dir)-3.1415926/2.)<2.5*3.1415926/180.){
     cluster->adjust_wcpoints_parallel(start_wcpoint,end_wcpoint);
     // std::cout << "Parallel Case! " << " " << fabs(test_dir.Angle(drift_dir)-3.1415926/2.)/3.1415926*180. << std::endl;
   }
   
-  //std::cout  << " XQ " << start_wcpoint.x/units::cm << " " << start_wcpoint.y/units::cm << " " << start_wcpoint.z/units::cm << " " << end_wcpoint.x/units::cm << " " << end_wcpoint.y/units::cm << " " << end_wcpoint.z/units::cm << " " << dir.X() << " " << dir.Y() << " " << dir.Z() << std::endl;
+  std::cout  << " XQ " << start_wcpoint.x/units::cm << " " << start_wcpoint.y/units::cm << " " << start_wcpoint.z/units::cm << " " << end_wcpoint.x/units::cm << " " << end_wcpoint.y/units::cm << " " << end_wcpoint.z/units::cm << " " << dir.X() << " " << dir.Y() << " " << dir.Z() << std::endl;
   
   
   cluster->dijkstra_shortest_paths(start_wcpoint);
