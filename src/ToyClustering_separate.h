@@ -817,7 +817,7 @@ std::vector<WireCell::PR3DCluster*> WireCell2dToy::Separate_1(WireCell::PR3DClus
     ToyPointCloud* temp_cloud1 = other_clusters.at(i)->get_point_cloud();
     std::tuple<int,int,double> temp_dis = temp_cloud1->get_closest_points(temp_cloud);
 
-    //std::cout << length_1 / units::cm << std::endl;
+    // std::cout << length_1 / units::cm << std::endl;
     
     if (length_1 < 30*units::cm && std::get<2>(temp_dis)<5*units::cm){
       
@@ -830,7 +830,7 @@ std::vector<WireCell::PR3DCluster*> WireCell2dToy::Separate_1(WireCell::PR3DClus
 	}
       }
       
-      //std::cout << temp_close_points << " A " << temp_total_points << std::endl;
+      //   std::cout << temp_close_points << " A " << temp_total_points << std::endl;
 
       if (temp_close_points > 0.75 * temp_total_points){
 	saved_clusters.push_back(other_clusters.at(i));
