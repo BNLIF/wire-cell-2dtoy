@@ -178,9 +178,9 @@ void WireCell2dToy::Clustering_deghost(WireCell::PR3DClusterSelection& live_clus
 	   num_unique[0]==0 && num_unique[1]==0 && num_unique[2] < 0.22 * num_total_points ||
 	   num_unique[0]==0 && num_unique[2]==0 && num_unique[1] < 0.22 * num_total_points ||
 	   num_unique[2]==0 && num_unique[1]==0 && num_unique[0] < 0.22 * num_total_points ||
-	   num_unique[0]==0 && (num_unique[1]+num_unique[2]) < 0.11 * num_total_points * 2 || 
-	   num_unique[1]==0 && (num_unique[0]+num_unique[2]) < 0.11 * num_total_points * 2 || 
-	   num_unique[2]==0 && (num_unique[1]+num_unique[0]) < 0.11 * num_total_points * 2 
+	   num_unique[0]==0 && (num_unique[1]+num_unique[2]) < 0.12 * num_total_points * 2 || 
+	   num_unique[1]==0 && (num_unique[0]+num_unique[2]) < 0.12 * num_total_points * 2 || 
+	   num_unique[2]==0 && (num_unique[1]+num_unique[0]) < 0.12 * num_total_points * 2 
 	   ) &&
 	   (num_unique[0] + num_unique[1] + num_unique[2])  <= 320 ){
 	flag_save = false;
