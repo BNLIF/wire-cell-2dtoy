@@ -694,7 +694,7 @@ std::vector<WireCell::PR3DCluster*> WireCell2dToy::Separate_1(WireCell::PR3DClus
       if (dead_u_index.find(cloud->get_cloud().pts[j].index)!=dead_u_index.end()){
 	if (cloud->get_cloud().pts[j].x >= dead_u_index[cloud->get_cloud().pts[j].index].first &&
 	    cloud->get_cloud().pts[j].x <= dead_u_index[cloud->get_cloud().pts[j].index].second &&
-	    dis < 20.0*units::cm)
+	    dis < 100.0*units::cm)
 	  flag1_u_pts.at(cloud->get_cloud().pts[j].index) = true;
       }
     }
@@ -709,7 +709,7 @@ std::vector<WireCell::PR3DCluster*> WireCell2dToy::Separate_1(WireCell::PR3DClus
       if (dead_v_index.find(cloud->get_cloud().pts[j].index)!=dead_v_index.end()){
 	if (cloud->get_cloud().pts[j].x >= dead_v_index[cloud->get_cloud().pts[j].index].first  &&
 	    cloud->get_cloud().pts[j].x <= dead_v_index[cloud->get_cloud().pts[j].index].second &&
-	    dis < 20.0*units::cm)
+	    dis < 100.0*units::cm)
 	  flag1_v_pts.at(cloud->get_cloud().pts[j].index) = true;
       }
     }
@@ -724,7 +724,7 @@ std::vector<WireCell::PR3DCluster*> WireCell2dToy::Separate_1(WireCell::PR3DClus
       if (dead_w_index.find(cloud->get_cloud().pts[j].index)!=dead_w_index.end()){
 	if (cloud->get_cloud().pts[j].x >= dead_w_index[cloud->get_cloud().pts[j].index].first &&
 	    cloud->get_cloud().pts[j].x <= dead_w_index[cloud->get_cloud().pts[j].index].second &&
-	    dis < 20.0*units::cm)
+	    dis < 100.0*units::cm)
 	  flag1_w_pts.at(cloud->get_cloud().pts[j].index) = true;
       }
     }
@@ -832,7 +832,7 @@ std::vector<WireCell::PR3DCluster*> WireCell2dToy::Separate_1(WireCell::PR3DClus
       
       //std::cout << temp_close_points << " A " << temp_total_points << std::endl;
 
-      if (temp_close_points > 0.7 * temp_total_points){
+      if (temp_close_points > 0.75 * temp_total_points){
 	saved_clusters.push_back(other_clusters.at(i));
 	flag_save = true;
       }
@@ -849,7 +849,7 @@ std::vector<WireCell::PR3DCluster*> WireCell2dToy::Separate_1(WireCell::PR3DClus
       
       // std::cout << temp_close_points << " A " << temp_total_points << std::endl;
 
-      if (temp_close_points > 0.8 * temp_total_points){
+      if (temp_close_points > 0.75 * temp_total_points){
 	saved_clusters.push_back(other_clusters.at(i));
 	flag_save = true;
       }
