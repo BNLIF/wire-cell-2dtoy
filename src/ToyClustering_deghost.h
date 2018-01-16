@@ -182,7 +182,7 @@ void WireCell2dToy::Clustering_deghost(WireCell::PR3DClusterSelection& live_clus
 	   num_unique[1]==0 && (num_unique[0]+num_unique[2]) < 0.12 * num_total_points * 2 || 
 	   num_unique[2]==0 && (num_unique[1]+num_unique[0]) < 0.12 * num_total_points * 2 
 	   ) &&
-	   (num_unique[0] + num_unique[1] + num_unique[2])  <= 120 ){
+	   (num_unique[0] + num_unique[1] + num_unique[2])  <= 200 ){
 	flag_save = false;
 
 	// now try to compare
@@ -287,10 +287,10 @@ void WireCell2dToy::Clustering_deghost(WireCell::PR3DClusterSelection& live_clus
 
 	//to_be_removed_clusters.push_back(cluster);
 	/* if (!flag_remove) */
-	/*   std::cout << cluster->get_cluster_id() << " " << num_dead[0] << " " << num_dead[1] << " " << num_dead[2] << " " << num_unique[0]/(num_total_points - num_dead[0]+1e-9) << " " << num_unique[1]/(num_total_points - num_dead[1]+1e-9) << " " << num_unique[2]/(num_total_points - num_dead[2]+1e-9) << " " << num_unique[0]+num_unique[1] + num_unique[2] << " " << (num_unique[0]+num_unique[1] + num_unique[2])/(num_total_points - num_dead[0] + num_total_points - num_dead[1] + num_total_points - num_dead[2]+1e-9) << " " << num_total_points << std::endl; */
+	//	std::cout << cluster->get_cluster_id() << " " << num_dead[0] << " " << num_dead[1] << " " << num_dead[2] << " " << num_unique[0]/(num_total_points - num_dead[0]+1e-9) << " " << num_unique[1]/(num_total_points - num_dead[1]+1e-9) << " " << num_unique[2]/(num_total_points - num_dead[2]+1e-9) << " " << num_unique[0]+num_unique[1] + num_unique[2] << " " << (num_unique[0]+num_unique[1] + num_unique[2])/(num_total_points - num_dead[0] + num_total_points - num_dead[1] + num_total_points - num_dead[2]+1e-9) << " " << num_total_points << std::endl; 
       }else{
 	/* if (num_dead[0] + num_dead[1] + num_dead[2] >0) */
-	//	std::cout <<  cluster->get_cluster_id() << " " << num_dead[0] << " " << num_dead[1] << " " << num_dead[2] << " " << num_unique[0]/(num_total_points - num_dead[0]+1e-9) << " " << num_unique[1]/(num_total_points - num_dead[1]+1e-9) << " " << num_unique[2]/(num_total_points - num_dead[2]+1e-9) << " " << num_unique[0]+num_unique[1] + num_unique[2] << " " << (num_unique[0]+num_unique[1] + num_unique[2])/(num_total_points - num_dead[0] + num_total_points - num_dead[1] + num_total_points - num_dead[2]+1e-9) << " " << num_total_points << " " << num_unique[0] << " " << num_unique[1] << " " << num_unique[2] << std::endl;
+	//std::cout <<  cluster->get_cluster_id() << " " << num_dead[0] << " " << num_dead[1] << " " << num_dead[2] << " " << num_unique[0]/(num_total_points - num_dead[0]+1e-9) << " " << num_unique[1]/(num_total_points - num_dead[1]+1e-9) << " " << num_unique[2]/(num_total_points - num_dead[2]+1e-9) << " " << num_unique[0]+num_unique[1] + num_unique[2] << " " << (num_unique[0]+num_unique[1] + num_unique[2])/(num_total_points - num_dead[0] + num_total_points - num_dead[1] + num_total_points - num_dead[2]+1e-9) << " " << num_total_points << " " << num_unique[0] << " " << num_unique[1] << " " << num_unique[2] << std::endl;
 
 	flag_save = true;
 	if ((num_unique[0]+num_unique[1] + num_unique[2])/(num_total_points - num_dead[0] + num_total_points - num_dead[1] + num_total_points - num_dead[2]+1e-9)>0.15 && cluster_length_map[cluster] < 25*units::cm){

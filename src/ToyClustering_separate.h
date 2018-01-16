@@ -693,8 +693,8 @@ std::vector<WireCell::PR3DCluster*> WireCell2dToy::Separate_1(WireCell::PR3DClus
     }else{
       if (dead_u_index.find(cloud->get_cloud().pts[j].index)!=dead_u_index.end()){
 	if (cloud->get_cloud().pts[j].x >= dead_u_index[cloud->get_cloud().pts[j].index].first &&
-	    cloud->get_cloud().pts[j].x <= dead_u_index[cloud->get_cloud().pts[j].index].second&&
-	    dis < 15.0*units::cm)
+	    cloud->get_cloud().pts[j].x <= dead_u_index[cloud->get_cloud().pts[j].index].second &&
+	    dis < 20.0*units::cm)
 	  flag1_u_pts.at(cloud->get_cloud().pts[j].index) = true;
       }
     }
@@ -707,9 +707,9 @@ std::vector<WireCell::PR3DCluster*> WireCell2dToy::Separate_1(WireCell::PR3DClus
       flag1_v_pts.at(cloud->get_cloud().pts[j].index) = true;
     }else{
       if (dead_v_index.find(cloud->get_cloud().pts[j].index)!=dead_v_index.end()){
-	if (cloud->get_cloud().pts[j].x >= dead_v_index[cloud->get_cloud().pts[j].index].first &&
-	    cloud->get_cloud().pts[j].x <= dead_v_index[cloud->get_cloud().pts[j].index].second&&
-	    dis < 15.0*units::cm)
+	if (cloud->get_cloud().pts[j].x >= dead_v_index[cloud->get_cloud().pts[j].index].first  &&
+	    cloud->get_cloud().pts[j].x <= dead_v_index[cloud->get_cloud().pts[j].index].second &&
+	    dis < 20.0*units::cm)
 	  flag1_v_pts.at(cloud->get_cloud().pts[j].index) = true;
       }
     }
@@ -724,7 +724,7 @@ std::vector<WireCell::PR3DCluster*> WireCell2dToy::Separate_1(WireCell::PR3DClus
       if (dead_w_index.find(cloud->get_cloud().pts[j].index)!=dead_w_index.end()){
 	if (cloud->get_cloud().pts[j].x >= dead_w_index[cloud->get_cloud().pts[j].index].first &&
 	    cloud->get_cloud().pts[j].x <= dead_w_index[cloud->get_cloud().pts[j].index].second &&
-	    dis < 15.0*units::cm)
+	    dis < 20.0*units::cm)
 	  flag1_w_pts.at(cloud->get_cloud().pts[j].index) = true;
       }
     }
