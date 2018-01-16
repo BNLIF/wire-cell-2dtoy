@@ -440,7 +440,7 @@ bool WireCell2dToy::JudgeSeparateDec_2(WireCell::PR3DCluster* cluster, TVector3&
   return false;
 }
 
-std::vector<WireCell::PR3DCluster*> WireCell2dToy::Separate_1(WireCell::PR3DCluster* cluster,std::vector<WireCell::WCPointCloud<double>::WCPoint>& boundary_points, std::vector<WireCell::WCPointCloud<double>::WCPoint>& independent_points, std::map<int,std::pair<double,double>>& dead_u_index, std::map<int,std::pair<double,double>>& dead_v_index, std::map<int,std::pair<double,double>>& dead_w_index){
+std::vector<WireCell::PR3DCluster*> WireCell2dToy::Separate_1(WireCell::PR3DCluster* cluster,std::vector<WireCell::WCPointCloud<double>::WCPoint>& boundary_points, std::vector<WireCell::WCPointCloud<double>::WCPoint>& independent_points, std::map<int,std::pair<double,double>>& dead_u_index, std::map<int,std::pair<double,double>>& dead_v_index, std::map<int,std::pair<double,double>>& dead_w_index, double length){
 
   TPCParams& mp = Singleton<TPCParams>::Instance();
   double pitch_u = mp.get_pitch_u();
@@ -477,78 +477,163 @@ std::vector<WireCell::PR3DCluster*> WireCell2dToy::Separate_1(WireCell::PR3DClus
   
   main_dir.SetMag(1);
   if (main_dir.Y()>0) main_dir *= -1;
-    //  std::cout << cluster->get_PCA_value(0) << " " << cluster->get_PCA_value(1) << " " << cluster->get_PCA_value(2) << std::endl;
-  
-  double min_dis = 1e9;
-  int min_index = 0;
-  for (size_t j=0; j!= independent_points.size(); j++){
-    TVector3 dir(independent_points.at(j).x - cluster_center.x, independent_points.at(j).y - cluster_center.y, independent_points.at(j).z -cluster_center.z);
-    Point temp_p(independent_points.at(j).x, independent_points.at(j).y, independent_points.at(j).z);
-    double dis = dir.Dot(main_dir);
-    //std::cout << j << " " << dis << " " << dir.Mag() << " " << sqrt(dir.Mag()*dir.Mag() - dis*dis) << std::endl;
-    bool flag_connect = false;
-    int num_points = cluster->get_num_points(temp_p,15*units::cm);
-    if (num_points >100){
-      flag_connect = true;
-    }else if (num_points > 75){ 
-      num_points = cluster->get_num_points(temp_p,30*units::cm);
-      if (num_points > 160)
-	flag_connect = true;
-    }
-    
-    // std::cout << dis / units::cm << " A " << cluster->get_num_points(temp_p,15*units::cm) << " " << cluster->get_num_points(temp_p,30*units::cm)  << std::endl;
-    if (dis < min_dis && flag_connect){
-      min_dis = dis;
-      min_index = j;
-    }
-  }
 
-  /* std::cout << independent_points.at(min_index).x/units::cm << " " << independent_points.at(min_index).y/units::cm << "  " << independent_points.at(min_index).z/units::cm << " " << min_index << " " << min_dis/units::cm << " " << independent_points.size() << std::endl; */
-  /* for (size_t k=0;k!=independent_points.size();k++){ */
-  /*   std::cout << independent_points.at(k).x/units::cm << " " << independent_points.at(k).y/units::cm << "  " << independent_points.at(k).z/units::cm << std::endl; */
-  /* } */
-  
-   
-  WCPointCloud<double>::WCPoint start_wcpoint = independent_points.at(min_index);
-  Point start_point(start_wcpoint.x, start_wcpoint.y, start_wcpoint.z);
+  //  std::cout << cluster->get_PCA_value(0) << " " << cluster->get_PCA_value(1) << " " << cluster->get_PCA_value(2) << std::endl;
 
-  
+  WCPointCloud<double>::WCPoint start_wcpoint;
+  WCPointCloud<double>::WCPoint end_wcpoint;
+  TVector3 drift_dir(1,0,0);
   TVector3 dir; 
+  
   {
-    TVector3 drift_dir(1,0,0);
-    dir  = cluster->VHoughTrans(start_point,100*units::cm);
-    TVector3 dir1 = cluster->VHoughTrans(start_point,30*units::cm);
-    if (dir.Angle(dir1) > 20*3.1415926/180.){
-      if (fabs(dir.Angle(drift_dir)-3.1415926/2.)<5*3.1415926/180. ||
-	  fabs(dir1.Angle(drift_dir)-3.1415926/2.)<5*3.1415926/180.){
-	dir  = cluster->VHoughTrans(start_point,200*units::cm);
-      }else{
-	dir = dir1;
+    double min_dis = 1e9;
+    int min_index = 0;
+    for (size_t j=0; j!= independent_points.size(); j++){
+      TVector3 dir(independent_points.at(j).x - cluster_center.x, independent_points.at(j).y - cluster_center.y, independent_points.at(j).z -cluster_center.z);
+      Point temp_p(independent_points.at(j).x, independent_points.at(j).y, independent_points.at(j).z);
+      double dis = dir.Dot(main_dir);
+      //std::cout << j << " " << dis << " " << dir.Mag() << " " << sqrt(dir.Mag()*dir.Mag() - dis*dis) << std::endl;
+      bool flag_connect = false;
+      int num_points = cluster->get_num_points(temp_p,15*units::cm);
+      if (num_points >100){
+	flag_connect = true;
+      }else if (num_points > 75){ 
+	num_points = cluster->get_num_points(temp_p,30*units::cm);
+	if (num_points > 160)
+	  flag_connect = true;
+      }
+      
+      // std::cout << dis / units::cm << " A " << cluster->get_num_points(temp_p,15*units::cm) << " " << cluster->get_num_points(temp_p,30*units::cm)  << std::endl;
+      if (dis < min_dis && flag_connect){
+	min_dis = dis;
+	min_index = j;
       }
     }
+    
+    /* std::cout << independent_points.at(min_index).x/units::cm << " " << independent_points.at(min_index).y/units::cm << "  " << independent_points.at(min_index).z/units::cm << " " << min_index << " " << min_dis/units::cm << " " << independent_points.size() << std::endl; */
+    /* for (size_t k=0;k!=independent_points.size();k++){ */
+    /*   std::cout << independent_points.at(k).x/units::cm << " " << independent_points.at(k).y/units::cm << "  " << independent_points.at(k).z/units::cm << std::endl; */
+    /* } */
+    
+    
+    start_wcpoint = independent_points.at(min_index);
+    Point start_point(start_wcpoint.x, start_wcpoint.y, start_wcpoint.z);
+    
+    
+    
+    {
+      TVector3 drift_dir(1,0,0);
+      dir  = cluster->VHoughTrans(start_point,100*units::cm);
+      TVector3 dir1 = cluster->VHoughTrans(start_point,30*units::cm);
+      if (dir.Angle(dir1) > 20*3.1415926/180.){
+	if (fabs(dir.Angle(drift_dir)-3.1415926/2.)<5*3.1415926/180. ||
+	    fabs(dir1.Angle(drift_dir)-3.1415926/2.)<5*3.1415926/180.){
+	  dir  = cluster->VHoughTrans(start_point,200*units::cm);
+	}else{
+	  dir = dir1;
+	}
+      }
+    }
+    dir.SetMag(1);
+    
+    
+    
+    
+    // std::cout  << " " << start_wcpoint.x/units::cm << " " << start_wcpoint.y/units::cm << " " << start_wcpoint.z/units::cm << " " <<  " " << dir.X() << " " << dir.Y() << " " << dir.Z() << std::endl;
+    
+    
+    TVector3 inv_dir = dir * (-1);
+    start_wcpoint = cluster->get_furthest_wcpoint(start_wcpoint,inv_dir,1*units::cm,0);
+    end_wcpoint = cluster->get_furthest_wcpoint(start_wcpoint,dir);
+    
+    TVector3 test_dir(end_wcpoint.x - start_wcpoint.x, end_wcpoint.y - start_wcpoint.y, end_wcpoint.z - start_wcpoint.z);
+    
+    // std::cout  << " XQ1 " << start_wcpoint.x/units::cm << " " << start_wcpoint.y/units::cm << " " << start_wcpoint.z/units::cm << " " << end_wcpoint.x/units::cm << " " << end_wcpoint.y/units::cm << " " << end_wcpoint.z/units::cm << " " << dir.X() << " " << dir.Y() << " " << dir.Z() << " " << fabs(test_dir.Angle(drift_dir)-3.1415926/2.)/3.1415926*180. << std::endl;
+    
+    if (fabs(test_dir.Angle(drift_dir)-3.1415926/2.)<2.5*3.1415926/180.){
+      cluster->adjust_wcpoints_parallel(start_wcpoint,end_wcpoint);
+      // std::cout << "Parallel Case! " << " " << fabs(test_dir.Angle(drift_dir)-3.1415926/2.)/3.1415926*180. << std::endl;
+    }
   }
-  dir.SetMag(1);
-
   
-  TVector3 drift_dir(1,0,0);
-
-  // std::cout  << " " << start_wcpoint.x/units::cm << " " << start_wcpoint.y/units::cm << " " << start_wcpoint.z/units::cm << " " <<  " " << dir.X() << " " << dir.Y() << " " << dir.Z() << std::endl;
-
-  
-  TVector3 inv_dir = dir * (-1);
-  start_wcpoint = cluster->get_furthest_wcpoint(start_wcpoint,inv_dir,1*units::cm,0);
-  WCPointCloud<double>::WCPoint end_wcpoint = cluster->get_furthest_wcpoint(start_wcpoint,dir);
-
-  TVector3 test_dir(end_wcpoint.x - start_wcpoint.x, end_wcpoint.y - start_wcpoint.y, end_wcpoint.z - start_wcpoint.z);
-  
-  // std::cout  << " XQ1 " << start_wcpoint.x/units::cm << " " << start_wcpoint.y/units::cm << " " << start_wcpoint.z/units::cm << " " << end_wcpoint.x/units::cm << " " << end_wcpoint.y/units::cm << " " << end_wcpoint.z/units::cm << " " << dir.X() << " " << dir.Y() << " " << dir.Z() << " " << fabs(test_dir.Angle(drift_dir)-3.1415926/2.)/3.1415926*180. << std::endl;
-  
-  if (fabs(test_dir.Angle(drift_dir)-3.1415926/2.)<2.5*3.1415926/180.){
-    cluster->adjust_wcpoints_parallel(start_wcpoint,end_wcpoint);
-    // std::cout << "Parallel Case! " << " " << fabs(test_dir.Angle(drift_dir)-3.1415926/2.)/3.1415926*180. << std::endl;
+  if (sqrt(pow(start_wcpoint.x-end_wcpoint.x,2)+pow(start_wcpoint.y-end_wcpoint.y,2)+pow(start_wcpoint.z-end_wcpoint.z,2)) <  length/3.){
+    main_dir *= -1;
+    
+    double min_dis = 1e9;
+    int min_index = 0;
+    for (size_t j=0; j!= independent_points.size(); j++){
+      TVector3 dir(independent_points.at(j).x - cluster_center.x, independent_points.at(j).y - cluster_center.y, independent_points.at(j).z -cluster_center.z);
+      Point temp_p(independent_points.at(j).x, independent_points.at(j).y, independent_points.at(j).z);
+      double dis = dir.Dot(main_dir);
+      //std::cout << j << " " << dis << " " << dir.Mag() << " " << sqrt(dir.Mag()*dir.Mag() - dis*dis) << std::endl;
+      bool flag_connect = false;
+      int num_points = cluster->get_num_points(temp_p,15*units::cm);
+      if (num_points >100){
+	flag_connect = true;
+      }else if (num_points > 75){ 
+	num_points = cluster->get_num_points(temp_p,30*units::cm);
+	if (num_points > 160)
+	  flag_connect = true;
+      }
+      
+      // std::cout << dis / units::cm << " A " << cluster->get_num_points(temp_p,15*units::cm) << " " << cluster->get_num_points(temp_p,30*units::cm)  << std::endl;
+      if (dis < min_dis && flag_connect){
+	min_dis = dis;
+	min_index = j;
+      }
+    }
+    
+    /* std::cout << independent_points.at(min_index).x/units::cm << " " << independent_points.at(min_index).y/units::cm << "  " << independent_points.at(min_index).z/units::cm << " " << min_index << " " << min_dis/units::cm << " " << independent_points.size() << std::endl; */
+    /* for (size_t k=0;k!=independent_points.size();k++){ */
+    /*   std::cout << independent_points.at(k).x/units::cm << " " << independent_points.at(k).y/units::cm << "  " << independent_points.at(k).z/units::cm << std::endl; */
+    /* } */
+    
+    
+    start_wcpoint = independent_points.at(min_index);
+    Point start_point(start_wcpoint.x, start_wcpoint.y, start_wcpoint.z);
+    
+    
+    
+    {
+      TVector3 drift_dir(1,0,0);
+      dir  = cluster->VHoughTrans(start_point,100*units::cm);
+      TVector3 dir1 = cluster->VHoughTrans(start_point,30*units::cm);
+      if (dir.Angle(dir1) > 20*3.1415926/180.){
+	if (fabs(dir.Angle(drift_dir)-3.1415926/2.)<5*3.1415926/180. ||
+	    fabs(dir1.Angle(drift_dir)-3.1415926/2.)<5*3.1415926/180.){
+	  dir  = cluster->VHoughTrans(start_point,200*units::cm);
+	}else{
+	  dir = dir1;
+	}
+      }
+    }
+    dir.SetMag(1);
+    
+    
+    
+    
+    // std::cout  << " " << start_wcpoint.x/units::cm << " " << start_wcpoint.y/units::cm << " " << start_wcpoint.z/units::cm << " " <<  " " << dir.X() << " " << dir.Y() << " " << dir.Z() << std::endl;
+    
+    
+    TVector3 inv_dir = dir * (-1);
+    start_wcpoint = cluster->get_furthest_wcpoint(start_wcpoint,inv_dir,1*units::cm,0);
+    end_wcpoint = cluster->get_furthest_wcpoint(start_wcpoint,dir);
+    
+    TVector3 test_dir(end_wcpoint.x - start_wcpoint.x, end_wcpoint.y - start_wcpoint.y, end_wcpoint.z - start_wcpoint.z);
+    
+    // std::cout  << " XQ1 " << start_wcpoint.x/units::cm << " " << start_wcpoint.y/units::cm << " " << start_wcpoint.z/units::cm << " " << end_wcpoint.x/units::cm << " " << end_wcpoint.y/units::cm << " " << end_wcpoint.z/units::cm << " " << dir.X() << " " << dir.Y() << " " << dir.Z() << " " << fabs(test_dir.Angle(drift_dir)-3.1415926/2.)/3.1415926*180. << std::endl;
+    
+    if (fabs(test_dir.Angle(drift_dir)-3.1415926/2.)<2.5*3.1415926/180.){
+      cluster->adjust_wcpoints_parallel(start_wcpoint,end_wcpoint);
+      // std::cout << "Parallel Case! " << " " << fabs(test_dir.Angle(drift_dir)-3.1415926/2.)/3.1415926*180. << std::endl;
+    }
+    
   }
   
-  //std::cout  << " XQ " << start_wcpoint.x/units::cm << " " << start_wcpoint.y/units::cm << " " << start_wcpoint.z/units::cm << " " << end_wcpoint.x/units::cm << " " << end_wcpoint.y/units::cm << " " << end_wcpoint.z/units::cm << " " << dir.X() << " " << dir.Y() << " " << dir.Z() << std::endl;
+  /* if (sqrt(pow(start_wcpoint.x-end_wcpoint.x,2)+pow(start_wcpoint.y-end_wcpoint.y,2)+pow(start_wcpoint.z-end_wcpoint.z,2))/units::cm ) */
+  
+  
+  //std::cout  << " XQ " << start_wcpoint.x/units::cm << " " << start_wcpoint.y/units::cm << " " << start_wcpoint.z/units::cm << " " << end_wcpoint.x/units::cm << " " << end_wcpoint.y/units::cm << " " << end_wcpoint.z/units::cm << " " << dir.X() << " " << dir.Y() << " " << dir.Z() << " " << sqrt(pow(start_wcpoint.x-end_wcpoint.x,2)+pow(start_wcpoint.y-end_wcpoint.y,2)+pow(start_wcpoint.z-end_wcpoint.z,2))/units::cm << " " << length/units::cm << std::endl;
   
   
   cluster->dijkstra_shortest_paths(start_wcpoint);
@@ -609,7 +694,7 @@ std::vector<WireCell::PR3DCluster*> WireCell2dToy::Separate_1(WireCell::PR3DClus
       if (dead_u_index.find(cloud->get_cloud().pts[j].index)!=dead_u_index.end()){
 	if (cloud->get_cloud().pts[j].x >= dead_u_index[cloud->get_cloud().pts[j].index].first &&
 	    cloud->get_cloud().pts[j].x <= dead_u_index[cloud->get_cloud().pts[j].index].second&&
-	    dis < 6.0*units::cm)
+	    dis < 15.0*units::cm)
 	  flag1_u_pts.at(cloud->get_cloud().pts[j].index) = true;
       }
     }
@@ -624,7 +709,7 @@ std::vector<WireCell::PR3DCluster*> WireCell2dToy::Separate_1(WireCell::PR3DClus
       if (dead_v_index.find(cloud->get_cloud().pts[j].index)!=dead_v_index.end()){
 	if (cloud->get_cloud().pts[j].x >= dead_v_index[cloud->get_cloud().pts[j].index].first &&
 	    cloud->get_cloud().pts[j].x <= dead_v_index[cloud->get_cloud().pts[j].index].second&&
-	    dis < 6.0*units::cm)
+	    dis < 15.0*units::cm)
 	  flag1_v_pts.at(cloud->get_cloud().pts[j].index) = true;
       }
     }
@@ -639,7 +724,7 @@ std::vector<WireCell::PR3DCluster*> WireCell2dToy::Separate_1(WireCell::PR3DClus
       if (dead_w_index.find(cloud->get_cloud().pts[j].index)!=dead_w_index.end()){
 	if (cloud->get_cloud().pts[j].x >= dead_w_index[cloud->get_cloud().pts[j].index].first &&
 	    cloud->get_cloud().pts[j].x <= dead_w_index[cloud->get_cloud().pts[j].index].second &&
-	    dis < 6.0*units::cm)
+	    dis < 15.0*units::cm)
 	  flag1_w_pts.at(cloud->get_cloud().pts[j].index) = true;
       }
     }
@@ -732,7 +817,7 @@ std::vector<WireCell::PR3DCluster*> WireCell2dToy::Separate_1(WireCell::PR3DClus
     ToyPointCloud* temp_cloud1 = other_clusters.at(i)->get_point_cloud();
     std::tuple<int,int,double> temp_dis = temp_cloud1->get_closest_points(temp_cloud);
 
-    // std::cout << length_1 / units::cm << std::endl;
+    //std::cout << length_1 / units::cm << std::endl;
     
     if (length_1 < 30*units::cm && std::get<2>(temp_dis)<5*units::cm){
       
@@ -745,7 +830,7 @@ std::vector<WireCell::PR3DCluster*> WireCell2dToy::Separate_1(WireCell::PR3DClus
 	}
       }
       
-      // std::cout << temp_close_points << " A " << temp_total_points << std::endl;
+      //std::cout << temp_close_points << " A " << temp_total_points << std::endl;
 
       if (temp_close_points > 0.7 * temp_total_points){
 	saved_clusters.push_back(other_clusters.at(i));
@@ -762,9 +847,9 @@ std::vector<WireCell::PR3DCluster*> WireCell2dToy::Separate_1(WireCell::PR3DClus
 	}
       }
       
-      //std::cout << temp_close_points << " A " << temp_total_points << std::endl;
+      // std::cout << temp_close_points << " A " << temp_total_points << std::endl;
 
-      if (temp_close_points > 0.85 * temp_total_points){
+      if (temp_close_points > 0.8 * temp_total_points){
 	saved_clusters.push_back(other_clusters.at(i));
 	flag_save = true;
       }
@@ -836,7 +921,7 @@ void WireCell2dToy::Clustering_separate(WireCell::PR3DClusterSelection& live_clu
 	  std::cout << "Separate cluster " << cluster->get_cluster_id() << std::endl;
 	  
 	  
-	  std::vector<PR3DCluster*> sep_clusters = WireCell2dToy::Separate_1(cluster,boundary_points,independent_points, dead_u_index, dead_v_index, dead_w_index);
+	  std::vector<PR3DCluster*> sep_clusters = WireCell2dToy::Separate_1(cluster,boundary_points,independent_points, dead_u_index, dead_v_index, dead_w_index, cluster_length_map[cluster]);
 	  PR3DCluster* cluster1 = sep_clusters.at(0);
 	  new_clusters.push_back(cluster1);
 	  del_clusters.push_back(cluster);
@@ -861,7 +946,7 @@ void WireCell2dToy::Clustering_separate(WireCell::PR3DClusterSelection& live_clu
 	      
 	      // std::cout << "Separate 2nd level" << std::endl;
 	      
-	      std::vector<PR3DCluster*>  sep_clusters = WireCell2dToy::Separate_1(cluster2,boundary_points,independent_points, dead_u_index, dead_v_index, dead_w_index);
+	      std::vector<PR3DCluster*>  sep_clusters = WireCell2dToy::Separate_1(cluster2,boundary_points,independent_points, dead_u_index, dead_v_index, dead_w_index, length_1);
 	      PR3DCluster* cluster3 = sep_clusters.at(0);
 	      new_clusters.push_back(cluster3);
 	      temp_del_clusters.push_back(cluster2);
@@ -881,7 +966,7 @@ void WireCell2dToy::Clustering_separate(WireCell::PR3DClusterSelection& live_clu
 		    WireCell2dToy::JudgeSeparateDec_2(cluster4,drift_dir,boundary_points,independent_points)){
 		  //	std::cout << "Separate 3rd level" << std::endl;
 		  
-		  std::vector<PR3DCluster*>  sep_clusters = WireCell2dToy::Separate_1(cluster4,boundary_points,independent_points, dead_u_index, dead_v_index, dead_w_index);
+		  std::vector<PR3DCluster*>  sep_clusters = WireCell2dToy::Separate_1(cluster4,boundary_points,independent_points, dead_u_index, dead_v_index, dead_w_index, length_1);
 		  PR3DCluster* cluster5 = sep_clusters.at(0);
 		  new_clusters.push_back(cluster5);
 		  temp_del_clusters.push_back(cluster4);
@@ -910,7 +995,7 @@ void WireCell2dToy::Clustering_separate(WireCell::PR3DClusterSelection& live_clu
 	      
 	      // std::cout << "Separate final one" << std::endl;
 	      
-	      std::vector<PR3DCluster*> sep_clusters = WireCell2dToy::Separate_1(final_sep_cluster,boundary_points,independent_points, dead_u_index, dead_v_index, dead_w_index);
+	      std::vector<PR3DCluster*> sep_clusters = WireCell2dToy::Separate_1(final_sep_cluster,boundary_points,independent_points, dead_u_index, dead_v_index, dead_w_index, length_1);
 	      PR3DCluster* cluster5 = sep_clusters.at(0);
 	      new_clusters.push_back(cluster5);
 	      temp_del_clusters.push_back(final_sep_cluster);
@@ -944,7 +1029,7 @@ void WireCell2dToy::Clustering_separate(WireCell::PR3DClusterSelection& live_clu
 	}else{
 	  std::cout << "Stripping Cluster " <<   cluster->get_cluster_id() << std::endl;
 
-	  std::vector<PR3DCluster*> sep_clusters = WireCell2dToy::Separate_1(cluster,boundary_points,independent_points, dead_u_index, dead_v_index, dead_w_index);
+	  std::vector<PR3DCluster*> sep_clusters = WireCell2dToy::Separate_1(cluster,boundary_points,independent_points, dead_u_index, dead_v_index, dead_w_index,cluster_length_map[cluster]);
 	  
 	  PR3DCluster* cluster1 = sep_clusters.at(0);
 	  new_clusters.push_back(cluster1);
