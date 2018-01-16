@@ -200,7 +200,7 @@ int main(int argc, char* argv[])
 	  dead_u_index[wire_index_u[i]] = std::make_pair(temp_x-0.1*units::cm,temp_x+0.1*units::cm);
 	}else{
 	  if (temp_x-0.1*units::cm < dead_u_index[wire_index_u[i]].first){
-	    dead_u_index[wire_index_u[i]].first = temp_x-0.1*units::cm;
+	    dead_u_index[wire_index_u[i]].first = temp_x - 0.1*units::cm;
 	  }else if (temp_x+0.1*units::cm > dead_u_index[wire_index_u[i]].second){
 	    dead_u_index[wire_index_u[i]].second = temp_x + 0.1*units::cm;
 	  }
@@ -326,6 +326,10 @@ int main(int argc, char* argv[])
      // 	       << dead_clusters.at(i)->get_num_mcells() << " "
      // 	       << dead_clusters.at(i)->get_num_time_slices() << std::endl;
    }
+
+   // for (auto it = dead_u_index.begin(); it!=dead_u_index.end(); it++){
+   //   std::cout << it->first << " " << it->second.first/units::cm << " " << it->second.second/units::cm << std::endl;
+   // }
   
    
    //   cerr << em("load clusters from file") << endl;
