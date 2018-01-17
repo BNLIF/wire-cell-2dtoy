@@ -724,12 +724,14 @@ std::vector<WireCell::PR3DCluster*> WireCell2dToy::Separate_1(WireCell::PR3DClus
     /*   std::cout << test_p.x/units::cm << " " << test_p.y/units::cm << " " << test_p.z/units::cm << " " << flag_u_pts.at(cloud->get_cloud().pts[j].index) << " " << flag_v_pts.at(cloud->get_cloud().pts[j].index) << " " << flag_w_pts.at(cloud->get_cloud().pts[j].index) << " " << flag1_u_pts.at(cloud->get_cloud().pts[j].index) << " " << flag1_v_pts.at(cloud->get_cloud().pts[j].index) << " " << flag1_w_pts.at(cloud->get_cloud().pts[j].index) << " " << temp0.second/units::cm << " " << pts[temp0.first].x/units::cm << " " << pts[temp0.first].y/units::cm << " " << pts[temp0.first].z/units::cm << " " << cloud->get_cloud().pts[j].mcell->GetTimeSlice() << std::endl; */
     /* } */
     // std::cout << j << " " << << std::endl;
-    /* if (fabs(cloud->get_cloud().pts[j].z-151.691*units::cm) < 1*units::cm && */
-    /* 	fabs(cloud->get_cloud().pts[j].x-298.26*units::cm) < 2*units::cm){ */
+    /* if (fabs(cloud->get_cloud().pts[j].z-194.1*units::cm) < 1*units::cm && */
+    /* 	fabs(cloud->get_cloud().pts[j].x-297.3*units::cm) < 1*units::cm && */
+    /* 	fabs(cloud->get_cloud().pts[j].y-93.9*units::cm) < 1*units::cm */
+    /* 	){ */
     /*   temp_results = temp_cloud->get_closest_2d_dis(test_p,0); */
     /*   dis = temp_results.second; */
     /*   bool test_flag = dead_u_index.find(cloud->get_cloud().pts[j].index_u)==dead_u_index.end() ; */
-    /*   std::cout << cloud->get_cloud().pts[j].x/units::cm << " " << cloud->get_cloud().pts[j].y/units::cm << " " << cloud->get_cloud().pts[j].z/units::cm << " " << flag_u_pts.at(cloud->get_cloud().pts[j].index) << " " << flag_v_pts.at(cloud->get_cloud().pts[j].index) << " " << flag_w_pts.at(cloud->get_cloud().pts[j].index) << " " << flag1_u_pts.at(cloud->get_cloud().pts[j].index) << " " << flag1_v_pts.at(cloud->get_cloud().pts[j].index) << " " << flag1_w_pts.at(cloud->get_cloud().pts[j].index) << " " << dis/units::cm << " " <<  test_flag << " " <<  dead_u_index[cloud->get_cloud().pts[j].index_u].first << " " << dead_u_index[cloud->get_cloud().pts[j].index_u].second << " " << cloud->get_cloud().pts[j].index_u << std::endl; */
+    /*   std::cout << cloud->get_cloud().pts[j].x/units::cm << " " << cloud->get_cloud().pts[j].y/units::cm << " " << cloud->get_cloud().pts[j].z/units::cm << " " << flag_u_pts.at(cloud->get_cloud().pts[j].index) << " " << flag_v_pts.at(cloud->get_cloud().pts[j].index) << " " << flag_w_pts.at(cloud->get_cloud().pts[j].index) << " " << flag1_u_pts.at(cloud->get_cloud().pts[j].index) << " " << flag1_v_pts.at(cloud->get_cloud().pts[j].index) << " " << flag1_w_pts.at(cloud->get_cloud().pts[j].index) << " " << dis/units::cm << " A " <<  test_flag << " " << flag2_u_pts.at(cloud->get_cloud().pts[j].index) << " " << flag2_v_pts.at(cloud->get_cloud().pts[j].index) << " " << flag_w_pts.at(cloud->get_cloud().pts[j].index)  << std::endl; */
     /* } */
   }
 
@@ -801,7 +803,7 @@ std::vector<WireCell::PR3DCluster*> WireCell2dToy::Separate_1(WireCell::PR3DClus
     }else if (mcell_np_map1[mcell] >=0.95 * mcell->get_sampling_points().size()){
       delete mcell; // ghost cell ... 
     }else{
-      /* if (mcell_np_map1[mcell] > 0.4* mcell->get_sampling_points().size()) */
+      /* if (mcell_np_map1[mcell] > 0.01* mcell->get_sampling_points().size()) */
       /* 	std::cout << mcell_np_map1[mcell] / (mcell->get_sampling_points().size()+1e-9) << " " << */
       /* 	  mcell_np_map[mcell] / (mcell->get_sampling_points().size()+1e-9) << " " << mcell->get_sampling_points().size() << std::endl; */
       
