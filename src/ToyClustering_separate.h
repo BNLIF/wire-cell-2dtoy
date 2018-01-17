@@ -688,13 +688,13 @@ std::vector<WireCell::PR3DCluster*> WireCell2dToy::Separate_1(WireCell::PR3DClus
     if (dis <= 1.5*units::cm){
       flag_u_pts.at(cloud->get_cloud().pts[j].index) = true;
     }
-    if (dis <= 2.0*units::cm){
+    if (dis <= 2.4*units::cm){
       flag1_u_pts.at(cloud->get_cloud().pts[j].index) = true;
     }else{
       if (dead_u_index.find(cloud->get_cloud().pts[j].index_u)!=dead_u_index.end()){
 	if (cloud->get_cloud().pts[j].x >= dead_u_index[cloud->get_cloud().pts[j].index_u].first &&
 	    cloud->get_cloud().pts[j].x <= dead_u_index[cloud->get_cloud().pts[j].index_u].second &&
-	    dis < 100.0*units::cm)
+	    dis < 10.0*units::cm)
 	  flag1_u_pts.at(cloud->get_cloud().pts[j].index) = true;
       }
     }
@@ -703,13 +703,13 @@ std::vector<WireCell::PR3DCluster*> WireCell2dToy::Separate_1(WireCell::PR3DClus
     if (dis <= 1.5*units::cm){
       flag_v_pts.at(cloud->get_cloud().pts[j].index) = true;
     }
-    if (dis <= 2.0*units::cm){
+    if (dis <= 2.4*units::cm){
       flag1_v_pts.at(cloud->get_cloud().pts[j].index) = true;
     }else{
       if (dead_v_index.find(cloud->get_cloud().pts[j].index_v)!=dead_v_index.end()){
 	if (cloud->get_cloud().pts[j].x >= dead_v_index[cloud->get_cloud().pts[j].index_v].first  &&
 	    cloud->get_cloud().pts[j].x <= dead_v_index[cloud->get_cloud().pts[j].index_v].second &&
-	    dis < 100.0*units::cm)
+	    dis < 10.0*units::cm)
 	  flag1_v_pts.at(cloud->get_cloud().pts[j].index) = true;
       }
     }
@@ -718,13 +718,13 @@ std::vector<WireCell::PR3DCluster*> WireCell2dToy::Separate_1(WireCell::PR3DClus
     if (dis <= 1.5*units::cm){
       flag_w_pts.at(cloud->get_cloud().pts[j].index) = true;
     }
-    if (dis <= 2.0*units::cm){
+    if (dis <= 2.4*units::cm){
       flag1_w_pts.at(cloud->get_cloud().pts[j].index) = true;
     }else{
       if (dead_w_index.find(cloud->get_cloud().pts[j].index_w)!=dead_w_index.end()){
 	if (cloud->get_cloud().pts[j].x >= dead_w_index[cloud->get_cloud().pts[j].index_w].first &&
 	    cloud->get_cloud().pts[j].x <= dead_w_index[cloud->get_cloud().pts[j].index_w].second &&
-	    dis < 100.0*units::cm)
+	    dis < 10.0*units::cm)
 	  flag1_w_pts.at(cloud->get_cloud().pts[j].index) = true;
       }
     }
