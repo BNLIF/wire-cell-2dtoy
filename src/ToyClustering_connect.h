@@ -27,11 +27,25 @@ void WireCell2dToy::Clustering_connect1(WireCell::PR3DClusterSelection& live_clu
 
   DynamicToyPointCloud global_skeleton_cloud(angle_u,angle_v,angle_w);
 
-
+  double extending_dis = 50*units::cm;
+  
   std::set<std::pair<PR3DCluster*, PR3DCluster*>> to_be_merged_pairs;
   for (size_t i=0;i!=live_clusters.size();i++){
+    live_clusters.at(i)->Create_point_cloud();
+    
+    std::pair<Point,Point> extreme_points = live_clusters.at(i)->get_two_extreme_points();
+    TVector3 main_dir(extreme_points.second.x - extreme_points.first.x,
+		      extreme_points.second.y - extreme_points.first.y,
+		      extreme_points.second.z - extreme_points.first.z);
+    TVector3 dir1 = global_point_cloud.VHoughTrans(extreme_points.first,80*units::cm);
+    TVector3 dir2 = global_point_cloud.VHoughTrans(extreme_points.second,80*units::cm);
+    if (dir1.Dot(main_dir)>0) dir1 *=-1;
+    if (dir2.Dot(dir1)>0) dir2 *= -1;
+
+    // add extension points in ... 
     
     
+    //std::cout << extreme_points.first.x/units::cm << " " << extreme_points.first.y/units::cm << " " << extreme_points.first.z/units::cm << " " << extreme_points.second.x/units::cm << " " << extreme_points.second.y/units::cm << " " << extreme_points.second.z/units::cm << std::endl;
   }
   
 
