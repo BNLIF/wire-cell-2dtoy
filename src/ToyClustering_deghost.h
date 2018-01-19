@@ -62,14 +62,14 @@ void WireCell2dToy::Clustering_deghost(WireCell::PR3DClusterSelection& live_clus
 
       double dis_cut = 1.2*units::cm;
       
-      for (size_t i=0;i!=num_total_points;i++){
-	Point test_point(cloud.pts.at(i).x,cloud.pts.at(i).y,cloud.pts.at(i).z);
+      for (size_t j=0;j!=num_total_points;j++){
+	Point test_point(cloud.pts.at(j).x,cloud.pts.at(j).y,cloud.pts.at(j).z);
 
 	bool flag_dead = false;
 
-	if (dead_u_index.find(cloud.pts.at(i).index_u)!=dead_u_index.end()){
-	  if (cloud.pts.at(i).x >= dead_u_index[cloud.pts.at(i).index_u].first &&
-	      cloud.pts.at(i).x <= dead_u_index[cloud.pts.at(i).index_u].second){
+	if (dead_u_index.find(cloud.pts.at(j).index_u)!=dead_u_index.end()){
+	  if (cloud.pts.at(j).x >= dead_u_index[cloud.pts.at(j).index_u].first &&
+	      cloud.pts.at(j).x <= dead_u_index[cloud.pts.at(j).index_u].second){
 	    flag_dead = true;
 	  }
 	}
@@ -101,9 +101,9 @@ void WireCell2dToy::Clustering_deghost(WireCell::PR3DClusterSelection& live_clus
 
 	flag_dead = false;
 
-	if (dead_v_index.find(cloud.pts.at(i).index_v)!=dead_v_index.end()){
-	  if (cloud.pts.at(i).x >= dead_v_index[cloud.pts.at(i).index_v].first &&
-	      cloud.pts.at(i).x <= dead_v_index[cloud.pts.at(i).index_v].second){
+	if (dead_v_index.find(cloud.pts.at(j).index_v)!=dead_v_index.end()){
+	  if (cloud.pts.at(j).x >= dead_v_index[cloud.pts.at(j).index_v].first &&
+	      cloud.pts.at(j).x <= dead_v_index[cloud.pts.at(j).index_v].second){
 	    flag_dead = true;
 	  }
 	}
@@ -135,9 +135,9 @@ void WireCell2dToy::Clustering_deghost(WireCell::PR3DClusterSelection& live_clus
 
 	flag_dead = false;
 
-	if (dead_w_index.find(cloud.pts.at(i).index_w)!=dead_w_index.end()){
-	  if (cloud.pts.at(i).x >= dead_w_index[cloud.pts.at(i).index_w].first &&
-	      cloud.pts.at(i).x <= dead_w_index[cloud.pts.at(i).index_w].second){
+	if (dead_w_index.find(cloud.pts.at(j).index_w)!=dead_w_index.end()){
+	  if (cloud.pts.at(j).x >= dead_w_index[cloud.pts.at(j).index_w].first &&
+	      cloud.pts.at(j).x <= dead_w_index[cloud.pts.at(j).index_w].second){
 	    flag_dead = true;
 	  }
 	}
@@ -328,7 +328,7 @@ void WireCell2dToy::Clustering_deghost(WireCell::PR3DClusterSelection& live_clus
 	       (max_cluster_w==max_cluster_v && max_cluster_u==0) ||
 	       (max_cluster_u==max_cluster_w && max_cluster_v==0) ){
 
-	    //   std::cout << cluster->get_cluster_id() << " " << (num_unique[0]+num_unique[1] + num_unique[2])/(num_total_points - num_dead[0] + num_total_points - num_dead[1] + num_total_points - num_dead[2]+1e-9) << " " << (max_value_u+max_value_v+max_value_w)/(num_total_points  + num_total_points  + num_total_points +1e-9) << std::endl;
+	    //  std::cout << cluster->get_cluster_id() << " " << (num_unique[0]+num_unique[1] + num_unique[2])/(num_total_points - num_dead[0] + num_total_points - num_dead[1] + num_total_points - num_dead[2]+1e-9) << " " << (max_value_u+max_value_v+max_value_w)/(num_total_points  + num_total_points  + num_total_points +1e-9) << std::endl;
 
 	    if ((max_value_u+max_value_v+max_value_w)/(num_total_points  + num_total_points  + num_total_points +1e-9)>0.25 ){
 	      flag_save = false;
