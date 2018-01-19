@@ -94,6 +94,11 @@ void WireCell2dToy::Clustering_connect1(WireCell::PR3DClusterSelection& live_clu
 	dir2 *= -1;
 	global_skeleton_cloud.AddPoints(cluster,extreme_points.second,dir2,extending_dis,0.6*units::cm, angle);
       }
+
+      if (cluster_length_map[cluster] > 30*units::cm){
+	live_clusters.at(i)->Construct_skeleton();
+	global_skeleton_cloud.AddPoints(live_clusters.at(i),1);
+      }
     }else{
       
       WireCell::WCPointCloud<double>& cloud = cluster->get_point_cloud()->get_cloud();
@@ -417,12 +422,12 @@ void WireCell2dToy::Clustering_connect1(WireCell::PR3DClusterSelection& live_clu
 	dir2 *= -1;
 	global_skeleton_cloud.AddPoints(cluster,extreme_points.second,dir2,extending_dis,0.6*units::cm, angle);
       }
-     
-      
-    }
 
-    
-   
+      if (cluster_length_map[cluster] > 30*units::cm){
+	live_clusters.at(i)->Construct_skeleton();
+	global_skeleton_cloud.AddPoints(live_clusters.at(i),1);
+      }
+    }
 
 
     
