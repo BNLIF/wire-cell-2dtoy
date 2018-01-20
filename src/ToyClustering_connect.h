@@ -36,6 +36,8 @@ void WireCell2dToy::Clustering_connect1(WireCell::PR3DClusterSelection& live_clu
 
   WireCell::WCPointCloud<double>& global_cloud = global_skeleton_cloud.get_cloud();
 
+  std::map<PR3DCluster*, TVector3 > map_cluster_dir1;
+  std::map<PR3DCluster*, TVector3 > map_cluster_dir2;
   
   for (size_t i=0;i!=live_clusters.size();i++){
     PR3DCluster* cluster = live_clusters.at(i);
@@ -75,8 +77,10 @@ void WireCell2dToy::Clustering_connect1(WireCell::PR3DClusterSelection& live_clu
       if (dir2.Dot(dir1)>0) dir2 *= -1;
     }
 
-    bool flag_add = false;
-    
+    bool flag_add_dir1 = true;
+    bool flag_add_dir2 = true;
+    map_cluster_dir1[cluster] = dir1;
+    map_cluster_dir1[cluster] = dir2;
     
     
     if (i==0){
@@ -275,7 +279,7 @@ void WireCell2dToy::Clustering_connect1(WireCell::PR3DClusterSelection& live_clu
 	
 	
       }
-      PR3DCluster *curr_cluster = cluster;
+      //      PR3DCluster *curr_cluster = cluster;
 
 
       bool flag_merge = false;
@@ -389,10 +393,26 @@ void WireCell2dToy::Clustering_connect1(WireCell::PR3DClusterSelection& live_clu
 	// if overlap a lot merge
 	if ((max_value[0]+max_value[1]+max_value[2]) > 0.75 *(num_total_points  + num_total_points  + num_total_points) &&
 	    (num_unique[1]+num_unique[0]+num_unique[2]) < 0.24 * num_total_points){
-	  to_be_merged_pairs.insert(std::make_pair(cluster,max_cluster)); 
-	  curr_cluster = max_cluster;
+
 	  flag_merge = true;
-	  //std::cout << cluster->get_cluster_id() << " B " << max_cluster->get_cluster_id() << " " << max_value[0] << " " << max_value[1] << " " << max_value[2] << std::endl;
+	  to_be_merged_pairs.insert(std::make_pair(cluster,max_cluster)); 
+	  //curr_cluster = max_cluster;
+
+	  if (fabs(dir1.Angle(map_cluster_dir1[max_cluster])-3.1415926/2.) < 75*3.1415926/180. &&
+	      fabs(dir1.Angle(map_cluster_dir2[max_cluster])-3.1415926/2.) < 75*3.1415926/180. ){
+	    flag_add_dir1 = false;
+	  }
+	  if (fabs(dir2.Angle(map_cluster_dir1[max_cluster])-3.1415926/2.) < 75*3.1415926/180. &&
+	      fabs(dir2.Angle(map_cluster_dir2[max_cluster])-3.1415926/2.) < 75*3.1415926/180. ){
+	    flag_add_dir2 = false;
+	  }
+	  
+	  /* max_cluster->Calc_PCA(); */
+	  /* TVector3 p2_dir(max_cluster->get_PCA_axis(0).x, max_cluster->get_PCA_axis(0).y, max_cluster->get_PCA_axis(0).z); */
+	  /* if (fabs(p2_dir.Angle(dir1)-3.1415926/2.) < 75 || fabs(p2_dir.Angle(dir2)-3.1415926/2.) < 75) */
+	  /*   flag_add = false; */
+
+	  //std::cout << cluster->get_cluster_id() << " B " << max_cluster->get_cluster_id() << " " << max_value[0] << " " << max_value[1] << " " << max_value[2] << " " << num_total_points << " " << std::endl;
 	  
 	}else if ((max_value[0]+max_value[1]+max_value[2]) > 300){
 	  // if overlap significant, compare the PCA
@@ -413,8 +433,8 @@ void WireCell2dToy::Clustering_connect1(WireCell::PR3DClusterSelection& live_clu
 
 
 	  if ( (angle_diff < 5 || angle_diff > 175 || fabs(angle1_drift-90) < 5 && fabs(angle2_drift-90) < 5 && fabs(angle1_drift-90)+fabs(angle2_drift-90) < 6 && (angle_diff < 30 || angle_diff > 150)) && dis < 1.5*units::cm){
-	    to_be_merged_pairs.insert(std::make_pair(cluster,max_cluster)); 
-	    curr_cluster = max_cluster;
+	    to_be_merged_pairs.insert(std::make_pair(cluster,max_cluster));
+	    //curr_cluster = max_cluster;
 	    flag_merge = true;
 	  }
 	  
@@ -435,26 +455,29 @@ void WireCell2dToy::Clustering_connect1(WireCell::PR3DClusterSelection& live_clu
 	/* } */
       }
       
-
-      // add extension points in ... 
-      if (fabs(dir1.Angle(drift_dir) - 3.1415926/2.) < 5*3.1415926/180.){
-	global_skeleton_cloud.AddPoints(curr_cluster,extreme_points.first,dir1,extending_dis*2,1.2*units::cm, angle/2.);
-	dir1 *= -1;
-	global_skeleton_cloud.AddPoints(curr_cluster,extreme_points.first,dir1,extending_dis*2,1.2*units::cm, angle/2.);
-      }else{
-	global_skeleton_cloud.AddPoints(curr_cluster,extreme_points.first,dir1,extending_dis,1.2*units::cm, angle);
-	dir1 *= -1;
-	global_skeleton_cloud.AddPoints(curr_cluster,extreme_points.first,dir1,extending_dis,1.2*units::cm, angle);
+      if (flag_add_dir1){
+	// add extension points in ... 
+	if (fabs(dir1.Angle(drift_dir) - 3.1415926/2.) < 5*3.1415926/180.){
+	  global_skeleton_cloud.AddPoints(cluster,extreme_points.first,dir1,extending_dis*2,1.2*units::cm, angle/2.);
+	  dir1 *= -1;
+	  global_skeleton_cloud.AddPoints(cluster,extreme_points.first,dir1,extending_dis*2,1.2*units::cm, angle/2.);
+	}else{
+	  global_skeleton_cloud.AddPoints(cluster,extreme_points.first,dir1,extending_dis,1.2*units::cm, angle);
+	  dir1 *= -1;
+	  global_skeleton_cloud.AddPoints(cluster,extreme_points.first,dir1,extending_dis,1.2*units::cm, angle);
+	}
       }
 
-      if (fabs(dir2.Angle(drift_dir) - 3.1415926/2.) < 5*3.1415926/180.){
-	global_skeleton_cloud.AddPoints(curr_cluster,extreme_points.second,dir2,extending_dis*2.0,1.2*units::cm, angle/2.);
-	dir2 *= -1;
-	global_skeleton_cloud.AddPoints(curr_cluster,extreme_points.second,dir2,extending_dis*2.0,1.2*units::cm, angle/2.);
-      }else{
-	global_skeleton_cloud.AddPoints(curr_cluster,extreme_points.second,dir2,extending_dis,1.2*units::cm, angle);
-	dir2 *= -1;
-	global_skeleton_cloud.AddPoints(curr_cluster,extreme_points.second,dir2,extending_dis,1.2*units::cm, angle);
+      if (flag_add_dir2){
+	if (fabs(dir2.Angle(drift_dir) - 3.1415926/2.) < 5*3.1415926/180.){
+	  global_skeleton_cloud.AddPoints(cluster,extreme_points.second,dir2,extending_dis*2.0,1.2*units::cm, angle/2.);
+	  dir2 *= -1;
+	  global_skeleton_cloud.AddPoints(cluster,extreme_points.second,dir2,extending_dis*2.0,1.2*units::cm, angle/2.);
+	}else{
+	  global_skeleton_cloud.AddPoints(cluster,extreme_points.second,dir2,extending_dis,1.2*units::cm, angle);
+	  dir2 *= -1;
+	  global_skeleton_cloud.AddPoints(cluster,extreme_points.second,dir2,extending_dis,1.2*units::cm, angle);
+	}
       }
 
       /* if (cluster_length_map[cluster] > extending_dis * 0.8){ */
