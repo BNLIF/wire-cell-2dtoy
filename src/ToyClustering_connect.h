@@ -431,13 +431,19 @@ void WireCell2dToy::Clustering_connect1(WireCell::PR3DClusterSelection& live_clu
 	  Line l1(p1_c,p1_dir);
 	  Line l2(p2_c,p2_dir);
 	  double dis = l1.closest_dis(l2);
-	  
+	   double dis1 = sqrt(pow(p1_c.x - p2_c.x,2) + pow(p1_c.y - p2_c.y,2) + pow(p1_c.z - p2_c.z,2));
 
 
 	  if ( (angle_diff < 5 || angle_diff > 175 || fabs(angle1_drift-90) < 5 && fabs(angle2_drift-90) < 5 && fabs(angle1_drift-90)+fabs(angle2_drift-90) < 6 && (angle_diff < 30 || angle_diff > 150)) && dis < 1.5*units::cm ||
-	       (angle_diff < 10 || angle_diff > 170) && dis < 0.9*units::cm){
+	       (angle_diff < 10 || angle_diff > 170) && dis < 0.9*units::cm &&
+	       dis1 > (cluster_length_map[cluster] + cluster_length_map[max_cluster])/3.){
 	    to_be_merged_pairs.insert(std::make_pair(cluster,max_cluster));
 	    //curr_cluster = max_cluster;
+	    flag_merge = true;
+	  }if (((angle_diff < 5 || angle_diff > 175) && dis < 2.5*units::cm ||
+		(angle_diff < 10 || angle_diff > 170) && dis < 1.2*units::cm) &&
+	       dis1 > (cluster_length_map[cluster] + cluster_length_map[max_cluster])/3.){
+	    to_be_merged_pairs.insert(std::make_pair(cluster,max_cluster));
 	    flag_merge = true;
 	  }
 	  
