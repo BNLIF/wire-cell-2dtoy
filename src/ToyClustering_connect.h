@@ -392,7 +392,9 @@ void WireCell2dToy::Clustering_connect1(WireCell::PR3DClusterSelection& live_clu
 	
 	// if overlap a lot merge
 	if ((max_value[0]+max_value[1]+max_value[2]) > 0.75 *(num_total_points  + num_total_points  + num_total_points) &&
-	    (num_unique[1]+num_unique[0]+num_unique[2]) < 0.24 * num_total_points){
+	    ((num_unique[1]+num_unique[0]+num_unique[2]) < 0.24 * num_total_points ||
+	     ((num_unique[1]+num_unique[0]+num_unique[2]) < 0.45 * num_total_points &&
+	      (num_unique[1]+num_unique[0]+num_unique[2]) < 25))){
 
 	  flag_merge = true;
 	  to_be_merged_pairs.insert(std::make_pair(cluster,max_cluster)); 
@@ -432,12 +434,12 @@ void WireCell2dToy::Clustering_connect1(WireCell::PR3DClusterSelection& live_clu
 	  
 
 
-	  if ( (angle_diff < 5 || angle_diff > 175 || fabs(angle1_drift-90) < 5 && fabs(angle2_drift-90) < 5 && fabs(angle1_drift-90)+fabs(angle2_drift-90) < 6 && (angle_diff < 30 || angle_diff > 150)) && dis < 1.5*units::cm){
+	  if ( (angle_diff < 5 || angle_diff > 175 || fabs(angle1_drift-90) < 5 && fabs(angle2_drift-90) < 5 && fabs(angle1_drift-90)+fabs(angle2_drift-90) < 6 && (angle_diff < 30 || angle_diff > 150)) && dis < 1.5*units::cm ||
+	       (angle_diff < 10 || angle_diff > 170) && dis < 0.9*units::cm){
 	    to_be_merged_pairs.insert(std::make_pair(cluster,max_cluster));
 	    //curr_cluster = max_cluster;
 	    flag_merge = true;
 	  }
-	  
 	  
 	  /* std::cout <<cluster->get_cluster_id() << " " << max_cluster->get_cluster_id() << " " << cluster_length_map[cluster]/units::cm << " " << cluster_length_map[max_cluster]/units::cm << " " << angle_diff << " " << angle1_drift << " " << angle2_drift << " " << dis/units::cm << std::endl; */
 	}
@@ -445,9 +447,10 @@ void WireCell2dToy::Clustering_connect1(WireCell::PR3DClusterSelection& live_clu
 	// when added points in
 	// if overlap a lot merge 
 	// if overlap significant, compare the PCA
-	/* if (fabs(extreme_points.first.x-140.7*units::cm)< 15*units::cm && */
-	/*     fabs(extreme_points.first.y+72.3*units::cm)< 15*units::cm && */
-	/*     fabs(extreme_points.first.z-30.1*units::cm)< 15*units::cm ){ */
+	
+	/* if (fabs(extreme_points.first.x-275.9*units::cm)< 5*units::cm && */
+	/*     fabs(extreme_points.first.y-93.4*units::cm)< 5*units::cm && */
+	/*     fabs(extreme_points.first.z-106.8*units::cm)< 5*units::cm ){ */
 	/*   // if (max_cluster!=0) */
 	/*   std::cout << cluster->get_cluster_id() << " " << max_cluster << " " << max_value[0] << " " << max_value[1] << " " << max_value[2] << " " << num_total_points << std::endl; */
 	/*   std::cout << max_value_u[0] << " " << max_value_u[1] << " " << max_value_u[2] << " " << max_cluster_u->get_cluster_id() << " "<< max_cluster_u << " " << max_value_v[0] << " " << max_value_v[1] << " " << max_value_v[2] << " " << max_cluster_v->get_cluster_id() << " " << max_cluster_v << " " << max_value_w[0] << " " << max_value_w[1] << " " << max_value_w[2] << " " << max_cluster_w->get_cluster_id() << " " << max_cluster_w << std::endl; */
@@ -534,7 +537,115 @@ void WireCell2dToy::Clustering_connect1(WireCell::PR3DClusterSelection& live_clu
     }
   }
 
+
+
+  WireCell::PR3DClusterSelection new_clusters;
+  
   // merge clusters into new clusters, delete old clusters 
+  for (auto it = merge_clusters.begin(); it!=merge_clusters.end();it++){
+    std::set<PR3DCluster*>& clusters = (*it);
+    PR3DCluster *ncluster = new PR3DCluster((*clusters.begin())->get_cluster_id());
+    live_clusters.push_back(ncluster);
+    
+    new_clusters.push_back(ncluster);
+
+    for (auto it1 = clusters.begin(); it1!=clusters.end(); it1++){
+      PR3DCluster *ocluster = *(it1);
+      // std::cout << ocluster->get_cluster_id() << " ";
+      SMGCSelection& mcells = ocluster->get_mcells();
+      for (auto it2 = mcells.begin(); it2!=mcells.end(); it2++){
+  	SlimMergeGeomCell *mcell = (*it2);
+  	//std::cout << ocluster->get_cluster_id() << " " << mcell << std::endl;
+  	int time_slice = mcell->GetTimeSlice();
+  	ncluster->AddCell(mcell,time_slice);
+      }
+      live_clusters.erase(find(live_clusters.begin(), live_clusters.end(), ocluster));
+      cluster_length_map.erase(ocluster);
+      delete ocluster;
+    }
+    std::vector<int> range_v1 = ncluster->get_uvwt_range();
+    double length_1 = sqrt(2./3. * (pow(pitch_u*range_v1.at(0),2) + pow(pitch_v*range_v1.at(1),2) + pow(pitch_w*range_v1.at(2),2)) + pow(time_slice_width*range_v1.at(3),2));
+    cluster_length_map[ncluster] = length_1;
+    //std::cout << std::endl;
+  }
+
+
+  to_be_merged_pairs.clear();
+  for (auto it = new_clusters.begin(); it!= new_clusters.end(); it++){
+    PR3DCluster *cluster_1 = (*it);
+    cluster_1->Calc_PCA();
+    Point p1_c = cluster_1->get_center();
+    TVector3 p1_dir(cluster_1->get_PCA_axis(0).x, cluster_1->get_PCA_axis(0).y, cluster_1->get_PCA_axis(0).z);
+    Line l1(p1_c,p1_dir);
+    for (auto it1 = live_clusters.begin(); it1 != live_clusters.end(); it1++){
+      PR3DCluster *cluster_2 = (*it1);
+      if (cluster_length_map[cluster_2] < 3*units::cm) continue;
+      if (cluster_2 == cluster_1) continue;
+      cluster_2->Calc_PCA();
+      Point p2_c = cluster_2->get_center();
+      TVector3 p2_dir(cluster_2->get_PCA_axis(0).x, cluster_2->get_PCA_axis(0).y, cluster_2->get_PCA_axis(0).z);
+
+      double angle_diff = p1_dir.Angle(p2_dir)/3.1415926*180.;
+      Line l2(p2_c,p2_dir);
+      double dis = l1.closest_dis(l2);
+
+      double dis1 = sqrt(pow(p1_c.x - p2_c.x,2) + pow(p1_c.y - p2_c.y,2) + pow(p1_c.z - p2_c.z,2));
+
+      p1_dir.SetMag(1);
+      p2_dir.SetMag(1);
+      // if (cluster_2->get_cluster_id()==26)
+      /* if (p1_c.z/units::cm > 900 && p2_c.z/units::cm > 900 && )cluster_length_map[cluster_1]/units::cm> 10 && cluster_length_map[cluster_2]/units::cm > 10) */
+      /* std::cout << cluster_2->get_cluster_id() << " " << angle_diff << " " << dis/units::cm << " " << dis1/units::cm <<  " " << cluster_length_map[cluster_1]/units::cm << " " << cluster_length_map[cluster_2]/units::cm << " " << p1_dir.X() << " " << p1_dir.Y() << " " <<  p1_dir.Z() << " " << p2_dir.X() << " " << p2_dir.Y() << " " << p2_dir.Z() << " " << p1_c.x/units::cm << " " << p1_c.y/units::cm << " " << p1_c.z/units::cm << " " << p2_c.x/units::cm << " " << p2_c.y/units::cm << " " << p2_c.z/units::cm << std::endl; */
+      
+      if (((angle_diff < 5 || angle_diff > 175) && dis < 2.5*units::cm ||
+	   (angle_diff < 10 || angle_diff > 170) && dis < 1.2*units::cm) &&
+	  dis1 > (cluster_length_map[cluster_2] + cluster_length_map[cluster_1])/3.){
+	to_be_merged_pairs.insert(std::make_pair(cluster_1,cluster_2));
+      }
+    }
+  }
+
+
+  merge_clusters.clear();
+  for (auto it = to_be_merged_pairs.begin(); it!=to_be_merged_pairs.end(); it++){
+    PR3DCluster *cluster1 = (*it).first;
+    PR3DCluster *cluster2 = (*it).second;
+    //  std::cout << cluster1 << " " << cluster2 << " " << cluster1->get_cluster_id() << " " << cluster2->get_cluster_id() << std::endl;
+    
+    bool flag_new = true;
+    std::vector<std::set<PR3DCluster*>> temp_set;
+    for (auto it1 = merge_clusters.begin(); it1!=merge_clusters.end(); it1++){
+      std::set<PR3DCluster*>& clusters = (*it1);
+      if (clusters.find(cluster1)!=clusters.end() ||
+	  clusters.find(cluster2)!=clusters.end()){
+	clusters.insert(cluster1);
+	clusters.insert(cluster2);
+	flag_new = false;
+	temp_set.push_back(clusters);
+	//break;
+      }
+    }
+    if (flag_new){
+      std::set<PR3DCluster*> clusters;
+      clusters.insert(cluster1);
+      clusters.insert(cluster2);
+      merge_clusters.push_back(clusters);
+    }
+    if (temp_set.size()>1){
+      // merge them further ...
+      std::set<PR3DCluster*> clusters;
+      for (size_t i=0;i!=temp_set.size();i++){
+	for (auto it1 = temp_set.at(i).begin(); it1!= temp_set.at(i).end(); it1++){
+	  clusters.insert(*it1);
+	}
+	merge_clusters.erase(find(merge_clusters.begin(),merge_clusters.end(),temp_set.at(i)));
+      }
+      merge_clusters.push_back(clusters);
+    }
+  }
+
+
+
   for (auto it = merge_clusters.begin(); it!=merge_clusters.end();it++){
     std::set<PR3DCluster*>& clusters = (*it);
     PR3DCluster *ncluster = new PR3DCluster((*clusters.begin())->get_cluster_id());
@@ -558,5 +669,8 @@ void WireCell2dToy::Clustering_connect1(WireCell::PR3DClusterSelection& live_clu
     cluster_length_map[ncluster] = length_1;
     //std::cout << std::endl;
   }
+
+  
+  
   
 }
