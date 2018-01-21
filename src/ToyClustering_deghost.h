@@ -3,7 +3,7 @@
 using namespace WireCell;
 
 
-void WireCell2dToy::Clustering_deghost(WireCell::PR3DClusterSelection& live_clusters, std::map<WireCell::PR3DCluster*,double>& cluster_length_map, DynamicToyPointCloud& global_point_cloud, std::map<int,std::pair<double,double>>& dead_u_index, std::map<int,std::pair<double,double>>& dead_v_index, std::map<int,std::pair<double,double>>& dead_w_index, double length_cut){
+void WireCell2dToy::Clustering_deghost(WireCell::PR3DClusterSelection& live_clusters, std::map<WireCell::PR3DCluster*,double>& cluster_length_map, std::map<int,std::pair<double,double>>& dead_u_index, std::map<int,std::pair<double,double>>& dead_v_index, std::map<int,std::pair<double,double>>& dead_w_index, double length_cut){
 
   
   // sort the clusters length ...
@@ -34,7 +34,7 @@ void WireCell2dToy::Clustering_deghost(WireCell::PR3DClusterSelection& live_clus
   double time_slice_width = mp.get_ts_width();
 
   
-  //DynamicToyPointCloud global_point_cloud(angle_u,angle_v,angle_w);
+  DynamicToyPointCloud global_point_cloud(angle_u,angle_v,angle_w);
   DynamicToyPointCloud global_skeleton_cloud(angle_u,angle_v,angle_w);
 
   std::vector<PR3DCluster*> to_be_removed_clusters;

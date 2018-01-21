@@ -353,9 +353,12 @@ int main(int argc, char* argv[])
      WireCell2dToy::calc_boundary_points_dead(gds,dead_clusters.at(j));
    }
    // form sampling points for the normal cells ...
+   DynamicToyPointCloud global_point_cloud(angle_u,angle_v,angle_w);
    for (size_t i=0; i!=live_clusters.size();i++){
      WireCell2dToy::calc_sampling_points(gds,live_clusters.at(i),nrebin, frame_length, unit_dis);
-     live_clusters.at(i)->Calc_PCA();
+     live_clusters.at(i)->Create_point_cloud();
+     global_point_cloud.AddPoints(live_clusters.at(i),0);
+     //live_clusters.at(i)->Calc_PCA();
    }
    cerr << em("Add X, Y, Z points") << std::endl;
 
@@ -363,7 +366,7 @@ int main(int argc, char* argv[])
    // WireCell2dToy::Clustering_live_dead(live_clusters, dead_clusters);
    // cerr << em("Clustering live and dead clusters") << std::endl;
 
-   WireCell2dToy::Clustering_jump_gap_cosmics(live_clusters, dead_clusters,dead_u_index, dead_v_index, dead_w_index);
+   WireCell2dToy::Clustering_jump_gap_cosmics(live_clusters, dead_clusters,dead_u_index, dead_v_index, dead_w_index, global_point_cloud);
    cerr << em("Clustering to jump gap in cosmics") << std::endl;
 
    // need to further cluster things ...

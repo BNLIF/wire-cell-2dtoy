@@ -351,15 +351,17 @@ int main(int argc, char* argv[])
    // create global point cloud and mcell to cluster map ...
    // ToyPointCloud *global_point_cloud =  new ToyPointCloud();
    //std::map<SlimMergeGeomCell*,PR3DCluster*> mcell_cluster_map;
+   DynamicToyPointCloud global_point_cloud(angle_u,angle_v,angle_w);
    for (size_t i=0;i!=live_clusters.size();i++){
      live_clusters.at(i)->Create_point_cloud();
+     global_point_cloud.AddPoints(live_clusters.at(i),0);
      // live_clusters.at(i)->Update_mcell_cluster_map(mcell_cluster_map);
    }
    //   global_point_cloud->build_kdtree_index();
    cerr << em("Build local point clouds") << std::endl;
    
 
-   WireCell2dToy::Clustering_jump_gap_cosmics(live_clusters, dead_clusters, dead_u_index, dead_v_index, dead_w_index);
+   WireCell2dToy::Clustering_jump_gap_cosmics(live_clusters, dead_clusters, dead_u_index, dead_v_index, dead_w_index, global_point_cloud);
    cerr << em("Clustering to jump gap in cosmics") << std::endl;
 
 

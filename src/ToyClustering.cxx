@@ -187,7 +187,7 @@ double WireCell2dToy::Find_Closeset_Points(WireCell::PR3DCluster *cluster1, Wire
 }
 
 
-void WireCell2dToy::Clustering_jump_gap_cosmics(WireCell::PR3DClusterSelection& live_clusters, WireCell::PR3DClusterSelection& dead_clusters, std::map<int,std::pair<double,double>>& dead_u_index, std::map<int,std::pair<double,double>>& dead_v_index, std::map<int,std::pair<double,double>>& dead_w_index){
+void WireCell2dToy::Clustering_jump_gap_cosmics(WireCell::PR3DClusterSelection& live_clusters, WireCell::PR3DClusterSelection& dead_clusters, std::map<int,std::pair<double,double>>& dead_u_index, std::map<int,std::pair<double,double>>& dead_v_index, std::map<int,std::pair<double,double>>& dead_w_index, WireCell::DynamicToyPointCloud& global_point_cloud){
 
   
   ExecMon em("starting");
@@ -290,20 +290,8 @@ void WireCell2dToy::Clustering_jump_gap_cosmics(WireCell::PR3DClusterSelection& 
     cluster->set_cluster_id(i+1);
   }
 
-  
-  DynamicToyPointCloud global_point_cloud(angle_u,angle_v,angle_w);
 
-  // prepare for deghosting and clustering along track
-  Clustering_deghost(live_clusters,cluster_length_map, global_point_cloud, dead_u_index, dead_v_index, dead_w_index);
-  cerr << em("deghost clusters") << std::endl;
-
-  for (size_t i=0;i!=live_clusters.size();i++){
-    PR3DCluster *cluster = live_clusters.at(i);
-    cluster->set_cluster_id(i+1);
-  }
-
-  
-  Clustering_connect1(live_clusters,cluster_length_map, global_point_cloud, dead_u_index, dead_v_index, dead_w_index);
+   Clustering_connect1(live_clusters,cluster_length_map, global_point_cloud, dead_u_index, dead_v_index, dead_w_index);
   cerr << em("connect 1") << std::endl;
 
 
@@ -312,15 +300,29 @@ void WireCell2dToy::Clustering_jump_gap_cosmics(WireCell::PR3DClusterSelection& 
     cluster->set_cluster_id(i+1);
   }
   
-  DynamicToyPointCloud global_point_cloud1(angle_u,angle_v,angle_w);
+  //  DynamicToyPointCloud global_point_cloud(angle_u,angle_v,angle_w);
+
   // prepare for deghosting and clustering along track
-  Clustering_deghost(live_clusters, cluster_length_map, global_point_cloud1, dead_u_index, dead_v_index, dead_w_index, 50*units::cm);
-  cerr << em("deghost clusters 2 ") << std::endl;
-  
+  Clustering_deghost(live_clusters,cluster_length_map, dead_u_index, dead_v_index, dead_w_index);
+  cerr << em("deghost clusters") << std::endl;
+
   for (size_t i=0;i!=live_clusters.size();i++){
     PR3DCluster *cluster = live_clusters.at(i);
     cluster->set_cluster_id(i+1);
   }
+
+  
+ 
+  
+  // DynamicToyPointCloud global_point_cloud1(angle_u,angle_v,angle_w);
+  // // prepare for deghosting and clustering along track
+  // Clustering_deghost(live_clusters, cluster_length_map, global_point_cloud1, dead_u_index, dead_v_index, dead_w_index, 50*units::cm);
+  // cerr << em("deghost clusters 2 ") << std::endl;
+  
+  // for (size_t i=0;i!=live_clusters.size();i++){
+  //   PR3DCluster *cluster = live_clusters.at(i);
+  //   cluster->set_cluster_id(i+1);
+  // }
 
   
   

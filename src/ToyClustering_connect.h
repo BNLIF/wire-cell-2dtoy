@@ -62,14 +62,14 @@ void WireCell2dToy::Clustering_connect1(WireCell::PR3DClusterSelection& live_clu
       dir2 = main_dir;
     }else if (cluster_length_map[cluster] > 25*units::cm){
       dir1 = cluster->VHoughTrans(extreme_points.first,80*units::cm);
-      dir1.SetMag(1);
+      if (dir1.Mag()!=0) dir1.SetMag(1);
       if (fabs(dir1.Angle(drift_dir) - 3.1415926/2.) < 5*3.1415926/180.){
 	dir1.SetXYZ(dir1.X(),(extreme_points.second.y - extreme_points.first.y)/main_dir.Mag(),
 		    (extreme_points.second.z - extreme_points.first.z)/main_dir.Mag());
 	dir1 *= -1;
       }
       dir2 = cluster->VHoughTrans(extreme_points.second,80*units::cm);
-      dir2.SetMag(1);
+      if (dir2.Mag()!=0) dir2.SetMag(1);
       if (fabs(dir2.Angle(drift_dir) - 3.1415926/2.) < 5*3.1415926/180.){
 	dir2.SetXYZ(dir2.X(),(extreme_points.second.y - extreme_points.first.y)/main_dir.Mag(),
 		    (extreme_points.second.z - extreme_points.first.z)/main_dir.Mag());
@@ -687,8 +687,8 @@ void WireCell2dToy::Clustering_connect1(WireCell::PR3DClusterSelection& live_clu
 	
 	double dis1 = sqrt(pow(p1_c.x - p2_c.x,2) + pow(p1_c.y - p2_c.y,2) + pow(p1_c.z - p2_c.z,2));
 	
-	p1_dir.SetMag(1);
-	p2_dir.SetMag(1);
+	if (p1_dir.Mag()!=0) p1_dir.SetMag(1);
+	if (p2_dir.Mag()!=0) p2_dir.SetMag(1);
 	// if (cluster_2->get_cluster_id()==26)
 	/* if (p1_c.z/units::cm > 900 && p2_c.z/units::cm > 900 && )cluster_length_map[cluster_1]/units::cm> 10 && cluster_length_map[cluster_2]/units::cm > 10) */
 	/* std::cout << cluster_2->get_cluster_id() << " " << angle_diff << " " << dis/units::cm << " " << dis1/units::cm <<  " " << cluster_length_map[cluster_1]/units::cm << " " << cluster_length_map[cluster_2]/units::cm << " " << p1_dir.X() << " " << p1_dir.Y() << " " <<  p1_dir.Z() << " " << p2_dir.X() << " " << p2_dir.Y() << " " << p2_dir.Z() << " " << p1_c.x/units::cm << " " << p1_c.y/units::cm << " " << p1_c.z/units::cm << " " << p2_c.x/units::cm << " " << p2_c.y/units::cm << " " << p2_c.z/units::cm << std::endl; */
