@@ -471,10 +471,15 @@ void WireCell2dToy::Clustering_connect1(WireCell::PR3DClusterSelection& live_clu
 	      ((num_unique[1]+num_unique[0]+num_unique[2]) < 0.24 * num_total_points ||
 	       ((num_unique[1]+num_unique[0]+num_unique[2]) < 0.45 * num_total_points &&
 		(num_unique[1]+num_unique[0]+num_unique[2]) < 25))){
-	    
-	    flag_merge = true;
-	    to_be_merged_pairs.insert(std::make_pair(cluster,max_cluster)); 
+
+	    if (fabs(dir1.Angle(map_cluster_dir1[max_cluster])-3.1415926/2.) >= 70*3.1415926/180. ||
+		fabs(dir1.Angle(map_cluster_dir2[max_cluster])-3.1415926/2.) >= 70*3.1415926/180. ||
+		fabs(dir2.Angle(map_cluster_dir1[max_cluster])-3.1415926/2.) >= 70*3.1415926/180. ||
+		fabs(dir2.Angle(map_cluster_dir2[max_cluster])-3.1415926/2.) >= 70*3.1415926/180.){
+	      flag_merge = true;
+	      to_be_merged_pairs.insert(std::make_pair(cluster,max_cluster)); 
 	    //curr_cluster = max_cluster;
+	    }
 	    
 	    if (fabs(dir1.Angle(map_cluster_dir1[max_cluster])-3.1415926/2.) < 75*3.1415926/180. &&
 		fabs(dir1.Angle(map_cluster_dir2[max_cluster])-3.1415926/2.) < 75*3.1415926/180. ){
