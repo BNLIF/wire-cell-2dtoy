@@ -532,18 +532,20 @@ void WireCell2dToy::Clustering_connect1(WireCell::PR3DClusterSelection& live_clu
 		to_be_merged_pairs.insert(std::make_pair(cluster,max_cluster));
 		flag_merge = true;
 	      }
+	      
+	      // std::cout <<cluster->get_cluster_id() << " " << max_cluster->get_cluster_id() << " " << cluster_length_map[cluster]/units::cm << " " << cluster_length_map[max_cluster]/units::cm << " " << angle_diff << " " << angle1_drift << " " << angle2_drift << " " << dis/units::cm << std::endl;
 	    }
 	    
-	    /* std::cout <<cluster->get_cluster_id() << " " << max_cluster->get_cluster_id() << " " << cluster_length_map[cluster]/units::cm << " " << cluster_length_map[max_cluster]/units::cm << " " << angle_diff << " " << angle1_drift << " " << angle2_drift << " " << dis/units::cm << std::endl; */
+
 	  }
 	  
 	  // when added points in
 	  // if overlap a lot merge 
 	  // if overlap significant, compare the PCA
 	  
-	  /* if (fabs(extreme_points.first.x-275.9*units::cm)< 5*units::cm && */
-	  /*     fabs(extreme_points.first.y-93.4*units::cm)< 5*units::cm && */
-	  /*     fabs(extreme_points.first.z-106.8*units::cm)< 5*units::cm ){ */
+	  /* if (fabs(extreme_points.first.x-228.6*units::cm)< 5*units::cm && */
+	  /*     fabs(extreme_points.first.y+5.2*units::cm)< 5*units::cm && */
+	  /*     fabs(extreme_points.first.z-448.4*units::cm)< 5*units::cm ){ */
 	  /*   // if (max_cluster!=0) */
 	  /*   std::cout << cluster->get_cluster_id() << " " << max_cluster << " " << max_value[0] << " " << max_value[1] << " " << max_value[2] << " " << num_total_points << std::endl; */
 	  /*   std::cout << max_value_u[0] << " " << max_value_u[1] << " " << max_value_u[2] << " " << max_cluster_u->get_cluster_id() << " "<< max_cluster_u << " " << max_value_v[0] << " " << max_value_v[1] << " " << max_value_v[2] << " " << max_cluster_v->get_cluster_id() << " " << max_cluster_v << " " << max_value_w[0] << " " << max_value_w[1] << " " << max_value_w[2] << " " << max_cluster_w->get_cluster_id() << " " << max_cluster_w << std::endl; */
@@ -690,13 +692,18 @@ void WireCell2dToy::Clustering_connect1(WireCell::PR3DClusterSelection& live_clu
 	if (p1_dir.Mag()!=0) p1_dir.SetMag(1);
 	if (p2_dir.Mag()!=0) p2_dir.SetMag(1);
 	// if (cluster_2->get_cluster_id()==26)
-	/* if (p1_c.z/units::cm > 900 && p2_c.z/units::cm > 900 && )cluster_length_map[cluster_1]/units::cm> 10 && cluster_length_map[cluster_2]/units::cm > 10) */
-	/* std::cout << cluster_2->get_cluster_id() << " " << angle_diff << " " << dis/units::cm << " " << dis1/units::cm <<  " " << cluster_length_map[cluster_1]/units::cm << " " << cluster_length_map[cluster_2]/units::cm << " " << p1_dir.X() << " " << p1_dir.Y() << " " <<  p1_dir.Z() << " " << p2_dir.X() << " " << p2_dir.Y() << " " << p2_dir.Z() << " " << p1_c.x/units::cm << " " << p1_c.y/units::cm << " " << p1_c.z/units::cm << " " << p2_c.x/units::cm << " " << p2_c.y/units::cm << " " << p2_c.z/units::cm << std::endl; */
+	/* if ((fabs(p2_c.z/units::cm-420) <20 && fabs(p2_c.x/units::cm-250)<20 || */
+	/*      fabs(p1_c.z/units::cm-420) <20 && fabs(p1_c.x/units::cm-250)<20 */
+	/*      ) && cluster_length_map[cluster_1]/units::cm> 5 && cluster_length_map[cluster_2]/units::cm > 5)  */
+	/*   std::cout << cluster_2->get_cluster_id() << " " << angle_diff << " " << dis/units::cm << " " << dis1/units::cm <<  " " << cluster_length_map[cluster_1]/units::cm << " " << cluster_length_map[cluster_2]/units::cm << " " << p1_dir.X() << " " << p1_dir.Y() << " " <<  p1_dir.Z() << " " << p2_dir.X() << " " << p2_dir.Y() << " " << p2_dir.Z() << " " << p1_c.x/units::cm << " " << p1_c.y/units::cm << " " << p1_c.z/units::cm << " " << p2_c.x/units::cm << " " << p2_c.y/units::cm << " " << p2_c.z/units::cm << std::endl;  */
 	
 	if (((angle_diff < 5 || angle_diff > 175) && dis < 2.5*units::cm ||
 		   (angle_diff < 10 || angle_diff > 170) && dis < 1.2*units::cm) &&
 		  dis1 > (cluster_length_map[cluster_2] + cluster_length_map[cluster_1])/3.){
 		to_be_merged_pairs.insert(std::make_pair(cluster_1,cluster_2));
+	}else if ((angle_diff < 3 || angle_diff > 177) && dis < 4.0*units::cm &&
+		  dis1 > (cluster_length_map[cluster_2] + cluster_length_map[cluster_1])/2. && cluster_length_map[cluster_2] > 15*units::cm && cluster_length_map[cluster_1] > 15*units::cm && cluster_length_map[cluster_2]+cluster_length_map[cluster_1] > 45*units::cm){
+	  to_be_merged_pairs.insert(std::make_pair(cluster_1,cluster_2));
 	}
       }
     }

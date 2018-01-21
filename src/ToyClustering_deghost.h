@@ -225,9 +225,9 @@ void WireCell2dToy::Clustering_deghost(WireCell::PR3DClusterSelection& live_clus
 	  /* 	  << max_cluster_v << " " << max_value_v/(num_total_points-num_dead[1]+1e-9) << " " */
 	  /* 	  << max_cluster_w << " " << max_value_w/(num_total_points-num_dead[2]+1e-9) << std::endl; */
 	  
-	  if (max_cluster_u==max_cluster_v && max_value_u > 0.875 * (num_total_points-num_dead[0]) && max_value_v > 0.875 * (num_total_points - num_dead[1]) ){
+	  if (max_cluster_u==max_cluster_v && max_value_u > 0.8 * (num_total_points-num_dead[0]) && max_value_v > 0.8 * (num_total_points - num_dead[1]) ){
 	    if (map_cluster_num[2].find(max_cluster_u)!=map_cluster_num[2].end()){
-	      if (map_cluster_num[2][max_cluster_u]> 0.75 * (num_total_points - num_dead[2])){
+	      if (map_cluster_num[2][max_cluster_u]> 0.65 * (num_total_points - num_dead[2])){
 		ToyPointCloud *cloud1 = cluster->get_point_cloud();
 		ToyPointCloud *cloud2 = max_cluster_u->get_point_cloud();
 		std::tuple<int,int,double> temp_results = cloud1->get_closest_points(cloud2);
@@ -248,9 +248,9 @@ void WireCell2dToy::Clustering_deghost(WireCell::PR3DClusterSelection& live_clus
 	      }
 	    }
 	    
-	  }else if (max_cluster_u==max_cluster_w && max_value_u > 0.875 * (num_total_points-num_dead[0]) && max_value_w > 0.875 * (num_total_points - num_dead[2])){
+	  }else if (max_cluster_u==max_cluster_w && max_value_u > 0.8 * (num_total_points-num_dead[0]) && max_value_w > 0.8 * (num_total_points - num_dead[2])){
 	    if (map_cluster_num[1].find(max_cluster_u)!=map_cluster_num[1].end()){
-	      if (map_cluster_num[1][max_cluster_u]>0.75 * (num_total_points - num_dead[1])){
+	      if (map_cluster_num[1][max_cluster_u]>0.65 * (num_total_points - num_dead[1])){
 		ToyPointCloud *cloud1 = cluster->get_point_cloud();
 		ToyPointCloud *cloud2 = max_cluster_u->get_point_cloud();
 		std::tuple<int,int,double> temp_results = cloud1->get_closest_points(cloud2);
@@ -270,9 +270,9 @@ void WireCell2dToy::Clustering_deghost(WireCell::PR3DClusterSelection& live_clus
 		}
 	      }
 	    }
-	  }else if (max_cluster_w==max_cluster_v && max_value_w > 0.875 * (num_total_points-num_dead[2]) && max_value_v > 0.875 * (num_total_points - num_dead[1]) ){
+	  }else if (max_cluster_w==max_cluster_v && max_value_w > 0.8 * (num_total_points-num_dead[2]) && max_value_v > 0.8 * (num_total_points - num_dead[1]) ){
 	    if (map_cluster_num[0].find(max_cluster_w)!=map_cluster_num[0].end()){
-	      if (map_cluster_num[0][max_cluster_w]> 0.75 * (num_total_points - num_dead[0])){
+	      if (map_cluster_num[0][max_cluster_w]> 0.65 * (num_total_points - num_dead[0])){
 		ToyPointCloud *cloud1 = cluster->get_point_cloud();
 		ToyPointCloud *cloud2 = max_cluster_w->get_point_cloud();
 		std::tuple<int,int,double> temp_results = cloud1->get_closest_points(cloud2);
