@@ -173,13 +173,13 @@ void WireCell2dToy::Clustering_deghost(WireCell::PR3DClusterSelection& live_clus
 	  
 	  
 	  if ( (num_unique[1]+num_unique[0]+num_unique[2]) >= 0.24 * num_total_points &&
-	       (num_unique[1]+num_unique[0]+num_unique[2]) > 50 )
+	       (num_unique[1]+num_unique[0]+num_unique[2]) > 25 )
 	    break;
 	}
 	
 	//std::cout << cluster->get_cluster_id() << " " << num_unique[0] << " " << num_unique[1] << " " << num_unique[2] << " " << num_dead[0] << " " << num_dead[1] << " " << num_dead[2] << " " << num_total_points << std::endl;
 	
-	bool flag_save = true;
+	bool flag_save = false;
 	
 	if (((num_unique[0] <= 0.1 * (num_total_points - num_dead[0]) || num_unique[0] <= 0.1 * num_total_points && num_unique[0] <= 8) &&
 	     (num_unique[1] <= 0.1 * (num_total_points - num_dead[1]) || num_unique[1] <= 0.1 * num_total_points && num_unique[1] <= 8) &&
