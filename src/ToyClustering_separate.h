@@ -476,7 +476,7 @@ std::vector<WireCell::PR3DCluster*> WireCell2dToy::Separate_1(WireCell::PR3DClus
   //  std::cout << main_dir.Angle(dir_beam)/3.1415926*180. << " " << second_dir.Angle(dir_cosmic)/3.1415926*180. << " " << independent_points.size() << " " << std::endl;
   
   main_dir.SetMag(1);
-  if (main_dir.Y()>0) main_dir *= -1; // make sure it is pointing up????
+  if (main_dir.Y()>0) main_dir *= -1; // make sure it is pointing down????
 
   //  std::cout << cluster->get_PCA_value(0) << " " << cluster->get_PCA_value(1) << " " << cluster->get_PCA_value(2) << std::endl;
 
