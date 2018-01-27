@@ -33,35 +33,55 @@ void WireCell2dToy::Clustering_neutrino(WireCell::PR3DClusterSelection& live_clu
       saved_wcps.push_back(hl_wcps.second);
 
     if (fb_wcps.first.z < 15*units::cm){
+      bool flag_save = true;
       for (size_t j=0;j!=saved_wcps.size();j++){
 	double dis = sqrt(pow(saved_wcps.at(j).x - fb_wcps.first.x,2) + pow(saved_wcps.at(j).y - fb_wcps.first.y,2) + pow(saved_wcps.at(j).z - fb_wcps.first.z,2));
-	if (dis > 15*units::cm)
-	  saved_wcps.push_back(fb_wcps.first);
+	if (dis < 15*units::cm){
+	  flag_save = false;
+	  break;
+	}
       }
+      if (flag_save)
+	saved_wcps.push_back(fb_wcps.first);
     }
 
     if (fb_wcps.second.z > 1022*units::cm){
+      bool flag_save = true;
       for (size_t j=0;j!=saved_wcps.size();j++){
 	double dis = sqrt(pow(saved_wcps.at(j).x - fb_wcps.second.x,2) + pow(saved_wcps.at(j).y - fb_wcps.second.y,2) + pow(saved_wcps.at(j).z - fb_wcps.second.z,2));
-	if (dis > 15*units::cm)
-	  saved_wcps.push_back(fb_wcps.second);
+	if (dis < 15*units::cm){
+	  flag_save = false;
+	  break;
+	}
       }
+      if ( flag_save)
+	saved_wcps.push_back(fb_wcps.second);
     }
 
     if (el_wcps.first.x < 1*units::cm){
+      bool flag_save = true;
       for (size_t j=0;j!=saved_wcps.size();j++){
 	double dis = sqrt(pow(saved_wcps.at(j).x - el_wcps.first.x,2) + pow(saved_wcps.at(j).y - el_wcps.first.y,2) + pow(saved_wcps.at(j).z - el_wcps.first.z,2));
-	if (dis > 15*units::cm)
-	  saved_wcps.push_back(el_wcps.first);
+	if (dis < 15*units::cm){
+	  flag_save = false;
+	  break;
+	}
       }
+      if (flag_save)
+	saved_wcps.push_back(el_wcps.first);
     }
 
     if (el_wcps.second.x > 255*units::cm){
+      bool flag_save = true;
       for (size_t j=0;j!=saved_wcps.size();j++){
 	double dis = sqrt(pow(saved_wcps.at(j).x - el_wcps.second.x,2) + pow(saved_wcps.at(j).y - el_wcps.second.y,2) + pow(saved_wcps.at(j).z - el_wcps.second.z,2));
-	if (dis > 15*units::cm)
-	  saved_wcps.push_back(el_wcps.second);
+	if (dis < 15*units::cm){
+	  flag_save = false;
+	  break;
+	}
       }
+      if (flag_save)
+	saved_wcps.push_back(el_wcps.second);
     }
     if (saved_wcps.size()<=1)
       candidate_clusters.push_back(cluster);
@@ -69,7 +89,7 @@ void WireCell2dToy::Clustering_neutrino(WireCell::PR3DClusterSelection& live_clu
     //std::cout << el_wcps.first.x/units::cm << " " << el_wcps.second.x/units::cm << std::endl;
   }
 
-  std::cout << contained_clusters.size() << " " << candidate_clusters.size() << std::endl;
+  //std::cout << contained_clusters.size() << " " << candidate_clusters.size() << std::endl;
 
   std::set<std::pair<PR3DCluster*, PR3DCluster*>> to_be_merged_pairs;
 
