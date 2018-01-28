@@ -183,6 +183,8 @@ void WireCell2dToy::Clustering_neutrino(WireCell::PR3DClusterSelection& live_clu
 	WireCell::PointVector pts;
 	std::pair<Point,Point> extreme_pts = cluster1->get_two_extreme_points();
 
+	TVector3 dir1 = cluster1->VHoughTrans(extreme_pts.first,30*units::cm);
+	TVector3 dir2 = cluster1->VHoughTrans(extreme_pts.second,30*units::cm);
 
 	if (cluster1->get_num_points(extreme_pts.first,15*units::cm) <= 75 && cluster1->get_num_points() >75 ||
 	    cluster1->get_num_points(extreme_pts.second,15*units::cm) <= 75 && cluster1->get_num_points() > 75){
@@ -196,11 +198,29 @@ void WireCell2dToy::Clustering_neutrino(WireCell::PR3DClusterSelection& live_clu
 	      largest_cluster = sep_clusters.at(j);
 	    }
 	  }
-	  extreme_pts = largest_cluster->get_two_extreme_points();
+	  std::pair<Point,Point> temp_extreme_pts = largest_cluster->get_two_extreme_points();
 	  center = largest_cluster->get_center();
 	  main_dir.SetXYZ(largest_cluster->get_PCA_axis(0).x,largest_cluster->get_PCA_axis(0).y,largest_cluster->get_PCA_axis(0).z );
 	  for (size_t j=0;j!=sep_clusters.size();j++){
 	    delete sep_clusters.at(j);
+	  }
+	  
+	  if (fabs(dir1.Angle(main_dir)-3.1415926/2.)<75/180.*3.1415926){
+	    if (pow(extreme_pts.first.x-temp_extreme_pts.first.x,2)+pow(extreme_pts.first.y-temp_extreme_pts.first.y,2)+pow(extreme_pts.first.z-temp_extreme_pts.first.z,2) < pow(extreme_pts.first.x-temp_extreme_pts.second.x,2)+pow(extreme_pts.first.y-temp_extreme_pts.second.y,2)+pow(extreme_pts.first.z-temp_extreme_pts.second.z,2)){
+	      extreme_pts.first = temp_extreme_pts.first;
+	    }else{
+	      extreme_pts.first = temp_extreme_pts.second;
+	    }
+	    dir1 = cluster1->VHoughTrans(extreme_pts.first,30*units::cm);
+	  }
+
+	  if (fabs(dir2.Angle(main_dir)-3.1415926/2.)<75/180.*3.1415926){
+	    if (pow(extreme_pts.second.x-temp_extreme_pts.second.x,2)+pow(extreme_pts.second.y-temp_extreme_pts.second.y,2)+pow(extreme_pts.second.z-temp_extreme_pts.second.z,2) < pow(extreme_pts.second.x-temp_extreme_pts.first.x,2)+pow(extreme_pts.second.y-temp_extreme_pts.first.y,2)+pow(extreme_pts.second.z-temp_extreme_pts.first.z,2)){
+	      extreme_pts.second = temp_extreme_pts.second;
+	    }else{
+	      extreme_pts.second = temp_extreme_pts.first;
+	    }
+	    dir2 = cluster1->VHoughTrans(extreme_pts.second,30*units::cm);
 	  }
 	}
 
@@ -209,9 +229,8 @@ void WireCell2dToy::Clustering_neutrino(WireCell::PR3DClusterSelection& live_clu
 	/*   std::cout << cluster1->get_cluster_id()<< " " << extreme_pts.first.x/units::cm << " " << extreme_pts.first.y/units::cm << " " << extreme_pts.first.z/units::cm << " " << extreme_pts.second.x/units::cm << " " << extreme_pts.second.y/units::cm << " " << extreme_pts.second.z/units::cm << std::endl; */
 	/* } */
 
+
 	
-	TVector3 dir1 = cluster1->VHoughTrans(extreme_pts.first,30*units::cm);
-	TVector3 dir2 = cluster1->VHoughTrans(extreme_pts.second,30*units::cm);
 	dir1 *=-1;
 	dir2 *=-1;
 	dir1.SetMag(1);
@@ -291,8 +310,11 @@ void WireCell2dToy::Clustering_neutrino(WireCell::PR3DClusterSelection& live_clu
 	cluster_cloud_map[cluster2] = cloud2_ext;
 	WireCell::PointVector pts;
 	std::pair<Point,Point> extreme_pts = cluster2->get_two_extreme_points();
-
-
+	
+	TVector3 dir1 = cluster2->VHoughTrans(extreme_pts.first,30*units::cm);
+	TVector3 dir2 = cluster2->VHoughTrans(extreme_pts.second,30*units::cm);
+	
+	
 	if (cluster2->get_num_points(extreme_pts.first,15*units::cm) <= 75 && cluster2->get_num_points() >75 ||
 	    cluster2->get_num_points(extreme_pts.second,15*units::cm) <= 75 && cluster2->get_num_points() > 75){
 	  std::vector<PR3DCluster*> sep_clusters = Separate_2(cluster2,2.5*units::cm);
@@ -305,11 +327,28 @@ void WireCell2dToy::Clustering_neutrino(WireCell::PR3DClusterSelection& live_clu
 	      largest_cluster = sep_clusters.at(j);
 	    }
 	  }
-	  extreme_pts = largest_cluster->get_two_extreme_points();
+	  std::pair<Point,Point> temp_extreme_pts = largest_cluster->get_two_extreme_points();
 	  center = largest_cluster->get_center();
 	  main_dir.SetXYZ(largest_cluster->get_PCA_axis(0).x,largest_cluster->get_PCA_axis(0).y,largest_cluster->get_PCA_axis(0).z );
 	  for (size_t j=0;j!=sep_clusters.size();j++){
 	    delete sep_clusters.at(j);
+	  }
+	  
+	  if (fabs(dir1.Angle(main_dir)-3.1415926/2.)<75/180.*3.1415926){
+	    if (pow(extreme_pts.first.x-temp_extreme_pts.first.x,2)+pow(extreme_pts.first.y-temp_extreme_pts.first.y,2)+pow(extreme_pts.first.z-temp_extreme_pts.first.z,2) < pow(extreme_pts.first.x-temp_extreme_pts.second.x,2)+pow(extreme_pts.first.y-temp_extreme_pts.second.y,2)+pow(extreme_pts.first.z-temp_extreme_pts.second.z,2)){
+	      extreme_pts.first = temp_extreme_pts.first;
+	    }else{
+	      extreme_pts.first = temp_extreme_pts.second;
+	    }
+	    dir1 = cluster2->VHoughTrans(extreme_pts.first,30*units::cm);
+	  }
+	  if (fabs(dir2.Angle(main_dir)-3.1415926/2.)<75/180.*3.1415926){
+	    if (pow(extreme_pts.second.x-temp_extreme_pts.second.x,2)+pow(extreme_pts.second.y-temp_extreme_pts.second.y,2)+pow(extreme_pts.second.z-temp_extreme_pts.second.z,2) < pow(extreme_pts.second.x-temp_extreme_pts.first.x,2)+pow(extreme_pts.second.y-temp_extreme_pts.first.y,2)+pow(extreme_pts.second.z-temp_extreme_pts.first.z,2)){
+	      extreme_pts.second = temp_extreme_pts.second;
+	    }else{
+	      extreme_pts.second = temp_extreme_pts.first;
+	    }
+	    dir2 = cluster2->VHoughTrans(extreme_pts.second,30*units::cm);
 	  }
 	}
 
@@ -319,8 +358,7 @@ void WireCell2dToy::Clustering_neutrino(WireCell::PR3DClusterSelection& live_clu
 
 	
 	
-	TVector3 dir1 = cluster2->VHoughTrans(extreme_pts.first,30*units::cm);
-	TVector3 dir2 = cluster2->VHoughTrans(extreme_pts.second,30*units::cm);
+	
 	dir1 *=-1;
 	dir2 *=-1;
 	dir1.SetMag(1);
