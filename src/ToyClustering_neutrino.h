@@ -47,7 +47,7 @@ void WireCell2dToy::Clustering_neutrino(WireCell::PR3DClusterSelection& live_clu
 	saved_wcps.push_back(fb_wcps.first);
     }
 
-    if (fb_wcps.second.z ){
+    if (fb_wcps.second.z < 15*units::cm){
       bool flag_save = true;
       for (size_t j=0;j!=saved_wcps.size();j++){
 	double dis = sqrt(pow(saved_wcps.at(j).x - fb_wcps.second.x,2) + pow(saved_wcps.at(j).y - fb_wcps.second.y,2) + pow(saved_wcps.at(j).z - fb_wcps.second.z,2));
@@ -88,6 +88,10 @@ void WireCell2dToy::Clustering_neutrino(WireCell::PR3DClusterSelection& live_clu
     if (saved_wcps.size()<=1 )
       candidate_clusters.push_back(cluster);
 
+    /* if (cluster_length_map[cluster] > 60*units::cm) */
+    /*   std::cout << cluster->get_cluster_id() << " " << saved_wcps.size() << " " << cluster_length_map[cluster] /units::cm << std::endl; */
+   
+    
     // std::cout << el_wcps.first.x/units::cm << " " << el_wcps.second.x/units::cm << " " << hl_wcps.first.y/units::cm << " " << hl_wcps.second.y/units::cm << " " << fb_wcps.first.z/units::cm << " " << fb_wcps.second.z/units::cm << " " << saved_wcps.size() << std::endl;
     
     //std::cout << el_wcps.first.x/units::cm << " " << el_wcps.second.x/units::cm << std::endl;
@@ -115,6 +119,10 @@ void WireCell2dToy::Clustering_neutrino(WireCell::PR3DClusterSelection& live_clu
 
       std::tuple<int,int,double> results =  cloud2->get_closest_points(cloud1);
       double dis = std::get<2>(results);
+
+      /* if (dis < 2.5*units::cm) */
+      /* 	std::cout << dis/units::cm <<  " " << cluster_length_map[cluster1]/units::cm << " " << cluster_length_map[cluster2]/units::cm << " " << cluster1->get_cluster_id() << " " << cluster2->get_cluster_id() << std::endl; */
+      
       // cannot be too far ...
       if (dis > 80*units::cm || cluster_length_map[cluster1] > 60*units::cm && dis > 10*units::cm) continue;
 
@@ -259,6 +267,8 @@ void WireCell2dToy::Clustering_neutrino(WireCell::PR3DClusterSelection& live_clu
 	double dis2 = cloud1->get_closest_dis(test_pt);
 	if (dis1 < std::max(1.5*units::cm,dis2*sin(10/180.*3.1415926)))
 	  flag_merge = true;
+
+	
       }
 
       if (!flag_merge && cluster_length_map[cluster2] < 60*units::cm && cluster_length_map[cluster1] < 60*units::cm){
@@ -290,6 +300,8 @@ void WireCell2dToy::Clustering_neutrino(WireCell::PR3DClusterSelection& live_clu
   for (auto it = cluster_cloud_map.begin(); it!= cluster_cloud_map.end(); it++){
     delete it->second;
   }
+
+  //to_be_merged_pairs.clear();
 
 
     //merge clusters
