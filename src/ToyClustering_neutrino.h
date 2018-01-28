@@ -343,16 +343,20 @@ void WireCell2dToy::Clustering_neutrino(WireCell::PR3DClusterSelection& live_clu
 
       if (flag_merge){
 	bool flag_proceed = true;
-	if (cluster_length_map[cluster1] < 60*units::cm && used_clusters.find(cluster1) != used_clusters.end())
-	  flag_proceed = false;
-	if (cluster_length_map[cluster2] < 60*units::cm && used_clusters.find(cluster2) != used_clusters.end())
-	  flag_proceed = false;
+	/* if (cluster_length_map[cluster1] < 60*units::cm && cluster_length_map[cluster2] > 60*units::cm && used_clusters.find(cluster1) != used_clusters.end()) */
+	/*   flag_proceed = false; */
+	/* if (cluster_length_map[cluster2] < 60*units::cm && cluster_length_map[cluster1] > 60*units::cm && used_clusters.find(cluster2) != used_clusters.end()) */
+	/*   flag_proceed = false; */
+
 	if (flag_proceed){
 	  to_be_merged_pairs.insert(std::make_pair(cluster1,cluster2));
-	  if (cluster_length_map[cluster1] < 60*units::cm)
-	    used_clusters.insert(cluster1);
-	  if (cluster_length_map[cluster2] < 60*units::cm)
-	    used_clusters.insert(cluster2);
+
+	  /* if (cluster_length_map[cluster1] < 60*units::cm && cluster_length_map[cluster2] > 60*units::cm) */
+	  /*   used_clusters.insert(cluster1); */
+
+	  /* if (cluster_length_map[cluster2] < 60*units::cm && cluster_length_map[cluster1] > 60*units::cm) */
+	  /*   used_clusters.insert(cluster2); */
+	  
 	}
       }
     }
