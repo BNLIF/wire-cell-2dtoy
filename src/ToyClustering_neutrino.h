@@ -21,7 +21,9 @@ void WireCell2dToy::Clustering_neutrino(WireCell::PR3DClusterSelection& live_clu
     std::pair<WCPointCloud<double>::WCPoint,WCPointCloud<double>::WCPoint> fb_wcps = cluster->get_front_back_wcps();
     std::pair<WCPointCloud<double>::WCPoint,WCPointCloud<double>::WCPoint> el_wcps = cluster->get_earliest_latest_wcps();
 
-    if (el_wcps.first.x < -1*units::cm || el_wcps.second.x > 257*units::cm) continue;
+    if (el_wcps.first.x < -1*units::cm || el_wcps.second.x > 257*units::cm || cluster_length_map[cluster] < 2.5*units::cm) continue;
+
+    
     
     contained_clusters.push_back(cluster);
 
@@ -32,7 +34,7 @@ void WireCell2dToy::Clustering_neutrino(WireCell::PR3DClusterSelection& live_clu
     if (hl_wcps.second.y < -99.5*units::cm)
       saved_wcps.push_back(hl_wcps.second);
 
-    if (fb_wcps.first.z < 15*units::cm){
+    if (fb_wcps.first.z > 1022*units::cm){
       bool flag_save = true;
       for (size_t j=0;j!=saved_wcps.size();j++){
 	double dis = sqrt(pow(saved_wcps.at(j).x - fb_wcps.first.x,2) + pow(saved_wcps.at(j).y - fb_wcps.first.y,2) + pow(saved_wcps.at(j).z - fb_wcps.first.z,2));
@@ -41,11 +43,11 @@ void WireCell2dToy::Clustering_neutrino(WireCell::PR3DClusterSelection& live_clu
 	  break;
 	}
       }
-      if (flag_save)
+      if (flag_save< 15*units::cm)
 	saved_wcps.push_back(fb_wcps.first);
     }
 
-    if (fb_wcps.second.z > 1022*units::cm){
+    if (fb_wcps.second.z ){
       bool flag_save = true;
       for (size_t j=0;j!=saved_wcps.size();j++){
 	double dis = sqrt(pow(saved_wcps.at(j).x - fb_wcps.second.x,2) + pow(saved_wcps.at(j).y - fb_wcps.second.y,2) + pow(saved_wcps.at(j).z - fb_wcps.second.z,2));
@@ -83,17 +85,133 @@ void WireCell2dToy::Clustering_neutrino(WireCell::PR3DClusterSelection& live_clu
       if (flag_save)
 	saved_wcps.push_back(el_wcps.second);
     }
-    if (saved_wcps.size()<=1)
+    if (saved_wcps.size()<=1 && cluster_length_map[cluster] < 60*units::cm)
       candidate_clusters.push_back(cluster);
+
+    // std::cout << el_wcps.first.x/units::cm << " " << el_wcps.second.x/units::cm << " " << hl_wcps.first.y/units::cm << " " << hl_wcps.second.y/units::cm << " " << fb_wcps.first.z/units::cm << " " << fb_wcps.second.z/units::cm << " " << saved_wcps.size() << std::endl;
     
     //std::cout << el_wcps.first.x/units::cm << " " << el_wcps.second.x/units::cm << std::endl;
   }
-
-  //std::cout << contained_clusters.size() << " " << candidate_clusters.size() << std::endl;
+  
+  //  std::cout << contained_clusters.size() << " " << candidate_clusters.size() << std::endl;
 
   std::set<std::pair<PR3DCluster*, PR3DCluster*>> to_be_merged_pairs;
 
+  std::map<PR3DCluster*, ToyPointCloud*> cluster_cloud_map;
+  
+  // ignore very small ones?
+  // two short ones, NC pi0 case
+  // one short one and one big one, CC pi0
+  for (auto it = candidate_clusters.begin(); it!=candidate_clusters.end(); it++){
+    PR3DCluster *cluster1 = (*it);
+    cluster1->Create_point_cloud();
+    ToyPointCloud *cloud1 = cluster1->get_point_cloud();
+    for (auto it1 = contained_clusters.begin(); it1!=contained_clusters.end(); it1++){
+      PR3DCluster *cluster2 = (*it1);
+      //can not be the same
+      if (cluster2==cluster1) continue;
+      cluster2->Create_point_cloud();
+      ToyPointCloud *cloud2 = cluster2->get_point_cloud();
 
+      std::tuple<int,int,double> results =  cloud2->get_closest_points(cloud1);
+      double dis = std::get<2>(results);
+      // cannot be too far ...
+      if (dis > 80*units::cm) continue;
+
+      if (cluster_cloud_map.find(cluster1) == cluster_cloud_map.end()){
+	ToyPointCloud* cloud1_ext = new ToyPointCloud(angle_u, angle_v, angle_w);
+	cluster_cloud_map[cluster1] = cloud1_ext;
+	WireCell::PointVector pts;
+	std::pair<Point,Point> extreme_pts = cluster1->get_two_extreme_points();
+	TVector3 dir1 = cluster1->VHoughTrans(extreme_pts.first,30*units::cm);
+	TVector3 dir2 = cluster1->VHoughTrans(extreme_pts.second,30*units::cm);
+	dir1 *=-1;
+	dir2 *=-1;
+	dir1.SetMag(1);
+	dir2.SetMag(1);
+
+	for (size_t j=0;j!=110;j++){
+	  Point pt1(extreme_pts.first.x + dir1.X() * (j+1) * 0.5*units::cm,
+		    extreme_pts.first.y + dir1.Y() * (j+1) * 0.5*units::cm,
+		    extreme_pts.first.z + dir1.Z() * (j+1) * 0.5*units::cm);
+	  pts.push_back(pt1);
+	  Point pt2(extreme_pts.second.x + dir2.X() * (j+1) * 0.5*units::cm,
+		    extreme_pts.second.y + dir2.Y() * (j+1) * 0.5*units::cm,
+		    extreme_pts.second.z + dir2.Z() * (j+1) * 0.5*units::cm);
+	  pts.push_back(pt2);
+	}
+	cloud1_ext->AddPoints(pts);
+	cloud1_ext->build_kdtree_index();
+	
+      }
+      if (cluster_cloud_map.find(cluster2) == cluster_cloud_map.end()){
+	ToyPointCloud* cloud2_ext = new ToyPointCloud(angle_u, angle_v, angle_w);
+	cluster_cloud_map[cluster2] = cloud2_ext;
+	WireCell::PointVector pts;
+	std::pair<Point,Point> extreme_pts = cluster2->get_two_extreme_points();
+	TVector3 dir1 = cluster2->VHoughTrans(extreme_pts.first,30*units::cm);
+	TVector3 dir2 = cluster2->VHoughTrans(extreme_pts.second,30*units::cm);
+	dir1 *=-1;
+	dir2 *=-1;
+	dir1.SetMag(1);
+	dir2.SetMag(1);
+
+	for (size_t j=0;j!=110;j++){
+	  Point pt1(extreme_pts.first.x + dir1.X() * (j+1) * 0.5*units::cm,
+		    extreme_pts.first.y + dir1.Y() * (j+1) * 0.5*units::cm,
+		    extreme_pts.first.z + dir1.Z() * (j+1) * 0.5*units::cm);
+	  pts.push_back(pt1);
+	  Point pt2(extreme_pts.second.x + dir2.X() * (j+1) * 0.5*units::cm,
+		    extreme_pts.second.y + dir2.Y() * (j+1) * 0.5*units::cm,
+		    extreme_pts.second.z + dir2.Z() * (j+1) * 0.5*units::cm);
+	  pts.push_back(pt2);
+	}
+	cloud2_ext->AddPoints(pts);
+	cloud2_ext->build_kdtree_index();
+      }
+
+      ToyPointCloud *cloud1_ext = cluster_cloud_map[cluster1];
+      ToyPointCloud *cloud2_ext = cluster_cloud_map[cluster2];
+
+      bool flag_merge = false;
+      {
+	std::tuple<int,int,double> results_1 =  cloud1_ext->get_closest_points(cloud2);
+	Point test_pt(cloud1_ext->get_cloud().pts.at(std::get<0>(results_1)).x,
+		      cloud1_ext->get_cloud().pts.at(std::get<0>(results_1)).y,
+		      cloud1_ext->get_cloud().pts.at(std::get<0>(results_1)).z);
+	double dis1 = std::get<2>(results_1);
+	double dis2 = cloud1->get_closest_dis(test_pt);
+	if (dis1 < std::max(1.5*units::cm,dis2*sin(10/180.*3.1415926)))
+	  flag_merge = true;
+      }
+
+      if (!flag_merge){
+	std::tuple<int,int,double> results_2 =  cloud1_ext->get_closest_points(cloud2_ext);
+	Point test_pt(cloud1_ext->get_cloud().pts.at(std::get<0>(results_2)).x,
+		      cloud1_ext->get_cloud().pts.at(std::get<0>(results_2)).y,
+		      cloud1_ext->get_cloud().pts.at(std::get<0>(results_2)).z);
+	Point test_pt1(cloud2_ext->get_cloud().pts.at(std::get<1>(results_2)).x,
+		       cloud2_ext->get_cloud().pts.at(std::get<1>(results_2)).y,
+		       cloud2_ext->get_cloud().pts.at(std::get<1>(results_2)).z);
+	double dis1 = std::get<2>(results_2);
+	double dis2 = cloud1->get_closest_dis(test_pt);
+	double dis3 = cloud2->get_closest_dis(test_pt1);
+	if (dis1 < std::max(1.5*units::cm, dis2*sin(10/180.*3.1415926)) && dis1 < std::max(1.5*units::cm, dis3*sin(15/180.*3.1415926))||
+	    dis1 < std::max(1.5*units::cm, dis3*sin(10/180.*3.1415926)) && dis1 < std::max(1.5*units::cm, dis2*sin(15/180.*3.1415926)))
+	  flag_merge = true;
+      }
+
+      
+
+      if (flag_merge)
+	to_be_merged_pairs.insert(std::make_pair(cluster1,cluster2));
+    }
+  }
+  
+  
+  for (auto it = cluster_cloud_map.begin(); it!= cluster_cloud_map.end(); it++){
+    delete it->second;
+  }
 
 
     //merge clusters
