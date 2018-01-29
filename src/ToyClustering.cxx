@@ -315,14 +315,17 @@ void WireCell2dToy::Clustering_jump_gap_cosmics(WireCell::PR3DClusterSelection& 
 
 
   // Now clustering the isolated pieces ....
-  Clustering_neutrino(live_clusters,cluster_length_map);
-  Clustering_dis(live_clusters,cluster_length_map);
-  cerr << em("clustering isolated piece") << std::endl;
-  
-  for (size_t i=0;i!=live_clusters.size();i++){
-    PR3DCluster *cluster = live_clusters.at(i);
-    cluster->set_cluster_id(i+1);
+  for (int i=0;i!=1;i++){
+    Clustering_neutrino(live_clusters,cluster_length_map,i);
+    // std::cout << std::endl << std::endl;
   }
+  // Clustering_dis(live_clusters,cluster_length_map);
+  // cerr << em("clustering isolated piece") << std::endl;
+  
+  // for (size_t i=0;i!=live_clusters.size();i++){
+  //   PR3DCluster *cluster = live_clusters.at(i);
+  //   cluster->set_cluster_id(i+1);
+  // }
 
 
   
