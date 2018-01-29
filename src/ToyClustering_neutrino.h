@@ -559,7 +559,7 @@ void WireCell2dToy::Clustering_neutrino(WireCell::PR3DClusterSelection& live_clu
 	    merge_type = 1;
 	  }
 
-	  if (cluster_close_cluster_map[cluster1].second < 1.2*units::cm && cluster_close_cluster_map[cluster1].first != cluster2){
+	  if (cluster_close_cluster_map[cluster1].second < 1.2*units::cm && cluster_close_cluster_map[cluster1].first != cluster2 && cluster_length_map[cluster_close_cluster_map[cluster1].first] > 60*units::cm){
 	    flag_merge = false;
 	  }
 	  
@@ -771,6 +771,7 @@ void WireCell2dToy::Clustering_dis(WireCell::PR3DClusterSelection& live_clusters
 
   std::set<std::pair<PR3DCluster*, PR3DCluster*>> to_be_merged_pairs;
 
+    
   // clustering small with big ones ... 
   double small_big_dis_cut = 80*units::cm;
   std::set<PR3DCluster*> used_small_clusters;
@@ -796,6 +797,28 @@ void WireCell2dToy::Clustering_dis(WireCell::PR3DClusterSelection& live_clusters
       used_small_clusters.insert(curr_cluster);
     }
   }
+
+  // small distance ... 
+  double small_small_dis_cut = 5*units::cm;
+  for (size_t i=0;i!=small_clusters.size(); i++){
+    PR3DCluster *cluster1 = small_clusters.at(i);
+    ToyPointCloud *cloud1 = cluster1->get_point_cloud();
+    for (size_t j=i+1; j!=small_clusters.size(); j++){
+      PR3DCluster *cluster2 = small_clusters.at(j);
+      ToyPointCloud *cloud2 = cluster2->get_point_cloud();
+      std::tuple<int,int,double> results =  cloud2->get_closest_points(cloud1);
+      double dis = std::get<2>(results);
+      if (dis < small_small_dis_cut){
+	if (used_small_clusters.find(cluster1)!=used_small_clusters.end() ||
+	    used_small_clusters.find(cluster2)!=used_small_clusters.end()){
+	  to_be_merged_pairs.insert(std::make_pair(cluster1,cluster2));
+	  used_small_clusters.insert(cluster1);
+	  used_small_clusters.insert(cluster2);
+	}
+      }
+    }
+  }
+  
   
   std::vector<PR3DCluster*> remaining_small_clusters;
   for (auto it = small_clusters.begin(); it!= small_clusters.end(); it++){
@@ -806,7 +829,7 @@ void WireCell2dToy::Clustering_dis(WireCell::PR3DClusterSelection& live_clusters
 
   
   // clustering small with small ones ... 
-  double small_small_dis_cut = 50*units::cm;
+  small_small_dis_cut = 50*units::cm;
   for (size_t i=0;i!=remaining_small_clusters.size(); i++){
     PR3DCluster *cluster1 = remaining_small_clusters.at(i);
     ToyPointCloud *cloud1 = cluster1->get_point_cloud();
@@ -823,7 +846,7 @@ void WireCell2dToy::Clustering_dis(WireCell::PR3DClusterSelection& live_clusters
 
   // clustering big ones ...
   double big_dis_cut = 3*units::cm;
-  double big_dis_range_cut = 11*units::cm;
+  double big_dis_range_cut = 16*units::cm;
   for (size_t i=0;i!=big_clusters.size();i++){
     PR3DCluster *cluster1 = big_clusters.at(i);
     for (size_t j=i+1; j!=big_clusters.size();j++){
@@ -846,19 +869,20 @@ void WireCell2dToy::Clustering_dis(WireCell::PR3DClusterSelection& live_clusters
 	WireCell::WCPointCloud<double>& cloud = cloud2->get_cloud();
 	for (int k=0;k!=N;k++){
 	  Point test_p1(cloud.pts[k].x,cloud.pts[k].y,cloud.pts[k].z);
-	  if (cloud1->get_closest_2d_dis(test_p1,0).second > big_dis_range_cut ||
-	      cloud1->get_closest_2d_dis(test_p1,1).second > big_dis_range_cut ||
-	      cloud1->get_closest_2d_dis(test_p1,2).second > big_dis_range_cut){
+	  if (cloud1->get_closest_dis(test_p1) > big_dis_range_cut){
+	  /* if (cloud1->get_closest_2d_dis(test_p1,0).second > big_dis_range_cut || */
+	  /*     cloud1->get_closest_2d_dis(test_p1,1).second > big_dis_range_cut || */
+	  /*     cloud1->get_closest_2d_dis(test_p1,2).second > big_dis_range_cut){ */
 	    num_outside_points ++ ;
 	    //flag_merge = false;
-	    if (num_outside_points > 160)
+	    if (num_outside_points > 300)
 	      break;
 	  }
 	}
 
 	//	std::cout << num_outside_points << " " << N << std::endl;
 	
-	if (num_outside_points > 0.15 * N  || num_outside_points > 160)
+	if (num_outside_points > 0.17 * N  || num_outside_points > 300)
 	  flag_merge = false;
 	
 	if (flag_merge)
