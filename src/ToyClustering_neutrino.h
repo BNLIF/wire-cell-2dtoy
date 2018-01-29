@@ -130,6 +130,7 @@ void WireCell2dToy::Clustering_neutrino(WireCell::PR3DClusterSelection& live_clu
       contained_clusters.push_back(cluster); 
     } 
 
+
     
 
     /* if (cluster_length_map[cluster] > 60*units::cm) */
@@ -140,6 +141,35 @@ void WireCell2dToy::Clustering_neutrino(WireCell::PR3DClusterSelection& live_clu
     
     //std::cout << el_wcps.first.x/units::cm << " " << el_wcps.second.x/units::cm << std::endl;
   }
+
+  std::map<PR3DCluster*, std::pair<PR3DCluster*, double>> cluster_close_cluster_map;
+  // calculate the closest distance??? ... 
+  for (size_t i=0;i!=live_clusters.size();i++){
+    PR3DCluster *cluster1 = live_clusters.at(i);
+    ToyPointCloud *cloud1 = cluster1->get_point_cloud();
+    for (size_t j=i+1;j!=live_clusters.size();j++){
+      PR3DCluster *cluster2 = live_clusters.at(j);
+      ToyPointCloud *cloud2 = cluster2->get_point_cloud();
+
+      std::tuple<int,int,double> results =  cloud2->get_closest_points(cloud1);
+      double dis = std::get<2>(results);
+
+      if (cluster_close_cluster_map.find(cluster1)==cluster_close_cluster_map.end()){
+	cluster_close_cluster_map[cluster1] = std::make_pair(cluster2, dis);
+      }else{
+	if (dis < cluster_close_cluster_map[cluster1].second)
+	  cluster_close_cluster_map[cluster1] = std::make_pair(cluster2, dis);
+      }
+
+      if (cluster_close_cluster_map.find(cluster2)==cluster_close_cluster_map.end()){
+	cluster_close_cluster_map[cluster2] = std::make_pair(cluster1, dis);
+      }else{
+	if (dis < cluster_close_cluster_map[cluster2].second)
+	  cluster_close_cluster_map[cluster2] = std::make_pair(cluster1, dis);
+      }
+    }
+  }
+  
   
   //  std::cout << contained_clusters.size() << " " << candidate_clusters.size() << std::endl;
 
@@ -516,15 +546,27 @@ void WireCell2dToy::Clustering_neutrino(WireCell::PR3DClusterSelection& live_clu
 	/*   flag_merge = true; */
 	if (dis1 < std::max(4.5*units::cm,dis2*sin(15/180.*3.1415926)) && (cluster_length_map[cluster2]>25*units::cm || cluster_length_map[cluster1] <= cluster_length_map[cluster2]) ||
 	    dis1 < std::max(2.5*units::cm,dis2*sin(10/180.*3.1415926))) {
-	  if (cluster_length_map[cluster2]<30*units::cm){ 
-	    flag_merge = true; 
-	  }else if (JudgeSeparateDec_1(cluster2,drift_dir)){
-	    flag_merge = true;
+
+	  if (cluster_length_map[cluster1]>25*units::cm && cluster1->get_PCA_value(1) < 0.0015 * cluster1->get_PCA_value(0)){
 	  }else{
-	    flag_merge = cluster2->judge_vertex(test_pt1);
+	    if (cluster_length_map[cluster2]<30*units::cm){ 
+	      flag_merge = true; 
+	    }else if (JudgeSeparateDec_1(cluster2,drift_dir)){
+	      flag_merge = true;
+	    }else{
+	      flag_merge = cluster2->judge_vertex(test_pt1);
+	    }
+	    merge_type = 1;
 	  }
-	  merge_type = 1;
+
+	  if (cluster_close_cluster_map[cluster1].second < 1.2*units::cm && cluster_close_cluster_map[cluster1].first != cluster2){
+	    flag_merge = false;
+	  }
+	  
 	}
+
+	/* if (flag_merge) */
+	/*   std::cout << cluster_length_map[cluster1]/units::cm << " " << cluster1->get_PCA_value(0) << " " << cluster1->get_PCA_value(1) << " " << cluster_length_map[cluster2]/units::cm << " " << cluster1->get_cluster_id() << " " << cluster2->get_cluster_id() << " " << cluster_close_cluster_map[cluster1].first->get_cluster_id() << " " << cluster_close_cluster_map[cluster1].second/units::cm << std::endl;  */
 	
 	/* std::cout << dis1/units::cm << " " << dis2/units::cm << " " << dis/units::cm << " " << */
 	/*   cluster_length_map[cluster1]/units::cm << " " << cluster_length_map[cluster2]/units::cm << " " << cluster1->get_cluster_id() << " " << cluster2->get_cluster_id() << " " << flag_merge << std::endl; */
@@ -695,7 +737,7 @@ void WireCell2dToy::Clustering_dis(WireCell::PR3DClusterSelection& live_clusters
       if (cluster_length_map[live_clusters.at(i)] < 60*units::cm){
 	//	if (JudgeSeparateDec_1(live_clusters.at(i),drift_dir))
 	{
-	  std::vector<PR3DCluster*> sep_clusters = Separate_2(live_clusters.at(i),2.5*units::cm);
+	  std::vector<PR3DCluster*> sep_clusters = Separate_2(live_clusters.at(i),5.0*units::cm);
 	  int max = 0;
 	  for (auto it = sep_clusters.begin(); it!= sep_clusters.end(); it++){
 	    std::vector<int> ranges = (*it)->get_uvwt_range();
