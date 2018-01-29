@@ -875,14 +875,14 @@ void WireCell2dToy::Clustering_dis(WireCell::PR3DClusterSelection& live_clusters
 	  /*     cloud1->get_closest_2d_dis(test_p1,2).second > big_dis_range_cut){ */
 	    num_outside_points ++ ;
 	    //flag_merge = false;
-	    if (num_outside_points > 300)
+	    if (num_outside_points > 350)
 	      break;
 	  }
 	}
 
 	//	std::cout << num_outside_points << " " << N << std::endl;
 	
-	if (num_outside_points > 0.17 * N  || num_outside_points > 300)
+	if (num_outside_points > 0.15 * N  || num_outside_points > 350)
 	  flag_merge = false;
 	
 	if (flag_merge)
