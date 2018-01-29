@@ -809,8 +809,8 @@ void WireCell2dToy::Clustering_dis(WireCell::PR3DClusterSelection& live_clusters
       std::tuple<int,int,double> results =  cloud2->get_closest_points(cloud1);
       double dis = std::get<2>(results);
       if (dis < small_small_dis_cut){
-	if (used_small_clusters.find(cluster1)!=used_small_clusters.end() ||
-	    used_small_clusters.find(cluster2)!=used_small_clusters.end()){
+	if (used_small_clusters.find(cluster1)!=used_small_clusters.end() && used_small_clusters.find(cluster2)==used_small_clusters.end()||
+	    used_small_clusters.find(cluster2)!=used_small_clusters.end() && used_small_clusters.find(cluster1)==used_small_clusters.end()){
 	  to_be_merged_pairs.insert(std::make_pair(cluster1,cluster2));
 	  used_small_clusters.insert(cluster1);
 	  used_small_clusters.insert(cluster2);
