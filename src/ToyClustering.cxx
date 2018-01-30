@@ -311,8 +311,9 @@ void WireCell2dToy::Clustering_jump_gap_cosmics(WireCell::PR3DClusterSelection& 
     PR3DCluster *cluster = live_clusters.at(i);
     cluster->set_cluster_id(i+1);
   }
-
-
+  
+  Clustering_examine_x_boundary(live_clusters,cluster_length_map);
+  
 
   // Now clustering the isolated pieces ....
   for (int i=0;i!=1;i++){
