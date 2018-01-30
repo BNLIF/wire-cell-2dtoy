@@ -943,24 +943,31 @@ void WireCell2dToy::Clustering_dis(WireCell::PR3DClusterSelection& live_clusters
 	bool flag_merge = true;
 
 	int num_outside_points = 0;
+	//int num_outside_points_1 = 0;
 	const int N = cloud2->get_num_points();
 	WireCell::WCPointCloud<double>& cloud = cloud2->get_cloud();
 	for (int k=0;k!=N;k++){
 	  Point test_p1(cloud.pts[k].x,cloud.pts[k].y,cloud.pts[k].z);
 	  if (cloud1->get_closest_dis(test_p1) > big_dis_range_cut){
-	  /* if (cloud1->get_closest_2d_dis(test_p1,0).second > big_dis_range_cut || */
-	  /*     cloud1->get_closest_2d_dis(test_p1,1).second > big_dis_range_cut || */
-	  /*     cloud1->get_closest_2d_dis(test_p1,2).second > big_dis_range_cut){ */
+	  /* if ( */
 	    num_outside_points ++ ;
 	    //flag_merge = false;
-	    if (num_outside_points > 360)
+	    if (num_outside_points > 400)
 	      break;
 	  }
+	  /* if (cloud1->get_closest_2d_dis(test_p1,0).second > big_dis_range_cut ||  */
+	  /*      cloud1->get_closest_2d_dis(test_p1,1).second > big_dis_range_cut ||  */
+	  /*      cloud1->get_closest_2d_dis(test_p1,2).second > big_dis_range_cut){ */
+	  /*   num_outside_points_1 ++; */
+	  /*   if (num_outside_points_1 > 360) */
+	  /*     break; */
+	  /* } */
+	  
 	}
 
 	//std::cout << num_outside_points << " " << N << std::endl;
 	
-	if (num_outside_points > 0.125 * N  || num_outside_points > 360 )
+	if (num_outside_points > 0.125 * N  || num_outside_points > 400  )
 	  flag_merge = false;
 	
 	if (flag_merge)
