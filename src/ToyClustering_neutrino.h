@@ -598,14 +598,14 @@ void WireCell2dToy::Clustering_neutrino(WireCell::PR3DClusterSelection& live_clu
 	  }else{
 	    if (cluster_length_map[cluster2]<30*units::cm){ 
 	      flag_merge = true;
-	      if (cluster_length_map[cluster1]>45*units::cm ){
+	      if (cluster_length_map[cluster1]>45*units::cm && cluster1->get_PCA_value(1) < 0.012 * cluster1->get_PCA_value(0)){
 		if (dis1 > std::max(2.5*units::cm, dis2*sin(7.5/180.*3.1415926)))
 		  flag_merge = false;
 		//std::cout << JudgeSeparateDec_1(cluster1,drift_dir) << " " << cluster1->get_PCA_value(0) << " " << cluster1->get_PCA_value(1) << std::endl; 
 	      } 
 	    }else if (JudgeSeparateDec_1(cluster2,drift_dir)){
 	      flag_merge = true;
-	      if (cluster_length_map[cluster1]>45*units::cm ){
+	      if (cluster_length_map[cluster1]>45*units::cm && cluster1->get_PCA_value(1) < 0.012 * cluster1->get_PCA_value(0)){
 		if (dis1 > std::max(2.5*units::cm, dis2*sin(7.5/180.*3.1415926)))
 		  flag_merge = false;
 		//std::cout << JudgeSeparateDec_1(cluster1,drift_dir) << " " << cluster1->get_PCA_value(0) << " " << cluster1->get_PCA_value(1) << std::endl; 
@@ -953,14 +953,14 @@ void WireCell2dToy::Clustering_dis(WireCell::PR3DClusterSelection& live_clusters
 	  /*     cloud1->get_closest_2d_dis(test_p1,2).second > big_dis_range_cut){ */
 	    num_outside_points ++ ;
 	    //flag_merge = false;
-	    if (num_outside_points > 350)
+	    if (num_outside_points > 360)
 	      break;
 	  }
 	}
 
-	//	std::cout << num_outside_points << " " << N << std::endl;
+	//std::cout << num_outside_points << " " << N << std::endl;
 	
-	if (num_outside_points > 0.15 * N  || num_outside_points > 350)
+	if (num_outside_points > 0.125 * N  || num_outside_points > 360 )
 	  flag_merge = false;
 	
 	if (flag_merge)
@@ -975,7 +975,7 @@ void WireCell2dToy::Clustering_dis(WireCell::PR3DClusterSelection& live_clusters
   for (auto it = to_be_merged_pairs.begin(); it!=to_be_merged_pairs.end(); it++){
     PR3DCluster *cluster1 = (*it).first;
     PR3DCluster *cluster2 = (*it).second;
-    //  std::cout << cluster1 << " " << cluster2 << " " << cluster1->get_cluster_id() << " " << cluster2->get_cluster_id() << std::endl;
+    /* std::cout << cluster1 << " " << cluster2 << " " << cluster1->get_cluster_id() << " " << cluster2->get_cluster_id() << " " << cluster_length_map[cluster1]/units::cm << " " << cluster_length_map[cluster2]/units::cm << std::endl; */
     
     bool flag_new = true;
     std::vector<std::set<PR3DCluster*>> temp_set;
