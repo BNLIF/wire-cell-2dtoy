@@ -904,6 +904,7 @@ std::vector<WireCell::PR3DCluster*> WireCell2dToy::Separate_1(WireCell::PR3DClus
     std::vector<int> range_v1 = other_clusters.at(i)->get_uvwt_range();
     double length_1 = sqrt(2./3. * (pow(pitch_u*range_v1.at(0),2) + pow(pitch_v*range_v1.at(1),2) + pow(pitch_w*range_v1.at(2),2)) + pow(time_slice_width*range_v1.at(3),2));
     other_clusters.at(i)->Create_point_cloud();
+    other_clusters.at(i)->Calc_PCA();
     ToyPointCloud* temp_cloud1 = other_clusters.at(i)->get_point_cloud();
     std::tuple<int,int,double> temp_dis = temp_cloud1->get_closest_points(cluster1_cloud);
 
@@ -920,7 +921,7 @@ std::vector<WireCell::PR3DCluster*> WireCell2dToy::Separate_1(WireCell::PR3DClus
 	}
       }
       
-      //   std::cout << temp_close_points << " A " << temp_total_points << std::endl;
+      //std::cout << temp_close_points << " A " << temp_total_points << " " << length_1/units::cm << std::endl;
 
       if (temp_close_points > 0.7 * temp_total_points){
 	saved_clusters.push_back(other_clusters.at(i));
@@ -937,7 +938,7 @@ std::vector<WireCell::PR3DCluster*> WireCell2dToy::Separate_1(WireCell::PR3DClus
 	}
       }
       
-      // std::cout << temp_close_points << " A " << temp_total_points << std::endl;
+      //std::cout << temp_close_points << " B " << temp_total_points << " " << length_1/units::cm << std::endl;
 
       if (temp_close_points > 0.85 * temp_total_points){
 	saved_clusters.push_back(other_clusters.at(i));
@@ -949,7 +950,50 @@ std::vector<WireCell::PR3DCluster*> WireCell2dToy::Separate_1(WireCell::PR3DClus
     if (!flag_save)
       to_be_merged_clusters.push_back(other_clusters.at(i));
   }
+  
+  //add a protection
+  std::vector<WireCell::PR3DCluster*> temp_save_clusters;
+  std::map<WireCell::PR3DCluster*, double> temp_cluster_length_map;
+  for (size_t i=0;i!=saved_clusters.size();i++){
+    PR3DCluster *cluster1 = saved_clusters.at(i);
+    std::vector<int> range_v1 = cluster1->get_uvwt_range();
+    double length_1 = sqrt(2./3. * (pow(pitch_u*range_v1.at(0),2) + pow(pitch_v*range_v1.at(1),2) + pow(pitch_w*range_v1.at(2),2)) + pow(time_slice_width*range_v1.at(3),2));
+    temp_cluster_length_map[cluster1] = length_1;
+  }
+  for (size_t i=0;i!=to_be_merged_clusters.size();i++){
+    PR3DCluster *cluster1 = to_be_merged_clusters.at(i);
+    std::vector<int> range_v1 = cluster1->get_uvwt_range();
+    double length_1 = sqrt(2./3. * (pow(pitch_u*range_v1.at(0),2) + pow(pitch_v*range_v1.at(1),2) + pow(pitch_w*range_v1.at(2),2)) + pow(time_slice_width*range_v1.at(3),2));
+    temp_cluster_length_map[cluster1] = length_1;
+  }
+  
+  for (size_t i=0;i!=saved_clusters.size();i++){
+    PR3DCluster *cluster1 = saved_clusters.at(i);
+    if (temp_cluster_length_map[cluster1] < 5*units::cm) continue;
+    ToyPointCloud* cloud1 = cluster1->get_point_cloud();
+    TVector3 dir1(cluster1->get_PCA_axis(0).x,cluster1->get_PCA_axis(0).y,cluster1->get_PCA_axis(0).z);
+    for (size_t j=0;j!=to_be_merged_clusters.size();j++){
+      PR3DCluster *cluster2 = to_be_merged_clusters.at(j);
+      if (temp_cluster_length_map[cluster2] < 10*units::cm) continue;
+      ToyPointCloud* cloud2 = cluster2->get_point_cloud();
+      TVector3 dir2(cluster2->get_PCA_axis(0).x,cluster2->get_PCA_axis(0).y,cluster2->get_PCA_axis(0).z);
+      std::tuple<int,int,double> temp_dis = cloud1->get_closest_points(cloud2);
+      if (std::get<2>(temp_dis) < 15*units::cm && fabs(dir1.Angle(dir2)-3.1415926/2.)/3.1415926*180>75){
+	//	std::cout << std::get<2>(temp_dis)/units::cm << " " <<  << std::endl;
+	temp_save_clusters.push_back(cluster1);
+	break;
+      }
+    }
+  }
+  
+  // std::cout << temp_save_clusters.size() << std::endl;
 
+  for (size_t i=0;i!= temp_save_clusters.size();i++){
+    PR3DCluster *cluster1 = temp_save_clusters.at(i);
+    to_be_merged_clusters.push_back(cluster1);
+    saved_clusters.erase(find(saved_clusters.begin(),saved_clusters.end(),cluster1));
+  }
+  
   
   cluster2 = new PR3DCluster(2);
   for (size_t i=0;i!=to_be_merged_clusters.size();i++){
