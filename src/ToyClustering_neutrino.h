@@ -53,6 +53,7 @@ void WireCell2dToy::Clustering_neutrino(WireCell::PR3DClusterSelection& live_clu
   double angle_w = mp.get_angle_w();
   double time_slice_width = mp.get_ts_width();
   TVector3 drift_dir(1,0,0);
+  TVector3 vertical_dir(0,1,0);
 
    // sort the clusters length ...
   {
@@ -222,6 +223,11 @@ void WireCell2dToy::Clustering_neutrino(WireCell::PR3DClusterSelection& live_clu
   std::set< PR3DCluster*> used_clusters; 
 
   std::map<PR3DCluster*, ToyPointCloud*> cluster_cloud_map;
+
+  for (auto it = candidate_clusters.begin(); it!=candidate_clusters.end(); it++){
+    PR3DCluster *cluster1 = (*it);
+    cluster1->Calc_PCA();
+  }
   
   // ignore very small ones?
   // two short ones, NC pi0 case
@@ -234,6 +240,11 @@ void WireCell2dToy::Clustering_neutrino(WireCell::PR3DClusterSelection& live_clu
       PR3DCluster *cluster2 = (*it1);
       //can not be the same
       if (cluster2==cluster1) continue;
+      if (cluster_length_map[cluster2] > 150*units::cm){
+	TVector3 dir1(cluster2->get_PCA_axis(0).x, cluster2->get_PCA_axis(0).y, cluster2->get_PCA_axis(0).z);
+	if (fabs(dir1.Angle(vertical_dir)-3.1415926/2.)/3.1415926*180.>80)
+	  continue;
+      }
       cluster2->Create_point_cloud();
       ToyPointCloud *cloud2 = cluster2->get_point_cloud();
 
