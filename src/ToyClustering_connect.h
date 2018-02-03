@@ -109,7 +109,8 @@ void WireCell2dToy::Clustering_connect1(WireCell::PR3DClusterSelection& live_clu
     	  tempV5.SetXYZ(fabs(dir1.X()),sqrt(pow(dir1.Y(),2) + pow(dir1.Z(),2)) * sin(angle1),0);
     	  angle1 = tempV5.Angle(drift_dir);
 
-    	  
+	  /* if (extreme_points.first.z<20*units::cm) */
+	  /*   std::cout << angle1/3.1415926*180. << " " << cluster_length_map[cluster]/units::cm << std::endl; */
 	  
     	  if (angle1 < 7.5/180.*3.1415926 ){
     	    flag_add_dir1 = true;

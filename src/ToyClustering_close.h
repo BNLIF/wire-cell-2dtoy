@@ -142,6 +142,9 @@ bool WireCell2dToy::Clustering_3rd_round(WireCell::PR3DCluster *cluster1, WireCe
     return true;
   }
 
+  if (dis < 1.0*units::cm && length_2 < 12*units::cm && length_1 <12*units::cm)
+    return true;
+
   
   if (dis < 2.0*units::cm && (length_2 >=12*units::cm || length_1 >=12*units::cm)){
     dir1 = cluster1->VHoughTrans(p1,50*units::cm); // cluster 1 direction based on hough
