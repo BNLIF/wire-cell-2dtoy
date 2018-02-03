@@ -14,7 +14,7 @@ void WireCell2dToy::Clustering_examine_x_boundary(WireCell::PR3DClusterSelection
   for (size_t i=0;i!=live_clusters.size();i++){
     PR3DCluster *cluster = live_clusters.at(i);
     // only examine big clusters ... 
-    if (cluster_length_map[cluster] > 5*units::cm){
+    if (cluster_length_map[cluster] > 5*units::cm&&cluster_length_map[cluster]<150*units::cm){
       //cluster->Create_point_cloud();
       std::vector<PR3DCluster*> clusters = cluster->examine_x_boundary();
       if (clusters.size()!=0){
