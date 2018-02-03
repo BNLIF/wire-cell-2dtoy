@@ -86,7 +86,7 @@ void WireCell2dToy::Clustering_connect1(WireCell::PR3DClusterSelection& live_clu
     bool flag_add_dir1 = true;
     bool flag_add_dir2 = true;
     map_cluster_dir1[cluster] = dir1;
-    map_cluster_dir1[cluster] = dir2;
+    map_cluster_dir2[cluster] = dir2;
 
     // judge if something is good ...
     if (cluster_length_map[cluster] < 15*units::cm && i!=0){
@@ -185,7 +185,8 @@ void WireCell2dToy::Clustering_connect1(WireCell::PR3DClusterSelection& live_clu
       /* } */
     }else{
 
-      if (cluster_length_map[cluster] < 100*units::cm){
+      if (cluster_length_map[cluster] < 100*units::cm  ||
+	  fabs(dir2.Angle(drift_dir) - 3.1415926/2.) < 5*3.1415926/180. && fabs(dir1.Angle(drift_dir) - 3.1415926/2.) < 5*3.1415926/180.  && cluster_length_map[cluster] < 200*units::cm){
 	WireCell::WCPointCloud<double>& cloud = cluster->get_point_cloud()->get_cloud();
 	int num_total_points = cloud.pts.size(); // total number of points
 	int num_unique[3]={0,0,0}; // points that are unique (not agree with any other clusters)
@@ -433,6 +434,10 @@ void WireCell2dToy::Clustering_connect1(WireCell::PR3DClusterSelection& live_clu
 	      
 	    }
 	  }
+
+	  /* std::cout << max_value_u[0] << " " << max_value_u[1] << " " << max_value_u[2] << " " */
+	  /* 	    << max_value_v[0] << " " << max_value_v[1] << " " << max_value_v[2] << " " */
+	  /* 	    << max_value_w[0] << " " << max_value_w[1] << " " << max_value_w[2] << " " << std::endl; */
 	  
 	  if ((max_value_u[0] > 0.33 * num_total_points || max_value_u[0] > 100) &&
 	      (max_value_u[1] > 0.33 * num_total_points || max_value_u[1] > 100) &&
@@ -464,8 +469,14 @@ void WireCell2dToy::Clustering_connect1(WireCell::PR3DClusterSelection& live_clu
 	      max_cluster = max_cluster_w;
 	    }
 	  }
+
+
+	  /* if (extreme_points.first.x < 117*units::cm && extreme_points.first.x > 105*units::cm && */
+	  /*     extreme_points.first.z < 280*units::cm){ */
+	  /*   std::cout << extreme_points.first.x /units::cm << " " << extreme_points.first.y/units::cm << " " << extreme_points.first.z/units::cm << " " << cluster->get_cluster_id() << " B " << max_value[0] << " " << max_value[1] << " " << max_value[2] << " " << num_total_points << " " << cluster_length_map[cluster]/units::cm << std::endl; */
+	  /* } */
 	  
-	  
+	 
 	  // if overlap a lot merge
 	  if ((max_value[0]+max_value[1]+max_value[2]) > 0.75 *(num_total_points  + num_total_points  + num_total_points) &&
 	      ((num_unique[1]+num_unique[0]+num_unique[2]) < 0.24 * num_total_points ||
@@ -526,22 +537,30 @@ void WireCell2dToy::Clustering_connect1(WireCell::PR3DClusterSelection& live_clu
 		to_be_merged_pairs.insert(std::make_pair(cluster,max_cluster));
 		//curr_cluster = max_cluster;
 		flag_merge = true;
-	      }if (((angle_diff < 5 || angle_diff > 175) && dis < 2.5*units::cm ||
-		    (angle_diff < 10 || angle_diff > 170) && dis < 1.2*units::cm) &&
-		   dis1 > (cluster_length_map[cluster] + cluster_length_map[max_cluster])/3.){
+	      }else if (((angle_diff < 5 || angle_diff > 175) && dis < 2.5*units::cm ||
+			 (angle_diff < 10 || angle_diff > 170) && dis < 1.2*units::cm) &&
+			dis1 > (cluster_length_map[cluster] + cluster_length_map[max_cluster])/3.){
 		to_be_merged_pairs.insert(std::make_pair(cluster,max_cluster));
 		flag_merge = true;
 	      }
 	      
-	      // std::cout <<cluster->get_cluster_id() << " " << max_cluster->get_cluster_id() << " " << cluster_length_map[cluster]/units::cm << " " << cluster_length_map[max_cluster]/units::cm << " " << angle_diff << " " << angle1_drift << " " << angle2_drift << " " << dis/units::cm << std::endl;
+	      //   std::cout <<cluster->get_cluster_id() << " " << max_cluster->get_cluster_id() << " " << cluster_length_map[cluster]/units::cm << " " << cluster_length_map[max_cluster]/units::cm << " " << angle_diff << " " << angle1_drift << " " << angle2_drift << " " << dis/units::cm << " " << flag_merge << std::endl;
 	    }
-	    
+
+	    if (fabs(dir2.Angle(drift_dir) - 3.1415926/2.) < 5*3.1415926/180. && fabs(dir1.Angle(drift_dir) - 3.1415926/2.) < 5*3.1415926/180. && (max_value[0]+max_value[1]+max_value[2]) > 0.7 *(num_total_points  + num_total_points  + num_total_points)){
+	      to_be_merged_pairs.insert(std::make_pair(cluster,max_cluster));
+	      flag_merge = true;
+	    }
 
 	  }
+
 	  
-	  // when added points in
-	  // if overlap a lot merge 
-	  // if overlap significant, compare the PCA
+	 
+	  
+	  
+	
+
+
 	  
 	  /* if (fabs(extreme_points.first.x-228.6*units::cm)< 5*units::cm && */
 	  /*     fabs(extreme_points.first.y+5.2*units::cm)< 5*units::cm && */
@@ -552,8 +571,25 @@ void WireCell2dToy::Clustering_connect1(WireCell::PR3DClusterSelection& live_clu
 	  /*   std::cout << map_cluster_num[0][max_cluster_w] << " " << map_cluster_num[1][max_cluster_w] << " " << map_cluster_num[2][max_cluster_w] << " " << std::endl; */
 	  /* } */
 	}
-      }
-      
+
+
+	// when added points in
+	// if overlap a lot merge 
+	// if overlap significant, compare the PCA
+	if (!flag_merge){
+	  
+	  
+	}
+	  
+	  //if (max_value[0] + max_value[1] + max_value[2]>0)
+	/* if (extreme_points.first.z <=1020*units::cm && extreme_points.first.z >= 960*units::cm && */
+	/*     extreme_points.first.y < 0) */
+	/*   std::cout << extreme_points.first.x/units::cm << " " << extreme_points.first.y/units::cm << " " << extreme_points.first.z/units::cm << " " << max_value[0] << " " << max_value[1] << " " << max_value[2] << " " << num_total_points << " " << num_unique[0] << " " << num_unique[1] << " " << num_unique[2] << " " << flag_merge << " " << flag_add_dir1 << " " << flag_add_dir2 << std::endl; */
+	
+	
+	
+      } // length cut ... 
+     
       if (flag_add_dir1){
 	// add extension points in ... 
 	if (fabs(dir1.Angle(drift_dir) - 3.1415926/2.) < 5*3.1415926/180.){
@@ -578,17 +614,12 @@ void WireCell2dToy::Clustering_connect1(WireCell::PR3DClusterSelection& live_clu
 	  global_skeleton_cloud.AddPoints(cluster,extreme_points.second,dir2,extending_dis,1.2*units::cm, angle);
 	}
       }
-
-      /* if (cluster_length_map[cluster] > extending_dis * 0.8){ */
-      /* 	live_clusters.at(i)->Construct_skeleton(); */
-      /* 	global_skeleton_cloud.AddPoints(live_clusters.at(i),1); */
-      /* } */
-    }
+    } // not the first cluster ... 
 
 
     
     //std::cout << extreme_points.first.x/units::cm << " " << extreme_points.first.y/units::cm << " " << extreme_points.first.z/units::cm << " " << extreme_points.second.x/units::cm << " " << extreme_points.second.y/units::cm << " " << extreme_points.second.z/units::cm << std::endl;
-  }
+  } // loop over clusters ... 
 
 
   // to_be_merged_pairs.clear();
