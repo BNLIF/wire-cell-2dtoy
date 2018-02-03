@@ -616,6 +616,26 @@ std::vector<WireCell::PR3DCluster*> WireCell2dToy::Separate_1(WireCell::PR3DClus
       main_dir *= -1;
       
       max_index = min_index;
+    }else{
+      Point p1(independent_points.at(max_index).x,independent_points.at(max_index).y,independent_points.at(max_index).z);
+      Point p2(independent_points.at(min_index).x,independent_points.at(min_index).y,independent_points.at(min_index).z);
+      TVector3 temp_dir1 = cluster->VHoughTrans(p1,15*units::cm);
+      TVector3 temp_dir2 = cluster->VHoughTrans(p2,15*units::cm);
+      //int num_p1 = cluster->get_num_points(p1,15*units::cm);
+      //int num_p2 = cluster->get_num_points(p2,15*units::cm);
+
+      //   std::cout << p1.x/units::cm << " " << p1.y/units::cm << " " << p1.z/units::cm << " " << cluster->get_num_points(p1,15*units::cm) << " " << cluster->get_num_points(p2,15*units::cm) << " " << fabs(temp_dir1.Angle(main_dir)-3.1415926/2.)/3.1415926*180. << " " << fabs(temp_dir2.Angle(main_dir)-3.1415926/2.)/3.1415926*180. << " " << length/units::cm << " " << fabs(temp_dir1.Angle(drift_dir)-3.1415926/2.)/3.1415926*180. << " " << fabs(temp_dir2.Angle(drift_dir)-3.1415926/2.)/3.1415926*180. << std::endl;
+      
+      if (fabs(temp_dir1.Angle(main_dir)-3.1415926/2.) <  fabs(temp_dir2.Angle(main_dir)-3.1415926/2.) ||
+	  fabs(temp_dir1.Angle(drift_dir)-3.1415926/2.) > fabs(temp_dir2.Angle(drift_dir)-3.1415926/2.) &&
+	  fabs(temp_dir2.Angle(drift_dir)-3.1415926/2.) < 10){
+	 
+	  //
+	start_wcpoint = independent_points.at(max_index);
+	main_dir *= -1;
+	
+	max_index = min_index;
+      }
     }
     
     Point start_point(start_wcpoint.x, start_wcpoint.y, start_wcpoint.z);
