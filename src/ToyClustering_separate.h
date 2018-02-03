@@ -422,12 +422,12 @@ bool WireCell2dToy::JudgeSeparateDec_2(WireCell::PR3DCluster* cluster, TVector3&
   
   
   
-  //std::cout <<  cluster->get_cluster_id() << " " << hy_points.size() << " " << ly_points.size() << " " << hz_points.size() << " " << lz_points.size() <<  " " << hx_points.size() << " " << lx_points.size() << " " << num_outside_points << " " << num_outx_points << " " << independent_points.size() << " " << num_far_points << " " << independent_surfaces.size() << std::endl;
+  // std::cout <<  cluster->get_cluster_id() << " " << hy_points.size() << " " << ly_points.size() << " " << hz_points.size() << " " << lz_points.size() <<  " " << hx_points.size() << " " << lx_points.size() << " " << num_outside_points << " " << num_outx_points << " " << independent_points.size() << " " << num_far_points << " " << independent_surfaces.size() << std::endl;
 
   
-  /* /\* for (auto it=independent_surfaces.begin(); it!=independent_surfaces.end(); it++){ *\/ */
-  /* /\*   std::cout << (*it) << std::endl; *\/ */
-  /* /\* } *\/ */
+  /* for (auto it=independent_surfaces.begin(); it!=independent_surfaces.end(); it++){ */
+  /*   std::cout << (*it) << std::endl; */
+  /* } */
   
   double max_x=-1e9, min_x=1e9;
   double max_y=-1e9, min_y=1e9;
@@ -442,7 +442,7 @@ bool WireCell2dToy::JudgeSeparateDec_2(WireCell::PR3DCluster* cluster, TVector3&
     //std::cout << (*it).x/units::cm << " " << (*it).y/units::cm << " " << (*it).z/units::cm << std::endl; 
   }
   if (max_x-min_x < 2.5*units::cm && sqrt(pow(max_y-min_y,2)+pow(max_z-min_z,2)+pow(max_x-min_x,2))>150*units::cm) return false;
-  
+  if (max_x-min_x < 2.5*units::cm  && independent_points.size()==2 && num_outx_points == 0) return false;
   
   if ((num_outside_points > 1 && independent_surfaces.size()>1
        || num_outx_points>0) &&
@@ -697,7 +697,7 @@ std::vector<WireCell::PR3DCluster*> WireCell2dToy::Separate_1(WireCell::PR3DClus
   /* if (sqrt(pow(start_wcpoint.x-end_wcpoint.x,2)+pow(start_wcpoint.y-end_wcpoint.y,2)+pow(start_wcpoint.z-end_wcpoint.z,2))/units::cm ) */
   
   
-  //  std::cout  << " XQ " << start_wcpoint.x/units::cm << " " << start_wcpoint.y/units::cm << " " << start_wcpoint.z/units::cm << " " << end_wcpoint.x/units::cm << " " << end_wcpoint.y/units::cm << " " << end_wcpoint.z/units::cm << " " << dir.X() << " " << dir.Y() << " " << dir.Z() << " " << sqrt(pow(start_wcpoint.x-end_wcpoint.x,2)+pow(start_wcpoint.y-end_wcpoint.y,2)+pow(start_wcpoint.z-end_wcpoint.z,2))/units::cm << " " << length/units::cm << std::endl;
+  //std::cout  << " XQ " << start_wcpoint.x/units::cm << " " << start_wcpoint.y/units::cm << " " << start_wcpoint.z/units::cm << " " << end_wcpoint.x/units::cm << " " << end_wcpoint.y/units::cm << " " << end_wcpoint.z/units::cm << " " << dir.X() << " " << dir.Y() << " " << dir.Z() << " " << sqrt(pow(start_wcpoint.x-end_wcpoint.x,2)+pow(start_wcpoint.y-end_wcpoint.y,2)+pow(start_wcpoint.z-end_wcpoint.z,2))/units::cm << " " << length/units::cm << std::endl;
   
   
   cluster->dijkstra_shortest_paths(start_wcpoint);
