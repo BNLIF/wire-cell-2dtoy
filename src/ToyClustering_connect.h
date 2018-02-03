@@ -723,6 +723,7 @@ void WireCell2dToy::Clustering_connect1(WireCell::PR3DClusterSelection& live_clu
 	
 	double angle_diff = fabs(p1_dir.Angle(p2_dir)-3.1415926/2.)/3.1415926*180.;
 	double angle_diff1 = fabs(cc_dir.Angle(p1_dir)-3.1415926/2.)/3.1415926*180;
+	double angle_diff2 = fabs(cc_dir.Angle(p2_dir)-3.1415926/2.)/3.1415926*180;
 	  
 	Line l2(p2_c,p2_dir);
 	double dis = l1.closest_dis(l2);
@@ -739,12 +740,14 @@ void WireCell2dToy::Clustering_connect1(WireCell::PR3DClusterSelection& live_clu
 	
 	bool flag_merge = false;
 	
-	if (((angle_diff >85) && angle_diff1 > 90 - 1.5 * (90-angle_diff) && dis < 2.5*units::cm ||
-	     (angle_diff >80) &&angle_diff1 > 90 - 1.5 * (90-angle_diff) && dis < 1.2*units::cm) &&
-	    dis1 > (cluster_length_map[cluster_2] + cluster_length_map[cluster_1])/3.){
+	if (((angle_diff >85) && (angle_diff1 > 90 - 1.5 * (90-angle_diff)) &&
+	     (angle_diff2 > 90 - 1.5 * (90-angle_diff)) && dis < 2.5*units::cm ||
+	     (angle_diff >80) && angle_diff1 > 80 && angle_diff2 > 80 && dis < 1.2*units::cm) &&
+	    dis1 > (cluster_length_map[cluster_2] + cluster_length_map[cluster_1])/3. ){
 	  to_be_merged_pairs.insert(std::make_pair(cluster_1,cluster_2));
 	  flag_merge = true;
-	}else if ((angle_diff >87) && angle_diff1 > 90 - 1.5 * (90-angle_diff) && dis < 4.0*units::cm &&
+	}else if ((angle_diff >87) && (angle_diff1 > 90 - 1.5 * (90-angle_diff) ) &&
+		  (angle_diff2 > 90 - 1.5 * (90-angle_diff) ) && dis < 4.0*units::cm &&
 		  dis1 > (cluster_length_map[cluster_2] + cluster_length_map[cluster_1])/2. &&
 		  cluster_length_map[cluster_2] > 15*units::cm && cluster_length_map[cluster_1] > 15*units::cm &&
 		  cluster_length_map[cluster_2]+cluster_length_map[cluster_1] > 45*units::cm){
@@ -753,7 +756,7 @@ void WireCell2dToy::Clustering_connect1(WireCell::PR3DClusterSelection& live_clu
 	}
 
 	/* if (flag_merge) */
-	/*   std::cout << cluster_2->get_cluster_id() << " " << cluster_1->get_cluster_id() << " " << angle_diff << " " << angle_diff1 << " " << dis/units::cm << " " << dis1/units::cm <<  " " << cluster_length_map[cluster_1]/units::cm << " " << cluster_length_map[cluster_2]/units::cm << " " << p1_dir.X() << " " << p1_dir.Y() << " " <<  p1_dir.Z() << " " << p2_dir.X() << " " << p2_dir.Y() << " " << p2_dir.Z() << " " << p1_c.x/units::cm << " " << p1_c.y/units::cm << " " << p1_c.z/units::cm << " " << p2_c.x/units::cm << " " << p2_c.y/units::cm << " " << p2_c.z/units::cm << std::endl;  */ 
+	/*   std::cout << cluster_2->get_cluster_id() << " " << cluster_1->get_cluster_id() << " " << angle_diff << " " << angle_diff1 << " " << dis/units::cm << " " << dis1/units::cm <<  " " << cluster_length_map[cluster_1]/units::cm << " " << cluster_length_map[cluster_2]/units::cm << " " << p1_dir.X() << " " << p1_dir.Y() << " " <<  p1_dir.Z() << " " << p2_dir.X() << " " << p2_dir.Y() << " " << p2_dir.Z() << " " << p1_c.x/units::cm << " " << p1_c.y/units::cm << " " << p1_c.z/units::cm << " " << p2_c.x/units::cm << " " << p2_c.y/units::cm << " " << p2_c.z/units::cm << std::endl;  */
 	
       }
     }

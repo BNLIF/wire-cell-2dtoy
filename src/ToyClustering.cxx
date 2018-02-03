@@ -301,8 +301,7 @@ void WireCell2dToy::Clustering_jump_gap_cosmics(WireCell::PR3DClusterSelection& 
     cluster->set_cluster_id(i+1);
   }
   
-  //  DynamicToyPointCloud global_point_cloud(angle_u,angle_v,angle_w);
-
+ 
   // prepare for deghosting and clustering along track
   Clustering_deghost(live_clusters,cluster_length_map, dead_u_index, dead_v_index, dead_w_index);
   cerr << em("deghost clusters") << std::endl;
