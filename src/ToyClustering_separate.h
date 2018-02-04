@@ -621,12 +621,16 @@ std::vector<WireCell::PR3DCluster*> WireCell2dToy::Separate_1(WireCell::PR3DClus
     start_wcpoint = independent_points.at(min_index);
 
     // change direction if certain thing happened ...
-    if (min_pca_dis > max_pca_dis && max_pca_dis < 5*units::cm){
-      start_wcpoint = independent_points.at(max_index);
-      main_dir *= -1;
-      
-      max_index = min_index;
-    }else{
+    /* if (min_pca_dis > max_pca_dis && max_pca_dis < 5*units::cm){ */
+    /*   if (1){ */
+    /* 	std::cout << min_pca_dis/units::cm << " " << max_pca_dis/units::cm << std::endl; */
+    /* 	start_wcpoint = independent_points.at(max_index); */
+    /* 	main_dir *= -1; */
+    /* 	max_index = min_index; */
+    /*   } */
+    /* }else */
+
+    {
       Point p1(independent_points.at(max_index).x,independent_points.at(max_index).y,independent_points.at(max_index).z);
       Point p2(independent_points.at(min_index).x,independent_points.at(min_index).y,independent_points.at(min_index).z);
       TVector3 temp_dir1 = cluster->VHoughTrans(p1,15*units::cm);
@@ -634,16 +638,24 @@ std::vector<WireCell::PR3DCluster*> WireCell2dToy::Separate_1(WireCell::PR3DClus
       //int num_p1 = cluster->get_num_points(p1,15*units::cm);
       //int num_p2 = cluster->get_num_points(p2,15*units::cm);
 
-      //   std::cout << p1.x/units::cm << " " << p1.y/units::cm << " " << p1.z/units::cm << " " << cluster->get_num_points(p1,15*units::cm) << " " << cluster->get_num_points(p2,15*units::cm) << " " << fabs(temp_dir1.Angle(main_dir)-3.1415926/2.)/3.1415926*180. << " " << fabs(temp_dir2.Angle(main_dir)-3.1415926/2.)/3.1415926*180. << " " << length/units::cm << " " << fabs(temp_dir1.Angle(drift_dir)-3.1415926/2.)/3.1415926*180. << " " << fabs(temp_dir2.Angle(drift_dir)-3.1415926/2.)/3.1415926*180. << std::endl;
+      // std::cout << p1.x/units::cm << " " << p1.y/units::cm << " " << p1.z/units::cm << " " << cluster->get_num_points(p1,15*units::cm) << " " << cluster->get_num_points(p2,15*units::cm) << " " << fabs(temp_dir1.Angle(main_dir)-3.1415926/2.)/3.1415926*180. << " " << fabs(temp_dir2.Angle(main_dir)-3.1415926/2.)/3.1415926*180. << " " << length/units::cm << " " << fabs(temp_dir1.Angle(drift_dir)-3.1415926/2.)/3.1415926*180. << " " << fabs(temp_dir2.Angle(drift_dir)-3.1415926/2.)/3.1415926*180. << " " << main_dir.X() << " " << main_dir.Y() << " " << main_dir.Z() << std::endl;
+
+      bool flag_change = false;
       
-      if (fabs(temp_dir1.Angle(main_dir)-3.1415926/2.) <  fabs(temp_dir2.Angle(main_dir)-3.1415926/2.) ||
-	  fabs(temp_dir1.Angle(drift_dir)-3.1415926/2.) > fabs(temp_dir2.Angle(drift_dir)-3.1415926/2.) &&
-	  fabs(temp_dir2.Angle(drift_dir)-3.1415926/2.) < 10){
-	 
-	  //
+      if (fabs(temp_dir1.Angle(main_dir)-3.1415926/2.) >  fabs(temp_dir2.Angle(main_dir)-3.1415926/2.)){
+	if (fabs(temp_dir2.Angle(main_dir)-3.1415926/2.) > 80/180.*3.1415926 && fabs(temp_dir1.Angle(main_dir)-3.1415926/2.) < fabs(temp_dir2.Angle(main_dir)-3.1415926/2.)+2.5/180.*3.1415926) {
+	}else{
+	  flag_change = true;
+	  start_wcpoint = independent_points.at(max_index);
+	  main_dir *= -1;
+	  max_index = min_index;
+	}
+      }
+
+      if ((!flag_change) && fabs(temp_dir1.Angle(drift_dir)-3.1415926/2.) > fabs(temp_dir2.Angle(drift_dir)-3.1415926/2.) &&
+	  fabs(temp_dir2.Angle(drift_dir)-3.1415926/2.)/3.1415926*180. < 10 && fabs(temp_dir2.Angle(main_dir)-3.1415926/2.)/3.1415926*180. < 80){
 	start_wcpoint = independent_points.at(max_index);
 	main_dir *= -1;
-	
 	max_index = min_index;
       }
     }
@@ -673,7 +685,7 @@ std::vector<WireCell::PR3DCluster*> WireCell2dToy::Separate_1(WireCell::PR3DClus
     
     TVector3 test_dir(end_wcpoint.x - start_wcpoint.x, end_wcpoint.y - start_wcpoint.y, end_wcpoint.z - start_wcpoint.z);
     
-    // std::cout  << " XQ1 " << start_wcpoint.x/units::cm << " " << start_wcpoint.y/units::cm << " " << start_wcpoint.z/units::cm << " " << end_wcpoint.x/units::cm << " " << end_wcpoint.y/units::cm << " " << end_wcpoint.z/units::cm << " " << dir.X() << " " << dir.Y() << " " << dir.Z() << " " << fabs(test_dir.Angle(drift_dir)-3.1415926/2.)/3.1415926*180. << std::endl;
+    //  std::cout  << " XQ1 " << start_wcpoint.x/units::cm << " " << start_wcpoint.y/units::cm << " " << start_wcpoint.z/units::cm << " " << end_wcpoint.x/units::cm << " " << end_wcpoint.y/units::cm << " " << end_wcpoint.z/units::cm << " " << dir.X() << " " << dir.Y() << " " << dir.Z() << " " << fabs(test_dir.Angle(drift_dir)-3.1415926/2.)/3.1415926*180. << std::endl;
     
     if (fabs(test_dir.Angle(drift_dir)-3.1415926/2.)<2.5*3.1415926/180.){
       cluster->adjust_wcpoints_parallel(start_wcpoint,end_wcpoint);
@@ -715,7 +727,7 @@ std::vector<WireCell::PR3DCluster*> WireCell2dToy::Separate_1(WireCell::PR3DClus
     
     TVector3 test_dir(end_wcpoint.x - start_wcpoint.x, end_wcpoint.y - start_wcpoint.y, end_wcpoint.z - start_wcpoint.z);
     
-    // std::cout  << " XQ1 " << start_wcpoint.x/units::cm << " " << start_wcpoint.y/units::cm << " " << start_wcpoint.z/units::cm << " " << end_wcpoint.x/units::cm << " " << end_wcpoint.y/units::cm << " " << end_wcpoint.z/units::cm << " " << dir.X() << " " << dir.Y() << " " << dir.Z() << " " << fabs(test_dir.Angle(drift_dir)-3.1415926/2.)/3.1415926*180. << std::endl;
+    //  std::cout  << " XQ2 " << start_wcpoint.x/units::cm << " " << start_wcpoint.y/units::cm << " " << start_wcpoint.z/units::cm << " " << end_wcpoint.x/units::cm << " " << end_wcpoint.y/units::cm << " " << end_wcpoint.z/units::cm << " " << dir.X() << " " << dir.Y() << " " << dir.Z() << " " << fabs(test_dir.Angle(drift_dir)-3.1415926/2.)/3.1415926*180. << std::endl;
     
     if (fabs(test_dir.Angle(drift_dir)-3.1415926/2.)<2.5*3.1415926/180.){
       cluster->adjust_wcpoints_parallel(start_wcpoint,end_wcpoint);
@@ -1165,21 +1177,21 @@ void WireCell2dToy::Clustering_separate(WireCell::PR3DClusterSelection& live_clu
 
       
       bool flag_proceed = WireCell2dToy::JudgeSeparateDec_2(cluster,drift_dir,boundary_points,independent_points);
-      if (!flag_proceed && cluster_length_map[cluster]>140*units::cm && WireCell2dToy::JudgeSeparateDec_1(cluster,drift_dir) && independent_points.size()>0){
+      if (!flag_proceed && cluster_length_map[cluster]>100*units::cm && WireCell2dToy::JudgeSeparateDec_1(cluster,drift_dir) && independent_points.size()>0){
 	
       	cluster->Calc_PCA();
       	TVector3 main_dir(cluster->get_PCA_axis(0).x, cluster->get_PCA_axis(0).y, cluster->get_PCA_axis(0).z);
 	//TVector3 second_dir(cluster->get_PCA_axis(1).x, cluster->get_PCA_axis(1).y, cluster->get_PCA_axis(1).z);
 
-	//	std::cout << cluster_length_map[cluster]/units::cm << " " << WireCell2dToy::JudgeSeparateDec_1(cluster,drift_dir) << " " << fabs(main_dir.Angle(beam_dir)-3.1415926/2.)/3.1415926*180. << " " << independent_points.at(0).x/units::cm << " " << independent_points.at(0).y/units::cm << " " << independent_points.at(0).z/units::cm << " " << cluster->get_PCA_value(0) << " " << cluster->get_PCA_value(1) << " " << cluster->get_PCA_axis(0) << " " << cluster->get_PCA_axis(1) << std::endl;
+	//std::cout << cluster_length_map[cluster]/units::cm << " " << WireCell2dToy::JudgeSeparateDec_1(cluster,drift_dir) << " " << fabs(main_dir.Angle(beam_dir)-3.1415926/2.)/3.1415926*180. << " " << independent_points.at(0).x/units::cm << " " << independent_points.at(0).y/units::cm << " " << independent_points.at(0).z/units::cm << " " << cluster->get_PCA_value(0) << " " << cluster->get_PCA_value(1) << " " << cluster->get_PCA_axis(0) << " " << cluster->get_PCA_axis(1) << std::endl;
 	
       	if (fabs(main_dir.Angle(beam_dir)-3.1415926/2.)/3.1415926*180. < 15 ||
 	    fabs(main_dir.Angle(beam_dir)-3.1415926/2.)/3.1415926*180. < 25 && cluster_length_map[cluster]>160*units::cm ||
 	    fabs(main_dir.Angle(beam_dir)-3.1415926/2.)/3.1415926*180. < 30 && cluster_length_map[cluster]>220*units::cm ||
 	    fabs(main_dir.Angle(beam_dir)-3.1415926/2.)/3.1415926*180. < 35 && cluster_length_map[cluster]>280*units::cm ||
+	    fabs(main_dir.Angle(beam_dir)-3.1415926/2.)/3.1415926*180. < 65 && cluster_length_map[cluster]>360*units::cm ||
 	    fabs(main_dir.Angle(beam_dir)-3.1415926/2.)/3.1415926*180. < 45 && cluster->get_PCA_value(1) > 0.75 * cluster->get_PCA_value(0) ||
-	    fabs(main_dir.Angle(beam_dir)-3.1415926/2.)/3.1415926*180. < 65 && cluster_length_map[cluster]>360*units::cm 
-	    ){
+	    fabs(main_dir.Angle(beam_dir)-3.1415926/2.)/3.1415926*180. < 40 && cluster->get_PCA_value(1) > 0.55 * cluster->get_PCA_value(0)){
 	  flag_proceed = true;
 	}
       }

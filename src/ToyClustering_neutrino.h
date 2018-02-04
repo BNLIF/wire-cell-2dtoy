@@ -389,12 +389,12 @@ void WireCell2dToy::Clustering_neutrino(WireCell::PR3DClusterSelection& live_clu
 
 	bool flag_add1 = true;
 	if (cluster1->get_num_points(extreme_pts.first,15*units::cm) <= 75 && cluster_length_map[cluster1] > 60*units::cm
-	    || flag_enable_temp && num_clusters >=4 )
+	    || flag_enable_temp && num_clusters >=4 && cluster1->get_PCA_value(1) > 0.022 * cluster1->get_PCA_value(0))
 	  flag_add1 = false;
 	
 	bool flag_add2 = true;
 	if (cluster1->get_num_points(extreme_pts.second,15*units::cm) <= 75 && cluster_length_map[cluster1] > 60*units::cm
-	    || flag_enable_temp && num_clusters >=4 )
+	    || flag_enable_temp && num_clusters >=4 && cluster1->get_PCA_value(1) > 0.022 * cluster1->get_PCA_value(0))
 	  flag_add2 = false;
 	
 	for (size_t j=0;j!=150;j++){
@@ -588,11 +588,11 @@ void WireCell2dToy::Clustering_neutrino(WireCell::PR3DClusterSelection& live_clu
 
 	bool flag_add1 = true;
 	if (cluster2->get_num_points(extreme_pts.first,15*units::cm) <= 75 && cluster_length_map[cluster2] > 60*units::cm
-	    || flag_enable_temp && num_clusters >=4 )
+	    || flag_enable_temp && num_clusters >=4 && cluster2->get_PCA_value(1) > 0.022 * cluster2->get_PCA_value(0))
 	  flag_add1 = false;
 	bool flag_add2 = true;
 	if (cluster2->get_num_points(extreme_pts.second,15*units::cm) <= 75 && cluster_length_map[cluster2] > 60*units::cm
-	    || flag_enable_temp && num_clusters >=4  )
+	    || flag_enable_temp && num_clusters >=4 && cluster2->get_PCA_value(1) > 0.022 * cluster2->get_PCA_value(0))
 	  flag_add2 = false;
 
 	// std::cout << flag_add1 << " " << flag_add2 << " " << dir1.X() << " " << dir1.Y() << " " << dir1.Z() << " " << dir2.X() << " " << dir2.Y() << " " << dir2.Z() << std::endl;
@@ -686,7 +686,7 @@ void WireCell2dToy::Clustering_neutrino(WireCell::PR3DClusterSelection& live_clu
 	
 
 		
-	//std::cout << cluster1->get_cluster_id() << " " << cluster2->get_cluster_id() << " " << dis1/units::cm << " " << dis2/units::cm << " " << dis/units::cm << " " << cluster_length_map[cluster1]/units::cm << " " << cluster_length_map[cluster2]/units::cm << " " << fabs(drift_dir.Angle(cluster_dir1_map[cluster1])-3.1415926/2.)/3.1415926*180. << " " << fabs(drift_dir.Angle(cluster_dir2_map[cluster1])-3.1415926/2.)/3.1415926*180. << std::endl;
+	//	std::cout << cluster1->get_cluster_id() << " " << cluster2->get_cluster_id() << " " << dis1/units::cm << " " << dis2/units::cm << " " << dis/units::cm << " " << cluster_length_map[cluster1]/units::cm << " " << cluster_length_map[cluster2]/units::cm << " " << fabs(drift_dir.Angle(cluster_dir1_map[cluster1])-3.1415926/2.)/3.1415926*180. << " " << fabs(drift_dir.Angle(cluster_dir2_map[cluster1])-3.1415926/2.)/3.1415926*180. << std::endl;
 	
 	/* if (dis1 < std::max(3.5*units::cm,dis2*sin(15/180.*3.1415926)) && num_try == 0)  */
 	/*   flag_merge = true; */
@@ -735,17 +735,30 @@ void WireCell2dToy::Clustering_neutrino(WireCell::PR3DClusterSelection& live_clu
 	      if (cluster_length_map[cluster1]>15*units::cm && cluster1->get_PCA_value(1) < 0.012 * cluster1->get_PCA_value(0)){
 		if (dis1 > std::max(2.5*units::cm, dis2*sin(7.5/180.*3.1415926)))
 		  flag_merge = false;
-		//std::cout << JudgeSeparateDec_1(cluster1,drift_dir) << " A1 " << cluster1->get_PCA_value(0) << " " << cluster1->get_PCA_value(1) << std::endl; 
+		//	std::cout << JudgeSeparateDec_1(cluster1,drift_dir) << " A1 " << cluster1->get_PCA_value(0) << " " << cluster1->get_PCA_value(1) << " " << flag_merge << std::endl; 
 	      }
-	      //std::cout << JudgeSeparateDec_1(cluster1,drift_dir) << " A2 " << cluster1->get_PCA_value(0) << " " << cluster1->get_PCA_value(1) << std::endl; 
+
+	      if (cluster_length_map[cluster1]>150*units::cm){
+		flag_merge = false;
+	      }
+	      //  std::cout << JudgeSeparateDec_1(cluster1,drift_dir) << " A2 " << cluster1->get_PCA_value(0) << " " << cluster1->get_PCA_value(1) << " " << flag_merge << std::endl; 
 	    }else if (JudgeSeparateDec_1(cluster2,drift_dir)){
-	      flag_merge = cluster2->judge_vertex(test_pt1);
+
+	      if (dis2 < 5*units::cm){
+		flag_merge = cluster2->judge_vertex(test_pt1,2./3.);
+	      }else if (dis < 0.5*units::cm){
+		flag_merge = cluster2->judge_vertex(test_pt1,0.5,0.6);
+	      }else{
+		flag_merge = cluster2->judge_vertex(test_pt1);
+	      }
+	      //flag_merge = cluster2->judge_vertex(test_pt1);
+
 	      if (cluster_length_map[cluster1]>15*units::cm && cluster1->get_PCA_value(1) < 0.012 * cluster1->get_PCA_value(0)){
 		if (dis1 > std::max(2.5*units::cm, dis2*sin(7.5/180.*3.1415926)))
 		  flag_merge = false;
-		//	std::cout << JudgeSeparateDec_1(cluster1,drift_dir) << " B1 " << cluster1->get_PCA_value(0) << " " << cluster1->get_PCA_value(1) << std::endl; 
+		//	std::cout << JudgeSeparateDec_1(cluster1,drift_dir) << " B1 " << cluster1->get_PCA_value(0) << " " << cluster1->get_PCA_value(1) << " " << flag_merge << std::endl; 
 	      }
-	      // std::cout << JudgeSeparateDec_1(cluster1,drift_dir) << " B2 " << cluster1->get_PCA_value(0) << " " << cluster1->get_PCA_value(1) << " " << test_pt1.x/units::cm << " " << test_pt1.y/units::cm << " " << test_pt1.z/units::cm << std::endl; 
+	      // std::cout << JudgeSeparateDec_1(cluster1,drift_dir) << " B2 " << cluster1->get_PCA_value(0) << " " << cluster1->get_PCA_value(1) << " " << test_pt1.x/units::cm << " " << test_pt1.y/units::cm << " " << test_pt1.z/units::cm << " " << flag_merge << std::endl; 
 	    }else{
 	      //  std::cout << cluster1->get_cluster_id() << " " << cluster2->get_cluster_id() << std::endl;
 	      if (dis2 < 5*units::cm){
@@ -757,7 +770,7 @@ void WireCell2dToy::Clustering_neutrino(WireCell::PR3DClusterSelection& live_clu
 	      }
 
 	      if (cluster_length_map[cluster1]>15*units::cm && cluster1->get_PCA_value(1) < 0.012 * cluster1->get_PCA_value(0)){
-		if (dis1 > std::max(2.5*units::cm, dis2*sin(7.5/180.*3.1415926)))
+		if (dis1 > std::max(3.5*units::cm, dis2*sin(7.5/180.*3.1415926)))
 		  flag_merge = false;
 	      }
 	      
@@ -766,11 +779,17 @@ void WireCell2dToy::Clustering_neutrino(WireCell::PR3DClusterSelection& live_clu
 	  }
 	  // std::cout << flag_merge << " " << merge_type << std::endl;
 
-	  if (cluster_close_cluster_map[cluster1].second < 1.2*units::cm && cluster_close_cluster_map[cluster1].first != cluster2 && cluster_length_map[cluster_close_cluster_map[cluster1].first] > 60*units::cm){
+	  if (cluster_close_cluster_map[cluster1].second < 1.2*units::cm &&
+	      cluster_close_cluster_map[cluster1].first != cluster2 &&
+	      cluster_length_map[cluster_close_cluster_map[cluster1].first] > 60*units::cm &&
+	      cluster1->get_PCA_value(1) > 0.012 * cluster1->get_PCA_value(0) && dis1 > 0.6*units::cm){
 	    flag_merge = false;
 	  }
+
 	  
-	  if (flag_merge && cluster_length_map[cluster1]>150*units::cm && cluster_length_map[cluster2]>150*units::cm){
+	  if (flag_merge && cluster_length_map[cluster1]>150*units::cm && cluster_length_map[cluster2]>150*units::cm &&
+	      (cluster1->get_PCA_value(1) < 0.03 * cluster1->get_PCA_value(0) ||
+	       cluster2->get_PCA_value(1) < 0.03 * cluster2->get_PCA_value(0))){
 	    // protect against two long tracks ... 
 	    cluster1->Calc_PCA();
 	    cluster2->Calc_PCA();
@@ -782,10 +801,12 @@ void WireCell2dToy::Clustering_neutrino(WireCell::PR3DClusterSelection& live_clu
 	}
 
 	/* if (flag_merge) */
-	/* /\* /\\*   // std::cout << cluster_length_map[cluster1]/units::cm << " " << cluster1->get_PCA_value(0) << " " << cluster1->get_PCA_value(1) << " " << cluster_length_map[cluster2]/units::cm << " " << cluster1->get_cluster_id() << " " << cluster2->get_cluster_id() << " " << cluster_close_cluster_map[cluster1].first->get_cluster_id() << " " << cluster_close_cluster_map[cluster1].second/units::cm << std::endl; *\\/ *\/ */
-	/* /\* /\\* /\\\*   /\\\\* if (dis < 3*units::cm && dis1 < 3*units::cm) *\\\\/ *\\\/ *\\/ *\/ */
-	/*   std::cout << dis1/units::cm << " " << dis2/units::cm << " " << dis/units::cm << " " << */
-	/*     cluster_length_map[cluster1]/units::cm << " " << cluster_length_map[cluster2]/units::cm << " " << cluster1->get_cluster_id() << " " << cluster2->get_cluster_id() << " " << flag_merge << " " << cluster1->get_PCA_value(0) << " " << cluster1->get_PCA_value(1) << " " << cluster2->get_PCA_value(0) << " " << cluster2->get_PCA_value(1) << std::endl; */
+	/*    std::cout << dis1/units::cm << " " << dis2/units::cm << " " << dis/units::cm << " " << */
+	/*      cluster_length_map[cluster1]/units::cm << " " << cluster_length_map[cluster2]/units::cm << " " << cluster1->get_cluster_id() << " " << cluster2->get_cluster_id() << " " << flag_merge << " " << cluster1->get_PCA_value(0) << " " << cluster1->get_PCA_value(1) << " " << cluster2->get_PCA_value(0) << " " << cluster2->get_PCA_value(1) << " " << merge_type << std::endl; */
+	
+	/* /\*   // std::cout << cluster_length_map[cluster1]/units::cm << " " << cluster1->get_PCA_value(0) << " " << cluster1->get_PCA_value(1) << " " << cluster_length_map[cluster2]/units::cm << " " << cluster1->get_cluster_id() << " " << cluster2->get_cluster_id() << " " << cluster_close_cluster_map[cluster1].first->get_cluster_id() << " " << cluster_close_cluster_map[cluster1].second/units::cm << std::endl; *\/ */
+	/* /\* /\\*   /\\\* if (dis < 3*units::cm && dis1 < 3*units::cm) *\\\/ *\\/ *\/ */
+	 
 
 	
 	if (dis < 1.8*units::cm && cluster_length_map[cluster1] < 75*units::cm && cluster_length_map[cluster2] < 75*units::cm && (cluster_length_map[cluster1]+cluster_length_map[cluster2]) < 120*units::cm){
@@ -843,7 +864,7 @@ void WireCell2dToy::Clustering_neutrino(WireCell::PR3DClusterSelection& live_clu
 	}
 
 	if (flag_proceed){
-	  // std::cout << cluster1->get_cluster_id() << " " << cluster2->get_cluster_id() << " " << merge_type << " " <<std::endl;
+	  //std::cout << cluster1->get_cluster_id() << " " << cluster2->get_cluster_id() << " " << merge_type << " " <<std::endl;
 
 	  to_be_merged_pairs.insert(std::make_pair(cluster1,cluster2));
 
@@ -875,7 +896,8 @@ void WireCell2dToy::Clustering_neutrino(WireCell::PR3DClusterSelection& live_clu
   for (auto it = to_be_merged_pairs.begin(); it!=to_be_merged_pairs.end(); it++){
     PR3DCluster *cluster1 = (*it).first;
     PR3DCluster *cluster2 = (*it).second;
-    //  std::cout << cluster1 << " " << cluster2 << " " << cluster1->get_cluster_id() << " " << cluster2->get_cluster_id() << std::endl;
+
+    // std::cout << cluster1 << " " << cluster2 << " " << cluster1->get_cluster_id() << " " << cluster2->get_cluster_id() << std::endl;
     
     bool flag_new = true;
     std::vector<std::set<PR3DCluster*>> temp_set;
