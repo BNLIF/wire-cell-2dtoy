@@ -513,7 +513,9 @@ void WireCell2dToy::Clustering_connect1(WireCell::PR3DClusterSelection& live_clu
 	    /* if ( flag_merge ) */
 	    /*   std::cout << extreme_points.first.x /units::cm << " " << extreme_points.first.y/units::cm << " " << extreme_points.first.z/units::cm << " " << cluster->get_cluster_id() << " B " << max_cluster->get_cluster_id() << " " << cluster_length_map[cluster]/units::cm << " " << cluster_length_map[max_cluster]/units::cm << " " << max_value[0] << " " << max_value[1] << " " << max_value[2] << " " << num_total_points << " " << num_unique[0] << " " << num_unique[1] << " " << num_unique[2] << std::endl; */
 	    
-	  }else if ((max_value[0]+max_value[1]+max_value[2]) > 300){
+	  }
+
+	  if ((max_value[0]+max_value[1]+max_value[2]) > 300 && !flag_merge){
 	    if (cluster_length_map[cluster]> 25*units::cm || cluster_length_map[max_cluster]> 25*units::cm){
 	      // if overlap significant, compare the PCA
 	      cluster->Calc_PCA();
@@ -549,8 +551,10 @@ void WireCell2dToy::Clustering_connect1(WireCell::PR3DClusterSelection& live_clu
 		to_be_merged_pairs.insert(std::make_pair(cluster,max_cluster));
 		flag_merge = true;
 	      }
+
+	      std::cout << fabs(dir2.Angle(drift_dir) - 3.1415926/2.) /3.1415928*180. << " " << fabs(dir1.Angle(drift_dir) - 3.1415926/2.)/3.1415926*180. << " " << (max_value[0]+max_value[1]+max_value[2]) << " " << num_total_points << std::endl;
 	      
-	      // std::cout << extreme_points.first.x /units::cm << " " << extreme_points.first.y/units::cm << " " << extreme_points.first.z/units::cm << " " << cluster->get_cluster_id() << " " << max_cluster->get_cluster_id() << " " << cluster_length_map[cluster]/units::cm << " " << cluster_length_map[max_cluster]/units::cm << " " << angle_diff << " " << angle1_drift << " " << angle2_drift << " " << dis/units::cm << " " << dis1/units::cm << " " << flag_merge << std::endl;
+	      //std::cout << extreme_points.first.x /units::cm << " " << extreme_points.first.y/units::cm << " " << extreme_points.first.z/units::cm << " " << cluster->get_cluster_id() << " " << max_cluster->get_cluster_id() << " " << cluster_length_map[cluster]/units::cm << " " << cluster_length_map[max_cluster]/units::cm << " " << angle_diff << " " << angle1_drift << " " << angle2_drift << " " << dis/units::cm << " " << dis1/units::cm << " " << flag_merge << std::endl;
 	    }
 
 	   
@@ -561,7 +565,7 @@ void WireCell2dToy::Clustering_connect1(WireCell::PR3DClusterSelection& live_clu
 	 
 	  
 	  
-	
+	  
 
 
 	  
@@ -579,10 +583,7 @@ void WireCell2dToy::Clustering_connect1(WireCell::PR3DClusterSelection& live_clu
 	// when added points in
 	// if overlap a lot merge 
 	// if overlap significant, compare the PCA
-	if (!flag_merge){
-	  
-	  
-	}
+	
 
 	
 	  
