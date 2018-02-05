@@ -686,7 +686,7 @@ void WireCell2dToy::Clustering_neutrino(WireCell::PR3DClusterSelection& live_clu
 	
 
 		
-	//	std::cout << cluster1->get_cluster_id() << " " << cluster2->get_cluster_id() << " " << dis1/units::cm << " " << dis2/units::cm << " " << dis/units::cm << " " << cluster_length_map[cluster1]/units::cm << " " << cluster_length_map[cluster2]/units::cm << " " << fabs(drift_dir.Angle(cluster_dir1_map[cluster1])-3.1415926/2.)/3.1415926*180. << " " << fabs(drift_dir.Angle(cluster_dir2_map[cluster1])-3.1415926/2.)/3.1415926*180. << std::endl;
+	// 	std::cout << cluster1->get_cluster_id() << " " << cluster2->get_cluster_id() << " " << dis1/units::cm << " " << dis2/units::cm << " " << dis/units::cm << " " << cluster_length_map[cluster1]/units::cm << " " << cluster_length_map[cluster2]/units::cm << " " << fabs(drift_dir.Angle(cluster_dir1_map[cluster1])-3.1415926/2.)/3.1415926*180. << " " << fabs(drift_dir.Angle(cluster_dir2_map[cluster1])-3.1415926/2.)/3.1415926*180. << std::endl;
 	
 	/* if (dis1 < std::max(3.5*units::cm,dis2*sin(15/180.*3.1415926)) && num_try == 0)  */
 	/*   flag_merge = true; */
@@ -723,7 +723,7 @@ void WireCell2dToy::Clustering_neutrino(WireCell::PR3DClusterSelection& live_clu
 	    }
 	  }
 
-	  //  std::cout << test_pt1.x/units::cm << " " << test_pt1.y/units::cm << " " << test_pt1.z/units::cm << " " << cluster1->get_PCA_value(1)/cluster1->get_PCA_value(0)<< std::endl;
+	  // std::cout << test_pt1.x/units::cm << " " << test_pt1.y/units::cm << " " << test_pt1.z/units::cm << " " << cluster1->get_PCA_value(1)/cluster1->get_PCA_value(0)<< std::endl;
 
 
 	  
@@ -745,7 +745,7 @@ void WireCell2dToy::Clustering_neutrino(WireCell::PR3DClusterSelection& live_clu
 	      if (cluster_length_map[cluster1]>150*units::cm){
 		flag_merge = false;
 	      }
-	      //   std::cout << JudgeSeparateDec_1(cluster1,drift_dir) << " A2 " << cluster1->get_PCA_value(0) << " " << cluster1->get_PCA_value(1) << " " << flag_merge << std::endl; 
+	      //    std::cout << JudgeSeparateDec_1(cluster1,drift_dir) << " A2 " << cluster1->get_PCA_value(0) << " " << cluster1->get_PCA_value(1) << " " << flag_merge << std::endl; 
 	    }else if (JudgeSeparateDec_1(cluster2,drift_dir)){
 
 	      if (dis2 < 5*units::cm){
@@ -762,7 +762,7 @@ void WireCell2dToy::Clustering_neutrino(WireCell::PR3DClusterSelection& live_clu
 		  flag_merge = false;
 		//	std::cout << JudgeSeparateDec_1(cluster1,drift_dir) << " B1 " << cluster1->get_PCA_value(0) << " " << cluster1->get_PCA_value(1) << " " << flag_merge << std::endl; 
 	      }
-	      //   std::cout << JudgeSeparateDec_1(cluster1,drift_dir) << " B2 " << cluster1->get_PCA_value(0) << " " << cluster1->get_PCA_value(1) << " " << test_pt1.x/units::cm << " " << test_pt1.y/units::cm << " " << test_pt1.z/units::cm << " " << flag_merge << std::endl; 
+	      // std::cout << JudgeSeparateDec_1(cluster1,drift_dir) << " B2 " << cluster1->get_PCA_value(0) << " " << cluster1->get_PCA_value(1) << " " << test_pt1.x/units::cm << " " << test_pt1.y/units::cm << " " << test_pt1.z/units::cm << " " << flag_merge << std::endl; 
 	    }else{
 	      // std::cout << cluster1->get_cluster_id() << " " << cluster2->get_cluster_id() << std::endl;
 	      if (dis2 < 5*units::cm){
@@ -781,7 +781,7 @@ void WireCell2dToy::Clustering_neutrino(WireCell::PR3DClusterSelection& live_clu
 	    }
 	    merge_type = 1;
 	  }
-	  //  std::cout << flag_merge << " " << merge_type << std::endl;
+	  //  
 
 	  if (cluster_close_cluster_map[cluster1].second < 1.2*units::cm &&
 	      cluster_close_cluster_map[cluster1].first != cluster2 &&
