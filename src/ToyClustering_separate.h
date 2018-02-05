@@ -1177,24 +1177,49 @@ void WireCell2dToy::Clustering_separate(WireCell::PR3DClusterSelection& live_clu
 
       
       bool flag_proceed = WireCell2dToy::JudgeSeparateDec_2(cluster,drift_dir,boundary_points,independent_points);
+
+      /* if (cluster_length_map[cluster]>100*units::cm) */
+      /* 	std::cout << cluster->get_cluster_id() << " " << cluster_length_map[cluster]/units::cm << " " << flag_proceed << " " << WireCell2dToy::JudgeSeparateDec_1(cluster,drift_dir) << std::endl; */
+      
       if (!flag_proceed && cluster_length_map[cluster]>100*units::cm && WireCell2dToy::JudgeSeparateDec_1(cluster,drift_dir) && independent_points.size()>0){
+	bool flag_top = false;
+	for (size_t j=0;j!=independent_points.size();j++){
+	  if (independent_points.at(j).y > 101.5*units::cm){
+	    flag_top = true;
+	    break;
+	  }
+	}
 	
       	cluster->Calc_PCA();
       	TVector3 main_dir(cluster->get_PCA_axis(0).x, cluster->get_PCA_axis(0).y, cluster->get_PCA_axis(0).z);
 	//TVector3 second_dir(cluster->get_PCA_axis(1).x, cluster->get_PCA_axis(1).y, cluster->get_PCA_axis(1).z);
 
-	//std::cout << cluster_length_map[cluster]/units::cm << " " << WireCell2dToy::JudgeSeparateDec_1(cluster,drift_dir) << " " << fabs(main_dir.Angle(beam_dir)-3.1415926/2.)/3.1415926*180. << " " << independent_points.at(0).x/units::cm << " " << independent_points.at(0).y/units::cm << " " << independent_points.at(0).z/units::cm << " " << cluster->get_PCA_value(0) << " " << cluster->get_PCA_value(1) << " " << cluster->get_PCA_axis(0) << " " << cluster->get_PCA_axis(1) << std::endl;
-	
-      	if (fabs(main_dir.Angle(beam_dir)-3.1415926/2.)/3.1415926*180. < 15 ||
-	    fabs(main_dir.Angle(beam_dir)-3.1415926/2.)/3.1415926*180. < 25 && cluster_length_map[cluster]>160*units::cm ||
-	    fabs(main_dir.Angle(beam_dir)-3.1415926/2.)/3.1415926*180. < 30 && cluster_length_map[cluster]>220*units::cm ||
-	    fabs(main_dir.Angle(beam_dir)-3.1415926/2.)/3.1415926*180. < 35 && cluster_length_map[cluster]>280*units::cm ||
-	    fabs(main_dir.Angle(beam_dir)-3.1415926/2.)/3.1415926*180. < 65 && cluster_length_map[cluster]>360*units::cm ||
-	    fabs(main_dir.Angle(beam_dir)-3.1415926/2.)/3.1415926*180. < 45 && cluster->get_PCA_value(1) > 0.75 * cluster->get_PCA_value(0) ||
-	    fabs(main_dir.Angle(beam_dir)-3.1415926/2.)/3.1415926*180. < 40 && cluster->get_PCA_value(1) > 0.55 * cluster->get_PCA_value(0)){
-	  flag_proceed = true;
+	//	std::cout << cluster_length_map[cluster]/units::cm << " " << WireCell2dToy::JudgeSeparateDec_1(cluster,drift_dir) << " " << fabs(main_dir.Angle(beam_dir)-3.1415926/2.)/3.1415926*180. << " " << independent_points.at(0).x/units::cm << " " << independent_points.at(0).y/units::cm << " " << independent_points.at(0).z/units::cm << " " << cluster->get_PCA_value(1)/cluster->get_PCA_value(0)  << " " << cluster->get_PCA_axis(0) << " " << cluster->get_PCA_axis(1) << std::endl;
+
+	if (flag_top){
+	  if (fabs(main_dir.Angle(beam_dir)-3.1415926/2.)/3.1415926*180. < 16 ||
+	      fabs(main_dir.Angle(beam_dir)-3.1415926/2.)/3.1415926*180. < 33 && cluster_length_map[cluster]>160*units::cm ||
+	      fabs(main_dir.Angle(beam_dir)-3.1415926/2.)/3.1415926*180. < 40 && cluster_length_map[cluster]>260*units::cm ||
+	      fabs(main_dir.Angle(beam_dir)-3.1415926/2.)/3.1415926*180. < 65 && cluster_length_map[cluster]>360*units::cm ||
+	      fabs(main_dir.Angle(beam_dir)-3.1415926/2.)/3.1415926*180. < 45 && cluster->get_PCA_value(1) > 0.75 * cluster->get_PCA_value(0) ||
+	      fabs(main_dir.Angle(beam_dir)-3.1415926/2.)/3.1415926*180. < 40 && cluster->get_PCA_value(1) > 0.55 * cluster->get_PCA_value(0)){
+	    flag_proceed = true;
+	  }
+	}else{
+	  if (fabs(main_dir.Angle(beam_dir)-3.1415926/2.)/3.1415926*180. < 4 && cluster_length_map[cluster]>170*units::cm ||
+	      fabs(main_dir.Angle(beam_dir)-3.1415926/2.)/3.1415926*180. < 15 && cluster_length_map[cluster]>220*units::cm ||
+	      fabs(main_dir.Angle(beam_dir)-3.1415926/2.)/3.1415926*180. < 20 && cluster_length_map[cluster]>270*units::cm ||
+	      fabs(main_dir.Angle(beam_dir)-3.1415926/2.)/3.1415926*180. < 25 && cluster_length_map[cluster]>350*units::cm ||
+	      fabs(main_dir.Angle(beam_dir)-3.1415926/2.)/3.1415926*180. < 30 && cluster->get_PCA_value(1) > 0.55 * cluster->get_PCA_value(0) ){
+	    flag_proceed = true;
+	  }
 	}
+
+	//	std::cout << flag_top << " " << flag_proceed << std::endl;
+	
       }
+
+
       
       if (flag_proceed){
       //   if (WireCell2dToy::JudgeSeparateDec_2(cluster,drift_dir,boundary_points,independent_points)){
