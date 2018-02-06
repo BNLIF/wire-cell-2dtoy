@@ -585,14 +585,12 @@ void WireCell2dToy::Clustering_connect1(WireCell::PR3DClusterSelection& live_clu
 		flag_merge = true;
 	      }
 
-	      if (fabs(dir2.Angle(drift_dir) - 3.1415926/2.) < 5*3.1415926/180. && fabs(dir1.Angle(drift_dir) - 3.1415926/2.) < 5*3.1415926/180. && (max_value[0]+max_value[1]+max_value[2]) > 0.7 *(num_total_points  + num_total_points  + num_total_points)){
+	      if ((fabs(dir2.Angle(drift_dir) - 3.1415926/2.) < 5*3.1415926/180. && fabs(dir1.Angle(drift_dir) - 3.1415926/2.) < 5*3.1415926/180.) && (max_value[0]+max_value[1]+max_value[2]) > 0.7 *(num_total_points  + num_total_points  + num_total_points) ){
 		to_be_merged_pairs.insert(std::make_pair(cluster,max_cluster));
 		flag_merge = true;
 	      }
-
-	      //std::cout << fabs(dir2.Angle(drift_dir) - 3.1415926/2.) /3.1415928*180. << " " << fabs(dir1.Angle(drift_dir) - 3.1415926/2.)/3.1415926*180. << " " << (max_value[0]+max_value[1]+max_value[2]) << " " << num_total_points << std::endl;
 	      
-	      //std::cout << extreme_points.first.x /units::cm << " " << extreme_points.first.y/units::cm << " " << extreme_points.first.z/units::cm << " " << cluster->get_cluster_id() << " " << max_cluster->get_cluster_id() << " " << cluster_length_map[cluster]/units::cm << " " << cluster_length_map[max_cluster]/units::cm << " " << angle_diff << " " << angle1_drift << " " << angle2_drift << " " << dis/units::cm << " " << dis1/units::cm << " " << flag_merge << std::endl;
+	      //  std::cout << extreme_points.first.x /units::cm << " " << extreme_points.first.y/units::cm << " " << extreme_points.first.z/units::cm << " " << cluster->get_cluster_id() << " " << max_cluster->get_cluster_id() << " " << cluster_length_map[cluster]/units::cm << " " << cluster_length_map[max_cluster]/units::cm << " " << angle_diff << " " << angle1_drift << " " << angle2_drift << " " << dis/units::cm << " " << dis1/units::cm << " " << flag_merge << " " << dir2.Angle(drift_dir)  /3.1415928*180. << " " << dir1.Angle(drift_dir) /3.1415926*180. << " " << (max_value[0]+max_value[1]+max_value[2]) << " " << num_total_points << std::endl;
 	    }
 
 	   

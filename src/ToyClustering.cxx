@@ -292,39 +292,39 @@ void WireCell2dToy::Clustering_jump_gap_cosmics(WireCell::PR3DClusterSelection& 
   }
 
 
-  //  Clustering_connect1(live_clusters,cluster_length_map, global_point_cloud, dead_u_index, dead_v_index, dead_w_index);
-  // cerr << em("connect 1") << std::endl;
+   Clustering_connect1(live_clusters,cluster_length_map, global_point_cloud, dead_u_index, dead_v_index, dead_w_index);
+  cerr << em("connect 1") << std::endl;
 
 
-  // for (size_t i=0;i!=live_clusters.size();i++){
-  //   PR3DCluster *cluster = live_clusters.at(i);
-  //   cluster->set_cluster_id(i+1);
-  // }
+  for (size_t i=0;i!=live_clusters.size();i++){
+    PR3DCluster *cluster = live_clusters.at(i);
+    cluster->set_cluster_id(i+1);
+  }
   
  
-  // // prepare for deghosting and clustering along track
-  // Clustering_deghost(live_clusters,cluster_length_map, dead_u_index, dead_v_index, dead_w_index);
-  // cerr << em("deghost clusters") << std::endl;
+  // prepare for deghosting and clustering along track
+  Clustering_deghost(live_clusters,cluster_length_map, dead_u_index, dead_v_index, dead_w_index);
+  cerr << em("deghost clusters") << std::endl;
 
-  // for (size_t i=0;i!=live_clusters.size();i++){
-  //   PR3DCluster *cluster = live_clusters.at(i);
-  //   cluster->set_cluster_id(i+1);
-  // }
+  for (size_t i=0;i!=live_clusters.size();i++){
+    PR3DCluster *cluster = live_clusters.at(i);
+    cluster->set_cluster_id(i+1);
+  }
   
-  // Clustering_examine_x_boundary(live_clusters,cluster_length_map);
-  // // Now clustering the isolated pieces ....
-  // for (int i=0;i!=1;i++){
-  //   Clustering_neutrino(live_clusters,cluster_length_map,i);
-  //   // std::cout << std::endl << std::endl;
-  // }
+  Clustering_examine_x_boundary(live_clusters,cluster_length_map);
+  // Now clustering the isolated pieces ....
+  for (int i=0;i!=1;i++){
+    Clustering_neutrino(live_clusters,cluster_length_map,i);
+    // std::cout << std::endl << std::endl;
+  }
   
-  //  Clustering_dis(live_clusters,cluster_length_map);
-  //  cerr << em("clustering isolated piece") << std::endl;
+   Clustering_dis(live_clusters,cluster_length_map);
+   cerr << em("clustering isolated piece") << std::endl;
   
-  // for (size_t i=0;i!=live_clusters.size();i++){
-  //   PR3DCluster *cluster = live_clusters.at(i);
-  //   cluster->set_cluster_id(i+1);
-  // }
+  for (size_t i=0;i!=live_clusters.size();i++){
+    PR3DCluster *cluster = live_clusters.at(i);
+    cluster->set_cluster_id(i+1);
+  }
 
 
   
