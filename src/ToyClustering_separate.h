@@ -1242,9 +1242,9 @@ void WireCell2dToy::Clustering_separate(WireCell::PR3DClusterSelection& live_clu
 	  }
 	}else{
 	  if (fabs(main_dir.Angle(beam_dir)-3.1415926/2.)/3.1415926*180. < 4 && cluster_length_map[cluster]>170*units::cm ||
-	      fabs(main_dir.Angle(beam_dir)-3.1415926/2.)/3.1415926*180. < 15 && cluster_length_map[cluster]>220*units::cm ||
-	      fabs(main_dir.Angle(beam_dir)-3.1415926/2.)/3.1415926*180. < 20 && cluster_length_map[cluster]>270*units::cm ||
-	      fabs(main_dir.Angle(beam_dir)-3.1415926/2.)/3.1415926*180. < 25 && cluster_length_map[cluster]>350*units::cm ||
+	      fabs(main_dir.Angle(beam_dir)-3.1415926/2.)/3.1415926*180. < 25 && cluster_length_map[cluster]>210*units::cm ||
+	      fabs(main_dir.Angle(beam_dir)-3.1415926/2.)/3.1415926*180. < 28 && cluster_length_map[cluster]>270*units::cm ||
+	      fabs(main_dir.Angle(beam_dir)-3.1415926/2.)/3.1415926*180. < 30 && cluster_length_map[cluster]>350*units::cm ||
 	      fabs(main_dir.Angle(beam_dir)-3.1415926/2.)/3.1415926*180. < 30 && cluster->get_PCA_value(1) > 0.55 * cluster->get_PCA_value(0) ){
 	    flag_proceed = true;
 	  }
