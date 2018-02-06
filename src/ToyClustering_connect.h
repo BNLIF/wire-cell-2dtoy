@@ -54,6 +54,10 @@ void WireCell2dToy::Clustering_connect1(WireCell::PR3DClusterSelection& live_clu
 		      extreme_points.second.y - extreme_points.first.y,
 		      extreme_points.second.z - extreme_points.first.z);
     TVector3 dir1, dir2;
+    bool flag_para_1 = false;
+    bool flag_prol_1 = false;
+    bool flag_para_2 = false;
+    bool flag_prol_2 = false;
     
 
     if (main_dir.Mag() > 10*units::cm && fabs(main_dir.Angle(drift_dir)-3.1415926/2.) < 5 * 3.1415926 / 180.){
@@ -88,92 +92,122 @@ void WireCell2dToy::Clustering_connect1(WireCell::PR3DClusterSelection& live_clu
     map_cluster_dir1[cluster] = dir1;
     map_cluster_dir2[cluster] = dir2;
 
+    
+        
+
+    
     // judge if something is good ...
-    if (cluster_length_map[cluster] < 15*units::cm && i!=0){
-      flag_add_dir1 = false;
-      flag_add_dir2 = false;
+    /* if (cluster_length_map[cluster] < 15*units::cm && i!=0){ */
+    /*   flag_add_dir1 = false; */
+    /*   flag_add_dir2 = false; */
 
-      if (fabs(dir1.Angle(drift_dir)-3.1415926/2.)<7.5*3.1415926/180. ){
-    	flag_add_dir1 = true;
+    if (fabs(dir1.Angle(drift_dir)-3.1415926/2.)<7.5*3.1415926/180. ){
+      flag_para_1 = true;
+    }else{
+      TVector3 tempV1(0,dir1.Y(), dir1.Z());
+      TVector3 tempV5;
+      double angle1 = tempV1.Angle(U_dir);
+      tempV5.SetXYZ(fabs(dir1.X()),sqrt(pow(dir1.Y(),2) + pow(dir1.Z(),2)) * sin(angle1),0);
+      angle1 = tempV5.Angle(drift_dir);
+      
+      if (angle1 < 7.5/180.*3.1415926 ){
+	flag_prol_1 = true;
       }else{
-    	TVector3 tempV1(0,dir1.Y(), dir1.Z());
-    	TVector3 tempV5;
-    	double angle1 = tempV1.Angle(U_dir);
-    	tempV5.SetXYZ(fabs(dir1.X()),sqrt(pow(dir1.Y(),2) + pow(dir1.Z(),2)) * sin(angle1),0);
-    	angle1 = tempV5.Angle(drift_dir);
+	angle1 = tempV1.Angle(V_dir);
+	tempV5.SetXYZ(fabs(dir1.X()),sqrt(pow(dir1.Y(),2) + pow(dir1.Z(),2)) * sin(angle1),0);
+	angle1 = tempV5.Angle(drift_dir);
 	
-    	if (angle1 < 7.5/180.*3.1415926 ){
-    	  flag_add_dir1 = true;
+	/* if (extreme_points.first.z<20*units::cm) */
+	/*   std::cout << angle1/3.1415926*180. << " " << cluster_length_map[cluster]/units::cm << std::endl; */
+	
+	if (angle1 < 7.5/180.*3.1415926 ){
+	  flag_prol_1 = true;
 	}else{
-    	  angle1 = tempV1.Angle(V_dir);
-    	  tempV5.SetXYZ(fabs(dir1.X()),sqrt(pow(dir1.Y(),2) + pow(dir1.Z(),2)) * sin(angle1),0);
-    	  angle1 = tempV5.Angle(drift_dir);
-
-	  /* if (extreme_points.first.z<20*units::cm) */
-	  /*   std::cout << angle1/3.1415926*180. << " " << cluster_length_map[cluster]/units::cm << std::endl; */
+	  angle1 = tempV1.Angle(W_dir);
+	  tempV5.SetXYZ(fabs(dir1.X()),sqrt(pow(dir1.Y(),2) + pow(dir1.Z(),2)) * sin(angle1),0);
+	  angle1 = tempV5.Angle(drift_dir);
 	  
-    	  if (angle1 < 7.5/180.*3.1415926 ){
-    	    flag_add_dir1 = true;
-	  }else{
-    	    angle1 = tempV1.Angle(W_dir);
-    	    tempV5.SetXYZ(fabs(dir1.X()),sqrt(pow(dir1.Y(),2) + pow(dir1.Z(),2)) * sin(angle1),0);
-    	    angle1 = tempV5.Angle(drift_dir);
-
-    	  
-	    
-    	    if (angle1 < 7.5/180.*3.1415926  ){
-    	      flag_add_dir1 = true;
-    	      
-    	    }
-    	  }
-    	}
-      }
-
-      if (fabs(dir2.Angle(drift_dir)-3.1415926/2.)<7.5*3.1415926/180. ){
-	flag_add_dir2 = true;
-      }else{
-	TVector3 tempV2(0,dir2.Y(), dir2.Z());
-    	TVector3 tempV6;
-    	double angle2 = tempV2.Angle(U_dir);
-    	tempV6.SetXYZ(fabs(dir2.X()),sqrt(pow(dir2.Y(),2) + pow(dir2.Z(),2)) * sin(angle2),0);
-    	angle2 = tempV6.Angle(drift_dir);
-	if (angle2 < 7.5/180.*3.1415926){
-	  flag_add_dir2 = true;
-	}else{
-	  angle2 = tempV2.Angle(V_dir);
-    	  tempV6.SetXYZ(fabs(dir2.X()),sqrt(pow(dir2.Y(),2) + pow(dir2.Z(),2)) * sin(angle2),0);
-    	  angle2 = tempV6.Angle(drift_dir);
-	  if (angle2 < 7.5/180.*3.1415926){
-	    flag_add_dir2 = true;
-	  }else{
-	    angle2 = tempV2.Angle(W_dir);
-    	    tempV6.SetXYZ(fabs(dir2.X()),sqrt(pow(dir2.Y(),2) + pow(dir2.Z(),2)) * sin(angle2),0);
-    	    angle2 = tempV6.Angle(drift_dir);
-	    if (angle2 < 7.5 /180.*3.1415926){
-	      flag_add_dir2 = true;
-	    }
+	  
+	  if (angle1 < 7.5/180.*3.1415926  ){
+	    flag_prol_1 = true;
 	  }
 	}
       }
-
     }
+    
+    if (fabs(dir2.Angle(drift_dir)-3.1415926/2.)<7.5*3.1415926/180. ){
+      flag_para_2 = true;
+    }else{
+      TVector3 tempV2(0,dir2.Y(), dir2.Z());
+      TVector3 tempV6;
+      double angle2 = tempV2.Angle(U_dir);
+      tempV6.SetXYZ(fabs(dir2.X()),sqrt(pow(dir2.Y(),2) + pow(dir2.Z(),2)) * sin(angle2),0);
+      angle2 = tempV6.Angle(drift_dir);
+      if (angle2 < 7.5/180.*3.1415926){
+	flag_prol_2 = true;
+      }else{
+	angle2 = tempV2.Angle(V_dir);
+	tempV6.SetXYZ(fabs(dir2.X()),sqrt(pow(dir2.Y(),2) + pow(dir2.Z(),2)) * sin(angle2),0);
+	angle2 = tempV6.Angle(drift_dir);
+	if (angle2 < 7.5/180.*3.1415926){
+	  flag_prol_2 = true;
+	}else{
+	  angle2 = tempV2.Angle(W_dir);
+	  tempV6.SetXYZ(fabs(dir2.X()),sqrt(pow(dir2.Y(),2) + pow(dir2.Z(),2)) * sin(angle2),0);
+	  angle2 = tempV6.Angle(drift_dir);
+	  if (angle2 < 7.5 /180.*3.1415926){
+	    flag_prol_2 = true;
+	  }
+	}
+      }
+    }
+
+    if ((flag_para_1 || flag_prol_1) && cluster_length_map[cluster] < 15*units::cm){
+      flag_add_dir1 = true;
+    }else if (cluster_length_map[cluster] >= 15*units::cm){
+      flag_add_dir1 = true;
+    }else{
+      flag_add_dir1 = false;
+    }
+
+    if ((flag_para_2 || flag_prol_2) && cluster_length_map[cluster] < 15*units::cm){
+      flag_add_dir2 = true;
+    }else if (cluster_length_map[cluster] >= 15*units::cm){
+      flag_add_dir2 = true;
+    }else{
+      flag_add_dir2 = false;
+    }
+    
+
+    if (fabs(dir1.Angle(drift_dir) - 3.1415926/2.) < 5*3.1415926/180.){
+      flag_para_1 = true;
+    }else{
+      flag_para_1 = false;
+    }
+    if (fabs(dir2.Angle(drift_dir) - 3.1415926/2.) < 5*3.1415926/180.){
+      flag_para_2 = true;
+    }else{
+      flag_para_2 = false;
+    }
+      
+      //}
     
     
     if (i==0){
-      if (fabs(dir1.Angle(drift_dir) - 3.1415926/2.) < 5*3.1415926/180.){
-	global_skeleton_cloud.AddPoints(cluster,extreme_points.first,dir1,extending_dis*2,1.2*units::cm, angle/2.);
+      if (flag_para_1 || flag_prol_1){
+	global_skeleton_cloud.AddPoints(cluster,extreme_points.first,dir1,extending_dis*3,1.2*units::cm, angle);
 	dir1 *= -1;
-	global_skeleton_cloud.AddPoints(cluster,extreme_points.first,dir1,extending_dis*2,1.2*units::cm, angle/2.);
+	global_skeleton_cloud.AddPoints(cluster,extreme_points.first,dir1,extending_dis*3,1.2*units::cm, angle);
       }else{
 	global_skeleton_cloud.AddPoints(cluster,extreme_points.first,dir1,extending_dis,1.2*units::cm, angle);
 	dir1 *= -1;
 	global_skeleton_cloud.AddPoints(cluster,extreme_points.first,dir1,extending_dis,1.2*units::cm, angle);
       }
 
-      if (fabs(dir2.Angle(drift_dir) - 3.1415926/2.) < 5*3.1415926/180.){
-	global_skeleton_cloud.AddPoints(cluster,extreme_points.second,dir2,extending_dis*2.0,1.2*units::cm, angle/2.);
+      if (flag_para_2 || flag_prol_2){
+	global_skeleton_cloud.AddPoints(cluster,extreme_points.second,dir2,extending_dis*3.0,1.2*units::cm, angle);
 	dir2 *= -1;
-	global_skeleton_cloud.AddPoints(cluster,extreme_points.second,dir2,extending_dis*2.0,1.2*units::cm, angle/2.);
+	global_skeleton_cloud.AddPoints(cluster,extreme_points.second,dir2,extending_dis*3.0,1.2*units::cm, angle);
       }else{
 	global_skeleton_cloud.AddPoints(cluster,extreme_points.second,dir2,extending_dis,1.2*units::cm, angle);
 	dir2 *= -1;
@@ -209,6 +243,11 @@ void WireCell2dToy::Clustering_connect1(WireCell::PR3DClusterSelection& live_clu
 	    if (results.size()>0){
 	      std::set<PR3DCluster*> temp_clusters;
 	      for (size_t k = 0; k!= results.size(); k++){
+		
+		/* if (extreme_points.first.x < 125*units::cm && extreme_points.first.x > 100*units::cm && */
+		/*     extreme_points.first.z < 660*units::cm && extreme_points.first.z > 620*units::cm) */
+		/*   std::cout <<std::get<0>(results.at(k))/units::cm << " " << global_cloud.pts.at(std::get<2>(results.at(k))).index_u/units::cm << std::endl; */
+		
 		if (std::get<0>(results.at(k)) < global_cloud.pts.at(std::get<2>(results.at(k))).index_u){
 		  flag_unique = false;
 		  temp_clusters.insert(std::get<1>(results.at(k)));
@@ -363,9 +402,8 @@ void WireCell2dToy::Clustering_connect1(WireCell::PR3DClusterSelection& live_clu
 	bool flag_merge = false;
 	
 	
-	/* if (fabs(extreme_points.first.x-140.7*units::cm)< 15*units::cm && */
-	/* 	  fabs(extreme_points.first.y+72.3*units::cm)< 15*units::cm && */
-	/* 	  fabs(extreme_points.first.z-30.1*units::cm)< 15*units::cm || cluster->get_cluster_id()==155) */
+	/* if (extreme_points.first.x < 125*units::cm && extreme_points.first.x > 100*units::cm && */
+	/*     extreme_points.first.z < 660*units::cm && extreme_points.first.z > 620*units::cm) */
 	/* 	std::cout << cluster->get_cluster_id()  << " A " */
 	/* 		  << num_unique[0] << " " << num_unique[1] << " " << num_unique[2] << " " << num_total_points << " " << extreme_points.first.x/units::cm << " " << extreme_points.first.y/units::cm << " " << extreme_points.first.z/units::cm << " " << extreme_points.second.x/units::cm << " " << extreme_points.second.y/units::cm << " " << extreme_points.second.z/units::cm << " " */
 	/* 		  << dir1.X() << " " << dir1.Y() << " " << dir1.Z() << " " << dir2.X() << " " << dir2.Y() << " " << dir2.Z() << " " << cluster_length_map[cluster] /units::cm << std::endl; */
@@ -472,8 +510,8 @@ void WireCell2dToy::Clustering_connect1(WireCell::PR3DClusterSelection& live_clu
 	  }
 
 
-	  /* if (extreme_points.first.x < 117*units::cm && extreme_points.first.x > 105*units::cm && */
-	  /*     extreme_points.first.z < 280*units::cm){ */
+	  /* if (extreme_points.first.x < 125*units::cm && extreme_points.first.x > 100*units::cm && */
+	  /*     extreme_points.first.z < 660*units::cm && extreme_points.first.z > 620*units::cm){ */
 	  /*   std::cout << extreme_points.first.x /units::cm << " " << extreme_points.first.y/units::cm << " " << extreme_points.first.z/units::cm << " " << cluster->get_cluster_id() << " B " << max_value[0] << " " << max_value[1] << " " << max_value[2] << " " << num_total_points << " " << cluster_length_map[cluster]/units::cm << std::endl; */
 	  /* } */
 	  
@@ -595,13 +633,20 @@ void WireCell2dToy::Clustering_connect1(WireCell::PR3DClusterSelection& live_clu
 	
 	
       } // length cut ... 
-     
+
+
+      /* if (extreme_points.first.x < 125*units::cm && extreme_points.first.x > 100*units::cm && */
+      /* 	  extreme_points.first.z < 660*units::cm && extreme_points.first.z > 620*units::cm){ */
+      /* 	std::cout << flag_add_dir1 << " " << flag_add_dir2 << " " << extreme_points.first.x/units::cm << " " << extreme_points.first.y/units::cm << " " << extreme_points.first.z/units::cm << " " << dir1.X() << " " << dir1.Y() << " " << dir1.Z() << " " << extreme_points.second.x/units::cm << " " << extreme_points.second.y/units::cm << " " << extreme_points.second.z/units::cm << " " << dir2.X() << " " << dir2.Y() << " " << dir2.Z() << " " << cluster_length_map[cluster]/units::cm << std::endl; */
+	
+      /* } */
+      
       if (flag_add_dir1){
 	// add extension points in ... 
-	if (fabs(dir1.Angle(drift_dir) - 3.1415926/2.) < 5*3.1415926/180.){
-	  global_skeleton_cloud.AddPoints(cluster,extreme_points.first,dir1,extending_dis*2,1.2*units::cm, angle/2.);
+	if (flag_para_1 || flag_prol_1){
+	  global_skeleton_cloud.AddPoints(cluster,extreme_points.first,dir1,extending_dis*3,1.2*units::cm, angle);
 	  dir1 *= -1;
-	  global_skeleton_cloud.AddPoints(cluster,extreme_points.first,dir1,extending_dis*2,1.2*units::cm, angle/2.);
+	  global_skeleton_cloud.AddPoints(cluster,extreme_points.first,dir1,extending_dis*3,1.2*units::cm, angle);
 	}else{
 	  global_skeleton_cloud.AddPoints(cluster,extreme_points.first,dir1,extending_dis,1.2*units::cm, angle);
 	  dir1 *= -1;
@@ -610,10 +655,10 @@ void WireCell2dToy::Clustering_connect1(WireCell::PR3DClusterSelection& live_clu
       }
       
       if (flag_add_dir2){
-	if (fabs(dir2.Angle(drift_dir) - 3.1415926/2.) < 5*3.1415926/180.){
-	  global_skeleton_cloud.AddPoints(cluster,extreme_points.second,dir2,extending_dis*2.0,1.2*units::cm, angle/2.);
+	if (flag_para_2 || flag_prol_2){
+	  global_skeleton_cloud.AddPoints(cluster,extreme_points.second,dir2,extending_dis*3.0,1.2*units::cm, angle);
 	  dir2 *= -1;
-	  global_skeleton_cloud.AddPoints(cluster,extreme_points.second,dir2,extending_dis*2.0,1.2*units::cm, angle/2.);
+	  global_skeleton_cloud.AddPoints(cluster,extreme_points.second,dir2,extending_dis*3.0,1.2*units::cm, angle);
 	}else{
 	  global_skeleton_cloud.AddPoints(cluster,extreme_points.second,dir2,extending_dis,1.2*units::cm, angle);
 	  dir2 *= -1;
