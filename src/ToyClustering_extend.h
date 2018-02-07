@@ -355,11 +355,12 @@ bool WireCell2dToy::Clustering_4th_dead(WireCell::PR3DCluster *cluster_1, WireCe
   //add a special one ...  
   if (length_1 > 30*units::cm && length_2 > 30*units::cm &&
       (dis < 3*units::cm ||
-       fabs(p1.x-p2.x) < 1.6*units::cm && dis < 20*units::cm &&
-       p1.z > 700.6*units::cm && p1.z < 739.6*units::cm && 
-       p2.z > 700.6*units::cm && p2.z < 739.6*units::cm &&
-       p1.y > -10.4*units::cm && p1.y < 29*units::cm &&
-       p2.y > -10.4*units::cm && p2.y < 29*units::cm )){
+       fabs(p1.x-p2.x) < 1.6*units::cm && (dis < 20*units::cm &&
+					   p1.z > 700.6*units::cm && p1.z < 739.6*units::cm && 
+					   p2.z > 700.6*units::cm && p2.z < 739.6*units::cm &&
+					   p1.y > -10.4*units::cm && p1.y < 29*units::cm &&
+					   p2.y > -10.4*units::cm && p2.y < 29*units::cm )
+       )){
     return true; 
   } 
   
