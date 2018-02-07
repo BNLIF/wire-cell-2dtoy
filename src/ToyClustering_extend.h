@@ -352,10 +352,16 @@ bool WireCell2dToy::Clustering_4th_dead(WireCell::PR3DCluster *cluster_1, WireCe
   Point p2;
   double dis = Find_Closeset_Points(cluster_1, cluster_2, length_1, length_2, length_cut, mcell1, mcell2, p1,p2);
 
-  /* //add a special one ...  */
-  /* if (fabs(p1.x-p2.x) < 1.6*units::cm && dis < 20*units::cm && length_1 > 10*units::cm && length_2 > 10*units::cm){ */
-  /*   return true; */
-  /* } */
+  //add a special one ...  
+  if (length_1 > 30*units::cm && length_2 > 30*units::cm &&
+      (dis < 3*units::cm ||
+       fabs(p1.x-p2.x) < 1.6*units::cm && dis < 20*units::cm &&
+       p1.z > 700.6*units::cm && p1.z < 739.6*units::cm && 
+       p2.z > 700.6*units::cm && p2.z < 739.6*units::cm &&
+       p1.y > -10.4*units::cm && p1.y < 29*units::cm &&
+       p2.y > -10.4*units::cm && p2.y < 29*units::cm )){
+    return true; 
+  } 
   
   //  if (length_2 < 10*units::cm && dis >20*units::cm) return false;
 

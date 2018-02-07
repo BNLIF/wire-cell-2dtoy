@@ -765,7 +765,7 @@ std::vector<WireCell::PR3DCluster*> WireCell2dToy::Separate_1(WireCell::PR3DClus
   /* if (sqrt(pow(start_wcpoint.x-end_wcpoint.x,2)+pow(start_wcpoint.y-end_wcpoint.y,2)+pow(start_wcpoint.z-end_wcpoint.z,2))/units::cm ) */
   
   
-  // std::cout  << " XQ " << start_wcpoint.x/units::cm << " " << start_wcpoint.y/units::cm << " " << start_wcpoint.z/units::cm << " " << end_wcpoint.x/units::cm << " " << end_wcpoint.y/units::cm << " " << end_wcpoint.z/units::cm << " " << dir.X() << " " << dir.Y() << " " << dir.Z() << " " << sqrt(pow(start_wcpoint.x-end_wcpoint.x,2)+pow(start_wcpoint.y-end_wcpoint.y,2)+pow(start_wcpoint.z-end_wcpoint.z,2))/units::cm << " " << length/units::cm << std::endl;
+  //std::cout  << " XQ " << start_wcpoint.x/units::cm << " " << start_wcpoint.y/units::cm << " " << start_wcpoint.z/units::cm << " " << end_wcpoint.x/units::cm << " " << end_wcpoint.y/units::cm << " " << end_wcpoint.z/units::cm << " " << dir.X() << " " << dir.Y() << " " << dir.Z() << " " << sqrt(pow(start_wcpoint.x-end_wcpoint.x,2)+pow(start_wcpoint.y-end_wcpoint.y,2)+pow(start_wcpoint.z-end_wcpoint.z,2))/units::cm << " " << length/units::cm << std::endl;
   
   
   cluster->dijkstra_shortest_paths(start_wcpoint);
@@ -1072,7 +1072,7 @@ std::vector<WireCell::PR3DCluster*> WireCell2dToy::Separate_1(WireCell::PR3DClus
 	}
       }
       
-      //std::cout << temp_close_points << " B " << temp_total_points << " " << length_1/units::cm << std::endl;
+      //      std::cout << temp_close_points << " B " << temp_total_points << " " << length_1/units::cm << std::endl;
 
       if (temp_close_points > 0.85 * temp_total_points){
 	saved_clusters.push_back(other_clusters.at(i));
@@ -1206,13 +1206,13 @@ void WireCell2dToy::Clustering_separate(WireCell::PR3DClusterSelection& live_clu
 
       /* if (cluster_length_map[cluster]>100*units::cm && independent_points.size()>0){ */
       /* 	std::cout << cluster->get_cluster_id() << " A " << cluster_length_map[cluster]/units::cm << " " << flag_proceed << " " << WireCell2dToy::JudgeSeparateDec_1(cluster,drift_dir) << " " << independent_points.at(0).x/units::cm << " " << independent_points.at(0).y/units::cm << " " << independent_points.at(0).z/units::cm << " " << independent_points.size() << std::endl; */
-      /* 	/\* if (independent_points.size()==2){ *\/ */
-      /* 	/\*   TVector3 main_dir(cluster->get_PCA_axis(0).x,cluster->get_PCA_axis(0).y,cluster->get_PCA_axis(0).z); *\/ */
-      /* 	/\*   TVector3 main_dir1(independent_points.at(1).x - independent_points.at(0).x, *\/ */
-      /* 	/\* 		     independent_points.at(1).y - independent_points.at(0).y, *\/ */
-      /* 	/\* 		     independent_points.at(1).z - independent_points.at(0).z); *\/ */
-      /* 	/\*   std::cout << fabs(main_dir.Angle(main_dir1)-3.1415926/2.)/3.1415926*180. << std::endl; *\/ */
-      /* 	/\* } *\/ */
+      /* /\* 	/\\* if (independent_points.size()==2){ *\\/ *\/ */
+      /* /\* 	/\\*   TVector3 main_dir(cluster->get_PCA_axis(0).x,cluster->get_PCA_axis(0).y,cluster->get_PCA_axis(0).z); *\\/ *\/ */
+      /* /\* 	/\\*   TVector3 main_dir1(independent_points.at(1).x - independent_points.at(0).x, *\\/ *\/ */
+      /* /\* 	/\\* 		     independent_points.at(1).y - independent_points.at(0).y, *\\/ *\/ */
+      /* /\* 	/\\* 		     independent_points.at(1).z - independent_points.at(0).z); *\\/ *\/ */
+      /* /\* 	/\\*   std::cout << fabs(main_dir.Angle(main_dir1)-3.1415926/2.)/3.1415926*180. << std::endl; *\\/ *\/ */
+      /* /\* 	/\\* } *\\/ *\/ */
       /* } */
       
       

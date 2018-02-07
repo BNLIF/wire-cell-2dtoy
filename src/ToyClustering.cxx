@@ -270,10 +270,12 @@ void WireCell2dToy::Clustering_jump_gap_cosmics(WireCell::PR3DClusterSelection& 
     }else{
       Clustering_extend(live_clusters, cluster_length_map,cluster_connected_dead,4,35*units::cm,i);
     }
-      
-    
     //  cerr << em("extend dead") << endl;
   }
+
+  
+
+  
   cerr << em("first round of clustering") << std::endl;
 
   for (size_t i=0;i!=live_clusters.size();i++){

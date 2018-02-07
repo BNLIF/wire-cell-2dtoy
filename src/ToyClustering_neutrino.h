@@ -1138,14 +1138,21 @@ void WireCell2dToy::Clustering_dis(WireCell::PR3DClusterSelection& live_clusters
     for (size_t j=i+1; j!=big_clusters.size();j++){
       PR3DCluster *cluster2 = big_clusters.at(j);
       ToyPointCloud *cloud1, *cloud2;
+      double pca_ratio, small_cluster_length;
       if (cluster_length_map[cluster1] > cluster_length_map[cluster2]){
 	cloud1 = cluster1->get_point_cloud();
 	cloud2 = cluster2->get_point_cloud();
 	if (used_big_clusters.find(cluster2)!=used_big_clusters.end()) continue;
+	cluster2->Calc_PCA();
+	pca_ratio = cluster2->get_PCA_value(1)/ cluster2->get_PCA_value(0);
+	small_cluster_length = cluster_length_map[cluster2];
       }else{
 	cloud1 = cluster2->get_point_cloud();
 	cloud2 = cluster1->get_point_cloud();
 	if (used_big_clusters.find(cluster1)!=used_big_clusters.end()) continue;
+	cluster1->Calc_PCA();
+	pca_ratio = cluster1->get_PCA_value(1)/ cluster1->get_PCA_value(0);
+	small_cluster_length = cluster_length_map[cluster1];
       }
       std::tuple<int,int,double> results =  cloud2->get_closest_points(cloud1);
       double min_dis = std::get<2>(results);
@@ -1172,14 +1179,21 @@ void WireCell2dToy::Clustering_dis(WireCell::PR3DClusterSelection& live_clusters
 	
 	if (num_outside_points > 0.125 * N  || num_outside_points > 400   )
 	  flag_merge = false;
+
+	//	std::cout << pca_ratio << " " << small_cluster_length/units::cm << std::endl;
+	if (flag_merge && small_cluster_length > 60 * units::cm && pca_ratio < 0.0015)
+	  flag_merge = false;
 	
 	if (flag_merge) {
+	  
+	  
 	  to_be_merged_pairs.insert(std::make_pair(cluster1,cluster2));
 	  if (cluster_length_map[cluster1] < cluster_length_map[cluster2]){
 	    used_big_clusters.insert(cluster1);
 	  }else{
 	    used_big_clusters.insert(cluster2);
-	  }	
+	  }
+	  
 	}
       }
     }
