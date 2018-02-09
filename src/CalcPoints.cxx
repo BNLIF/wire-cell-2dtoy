@@ -704,6 +704,7 @@ void WireCell2dToy::calc_sampling_points(WireCell::GeomDataSource& gds, WireCell
 	int index_v;
 	int index_w;
 	const GeomWire* wire_other = gds.closest(point,other_wire_plane_type);
+	if (wire_other == 0 ) continue;
 	if (max_wire_plane_type==WirePlaneType_t(0)){
 	  index_u = (*it)->index();
 	  if (min_wire_plane_type==WirePlaneType_t(1)){

@@ -1126,41 +1126,83 @@ WireCell::SlimMergeGeomCell* WireCell2dToy::LowmemTiling::create_slim_merge_cell
     
 
     const GeomWire* uwire_min = gds.closest(u_min,WirePlaneType_t(0));
-    if (uwire_min->index() < uwire_1->index()){
-      uwire_min = uwire_1;
-    }else if (uwire_min->index() > uwire_2->index()){
-      uwire_min = uwire_2;
+    if (uwire_min == 0 ){
+      if (u_min <= gds.wire_dist(*uwire_1)){
+	uwire_min = uwire_1;
+      }else{
+	uwire_min = uwire_2;
+      }
     }
+    //    if (uwire_min->index() < uwire_1->index()){
+    //  uwire_min = uwire_1;
+    //}else if (uwire_min->index() > uwire_2->index()){
+    //  uwire_min = uwire_2;
+    //}
     const GeomWire* uwire_max = gds.closest(u_max,WirePlaneType_t(0));
-    if (uwire_max->index() < uwire_1->index()){
-      uwire_max = uwire_1;
-    }else if (uwire_max->index() > uwire_2->index()){
-      uwire_max = uwire_2;
+    if (uwire_max == 0 ){
+      if (u_min <= gds.wire_dist(*uwire_1)){
+	uwire_max = uwire_1;
+      }else{
+	uwire_max = uwire_2;
+      }
     }
+    // if (uwire_max->index() < uwire_1->index()){
+    //   uwire_max = uwire_1;
+    // }else if (uwire_max->index() > uwire_2->index()){
+    //   uwire_max = uwire_2;
+    // }
     const GeomWire* vwire_min = gds.closest(v_min,WirePlaneType_t(1));
-    if (vwire_min->index() < vwire_1->index()){
-      vwire_min = vwire_1;
-    }else if (vwire_min->index() > vwire_2->index()){
-      vwire_min = vwire_2;
+    if (vwire_min == 0 ){
+      if (v_min <= gds.wire_dist(*vwire_1)){
+	vwire_min = vwire_1;
+      }else{
+	vwire_min = vwire_2;
+      }
     }
+    // if (vwire_min->index() < vwire_1->index()){
+    //   vwire_min = vwire_1;
+    // }else if (vwire_min->index() > vwire_2->index()){
+    //   vwire_min = vwire_2;
+    // }
     const GeomWire* vwire_max = gds.closest(v_max,WirePlaneType_t(1));
-    if (vwire_max->index() < vwire_1->index()){
-      vwire_max = vwire_1;
-    }else if (vwire_max->index() > vwire_2->index()){
-      vwire_max = vwire_2;
+    if (vwire_max == 0 ){
+      if (v_max <= gds.wire_dist(*vwire_1)){
+	vwire_max = vwire_1;
+      }else{
+	vwire_max = vwire_2;
+      }
     }
+    // if (vwire_max->index() < vwire_1->index()){
+    //   vwire_max = vwire_1;
+    // }else if (vwire_max->index() > vwire_2->index()){
+    //   vwire_max = vwire_2;
+    // }
     const GeomWire* wwire_min = gds.closest(w_min,WirePlaneType_t(2));//.bounds(w_min,WirePlaneType_t(2)).second;
-    if (wwire_min->index() < wwire_1->index()){
-      wwire_min = wwire_1;
-    }else if (wwire_min->index() > wwire_2->index()){
-      wwire_min = wwire_2;
+    if (wwire_min == 0 ){
+      if (w_min <= gds.wire_dist(*wwire_1)){
+	wwire_min = wwire_1;
+      }else{
+	wwire_min = wwire_2;
+      }
     }
+    // if (wwire_min->index() < wwire_1->index()){
+    //   wwire_min = wwire_1;
+    // }else if (wwire_min->index() > wwire_2->index()){
+    //   wwire_min = wwire_2;
+    // }
     const GeomWire* wwire_max = gds.closest(w_max,WirePlaneType_t(2));//.bounds(w_max,WirePlaneType_t(2)).first;
-    if (wwire_max->index() < wwire_1->index()){
-      wwire_max = wwire_1;
-    }else if (wwire_max->index() > wwire_2->index()){
-      wwire_max = wwire_2;
+    if (wwire_max == 0 ){
+      if (w_max <= gds.wire_dist(*wwire_1)){
+	wwire_max = wwire_1;
+      }else{
+	wwire_max = wwire_2;
+      }
     }
+    // if (wwire_max->index() < wwire_1->index()){
+    //   wwire_max = wwire_1;
+    // }else if (wwire_max->index() > wwire_2->index()){
+    //   wwire_max = wwire_2;
+    // }
     u_min = gds.wire_dist(*uwire_min)-u_pitch/2.;
     u_max = gds.wire_dist(*uwire_max)+u_pitch/2.;
     v_min = gds.wire_dist(*vwire_min)-v_pitch/2.;
