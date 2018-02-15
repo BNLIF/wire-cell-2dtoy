@@ -137,7 +137,13 @@ bool WireCell2dToy::Clustering_3rd_round(WireCell::PR3DCluster *cluster1, WireCe
   TVector3 dir1, dir2;
   int num_p1, num_p2, num_tp1, num_tp2;
 
-  
+  // if very close merge anyway???
+  if (dis < 0.5*units::cm){
+    return true;
+  }
+
+  if (dis < 1.0*units::cm && length_2 < 12*units::cm && length_1 <12*units::cm)
+    return true;
 
   
   if (dis < 2.0*units::cm && (length_2 >=12*units::cm || length_1 >=12*units::cm)){

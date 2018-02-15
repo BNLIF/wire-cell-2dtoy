@@ -47,7 +47,7 @@ namespace WireCell2dToy{
   
   void Clustering_separate(WireCell::PR3DClusterSelection& live_clusters, std::map<WireCell::PR3DCluster*,double>& cluster_length_map, std::map<int,std::pair<double,double>>& dead_u_index, std::map<int,std::pair<double,double>>& dead_v_index, std::map<int,std::pair<double,double>>& dead_w_index);
   bool JudgeSeparateDec_1(WireCell::PR3DCluster* cluster, TVector3& drift_dir);
-  bool JudgeSeparateDec_2(WireCell::PR3DCluster* cluster, TVector3& drift_dir ,std::vector<WireCell::WCPointCloud<double>::WCPoint>& boundary_points, std::vector<WireCell::WCPointCloud<double>::WCPoint>& independent_points);
+  bool JudgeSeparateDec_2(WireCell::PR3DCluster* cluster, TVector3& drift_dir ,std::vector<WireCell::WCPointCloud<double>::WCPoint>& boundary_points, std::vector<WireCell::WCPointCloud<double>::WCPoint>& independent_points, double cluster_length = 100*units::cm);
   std::vector<WireCell::PR3DCluster*> Separate_1(WireCell::PR3DCluster* cluster,std::vector<WireCell::WCPointCloud<double>::WCPoint>& boundary_points, std::vector<WireCell::WCPointCloud<double>::WCPoint>& independent_points, std::map<int,std::pair<double,double>>& dead_u_index, std::map<int,std::pair<double,double>>& dead_v_index, std::map<int,std::pair<double,double>>& dead_w_index, double length=0);
 
   std::vector<WireCell::PR3DCluster*> Separate_2(WireCell::PR3DCluster* cluster, double dis_cut = 5*units::cm);
@@ -57,6 +57,13 @@ namespace WireCell2dToy{
 
 
   void Clustering_connect1(WireCell::PR3DClusterSelection& live_clusters, std::map<WireCell::PR3DCluster*,double>& cluster_length_map, WireCell::DynamicToyPointCloud& global_point_cloud, std::map<int,std::pair<double,double>>& dead_u_index, std::map<int,std::pair<double,double>>& dead_v_index, std::map<int,std::pair<double,double>>& dead_w_index);
+ 
+
+  void Clustering_examine_x_boundary(WireCell::PR3DClusterSelection& live_clusters,std::map<WireCell::PR3DCluster*,double>& cluster_length_map);
+  
+  void Clustering_neutrino(WireCell::PR3DClusterSelection& live_clusters,std::map<WireCell::PR3DCluster*,double>& cluster_length_map, int num_try=0);
+  
+  void Clustering_dis(WireCell::PR3DClusterSelection& live_clusters,std::map<WireCell::PR3DCluster*,double>& cluster_length_map);
   
 
   std::map<WireCell::PR3DCluster*,std::vector<std::pair<WireCell::PR3DCluster*,double>>> Clustering_isolated(WireCell::PR3DClusterSelection& live_clusters);

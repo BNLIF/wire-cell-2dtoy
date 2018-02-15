@@ -336,6 +336,7 @@ void WireCell2dToy::Clustering_extend(WireCell::PR3DClusterSelection& live_clust
 
 
 bool WireCell2dToy::Clustering_4th_dead(WireCell::PR3DCluster *cluster_1, WireCell::PR3DCluster *cluster_2, double length_1, double length_2, double length_cut, int num_dead_try){
+  cluster_1->Create_point_cloud();
   cluster_2->Create_point_cloud();
 
   TPCParams& mp = Singleton<TPCParams>::Instance();
@@ -351,6 +352,18 @@ bool WireCell2dToy::Clustering_4th_dead(WireCell::PR3DCluster *cluster_1, WireCe
   Point p2;
   double dis = Find_Closeset_Points(cluster_1, cluster_2, length_1, length_2, length_cut, mcell1, mcell2, p1,p2);
 
+  //add a special one ...  
+  if (length_1 > 30*units::cm && length_2 > 30*units::cm &&
+      (dis < 3*units::cm ||
+       fabs(p1.x-p2.x) < 1.6*units::cm && (dis < 20*units::cm &&
+					   p1.z > 700.6*units::cm && p1.z < 739.6*units::cm && 
+					   p2.z > 700.6*units::cm && p2.z < 739.6*units::cm &&
+					   p1.y > -10.4*units::cm && p1.y < 29*units::cm &&
+					   p2.y > -10.4*units::cm && p2.y < 29*units::cm )
+       )){
+    return true; 
+  } 
+  
   //  if (length_2 < 10*units::cm && dis >20*units::cm) return false;
 
   /* if (length_1> 100*units::cm && length_2>100*units::cm) */

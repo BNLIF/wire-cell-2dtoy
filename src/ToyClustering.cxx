@@ -15,6 +15,7 @@ using namespace std;
 #include "ToyClustering_separate.h"
 #include "ToyClustering_deghost.h"
 #include "ToyClustering_connect.h"
+#include "ToyClustering_neutrino.h"
 
 #include "ToyClustering_isolated.h"
 
@@ -269,10 +270,12 @@ void WireCell2dToy::Clustering_jump_gap_cosmics(WireCell::PR3DClusterSelection& 
     }else{
       Clustering_extend(live_clusters, cluster_length_map,cluster_connected_dead,4,35*units::cm,i);
     }
-      
-    
     //  cerr << em("extend dead") << endl;
   }
+
+  
+
+  
   cerr << em("first round of clustering") << std::endl;
 
   for (size_t i=0;i!=live_clusters.size();i++){
@@ -300,8 +303,7 @@ void WireCell2dToy::Clustering_jump_gap_cosmics(WireCell::PR3DClusterSelection& 
     cluster->set_cluster_id(i+1);
   }
   
-  //  DynamicToyPointCloud global_point_cloud(angle_u,angle_v,angle_w);
-
+ 
   // prepare for deghosting and clustering along track
   Clustering_deghost(live_clusters,cluster_length_map, dead_u_index, dead_v_index, dead_w_index);
   cerr << em("deghost clusters") << std::endl;
@@ -310,19 +312,25 @@ void WireCell2dToy::Clustering_jump_gap_cosmics(WireCell::PR3DClusterSelection& 
     PR3DCluster *cluster = live_clusters.at(i);
     cluster->set_cluster_id(i+1);
   }
+  
+  Clustering_examine_x_boundary(live_clusters,cluster_length_map);
+  // Now clustering the isolated pieces ....
+  for (int i=0;i!=1;i++){
+    Clustering_neutrino(live_clusters,cluster_length_map,i);
+    // std::cout << std::endl << std::endl;
+  }
+  
+  Clustering_dis(live_clusters,cluster_length_map);
+   cerr << em("clustering isolated piece") << std::endl;
+  
+  for (size_t i=0;i!=live_clusters.size();i++){
+    PR3DCluster *cluster = live_clusters.at(i);
+    cluster->set_cluster_id(i+1);
+  }
+
 
   
  
-  
-  // DynamicToyPointCloud global_point_cloud1(angle_u,angle_v,angle_w);
-  // // prepare for deghosting and clustering along track
-  // Clustering_deghost(live_clusters, cluster_length_map, global_point_cloud1, dead_u_index, dead_v_index, dead_w_index, 50*units::cm);
-  // cerr << em("deghost clusters 2 ") << std::endl;
-  
-  // for (size_t i=0;i!=live_clusters.size();i++){
-  //   PR3DCluster *cluster = live_clusters.at(i);
-  //   cluster->set_cluster_id(i+1);
-  // }
 
   
   
