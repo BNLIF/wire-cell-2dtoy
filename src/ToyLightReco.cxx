@@ -133,7 +133,7 @@ void WireCell2dToy::ToyLightReco::load_event_raw(int eve_num){
   COphitSelection left_ophits;
   for (int i=32;i!=fop_femch->size();i++){
     COphit *op_hit = new COphit(fop_femch->at(i), (TH1S*)fop_wf->At(i), fop_timestamp->at(i) - triggerTime, op_gain->at(fop_femch->at(i)), op_gainerror->at(fop_femch->at(i)));
-    if (op_hit->get_type()){
+    if (op_hit->get_type()){ // what type  good baseline ???
       bool flag_used = false;
       if (ophits_group.size()==0){
 	COphitSelection ophits;
@@ -143,7 +143,7 @@ void WireCell2dToy::ToyLightReco::load_event_raw(int eve_num){
       }else{
 	for (size_t j=0; j!=ophits_group.size();j++){
 	  for (size_t k=0; k!= ophits_group.at(j).size(); k++){
-	    if (fabs(op_hit->get_time() - ophits_group.at(j).at(k)->get_time()) < 0.1 ){
+	    if (fabs(op_hit->get_time() - ophits_group.at(j).at(k)->get_time()) < 0.1 ){  // time unit??? 0.1 us?
 	      ophits_group.at(j).push_back(op_hit);
 	      flag_used = true;
 	      break;
@@ -167,7 +167,7 @@ void WireCell2dToy::ToyLightReco::load_event_raw(int eve_num){
     bool flag_used = false;
     for (size_t j=0; j!=ophits_group.size();j++){
       for (size_t k=0; k!= ophits_group.at(j).size(); k++){
-	if (fabs(left_ophits.at(i)->get_time() - ophits_group.at(j).at(k)->get_time())<0.1){
+	if (fabs(left_ophits.at(i)->get_time() - ophits_group.at(j).at(k)->get_time())<0.1){ // time unit??? 0.1 us?
 	  ophits_group.at(j).push_back(left_ophits.at(i));
 	  flag_used = true;
 	  break;
@@ -594,6 +594,7 @@ WireCell2dToy::pmtMapSet WireCell2dToy::ToyLightReco::makePmtContainer(bool high
       disc.wfm.resize(discSize);
       if(beam == false){ baseline = h->GetBinContent(1); }
       for(int j=0; j<discSize; j++){
+	// is 2050 a good approximation??? 
 	//disc.wfm.at(j) = (h->GetBinContent(j+1)-baseline)*scalePMT[disc.channel]+baseline;
 	disc.wfm.at(j) = (h->GetBinContent(j+1)-baseline)*findScaling(disc.channel)+baseline;
       }
@@ -620,7 +621,8 @@ WireCell2dToy::pmtMapSetPair WireCell2dToy::ToyLightReco::makeCosmicPairs(WireCe
   WireCell2dToy::pmtMapSetPair result;
   int countIsoLg = 0, tickWindow=20;
   float tick = 0.015625;
-  
+
+  // can use the 1D kd tree to search??? 
   for(auto h=high.begin(); h!=high.end(); h++){
     WireCell2dToy::pmtSetPair tempSetPair;
 

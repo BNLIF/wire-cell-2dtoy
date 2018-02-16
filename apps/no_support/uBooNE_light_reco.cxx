@@ -141,7 +141,7 @@ void WireCell2dToy::uBooNE_light_reco::load_event_raw(int eve_num){
       }else{
 	for (size_t j=0; j!=ophits_group.size();j++){
 	  for (size_t k=0; k!= ophits_group.at(j).size(); k++){
-	    if (fabs(op_hit->get_time() - ophits_group.at(j).at(k)->get_time()) < 0.1 ){
+	    if (fabs(op_hit->get_time() - ophits_group.at(j).at(k)->get_time()) < 0.1 ){ // time unit??? 0.1 us?
 	      ophits_group.at(j).push_back(op_hit);
 	      flag_used = true;
 	      break;
