@@ -188,7 +188,7 @@ double WireCell2dToy::Find_Closeset_Points(WireCell::PR3DCluster *cluster1, Wire
 }
 
 
-void WireCell2dToy::Clustering_jump_gap_cosmics(WireCell::PR3DClusterSelection& live_clusters, WireCell::PR3DClusterSelection& dead_clusters, std::map<int,std::pair<double,double>>& dead_u_index, std::map<int,std::pair<double,double>>& dead_v_index, std::map<int,std::pair<double,double>>& dead_w_index, WireCell::DynamicToyPointCloud& global_point_cloud){
+std::map<PR3DCluster*,std::vector<std::pair<PR3DCluster*,double>>> WireCell2dToy::Clustering_jump_gap_cosmics(WireCell::PR3DClusterSelection& live_clusters, WireCell::PR3DClusterSelection& dead_clusters, std::map<int,std::pair<double,double>>& dead_u_index, std::map<int,std::pair<double,double>>& dead_v_index, std::map<int,std::pair<double,double>>& dead_w_index, WireCell::DynamicToyPointCloud& global_point_cloud){
 
   
   ExecMon em("starting");
@@ -320,8 +320,8 @@ void WireCell2dToy::Clustering_jump_gap_cosmics(WireCell::PR3DClusterSelection& 
     // std::cout << std::endl << std::endl;
   }
   
-  Clustering_dis(live_clusters,cluster_length_map);
-   cerr << em("clustering isolated piece") << std::endl;
+  // Clustering_dis(live_clusters,cluster_length_map);
+  //  cerr << em("clustering isolated piece") << std::endl;
   
   for (size_t i=0;i!=live_clusters.size();i++){
     PR3DCluster *cluster = live_clusters.at(i);
@@ -329,10 +329,12 @@ void WireCell2dToy::Clustering_jump_gap_cosmics(WireCell::PR3DClusterSelection& 
   }
 
 
-  
+   // need to further cluster things ...
+  std::map<PR3DCluster*,std::vector<std::pair<PR3DCluster*,double>>> group_clusters =  WireCell2dToy::Clustering_isolated(live_clusters, cluster_length_map);
+  // cerr << em("Clustering isolated") << std::endl;
  
 
-  
+  return group_clusters;
   
 }
 
