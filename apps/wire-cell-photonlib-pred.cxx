@@ -1,7 +1,7 @@
 #include "WireCellSst/GeomDataSource.h"
 #include "WireCellData/TPCParams.h"
 #include "WireCellData/Singleton.h"
-#include "WireCell2dToy/uBooNE_light_reco.h"
+//#include "WireCell2dToy/ToyLightReco.h"
 
 #include "WireCell2dToy/ToyLibPe.h"
 

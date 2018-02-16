@@ -6,7 +6,9 @@
 #include "WireCell2dToy/ExecMon.h"
 #include "WireCell2dToy/CalcPoints.h"
 #include "WireCell2dToy/ToyClustering.h"
-#include "WireCell2dToy/uBooNE_light_reco.h"
+//#include "WireCell2dToy/uBooNE_light_reco.h"
+#include "WireCell2dToy/ToyLightReco.h"
+
 
 #include "WireCell2dToy/ToyMatching.h"
 
@@ -387,7 +389,8 @@ int main(int argc, char* argv[])
    
    // processing light information
    const char* root_file = argv[3];
-   WireCell2dToy::uBooNE_light_reco uboone_flash(root_file);
+   //  WireCell2dToy::uBooNE_light_reco uboone_flash(root_file);
+   WireCell2dToy::ToyLightReco uboone_flash(root_file);
    uboone_flash.load_event_raw(0);
    TFile *file2 = new TFile(root_file);
    TTree *T = (TTree*)file2->Get("/Event/Sim");
