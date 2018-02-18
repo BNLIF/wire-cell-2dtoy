@@ -357,7 +357,11 @@ void WireCell2dToy::ToyLightReco::Process_beam_wfs(){
     }
     results = cal_mean_rms(fb);
     for (int i=0;i!=1500;i++){
-      fb->SetBinContent(i+1,fb->GetBinContent(i+1)-results.first+0.01);
+      if (i<1500-4){
+	fb->SetBinContent(i+1,fb->GetBinContent(i+1)-results.first+0.01);
+      }else{
+	fb->SetBinContent(i+1,0);
+      }
     }
 
     // prepare L1 fit ... 
@@ -517,6 +521,8 @@ void WireCell2dToy::ToyLightReco::Process_beam_wfs(){
     beam_flashes.push_back(flash);
   }
 
+  Opflash *prev_cflash = 0;
+  
   for (size_t i=0; i!=cosmic_flashes.size();i++){
     Opflash *cflash = cosmic_flashes.at(i);
     bool save = true;
@@ -528,11 +534,24 @@ void WireCell2dToy::ToyLightReco::Process_beam_wfs(){
 	break;
       }
     }
-    if (save)
+    if (save){
       flashes.push_back(cflash);
+      if (prev_cflash==0){
+	prev_cflash = cflash;
+      }else{
+	if (cflash->get_time() < 0 && cflash->get_time() > prev_cflash->get_time())
+	  prev_cflash = cflash;
+      }
+    }
   }
   for (size_t j=0; j!=beam_flashes.size();j++){
     Opflash *bflash = beam_flashes.at(j);
+    if (prev_cflash!=0){
+      if (bflash->get_time() - prev_cflash->get_time() < 2.4 && // veto for 3 us
+	  bflash->get_total_PE() < 0.7 * prev_cflash->get_total_PE())
+	continue;
+      // std::cout << bflash->get_time() << " " << prev_cflash->get_time() << " " << bflash->get_total_PE() << " " << prev_cflash->get_total_PE() << std::endl;
+    }
     flashes.push_back(bflash);
   }
   // std::cout << cosmic_flashes.size() << " " << beam_flashes.size() << " " << flashes.size() << std::endl;
