@@ -30,8 +30,8 @@ int main(int argc, char* argv[])
     return 1;
   }
   TH1::AddDirectory(kFALSE);
-
-  int flag_pos_corr = 1; // correct X position after matching ... 
+  
+  int flag_pos_corr = 0; // correct X position after matching ... 
   for(Int_t i = 1; i != argc; i++){
      switch(argv[i][1]){
      case 'c':
@@ -391,7 +391,8 @@ int main(int argc, char* argv[])
    const char* root_file = argv[3];
    //  WireCell2dToy::uBooNE_light_reco uboone_flash(root_file);
    WireCell2dToy::ToyLightReco uboone_flash(root_file);
-   uboone_flash.load_event_raw(0);
+   uboone_flash.load_event_raw(eve_num);
+   
    TFile *file2 = new TFile(root_file);
    TTree *T = (TTree*)file2->Get("/Event/Sim");
    
@@ -407,7 +408,7 @@ int main(int argc, char* argv[])
    vector<double> *cosmic_lg_timestamp = new vector<double>;
    vector<double> *beam_hg_timestamp = new vector<double>;
    vector<double> *beam_lg_timestamp = new vector<double>;
-   vector<short> *opch_to_opdet = new vector<short>; 
+   //  vector<short> *opch_to_opdet = new vector<short>; 
    std::vector<float> *op_gain = new std::vector<float>;
    std::vector<float> *op_gainerror = new std::vector<float>; 
    double triggerTime;
@@ -435,7 +436,7 @@ int main(int argc, char* argv[])
    T->SetBranchAddress("cosmic_lg_timestamp",&cosmic_lg_timestamp);
    T->SetBranchAddress("beam_hg_timestamp",&beam_hg_timestamp);
    T->SetBranchAddress("beam_lg_timestamp",&beam_lg_timestamp);
-   T->SetBranchAddress("opch_to_opdet",&opch_to_opdet); 
+   // T->SetBranchAddress("opch_to_opdet",&opch_to_opdet); 
    T->SetBranchAddress("op_gain",&op_gain);
    T->SetBranchAddress("op_gainerror",&op_gainerror);
    /*
@@ -458,6 +459,10 @@ int main(int argc, char* argv[])
 
    // prepare light matching ....
    WireCell::OpflashSelection& flashes = uboone_flash.get_flashes();
+   for (size_t i=0;i!=flashes.size(); i++){
+     flashes.at(i)->set_flash_id(i);
+   }
+
    
    std::vector<std::tuple<WireCell::PR3DCluster*, WireCell::Opflash*, double, std::vector<double>>> matched_results = WireCell2dToy::tpc_light_match(time_offset,nrebin,group_clusters,flashes);
    cerr << em("TPC Light Matching") << std::endl;
@@ -483,9 +488,11 @@ int main(int argc, char* argv[])
 
    for (auto it = matched_results.begin(); it!=matched_results.end(); it++){
      Opflash *flash = std::get<1>(*it);
+     PR3DCluster *main_cluster = std::get<0>(*it);
      if (flash!=0){
        auto it1 = find(flashes.begin(),flashes.end(),flash);
-       flash_id = it1 - flashes.begin();
+       // flash_id = it1 - flashes.begin();
+       flash_id = flash->get_flash_id();
        strength = std::get<2>(*it);
        std::vector<double> temp = std::get<3>(*it);
        for (int i=0;i!=32;i++){
@@ -502,8 +509,9 @@ int main(int argc, char* argv[])
      	 pe_meas_err[i] = 0.;
        }
      }
+     ncluster = main_cluster->get_cluster_id();
      T_match->Fill();
-     ncluster++;
+     //ncluster++;
    }
    
    
@@ -560,13 +568,6 @@ int main(int argc, char* argv[])
    t_rec_charge->Branch("chi2",&chi2_save,"chi2/D");
    t_rec_charge->Branch("ndf",&ndf_save,"ndf/D");
    
-   // test ... 
-   // ncluster = 0;
-   // x=  0;
-   // y=0;
-   // z=0;
-   // T_cluster->Fill();
-
    
    // note did not save the unmatched cluster ... 
    ncluster = 0;
@@ -582,8 +583,9 @@ int main(int argc, char* argv[])
      
      if (flag_pos_corr==0)
        offset_x = 0;
-     
-   //   for (auto it = group_clusters.begin(); it!= group_clusters.end(); it++){
+
+     ncluster = main_cluster->get_cluster_id();
+
      PR3DClusterSelection temp_clusters;
      temp_clusters.push_back(main_cluster);
      for (auto it1 = group_clusters[main_cluster].begin(); it1!=group_clusters[main_cluster].end(); it1++){
@@ -605,7 +607,7 @@ int main(int argc, char* argv[])
 	 }
        }
      }
-     ncluster ++;
+     //     ncluster ++;
    }
    
    for (size_t j = 0; j!= live_clusters.size(); j++){
@@ -766,11 +768,11 @@ int main(int argc, char* argv[])
   TTree *T_flash = new TTree("T_flash","T_flash");
   T_flash->SetDirectory(file1);
   int type;
-  flash_id;
   double low_time, high_time;
   double time;
   double total_PE;
   double PE[32],PE_err[32];
+  // std::vector<int> matched_tpc_ids;
   std::vector<int> fired_channels;
   std::vector<double> l1_fired_time;
   std::vector<double> l1_fired_pe;
@@ -786,12 +788,16 @@ int main(int argc, char* argv[])
   T_flash->Branch("fired_channels",&fired_channels);
   T_flash->Branch("l1_fired_time",&l1_fired_time);
   T_flash->Branch("l1_fired_pe",&l1_fired_pe);
+  //  T_flash->Branch("matched_tpc_ids",&matched_tpc_ids);
 
+  
+  
   
   for (auto it = flashes.begin(); it!=flashes.end(); it++){
     fired_channels.clear();
-    flash_id = it - flashes.begin();
+    //it - flashes.begin();
     Opflash *flash = (*it);
+    flash_id = flash->get_flash_id();
     type = flash->get_type();
     low_time = flash->get_low_time();
     high_time = flash->get_high_time();
@@ -806,7 +812,6 @@ int main(int argc, char* argv[])
     l1_fired_time = flash->get_l1_fired_time();
     l1_fired_pe = flash->get_l1_fired_pe();
     T_flash->Fill();
-    
   }
 
 

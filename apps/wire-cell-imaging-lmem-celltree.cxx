@@ -105,7 +105,7 @@ int main(int argc, char* argv[])
   int nt_off2 = 0; // not used
   int solve_charge = 1; // not used
 
-  int save_file = 1; //
+  int save_file = 0; //
   // 1 for debug mode for bee ...
 
   for(Int_t i = 1; i != argc; i++){
