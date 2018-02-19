@@ -50,7 +50,7 @@ std::vector<std::tuple<PR3DCluster*, Opflash*, double, std::vector<double>>> Wir
 
   // PMT data is based on OpChannel
   // Library is NOT ...
-
+  // these are PE numbers ... 
   Double_t cos_pe_low[32]={11,11,11,11,10,
 			   7,8,8,10,7,
 			   11,11,11,11,10,
@@ -142,6 +142,7 @@ std::vector<std::tuple<PR3DCluster*, Opflash*, double, std::vector<double>>> Wir
     double offset_x = (flash->get_time() - time_offset)*2./nrebin*time_slice_width;
     int cluster_id = 0;
 
+    int flash_type = flash->get_type(); // 1 for cosmic, 2 for beam ... 
     bool flag_good_flash = false;
     
     for (auto it2 = group_clusters.begin(); it2!=group_clusters.end(); it2++){
@@ -152,6 +153,7 @@ std::vector<std::tuple<PR3DCluster*, Opflash*, double, std::vector<double>>> Wir
       double last_pos_x = (*((main_cluster->get_time_cells_set_map().rbegin())->second.begin()))->get_sampling_points().front().x;
 
       bool flag_at_x_boundary = false;
+      bool flag_close_to_PMT = false;
 
       // if (flash_num==57){
       // 	std::cout << cluster_id << " " << (first_pos_x-offset_x)/units::cm << " " << (last_pos_x-offset_x)/units::cm << " " << flash_num << std::endl;
@@ -173,14 +175,18 @@ std::vector<std::tuple<PR3DCluster*, Opflash*, double, std::vector<double>>> Wir
 	}
 	
 	// tracks ends at boundary ... 
-	if (first_pos_x-offset_x <=low_x_cut + low_x_cut_ext2 && first_pos_x-offset_x > low_x_cut + low_x_cut_ext1 ||
-	    last_pos_x-offset_x >= high_x_cut-high_x_cut_ext1 && last_pos_x-offset_x < high_x_cut + high_x_cut_ext1){
+	if (first_pos_x-offset_x <=low_x_cut + low_x_cut_ext2 && first_pos_x-offset_x > low_x_cut + low_x_cut_ext1 ){
+	  flag_at_x_boundary = true;
+	  flag_close_to_PMT = true; // may need to cut off PE ... 
+	}
+	if (last_pos_x-offset_x >= high_x_cut-high_x_cut_ext1 && last_pos_x-offset_x < high_x_cut + high_x_cut_ext1){
 	  flag_at_x_boundary = true;
 	}
 	
 	std::vector<double> pred_pmt_light;
-	//std::vector<double> pred_pmt_light1;
 	pred_pmt_light.resize(32,0);
+
+	//std::vector<double> pred_pmt_light1;
 	//pred_pmt_light1.resize(32,0);
 	
 	PR3DClusterSelection temp_clusters;
@@ -227,6 +233,20 @@ std::vector<std::tuple<PR3DCluster*, Opflash*, double, std::vector<double>>> Wir
 	//   sum1 += flash->get_PE(i);
 	//   sum2 += pred_pmt_light.at(i);
 	}
+
+	
+	// apply cut off, if the prediction for cosmic discriminator is too low, remove it ... 
+	if (flash_type==1){ 
+	  // what is the mapping ???
+	  for (size_t i=0;i!=32;i++){
+	    if (pred_pmt_light.at(i) < cos_pe_low[i]){ // lower than this limit, anyway zerod it ... 
+	      pred_pmt_light.at(i) = 0;
+	    }else if (flash->get_PE(i)==0 && pred_pmt_light.at(i) < cos_pe_low[i] * 1.3){
+	      pred_pmt_light.at(i) = 0;
+	    }
+	  }
+	}
+	
 
 	// if (fabs(sum2/sum1-1)<0.75){
 	map_flash_tpc_ids[flash].push_back(cluster_id);
@@ -308,7 +328,7 @@ std::vector<std::tuple<PR3DCluster*, Opflash*, double, std::vector<double>>> Wir
 	  G(32*i+k,total_pairs.end()-total_pairs.begin()) = 1./pe_err * map_flash_tpc_light_preds[flash].at(j).at(k);
 	}
 	// require each TPC can be used once
-	G(32*good_flashes.size()+map_tpc_index[map_flash_tpc_ids[flash].at(j)],total_pairs.end()-total_pairs.begin()) = 20.;// 10% 
+	G(32*good_flashes.size()+map_tpc_index[map_flash_tpc_ids[flash].at(j)],total_pairs.end()-total_pairs.begin()) = 20.;// 20% 
 	// require total TPC contribution to a flash is 1, not correct ... 
 	//G(33*i+32,total_pairs.end()-total_pairs.begin()) = 6.7; //15%
 	
