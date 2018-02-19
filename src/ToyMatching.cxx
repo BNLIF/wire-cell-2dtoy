@@ -279,15 +279,15 @@ std::vector<std::tuple<PR3DCluster*, Opflash*, double, std::vector<double>>> Wir
   double fudge_factor1 = 0.05; // add 5% relative uncertainty for pe
   double fudge_factor2 = 1.5; // increase the original uncertainties by 50% ... 
   int num_unknowns = 0;
-  //  int test_flash_id = 27;
+  
+
   std::set<int> tpc_ids;
   std::map<int,int> map_tpc_index;
   for (auto it = map_flash_tpc_ids.begin(); it!= map_flash_tpc_ids.end(); it++){
-    //  if (map_flash_index[it->first]==test_flash_id)
-      num_unknowns += it->second.size();
-      for (auto it1 = it->second.begin(); it1!=it->second.end(); it1++){
-	tpc_ids.insert(*it1);
-      }
+    num_unknowns += it->second.size();
+    for (auto it1 = it->second.begin(); it1!=it->second.end(); it1++){
+      tpc_ids.insert(*it1);
+    }
   }
   
   //  std::cout << num_unknowns << " " << tpc_ids.size() << std::endl;
@@ -297,7 +297,8 @@ std::vector<std::tuple<PR3DCluster*, Opflash*, double, std::vector<double>>> Wir
     tpc_index ++;
   }
   
-
+  // improve the chisquare definition ...
+  
   // let's try to fit one flash only ... 
   VectorXd W = VectorXd::Zero(32*good_flashes.size()+tpc_ids.size());
   MatrixXd G = MatrixXd::Zero(32*good_flashes.size()+tpc_ids.size(), num_unknowns);
@@ -306,7 +307,7 @@ std::vector<std::tuple<PR3DCluster*, Opflash*, double, std::vector<double>>> Wir
 
   // require each TPC can be used once
   for (size_t i=0; i!= tpc_ids.size(); i++){
-    W(32*good_flashes.size()+i) = 20.;// 10% constraint ... 
+    W(32*good_flashes.size()+i) = 20.;// 5% constraint ... 
   }
   
   for (size_t i=0; i!= good_flashes.size(); i++){
@@ -318,23 +319,21 @@ std::vector<std::tuple<PR3DCluster*, Opflash*, double, std::vector<double>>> Wir
 	double pe_err = sqrt(pow(flash->get_PE_err(j)*fudge_factor2,2) + pow(pe*fudge_factor1,2));
 	W(32*i+j) = pe/pe_err;
       }
+      
       // require total TPC contribution to a flash is 1, not correct ... 
       //      W(33*i+32)=6.7; // 15% // 
       for (size_t j=0;j!=map_flash_tpc_ids[flash].size();j++){
 	for (size_t k=0;k!=32;k++){
 	  double pe = flash->get_PE(k);
 	  double pe_err = sqrt(pow(flash->get_PE_err(k)*fudge_factor2,2) + pow(pe*fudge_factor1,2));
-	  //G(32*i+k,total_pairs.end()-total_pairs.begin()) = 1./pe_err * map_flash_tpc_light_preds[flash].at(j).at(map_pmt_lib[k]);
 	  G(32*i+k,total_pairs.end()-total_pairs.begin()) = 1./pe_err * map_flash_tpc_light_preds[flash].at(j).at(k);
 	}
 	// require each TPC can be used once
-	G(32*good_flashes.size()+map_tpc_index[map_flash_tpc_ids[flash].at(j)],total_pairs.end()-total_pairs.begin()) = 20.;// 20% 
-	// require total TPC contribution to a flash is 1, not correct ... 
-	//G(33*i+32,total_pairs.end()-total_pairs.begin()) = 6.7; //15%
+	G(32*good_flashes.size()+map_tpc_index[map_flash_tpc_ids[flash].at(j)],total_pairs.end()-total_pairs.begin()) = 20.;// 5% 
 	
 	total_pairs.push_back(std::make_pair(flash,map_flash_tpc_ids[flash].at(j)));
 	if (map_flash_tpc_boundaries[flash].at(j)){ // add boundary ... 
-	  //total_weights.push_back(1.0);
+	  // less change to be zeroed ... 
 	  total_weights.push_back(0.2);
 	}else{
 	  total_weights.push_back(1);
@@ -342,6 +341,7 @@ std::vector<std::tuple<PR3DCluster*, Opflash*, double, std::vector<double>>> Wir
       }
     }
   }
+  
   
   WireCell::LassoModel m2(lambda, 100000, 0.01);
   m2.SetData(G, W);
