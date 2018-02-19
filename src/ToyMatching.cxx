@@ -48,6 +48,24 @@ std::vector<std::tuple<PR3DCluster*, Opflash*, double, std::vector<double>>> Wir
   T->SetBranchAddress("OpChannel",&OpChannel);
   T->SetBranchAddress("Visibility",&Visibility);
 
+  // PMT data is based on OpChannel
+  // Library is NOT ...
+
+  Double_t cos_pe_low[32]={11,11,11,11,10,
+			   7,8,8,10,7,
+			   11,11,11,11,10,
+			   9,11,11,7,9,
+			   11,10,11,11,11,
+			   11,10,11,11,9,
+			   10,11};
+  Double_t cos_pe_mid[32]={34,32,28,35,22,
+			   23,22,24,33,30,
+			   35,35,33,36,33,
+			   33,36,33,19,27,
+			   32,23,42,32,33,
+			   34,24,33,35,25,
+			   32,34};
+  
   std::map<int,int> map_lib_pmt,map_pmt_lib;
   map_lib_pmt[1]=2; map_pmt_lib[2]=1; 
   map_lib_pmt[0]=4; map_pmt_lib[4]=0; 
