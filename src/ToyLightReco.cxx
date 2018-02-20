@@ -611,6 +611,7 @@ WireCell2dToy::pmtMapSet WireCell2dToy::ToyLightReco::makePmtContainer(bool high
       disc.isolated = true;
       disc.highGain = false;
       disc.wfm.resize(discSize);
+      if(beam == true){ baseline = findBaselineLg(h); }
       if(beam == false){ baseline = h->GetBinContent(1); }
       for(int j=0; j<discSize; j++){
 	// is 2050 a good approximation??? 
@@ -774,6 +775,18 @@ void WireCell2dToy::ToyLightReco::dumpPmtVec(WireCell2dToy::pmtMap &beam, WireCe
     }
   }
   return;
+}
+
+double WireCell2dToy::ToyLightReco::findBaselineLg(TH1 *hist, int nbin){
+  TH1F *h = new TH1F("h","",1000,1500,2500);
+  double baseline=0;
+  for(int i=0; i!=nbin; i++){
+    double content = hist->GetBinContent(i+1);
+    if(content>1500 && content<2500){ h->Fill(content); }
+  }
+  baseline = h->GetBinCenter(h->GetMaximumBin()+1);
+  delete h;
+  return baseline;
 }
 
 std::pair<double,double> WireCell2dToy::ToyLightReco::cal_mean_rms(TH1 *hist, int nbin){

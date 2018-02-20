@@ -67,18 +67,20 @@ int main(int argc, char* argv[]){
   tout->SetBranchAddress("z",&z);
   tout->GetEntry(eve_num);
 
+  std::cout<<"shift distance:\n x: "<<shiftX<<"\n y: "<<shiftY<<"\n z:"<<shiftZ<<std::endl;
+  
   WireCell2dToy::ToyLibPe simCharge(root_file);
 
   std::vector<double> shifted_v = simCharge.getShiftedXYZQ(x,y,z,numElectrons,shiftX,shiftY,shiftZ);
-  std::cout<<"shifted x="<<shifted_v[0]<<" shifted y="<<shifted_v[1]<<" shifted z="<<shifted_v[2]<<" q="<<shifted_v[3]<<std::endl;
+  std::cout<<"weighted average position:\n shifted x="<<shifted_v[0]<<" shifted y="<<shifted_v[1]<<" shifted z="<<shifted_v[2]<<" q="<<shifted_v[3]<<std::endl;
     
   std::pair<float,float> shiftedMinMax = simCharge.getShiftedXminXmax(x,shiftX);
-  std::cout<<"minimum shifted x: "<<shiftedMinMax.first<<" maximum shifted x:"<<shiftedMinMax.second<<std::endl;
+  std::cout<<"minimum extent shifted x: "<<shiftedMinMax.first<<"  maximum extent shifted x:"<<shiftedMinMax.second<<std::endl;
   
   bool fidVol = simCharge.xInFidVol(shiftedMinMax);
   bool atBoundary = simCharge.xAtBoundary(shiftedMinMax);
-  std::cout<<"Is cluster inside fiducial volume? \n"<< fidVol 
-	   <<"\nIs cluster at boundary? \n"<< atBoundary<<std::endl;
+  std::cout<<"Is cluster inside fiducial volume? "<< fidVol 
+	   <<"\nIs cluster at boundary? "<< atBoundary<<std::endl;
 
   std::vector<double> pe_pred_v(32,0);
   pe_pred_v= simCharge.fromClusterFindPeDist(x,y,z,numElectrons,shiftX,shiftY,shiftZ);

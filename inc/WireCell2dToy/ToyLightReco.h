@@ -70,7 +70,8 @@ namespace WireCell2dToy{
     saturationTick findSaturationTick(std::vector<short> &wfm);
     std::vector<short> replaceSaturatedBin(std::vector<short> &high, std::vector<short> &low, saturationTick &st);
     void dumpPmtVec(pmtMap &beam, pmtMapSet &cosmic);
-    
+
+    double findBaselineLg(TH1 *hist, int nbin=1500);
     std::pair<double,double> cal_mean_rms(TH1 *hist, int nbin=1500);
 
     float findScaling(int opdet);
