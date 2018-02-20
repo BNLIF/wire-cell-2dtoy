@@ -662,7 +662,8 @@ int main(int argc, char* argv[])
 
   cout << em("finish initial tiling") << endl;
 
- 
+
+
   
   l1sp.AddWireTime_Raw();
   l1sp.Form_rois(6);
@@ -670,6 +671,7 @@ int main(int argc, char* argv[])
   roi_fds.refresh(hu_decon,hv_decon,hw_decon,eve_num);
   roi_gaus_fds.refresh(hu_decon_g,hv_decon_g,hw_decon_g,eve_num);
   error_fds.refresh(hu_decon_g, hv_decon_g, hw_decon_g, eve_num);
+ 
   
   std::set<int>& time_slice_set = l1sp.get_time_slice_set();
   for (auto it = time_slice_set.begin(); it!= time_slice_set.end(); it++){
@@ -680,6 +682,7 @@ int main(int argc, char* argv[])
       sds.jump(time_slice);
       WireCell::Slice& slice = sds.get();
       WireCell::Slice& slice_err = sds.get_error();
+
 
       // std::cout << lowmemtiling[time_slice]->get_wire_charge_error_map().size() << std::endl;
       // WireCell::WireChargeMap& wire_charge_err_map = lowmemtiling[time_slice]->get_wire_charge_error_map();
@@ -725,7 +728,72 @@ int main(int argc, char* argv[])
   delete file1;
   
   cout << em("finish L1SP and retiling") << endl;
+
+  // to save original charge info (after L1SP) into output Trun
+  std::vector<int> *timesliceId = new std::vector<int>;
+  TClonesArray *raw_charge = new TClonesArray("TH1F");
+  TH1::AddDirectory(kFALSE);
+  int raw_charge_ind = 0;
+  for (int i=start_num; i<=end_num; i++){
+      sds.jump(i);
+      //WireCell::Slice& slice = sds.get();
+      //WireCell::Slice& slice_err = sds.get_error();
+      WireCell::Channel::Group group = sds.get().group();
+      //cout<<"slice charge group size: "<<group.size()<<endl;
+      if(group.size()!=0){
+        WireCell::Channel::Group group_err = sds.get_error().group();
+        TH1F *htemp = new ( (*raw_charge)[raw_charge_ind] ) TH1F("","", 8256, 0, 8256);
+        timesliceId->push_back(i);
+        for(int j=0; j<group.size(); j++){
+            int channel = group.at(j).first;
+            float charge = group.at(j).second;
+            float charge_err = group_err.at(j).second;
+            //cout <<"slice: "<<i<<" channel: "<<channel<<" charge: "<<charge<<" error: "<<charge_err<<endl;
+            if (channel >= 8256) { cout << "ERROR: out of bound of MicroBooNE channels." << endl;}
+            htemp->SetBinContent(channel+1, charge);    
+            htemp->SetBinError(channel+1, charge_err);    
+        }
+        raw_charge_ind ++;
+      }
+  }
+
+  TTree *Trun = new TTree("Trun","Trun");
+  Trun->SetDirectory(file);
+
+  int detector = 0; // MicroBooNE
+  Trun->Branch("detector",&detector,"detector/I");
+
+  Trun->Branch("eventNo",&event_no,"eventNo/I");
+  Trun->Branch("runNo",&run_no,"runNo/I");
+  Trun->Branch("subRunNo",&subrun_no,"runRunNo/I");
+
+  Trun->Branch("unit_dis",&unit_dis,"unit_dis/F");
+  Trun->Branch("toffset_uv",&toffset_1,"toffset_uv/F");
+  Trun->Branch("toffset_uw",&toffset_2,"toffset_uw/F");
+  Trun->Branch("toffset_u",&toffset_3,"toffset_u/F");
+  Trun->Branch("total_time_bin",&total_time_bin,"total_time_bin/I");
+  Trun->Branch("recon_threshold",&recon_threshold,"recon_threshold/I");
+  Trun->Branch("frame_length",&frame_length,"frame_length/I");
+  Trun->Branch("max_events",&max_events,"max_events/I");
+  Trun->Branch("eve_num",&eve_num,"eve_num/I");
+  Trun->Branch("nrebin",&nrebin,"nrebin/I");
+  Trun->Branch("threshold_u",&threshold_u,"threshold_u/F");
+  Trun->Branch("threshold_v",&threshold_v,"threshold_v/F");
+  Trun->Branch("threshold_w",&threshold_w,"threshold_w/F");
+  Trun->Branch("threshold_ug",&threshold_ug,"threshold_ug/F");
+  Trun->Branch("threshold_vg",&threshold_vg,"threshold_vg/F");
+  Trun->Branch("threshold_wg",&threshold_wg,"threshold_wg/F");
+  Trun->Branch("time_offset",&time_offset,"time_offset/I");
+  Trun->Branch("tpc_status",&tpc_status,"tpc_status/I");
   
+  Trun->Branch("timesliceId",&timesliceId);
+  Trun->Branch("raw_charge",&raw_charge, 256000, 0);
+
+  Trun->Fill();
+  raw_charge->Delete();
+  delete timesliceId;
+
+
   for (int i=start_num;i!=end_num+1;i++){
   
     // lowmemtiling[i]->Print_maps();
@@ -3614,40 +3682,6 @@ int main(int argc, char* argv[])
     
   TDC->Fill();
   }
-  
- 
-  TTree *Trun = new TTree("Trun","Trun");
-  Trun->SetDirectory(file);
-
-  int detector = 0; // MicroBooNE
-  Trun->Branch("detector",&detector,"detector/I");
-
-  Trun->Branch("eventNo",&event_no,"eventNo/I");
-  Trun->Branch("runNo",&run_no,"runNo/I");
-  Trun->Branch("subRunNo",&subrun_no,"runRunNo/I");
-  
-  Trun->Branch("unit_dis",&unit_dis,"unit_dis/F");
-  Trun->Branch("toffset_uv",&toffset_1,"toffset_uv/F");
-  Trun->Branch("toffset_uw",&toffset_2,"toffset_uw/F");
-  Trun->Branch("toffset_u",&toffset_3,"toffset_u/F");
-  Trun->Branch("total_time_bin",&total_time_bin,"total_time_bin/I");
-  Trun->Branch("recon_threshold",&recon_threshold,"recon_threshold/I");
-  Trun->Branch("frame_length",&frame_length,"frame_length/I");
-  Trun->Branch("max_events",&max_events,"max_events/I");
-  Trun->Branch("eve_num",&eve_num,"eve_num/I");
-  Trun->Branch("nrebin",&nrebin,"nrebin/I");
-  Trun->Branch("threshold_u",&threshold_u,"threshold_u/F");
-  Trun->Branch("threshold_v",&threshold_v,"threshold_v/F");
-  Trun->Branch("threshold_w",&threshold_w,"threshold_w/F");
-  Trun->Branch("threshold_ug",&threshold_ug,"threshold_ug/F");
-  Trun->Branch("threshold_vg",&threshold_vg,"threshold_vg/F");
-  Trun->Branch("threshold_wg",&threshold_wg,"threshold_wg/F");
-  Trun->Branch("time_offset",&time_offset,"time_offset/I");
-  Trun->Branch("tpc_status",&tpc_status,"tpc_status/I");
-  
-  Trun->Fill();
-
-
   
   // Trun->CloneTree()->Write();
   file->Write();
