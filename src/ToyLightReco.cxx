@@ -112,23 +112,23 @@ void WireCell2dToy::ToyLightReco::load_event_raw(int eve_num){
 
   T->GetEntry(eve_num);
 
-  std::cout<<"make PMT containers"<<std::endl;
   WireCell2dToy::pmtMapSet beamHG = makePmtContainer(true, true, beam_hg_wf, beam_hg_opch, beam_hg_timestamp);
   WireCell2dToy::pmtMapSet beamLG = makePmtContainer(false, true, beam_lg_wf, beam_lg_opch, beam_lg_timestamp);
   WireCell2dToy::pmtMapSet cosmicHG = makePmtContainer(true, false, cosmic_hg_wf, cosmic_hg_opch, cosmic_hg_timestamp);
   WireCell2dToy::pmtMapSet cosmicLG = makePmtContainer(false, false, cosmic_lg_wf, cosmic_lg_opch, cosmic_lg_timestamp);
 
-  std::cout<<"find PMT pairs"<<std::endl;
   WireCell2dToy::pmtMapPair beamPair = makeBeamPairs(beamHG, beamLG);
   WireCell2dToy::pmtMapSetPair cosmicPair = makeCosmicPairs(cosmicHG, cosmicLG);
 
-  std::cout<<"merge PMT pairs"<<std::endl;
   WireCell2dToy::pmtMap beamMerge = mergeBeam(beamPair);
   WireCell2dToy::pmtMapSet cosmicMerge = mergeCosmic(cosmicPair);
 
-  std::cout<<"dump PMT vectors"<<std::endl;
-  dumpPmtVec(beamMerge, cosmicMerge);
+  fop_wf->Clear();
+  fop_timestamp->clear();
+  fop_femch->clear();
   
+  dumpPmtVec(beamMerge, cosmicMerge);
+
   std::vector<COphitSelection> ophits_group;
   COphitSelection left_ophits;
   for (int i=32;i!=fop_femch->size();i++){
@@ -162,7 +162,7 @@ void WireCell2dToy::ToyLightReco::load_event_raw(int eve_num){
       left_ophits.push_back(op_hit);
     }
   }
-
+  
   for (size_t i=0;i!=left_ophits.size();i++){
     bool flag_used = false;
     for (size_t j=0; j!=ophits_group.size();j++){
