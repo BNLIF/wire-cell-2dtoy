@@ -173,9 +173,9 @@ std::vector<double> WireCell2dToy::ToyLibPe::getShiftedXYZQ(std::vector<float> *
 
   int nDeps = (int)x->size();
   for(int i=0; i<nDeps; i++){
-    sumX += x->at(i)*e->at(i)-xOffset;
-    sumY += y->at(i)*e->at(i)-yOffset;
-    sumZ += z->at(i)*e->at(i)-zOffset;
+    sumX += (x->at(i)-xOffset)*e->at(i);
+    sumY += (y->at(i)-yOffset)*e->at(i);
+    sumZ += (z->at(i)-zOffset)*e->at(i);
     sumE += e->at(i);
   }
   vector<double> xyzq = { sumX/sumE, sumY/sumE, sumZ/sumE, sumE};
