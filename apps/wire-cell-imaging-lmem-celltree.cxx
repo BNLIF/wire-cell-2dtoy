@@ -724,6 +724,11 @@ int main(int argc, char* argv[])
   // delete hv_threshold;
   // delete hw_threshold;
 
+  calibWiener_wf->Clear("C");
+  calibGaussian_wf->Clear("C");
+  nf_wf->Clear("C"); 
+
+
   file1->Close();
   delete file1;
   
@@ -731,8 +736,11 @@ int main(int argc, char* argv[])
 
   // to save original charge info (after L1SP) into output Trun
   std::vector<int> *timesliceId = new std::vector<int>;
-  TClonesArray *raw_charge = new TClonesArray("TH1F");
-  TH1::AddDirectory(kFALSE);
+  std::vector<std::vector<int>> *timesliceChannel = new std::vector<std::vector<int>>;
+  std::vector<std::vector<int>> *raw_charge = new std::vector<std::vector<int>>;
+  std::vector<std::vector<int>> *raw_charge_err = new std::vector<std::vector<int>>;
+  //TClonesArray *raw_charge = new TClonesArray("TH1I");
+  //TH1::AddDirectory(kFALSE);
   int raw_charge_ind = 0;
   for (int i=start_num; i<=end_num; i++){
       sds.jump(i);
@@ -742,18 +750,27 @@ int main(int argc, char* argv[])
       //cout<<"slice charge group size: "<<group.size()<<endl;
       if(group.size()!=0){
         WireCell::Channel::Group group_err = sds.get_error().group();
-        TH1F *htemp = new ( (*raw_charge)[raw_charge_ind] ) TH1F("","", 8256, 0, 8256);
+        //TH1I *htemp = new ( (*raw_charge)[raw_charge_ind] ) TH1I("","", 8256, 0, 8256);
         timesliceId->push_back(i);
+        std::vector<int> channel;
+        std::vector<int> charge;
+        std::vector<int> charge_err;
         for(int j=0; j<group.size(); j++){
-            int channel = group.at(j).first;
-            float charge = group.at(j).second;
-            float charge_err = group_err.at(j).second;
-            //cout <<"slice: "<<i<<" channel: "<<channel<<" charge: "<<charge<<" error: "<<charge_err<<endl;
-            if (channel >= 8256) { cout << "ERROR: out of bound of MicroBooNE channels." << endl;}
-            htemp->SetBinContent(channel+1, charge);    
-            htemp->SetBinError(channel+1, charge_err);    
+            //int channel = group.at(j).first;
+            //float charge = group.at(j).second;
+            //float charge_err = group_err.at(j).second;
+                //cout <<"slice: "<<i<<" channel: "<<channel<<" charge: "<<charge<<" error: "<<charge_err<<endl;
+            if (group.at(j).first >= 8256) { cout << "ERROR: out of bound of MicroBooNE channels." << endl;}
+            //htemp->SetBinContent(channel+1, charge);    
+            //htemp->SetBinError(channel+1, charge_err);
+            channel.push_back(group.at(j).first);
+            charge.push_back(group.at(j).second);
+            charge_err.push_back(group_err.at(j).second);
         }
-        raw_charge_ind ++;
+        //raw_charge_ind ++;
+        timesliceChannel->push_back(channel);
+        raw_charge->push_back(charge);
+        raw_charge_err->push_back(charge_err);
       }
   }
 
@@ -787,12 +804,16 @@ int main(int argc, char* argv[])
   Trun->Branch("tpc_status",&tpc_status,"tpc_status/I");
   
   Trun->Branch("timesliceId",&timesliceId);
-  Trun->Branch("raw_charge",&raw_charge, 256000, 0);
+  //Trun->Branch("raw_charge",&raw_charge, 256000, 0);
+  Trun->Branch("timesliceChannel",&timesliceChannel);
+  Trun->Branch("raw_charge",&raw_charge);
+  Trun->Branch("raw_charge_err",&raw_charge_err);
 
   Trun->Fill();
-  raw_charge->Delete();
-  delete timesliceId;
-
+  //raw_charge->Clear("C");
+  //delete raw_charge;
+  //delete raw_charge_err;
+  //delete timesliceId;
 
   for (int i=start_num;i!=end_num+1;i++){
   
