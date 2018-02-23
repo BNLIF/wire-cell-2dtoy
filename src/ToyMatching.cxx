@@ -98,12 +98,18 @@ std::vector<std::tuple<PR3DCluster*, Opflash*, double, std::vector<double>>> Wir
   map_lib_pmt[24]=22; map_pmt_lib[22]=24; 
 
   map_lib_pmt[26]=25; map_pmt_lib[25]=26; 
-  map_lib_pmt[25]=28; map_pmt_lib[28]=25; 
   map_lib_pmt[27]=30; map_pmt_lib[30]=27; 
   map_lib_pmt[28]=31; map_pmt_lib[31]=28; 
-  map_lib_pmt[31]=29; map_pmt_lib[29]=31; 
+  map_lib_pmt[31]=29; map_pmt_lib[29]=31;
+  // original map
+  map_lib_pmt[25]=28; map_pmt_lib[28]=25; 
   map_lib_pmt[30]=27; map_pmt_lib[27]=30; 
-  map_lib_pmt[29]=26; map_pmt_lib[26]=29; 
+  map_lib_pmt[29]=26; map_pmt_lib[26]=29;
+
+  // fixed map ... (if not swap in the flash reconstruction ...)
+  // map_lib_pmt[25]=27; map_pmt_lib[27]=25; 
+  // map_lib_pmt[30]=26; map_pmt_lib[26]=30; 
+  // map_lib_pmt[29]=28; map_pmt_lib[28]=29;
   
   std::vector<std::list<std::pair<int,float>>> photon_library;
   photon_library.resize(400*75*75);
@@ -220,9 +226,9 @@ std::vector<std::tuple<PR3DCluster*, Opflash*, double, std::vector<double>>> Wir
   	      max_pe = pred_pmt_light.at(i);
   	  }
 	  
-	  //  	  if (sum2 < sum1 * 1.5){
+	  if (sum2 < sum1 * 2.5){
   	    flag_good_bundle = true;
-	    // }
+	  }
   	}
 
   	if (flag_good_bundle){
@@ -242,6 +248,8 @@ std::vector<std::tuple<PR3DCluster*, Opflash*, double, std::vector<double>>> Wir
   	    cluster_bundles_map[main_cluster].push_back(bundle);
   	  }
   	  fc_bundles_map[std::make_pair(flash,main_cluster)] = bundle;
+
+	  // std::cout << flash->get_flash_id() << " " << main_cluster->get_cluster_id() << " " << bundle << std::endl;
 	  
   	}else{
   	  delete bundle;
@@ -376,7 +384,7 @@ std::vector<std::tuple<PR3DCluster*, Opflash*, double, std::vector<double>>> Wir
   	    matched_pairs[tpc_index] = std::make_pair(flash,beta(i));
   	  }
   	}
-	//	std::cout << i << " " <<  flash->get_flash_id() << " " << total_pairs.at(i).second->get_cluster_id() << " " << total_weights.at(i) << " " << beta(i)  << " " << flash->get_time() << std::endl;
+	//std::cout << i << " Q " <<  tpc_index << " " << flash->get_flash_id() << " " << total_pairs.at(i).second->get_cluster_id() << " " << total_weights.at(i) << " " << beta(i)  << " " << flash->get_time() << std::endl;
       }
     }
 
@@ -384,30 +392,44 @@ std::vector<std::tuple<PR3DCluster*, Opflash*, double, std::vector<double>>> Wir
     
     for (auto it = group_clusters.begin(); it!=group_clusters.end(); it++){
       PR3DCluster* main_cluster = it->first;
-      int tpc_index = map_tpc_index[main_cluster];
-      
-      if (matched_pairs.find(tpc_index)!=matched_pairs.end()){
-     	Opflash* flash = matched_pairs[tpc_index].first;
-     	double strength = matched_pairs[tpc_index].second;
 
-  	FlashTPCBundle* bundle = fc_bundles_map[std::make_pair(flash,main_cluster)];
-  	std::vector<double> pmt_pred = bundle->get_pred_pmt_light();
-  	results.push_back(std::make_tuple(main_cluster, flash, strength, pmt_pred));
-	
-	std::cout << flash->get_flash_id() << " " << main_cluster->get_cluster_id() << " " <<  strength << " " << flash->get_time() << std::endl;
-	// for (int i=0;i!=32;i++){
-	//   std::cout << i << " " << flash->get_PE(i) << " " << pmt_pred.at(i) << std::endl;
-	// }
-	
-	
+      if (map_tpc_index.find(main_cluster)!=map_tpc_index.end()){
+	int tpc_index = map_tpc_index[main_cluster];
+		
+	if (matched_pairs.find(tpc_index)!=matched_pairs.end()){
+	  Opflash* flash = matched_pairs[tpc_index].first;
+	  double strength = matched_pairs[tpc_index].second;
+	  
+	  std::cout << flash->get_flash_id() << " " << main_cluster->get_cluster_id() << " " << tpc_index <<  " " << strength << " " << flash->get_time() << std::endl;
+	  
+	  FlashTPCBundle* bundle = fc_bundles_map[std::make_pair(flash,main_cluster)];
+	  
+	  // std::cout << flash << " " << main_cluster << " " << bundle << std::endl;
+	  
+	  std::vector<double> pmt_pred = bundle->get_pred_pmt_light();
+	  results.push_back(std::make_tuple(main_cluster, flash, strength, pmt_pred));
+	  
+	  
+	  // for (int i=0;i!=32;i++){
+	  //   std::cout << i << " " << flash->get_PE(i) << " " << pmt_pred.at(i) << std::endl;
+	  // }
+	  
+	  
+	}else{
+	  std::cout << "missing cluster: " << tpc_index << std::endl;
+	  Opflash *flash = 0;
+	  double strength  =0;
+	  std::vector<double> pmt_pred; 
+	  results.push_back(std::make_tuple(main_cluster, flash, strength, pmt_pred));
+	  
+	}
       }else{
-     	std::cout << "missing cluster: " << tpc_index << std::endl;
-     	Opflash *flash = 0;
-     	double strength  =0;
-     	std::vector<double> pmt_pred; 
-     	results.push_back(std::make_tuple(main_cluster, flash, strength, pmt_pred));
-	
-      } 
+	std::cout << "missing cluster id: " << main_cluster->get_cluster_id() << std::endl;
+	Opflash *flash = 0;
+	double strength  =0;
+	std::vector<double> pmt_pred; 
+	results.push_back(std::make_tuple(main_cluster, flash, strength, pmt_pred));
+      }
       
     }
     return results;

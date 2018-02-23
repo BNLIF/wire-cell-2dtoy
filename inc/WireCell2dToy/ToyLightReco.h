@@ -61,7 +61,8 @@ namespace WireCell2dToy{
   protected:
     void Process_beam_wfs();
     void sort_flashes();
-
+    void update_pmt_map();
+    
     pmtMapSet makePmtContainer(bool high, bool beam, TClonesArray *wf, std::vector<short> *chan, std::vector<double> *timestamp);
     pmtMapPair makeBeamPairs(pmtMapSet &high, pmtMapSet &low);
     pmtMapSetPair makeCosmicPairs(pmtMapSet &high, pmtMapSet &low);

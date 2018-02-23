@@ -193,10 +193,23 @@ void WireCell2dToy::ToyLightReco::load_event_raw(int eve_num){
   }
   
   Process_beam_wfs();
-
   sort_flashes();
+
+  // update map
+  update_pmt_map();
+  
 }
 
+void WireCell2dToy::ToyLightReco::update_pmt_map(){
+  // std::cout << "Update map!" << std::endl;
+  for (auto it=flashes.begin(); it!=flashes.end(); it++){
+    Opflash *flash = *it;
+    flash->swap_channels(); // hard coded for now ... 
+  }
+}
+
+    
+    
 void WireCell2dToy::ToyLightReco::sort_flashes(){
   OpFlashSet cosmic_set;
   for (auto it= cosmic_flashes.begin(); it!= cosmic_flashes.end(); it++){
