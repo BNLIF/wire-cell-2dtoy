@@ -227,13 +227,14 @@ void WireCell2dToy::ToyLightReco::Process_beam_wfs(){
   TH1F h1("h1","h1",200,-100,100);
   for (int i=0;i!=32;i++){
     h1.Reset();
-    for (int j=0;j!=1500;j++){
+    for (int j=0;j!=20;j++){
       h1.Fill(hraw[i]->GetBinContent(j+1));
     }
     // double xq = 0.5;
     // double baseline;
     // h1.GetQuantiles(1,&baseline,&xq);
     double baseline = h1.GetMaximumBin()-100;
+    if (fabs(baseline)>=8) baseline = 0;
     //std::cout << h1.GetMaximum() << " " << baseline << std::endl;
     for (int j=0;j!=1500;j++){
       hraw[i]->SetBinContent(j+1,hraw[i]->GetBinContent(j+1)-baseline);
@@ -611,13 +612,21 @@ WireCell2dToy::pmtMapSet WireCell2dToy::ToyLightReco::makePmtContainer(bool high
       disc.isolated = true;
       disc.highGain = false;
       disc.wfm.resize(discSize);
-      if(beam == true){ baseline = findBaselineLg(h); }
+      if(beam == true){
+	baseline = 2050;
+	double temp_baseline = findBaselineLg(h);
+	//std::cout << temp_baseline << " " << baseline << std::endl;
+	if (fabs(temp_baseline-baseline)<=8)
+	  baseline = temp_baseline;
+      }
       if(beam == false){ baseline = h->GetBinContent(1); }
       for(int j=0; j<discSize; j++){
 	// is 2050 a good approximation??? 
 	//disc.wfm.at(j) = (h->GetBinContent(j+1)-baseline)*scalePMT[disc.channel]+baseline;
+	//if (j==0) std::cout << baseline << std::endl;
 	disc.wfm.at(j) = (h->GetBinContent(j+1)-baseline)*findScaling(disc.channel)+baseline;
       }
+      //      std::cout <<  disc.channel << " A " << disc.wfm.at(0) << std::endl;
       result[disc.channel].insert(disc);
       h->Delete();
     }
@@ -683,8 +692,10 @@ WireCell2dToy::pmtMap WireCell2dToy::ToyLightReco::mergeBeam(WireCell2dToy::pmtM
   WireCell2dToy::pmtMap result;
   for(auto b=beam.begin(); b!=beam.end(); b++){
     if(b->second.first.saturated == true){
+      //  std::cout << "Xin: " << b->second.first.channel <<  " " << b->second.first.wfm.at(0) << " " << b->second.second.wfm.at(0) << std::endl;
       WireCell2dToy::saturationTick tickVec = findSaturationTick(b->second.first.wfm);
       b->second.first.wfm = replaceSaturatedBin(b->second.first.wfm,b->second.second.wfm,tickVec);
+      //b->second.first.wfm = b->second.second.wfm;
     }
     result[b->first] = b->second.first;
   }
@@ -778,12 +789,14 @@ void WireCell2dToy::ToyLightReco::dumpPmtVec(WireCell2dToy::pmtMap &beam, WireCe
 }
 
 double WireCell2dToy::ToyLightReco::findBaselineLg(TH1 *hist, int nbin){
-  TH1F *h = new TH1F("h","",1000,1500,2500);
+  TH1F *h = new TH1F("h","",1000,1500-0.5,2500-0.5);
   double baseline=0;
-  for(int i=0; i!=nbin; i++){
+  for(int i=0; i!=20; i++){
     double content = hist->GetBinContent(i+1);
+    //    baseline += content;
     if(content>1500 && content<2500){ h->Fill(content); }
   }
+  //  baseline /= 6.;
   baseline = h->GetBinCenter(h->GetMaximumBin()+1);
   delete h;
   return baseline;

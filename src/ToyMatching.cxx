@@ -220,9 +220,9 @@ std::vector<std::tuple<PR3DCluster*, Opflash*, double, std::vector<double>>> Wir
   	      max_pe = pred_pmt_light.at(i);
   	  }
 	  
-  	  if (sum2 < sum1 * 1.5){
+	  //  	  if (sum2 < sum1 * 1.5){
   	    flag_good_bundle = true;
-  	  }
+	    // }
   	}
 
   	if (flag_good_bundle){
@@ -254,7 +254,12 @@ std::vector<std::tuple<PR3DCluster*, Opflash*, double, std::vector<double>>> Wir
     
     // examine the bundles ... 
     std::cout << "Starting: " << cluster_bundles_map.size() << " A " << flash_bundles_map.size() << " " << all_bundles.size() << std::endl;
+    for (auto it = all_bundles.begin(); it!=all_bundles.end();it++){
+      FlashTPCBundle *bundle = *it;
+      bundle->examine_bundle(cos_pe_low, cos_pe_mid);
+    }
 
+    
 
     // matching code
     
