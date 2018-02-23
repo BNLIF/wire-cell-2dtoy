@@ -92,7 +92,7 @@ void WireCell2dToy::ToyLightReco::load_event_raw(int eve_num){
   std::vector<double> *beam_lg_timestamp = new std::vector<double>;
   std::vector<float> *op_gain = new std::vector<float>;
   std::vector<float> *op_gainerror = new std::vector<float>;
-  double triggerTime;
+  //double triggerTime;
 
   T->SetBranchAddress("cosmic_hg_wf",&cosmic_hg_wf);
   T->SetBranchAddress("cosmic_lg_wf",&cosmic_lg_wf);
@@ -707,6 +707,8 @@ WireCell2dToy::pmtMapSet WireCell2dToy::ToyLightReco::mergeCosmic(WireCell2dToy:
   for(auto c=cosmic.begin(); c!=cosmic.end(); c++){
     for(auto p : c->second){
 
+      // std::cout << p.first.isolated << " " << p.first.saturated << " " << p.first.highGain << " " << p.first.timestamp-triggerTime << std::endl;
+      
       if(p.first.isolated == true){ // isolated cos. disc.
 	if(p.first.highGain == true){ // isolated HG
 	  result[c->first].insert(p.first);

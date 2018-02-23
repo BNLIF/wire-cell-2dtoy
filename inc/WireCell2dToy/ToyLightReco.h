@@ -83,6 +83,7 @@ namespace WireCell2dToy{
     WireCell::OpflashSelection flashes;
     // WireCell::COphitSelection op_hits;
 
+    double triggerTime;
     double gain[32];
     double beam_dt[32];
     TH1F **hraw; // raw
