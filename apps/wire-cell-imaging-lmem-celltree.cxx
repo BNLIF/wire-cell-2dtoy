@@ -896,10 +896,11 @@ if(beamspill || beam==-1){
   Trun->Fill();
   //Trun->Print();
   //raw_charge->Clear("C");
-  //delete raw_charge;
-  //delete raw_charge_err;
-  //delete timesliceId;
-  
+  delete raw_charge;
+  delete raw_charge_err;
+  delete timesliceId;
+  delete timesliceChannel;
+
   file1->Close();
   delete file1;
 
