@@ -372,13 +372,20 @@ std::vector<std::tuple<PR3DCluster*, Opflash*, double, std::vector<double>>> Wir
       PR3DCluster *main_cluster = it->first;
       FlashTPCBundleSelection& bundles = it->second;
       bool flag_tight_bundle = false;
+
+      bool flag_highly_consistent_bundle = false;
+      
       for (auto it1 = bundles.begin(); it1!=bundles.end(); it1++){
 	FlashTPCBundle *bundle = *it1;
 	if (bundle->get_consistent_flag()){
 	  flag_tight_bundle = true;
-	  break;
+
+	  if (bundle->get_ks_dis()<0.05 && bundle->get_ndf() >=5 && bundle->get_chi2() < bundle->get_ndf()  * 4 )
+	    flag_highly_consistent_bundle = true;
+	  //  break;
 	}
       }
+      
       if (!flag_tight_bundle){
 	for (auto it1 = bundles.begin(); it1!=bundles.end(); it1++){
 	  FlashTPCBundle *bundle = *it1;
@@ -392,6 +399,18 @@ std::vector<std::tuple<PR3DCluster*, Opflash*, double, std::vector<double>>> Wir
 	  }else if (bundle->get_ks_dis()<0.22 && bundle->get_ndf()>=3 && bundle->get_chi2() < bundle->get_ndf() * 16){
 	    bundle->set_consistent_flag(true);
 	    flag_tight_bundle = true;
+	  }
+	}
+      }else{
+	if (flag_highly_consistent_bundle){
+	  for (auto it1 = bundles.begin(); it1!=bundles.end(); it1++){
+	    FlashTPCBundle *bundle = *it1;
+	    if (bundle->get_consistent_flag()){
+	      if (bundle->get_ks_dis()<0.08 && bundle->get_ndf() >=5 && bundle->get_chi2() < bundle->get_ndf()  * 16 ){
+	      }else{
+		bundle->set_consistent_flag(false);
+	      }
+	    }
 	  }
 	}
       }
