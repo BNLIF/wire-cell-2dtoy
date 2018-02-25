@@ -337,6 +337,9 @@ std::vector<std::tuple<PR3DCluster*, Opflash*, double, std::vector<double>>> Wir
 	    bundle->set_consistent_flag(true);
 	    //std::cout << bundle->get_flash()->get_flash_id() << " " << bundle->get_main_cluster()->get_cluster_id() << " " << bundle->get_flag_at_x_boundary() << " " << bundle->get_ks_dis() << " " << bundle->get_chi2() << " " << bundle->get_ndf() << std::endl;
 	    flag_tight_bundle = true;
+	  }else if (bundle->get_ks_dis()<0.33 && bundle->get_ndf()>=3 && (bundle->get_chi2() < bundle->get_ndf() * 50 && bundle->get_flag_close_to_PMT() || bundle->get_chi2() < bundle->get_ndf() * 16 && bundle->get_flag_at_x_boundary())){
+	    bundle->set_consistent_flag(true);
+	    flag_tight_bundle = true;
 	  }
 	}
       }
