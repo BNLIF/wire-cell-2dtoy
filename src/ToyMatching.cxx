@@ -553,6 +553,11 @@ std::vector<std::tuple<PR3DCluster*, Opflash*, double, std::vector<double>>> Wir
       
       VectorXd W = RT * M + RFT * MF;
       MatrixXd G = RT * R + RFT * RF;
+
+      // for (size_t i = 0; i!= 32*flash_bundles_map.size(); i++){
+      // 	std::cout << i << " " << M(i) << std::endl;
+      // }
+      
       
       WireCell::LassoModel m2(lambda, 100000, 0.01);
       m2.SetData(G, W);
@@ -579,7 +584,7 @@ std::vector<std::tuple<PR3DCluster*, Opflash*, double, std::vector<double>>> Wir
       
       FlashTPCBundleSelection to_be_removed;
       for (size_t i=0;i!=total_pairs.size();i++){
-	//std::cout << i << " " << beta(i)  << std::endl;
+	//	std::cout << i << " " << beta(i)  << std::endl;
 	if (beta(i) < 0.05){
 	  to_be_removed.push_back(fc_bundles_map[std::make_pair(total_pairs.at(i).first, total_pairs.at(i).second)]);
 	}
