@@ -176,13 +176,62 @@ std::vector<std::tuple<PR3DCluster*, Opflash*, double, std::vector<double>>> Wir
   	double first_pos_x = (*((main_cluster->get_time_cells_set_map().begin())->second.begin()))->get_sampling_points().front().x;
   	double last_pos_x = (*((main_cluster->get_time_cells_set_map().rbegin())->second.begin()))->get_sampling_points().front().x;
 
+	// improve the position code ... 
+	if (first_pos_x - offset_x <= low_x_cut + low_x_cut_ext1 &&
+	    first_pos_x - offset_x > low_x_cut - 15*units::cm ){
+	  
+	  std::map<int,SMGCSet>& time_cells_set_map = main_cluster->get_time_cells_set_map();
+	  int num_mcells_outside = 0;
+	  double prev_pos_x= first_pos_x;
+	  double current_pos_x = first_pos_x;
+	  for (auto it3 = time_cells_set_map.begin(); it3 != time_cells_set_map.end(); it3++){
+	    current_pos_x = (*(it3->second.begin()))->get_sampling_points().front().x;
+	    
+	    if (current_pos_x -offset_x > low_x_cut + low_x_cut_ext1 && current_pos_x - prev_pos_x > 1.0*units::cm)
+	      break;
+
+	    // if (flash->get_flash_id()==32&&main_cluster->get_cluster_id()==19)
+	    //   std::cout << num_mcells_outside << "  " << (first_pos_x - offset_x)/units::cm << " " <<
+	    // 	(prev_pos_x-offset_x)/units::cm << " " << (current_pos_x-offset_x)/units::cm << std::endl;
+	    
+	    num_mcells_outside += it3->second.size();
+	    prev_pos_x = current_pos_x;
+	  }
+	  if (num_mcells_outside < 5)
+	    first_pos_x = current_pos_x;
+
+	  // if (flash->get_flash_id()==32&&main_cluster->get_cluster_id()==19)
+	  //   std::cout << num_mcells_outside << "  A " << (first_pos_x - offset_x)/units::cm << " " <<
+	  //     (prev_pos_x-offset_x)/units::cm << " " << (current_pos_x-offset_x)/units::cm << std::endl;
+	  
+	}
+	if (last_pos_x - offset_x >= high_x_cut + high_x_cut_ext1 &&
+	    last_pos_x - offset_x < high_x_cut + 15*units::cm){
+	  std::map<int,SMGCSet>& time_cells_set_map = main_cluster->get_time_cells_set_map();
+	  int num_mcells_outside = 0;
+	  double prev_pos_x= last_pos_x;
+	  double current_pos_x = last_pos_x;
+
+	  for (auto it3 = time_cells_set_map.rbegin(); it3 != time_cells_set_map.rend(); it3++){
+	    current_pos_x = (*(it3->second.begin()))->get_sampling_points().front().x;
+	    if (current_pos_x -offset_x<high_x_cut + high_x_cut_ext1 && fabs(current_pos_x - prev_pos_x) > 1.0*units::cm)
+	      break;
+	    num_mcells_outside += it3->second.size();
+	    prev_pos_x = current_pos_x;
+	  }
+	  if (num_mcells_outside < 5)
+	    last_pos_x = current_pos_x;
+	}
+	
+	// if (flash->get_flash_id()==32&&main_cluster->get_cluster_id()==19)
+	//   std::cout << (first_pos_x-offset_x)/units::cm << " " << std::endl;
+	
   	if (first_pos_x-offset_x > low_x_cut + low_x_cut_ext1 &&
   	    last_pos_x-offset_x > low_x_cut &&
   	    last_pos_x-offset_x < high_x_cut + high_x_cut_ext1 &&
   	    first_pos_x-offset_x < high_x_cut){
 
-	  // if (flash->get_flash_id()==38&&main_cluster->get_cluster_id()==13)
-	  //   std::cout << first_pos_x-offset_x << " " << std::endl;
+	  
 	  
   	  if (first_pos_x-offset_x <=low_x_cut + low_x_cut_ext2 && first_pos_x-offset_x > low_x_cut + low_x_cut_ext1 ){
   	    bundle->set_flag_close_to_PMT(true);
@@ -338,6 +387,9 @@ std::vector<std::tuple<PR3DCluster*, Opflash*, double, std::vector<double>>> Wir
 	    //std::cout << bundle->get_flash()->get_flash_id() << " " << bundle->get_main_cluster()->get_cluster_id() << " " << bundle->get_flag_at_x_boundary() << " " << bundle->get_ks_dis() << " " << bundle->get_chi2() << " " << bundle->get_ndf() << std::endl;
 	    flag_tight_bundle = true;
 	  }else if (bundle->get_ks_dis()<0.33 && bundle->get_ndf()>=3 && (bundle->get_chi2() < bundle->get_ndf() * 50 && bundle->get_flag_close_to_PMT() || bundle->get_chi2() < bundle->get_ndf() * 16 && bundle->get_flag_at_x_boundary())){
+	    bundle->set_consistent_flag(true);
+	    flag_tight_bundle = true;
+	  }else if (bundle->get_ks_dis()<0.22 && bundle->get_ndf()>=3 && bundle->get_chi2() < bundle->get_ndf() * 16){
 	    bundle->set_consistent_flag(true);
 	    flag_tight_bundle = true;
 	  }
