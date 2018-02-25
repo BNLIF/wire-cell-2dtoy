@@ -9,6 +9,7 @@
 #include "WireCell2dToy/LowmemTiling.h"
 #include "WireCell2dToy/uBooNE_L1SP.h"
 #include "WireCell2dToy/WireCellHolder.h"
+#include "WireCell2dToy/ToyLightReco.h"
 
 #include "WireCell2dToy/MergeToyTiling.h"
 #include "WireCell2dToy/TruthToyTiling.h"
@@ -90,10 +91,39 @@ bool GeomWireSelectionCompare(GeomWireSelection a, GeomWireSelection b) {
 }
 
 
+bool flashFilter(const char* file, int eve_num, unsigned int triggerbits)
+{
+  // light reco and apply a [3, 5] ([3.45, 5.45]) us cut on BNB (extBNB) trigger
+  WireCell2dToy::ToyLightReco flash(file);
+  flash.load_event_raw(eve_num);
+  WireCell::OpflashSelection& flashes = flash.get_flashes();
+  bool beamspill = false;
+  for(auto it = flashes.begin(); it!=flashes.end(); it++){
+      Opflash *flash = (*it);
+      int type = flash->get_type();
+      double time = flash->get_time();
+      //cout<<"Flash time: "<<time<<" Type: "<<type<<endl;
+      double lowerwindow = 0;
+      double upperwindow = 0;
+      if(triggerbits==2048) { lowerwindow = 3; upperwindow = 5; }// bnb
+      if(triggerbits==512) { lowerwindow = 3.45; upperwindow = 5.45; } // extbnb
+      if(type == 2 && time > lowerwindow && time < upperwindow)
+      {
+          beamspill = true;
+      }
+      if(beamspill){ break; }
+  }
+  return beamspill;
+}
+
+
+
+
+
 int main(int argc, char* argv[])
 {
   if (argc < 3) {
-    cerr << "usage: wire-cell-uboone /path/to/ChannelWireGeometry.txt /path/to/celltree.root -t[0,1] -s[0,1,2]" << endl;
+    cerr << "usage: wire-cell-uboone /path/to/ChannelWireGeometry.txt /path/to/celltree.root -t[0,1] -s[0,1,2] -f[0,1]" << endl;
     return 1;
   }
 
@@ -104,11 +134,13 @@ int main(int argc, char* argv[])
   int nt_off1 = 0; // not used
   int nt_off2 = 0; // not used
   int solve_charge = 1; // not used
+ 
+  int beam = -1; // 0: bnb; 1: extbnb
 
   int save_file = 0; //
   // 1 for debug mode for bee ...
 
-  for(Int_t i = 1; i != argc; i++){
+  for(Int_t i = 3; i != argc; i++){
      switch(argv[i][1]){
      case 't':
        two_plane = atoi(&argv[i][2]); 
@@ -125,9 +157,13 @@ int main(int argc, char* argv[])
      case 'b':
        nt_off2 = atoi(&argv[i][2]);
        break;
+     case 'f':
+       beam = atoi(&argv[i][2]);
+       break;
      }
   }
 
+  const char* root_file = argv[2];  
   if(save_file==1){
     std::cout << "Save file for bee. " << std::endl;
   }else if (save_file==0){
@@ -204,10 +240,8 @@ int main(int argc, char* argv[])
   int time_offset = 4; // Now the time offset is taken care int he signal processing, so we just need the overall offset ... 
   
 
-  const char* root_file = argv[2];  
   int run_no, subrun_no, event_no;
   
-  cout << em("load data") << endl;
 
   // load Trun
   TFile *file1 = new TFile(root_file);
@@ -245,13 +279,26 @@ int main(int argc, char* argv[])
   T->SetBranchAddress("calibWiener_wf",&calibWiener_wf);
   T->SetBranchAddress("calibGaussian_wf",&calibGaussian_wf);
   T->SetBranchAddress("nf_wf",&nf_wf);
-  
+  // a "special" branch for light info 
+  double triggerTime; // two Branches using same name triggerTime  
+  T->SetBranchAddress("triggerTime",&triggerTime);
+  unsigned int triggerbits;
+  T->SetBranchAddress("triggerBits",&triggerbits);
+
   T->GetEntry(eve_num);
   cout << "Run No: " << run_no << " " << subrun_no << " " << event_no << endl;
 
+  cout << em("load data") << endl;
 
-  TTree *T_op = 0;//(TTree*)file1->Get("T_op");
+  // flash time filter
+  bool beamspill = false;
+  if(beam!=-1){
+    beamspill = flashFilter(root_file, eve_num, triggerbits);
+    cout << em("Flash filter") <<endl;
+  }
   
+if(beamspill || beam==-1){  
+
   GeomWireSelection wires_u = gds.wires_in_plane(WirePlaneType_t(0));
   GeomWireSelection wires_v = gds.wires_in_plane(WirePlaneType_t(1));
   GeomWireSelection wires_w = gds.wires_in_plane(WirePlaneType_t(2));
@@ -593,10 +640,6 @@ int main(int argc, char* argv[])
   
   TFile *file = new TFile(Form("result_%d_%d_%d.root",run_no,subrun_no,event_no),"RECREATE");
 
-   if (T_op!=0){
-    T_op->CloneTree()->Write();
-  }
-  
   Int_t n_cells;
   Int_t n_good_wires;
   Int_t n_bad_wires;
@@ -728,12 +771,8 @@ int main(int argc, char* argv[])
   calibGaussian_wf->Clear("C");
   nf_wf->Clear("C"); 
 
-
-  file1->Close();
-  delete file1;
-  
   cout << em("finish L1SP and retiling") << endl;
-
+  
   // to save original charge info (after L1SP) into output Trun
   std::vector<int> *timesliceId = new std::vector<int>;
   std::vector<std::vector<int>> *timesliceChannel = new std::vector<std::vector<int>>;
@@ -774,10 +813,55 @@ int main(int argc, char* argv[])
       }
   }
 
-  TTree *Trun = new TTree("Trun","Trun");
+  // light info
+  /* TClonesArray* cosmic_hg_wf = new TClonesArray; */
+  /* TClonesArray* cosmic_lg_wf = new TClonesArray; */
+  /* TClonesArray* beam_hg_wf = new TClonesArray; */
+  /* TClonesArray* beam_lg_wf = new TClonesArray; */
+  /* vector<short> *cosmic_hg_opch = new vector<short>; */
+  /* vector<short> *cosmic_lg_opch = new vector<short>; */
+  /* vector<short> *beam_hg_opch = new vector<short>; */
+  /* vector<short> *beam_lg_opch = new vector<short>; */
+  /* vector<double> *cosmic_hg_timestamp = new vector<double>; */
+  /* vector<double> *cosmic_lg_timestamp = new vector<double>; */
+  /* vector<double> *beam_hg_timestamp = new vector<double>; */
+  /* vector<double> *beam_lg_timestamp = new vector<double>; */
+  /* std::vector<float> *op_gain = new std::vector<float>; */
+  /* std::vector<float> *op_gainerror = new std::vector<float>; */ 
+
+  T->SetBranchStatus("*",0);
+  T->SetBranchStatus("cosmic_hg_wf",1);
+  T->SetBranchStatus("cosmic_lg_wf",1);
+  T->SetBranchStatus("beam_hg_wf",1);
+  T->SetBranchStatus("beam_lg_wf",1);
+  T->SetBranchStatus("cosmic_hg_opch",1);
+  T->SetBranchStatus("cosmic_lg_opch",1);
+  T->SetBranchStatus("beam_hg_opch",1);
+  T->SetBranchStatus("beam_lg_opch",1);
+  T->SetBranchStatus("cosmic_hg_timestamp",1);
+  T->SetBranchStatus("cosmic_lg_timestamp",1);
+  T->SetBranchStatus("beam_hg_timestamp",1);
+  T->SetBranchStatus("beam_lg_timestamp",1);
+  T->SetBranchStatus("op_gain",1);
+  T->SetBranchStatus("op_gainerror",1);
+  T->SetBranchStatus("PHMAX",1);
+  T->SetBranchStatus("multiplicity",1);
+
+
+
+
+
+  //TTree *Trun = new TTree("Trun","Trun");
+  TTree *Trun = T->CloneTree(0);
+  Trun->SetTitle("Trun");
+  Trun->SetName("Trun");
   Trun->SetDirectory(file);
+  T->GetEntry(eve_num);
 
   int detector = 0; // MicroBooNE
+ 
+  Trun->Branch("triggerBits",&triggerbits,"triggerBits/i");
+  Trun->Branch("triggerTime",&triggerTime, "triggerTime/D");
   Trun->Branch("detector",&detector,"detector/I");
 
   Trun->Branch("eventNo",&event_no,"eventNo/I");
@@ -810,10 +894,15 @@ int main(int argc, char* argv[])
   Trun->Branch("raw_charge_err",&raw_charge_err);
 
   Trun->Fill();
+  //Trun->Print();
   //raw_charge->Clear("C");
-  //delete raw_charge;
-  //delete raw_charge_err;
-  //delete timesliceId;
+  delete raw_charge;
+  delete raw_charge_err;
+  delete timesliceId;
+  delete timesliceChannel;
+
+  file1->Close();
+  delete file1;
 
   for (int i=start_num;i!=end_num+1;i++){
   
@@ -3707,7 +3796,10 @@ int main(int argc, char* argv[])
   // Trun->CloneTree()->Write();
   file->Write();
   file->Close();
-  
+}
+else{
+    cout << "ATTENTION: No flashes within beamspill window." << endl;
+}
   return 0;
   
 } // main()

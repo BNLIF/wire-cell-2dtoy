@@ -43,13 +43,19 @@ WireCell2dToy::ToyLightReco::ToyLightReco(const char* root_file){
   fop_femch = new std::vector<short>;
   fop_timestamp = new std::vector<double>;
   ctr = 0;
+
+  delete_status = true;
 }
 
 WireCell2dToy::ToyLightReco::~ToyLightReco(){
+  if(delete_status){
   for (int i=0;i!=32;i++){
     delete hraw[i];
+    hraw[i] = nullptr;
     delete hdecon[i];
+    hdecon[i] = nullptr;
     delete hl1[i];
+    hl1[i] = nullptr;
   }
   delete hraw;
   delete hdecon;
@@ -74,6 +80,32 @@ WireCell2dToy::ToyLightReco::~ToyLightReco(){
   
   delete T;
   delete file;
+
+  hraw = nullptr;
+  hdecon = nullptr;
+  hl1 = nullptr;
+  
+  h_totPE = nullptr;
+  h_mult = nullptr;
+  h_l1_mult = nullptr;
+  h_l1_totPE = nullptr;
+
+  fop_wf_beam = nullptr;
+  fop_femch_beam = nullptr;
+  fop_timestamp_beam = nullptr;
+
+  fop_wf_cosmic = nullptr;
+  fop_femch_cosmic = nullptr;
+  fop_timestamp_cosmic = nullptr;
+
+  fop_wf = nullptr;
+  fop_femch = nullptr;
+  fop_timestamp = nullptr;
+
+  T = nullptr;
+  file = nullptr;
+  }
+  delete_status = false;
 }
 
 void WireCell2dToy::ToyLightReco::load_event_raw(int eve_num){
