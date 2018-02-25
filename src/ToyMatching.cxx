@@ -380,7 +380,8 @@ std::vector<std::tuple<PR3DCluster*, Opflash*, double, std::vector<double>>> Wir
 	if (bundle->get_consistent_flag()){
 	  flag_tight_bundle = true;
 
-	  if (bundle->get_ks_dis()<0.05 && bundle->get_ndf() >=5 && bundle->get_chi2() < bundle->get_ndf()  * 4 )
+	  if (bundle->get_ks_dis()<0.1 && bundle->get_ndf() >=5 && bundle->get_chi2() < bundle->get_ndf()  * 4  ||
+	      bundle->get_ks_dis()<0.15 && bundle->get_ndf()>=5 && bundle->get_chi2() < bundle->get_ndf()  * 3 	      )
 	    flag_highly_consistent_bundle = true;
 	  //  break;
 	}
@@ -406,7 +407,7 @@ std::vector<std::tuple<PR3DCluster*, Opflash*, double, std::vector<double>>> Wir
 	  for (auto it1 = bundles.begin(); it1!=bundles.end(); it1++){
 	    FlashTPCBundle *bundle = *it1;
 	    if (bundle->get_consistent_flag()){
-	      if (bundle->get_ks_dis()<0.08 && bundle->get_ndf() >=5 && bundle->get_chi2() < bundle->get_ndf()  * 16 ){
+	      if (bundle->get_ks_dis()<0.15 && bundle->get_ndf() >=5 && bundle->get_chi2() < bundle->get_ndf()  * 9 ){
 	      }else{
 		bundle->set_consistent_flag(false);
 	      }
