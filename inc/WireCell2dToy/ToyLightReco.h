@@ -38,7 +38,7 @@ namespace WireCell2dToy{
   
   class ToyLightReco{
   public:
-    ToyLightReco(const char* root_file);
+    ToyLightReco(const char* root_file, bool imagingoutput=false);
     ~ToyLightReco();
 
     void load_event_raw(int eve_num); // raw data from swizzler

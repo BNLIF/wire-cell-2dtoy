@@ -168,7 +168,6 @@ int main(int argc, char* argv[])
   TTree *TDC = (TTree*)file->Get("TDC");
   std::vector<int> *ntime_slice_vec = new std::vector<int>;
   std::vector<std::vector<int>> *time_slices_vec = new std::vector<std::vector<int>>;
-  //std::vector<int> *cluster_id_dc = new std::vector<int>;
 
   TDC->SetBranchAddress("cluster_id",&cluster_id_vec);
   TDC->SetBranchAddress("ntime_slice",&ntime_slice_vec);

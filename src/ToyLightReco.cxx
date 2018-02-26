@@ -12,9 +12,14 @@ using namespace WireCell;
 using namespace Eigen;
 
 
-WireCell2dToy::ToyLightReco::ToyLightReco(const char* root_file){
+WireCell2dToy::ToyLightReco::ToyLightReco(const char* root_file, bool imagingoutput){
   file = new TFile(root_file);
-  T = (TTree*)file->Get("/Event/Sim");
+  if(imagingoutput){
+    T = (TTree*)file->Get("Trun");
+  }
+  else{
+    T = (TTree*)file->Get("/Event/Sim");
+  }
 
   hraw = new TH1F*[32];
   hdecon = new TH1F*[32];
