@@ -571,7 +571,7 @@ std::vector<std::tuple<PR3DCluster*, Opflash*, double, std::vector<double>>> Wir
       
       // improve the chisquare definition ...
       double delta_track = 0.01; // track can only be used once
-      double delta_flash = 0.2;
+      double delta_flash = 0.1;
       double delta_flash1 = 0.1;
       
       double num_unused_flash = flash_bundles_map.size() - cluster_bundles_map.size();
@@ -579,8 +579,8 @@ std::vector<std::tuple<PR3DCluster*, Opflash*, double, std::vector<double>>> Wir
       
       VectorXd M = VectorXd::Zero(32*flash_bundles_map.size()); // measurement from each PMT from each flash
       MatrixXd R = MatrixXd::Zero(32*flash_bundles_map.size(), num_unknowns+flash_bundles_map.size()); // unknowns to measurement matrix
-      VectorXd MF = VectorXd::Zero(map_tpc_index.size() + flash_bundles_map.size()+1);
-      MatrixXd RF = MatrixXd::Zero(map_tpc_index.size() + flash_bundles_map.size()+1, num_unknowns + flash_bundles_map.size()); // penalty matrix term
+      VectorXd MF = VectorXd::Zero(map_tpc_index.size() + flash_bundles_map.size());
+      MatrixXd RF = MatrixXd::Zero(map_tpc_index.size() + flash_bundles_map.size(), num_unknowns + flash_bundles_map.size()); // penalty matrix term
       std::vector<std::pair<Opflash*,PR3DCluster*>> total_pairs;
       std::vector<double> total_weights;
       
@@ -632,8 +632,8 @@ std::vector<std::tuple<PR3DCluster*, Opflash*, double, std::vector<double>>> Wir
 	RF(cluster_bundles_map.size()+i,num_unknowns+i) = 1./delta_flash;
 	
 	map_flash_index[it->first] = num_unknowns + i;
-	MF(cluster_bundles_map.size()+flash_bundles_map.size()) = num_unused_flash/delta_flash1;
-	RF(cluster_bundles_map.size()+i,num_unknowns+i) = 1./delta_flash1;
+	//	MF(cluster_bundles_map.size()+flash_bundles_map.size()) = num_unused_flash/delta_flash1;
+	//	RF(cluster_bundles_map.size()+flash_bundles_map.size(),num_unknowns+i) = 1./delta_flash1;
 	i++;
       }
       
