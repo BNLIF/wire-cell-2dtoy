@@ -527,6 +527,9 @@ void WireCell2dToy::ToyLightReco::Process_beam_wfs(){
 
   std::vector<int> flash_time;
   std::vector<double> flash_pe;
+
+  TH1F *prev_hpe = new TH1F("prev_hpe","prev_hpe",32,0,32);
+  TH1F *curr_hpe = new TH1F("curr_hpe","curr_hpe",32,0,32);
   
   for (int i=0;i!=250;i++){
     double pe = h_totPE->GetBinContent(i+1);
@@ -534,22 +537,47 @@ void WireCell2dToy::ToyLightReco::Process_beam_wfs(){
     // careteria: multiplicity needs to be higher than 3, PE needs to be higher than 6
     //std::cout << pe << " " << mult << std::endl;
     if (pe >= 6 && mult >= 3){
+      bool flag_save = false;
       if (flash_time.size()==0){
-	flash_time.push_back(i);
-	flash_pe.push_back(pe);
+	flag_save = true;
+	for (int j=0;j!=32;j++){
+	  prev_hpe->SetBinContent(j+1,hdecon[j]->GetBinContent(i+1));
+	}
       }else{
+	for (int j=0;j!=32;j++){
+	  curr_hpe->SetBinContent(j+1,hdecon[j]->GetBinContent(i+1));
+	}
 	if (i - flash_time.back() >= 78){
-	  flash_time.push_back(i);
-	  flash_pe.push_back(pe);
+	  flag_save = true;
 	  // start one, and open a window of 8 us, if anything above it, not the next 2 bin
 	  // if find one is bigger than this, save a flash ... start a new flash?
 	}else if (i-flash_time.back() > 4 && pe > flash_pe.back()){
-	  flash_time.push_back(i);
-	  flash_pe.push_back(pe);
+	  if (i-flash_time.back()>15){
+	    flag_save = true;
+	  }else{
+	    if (curr_hpe->KolmogorovTest(prev_hpe,"M")>0.1){
+	      flag_save = true;
+	    }
+	  }
 	}
+	for (int j=0;j!=32;j++){
+	  prev_hpe->SetBinContent(j+1,hdecon[j]->GetBinContent(i+1));
+	}
+      }
+
+      if (flag_save){
+	flash_time.push_back(i);
+	flash_pe.push_back(pe);
+      }else{
+	if (i - flash_time.back()<=6 && pe > flash_pe.back())
+	  flash_pe.back()=pe;
       }
     }
   }
+
+  delete prev_hpe;
+  delete curr_hpe;
+  
   
   //  std::cout << flash_time.size() << " " << flash_pe.size() << std::endl;
   //  for a flash, examine the L1 one to decide if add in more time ...?
