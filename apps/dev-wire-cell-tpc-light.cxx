@@ -97,7 +97,7 @@ int main(int argc, char* argv[])
    double triggerTime;
   
  Trun->SetBranchAddress("op_gain",&op_gain); 
- Trun->SetBranchAddress("op_gain",&op_gainerror); 
+ Trun->SetBranchAddress("op_gainerror",&op_gainerror); 
  Trun->SetBranchAddress("triggerTime",&triggerTime); 
    
   Trun->GetEntry(0);
