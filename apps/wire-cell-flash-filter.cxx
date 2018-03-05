@@ -76,7 +76,7 @@ using namespace std;
 bool flashFilter(const char* file, int eve_num, unsigned int triggerbits)
 {
   // light reco and apply a [3, 5] ([3.45, 5.45]) us cut on BNB (extBNB) trigger
-  WireCell2dToy::ToyLightReco flash(file);
+  WireCell2dToy::ToyLightReco flash(file, 1);
   flash.load_event_raw(eve_num);
   WireCell::OpflashSelection& flashes = flash.get_flashes();
   bool beamspill = false;
@@ -109,30 +109,40 @@ int main(int argc, char* argv[])
   const char* root_file = argv[1];  
   int eve_num = atoi(argv[2]);
 
-  ExecMon em("Starting");
+  //ExecMon em("Starting");
   // load Trun
   TFile *file1 = new TFile(root_file);
-  TTree *T = (TTree*)file1->Get("/Event/Sim");
-  int event_no=0, run_no=0, subrun_no=0;
-  T->SetBranchAddress("eventNo",&event_no);
-  T->SetBranchAddress("runNo",&run_no);
-  T->SetBranchAddress("subRunNo",&subrun_no);
+  TTree *T = (TTree*)file1->Get("Trun");
+  //int event_no=0, run_no=0, subrun_no=0;
+  //T->SetBranchAddress("eventNo",&event_no);
+  //T->SetBranchAddress("runNo",&run_no);
+  //T->SetBranchAddress("subRunNo",&subrun_no);
   unsigned int triggerbits;
   T->SetBranchAddress("triggerBits",&triggerbits);
 
   T->GetEntry(eve_num);
-  cout << em("load data") << endl;
+  //cout << em("load data") << endl;
 
   // flash time filter
   bool beamspill = false;
   beamspill = flashFilter(root_file, eve_num, triggerbits);
-  cout << em("Flash filter") <<endl;
-  cout << "Run No: " << run_no << " " << subrun_no << " " << event_no << endl;
-  if(beamspill){  
-      cout << "Flash time filter: PASS"<<endl;
+  //cout << em("Flash filter") <<endl;
+  //cout << "Run No: " << run_no << " " << subrun_no << " " << event_no << endl;
+  if(beamspill){
+	if(triggerbits==2048){  
+      	cout << "BNB Flash time filter: PASS"<<endl;
+	}
+	if(triggerbits==512){  
+      	cout << "extBNB Flash time filter: PASS"<<endl;
+	}
   }
   else{
-    cout << "Flash time filter: FAIL" << endl;
+	if(triggerbits==2048){  
+    	cout << "BNB Flash time filter: FAIL" << endl;
+	}  
+	if(triggerbits==512){  
+    	cout << "extBNB Flash time filter: FAIL" << endl;
+	}  
   }
   return 0;
   
