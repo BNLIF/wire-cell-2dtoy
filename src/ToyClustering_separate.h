@@ -1,4 +1,6 @@
 #include <boost/graph/connected_components.hpp>
+#include "WireCell2dToy/ExecMon.h"
+
 
 bool sortbysec(const std::pair<PR3DCluster*,double> &a,
 	       const std::pair<PR3DCluster*,double> &b){
@@ -1175,6 +1177,9 @@ void WireCell2dToy::Clustering_separate(WireCell::PR3DClusterSelection& live_clu
   TVector3 beam_dir(0,0,1);
   TVector3 vertical_dir(0,1,0);
 
+   
+  //  ExecMon em("sep starting");
+  
  // sort the clusters length ...
   {
     std::vector<std::pair<PR3DCluster*,double>> temp_pair_vec;
@@ -1282,17 +1287,22 @@ void WireCell2dToy::Clustering_separate(WireCell::PR3DClusterSelection& live_clu
       if (flag_proceed){
       //   if (WireCell2dToy::JudgeSeparateDec_2(cluster,drift_dir,boundary_points,independent_points)){
       	if (WireCell2dToy::JudgeSeparateDec_1(cluster,drift_dir)){
+	  //	  std::cerr << em("sep prepare sep") << std::endl;
+	  
 	  std::cout << "Separate cluster " << cluster->get_cluster_id() << std::endl;
 	  
 	  
 	  std::vector<PR3DCluster*> sep_clusters = WireCell2dToy::Separate_1(cluster,boundary_points,independent_points, dead_u_index, dead_v_index, dead_w_index, cluster_length_map[cluster]);
 	  PR3DCluster* cluster1 = sep_clusters.at(0);
 	  new_clusters.push_back(cluster1);
+	 
 	  del_clusters.push_back(cluster);
+	  delete cluster;
+	   
 	  for (size_t k=2;k<sep_clusters.size();k++){
 	    new_clusters.push_back(sep_clusters.at(k));
 	  }
-	  
+	  //	  std::cerr << em("sep sep1") << std::endl;
 	  
 	  std::vector<PR3DCluster*> temp_del_clusters;
 	  PR3DCluster* cluster2 = sep_clusters.at(1);
@@ -1356,10 +1366,14 @@ void WireCell2dToy::Clustering_separate(WireCell::PR3DClusterSelection& live_clu
 	      std::vector<PR3DCluster*>  sep_clusters = WireCell2dToy::Separate_1(cluster2,boundary_points,independent_points, dead_u_index, dead_v_index, dead_w_index, length_1);
 	      PR3DCluster* cluster3 = sep_clusters.at(0);
 	      new_clusters.push_back(cluster3);
+	      
 	      temp_del_clusters.push_back(cluster2);
+	      delete cluster2;
+	      
 	      for (size_t k=2;k<sep_clusters.size();k++){
 		new_clusters.push_back(sep_clusters.at(k));
 	      }
+	      //	      std::cerr << em("sep sep2") << std::endl;
 	      
 	      PR3DCluster* cluster4 = sep_clusters.at(1);
 	      final_sep_cluster = cluster4;
@@ -1374,9 +1388,15 @@ void WireCell2dToy::Clustering_separate(WireCell::PR3DClusterSelection& live_clu
 		  //	std::cout << "Separate 3rd level" << std::endl;
 		  
 		  std::vector<PR3DCluster*>  sep_clusters = WireCell2dToy::Separate_1(cluster4,boundary_points,independent_points, dead_u_index, dead_v_index, dead_w_index, length_1);
+
+		  //		  std::cerr << em("sep sep3") << std::endl;
+		  
 		  PR3DCluster* cluster5 = sep_clusters.at(0);
 		  new_clusters.push_back(cluster5);
+		  
 		  temp_del_clusters.push_back(cluster4);
+		  delete cluster4;
+		  
 		  for (size_t k=2;k<sep_clusters.size();k++){
 		    new_clusters.push_back(sep_clusters.at(k));
 		  }
@@ -1403,9 +1423,16 @@ void WireCell2dToy::Clustering_separate(WireCell::PR3DClusterSelection& live_clu
 	      // std::cout << "Separate final one" << std::endl;
 	      
 	      std::vector<PR3DCluster*> sep_clusters = WireCell2dToy::Separate_1(final_sep_cluster,boundary_points,independent_points, dead_u_index, dead_v_index, dead_w_index, length_1);
+
+	      //	      std::cerr << em("sep sep4") << std::endl;
+
+	      
 	      PR3DCluster* cluster5 = sep_clusters.at(0);
 	      new_clusters.push_back(cluster5);
+	      
 	      temp_del_clusters.push_back(final_sep_cluster);
+	      delete final_sep_cluster;
+
 	      for (size_t k=2;k<sep_clusters.size();k++){
 		new_clusters.push_back(sep_clusters.at(k));
 	      }
@@ -1419,8 +1446,11 @@ void WireCell2dToy::Clustering_separate(WireCell::PR3DClusterSelection& live_clu
 	  for (auto it = final_sep_clusters.begin(); it!=final_sep_clusters.end(); it++){
 	    new_clusters.push_back(*it);
 	  }
+
 	  temp_del_clusters.push_back(final_sep_cluster);
+	  delete final_sep_cluster;
 	  
+	  //	  std::cerr << em("sep sep5") << std::endl;
 	  
 	  /* int num_mcells = 0; */
 	  /* for (size_t i=0;i!=new_clusters.size();i++){ */
@@ -1430,9 +1460,11 @@ void WireCell2dToy::Clustering_separate(WireCell::PR3DClusterSelection& live_clu
 	  
 	  
 	  
-	  for (auto it = temp_del_clusters.begin(); it!= temp_del_clusters.end(); it++){
-	    delete *it;
-	  }
+	  //	  for (auto it = temp_del_clusters.begin(); it!= temp_del_clusters.end(); it++){
+	  // delete *it;
+	  //}
+	  //	  std::cerr << em("sep del sep1") << std::endl;
+	  
 	}else if (cluster_length_map[cluster]<6*units::m){
 	  std::cout << "Stripping Cluster " <<   cluster->get_cluster_id() << std::endl;
 	  // std::cout << boundary_points.size() << " " << independent_points.size() << std::endl;
@@ -1440,7 +1472,10 @@ void WireCell2dToy::Clustering_separate(WireCell::PR3DClusterSelection& live_clu
 	  
 	  PR3DCluster* cluster1 = sep_clusters.at(0);
 	  new_clusters.push_back(cluster1);
+	  
 	  del_clusters.push_back(cluster);
+	  delete cluster;
+	  
 	  for (size_t k=2;k<sep_clusters.size();k++){
 	    new_clusters.push_back(sep_clusters.at(k));
 	  }
@@ -1456,10 +1491,11 @@ void WireCell2dToy::Clustering_separate(WireCell::PR3DClusterSelection& live_clu
 	    new_clusters.push_back(*it);
 	  }
 	  temp_del_clusters.push_back(final_sep_cluster);
+	  delete final_sep_cluster;
 	  
-	  for (auto it = temp_del_clusters.begin(); it!= temp_del_clusters.end(); it++){
-	    delete *it;
-	  }
+	  //	  for (auto it = temp_del_clusters.begin(); it!= temp_del_clusters.end(); it++){
+	  //  delete *it;
+	  //}
 	  
 	}
       } // else ... 
@@ -1477,13 +1513,10 @@ void WireCell2dToy::Clustering_separate(WireCell::PR3DClusterSelection& live_clu
     PR3DCluster *ocluster = (*it);
     cluster_length_map.erase(ocluster);
     live_clusters.erase(find(live_clusters.begin(), live_clusters.end(), ocluster));
-    delete ocluster;
+    //delete ocluster;
   }
-
- 
-  
-   //std::cout << live_clusters.size() << " " << cluster_length_map.size() << std::endl;
-   
+  //  std::cerr << em("sep del sep2") << std::endl;
+  //std::cout << live_clusters.size() << " " << cluster_length_map.size() << std::endl;
 }
 
 
