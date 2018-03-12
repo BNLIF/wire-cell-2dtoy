@@ -176,12 +176,15 @@ std::vector<std::tuple<PR3DCluster*, Opflash*, double, std::vector<double>>> Wir
   	double first_pos_x = (*((main_cluster->get_time_cells_set_map().begin())->second.begin()))->get_sampling_points().front().x;
   	double last_pos_x = (*((main_cluster->get_time_cells_set_map().rbegin())->second.begin()))->get_sampling_points().front().x;
 
+
+	
 	// improve the position code ... 
 	if (first_pos_x - offset_x <= low_x_cut + low_x_cut_ext1 &&
 	    first_pos_x - offset_x > low_x_cut - 120*units::cm ){
 	  
 	  std::map<int,SMGCSet>& time_cells_set_map = main_cluster->get_time_cells_set_map();
 	  int num_mcells_outside = 0;
+	  int num_time_slices_outside = 0;
 	  double prev_pos_x= first_pos_x;
 	  double current_pos_x = first_pos_x;
 	  for (auto it3 = time_cells_set_map.begin(); it3 != time_cells_set_map.end(); it3++){
@@ -189,15 +192,17 @@ std::vector<std::tuple<PR3DCluster*, Opflash*, double, std::vector<double>>> Wir
 	    
 	    if (current_pos_x -offset_x > low_x_cut + low_x_cut_ext1 && current_pos_x - prev_pos_x > 1.0*units::cm)
 	      break;
-	    if (num_mcells_outside > 10) break;
-	     // if (flash->get_flash_id()==0&&main_cluster->get_cluster_id()==16)
-	     //   std::cout << num_mcells_outside << "  " << (first_pos_x - offset_x)/units::cm << " " <<
-	     // 	 (prev_pos_x-offset_x)/units::cm << " " << (current_pos_x-offset_x)/units::cm << std::endl;
-	    
+	    if (num_time_slices_outside > 10) break;
+
+	    // if (flash->get_flash_id()==42&&abs(main_cluster->get_cluster_id()-13)<=2)
+	    //   std::cout << num_mcells_outside << "  " << (first_pos_x - offset_x)/units::cm << " " <<
+	    // 	(prev_pos_x-offset_x)/units::cm << " " << (current_pos_x-offset_x)/units::cm << std::endl;
+
+	    num_time_slices_outside += 1;
 	    num_mcells_outside += it3->second.size();
 	    prev_pos_x = current_pos_x;
 	  }
-	  if (num_mcells_outside <=10 && num_mcells_outside < 0.05*main_cluster->get_num_mcells())
+	  if (num_time_slices_outside <=10 && num_mcells_outside < 0.05*main_cluster->get_num_mcells())
 	    first_pos_x = current_pos_x;
 
 	  // if (flash->get_flash_id()==67&&main_cluster->get_cluster_id()==30)
@@ -209,6 +214,7 @@ std::vector<std::tuple<PR3DCluster*, Opflash*, double, std::vector<double>>> Wir
 	    last_pos_x - offset_x < high_x_cut + 120*units::cm){
 	  std::map<int,SMGCSet>& time_cells_set_map = main_cluster->get_time_cells_set_map();
 	  int num_mcells_outside = 0;
+	  int num_time_slices_outside = 0;
 	  double prev_pos_x= last_pos_x;
 	  double current_pos_x = last_pos_x;
 
@@ -216,12 +222,13 @@ std::vector<std::tuple<PR3DCluster*, Opflash*, double, std::vector<double>>> Wir
 	    current_pos_x = (*(it3->second.begin()))->get_sampling_points().front().x;
 	    if (current_pos_x -offset_x<high_x_cut + high_x_cut_ext1 && fabs(current_pos_x - prev_pos_x) > 1.0*units::cm)
 	      break;
-	    if (num_mcells_outside > 10) break;
-	    
+	    if (num_time_slices_outside > 10) break;
+
+	    num_time_slices_outside += 1;
 	    num_mcells_outside += it3->second.size();
 	    prev_pos_x = current_pos_x;
 	  }
-	  if (num_mcells_outside <=10 && num_mcells_outside < 0.05*main_cluster->get_num_mcells())
+	  if (num_time_slices_outside <=10 && num_mcells_outside < 0.05*main_cluster->get_num_mcells())
 	    last_pos_x = current_pos_x;
 	}
 	
@@ -229,6 +236,9 @@ std::vector<std::tuple<PR3DCluster*, Opflash*, double, std::vector<double>>> Wir
 	//     flash->get_flash_id()==35&&main_cluster->get_cluster_id()==5 
 	//     )
 	//     std::cout << flash->get_flash_id() << " "<< main_cluster->get_cluster_id() << " " << (first_pos_x-offset_x)/units::cm << " " << (last_pos_x-offset_x)/units::cm << std::endl;
+
+	// if (flash->get_flash_id()==42)
+	//   std::cout << flash->get_flash_id() << " " << main_cluster->get_cluster_id() << " " << offset_x/units::cm << " " << (first_pos_x-offset_x)/units::cm << " " << (last_pos_x-offset_x)/units::cm << " " << std::endl;
 	
   	if (first_pos_x-offset_x > low_x_cut + low_x_cut_ext1 -1.0*units::cm &&
   	    last_pos_x-offset_x > low_x_cut &&
@@ -386,7 +396,7 @@ std::vector<std::tuple<PR3DCluster*, Opflash*, double, std::vector<double>>> Wir
       for (auto it1 = bundles.begin(); it1!=bundles.end(); it1++){
 	FlashTPCBundle *bundle = *it1;
 
-	//	std::cout << bundle->get_flash()->get_flash_id() << " " << bundle->get_main_cluster()->get_cluster_id() << " " << bundle->get_flag_at_x_boundary() << " " << bundle->get_ks_dis() << " " << bundle->get_chi2() << " " << bundle->get_ndf() << std::endl;
+	std::cout << bundle->get_flash()->get_flash_id() << " " << bundle->get_main_cluster()->get_cluster_id() << " " << bundle->get_flag_at_x_boundary() << " " << bundle->get_ks_dis() << " " << bundle->get_chi2() << " " << bundle->get_ndf() << std::endl;
 	
 	if (bundle->get_consistent_flag()){
 	  flag_tight_bundle = true;
