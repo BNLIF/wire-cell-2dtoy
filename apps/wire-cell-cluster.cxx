@@ -332,7 +332,7 @@ int main(int argc, char* argv[])
    // }
   
    
-   //   cerr << em("load clusters from file") << endl;
+   //cerr << em("load clusters from file") << endl;
 
   
 
@@ -346,7 +346,7 @@ int main(int argc, char* argv[])
      WireCell2dToy::calc_sampling_points(gds,live_clusters.at(i),nrebin, frame_length, unit_dis);
      // live_clusters.at(i)->Calc_PCA();
    }
-   //cerr << em("Add X, Y, Z points") << std::endl;
+   //  cerr << em("Add X, Y, Z points") << std::endl;
 
    // create global point cloud and mcell to cluster map ...
    // ToyPointCloud *global_point_cloud =  new ToyPointCloud();
@@ -376,7 +376,7 @@ int main(int argc, char* argv[])
      live_clusters.at(i)->fine_tracking();
    }
    
-   // cerr << em("Trajectory fit in all clusters") << std::endl;
+   cerr << em("Trajectory fit in all clusters") << std::endl;
    
    // Point p1(337.346*units::cm,87.0524*units::cm,697.899*units::cm);
    // for (int i=0;i!=live_clusters.size();i++){
