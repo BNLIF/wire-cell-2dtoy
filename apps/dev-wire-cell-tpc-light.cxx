@@ -42,11 +42,11 @@ int main(int argc, char* argv[])
   
   
   ExecMon em("starting");
-  cerr << em("load geometry") << endl;
+  cout << em("load geometry") << endl;
 
   WireCellSst::GeomDataSource gds(argv[1]);
   std::vector<double> ex = gds.extent();
-  cerr << "Extent: "
+  cout << "Extent: "
        << " x:" << ex[0]/units::mm << " mm"
        << " y:" << ex[1]/units::m << " m"
        << " z:" << ex[2]/units::m << " m"
@@ -388,7 +388,7 @@ int main(int argc, char* argv[])
    }
   
    
-   cerr << em("load clusters from file") << endl;
+   cout << em("load clusters from file") << endl;
 
   
 
@@ -405,14 +405,14 @@ int main(int argc, char* argv[])
      global_point_cloud.AddPoints(live_clusters.at(i),0);
      //live_clusters.at(i)->Calc_PCA();
    }
-   cerr << em("Add X, Y, Z points") << std::endl;
+   cout << em("Add X, Y, Z points") << std::endl;
 
    
    // WireCell2dToy::Clustering_live_dead(live_clusters, dead_clusters);
    // cerr << em("Clustering live and dead clusters") << std::endl;
 
    std::map<PR3DCluster*,std::vector<std::pair<PR3DCluster*,double>>> group_clusters = WireCell2dToy::Clustering_jump_gap_cosmics(live_clusters, dead_clusters,dead_u_index, dead_v_index, dead_w_index, global_point_cloud);
-   cerr << em("Clustering to jump gap in cosmics") << std::endl;
+   cout << em("Clustering to jump gap in cosmics") << std::endl;
    
    // // need to further cluster things ...
    // std::map<PR3DCluster*,std::vector<std::pair<PR3DCluster*,double>>> group_clusters =  WireCell2dToy::Clustering_isolated(live_clusters);
@@ -444,10 +444,8 @@ int main(int argc, char* argv[])
    }
 
 
-   cout<<"BUGGGG"<<endl;
-   
    std::vector<std::tuple<WireCell::PR3DCluster*, WireCell::Opflash*, double, std::vector<double>>> matched_results = WireCell2dToy::tpc_light_match(time_offset,nrebin,group_clusters,flashes);
-   cerr << em("TPC Light Matching") << std::endl;
+   cout << em("TPC Light Matching") << std::endl;
    //
 
    
