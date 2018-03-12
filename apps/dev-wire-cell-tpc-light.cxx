@@ -444,7 +444,7 @@ int main(int argc, char* argv[])
    }
 
 
-   cout<<"BUGGGG"<<endl;
+   //   cout<<"BUGGGG"<<endl;
    
    std::vector<std::tuple<WireCell::PR3DCluster*, WireCell::Opflash*, double, std::vector<double>>> matched_results = WireCell2dToy::tpc_light_match(time_offset,nrebin,group_clusters,flashes);
    cerr << em("TPC Light Matching") << std::endl;

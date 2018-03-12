@@ -200,9 +200,9 @@ std::vector<std::tuple<PR3DCluster*, Opflash*, double, std::vector<double>>> Wir
 	  if (num_mcells_outside <=10 && num_mcells_outside < 0.05*main_cluster->get_num_mcells())
 	    first_pos_x = current_pos_x;
 
-	  if (flash->get_flash_id()==67&&main_cluster->get_cluster_id()==30)
-	    std::cout << num_mcells_outside << " " << main_cluster->get_num_mcells() << "  A " << (first_pos_x - offset_x)/units::cm << " " <<
-	      (prev_pos_x-offset_x)/units::cm << " " << (current_pos_x-offset_x)/units::cm << std::endl;
+	  // if (flash->get_flash_id()==67&&main_cluster->get_cluster_id()==30)
+	  //   std::cout << num_mcells_outside << " " << main_cluster->get_num_mcells() << "  A " << (first_pos_x - offset_x)/units::cm << " " <<
+	  //     (prev_pos_x-offset_x)/units::cm << " " << (current_pos_x-offset_x)/units::cm << std::endl;
 	  
 	}
 	if (last_pos_x - offset_x >= high_x_cut + high_x_cut_ext1 &&
@@ -378,9 +378,16 @@ std::vector<std::tuple<PR3DCluster*, Opflash*, double, std::vector<double>>> Wir
       bool flag_tight_bundle = false;
 
       bool flag_highly_consistent_bundle = false;
+
+
+    
+
       
       for (auto it1 = bundles.begin(); it1!=bundles.end(); it1++){
 	FlashTPCBundle *bundle = *it1;
+
+	//	std::cout << bundle->get_flash()->get_flash_id() << " " << bundle->get_main_cluster()->get_cluster_id() << " " << bundle->get_flag_at_x_boundary() << " " << bundle->get_ks_dis() << " " << bundle->get_chi2() << " " << bundle->get_ndf() << std::endl;
+	
 	if (bundle->get_consistent_flag()){
 	  flag_tight_bundle = true;
 
