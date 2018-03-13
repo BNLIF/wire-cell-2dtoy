@@ -473,7 +473,7 @@ std::vector<std::tuple<PR3DCluster*, Opflash*, double, std::vector<double>>> Wir
 	FlashTPCBundleSelection to_be_removed;
 	for (auto it1 = bundles.begin(); it1!=bundles.end(); it1++){
 	  FlashTPCBundle *bundle = *it1;
-	  if (!bundle->get_consistent_flag()){
+	  if ((!bundle->get_consistent_flag()) && (!bundle->get_flag_at_x_boundary())){
 	    to_be_removed.push_back(bundle);
 	  }
 	  //	  std::cout << bundle->get_flash()->get_flash_id() << " " << bundle->get_main_cluster()->get_cluster_id() << " " << bundle->get_flag_at_x_boundary() << " " << bundle->get_ks_dis() << " " << bundle->get_chi2() << " " << bundle->get_ndf() << std::endl;
@@ -562,7 +562,7 @@ std::vector<std::tuple<PR3DCluster*, Opflash*, double, std::vector<double>>> Wir
     std::cout << std::endl << std::endl;
     for (auto it = all_bundles.begin(); it!=all_bundles.end();it++){
       FlashTPCBundle *bundle = *it;
-      if ( bundle->get_consistent_flag())
+      if ( bundle->get_consistent_flag() || bundle->get_flag_at_x_boundary())
 	std::cout << bundle->get_flash()->get_flash_id() << " " << bundle->get_main_cluster()->get_cluster_id() << " " << bundle->get_flag_at_x_boundary() << " " << bundle->get_ks_dis() << " " << bundle->get_chi2() << " " << bundle->get_ndf() << std::endl;
     }
     std::cout << std::endl << std::endl;
@@ -590,7 +590,7 @@ std::vector<std::tuple<PR3DCluster*, Opflash*, double, std::vector<double>>> Wir
       
       // improve the chisquare definition ...
       double delta_track = 0.01; // track can only be used once
-      double delta_flash = 0.05;
+      double delta_flash = 0.03;
       //    double delta_flash1 = 0.1;
       
       double num_unused_flash = flash_bundles_map.size() - cluster_bundles_map.size();
