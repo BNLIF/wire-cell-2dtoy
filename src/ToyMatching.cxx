@@ -443,13 +443,21 @@ std::vector<std::tuple<PR3DCluster*, Opflash*, double, std::vector<double>>> Wir
 	}
       }
 
+      
       if (!flag_tight_bundle){
+	FlashTPCBundle *min_bundle = *bundles.begin();
 	for (auto it1 = bundles.begin(); it1!=bundles.end(); it1++){
 	  FlashTPCBundle *bundle = *it1;
-	  if ( bundle->get_ks_dis()<0.11 && bundle->get_ndf() >= 3 && bundle->get_chi2() < bundle->get_ndf() * 36){
-	    bundle->set_consistent_flag(true);
-	    flag_tight_bundle = true;
-	  }
+	  if (bundle->get_ks_dis()<min_bundle->get_ks_dis())
+	    min_bundle = bundle;
+	}
+
+	if (min_bundle->get_ks_dis()<0.15 && min_bundle->get_ndf()>=6 && min_bundle->get_chi2() < min_bundle->get_ndf() * 40){
+	  min_bundle->set_consistent_flag(true);
+	  flag_tight_bundle = true;
+	}else if ( min_bundle->get_ks_dis()<0.11 && min_bundle->get_ndf() >= 3 && min_bundle->get_chi2() < min_bundle->get_ndf() * 36){
+	  min_bundle->set_consistent_flag(true);
+	  flag_tight_bundle = true;
 	}
       }
 
@@ -576,22 +584,34 @@ std::vector<std::tuple<PR3DCluster*, Opflash*, double, std::vector<double>>> Wir
 		  min_bundle->get_chi2()/min_bundle->get_ndf() *1.1 < bundle->get_chi2()/bundle->get_ndf()){
 		// prepare remove bundle from the list ...
 		flag_remove = true;
-	      }else if (min_bundle->get_ks_dis() +0.03 < bundle->get_ks_dis() &&
+	      }else if (min_bundle->get_ks_dis() +0.025 < bundle->get_ks_dis() &&
 			min_bundle->get_chi2()/min_bundle->get_ndf() *0.85 < bundle->get_chi2()/bundle->get_ndf()){
 		flag_remove = true;
+	      }else if (flash_good_bundles_map[min_bundle->get_flash()].size()==1){
+		if (min_bundle->get_ks_dis()<0.06 &&
+		    min_bundle->get_chi2()/min_bundle->get_ndf() < bundle->get_chi2()/bundle->get_ndf() * 2.2)
+		  flag_remove = true;
 	      }
 	      
 	      if (flag_remove){
 		if (flash_good_bundles_map[bundle->get_flash()].size()>1){
 		  
 		  FlashTPCBundle *min_bundle1 = flash_good_bundles_map[bundle->get_flash()].at(0);
+		  FlashTPCBundle *min_bundle2 = flash_good_bundles_map[bundle->get_flash()].at(0);
 		  for (auto it2 = flash_good_bundles_map[bundle->get_flash()].begin(); it2!=flash_good_bundles_map[bundle->get_flash()].end(); it2++){
 		    FlashTPCBundle *bundle1 = *it2;
-		    if (bundle1->get_ks_dis() < min_bundle1->get_ks_dis())
+		    if (bundle1->get_ks_dis() < min_bundle1->get_ks_dis()){
 		      min_bundle1 = bundle1;
+		      min_bundle2 = min_bundle1;
+		    }
 		  }
-		  if (bundle!=min_bundle1)
+		  if (bundle!=min_bundle1){
 		    temp_bundles.push_back(bundle);
+		  }else{
+		    if (min_bundle1->get_ks_dis() + 0.01 > min_bundle2->get_ks_dis() &&
+			min_bundle1->get_chi2() > min_bundle2->get_chi2()*0.85)
+		      temp_bundles.push_back(bundle);
+		  }
 		}
 	      }
 	    }
