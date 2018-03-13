@@ -570,7 +570,7 @@ std::vector<std::tuple<PR3DCluster*, Opflash*, double, std::vector<double>>> Wir
 	  FlashTPCBundle *min_bundle = bundles.at(0);
 	  for (auto it1 = bundles.begin(); it1!=bundles.end(); it1++){
 	    FlashTPCBundle *bundle = *it1;
-	    if (bundle->get_ks_dis() < min_bundle->get_ks_dis())
+	    if (bundle->get_ks_dis()+0.003 * flash_good_bundles_map[bundle->get_flash()].size() < min_bundle->get_ks_dis() + 0.003 * flash_good_bundles_map[min_bundle->get_flash()].size())
 	      min_bundle = bundle;
 	  }
 
@@ -617,8 +617,13 @@ std::vector<std::tuple<PR3DCluster*, Opflash*, double, std::vector<double>>> Wir
 		    temp_bundles.push_back(bundle);
 		  }else{
 		    if (min_bundle1->get_ks_dis() + 0.01 > min_bundle2->get_ks_dis() &&
-			min_bundle1->get_chi2() > min_bundle2->get_chi2()*0.85)
+			min_bundle1->get_chi2() > min_bundle2->get_chi2()*0.85){
 		      temp_bundles.push_back(bundle);
+		    }else if (min_bundle1->get_chi2()/min_bundle1->get_ndf() > min_bundle2->get_chi2()/min_bundle2->get_ndf() * 3 &&
+			      min_bundle1->get_ndf()>=5 && 
+			      min_bundle2->get_ks_dis() < 0.12){
+		      temp_bundles.push_back(bundle);
+		    }
 		  }
 		}
 	      }
