@@ -396,13 +396,14 @@ std::vector<std::tuple<PR3DCluster*, Opflash*, double, std::vector<double>>> Wir
       for (auto it1 = bundles.begin(); it1!=bundles.end(); it1++){
 	FlashTPCBundle *bundle = *it1;
 
-	std::cout << bundle->get_flash()->get_flash_id() << " " << bundle->get_main_cluster()->get_cluster_id() << " " << bundle->get_flag_at_x_boundary() << " " << bundle->get_ks_dis() << " " << bundle->get_chi2() << " " << bundle->get_ndf() << std::endl;
+	std::cout << bundle->get_flash()->get_flash_id() << " " << bundle->get_main_cluster()->get_cluster_id() << " " << bundle->get_flag_at_x_boundary() << " " << bundle->get_ks_dis() << " " << bundle->get_chi2() << " " << bundle->get_ndf() << " " << bundle->get_consistent_flag() << std::endl;
 	
 	if (bundle->get_consistent_flag()){
 	  flag_tight_bundle = true;
 
-	  if (bundle->get_ks_dis()<0.1 && bundle->get_ndf() >=5 && bundle->get_chi2() < bundle->get_ndf()  * 4  ||
-	      bundle->get_ks_dis()<0.06 && bundle->get_ndf() >= 10 && bundle->get_chi2() < bundle->get_ndf()  * 9  ||
+	  if (bundle->get_ks_dis()<0.05 && bundle->get_ndf() >= 10 && bundle->get_chi2() < bundle->get_ndf()  * 12  ||
+	      bundle->get_ks_dis()<0.07 && bundle->get_ndf() >= 10 && bundle->get_chi2() < bundle->get_ndf()  * 9  ||
+	      bundle->get_ks_dis()<0.1 && bundle->get_ndf() >=5 && bundle->get_chi2() < bundle->get_ndf()  * 4  ||
 	      bundle->get_ks_dis()<0.15 && bundle->get_ndf()>=5 && bundle->get_chi2() < bundle->get_ndf()  * 3 	      )
 	    flag_highly_consistent_bundle = true;
 	  //  break;
@@ -454,6 +455,7 @@ std::vector<std::tuple<PR3DCluster*, Opflash*, double, std::vector<double>>> Wir
 	    FlashTPCBundle *bundle = *it1;
 	    if (bundle->get_consistent_flag()){
 	      if (bundle->get_ks_dis()<0.15 && bundle->get_ndf() >=5 && bundle->get_chi2() < bundle->get_ndf()  * 9 ){
+	      }else if (bundle->get_ks_dis()<0.075 && bundle->get_ndf() >=8 && bundle->get_chi2() < bundle->get_ndf()  * 12){
 	      }else{
 		bundle->set_consistent_flag(false);
 	      }
@@ -588,8 +590,8 @@ std::vector<std::tuple<PR3DCluster*, Opflash*, double, std::vector<double>>> Wir
       
       // improve the chisquare definition ...
       double delta_track = 0.01; // track can only be used once
-      double delta_flash = 0.1;
-      double delta_flash1 = 0.1;
+      double delta_flash = 0.05;
+      //    double delta_flash1 = 0.1;
       
       double num_unused_flash = flash_bundles_map.size() - cluster_bundles_map.size();
       if (num_unused_flash<0) num_unused_flash = 0;
