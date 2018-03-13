@@ -176,7 +176,7 @@ std::vector<std::tuple<PR3DCluster*, Opflash*, double, std::vector<double>>> Wir
   	double first_pos_x = (*((main_cluster->get_time_cells_set_map().begin())->second.begin()))->get_sampling_points().front().x;
   	double last_pos_x = (*((main_cluster->get_time_cells_set_map().rbegin())->second.begin()))->get_sampling_points().front().x;
 
-
+	bool flag_spec_end = false;
 	
 	// improve the position code ... 
 	if (first_pos_x - offset_x <= low_x_cut + low_x_cut_ext1 &&
@@ -189,22 +189,27 @@ std::vector<std::tuple<PR3DCluster*, Opflash*, double, std::vector<double>>> Wir
 	  double current_pos_x = first_pos_x;
 	  for (auto it3 = time_cells_set_map.begin(); it3 != time_cells_set_map.end(); it3++){
 	    current_pos_x = (*(it3->second.begin()))->get_sampling_points().front().x;
-	    
-	    if (current_pos_x -offset_x > low_x_cut + low_x_cut_ext1 && current_pos_x - prev_pos_x > 1.0*units::cm)
-	      break;
-	    if (num_time_slices_outside > 10) break;
 
-	    // if (flash->get_flash_id()==42&&abs(main_cluster->get_cluster_id()-13)<=2)
-	    //   std::cout << num_mcells_outside << "  " << (first_pos_x - offset_x)/units::cm << " " <<
-	    // 	(prev_pos_x-offset_x)/units::cm << " " << (current_pos_x-offset_x)/units::cm << std::endl;
+
+	      // if (flash->get_flash_id()==35&&abs(main_cluster->get_cluster_id()-5)<=0)
+	      // std::cout << num_time_slices_outside<< " " << num_mcells_outside << "  " << (first_pos_x - offset_x)/units::cm << " " <<
+	      // 	(prev_pos_x-offset_x)/units::cm << " " << (current_pos_x-offset_x)/units::cm << std::endl;
+	    
+	    if (current_pos_x -offset_x > low_x_cut + low_x_cut_ext1 && current_pos_x - prev_pos_x > 0.75*units::cm)
+	      break;
+	    if (num_time_slices_outside > 36) break;
+	    
+	  
 
 	    num_time_slices_outside += 1;
 	    num_mcells_outside += it3->second.size();
 	    prev_pos_x = current_pos_x;
 	  }
-	  if (num_time_slices_outside <=10 && num_mcells_outside < 0.05*main_cluster->get_num_mcells())
+	  if (num_time_slices_outside <=36 && num_mcells_outside < 0.05*main_cluster->get_num_mcells()){
 	    first_pos_x = current_pos_x;
-
+	    if (num_time_slices_outside > 10)
+	      flag_spec_end = true;
+	  }
 	  // if (flash->get_flash_id()==67&&main_cluster->get_cluster_id()==30)
 	  //   std::cout << num_mcells_outside << " " << main_cluster->get_num_mcells() << "  A " << (first_pos_x - offset_x)/units::cm << " " <<
 	  //     (prev_pos_x-offset_x)/units::cm << " " << (current_pos_x-offset_x)/units::cm << std::endl;
@@ -220,16 +225,19 @@ std::vector<std::tuple<PR3DCluster*, Opflash*, double, std::vector<double>>> Wir
 
 	  for (auto it3 = time_cells_set_map.rbegin(); it3 != time_cells_set_map.rend(); it3++){
 	    current_pos_x = (*(it3->second.begin()))->get_sampling_points().front().x;
-	    if (current_pos_x -offset_x<high_x_cut + high_x_cut_ext1 && fabs(current_pos_x - prev_pos_x) > 1.0*units::cm)
+	    if (current_pos_x -offset_x<high_x_cut + high_x_cut_ext1 && fabs(current_pos_x - prev_pos_x) > 0.75*units::cm)
 	      break;
-	    if (num_time_slices_outside > 10) break;
+	    if (num_time_slices_outside > 36) break;
 
 	    num_time_slices_outside += 1;
 	    num_mcells_outside += it3->second.size();
 	    prev_pos_x = current_pos_x;
 	  }
-	  if (num_time_slices_outside <=10 && num_mcells_outside < 0.05*main_cluster->get_num_mcells())
+	  if (num_time_slices_outside <=36 && num_mcells_outside < 0.05*main_cluster->get_num_mcells()){
 	    last_pos_x = current_pos_x;
+	    if (num_time_slices_outside > 10)
+	      flag_spec_end = true;
+	  }
 	}
 	
 	// if (flash->get_flash_id()==67&&main_cluster->get_cluster_id()==30 ||
@@ -244,8 +252,8 @@ std::vector<std::tuple<PR3DCluster*, Opflash*, double, std::vector<double>>> Wir
   	    last_pos_x-offset_x > low_x_cut &&
   	    last_pos_x-offset_x < high_x_cut + high_x_cut_ext1 &&
   	    first_pos_x-offset_x < high_x_cut){
-
 	  
+	  bundle->set_spec_end_flag(flag_spec_end);
 	  
   	  if (first_pos_x-offset_x <=low_x_cut + low_x_cut_ext2 && first_pos_x-offset_x > low_x_cut + low_x_cut_ext1 ){
   	    bundle->set_flag_close_to_PMT(true);
@@ -389,9 +397,6 @@ std::vector<std::tuple<PR3DCluster*, Opflash*, double, std::vector<double>>> Wir
 
       bool flag_highly_consistent_bundle = false;
 
-
-    
-
       
       for (auto it1 = bundles.begin(); it1!=bundles.end(); it1++){
 	FlashTPCBundle *bundle = *it1;
@@ -463,7 +468,223 @@ std::vector<std::tuple<PR3DCluster*, Opflash*, double, std::vector<double>>> Wir
 	  }
 	}
       }
+    }
 
+    //
+    for (auto it = cluster_bundles_map.begin(); it!= cluster_bundles_map.end(); it++){
+      PR3DCluster *main_cluster = it->first;
+      FlashTPCBundleSelection& bundles = it->second;
+
+      FlashTPCBundleSelection temp_bundles;
+      bool flag_remove = false;
+
+      for (auto it1 = bundles.begin(); it1!=bundles.end(); it1++){
+	FlashTPCBundle *bundle = *it1;
+	if (bundle->get_consistent_flag() && bundle->get_spec_end_flag()){
+	  temp_bundles.push_back(bundle);
+	}else if (bundle->get_consistent_flag()){
+	  flag_remove = true;
+	}
+     
+      }
+      
+      if (flag_remove){
+	for (auto it1 = temp_bundles.begin(); it1!=temp_bundles.end(); it1++){
+	  FlashTPCBundle *bundle = *it1;
+	  bundle->set_consistent_flag(false);
+	}
+      }
+    }
+    
+    
+
+    // further examine the map ...
+    {
+      Flash_bundles_map flash_good_bundles_map;
+      Cluster_bundles_map cluster_good_bundles_map;
+      FlashTPCBundleSelection good_bundles;
+            
+      Flash_bundles_map flash_other_bundles_map;
+      Cluster_bundles_map cluster_other_bundles_map;
+      
+      for (auto it = all_bundles.begin(); it!=all_bundles.end();it++){
+	FlashTPCBundle *bundle = *it;
+	Opflash *flash = bundle->get_flash();
+	PR3DCluster *cluster = bundle->get_main_cluster();
+
+	if (bundle->get_consistent_flag()){
+	  if (flash_good_bundles_map.find(flash)==flash_good_bundles_map.end()){
+	    FlashTPCBundleSelection bundles;
+	    bundles.push_back(bundle);
+	    flash_good_bundles_map[flash] = bundles;
+	  }else{
+	    flash_good_bundles_map[flash].push_back(bundle);
+	  }
+	  if (cluster_good_bundles_map.find(cluster)==cluster_good_bundles_map.end()){
+	    FlashTPCBundleSelection bundles;
+	    bundles.push_back(bundle);
+	    cluster_good_bundles_map[cluster] = bundles;
+	  }else{
+	    cluster_good_bundles_map[cluster].push_back(bundle);
+	  }
+	  good_bundles.push_back(bundle);
+	}else if (bundle->get_flag_at_x_boundary()){
+	  if (flash_other_bundles_map.find(flash)==flash_other_bundles_map.end()){
+	    FlashTPCBundleSelection bundles;
+	    bundles.push_back(bundle);
+	    flash_other_bundles_map[flash] = bundles;
+	  }else{
+	    flash_other_bundles_map[flash].push_back(bundle);
+	  }
+	  if (cluster_other_bundles_map.find(cluster)==cluster_other_bundles_map.end()){
+	    FlashTPCBundleSelection bundles;
+	    bundles.push_back(bundle);
+	    cluster_other_bundles_map[cluster] = bundles;
+	  }else{
+	    cluster_other_bundles_map[cluster].push_back(bundle);
+	  }
+	}
+	// if ( bundle->get_consistent_flag() || bundle->get_flag_at_x_boundary())
+	// 	std::cout << bundle->get_flash()->get_flash_id() << " " << bundle->get_main_cluster()->get_cluster_id() << " " << bundle->get_flag_at_x_boundary() << " " << bundle->get_ks_dis() << " " << bundle->get_chi2() << " " << bundle->get_ndf() << std::endl;
+      }
+
+      for (auto it = cluster_good_bundles_map.begin(); it!= cluster_good_bundles_map.end(); it++){
+	PR3DCluster *cluster =  it->first;
+	FlashTPCBundleSelection& bundles = it->second;
+
+	
+	if (bundles.size()>1){ // more than one flash
+
+	  // find the min bundle ... 
+	  FlashTPCBundle *min_bundle = bundles.at(0);
+	  for (auto it1 = bundles.begin(); it1!=bundles.end(); it1++){
+	    FlashTPCBundle *bundle = *it1;
+	    if (bundle->get_ks_dis() < min_bundle->get_ks_dis())
+	      min_bundle = bundle;
+	  }
+
+	  if (min_bundle->get_ks_dis() < 0.12){
+	    FlashTPCBundleSelection temp_bundles;
+	    
+	    //examine the rest of bundles;
+	    for (auto it1 = bundles.begin(); it1!=bundles.end(); it1++){
+	      FlashTPCBundle *bundle = *it1;
+	      if (bundle==min_bundle) continue;
+	      bool flag_remove = false;
+	      
+	      if (min_bundle->get_ks_dis() +0.015 < bundle->get_ks_dis() &&
+		  min_bundle->get_chi2()/min_bundle->get_ndf() *1.1 < bundle->get_chi2()/bundle->get_ndf()){
+		// prepare remove bundle from the list ...
+		flag_remove = true;
+	      }else if (min_bundle->get_ks_dis() +0.03 < bundle->get_ks_dis() &&
+			min_bundle->get_chi2()/min_bundle->get_ndf() *0.85 < bundle->get_chi2()/bundle->get_ndf()){
+		flag_remove = true;
+	      }
+	      
+	      if (flag_remove){
+		if (flash_good_bundles_map[bundle->get_flash()].size()>1){
+		  
+		  FlashTPCBundle *min_bundle1 = flash_good_bundles_map[bundle->get_flash()].at(0);
+		  for (auto it2 = flash_good_bundles_map[bundle->get_flash()].begin(); it2!=flash_good_bundles_map[bundle->get_flash()].end(); it2++){
+		    FlashTPCBundle *bundle1 = *it2;
+		    if (bundle1->get_ks_dis() < min_bundle1->get_ks_dis())
+		      min_bundle1 = bundle1;
+		  }
+		  if (bundle!=min_bundle1)
+		    temp_bundles.push_back(bundle);
+		}
+	      }
+	    }
+	  
+
+	    for (auto it1 = temp_bundles.begin(); it1!=temp_bundles.end(); it1++){
+	      FlashTPCBundle *bundle = *it1;
+	      PR3DCluster *cluster =  bundle->get_main_cluster();
+	      Opflash *flash = bundle->get_flash();
+	      
+	      bundle->set_consistent_flag(false);
+	      flash_good_bundles_map[flash].erase(find(flash_good_bundles_map[flash].begin(),flash_good_bundles_map[flash].end(),bundle));
+	      cluster_good_bundles_map[cluster].erase(find(cluster_good_bundles_map[cluster].begin(),cluster_good_bundles_map[cluster].end(),bundle));
+	      // remove from 
+	    }
+	  }
+	}
+      }
+      
+
+      
+      FlashTPCBundleSelection to_be_removed;
+      for (auto it = cluster_good_bundles_map.begin(); it!= cluster_good_bundles_map.end(); it++){
+	PR3DCluster *cluster =  it->first;
+	FlashTPCBundleSelection& bundles = it->second;
+	bool flag_remove_other = false;
+	for (auto it1 = bundles.begin(); it1!= bundles.end(); it1++){
+	  FlashTPCBundle *bundle = *it1;
+	  Opflash *flash = bundle->get_flash();
+	  // //TEST
+	  // if (cluster->get_cluster_id()==5&&flash->get_flash_id()==27)
+	  //   bundle->set_consistent_flag(false);
+	  if (flash_good_bundles_map[flash].size()==1){
+	    flag_remove_other = true;
+	    break;
+	  }
+	}
+	if (flag_remove_other){
+	  if (cluster_other_bundles_map.find(cluster)!=cluster_other_bundles_map.end()){
+	    std::copy(cluster_other_bundles_map[cluster].begin(),
+		      cluster_other_bundles_map[cluster].end(),
+		      std::back_inserter(to_be_removed));
+	  }
+	}
+	
+      }
+
+      for (auto it1 = to_be_removed.begin(); it1!=to_be_removed.end(); it1++){
+	FlashTPCBundle *bundle = *it1;
+	all_bundles.erase(bundle);
+	
+	Opflash *flash = bundle->get_flash();
+	PR3DCluster *cluster = bundle->get_main_cluster();
+	
+	fc_bundles_map.erase(std::make_pair(flash,cluster));
+	
+	//	bundles.erase(find(bundles.begin(),bundles.end(),bundle));
+	{
+	  FlashTPCBundleSelection& temp_bundles = cluster_bundles_map[cluster];
+	  temp_bundles.erase(find(temp_bundles.begin(), temp_bundles.end(), bundle));
+	  if (temp_bundles.size()==0)
+	    cluster_bundles_map.erase(cluster);
+	}
+
+	{
+	  FlashTPCBundleSelection& temp_bundles = flash_bundles_map[flash];
+	  temp_bundles.erase(find(temp_bundles.begin(), temp_bundles.end(), bundle));
+	  if (temp_bundles.size()==0)
+	    flash_bundles_map.erase(flash);
+	}
+	
+	delete bundle;
+      }
+      
+    }
+
+    for (auto it = cluster_bundles_map.begin(); it!= cluster_bundles_map.end(); it++){
+      PR3DCluster *main_cluster = it->first;
+      FlashTPCBundleSelection& bundles = it->second;
+      bool flag_tight_bundle = false;
+
+      for (auto it1 = bundles.begin(); it1!=bundles.end(); it1++){
+	FlashTPCBundle *bundle = *it1;
+	if (bundle->get_consistent_flag()){
+	  flag_tight_bundle = true;
+	  break;
+	}
+      }
+
+      // if (main_cluster->get_cluster_id()==5)
+      // 	std::cout << "Xin: " << flag_tight_bundle << " " << bundles.size() << std::endl;
+      
+      
       // clean up the map ...
       if (flag_tight_bundle){
 	// all_bundles;
@@ -499,7 +720,20 @@ std::vector<std::tuple<PR3DCluster*, Opflash*, double, std::vector<double>>> Wir
     }
 
     
+    // finish further examine the bundle ... 
+    
     std::cout << "After Cleaning 2 : " << cluster_bundles_map.size() << " A " << flash_bundles_map.size() << " " << all_bundles.size() << std::endl;
+
+
+    std::cout << std::endl << std::endl;
+    for (auto it = all_bundles.begin(); it!=all_bundles.end();it++){
+      FlashTPCBundle *bundle = *it;
+      
+      if ( bundle->get_consistent_flag() || bundle->get_flag_at_x_boundary())
+	std::cout << bundle->get_flash()->get_flash_id() << " " << bundle->get_main_cluster()->get_cluster_id() << " " << bundle->get_flag_at_x_boundary() << " " << bundle->get_ks_dis() << " " << bundle->get_chi2() << " " << bundle->get_ndf() << std::endl;
+    }
+    std::cout << std::endl << std::endl;
+
     
     // examining flash ... 
     for (auto it = flash_bundles_map.begin(); it!=flash_bundles_map.end(); it++){
@@ -562,6 +796,7 @@ std::vector<std::tuple<PR3DCluster*, Opflash*, double, std::vector<double>>> Wir
     std::cout << std::endl << std::endl;
     for (auto it = all_bundles.begin(); it!=all_bundles.end();it++){
       FlashTPCBundle *bundle = *it;
+      
       if ( bundle->get_consistent_flag() || bundle->get_flag_at_x_boundary())
 	std::cout << bundle->get_flash()->get_flash_id() << " " << bundle->get_main_cluster()->get_cluster_id() << " " << bundle->get_flag_at_x_boundary() << " " << bundle->get_ks_dis() << " " << bundle->get_chi2() << " " << bundle->get_ndf() << std::endl;
     }
@@ -590,7 +825,7 @@ std::vector<std::tuple<PR3DCluster*, Opflash*, double, std::vector<double>>> Wir
       
       // improve the chisquare definition ...
       double delta_track = 0.01; // track can only be used once
-      double delta_flash = 0.03;
+      double delta_flash = 0.025;
       //    double delta_flash1 = 0.1;
       
       double num_unused_flash = flash_bundles_map.size() - cluster_bundles_map.size();
@@ -894,445 +1129,6 @@ std::vector<std::tuple<PR3DCluster*, Opflash*, double, std::vector<double>>> Wir
     }
     return results;
     
-  }else{
-
-
-  
-  std::vector<Opflash*> good_flashes; // save flashes 
-  std::map<Opflash*,std::vector<int>> map_flash_tpc_ids; // save tpc ids
-  std::map<Opflash*,std::vector<std::vector<double>>> map_flash_tpc_light_preds; // save tpc predictions
-  std::map<Opflash*,std::vector<bool>> map_flash_tpc_boundaries; // save if the tpc predictions is at boundaries ... 
-  std::map<Opflash*,int> map_flash_index;
-  
-  int flash_num = 0;
-  for (auto it1 =flashes.begin(); it1!=flashes.end(); it1++){
-    Opflash *flash = (*it1);
-    double offset_x = (flash->get_time() - time_offset)*2./nrebin*time_slice_width;
-    int cluster_id = 0;
-
-    int flash_type = flash->get_type(); // 1 for cosmic, 2 for beam ... 
-    bool flag_good_flash = false;
-    
-    for (auto it2 = group_clusters.begin(); it2!=group_clusters.end(); it2++){
-      PR3DCluster* main_cluster = it2->first;
-      std::vector<std::pair<WireCell::PR3DCluster*,double>>& more_clusters = it2->second;
-      // judge if the main clusters are within the detector range ...
-      double first_pos_x = (*((main_cluster->get_time_cells_set_map().begin())->second.begin()))->get_sampling_points().front().x;
-      double last_pos_x = (*((main_cluster->get_time_cells_set_map().rbegin())->second.begin()))->get_sampling_points().front().x;
-
-      bool flag_at_x_boundary = false;
-      bool flag_close_to_PMT = false;
-
-      // if (flash_num==57){
-      // 	std::cout << cluster_id << " " << (first_pos_x-offset_x)/units::cm << " " << (last_pos_x-offset_x)/units::cm << " " << flash_num << std::endl;
-      // }
-      
-      if (first_pos_x-offset_x > low_x_cut + low_x_cut_ext1 &&
-  	  last_pos_x-offset_x > low_x_cut &&
-  	  last_pos_x-offset_x < high_x_cut + high_x_cut_ext1 &&
-  	  first_pos_x-offset_x < high_x_cut){
-	
-
-  	if (map_flash_tpc_ids.find(flash)==map_flash_tpc_ids.end()){
-  	  std::vector<int> temp_vec_int;
-  	  map_flash_tpc_ids[flash] = temp_vec_int;
-  	  std::vector<std::vector<double>> temp_vec_preds;
-  	  map_flash_tpc_light_preds[flash] = temp_vec_preds;
-  	  std::vector<bool> temp_vec_flag;
-  	  map_flash_tpc_boundaries[flash] = temp_vec_flag;
-  	}
-	
-  	// tracks ends at boundary ... 
-  	if (first_pos_x-offset_x <=low_x_cut + low_x_cut_ext2 && first_pos_x-offset_x > low_x_cut + low_x_cut_ext1 ){
-  	  flag_at_x_boundary = true;
-  	  flag_close_to_PMT = true; // may need to cut off PE ... 
-  	}
-  	if (last_pos_x-offset_x >= high_x_cut-high_x_cut_ext1 && last_pos_x-offset_x < high_x_cut + high_x_cut_ext1){
-  	  flag_at_x_boundary = true;
-  	}
-	
-  	std::vector<double> pred_pmt_light;
-  	pred_pmt_light.resize(32,0);
-
-  	//std::vector<double> pred_pmt_light1;
-  	//pred_pmt_light1.resize(32,0);
-	
-  	PR3DClusterSelection temp_clusters;
-  	// fill in stuff for the main cluster
-  	temp_clusters.push_back(main_cluster);
-  	// fill in the stuff for additional clusters
-  	for (auto it3 = more_clusters.begin(); it3!=more_clusters.end(); it3++){
-  	  temp_clusters.push_back(it3->first);
-  	}
-  	for (auto it3 = temp_clusters.begin(); it3!=temp_clusters.end(); it3++){
-  	  SMGCSelection& mcells = (*it3)->get_mcells();
-  	  for (auto it4 = mcells.begin(); it4!=mcells.end(); it4++){
-  	    SlimMergeGeomCell *mcell = (*it4);
-  	    if (mcell->get_q()>0){
-  	      PointVector& pts = mcell->get_sampling_points();
-  	      if (pts.at(0).x-offset_x < low_x_cut+low_x_cut_ext1 ||
-  		  pts.at(0).x-offset_x > high_x_cut+high_x_cut_ext1)
-  		continue;
-  	      float charge = mcell->get_q()/pts.size();
-  	      Point p;
-  	      for (size_t i=0;i!=pts.size();i++){
-  		p.x = pts.at(i).x - offset_x;
-  		p.y = pts.at(i).y;
-  		p.z = pts.at(i).z;
-
-  		// if (flash_num==27&&flag_at_x_boundary){
-  		//   std::cout << p.x/units::cm << " " << p.y/units::cm << " " << p.z/units::cm << " "  << flash_num << " " << cluster_id << std::endl;
-  		// }
-		
-  		int voxel_id = WireCell2dToy::convert_xyz_voxel_id(p);
-  		std::list<std::pair<int,float>>& pmt_list = photon_library.at(voxel_id);
-  		for (auto it5 = pmt_list.begin(); it5!=pmt_list.end(); it5++){
-  		  pred_pmt_light.at(map_lib_pmt[it5->first]) += charge * it5->second;
-  		  //pred_pmt_light1.at(it5->first) += charge * it5->second;
-  		}
-  	      }
-  	    }
-  	  }
-  	}
-
-  	double sum1 = 0, sum2 = 0, max_pe = 0;
-  	for (size_t i=0;i!=32;i++){
-  	  pred_pmt_light.at(i) *= scaling_light_mag;
-  	  sum1 += flash->get_PE(i);
-  	  sum2 += pred_pmt_light.at(i);
-  	  if (pred_pmt_light.at(i) > max_pe)
-  	    max_pe = pred_pmt_light.at(i);
-  	}
-
-	
-  	// // apply cut off, if the prediction for cosmic discriminator is too low, remove it ... 
-  	// if (flash_type==1 && max_pe > 50 && sum2 > 150){
-  	//   sum1 = 0;
-  	//   sum2 = 0;
-  	//   // what is the mapping ???
-  	//   for (size_t i=0;i!=32;i++){
-  	//     if (pred_pmt_light.at(i) < cos_pe_low[i]){ // lower than this limit, anyway zeroed it ... 
-  	//       pred_pmt_light.at(i) = 0;
-  	//     }else if (flash->get_PE(i)==0 && pred_pmt_light.at(i) < cos_pe_mid[i] ) {
-  	//       pred_pmt_light.at(i) = 0;
-  	//     }
-  	//     sum1 += flash->get_PE(i);
-  	//     sum2 += pred_pmt_light.at(i);
-  	//   }
-  	// }
-
-  	//std::cout << sum1 << " " << sum2 << " " << cluster_id << " " << " " << main_cluster->get_cluster_id() << " " << flash->get_time() << std::endl;
-	
-  	if (sum2 < sum1 * 1.5){ // prediction is smaller than 2 of measured ones 
-  	  // if (fabs(sum2/sum1-1)<0.75){
-  	  flag_good_flash = true;
-  	  map_flash_tpc_ids[flash].push_back(cluster_id);
-  	  map_flash_tpc_light_preds[flash].push_back(pred_pmt_light);
-  	  // fill in the content ... 
-  	  if (flag_at_x_boundary){
-  	    map_flash_tpc_boundaries[flash].push_back(true);
-  	  }else{
-  	    map_flash_tpc_boundaries[flash].push_back(false);
-  	  }
-  	}
-      }
-      
-      cluster_id++;
-    }
-
-    if (flag_good_flash){
-      good_flashes.push_back(flash);
-      map_flash_index[flash] = flash_num;
-    }
-    flash_num ++;
   }
-
- 
-
-  
-  // regularization strength ... 
-  double lambda = 0.25; // note the coefficient is all around 1
-  //form matrix ...
-  double fudge_factor1 = 0.06; // add 5% relative uncertainty for pe
-  double fudge_factor2 = 1.0; // increase the original uncertainties by 50% ... 
-  int num_unknowns = 0;
-  
-
-  std::set<int> tpc_ids;
-  std::map<int,int> map_tpc_index;
-  for (auto it = map_flash_tpc_ids.begin(); it!= map_flash_tpc_ids.end(); it++){
-    num_unknowns += it->second.size();
-    for (auto it1 = it->second.begin(); it1!=it->second.end(); it1++){
-      tpc_ids.insert(*it1);
-    }
-  }
-
-  std::cout << "Starting: " << tpc_ids.size() << " A " << good_flashes.size() << " " << num_unknowns << std::endl;
-  
-  //  std::cout << num_unknowns << " " << tpc_ids.size() << std::endl;
-  int tpc_index = 0;
-  for (auto it=tpc_ids.begin();it!=tpc_ids.end();it++){
-    map_tpc_index[*it] = tpc_index;
-    tpc_index ++;
-  }
-  
-  // improve the chisquare definition ...
-  double delta_track = 0.05;
-  double delta_flash = 0.01;
-  
-  VectorXd M = VectorXd::Zero(32*good_flashes.size()); // measurement from each PMT from each flash
-  MatrixXd R = MatrixXd::Zero(32*good_flashes.size(), num_unknowns+good_flashes.size()); // unknowns to measurement matrix
-  VectorXd MF = VectorXd::Zero(tpc_ids.size() + good_flashes.size());
-  MatrixXd RF = MatrixXd::Zero(tpc_ids.size() + good_flashes.size(), num_unknowns+good_flashes.size()); // penalty matrix term
-  std::vector<std::pair<Opflash*,int>> total_pairs;
-  std::vector<double> total_weights;
- 
-  for (size_t i=0;i!=good_flashes.size();i++){
-    Opflash *flash = good_flashes.at(i);
-    for (size_t j=0;j!=32;j++){
-      double pe = flash->get_PE(j);
-      double pe_err = sqrt(pow(flash->get_PE_err(j)*fudge_factor2,2) + pow(pe*fudge_factor1,2));
-      
-      
-      M(32*i+j) = pe/pe_err;
-
-      R(32*i+j,num_unknowns+i) = pe/pe_err; // flash alone term
-
-      //std::cout << i << " " << j << " " << pe << " " << pe_err << std::endl;
-    }
-
-    for (size_t j=0;j!=map_flash_tpc_ids[flash].size();j++){
-      for (size_t k=0;k!=32;k++){
-  	double pe = flash->get_PE(k);
-  	double pe_err = sqrt(pow(flash->get_PE_err(k)*fudge_factor2,2) + pow(pe*fudge_factor1,2));
-  	R(32*i+k,total_pairs.end()-total_pairs.begin()) = 1./pe_err * map_flash_tpc_light_preds[flash].at(j).at(k);
-      }
-      
-      total_pairs.push_back(std::make_pair(flash,map_flash_tpc_ids[flash].at(j)));
-      if (map_flash_tpc_boundaries[flash].at(j)){ // add boundary ... 
-  	// less change to be zeroed ... 
-  	total_weights.push_back(0.2);
-      }else{
-  	total_weights.push_back(1);
-      }
-    }
-  }
-  for (size_t i=0;i!=good_flashes.size();i++){
-    total_weights.push_back(1);
-  }
-  
-  // fill in the F term ... 
-  for (size_t i=0;i!=tpc_ids.size(); i++){
-    MF(i) = 1./delta_track;
-  }
-  for (size_t i=0;i!=good_flashes.size();i++){
-    MF(tpc_ids.size()+i) = 0;
-    RF(tpc_ids.size()+i,num_unknowns+i) = 1./delta_flash;
-  }
-  
-  {
-    int temp_num = 0;
-    for (size_t i=0;i!=good_flashes.size();i++){
-      Opflash *flash = good_flashes.at(i);
-      for (size_t j=0;j!=map_flash_tpc_ids[flash].size();j++){
-  	RF(map_tpc_index[map_flash_tpc_ids[flash].at(j)], temp_num) = 1./delta_track;	   
-  	temp_num ++;
-      }
-    }
-  }
-  
-  MatrixXd RT = R.transpose();
-  MatrixXd RFT = RF.transpose();
-  
-  
-  VectorXd W = RT * M + RFT * MF;
-  MatrixXd G = RT * R + RFT * RF;
-
-  
-  
-  // // let's try to fit one flash only ... 
-  // VectorXd W = VectorXd::Zero(32*good_flashes.size()+tpc_ids.size());
-  // MatrixXd G = MatrixXd::Zero(32*good_flashes.size()+tpc_ids.size(), num_unknowns);
-  // std::vector<std::pair<Opflash*,int>> total_pairs;
-  // std::vector<double> total_weights;
-
-  // // require each TPC can be used once
-  // for (size_t i=0; i!= tpc_ids.size(); i++){
-  //   W(32*good_flashes.size()+i) = 20.;// 5% constraint ... 
-  // }
-  
-  // for (size_t i=0; i!= good_flashes.size(); i++){
-  //   Opflash *flash = good_flashes.at(i);
-  //   {
-  //     //    if (map_flash_index[flash]==test_flash_id){
-  //     for (size_t j=0;j!=32;j++){
-  // 	double pe = flash->get_PE(j);
-  // 	double pe_err = sqrt(pow(flash->get_PE_err(j)*fudge_factor2,2) + pow(pe*fudge_factor1,2));
-  // 	W(32*i+j) = pe/pe_err;
-  //     }
-      
-  //     // require total TPC contribution to a flash is 1, not correct ... 
-  //     //      W(33*i+32)=6.7; // 15% // 
-  //     for (size_t j=0;j!=map_flash_tpc_ids[flash].size();j++){
-  // 	for (size_t k=0;k!=32;k++){
-  // 	  double pe = flash->get_PE(k);
-  // 	  double pe_err = sqrt(pow(flash->get_PE_err(k)*fudge_factor2,2) + pow(pe*fudge_factor1,2));
-  // 	  G(32*i+k,total_pairs.end()-total_pairs.begin()) = 1./pe_err * map_flash_tpc_light_preds[flash].at(j).at(k);
-  // 	}
-  // 	// require each TPC can be used once
-  // 	G(32*good_flashes.size()+map_tpc_index[map_flash_tpc_ids[flash].at(j)],total_pairs.end()-total_pairs.begin()) = 20.;// 5% 
-	
-  // 	total_pairs.push_back(std::make_pair(flash,map_flash_tpc_ids[flash].at(j)));
-  // 	if (map_flash_tpc_boundaries[flash].at(j)){ // add boundary ... 
-  // 	  // less change to be zeroed ... 
-  // 	  total_weights.push_back(0.2);
-  // 	}else{
-  // 	  total_weights.push_back(1);
-  // 	}
-  //     }
-  //   }
-  // }
-  
-  
-  WireCell::LassoModel m2(lambda, 100000, 0.01);
-  m2.SetData(G, W);
-  for (size_t i=0; i!=total_weights.size(); i++){
-    m2.SetLambdaWeight(i,total_weights.at(i));
-  }
-  m2.Fit();
-  VectorXd beta = m2.Getbeta();
-
-  std::map<int,std::pair<Opflash*,double>> matched_pairs;
-  // for each TPC object save the largest flash ...
-  for (size_t i=0;i!=total_pairs.size();i++){
-    if(beta(i)!=0){
-      int tpc_index = total_pairs.at(i).second;
-      Opflash *flash = total_pairs.at(i).first;
-      if (matched_pairs.find(tpc_index)==matched_pairs.end()){
-  	matched_pairs[tpc_index] = std::make_pair(flash,beta(i));
-      }else{
-  	if (beta(i) > matched_pairs[tpc_index].second){
-  	  matched_pairs[tpc_index] = std::make_pair(flash,beta(i));
-  	}
-      }
-      // std::cout << i << " " <<  map_flash_index[total_pairs.at(i).first] << " " << total_pairs.at(i).second << " " << total_weights.at(i) << " " << beta(i)  << " " << flash->get_time() << std::endl;
-    }
-  }
-
-  // for (auto it = matched_pairs.begin(); it!= matched_pairs.end(); it++){
-  //   std::cout << it->first << " " << map_flash_index[it->second.first] << " " << it->second.second << std::endl;
-  // }
-  
-  std::vector<std::tuple<PR3DCluster*, Opflash*, double, std::vector<double>>> results;
-  int cluster_id = 0;
-  for (auto it = group_clusters.begin(); it!=group_clusters.end(); it++){
-    PR3DCluster* main_cluster = it->first;
-    // std::cout << cluster_id << std::endl;
-    if (matched_pairs.find(cluster_id)!=matched_pairs.end()){
-      Opflash* flash = matched_pairs[cluster_id].first;
-      double strength = matched_pairs[cluster_id].second;
-
-      auto it1 = find(map_flash_tpc_ids[flash].begin(),map_flash_tpc_ids[flash].end(),cluster_id);
-      
-      std::vector<double> pmt_pred = map_flash_tpc_light_preds[flash].at(it1-map_flash_tpc_ids[flash].begin());
-      results.push_back(std::make_tuple(main_cluster,flash,strength, pmt_pred));
-
-      std::cout << flash->get_flash_id() << " " << main_cluster->get_cluster_id() << " " <<  strength << " " << flash->get_time() << std::endl;
-      
-    }else{
-      std::cout << "missing cluster: " << cluster_id << std::endl;
-      Opflash *flash = 0;
-      double strength  =0;
-      std::vector<double> pmt_pred; 
-      results.push_back(std::make_tuple(main_cluster,flash,strength, pmt_pred));
-    }
-    cluster_id ++;
-  }
-  return results;
-
-  }
-  
-  // double chi2_1 = 0, chi2_2 = 0;
-  // for (size_t i=0;i!=33;i++){
-  //   chi2_1 += pow(W(i)-G(i,14),2);
-  //   double sum = 0;
-  //   for (size_t j=0;j!=15;j++){
-  //     sum += G(i,j)*beta(j);
-  //   }
-  //   std::cout << i << " " << W(i) << " " << G(i,14) << " " << total_weights.at(14) <<" " <<   sum  << " " << std::endl;
-  //   chi2_2 += pow(W(i) - sum,2);
-  // }
-  // std::cout << chi2_1 << " "<< chi2_2 << std::endl;
-
-
-
-
-
-  
-
-  // for (auto it = map_flash_tpc_ids.begin(); it!= map_flash_tpc_ids.end(); it++){
-  //   num_unknowns += it->second.size();
-  // }
-  
-  // VectorXd W = VectorXd::Zero(32*good_flashes.size());
-  // MatrixXd G = MatrixXd::Zero(32*good_flashes.size(), num_unknowns);
-  // std::vector<std::pair<Opflash*,int>> total_pairs;
-  // std::vector<double> total_weights;
-  
-  // for (size_t i=0; i!= good_flashes.size(); i++){
-  //   Opflash *flash = good_flashes.at(i);
-  //   for (size_t j=0;j!=32;j++){
-  //     double pe = flash->get_PE(j);
-  //     double pe_err = sqrt(pow(flash->get_PE_err(j),2) + pow(pe*fudge_factor,2));
-  //     W(32*i+j) = pe/pe_err;
-  //   }
-  //   for (size_t j=0;j!=map_flash_tpc_ids[flash].size();j++){
-   
-  //     for (size_t k=0;k!=32;k++){
-  // 	double pe = flash->get_PE(k);
-  // 	double pe_err = sqrt(pow(flash->get_PE_err(k),2) + pow(pe*fudge_factor,2));
-  // 	G(32*i+k,total_pairs.end()-total_pairs.begin()) = 1./pe_err * map_flash_tpc_light_preds[flash].at(j).at(map_pmt_lib[k]);
-  //     }
-  //     total_pairs.push_back(std::make_pair(flash,map_flash_tpc_ids[flash].at(j)));
-  //     if (map_flash_tpc_boundaries[flash].at(j)){ // add boundary ... 
-  // 	total_weights.push_back(1.0);
-  // 	//total_weights.push_back(0.1);
-  //     }else{
-  // 	total_weights.push_back(1);
-  //     }
-  //   }
-  // }
-
-
-  // // std::cout << 32*good_flashes.size() << " " << num_unknowns << " " << total_weights.size() << " " << total_pairs.size() << std::endl;
-  
-
-  // WireCell::LassoModel m2(lambda, 100000, 1e-3);
-  // m2.SetData(G, W);
-  // for (size_t i=0; i!=total_weights.size(); i++){
-  //   m2.SetLambdaWeight(i,total_weights.at(i));
-  // }
-  // m2.Fit();
-
-  // VectorXd beta = m2.Getbeta();
-  // for (size_t i=0;i!=total_pairs.size();i++){
-  //   if (map_flash_index[total_pairs.at(i).first]  == 4)
-  //  std::cout << i << " " <<  map_flash_index[total_pairs.at(i).first] << " " << total_pairs.at(i).second << " " << total_weights.at(i) << " " << beta(i)  << std::endl;
-  // }
-
-  // double chi2_1 = 0, chi2_2 = 0;
-  // for (size_t i=0;i!=32;i++){
-  //   chi2_1 += pow(W(32*4+i)-G(32*4+i,60),2);
-  
-  //   double sum = 0;
-  //   for (size_t j=46;j!=61;j++){
-  //     sum += G(32*4+i,j)*beta(j);
-  //   }
-  //   std::cout << i << " " << W(32*4+i) << " " << G(32*4+i,60) << " " << total_weights.at(60) <<" " <<   sum  << " " << std::endl;
-  //   chi2_2 += pow(W(32*4+i) - sum,2);
-  // }
-  // std::cout << chi2_1 << " "<< chi2_2 << std::endl;
-  
-  
   
 }
