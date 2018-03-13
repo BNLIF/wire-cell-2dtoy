@@ -245,8 +245,8 @@ std::vector<std::tuple<PR3DCluster*, Opflash*, double, std::vector<double>>> Wir
 	//     )
 	//     std::cout << flash->get_flash_id() << " "<< main_cluster->get_cluster_id() << " " << (first_pos_x-offset_x)/units::cm << " " << (last_pos_x-offset_x)/units::cm << std::endl;
 
-	// if (flash->get_flash_id()==42)
-	//   std::cout << flash->get_flash_id() << " " << main_cluster->get_cluster_id() << " " << offset_x/units::cm << " " << (first_pos_x-offset_x)/units::cm << " " << (last_pos_x-offset_x)/units::cm << " " << std::endl;
+	//	if (flash->get_flash_id()==14)
+	//      std::cout << flash->get_flash_id() << " " << main_cluster->get_cluster_id() << " " << offset_x/units::cm << " " << (first_pos_x-offset_x)/units::cm << " " << (last_pos_x-offset_x)/units::cm << " " << std::endl;
 	
   	if (first_pos_x-offset_x > low_x_cut + low_x_cut_ext1 -1.0*units::cm &&
   	    last_pos_x-offset_x > low_x_cut &&
@@ -340,7 +340,8 @@ std::vector<std::tuple<PR3DCluster*, Opflash*, double, std::vector<double>>> Wir
   	  }
   	  fc_bundles_map[std::make_pair(flash,main_cluster)] = bundle;
 
-	  // std::cout << flash->get_flash_id() << " " << main_cluster->get_cluster_id() << " " << bundle << std::endl;
+	  // if (flash->get_flash_id()==14)
+	  //   std::cout << flash->get_flash_id() << " " << main_cluster->get_cluster_id() << " " << bundle << std::endl;
 	  
   	}else{
   	  delete bundle;
