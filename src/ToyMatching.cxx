@@ -575,6 +575,8 @@ std::vector<std::tuple<PR3DCluster*, Opflash*, double, std::vector<double>>> Wir
 	  }
 
 	  if (min_bundle->get_ks_dis() < 0.12){
+	    // std::cout << min_bundle->get_flash()->get_flash_id() << " " << min_bundle->get_main_cluster()->get_cluster_id() << std::endl;
+
 	    FlashTPCBundleSelection temp_bundles;
 	    
 	    //examine the rest of bundles;
@@ -586,6 +588,9 @@ std::vector<std::tuple<PR3DCluster*, Opflash*, double, std::vector<double>>> Wir
 	      if (min_bundle->get_ks_dis() +0.015 < bundle->get_ks_dis() &&
 		  min_bundle->get_chi2()/min_bundle->get_ndf() *1.1 < bundle->get_chi2()/bundle->get_ndf()){
 		// prepare remove bundle from the list ...
+		flag_remove = true;
+	      }else if(min_bundle->get_ks_dis() < bundle->get_ks_dis() &&
+		       min_bundle->get_chi2()/min_bundle->get_ndf() * 3 < bundle->get_chi2()/bundle->get_ndf()){
 		flag_remove = true;
 	      }else if (min_bundle->get_ks_dis() +0.025 < bundle->get_ks_dis() &&
 			min_bundle->get_chi2()/min_bundle->get_ndf() *0.85 < bundle->get_chi2()/bundle->get_ndf()){
@@ -600,6 +605,7 @@ std::vector<std::tuple<PR3DCluster*, Opflash*, double, std::vector<double>>> Wir
 		  }
 		}
 	      }
+	      //std::cout << min_bundle->get_flash()->get_flash_id() << " " << min_bundle->get_main_cluster()->get_cluster_id() << " " << flag_remove << std::endl;
 	      
 	      if (flag_remove){
 		if (flash_good_bundles_map[bundle->get_flash()].size()>1){
