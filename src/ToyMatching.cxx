@@ -472,6 +472,7 @@ std::vector<std::tuple<PR3DCluster*, Opflash*, double, std::vector<double>>> Wir
 	    if (bundle->get_consistent_flag()){
 	      if (bundle->get_ks_dis()<0.15 && bundle->get_ndf() >=5 && bundle->get_chi2() < bundle->get_ndf()  * 9 ){
 	      }else if (bundle->get_ks_dis()<0.075 && bundle->get_ndf() >=8 && bundle->get_chi2() < bundle->get_ndf()  * 12){
+	      }else if (bundle->get_ks_dis()<0.07 && bundle->get_ndf() >= 16 && bundle->get_chi2() < bundle->get_ndf()  * 20){
 	      }else{
 		bundle->set_consistent_flag(false);
 	      }
@@ -594,6 +595,10 @@ std::vector<std::tuple<PR3DCluster*, Opflash*, double, std::vector<double>>> Wir
 		flag_remove = true;
 	      }else if (min_bundle->get_ks_dis() +0.025 < bundle->get_ks_dis() &&
 			min_bundle->get_chi2()/min_bundle->get_ndf() *0.85 < bundle->get_chi2()/bundle->get_ndf()){
+		flag_remove = true;
+	      }else if (min_bundle->get_ks_dis()+0.075 < bundle->get_ks_dis() &&
+			min_bundle->get_ks_dis()<0.075 &&
+			min_bundle->get_chi2()/min_bundle->get_ndf() /15. < bundle->get_chi2()/bundle->get_ndf()){
 		flag_remove = true;
 	      }else if (flash_good_bundles_map[min_bundle->get_flash()].size()==1){
 		if (min_bundle->get_ks_dis()<0.06){
