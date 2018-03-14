@@ -596,6 +596,8 @@ std::vector<std::tuple<PR3DCluster*, Opflash*, double, std::vector<double>>> Wir
 	      }else if (min_bundle->get_ks_dis() +0.025 < bundle->get_ks_dis() &&
 			min_bundle->get_chi2()/min_bundle->get_ndf() *0.85 < bundle->get_chi2()/bundle->get_ndf()){
 		flag_remove = true;
+		if (bundle->get_ks_dis() < 0.075&&bundle->get_chi2()/bundle->get_ndf()<1.6)
+		  flag_remove = false;
 	      }else if (min_bundle->get_ks_dis()+0.075 < bundle->get_ks_dis() &&
 			min_bundle->get_ks_dis()<0.075 &&
 			min_bundle->get_chi2()/min_bundle->get_ndf() /15. < bundle->get_chi2()/bundle->get_ndf()){
@@ -610,7 +612,8 @@ std::vector<std::tuple<PR3DCluster*, Opflash*, double, std::vector<double>>> Wir
 		  }
 		}
 	      }
-	      //std::cout << min_bundle->get_flash()->get_flash_id() << " " << min_bundle->get_main_cluster()->get_cluster_id() << " " << flag_remove << std::endl;
+
+	      // std::cout << min_bundle->get_flash()->get_flash_id() << " " << min_bundle->get_main_cluster()->get_cluster_id() << " " << flag_remove << std::endl;
 	      
 	      if (flag_remove){
 		if (flash_good_bundles_map[bundle->get_flash()].size()>1){
@@ -654,6 +657,63 @@ std::vector<std::tuple<PR3DCluster*, Opflash*, double, std::vector<double>>> Wir
 	  }
 	}
       }
+
+      // new round according to chi2 .. .
+      for (auto it = cluster_good_bundles_map.begin(); it!= cluster_good_bundles_map.end(); it++){
+	PR3DCluster *cluster =  it->first;
+	FlashTPCBundleSelection& bundles = it->second;
+
+	
+	if (bundles.size()>1){ // more than one flash
+	  // find the min bundle ... 
+	  FlashTPCBundle *min_bundle = bundles.at(0);
+	  for (auto it1 = bundles.begin(); it1!=bundles.end(); it1++){
+	    FlashTPCBundle *bundle = *it1;
+	    if (bundle->get_chi2()/bundle->get_ndf() < min_bundle->get_chi2()/min_bundle->get_ndf())
+	      min_bundle = bundle;
+	  }
+
+	  if (min_bundle->get_ks_dis() < 0.12){
+	    FlashTPCBundleSelection temp_bundles;
+	    
+	    //examine the rest of bundles;
+	    for (auto it1 = bundles.begin(); it1!=bundles.end(); it1++){
+	      FlashTPCBundle *bundle = *it1;
+	      if (bundle==min_bundle) continue;
+	      bool flag_remove = false;
+	      
+	      if (flash_good_bundles_map[min_bundle->get_flash()].size()==1){
+		if (min_bundle->get_ks_dis()<0.08){
+		  if (min_bundle->get_chi2()/min_bundle->get_ndf() *1.1 < bundle->get_chi2()/bundle->get_ndf() ){
+		    flag_remove = true;
+		  }
+		}
+	      }
+	      
+	      if (flag_remove){
+		if (flash_good_bundles_map[bundle->get_flash()].size()>1){
+		  if (bundle!=min_bundle){
+		    temp_bundles.push_back(bundle);
+		  }
+		}
+	      }
+	    }
+	  
+
+	    for (auto it1 = temp_bundles.begin(); it1!=temp_bundles.end(); it1++){
+	      FlashTPCBundle *bundle = *it1;
+	      PR3DCluster *cluster =  bundle->get_main_cluster();
+	      Opflash *flash = bundle->get_flash();
+	      
+	      bundle->set_consistent_flag(false);
+	      flash_good_bundles_map[flash].erase(find(flash_good_bundles_map[flash].begin(),flash_good_bundles_map[flash].end(),bundle));
+	      cluster_good_bundles_map[cluster].erase(find(cluster_good_bundles_map[cluster].begin(),cluster_good_bundles_map[cluster].end(),bundle));
+	      // remove from 
+	    }
+	  }
+	}
+      }
+      //finish chi2 ...
       
 
       
