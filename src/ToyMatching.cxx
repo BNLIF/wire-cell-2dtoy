@@ -197,7 +197,7 @@ std::vector<std::tuple<PR3DCluster*, Opflash*, double, std::vector<double>>> Wir
 	    
 	    if (current_pos_x -offset_x > low_x_cut + low_x_cut_ext1 && current_pos_x - prev_pos_x > 0.75*units::cm)
 	      break;
-	    if (num_time_slices_outside > 36) break;
+	    if (num_time_slices_outside > 60) break;
 	    
 	  
 
@@ -207,8 +207,10 @@ std::vector<std::tuple<PR3DCluster*, Opflash*, double, std::vector<double>>> Wir
 	  }
 	  if (num_time_slices_outside <=36 && num_mcells_outside < 0.05*main_cluster->get_num_mcells()){
 	    first_pos_x = current_pos_x;
-	    if (num_time_slices_outside > 10)
+	    if (num_time_slices_outside > 10 && fabs(current_pos_x - prev_pos_x)<10*units::cm)
 	      flag_spec_end = true;
+	  }else if (num_time_slices_outside <=60 && num_mcells_outside < 0.06*main_cluster->get_num_mcells() && fabs(current_pos_x - prev_pos_x)>10*units::cm){
+	    last_pos_x = current_pos_x;
 	  }
 	  // if (flash->get_flash_id()==67&&main_cluster->get_cluster_id()==30)
 	  //   std::cout << num_mcells_outside << " " << main_cluster->get_num_mcells() << "  A " << (first_pos_x - offset_x)/units::cm << " " <<
@@ -227,7 +229,7 @@ std::vector<std::tuple<PR3DCluster*, Opflash*, double, std::vector<double>>> Wir
 	    current_pos_x = (*(it3->second.begin()))->get_sampling_points().front().x;
 	    if (current_pos_x -offset_x<high_x_cut + high_x_cut_ext1 && fabs(current_pos_x - prev_pos_x) > 0.75*units::cm)
 	      break;
-	    if (num_time_slices_outside > 36) break;
+	    if (num_time_slices_outside > 60) break;
 
 	    num_time_slices_outside += 1;
 	    num_mcells_outside += it3->second.size();
@@ -235,9 +237,15 @@ std::vector<std::tuple<PR3DCluster*, Opflash*, double, std::vector<double>>> Wir
 	  }
 	  if (num_time_slices_outside <=36 && num_mcells_outside < 0.05*main_cluster->get_num_mcells()){
 	    last_pos_x = current_pos_x;
-	    if (num_time_slices_outside > 10)
+	    if (num_time_slices_outside > 10 && fabs(current_pos_x - prev_pos_x)<10*units::cm)
 	      flag_spec_end = true;
+	  }else if (num_time_slices_outside <=60 && num_mcells_outside < 0.06*main_cluster->get_num_mcells() && fabs(current_pos_x - prev_pos_x)>10*units::cm){
+	    last_pos_x = current_pos_x;
 	  }
+
+	  //	  if (flash->get_flash_id()==14&&main_cluster->get_cluster_id()==13)
+	  //  std::cout << flash->get_flash_id() << " "<< main_cluster->get_cluster_id() << " " << (first_pos_x-offset_x)/units::cm << " " << (last_pos_x-offset_x)/units::cm << " " << num_time_slices_outside << " " << num_mcells_outside << " " << main_cluster->get_num_mcells() << " " << fabs(current_pos_x - prev_pos_x)/units::cm << std::endl;
+	  
 	}
 	
 	// if (flash->get_flash_id()==67&&main_cluster->get_cluster_id()==30 ||
