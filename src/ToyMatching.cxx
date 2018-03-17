@@ -143,7 +143,7 @@ std::vector<std::tuple<PR3DCluster*, Opflash*, double, std::vector<double>>> Wir
 
   //std::cout << num_flashes << " " << num_tpc_objs << std::endl;
   double high_x_cut = 256 * units::cm;
-  double high_x_cut_ext1 = + 1.0*units::cm;
+  double high_x_cut_ext1 = + 1.2*units::cm;
   double high_x_cut_ext2 = - 2.0*units::cm;
   double low_x_cut = 0*units::cm;
   double low_x_cut_ext1 = - 2*units::cm;
@@ -248,10 +248,9 @@ std::vector<std::tuple<PR3DCluster*, Opflash*, double, std::vector<double>>> Wir
 	  
 	}
 	
-	// if (flash->get_flash_id()==67&&main_cluster->get_cluster_id()==30 ||
-	//     flash->get_flash_id()==35&&main_cluster->get_cluster_id()==5 
-	//     )
-	//     std::cout << flash->get_flash_id() << " "<< main_cluster->get_cluster_id() << " " << (first_pos_x-offset_x)/units::cm << " " << (last_pos_x-offset_x)/units::cm << std::endl;
+	//	if (flash->get_flash_id()==18 && main_cluster->get_cluster_id()==6 
+	//  )
+	//  std::cout << flash->get_flash_id() << " "<< main_cluster->get_cluster_id() << " " << (first_pos_x-offset_x)/units::cm << " " << (last_pos_x-offset_x)/units::cm << std::endl;
 
 	//	if (flash->get_flash_id()==14)
 	//      std::cout << flash->get_flash_id() << " " << main_cluster->get_cluster_id() << " " << offset_x/units::cm << " " << (first_pos_x-offset_x)/units::cm << " " << (last_pos_x-offset_x)/units::cm << " " << std::endl;
@@ -455,19 +454,35 @@ std::vector<std::tuple<PR3DCluster*, Opflash*, double, std::vector<double>>> Wir
       
       if (!flag_tight_bundle){
 	FlashTPCBundle *min_bundle = *bundles.begin();
+	FlashTPCBundle *min_bundle1 = *bundles.begin();
 	for (auto it1 = bundles.begin(); it1!=bundles.end(); it1++){
 	  FlashTPCBundle *bundle = *it1;
-	  if (bundle->get_ks_dis()<min_bundle->get_ks_dis())
+	  if (bundle->get_ks_dis()<min_bundle->get_ks_dis()){
 	    min_bundle = bundle;
+	    min_bundle1 = min_bundle;
+	  }
 	}
 
+	bool flag_set = false;
 	if (min_bundle->get_ks_dis()<0.15 && min_bundle->get_ndf()>=6 && min_bundle->get_chi2() < min_bundle->get_ndf() * 40){
 	  min_bundle->set_consistent_flag(true);
 	  flag_tight_bundle = true;
+	  flag_set = true;
 	}else if ( min_bundle->get_ks_dis()<0.11 && min_bundle->get_ndf() >= 3 && min_bundle->get_chi2() < min_bundle->get_ndf() * 36){
 	  min_bundle->set_consistent_flag(true);
 	  flag_tight_bundle = true;
+	  flag_set = true;
 	}
+	if (!flag_set){
+	  if (min_bundle1->get_ks_dis()<0.15 && min_bundle1->get_ndf()>=6 && min_bundle1->get_chi2() < min_bundle1->get_ndf() * 40){
+	    min_bundle1->set_consistent_flag(true);
+	    flag_tight_bundle = true;
+	  }else if ( min_bundle1->get_ks_dis()<0.11 && min_bundle1->get_ndf() >= 3 && min_bundle1->get_chi2() < min_bundle1->get_ndf() * 36){
+	    min_bundle1->set_consistent_flag(true);
+	    flag_tight_bundle = true;
+	  }
+	}
+	
       }
 
      
@@ -484,9 +499,63 @@ std::vector<std::tuple<PR3DCluster*, Opflash*, double, std::vector<double>>> Wir
 	      }else{
 		bundle->set_consistent_flag(false);
 	      }
+	      
+	      
+	    }
+	  }
+
+	 
+	  
+	  
+	  
+	}
+
+	FlashTPCBundleSelection ndf1_bundles;
+	FlashTPCBundleSelection other_bundles;
+	for (auto it1 = bundles.begin(); it1!=bundles.end(); it1++){
+	  FlashTPCBundle *bundle = *it1;
+	  if (bundle->get_consistent_flag()){
+	    if (bundle->get_ndf()==1){
+	      ndf1_bundles.push_back(bundle);
+	      	}else{
+	      other_bundles.push_back(bundle);
 	    }
 	  }
 	}
+
+	// now remove ... 
+	bool flag_temp = false;
+	// if (main_cluster->get_cluster_id()==15)
+	//   std::cout << "Xin: " << other_bundles.size() << " " << ndf1_bundles.size() << std::endl;
+	
+	for (auto it1 = other_bundles.begin(); it1!=other_bundles.end(); it1++){
+	  FlashTPCBundle *bundle = *it1;
+	  if (flash_bundles_map.find(bundle->get_flash())!=flash_bundles_map.end()){
+	    FlashTPCBundleSelection bundles1 = flash_bundles_map[bundle->get_flash()];
+	    int temp_num = 0;
+	    for (auto it2 = bundles1.begin(); it2!=bundles1.end(); it2++){
+	      if ((*it2)->get_consistent_flag())
+		temp_num++;
+	    }
+	    // if (bundle->get_main_cluster()->get_cluster_id()==15)
+	    //   std::cout << bundle->get_flash()->get_flash_id() << " " << temp_num << std::endl;
+	    
+	    if (temp_num==1){
+	      flag_temp = true;
+	      break;
+	    }
+	    
+	  }
+	}
+	
+	if (flag_temp){
+	  for (auto it1 = ndf1_bundles.begin(); it1!=ndf1_bundles.end(); it1++){
+	    FlashTPCBundle *bundle = *it1;
+	    bundle->set_consistent_flag(false);
+	  }
+	}
+	
+	
       }
     }
 
@@ -849,7 +918,7 @@ std::vector<std::tuple<PR3DCluster*, Opflash*, double, std::vector<double>>> Wir
       FlashTPCBundle *bundle = *it;
       
       if ( bundle->get_consistent_flag() || bundle->get_flag_at_x_boundary())
-	std::cout << bundle->get_flash()->get_flash_id() << " " << bundle->get_main_cluster()->get_cluster_id() << " " << bundle->get_flag_at_x_boundary() << " " << bundle->get_ks_dis() << " " << bundle->get_chi2() << " " << bundle->get_ndf() << std::endl;
+	std::cout << bundle->get_flash()->get_flash_id() << " " << bundle->get_main_cluster()->get_cluster_id() << " " << bundle->get_flag_at_x_boundary() << " " << bundle->get_ks_dis() << " " << bundle->get_chi2() << " " << bundle->get_ndf() << " " << bundle->get_consistent_flag()  << std::endl;
     }
     std::cout << std::endl << std::endl;
 
@@ -907,6 +976,8 @@ std::vector<std::tuple<PR3DCluster*, Opflash*, double, std::vector<double>>> Wir
 	delete bundle;
       }
     }
+
+
     
 
     
@@ -917,7 +988,7 @@ std::vector<std::tuple<PR3DCluster*, Opflash*, double, std::vector<double>>> Wir
       FlashTPCBundle *bundle = *it;
       
       if ( bundle->get_consistent_flag() || bundle->get_flag_at_x_boundary())
-	std::cout << bundle->get_flash()->get_flash_id() << " " << bundle->get_main_cluster()->get_cluster_id() << " " << bundle->get_flag_at_x_boundary() << " " << bundle->get_ks_dis() << " " << bundle->get_chi2() << " " << bundle->get_ndf() << std::endl;
+	std::cout << bundle->get_flash()->get_flash_id() << " " << bundle->get_main_cluster()->get_cluster_id() << " " << bundle->get_flag_at_x_boundary() << " " << bundle->get_ks_dis() << " " << bundle->get_chi2() << " " << bundle->get_ndf() << " " << bundle->get_consistent_flag() << std::endl;
     }
     std::cout << std::endl << std::endl;
 
