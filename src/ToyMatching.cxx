@@ -454,14 +454,29 @@ std::vector<std::tuple<PR3DCluster*, Opflash*, double, std::vector<double>>> Wir
       
       if (!flag_tight_bundle){
 	FlashTPCBundle *min_bundle = *bundles.begin();
-	FlashTPCBundle *min_bundle1 = *bundles.begin();
+	
 	for (auto it1 = bundles.begin(); it1!=bundles.end(); it1++){
 	  FlashTPCBundle *bundle = *it1;
 	  if (bundle->get_ks_dis()<min_bundle->get_ks_dis()){
 	    min_bundle = bundle;
-	    min_bundle1 = min_bundle;
 	  }
 	}
+	
+	FlashTPCBundle *min_bundle1 = 0;
+	for (auto it1 = bundles.begin(); it1!=bundles.end(); it1++){
+	  FlashTPCBundle *bundle = *it1;
+	  if (bundle==min_bundle) continue;
+	  if (min_bundle1==0) {
+	    min_bundle1 = bundle;
+	  }else if (bundle->get_ks_dis()<min_bundle1->get_ks_dis()){
+	    min_bundle1 = bundle;
+	  }
+	}
+	
+	
+	// if (main_cluster->get_cluster_id()==12)
+	//   std::cout << "Xin: " << min_bundle->get_flash()->get_flash_id() << " " << min_bundle1->get_flash()->get_flash_id() << std::endl;
+	
 
 	bool flag_set = false;
 	if (min_bundle->get_ks_dis()<0.15 && min_bundle->get_ndf()>=6 && min_bundle->get_chi2() < min_bundle->get_ndf() * 40){
@@ -473,7 +488,8 @@ std::vector<std::tuple<PR3DCluster*, Opflash*, double, std::vector<double>>> Wir
 	  flag_tight_bundle = true;
 	  flag_set = true;
 	}
-	if (!flag_set){
+	
+	if (!flag_set && min_bundle1!=0){
 	  if (min_bundle1->get_ks_dis()<0.15 && min_bundle1->get_ndf()>=6 && min_bundle1->get_chi2() < min_bundle1->get_ndf() * 40){
 	    min_bundle1->set_consistent_flag(true);
 	    flag_tight_bundle = true;
@@ -482,7 +498,6 @@ std::vector<std::tuple<PR3DCluster*, Opflash*, double, std::vector<double>>> Wir
 	    flag_tight_bundle = true;
 	  }
 	}
-	
       }
 
      
