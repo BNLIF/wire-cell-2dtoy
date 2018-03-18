@@ -386,33 +386,89 @@ std::vector<std::tuple<PR3DCluster*, Opflash*, double, std::vector<double>>> Wir
 	  to_be_removed.push_back(bundle);
 	}
       }
-
+      
       for (auto it1 = to_be_removed.begin(); it1!=to_be_removed.end(); it1++){
-	  FlashTPCBundle *bundle = *it1;
-	  all_bundles.erase(bundle);
-	  
-	  Opflash *flash = bundle->get_flash();
-	  PR3DCluster *cluster = bundle->get_main_cluster();
-	  
-	  fc_bundles_map.erase(std::make_pair(flash,cluster));
-	  
-	  {
-	    FlashTPCBundleSelection& temp_bundles = flash_bundles_map[flash];
-	    temp_bundles.erase(find(temp_bundles.begin(), temp_bundles.end(), bundle));
-	    if (temp_bundles.size()==0)
-	      flash_bundles_map.erase(flash);
-	  }
-	  {
-	    FlashTPCBundleSelection& temp_bundles = cluster_bundles_map[cluster];
-	    temp_bundles.erase(find(temp_bundles.begin(), temp_bundles.end(), bundle));
-	    if (temp_bundles.size()==0)
-	      cluster_bundles_map.erase(cluster);
-	  }
-	  
-	  delete bundle;
+	FlashTPCBundle *bundle = *it1;
+	all_bundles.erase(bundle);
+	
+	Opflash *flash = bundle->get_flash();
+	PR3DCluster *cluster = bundle->get_main_cluster();
+	
+	fc_bundles_map.erase(std::make_pair(flash,cluster));
+	
+	{
+	  FlashTPCBundleSelection& temp_bundles = flash_bundles_map[flash];
+	  temp_bundles.erase(find(temp_bundles.begin(), temp_bundles.end(), bundle));
+	  if (temp_bundles.size()==0)
+	    flash_bundles_map.erase(flash);
 	}
+	{
+	  FlashTPCBundleSelection& temp_bundles = cluster_bundles_map[cluster];
+	  temp_bundles.erase(find(temp_bundles.begin(), temp_bundles.end(), bundle));
+	  if (temp_bundles.size()==0)
+	    cluster_bundles_map.erase(cluster);
+	}
+	
+	delete bundle;
+      }
+      to_be_removed.clear();
+
+
+      for (auto it = cluster_bundles_map.begin(); it!= cluster_bundles_map.end(); it++){
+       	PR3DCluster *main_cluster = it->first;
+       	FlashTPCBundleSelection& bundles = it->second;
+       	bool flag_consist = false;
+	FlashTPCBundleSelection temp_removed;
+	
+       	for (auto it1 = bundles.begin(); it1!=bundles.end(); it1++){
+	  FlashTPCBundle *bundle = *it1;
+	  if (bundle->get_potential_bad_match_flag())
+	    temp_removed.push_back(bundle);
+	  if (bundle->get_consistent_flag() ||
+	       (bundle->get_ks_dis() < 0.12 || bundle->get_chi2() < 3 * bundle->get_ndf() )&& bundle->get_ndf()>=3 ||
+	       bundle->get_ks_dis()<0.33 && bundle->get_chi2() < 50 * bundle->get_ndf()&&bundle->get_ndf()>=5 && bundle->get_flag_close_to_PMT())
+	    flag_consist = true;
+
+	  // if (main_cluster->get_cluster_id()==30)
+	  //   std::cout << bundle->get_flash()->get_flash_id() << " " << bundle->get_main_cluster()->get_cluster_id() << " " << bundle->get_flag_at_x_boundary() << " " << bundle->get_ks_dis() << " " << bundle->get_chi2() << " " << bundle->get_ndf() << " " << bundle->get_consistent_flag() << " " << bundle->get_flag_close_to_PMT() << " " << bundle->get_potential_bad_match_flag() << " " << flag_consist << std::endl;
+	  
+	}
+	if (flag_consist)
+	  to_be_removed.insert(to_be_removed.end(),temp_removed.begin(),temp_removed.end());
+      }
+
+      
+      for (auto it1 = to_be_removed.begin(); it1!=to_be_removed.end(); it1++){
+	FlashTPCBundle *bundle = *it1;
+	all_bundles.erase(bundle);
+	
+	Opflash *flash = bundle->get_flash();
+	PR3DCluster *cluster = bundle->get_main_cluster();
+	
+	fc_bundles_map.erase(std::make_pair(flash,cluster));
+	
+	{
+	  FlashTPCBundleSelection& temp_bundles = flash_bundles_map[flash];
+	  temp_bundles.erase(find(temp_bundles.begin(), temp_bundles.end(), bundle));
+	  if (temp_bundles.size()==0)
+	    flash_bundles_map.erase(flash);
+	}
+	{
+	  FlashTPCBundleSelection& temp_bundles = cluster_bundles_map[cluster];
+	  temp_bundles.erase(find(temp_bundles.begin(), temp_bundles.end(), bundle));
+	  if (temp_bundles.size()==0)
+	    cluster_bundles_map.erase(cluster);
+	}
+	
+	delete bundle;
+      }
+      
       
     }
+
+    
+
+    
     std::cout << "After Cleaning 1 : " << cluster_bundles_map.size() << " A " << flash_bundles_map.size() << " " << all_bundles.size() << std::endl;
     
     for (auto it = cluster_bundles_map.begin(); it!= cluster_bundles_map.end(); it++){
@@ -426,7 +482,7 @@ std::vector<std::tuple<PR3DCluster*, Opflash*, double, std::vector<double>>> Wir
       for (auto it1 = bundles.begin(); it1!=bundles.end(); it1++){
 	FlashTPCBundle *bundle = *it1;
 
-	std::cout << bundle->get_flash()->get_flash_id() << " " << bundle->get_main_cluster()->get_cluster_id() << " " << bundle->get_flag_at_x_boundary() << " " << bundle->get_ks_dis() << " " << bundle->get_chi2() << " " << bundle->get_ndf() << " " << bundle->get_consistent_flag() << " " << bundle->get_flag_close_to_PMT() << std::endl;
+	std::cout << bundle->get_flash()->get_flash_id() << " " << bundle->get_main_cluster()->get_cluster_id() << " " << bundle->get_flag_at_x_boundary() << " " << bundle->get_ks_dis() << " " << bundle->get_chi2() << " " << bundle->get_ndf() << " " << bundle->get_consistent_flag() << " " << bundle->get_flag_close_to_PMT() << " " << bundle->get_potential_bad_match_flag() << std::endl;
 	
 	if (bundle->get_consistent_flag()){
 	  flag_tight_bundle = true;
