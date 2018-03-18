@@ -211,6 +211,8 @@ std::vector<std::tuple<PR3DCluster*, Opflash*, double, std::vector<double>>> Wir
 	      flag_spec_end = true;
 	  }else if (num_time_slices_outside <=60 && num_mcells_outside < 0.06*main_cluster->get_num_mcells() && fabs(current_pos_x - prev_pos_x)>10*units::cm){
 	    last_pos_x = current_pos_x;
+	  }else if (num_time_slices_outside <=25 && num_mcells_outside < 0.12 * main_cluster->get_num_mcells() && fabs(current_pos_x - prev_pos_x)>20*units::cm){
+	    last_pos_x = current_pos_x;
 	  }
 	  // if (flash->get_flash_id()==67&&main_cluster->get_cluster_id()==30)
 	  //   std::cout << num_mcells_outside << " " << main_cluster->get_num_mcells() << "  A " << (first_pos_x - offset_x)/units::cm << " " <<
@@ -241,10 +243,12 @@ std::vector<std::tuple<PR3DCluster*, Opflash*, double, std::vector<double>>> Wir
 	      flag_spec_end = true;
 	  }else if (num_time_slices_outside <=60 && num_mcells_outside < 0.06*main_cluster->get_num_mcells() && fabs(current_pos_x - prev_pos_x)>10*units::cm){
 	    last_pos_x = current_pos_x;
+	  }else if (num_time_slices_outside <=25 && num_mcells_outside < 0.12 * main_cluster->get_num_mcells() && fabs(current_pos_x - prev_pos_x)>20*units::cm){
+	    last_pos_x = current_pos_x;
 	  }
 
-	  //	  if (flash->get_flash_id()==14&&main_cluster->get_cluster_id()==13)
-	  //  std::cout << flash->get_flash_id() << " "<< main_cluster->get_cluster_id() << " " << (first_pos_x-offset_x)/units::cm << " " << (last_pos_x-offset_x)/units::cm << " " << num_time_slices_outside << " " << num_mcells_outside << " " << main_cluster->get_num_mcells() << " " << fabs(current_pos_x - prev_pos_x)/units::cm << std::endl;
+	  // if (flash->get_flash_id()==23&&main_cluster->get_cluster_id()==19)
+	  //   std::cout << flash->get_flash_id() << " "<< main_cluster->get_cluster_id() << " " << (first_pos_x-offset_x)/units::cm << " " << (last_pos_x-offset_x)/units::cm << " " << num_time_slices_outside << " " << num_mcells_outside << " " << main_cluster->get_num_mcells() << " " << fabs(current_pos_x - prev_pos_x)/units::cm << std::endl;
 	  
 	}
 	
@@ -426,7 +430,10 @@ std::vector<std::tuple<PR3DCluster*, Opflash*, double, std::vector<double>>> Wir
       if (!flag_tight_bundle){
 	for (auto it1 = bundles.begin(); it1!=bundles.end(); it1++){
 	  FlashTPCBundle *bundle = *it1;
-	  if (bundle->get_ks_dis()<0.33 && bundle->get_ndf()>=3 && bundle->get_chi2() < bundle->get_ndf() * 10){
+	  if (bundle->get_ks_dis()<0.07 && bundle->get_ndf()>=10 && bundle->get_chi2() < bundle->get_ndf() * 60){
+	    bundle->set_consistent_flag(true);
+	    flag_tight_bundle = true;
+	  }else if (bundle->get_ks_dis()<0.33 && bundle->get_ndf()>=3 && bundle->get_chi2() < bundle->get_ndf() * 10){
 	    bundle->set_consistent_flag(true);
 	    flag_tight_bundle = true;
 	  }else if (bundle->get_ks_dis()<0.33 && bundle->get_ndf()>=3 && (bundle->get_chi2() < bundle->get_ndf() * 50 && bundle->get_flag_close_to_PMT() || bundle->get_chi2() < bundle->get_ndf() * 16 && bundle->get_flag_at_x_boundary())){
@@ -487,6 +494,18 @@ std::vector<std::tuple<PR3DCluster*, Opflash*, double, std::vector<double>>> Wir
 	  min_bundle->set_consistent_flag(true);
 	  flag_tight_bundle = true;
 	  flag_set = true;
+	}else if (min_bundle->get_ks_dis()<0.075 && min_bundle->get_ndf()>=10 && min_bundle->get_chi2() < min_bundle->get_ndf() * 60){
+	  min_bundle->set_consistent_flag(true);
+	  flag_tight_bundle = true;
+	  flag_set = true;
+	}else if (min_bundle->get_ks_dis()<0.11 && min_bundle->get_ndf()>=10 && min_bundle->get_chi2() < min_bundle->get_ndf() * 120){
+	  min_bundle->set_consistent_flag(true);
+	  flag_tight_bundle = true;
+	  flag_set = true;
+	}else if (min_bundle->get_ks_dis()<0.17 && min_bundle->get_ndf()>=10 && min_bundle->get_chi2() < min_bundle->get_ndf() * 40){
+	  min_bundle->set_consistent_flag(true);
+	  flag_tight_bundle = true;
+	  flag_set = true;
 	}
 	
 	if (!flag_set && min_bundle1!=0){
@@ -494,6 +513,9 @@ std::vector<std::tuple<PR3DCluster*, Opflash*, double, std::vector<double>>> Wir
 	    min_bundle1->set_consistent_flag(true);
 	    flag_tight_bundle = true;
 	  }else if ( min_bundle1->get_ks_dis()<0.11 && min_bundle1->get_ndf() >= 3 && min_bundle1->get_chi2() < min_bundle1->get_ndf() * 36){
+	    min_bundle1->set_consistent_flag(true);
+	    flag_tight_bundle = true;
+	  }else if (min_bundle1->get_ks_dis()<0.17 && min_bundle1->get_ndf()>=10 && min_bundle1->get_chi2() < min_bundle1->get_ndf() * 40){
 	    min_bundle1->set_consistent_flag(true);
 	    flag_tight_bundle = true;
 	  }
@@ -668,7 +690,7 @@ std::vector<std::tuple<PR3DCluster*, Opflash*, double, std::vector<double>>> Wir
 	  }
 
 	  if (min_bundle->get_ks_dis() < 0.12){
-	    // std::cout << min_bundle->get_flash()->get_flash_id() << " " << min_bundle->get_main_cluster()->get_cluster_id() << std::endl;
+	    //  std::cout << min_bundle->get_flash()->get_flash_id() << " Xin: " << min_bundle->get_main_cluster()->get_cluster_id() << std::endl;
 
 	    FlashTPCBundleSelection temp_bundles;
 	    
@@ -779,6 +801,8 @@ std::vector<std::tuple<PR3DCluster*, Opflash*, double, std::vector<double>>> Wir
 		  if (min_bundle->get_chi2()/min_bundle->get_ndf() *1.1 < bundle->get_chi2()/bundle->get_ndf() ){
 		    flag_remove = true;
 		  }
+		}else if (min_bundle->get_ks_dis()<0.1 && min_bundle->get_chi2()/min_bundle->get_ndf() *1.33< bundle->get_chi2()/bundle->get_ndf()){
+		  flag_remove = true;
 		}
 	      }
 	      
