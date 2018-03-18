@@ -185,6 +185,9 @@ std::vector<std::tuple<PR3DCluster*, Opflash*, double, std::vector<double>>> Wir
 	  std::map<int,SMGCSet>& time_cells_set_map = main_cluster->get_time_cells_set_map();
 	  int num_mcells_outside = 0;
 	  int num_time_slices_outside = 0;
+
+	  int num_mcells_def_outside = 0;
+	  
 	  double prev_pos_x= first_pos_x;
 	  double current_pos_x = first_pos_x;
 	  for (auto it3 = time_cells_set_map.begin(); it3 != time_cells_set_map.end(); it3++){
@@ -199,7 +202,7 @@ std::vector<std::tuple<PR3DCluster*, Opflash*, double, std::vector<double>>> Wir
 	      break;
 	    if (num_time_slices_outside > 60) break;
 	    
-	  
+	    if (current_pos_x -offset_x < low_x_cut + low_x_cut_ext1) num_mcells_def_outside += it3->second.size();
 
 	    num_time_slices_outside += 1;
 	    num_mcells_outside += it3->second.size();
@@ -210,13 +213,17 @@ std::vector<std::tuple<PR3DCluster*, Opflash*, double, std::vector<double>>> Wir
 	    if (num_time_slices_outside > 10 && fabs(current_pos_x - prev_pos_x)<10*units::cm)
 	      flag_spec_end = true;
 	  }else if (num_time_slices_outside <=60 && num_mcells_outside < 0.06*main_cluster->get_num_mcells() && fabs(current_pos_x - prev_pos_x)>10*units::cm){
-	    last_pos_x = current_pos_x;
+	    first_pos_x = current_pos_x;
 	  }else if (num_time_slices_outside <=25 && num_mcells_outside < 0.12 * main_cluster->get_num_mcells() && fabs(current_pos_x - prev_pos_x)>20*units::cm){
-	    last_pos_x = current_pos_x;
+	    first_pos_x = current_pos_x;
 	  }
-	  // if (flash->get_flash_id()==67&&main_cluster->get_cluster_id()==30)
-	  //   std::cout << num_mcells_outside << " " << main_cluster->get_num_mcells() << "  A " << (first_pos_x - offset_x)/units::cm << " " <<
-	  //     (prev_pos_x-offset_x)/units::cm << " " << (current_pos_x-offset_x)/units::cm << std::endl;
+
+	  if (num_mcells_def_outside < 0.0015 * main_cluster->get_num_mcells()&&num_mcells_def_outside>0)
+	    first_pos_x = offset_x;
+	  
+	  //  if (flash->get_flash_id()==61&&main_cluster->get_cluster_id()==1)
+	  // std::cout << num_mcells_outside << " " << main_cluster->get_num_mcells() << "  A " << (first_pos_x - offset_x)/units::cm << " " <<
+	  //  (prev_pos_x-offset_x)/units::cm << " " << (current_pos_x-offset_x)/units::cm << " " << num_mcells_def_outside << std::endl;
 	  
 	}
 	if (last_pos_x - offset_x >= high_x_cut + high_x_cut_ext1 &&
@@ -224,6 +231,7 @@ std::vector<std::tuple<PR3DCluster*, Opflash*, double, std::vector<double>>> Wir
 	  std::map<int,SMGCSet>& time_cells_set_map = main_cluster->get_time_cells_set_map();
 	  int num_mcells_outside = 0;
 	  int num_time_slices_outside = 0;
+	  int num_mcells_def_outside = 0;
 	  double prev_pos_x= last_pos_x;
 	  double current_pos_x = last_pos_x;
 
@@ -233,6 +241,9 @@ std::vector<std::tuple<PR3DCluster*, Opflash*, double, std::vector<double>>> Wir
 	      break;
 	    if (num_time_slices_outside > 60) break;
 
+
+	    if (current_pos_x -offset_x>high_x_cut + high_x_cut_ext1) num_mcells_def_outside +=it3->second.size();
+	    
 	    num_time_slices_outside += 1;
 	    num_mcells_outside += it3->second.size();
 	    prev_pos_x = current_pos_x;
@@ -246,7 +257,9 @@ std::vector<std::tuple<PR3DCluster*, Opflash*, double, std::vector<double>>> Wir
 	  }else if (num_time_slices_outside <=25 && num_mcells_outside < 0.12 * main_cluster->get_num_mcells() && fabs(current_pos_x - prev_pos_x)>20*units::cm){
 	    last_pos_x = current_pos_x;
 	  }
-
+	  
+	  if (num_mcells_def_outside < 0.0015 * main_cluster->get_num_mcells()&&num_mcells_def_outside>0)
+	    last_pos_x = offset_x;
 	  // if (flash->get_flash_id()==23&&main_cluster->get_cluster_id()==19)
 	  //   std::cout << flash->get_flash_id() << " "<< main_cluster->get_cluster_id() << " " << (first_pos_x-offset_x)/units::cm << " " << (last_pos_x-offset_x)/units::cm << " " << num_time_slices_outside << " " << num_mcells_outside << " " << main_cluster->get_num_mcells() << " " << fabs(current_pos_x - prev_pos_x)/units::cm << std::endl;
 	  
@@ -440,6 +453,9 @@ std::vector<std::tuple<PR3DCluster*, Opflash*, double, std::vector<double>>> Wir
 	    bundle->set_consistent_flag(true);
 	    flag_tight_bundle = true;
 	  }else if (bundle->get_ks_dis()<0.22 && bundle->get_ndf()>=3 && bundle->get_chi2() < bundle->get_ndf() * 16){
+	    bundle->set_consistent_flag(true);
+	    flag_tight_bundle = true;
+	  }else if (bundle->get_ks_dis()<0.16 && bundle->get_ndf()>=6 && bundle->get_chi2() < bundle->get_ndf() * 20){
 	    bundle->set_consistent_flag(true);
 	    flag_tight_bundle = true;
 	  }
