@@ -927,11 +927,17 @@ std::vector<std::tuple<PR3DCluster*, Opflash*, double, std::vector<double>>> Wir
 		  }
 		}else if (min_bundle->get_ks_dis()<0.1 && min_bundle->get_chi2()/min_bundle->get_ndf() *1.33< bundle->get_chi2()/bundle->get_ndf()){
 		  flag_remove = true;
+		}else if (min_bundle->get_ks_dis()<0.15 && min_bundle->get_chi2()/min_bundle->get_ndf() * 3 < bundle->get_chi2()/bundle->get_ndf()){
+		  flag_remove = true;
+		}
+	      }else if (flash_good_bundles_map[min_bundle->get_flash()].size()==2){
+		if (min_bundle->get_ks_dis()<0.1 && min_bundle->get_chi2()/min_bundle->get_ndf() * 6 < bundle->get_chi2()/bundle->get_ndf()){
+		  flag_remove = true;
 		}
 	      }
 	      
 	      if (flag_remove){
-		if (flash_good_bundles_map[bundle->get_flash()].size()>1){
+		if (flash_good_bundles_map[bundle->get_flash()].size()>flash_good_bundles_map[min_bundle->get_flash()].size()){
 		  if (bundle!=min_bundle){
 		    temp_bundles.push_back(bundle);
 		  }
