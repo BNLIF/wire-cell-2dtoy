@@ -516,22 +516,8 @@ std::vector<std::tuple<PR3DCluster*, Opflash*, double, std::vector<double>>> Wir
 	    flag_tight_bundle = true;
 	  }
 	}
-      }
-      
 
-
-      if (!flag_tight_bundle){
-	for (auto it1 = bundles.begin(); it1!=bundles.end(); it1++){
-	  FlashTPCBundle *bundle = *it1;
-	  if (bundle->get_flag_close_to_PMT() && bundle->get_ks_dis()<0.7 && bundle->get_ndf()>5 && bundle->get_chi2() < bundle->get_ndf() * 40){
-	    bundle->set_consistent_flag(true);
-	    flag_tight_bundle = true;
-	  }
-	}
-      }
-
-      
-      if (!flag_tight_bundle){
+	
 	FlashTPCBundle *min_bundle = *bundles.begin();
 	
 	for (auto it1 = bundles.begin(); it1!=bundles.end(); it1++){
@@ -619,6 +605,17 @@ std::vector<std::tuple<PR3DCluster*, Opflash*, double, std::vector<double>>> Wir
 	}
       }
 
+      
+       if (!flag_tight_bundle){
+	// last pieces ... 
+	for (auto it1 = bundles.begin(); it1!=bundles.end(); it1++){
+	  FlashTPCBundle *bundle = *it1;
+	  if (bundle->get_flag_close_to_PMT() && bundle->get_ks_dis()<0.7 && bundle->get_ndf()>5 && bundle->get_chi2() < bundle->get_ndf() * 40){
+	    bundle->set_consistent_flag(true);
+	    flag_tight_bundle = true;
+	  }
+	}
+      }
      
 
 
