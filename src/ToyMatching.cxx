@@ -705,7 +705,6 @@ std::vector<std::tuple<PR3DCluster*, Opflash*, double, std::vector<double>>> Wir
 	}else if (bundle->get_consistent_flag()){
 	  flag_remove = true;
 	}
-     
       }
       
       if (flag_remove){
@@ -714,6 +713,27 @@ std::vector<std::tuple<PR3DCluster*, Opflash*, double, std::vector<double>>> Wir
 	  bundle->set_consistent_flag(false);
 	}
       }
+
+      // examine the again
+      flag_remove = false;
+      temp_bundles.clear();
+      for (auto it1 = bundles.begin(); it1!=bundles.end(); it1++){
+	FlashTPCBundle *bundle = *it1;
+	if (bundle->get_consistent_flag()){
+	  if (bundle->get_ks_dis() < 0.06 && bundle->get_chi2() < 3.*bundle->get_ndf() && bundle->get_flag_at_x_boundary()){
+	    flag_remove = true;
+	  }else{
+	    temp_bundles.push_back(bundle);
+	  }
+	}
+      }
+      if (flag_remove){
+	for (auto it1 = temp_bundles.begin(); it1!=temp_bundles.end(); it1++){
+	  FlashTPCBundle *bundle = *it1;
+	  bundle->set_consistent_flag(false);
+	}
+      }
+      
     }
     
     
@@ -935,6 +955,9 @@ std::vector<std::tuple<PR3DCluster*, Opflash*, double, std::vector<double>>> Wir
       }
       //finish chi2 ...
       
+      
+
+      //
 
       
       FlashTPCBundleSelection to_be_removed;
