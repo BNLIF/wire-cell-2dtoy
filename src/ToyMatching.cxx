@@ -259,14 +259,14 @@ std::vector<std::tuple<PR3DCluster*, Opflash*, double, std::vector<double>>> Wir
 	  }
 	  
 	  if (num_mcells_def_outside < 0.0015 * main_cluster->get_num_mcells()&&num_mcells_def_outside>0)
-	    last_pos_x = offset_x;
-	  // if (flash->get_flash_id()==23&&main_cluster->get_cluster_id()==19)
+	    last_pos_x = offset_x+high_x_cut;
+
+	  // if (flash->get_flash_id()==7&&main_cluster->get_cluster_id()==6)
 	  //   std::cout << flash->get_flash_id() << " "<< main_cluster->get_cluster_id() << " " << (first_pos_x-offset_x)/units::cm << " " << (last_pos_x-offset_x)/units::cm << " " << num_time_slices_outside << " " << num_mcells_outside << " " << main_cluster->get_num_mcells() << " " << fabs(current_pos_x - prev_pos_x)/units::cm << std::endl;
 	  
 	}
 	
-	//	if (flash->get_flash_id()==18 && main_cluster->get_cluster_id()==6 
-	//  )
+	// if (flash->get_flash_id()==7 && main_cluster->get_cluster_id()==6 )
 	//  std::cout << flash->get_flash_id() << " "<< main_cluster->get_cluster_id() << " " << (first_pos_x-offset_x)/units::cm << " " << (last_pos_x-offset_x)/units::cm << std::endl;
 
 	//	if (flash->get_flash_id()==14)
