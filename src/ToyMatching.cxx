@@ -841,7 +841,7 @@ std::vector<std::tuple<PR3DCluster*, Opflash*, double, std::vector<double>>> Wir
 		  }else if (min_bundle->get_ks_dis() + 0.06 < bundle->get_ks_dis() &&
 			    min_bundle->get_chi2()/min_bundle->get_ndf() < bundle->get_chi2()/bundle->get_ndf() * 3.0){
 		    flag_remove = true;
-		  }else if (min_bundle->get_chi2()/min_bundle->get_ndf()<9){
+		  }else if (min_bundle->get_chi2()/min_bundle->get_ndf()<9 && min_bundle->get_ks_dis() + 0.01 < bundle->get_ks_dis()){
 		    flag_remove = true;
 		  }
 		}else{
