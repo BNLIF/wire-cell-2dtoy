@@ -261,12 +261,12 @@ std::vector<std::tuple<PR3DCluster*, Opflash*, double, std::vector<double>>> Wir
 	  if (num_mcells_def_outside < 0.0015 * main_cluster->get_num_mcells()&&num_mcells_def_outside>0)
 	    last_pos_x = offset_x+high_x_cut;
 
-	  // if (flash->get_flash_id()==7&&main_cluster->get_cluster_id()==6)
+	  // if (flash->get_flash_id()==19&&main_cluster->get_cluster_id()==19)
 	  //   std::cout << flash->get_flash_id() << " "<< main_cluster->get_cluster_id() << " " << (first_pos_x-offset_x)/units::cm << " " << (last_pos_x-offset_x)/units::cm << " " << num_time_slices_outside << " " << num_mcells_outside << " " << main_cluster->get_num_mcells() << " " << fabs(current_pos_x - prev_pos_x)/units::cm << std::endl;
 	  
 	}
 	
-	// if (flash->get_flash_id()==7 && main_cluster->get_cluster_id()==6 )
+	// if (flash->get_flash_id()==19 && main_cluster->get_cluster_id()==19 )
 	//  std::cout << flash->get_flash_id() << " "<< main_cluster->get_cluster_id() << " " << (first_pos_x-offset_x)/units::cm << " " << (last_pos_x-offset_x)/units::cm << std::endl;
 
 	//	if (flash->get_flash_id()==14)
@@ -377,7 +377,7 @@ std::vector<std::tuple<PR3DCluster*, Opflash*, double, std::vector<double>>> Wir
 
     
     // examine the bundles ... 
-    std::cout << "Starting: " << cluster_bundles_map.size() << " A " << flash_bundles_map.size() << " " << all_bundles.size() << std::endl;
+    //std::cout << "Starting: " << cluster_bundles_map.size() << " A " << flash_bundles_map.size() << " " << all_bundles.size() << std::endl;
     {
       FlashTPCBundleSelection to_be_removed;
       for (auto it = all_bundles.begin(); it!=all_bundles.end();it++){
@@ -469,7 +469,7 @@ std::vector<std::tuple<PR3DCluster*, Opflash*, double, std::vector<double>>> Wir
     
 
     
-    std::cout << "After Cleaning 1 : " << cluster_bundles_map.size() << " A " << flash_bundles_map.size() << " " << all_bundles.size() << std::endl;
+    //    std::cout << "After Cleaning 1 : " << cluster_bundles_map.size() << " A " << flash_bundles_map.size() << " " << all_bundles.size() << std::endl;
     
     for (auto it = cluster_bundles_map.begin(); it!= cluster_bundles_map.end(); it++){
       PR3DCluster *main_cluster = it->first;
@@ -482,7 +482,7 @@ std::vector<std::tuple<PR3DCluster*, Opflash*, double, std::vector<double>>> Wir
       for (auto it1 = bundles.begin(); it1!=bundles.end(); it1++){
 	FlashTPCBundle *bundle = *it1;
 
-	std::cout << bundle->get_flash()->get_flash_id() << " " << bundle->get_main_cluster()->get_cluster_id() << " " << bundle->get_flag_at_x_boundary() << " " << bundle->get_ks_dis() << " " << bundle->get_chi2() << " " << bundle->get_ndf() << " " << bundle->get_consistent_flag() << " " << bundle->get_flag_close_to_PMT() << " " << bundle->get_potential_bad_match_flag() << std::endl;
+	//	std::cout << bundle->get_flash()->get_flash_id() << " " << bundle->get_main_cluster()->get_cluster_id() << " " << bundle->get_flag_at_x_boundary() << " " << bundle->get_ks_dis() << " " << bundle->get_chi2() << " " << bundle->get_ndf() << " " << bundle->get_consistent_flag() << " " << bundle->get_flag_close_to_PMT() << " " << bundle->get_potential_bad_match_flag() << std::endl;
 	
 	if (bundle->get_consistent_flag()){
 	  flag_tight_bundle = true;
@@ -1092,17 +1092,17 @@ std::vector<std::tuple<PR3DCluster*, Opflash*, double, std::vector<double>>> Wir
     
     // finish further examine the bundle ... 
     
-    std::cout << "After Cleaning 2 : " << cluster_bundles_map.size() << " A " << flash_bundles_map.size() << " " << all_bundles.size() << std::endl;
+    // std::cout << "After Cleaning 2 : " << cluster_bundles_map.size() << " A " << flash_bundles_map.size() << " " << all_bundles.size() << std::endl;
 
 
-    std::cout << std::endl << std::endl;
-    for (auto it = all_bundles.begin(); it!=all_bundles.end();it++){
-      FlashTPCBundle *bundle = *it;
+    // std::cout << std::endl << std::endl;
+    // for (auto it = all_bundles.begin(); it!=all_bundles.end();it++){
+    //   FlashTPCBundle *bundle = *it;
       
-      if ( bundle->get_consistent_flag() || bundle->get_flag_at_x_boundary())
-	std::cout << bundle->get_flash()->get_flash_id() << " " << bundle->get_main_cluster()->get_cluster_id() << " " << bundle->get_flag_at_x_boundary() << " " << bundle->get_ks_dis() << " " << bundle->get_chi2() << " " << bundle->get_ndf() << " " << bundle->get_consistent_flag()  << std::endl;
-    }
-    std::cout << std::endl << std::endl;
+    //   if ( bundle->get_consistent_flag() || bundle->get_flag_at_x_boundary())
+    // 	std::cout << bundle->get_flash()->get_flash_id() << " " << bundle->get_main_cluster()->get_cluster_id() << " " << bundle->get_flag_at_x_boundary() << " " << bundle->get_ks_dis() << " " << bundle->get_chi2() << " " << bundle->get_ndf() << " " << bundle->get_consistent_flag()  << std::endl;
+    // }
+    // std::cout << std::endl << std::endl;
 
     
     // examining flash ... 
@@ -1163,16 +1163,16 @@ std::vector<std::tuple<PR3DCluster*, Opflash*, double, std::vector<double>>> Wir
     
 
     
-    std::cout << "After Cleaning 3 : " << cluster_bundles_map.size() << " A " << flash_bundles_map.size() << " " << all_bundles.size() << std::endl;
+    // std::cout << "After Cleaning 3 : " << cluster_bundles_map.size() << " A " << flash_bundles_map.size() << " " << all_bundles.size() << std::endl;
     
-    std::cout << std::endl << std::endl;
-    for (auto it = all_bundles.begin(); it!=all_bundles.end();it++){
-      FlashTPCBundle *bundle = *it;
+    // std::cout << std::endl << std::endl;
+    // for (auto it = all_bundles.begin(); it!=all_bundles.end();it++){
+    //   FlashTPCBundle *bundle = *it;
       
-      if ( bundle->get_consistent_flag() || bundle->get_flag_at_x_boundary())
-	std::cout << bundle->get_flash()->get_flash_id() << " " << bundle->get_main_cluster()->get_cluster_id() << " " << bundle->get_flag_at_x_boundary() << " " << bundle->get_ks_dis() << " " << bundle->get_chi2() << " " << bundle->get_ndf() << " " << bundle->get_consistent_flag() << std::endl;
-    }
-    std::cout << std::endl << std::endl;
+    //   if ( bundle->get_consistent_flag() || bundle->get_flag_at_x_boundary())
+    // 	std::cout << bundle->get_flash()->get_flash_id() << " " << bundle->get_main_cluster()->get_cluster_id() << " " << bundle->get_flag_at_x_boundary() << " " << bundle->get_ks_dis() << " " << bundle->get_chi2() << " " << bundle->get_ndf() << " " << bundle->get_consistent_flag() << std::endl;
+    // }
+    // std::cout << std::endl << std::endl;
 
 
 
@@ -1346,7 +1346,7 @@ std::vector<std::tuple<PR3DCluster*, Opflash*, double, std::vector<double>>> Wir
       }
     }
     
-    std::cout << "After Cleaning 4 : " << cluster_bundles_map.size() << " A " << flash_bundles_map.size() << " " << all_bundles.size() << std::endl;
+    //    std::cout << "After Cleaning 4 : " << cluster_bundles_map.size() << " A " << flash_bundles_map.size() << " " << all_bundles.size() << std::endl;
     
     // regularization strength ... 
     double lambda = 0.1; // note the coefficient is all around 1
@@ -1471,7 +1471,7 @@ std::vector<std::tuple<PR3DCluster*, Opflash*, double, std::vector<double>>> Wir
 	  Opflash* flash = matched_pairs[tpc_index].first;
 	  double strength = matched_pairs[tpc_index].second;
 	  
-	  std::cout << flash->get_flash_id() << " " << main_cluster->get_cluster_id() << " " << tpc_index <<  " " << strength << " "  << flash->get_time() << std::endl;
+	  //	  std::cout << flash->get_flash_id() << " " << main_cluster->get_cluster_id() << " " << tpc_index <<  " " << strength << " "  << flash->get_time() << std::endl;
 
 	  
 	  FlashTPCBundle* bundle = fc_bundles_map[std::make_pair(flash,main_cluster)];
@@ -1483,7 +1483,7 @@ std::vector<std::tuple<PR3DCluster*, Opflash*, double, std::vector<double>>> Wir
 	  
 	  
 	}else{
-	  std::cout << "missing cluster: " << tpc_index << std::endl;
+	  //std::cout << "missing cluster: " << tpc_index << std::endl;
 	  Opflash *flash = 0;
 	  double strength  =0;
 	  std::vector<double> pmt_pred; 
@@ -1491,7 +1491,7 @@ std::vector<std::tuple<PR3DCluster*, Opflash*, double, std::vector<double>>> Wir
 	  
 	}
       }else{
-	std::cout << "missing cluster id: " << main_cluster->get_cluster_id() << std::endl;
+	//	std::cout << "missing cluster id: " << main_cluster->get_cluster_id() << std::endl;
 	Opflash *flash = 0;
 	double strength  =0;
 	std::vector<double> pmt_pred; 
