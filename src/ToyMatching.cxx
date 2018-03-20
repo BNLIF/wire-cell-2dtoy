@@ -803,7 +803,7 @@ std::vector<std::tuple<PR3DCluster*, Opflash*, double, std::vector<double>>> Wir
 	      min_bundle = bundle;
 	  }
 
-	  if (min_bundle->get_ks_dis() < 0.15){
+	  if (min_bundle->get_ks_dis() < 0.18){
 	    //  std::cout << min_bundle->get_flash()->get_flash_id() << " Xin: " << min_bundle->get_main_cluster()->get_cluster_id() << std::endl;
 
 	    FlashTPCBundleSelection temp_bundles;
@@ -843,17 +843,25 @@ std::vector<std::tuple<PR3DCluster*, Opflash*, double, std::vector<double>>> Wir
 		    flag_remove = true;
 		  }else if (min_bundle->get_chi2()/min_bundle->get_ndf()<9 && min_bundle->get_ks_dis() + 0.01 < bundle->get_ks_dis()){
 		    flag_remove = true;
+		  }else if (min_bundle->get_ks_dis()<0.05 && min_bundle->get_chi2()/min_bundle->get_ndf()<38 && min_bundle->get_ks_dis() + 0.05 < bundle->get_ks_dis()){
+		    flag_remove = true;
 		  }
 		}else{
 		  if (min_bundle->get_ks_dis() + 0.015 < bundle->get_ks_dis() &&
 		      min_bundle->get_chi2()/min_bundle->get_ndf()*0.75 < bundle->get_chi2()/bundle->get_ndf() &&flash_good_bundles_map[bundle->get_flash()].size()>1
 		      ){
 		    flag_remove = true;
+		  }else if (min_bundle->get_ks_dis() + 0.08 < bundle->get_ks_dis() &&
+			    flash_good_bundles_map[bundle->get_flash()].size()>1 &&
+			    min_bundle->get_chi2()/min_bundle->get_ndf() < 25
+			    ){
+		    flag_remove = true;
 		  }
 		}
 	      }
-	      // if (min_bundle->get_main_cluster()->get_cluster_id()==1)
-	      // 	std::cout << min_bundle->get_flash()->get_flash_id() << " " << min_bundle->get_main_cluster()->get_cluster_id() << " " << flag_remove << " " << flash_good_bundles_map[min_bundle->get_flash()].size()<< std::endl;
+	      
+	      // if (min_bundle->get_main_cluster()->get_cluster_id()==22)
+	      //  	std::cout << min_bundle->get_flash()->get_flash_id() << " A " << min_bundle->get_main_cluster()->get_cluster_id() << " " << flag_remove << " " << flash_good_bundles_map[min_bundle->get_flash()].size()<< std::endl;
 	      
 	      if (flag_remove){
 		if (flash_good_bundles_map[bundle->get_flash()].size()>1){
