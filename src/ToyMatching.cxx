@@ -38,7 +38,8 @@ int WireCell2dToy::convert_xyz_voxel_id(WireCell::Point &p){
 }
 
 
-std::vector<std::tuple<PR3DCluster*, Opflash*, double, std::vector<double>>> WireCell2dToy::tpc_light_match(int time_offset, int nrebin, std::map<WireCell::PR3DCluster*,std::vector<std::pair<WireCell::PR3DCluster*,double>>>& group_clusters, WireCell::OpflashSelection& flashes){
+//std::vector<std::tuple<PR3DCluster*, Opflash*, double, std::vector<double>>> WireCell2dToy::tpc_light_match(int time_offset, int nrebin, std::map<WireCell::PR3DCluster*,std::vector<std::pair<WireCell::PR3DCluster*,double>>>& group_clusters, WireCell::OpflashSelection& flashes){
+FlashTPCBundleSelection WireCell2dToy::tpc_light_match(int time_offset, int nrebin, std::map<WireCell::PR3DCluster*,std::vector<std::pair<WireCell::PR3DCluster*,double>>>& group_clusters, WireCell::OpflashSelection& flashes){
   TChain *T = new TChain("/pmtresponse/PhotonLibraryData","/pmtresponse/PhotonLibraryData");
   T->AddFile("./uboone_photon_library.root");
   //  std::cout << T->GetEntries();
@@ -1458,48 +1459,72 @@ std::vector<std::tuple<PR3DCluster*, Opflash*, double, std::vector<double>>> Wir
 	//std::cout << i << " Q " <<  tpc_index << " " << flash->get_flash_id() << " " << total_pairs.at(i).second->get_cluster_id() << " " << total_weights.at(i) << " " << beta(i)  << " " << flash->get_time() << std::endl;
       }
     }
-
-    std::vector<std::tuple<PR3DCluster*, Opflash*, double, std::vector<double>>> results;
+    
+    // return bundles ...
+    FlashTPCBundleSelection results_bundles;
     
     for (auto it = group_clusters.begin(); it!=group_clusters.end(); it++){
       PR3DCluster* main_cluster = it->first;
-
       if (map_tpc_index.find(main_cluster)!=map_tpc_index.end()){
 	int tpc_index = map_tpc_index[main_cluster];
-
 	if (matched_pairs.find(tpc_index)!=matched_pairs.end()){
 	  Opflash* flash = matched_pairs[tpc_index].first;
 	  double strength = matched_pairs[tpc_index].second;
-	  
-	  //	  std::cout << flash->get_flash_id() << " " << main_cluster->get_cluster_id() << " " << tpc_index <<  " " << strength << " "  << flash->get_time() << std::endl;
-
-	  
 	  FlashTPCBundle* bundle = fc_bundles_map[std::make_pair(flash,main_cluster)];
-	  std::vector<double> pmt_pred = bundle->get_pred_pmt_light();
-	  results.push_back(std::make_tuple(main_cluster, flash, strength, pmt_pred));
-	  
-	  
-	  
-	  
-	  
+	  bundle->set_strength(strength);
+	  results_bundles.push_back(bundle);
 	}else{
-	  //std::cout << "missing cluster: " << tpc_index << std::endl;
 	  Opflash *flash = 0;
 	  double strength  =0;
-	  std::vector<double> pmt_pred; 
-	  results.push_back(std::make_tuple(main_cluster, flash, strength, pmt_pred));
-	  
+	  FlashTPCBundle *bundle = new FlashTPCBundle(flash,main_cluster,-1,tpc_index);
+	  results_bundles.push_back(bundle);
 	}
       }else{
-	//	std::cout << "missing cluster id: " << main_cluster->get_cluster_id() << std::endl;
 	Opflash *flash = 0;
 	double strength  =0;
-	std::vector<double> pmt_pred; 
-	results.push_back(std::make_tuple(main_cluster, flash, strength, pmt_pred));
+	FlashTPCBundle *bundle = new FlashTPCBundle(flash,main_cluster,-1,-1);
+	results_bundles.push_back(bundle);
       }
-      
     }
-    return results;
+    return results_bundles;
+
+    // // filled return bundles ...
+    
+    // std::vector<std::tuple<PR3DCluster*, Opflash*, double, std::vector<double>>> results;
+    
+    // for (auto it = group_clusters.begin(); it!=group_clusters.end(); it++){
+    //   PR3DCluster* main_cluster = it->first;
+
+    //   if (map_tpc_index.find(main_cluster)!=map_tpc_index.end()){
+    // 	int tpc_index = map_tpc_index[main_cluster];
+
+    // 	if (matched_pairs.find(tpc_index)!=matched_pairs.end()){
+    // 	  Opflash* flash = matched_pairs[tpc_index].first;
+    // 	  double strength = matched_pairs[tpc_index].second;
+	  
+    // 	  //	  std::cout << flash->get_flash_id() << " " << main_cluster->get_cluster_id() << " " << tpc_index <<  " " << strength << " "  << flash->get_time() << std::endl;
+
+	  
+    // 	  FlashTPCBundle* bundle = fc_bundles_map[std::make_pair(flash,main_cluster)];
+    // 	  std::vector<double> pmt_pred = bundle->get_pred_pmt_light();
+    // 	  results.push_back(std::make_tuple(main_cluster, flash, strength, pmt_pred));
+	  
+    // 	}else{
+    // 	  //std::cout << "missing cluster: " << tpc_index << std::endl;
+    // 	  Opflash *flash = 0;
+    // 	  double strength  =0;
+    // 	  std::vector<double> pmt_pred; 
+    // 	  results.push_back(std::make_tuple(main_cluster, flash, strength, pmt_pred));
+    // 	}
+    //   }else{
+    // 	//	std::cout << "missing cluster id: " << main_cluster->get_cluster_id() << std::endl;
+    // 	Opflash *flash = 0;
+    // 	double strength  =0;
+    // 	std::vector<double> pmt_pred; 
+    // 	results.push_back(std::make_tuple(main_cluster, flash, strength, pmt_pred));
+    //   }
+    // }
+    // return results;
     
   }
   

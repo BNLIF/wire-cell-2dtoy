@@ -448,7 +448,8 @@ int main(int argc, char* argv[])
    //   cout<<"BUGGGG"<<endl;
    
 
-   std::vector<std::tuple<WireCell::PR3DCluster*, WireCell::Opflash*, double, std::vector<double>>> matched_results = WireCell2dToy::tpc_light_match(time_offset,nrebin,group_clusters,flashes);
+   //   std::vector<std::tuple<WireCell::PR3DCluster*, WireCell::Opflash*, double, std::vector<double>>> matched_results = WireCell2dToy::tpc_light_match(time_offset,nrebin,group_clusters,flashes);
+   FlashTPCBundleSelection matched_bundles = WireCell2dToy::tpc_light_match(time_offset,nrebin,group_clusters,flashes);
    cout << em("TPC Light Matching") << std::endl;
    //
 
@@ -469,15 +470,16 @@ int main(int argc, char* argv[])
    T_match->Branch("pe_meas",pe_meas,"pe_meas[32]/D");
    T_match->Branch("pe_meas_err",pe_meas_err,"pe_meas_err[32]/D");
 
-   for (auto it = matched_results.begin(); it!=matched_results.end(); it++){
-     Opflash *flash = std::get<1>(*it);
-     PR3DCluster *main_cluster = std::get<0>(*it);
+   for (auto it = matched_bundles.begin(); it!=matched_bundles.end(); it++){
+     FlashTPCBundle *bundle = *it;
+     
+     Opflash *flash = bundle->get_flash();
+     PR3DCluster *main_cluster = bundle->get_main_cluster();
      if (flash!=0){
        auto it1 = find(flashes.begin(),flashes.end(),flash);
-       // flash_id = it1 - flashes.begin();
        flash_id = flash->get_flash_id();
-       strength = std::get<2>(*it);
-       std::vector<double> temp = std::get<3>(*it);
+       strength = bundle->get_strength();
+       std::vector<double> temp = bundle->get_pred_pmt_light();
        for (int i=0;i!=32;i++){
      	 pe_pred[i] = temp.at(i);
      	 pe_meas[i] = flash->get_PE(i);
@@ -494,8 +496,36 @@ int main(int argc, char* argv[])
      }
      ncluster = main_cluster->get_cluster_id();
      T_match->Fill();
-     //ncluster++;
    }
+
+   
+   // for (auto it = matched_results.begin(); it!=matched_results.end(); it++){
+   //   Opflash *flash = std::get<1>(*it);
+   //   PR3DCluster *main_cluster = std::get<0>(*it);
+   //   if (flash!=0){
+   //     auto it1 = find(flashes.begin(),flashes.end(),flash);
+   //     // flash_id = it1 - flashes.begin();
+   //     flash_id = flash->get_flash_id();
+   //     strength = std::get<2>(*it);
+   //     std::vector<double> temp = std::get<3>(*it);
+   //     for (int i=0;i!=32;i++){
+   //   	 pe_pred[i] = temp.at(i);
+   //   	 pe_meas[i] = flash->get_PE(i);
+   //   	 pe_meas_err[i] = flash->get_PE_err(i);
+   //     }
+   //   }else{
+   //     flash_id = -1;
+   //     strength = 0;
+   //     for (int i=0;i!=32;i++){
+   //   	 pe_pred[i] = 0;
+   //   	 pe_meas[i] = 0;
+   //   	 pe_meas_err[i] = 0.;
+   //     }
+   //   }
+   //   ncluster = main_cluster->get_cluster_id();
+   //   T_match->Fill();
+   //   //ncluster++;
+   // }
    
    
    
@@ -554,9 +584,11 @@ int main(int argc, char* argv[])
    
    // note did not save the unmatched cluster ... 
    ncluster = 0;
-   for (auto it = matched_results.begin(); it!= matched_results.end(); it++){
-     PR3DCluster *main_cluster = std::get<0>(*it);
-     Opflash *flash = std::get<1>(*it);
+   //   for (auto it = matched_results.begin(); it!= matched_results.end(); it++){
+   for (auto it = matched_bundles.begin(); it!= matched_bundles.end(); it++){
+     FlashTPCBundle *bundle = *it;
+     PR3DCluster *main_cluster = bundle->get_main_cluster();//std::get<0>(*it);
+     Opflash *flash = bundle->get_flash();//std::get<1>(*it);
      double offset_x ;
      if (flash!=0){
        offset_x = (flash->get_time() - time_offset)*2./nrebin*time_slice_width;
