@@ -832,12 +832,52 @@ int main(int argc, char* argv[])
     T_flash->Fill();
   }
 
+  // now save the projected charge information ... 
+  TTree *T_proj = new TTree("T_proj","T_proj");
+  std::vector<int> *proj_cluster_id = new std::vector<int>;
+  std::vector<std::vector<int>> *proj_cluster_channel = new std::vector<std::vector<int>>;
+  std::vector<std::vector<int>> *proj_cluster_timeslice= new std::vector<std::vector<int>>;
+  std::vector<std::vector<int>> *proj_cluster_charge= new std::vector<std::vector<int>>;
+  T_proj->Branch("cluster_id",&proj_cluster_id);
+  T_proj->Branch("channel",&proj_cluster_channel);
+  T_proj->Branch("time_slice",&proj_cluster_timeslice);
+  T_proj->Branch("charge",&proj_cluster_charge);
+  
+  T_proj->SetDirectory(file1);
+  
+  for (auto it = matched_bundles.begin(); it!= matched_bundles.end(); it++){
+    FlashTPCBundle *bundle = *it;
+    PR3DCluster *main_cluster = bundle->get_main_cluster();
+    Opflash *flash = bundle->get_flash();
+    if (flash!=0){
+      
+      // now prepare saving it
+      int cluster_id = main_cluster->get_cluster_id();
 
+      PR3DClusterSelection temp_clusters;
+      temp_clusters.push_back(main_cluster);
+      for (auto it1 = group_clusters[main_cluster].begin(); it1!=group_clusters[main_cluster].end(); it1++){
+	temp_clusters.push_back((*it1).first);
+      }
 
-
-
+      std::vector<int> proj_channel;
+      std::vector<int> proj_timeslice;
+      std::vector<int> proj_charge;
+      
+      for (size_t j = 0; j!= temp_clusters.size(); j++){
+	PR3DCluster *cluster = temp_clusters.at(j);
+	cluster->get_projection(proj_channel,proj_timeslice,proj_charge);
+      }
+      proj_cluster_id->push_back(cluster_id);
+      proj_cluster_channel->push_back(proj_channel);
+      proj_cluster_timeslice->push_back(proj_timeslice);
+      proj_cluster_charge->push_back(proj_charge);
+      
+    }
+  }
+  T_proj->Fill();
 
    
-   file1->Write();
-   file1->Close();
+  file1->Write();
+  file1->Close();
 }
