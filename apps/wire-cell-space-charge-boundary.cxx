@@ -31,7 +31,7 @@ int main(int argc, char* argv[])
   }
   TH1::AddDirectory(kFALSE);
   
-  int flag_pos_corr = 0; // correct X position after matching ... 
+  int flag_pos_corr = 1; // correct X position after matching ... 
   for(Int_t i = 1; i != argc; i++){
      switch(argv[i][1]){
      case 'c':
@@ -475,6 +475,7 @@ int main(int argc, char* argv[])
      
      Opflash *flash = bundle->get_flash();
      PR3DCluster *main_cluster = bundle->get_main_cluster();
+     
      if (flash!=0){
        auto it1 = find(flashes.begin(),flashes.end(),flash);
        flash_id = flash->get_flash_id();
@@ -589,6 +590,13 @@ int main(int argc, char* argv[])
      FlashTPCBundle *bundle = *it;
      PR3DCluster *main_cluster = bundle->get_main_cluster();//std::get<0>(*it);
      Opflash *flash = bundle->get_flash();//std::get<1>(*it);
+
+     // examine the bundle ...
+     if (flash==0) continue;
+     if (bundle->get_ks_dis()>0.2 || bundle->get_chi2()>bundle->get_ndf()*16) continue;
+
+     // to be finished ... 
+
      double offset_x ;
      if (flash!=0){
        offset_x = (flash->get_time() - time_offset)*2./nrebin*time_slice_width;
@@ -601,12 +609,15 @@ int main(int argc, char* argv[])
 
      ncluster = main_cluster->get_cluster_id();
 
+     // only push main cluster ... 
      PR3DClusterSelection temp_clusters;
      temp_clusters.push_back(main_cluster);
-     for (auto it1 = group_clusters[main_cluster].begin(); it1!=group_clusters[main_cluster].end(); it1++){
-       temp_clusters.push_back((*it1).first);
-       //std::cout << (*it1).second/units::cm << std::endl;
-     }
+
+     //     for (auto it1 = group_clusters[main_cluster].begin(); it1!=group_clusters[main_cluster].end(); it1++){
+     //     temp_clusters.push_back((*it1).first);
+     //     std::cout << (*it1).second/units::cm << std::endl;
+     //}
+     
      for (size_t j = 0; j!= temp_clusters.size(); j++){
        SMGCSelection& mcells = temp_clusters.at(j)->get_mcells();
        //ncluster = temp_clusters.at(0)->get_cluster_id();
