@@ -454,7 +454,7 @@ int main(int argc, char* argv[])
    //
 
    
-   TFile *file1 = new TFile(Form("match_%d_%d_%d.root",run_no,subrun_no,event_no),"RECREATE");
+   TFile *file1 = new TFile(Form("boundary_%d_%d_%d.root",run_no,subrun_no,event_no),"RECREATE");
    TTree *T_match = new TTree("T_match","T_match");
    T_match->SetDirectory(file1);
    Int_t ncluster=0;
@@ -592,9 +592,14 @@ int main(int argc, char* argv[])
      Opflash *flash = bundle->get_flash();//std::get<1>(*it);
 
      // examine the bundle ...
-     if (flash==0) continue;
-     if (bundle->get_ks_dis()>0.2 || bundle->get_chi2()>bundle->get_ndf()*16) continue;
-
+     if (flash==0) continue; // no flash ...
+     if (bundle->get_ks_dis()>0.25 && bundle->get_chi2()>bundle->get_ndf()*16) continue; // does not match well ...
+     // not the cutoff ... 
+     if (main_cluster->get_time_cells_set_map().begin()->first==0) continue;
+     if (main_cluster->get_time_cells_set_map().rbegin()->first>=2396) continue;
+     
+     
+     
      // to be finished ... 
 
      double offset_x ;
