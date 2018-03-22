@@ -832,6 +832,67 @@ int main(int argc, char* argv[])
     T_flash->Fill();
   }
 
+  // form a global map with the current map information
+  std::map<int,std::map<const GeomWire*, SMGCSelection > > global_wc_map;
+  for (size_t i=0; i!=live_clusters.size();i++){
+    PR3DCluster *cluster = live_clusters.at(i);
+    SMGCSelection& mcells = cluster->get_mcells();
+    for (auto it = mcells.begin(); it!= mcells.end(); it++){
+      SlimMergeGeomCell *mcell = *it;
+      int time_slice = mcell->GetTimeSlice();
+      if (global_wc_map.find(time_slice)==global_wc_map.end()){
+	std::map<const GeomWire*, SMGCSelection> temp_wc_map;
+	global_wc_map[time_slice] = temp_wc_map;
+      }
+      std::map<const GeomWire*, SMGCSelection>& timeslice_wc_map = global_wc_map[time_slice];
+      
+      GeomWireSelection& uwires = mcell->get_uwires();
+      GeomWireSelection& vwires = mcell->get_vwires();
+      GeomWireSelection& wwires = mcell->get_wwires();
+      std::vector<WirePlaneType_t> bad_planes = mcell->get_bad_planes();
+      if (find(bad_planes.begin(),bad_planes.end(),WirePlaneType_t(0))==bad_planes.end()){
+	for (int j=0;j!=uwires.size();j++){
+	  const GeomWire *wire = uwires.at(j);
+	  if (timeslice_wc_map.find(wire)==timeslice_wc_map.end()){
+	    SMGCSelection temp_mcells;
+	    temp_mcells.push_back(mcell);
+	    timeslice_wc_map[wire] = temp_mcells;
+	  }else{
+	    timeslice_wc_map[wire].push_back(mcell);
+	  }
+	}
+      }
+      if (find(bad_planes.begin(),bad_planes.end(),WirePlaneType_t(1))==bad_planes.end()){
+	for (int j=0;j!=vwires.size();j++){
+	  const GeomWire *wire = vwires.at(j);
+	  if (timeslice_wc_map.find(wire)==timeslice_wc_map.end()){
+	    SMGCSelection temp_mcells;
+	    temp_mcells.push_back(mcell);
+	    timeslice_wc_map[wire] = temp_mcells;
+	  }else{
+	    timeslice_wc_map[wire].push_back(mcell);
+	  }
+	}
+      }
+      if (find(bad_planes.begin(),bad_planes.end(),WirePlaneType_t(2))==bad_planes.end()){
+	for (int j=0;j!=wwires.size();j++){
+	  const GeomWire *wire = wwires.at(j);
+	  if (timeslice_wc_map.find(wire)==timeslice_wc_map.end()){
+	    SMGCSelection temp_mcells;
+	    temp_mcells.push_back(mcell);
+	    timeslice_wc_map[wire] = temp_mcells;
+	  }else{
+	    timeslice_wc_map[wire].push_back(mcell);
+	  }
+	}
+      }
+    }
+  }
+  
+  //
+ 
+  
+  
   // now save the projected charge information ... 
   TTree *T_proj = new TTree("T_proj","T_proj");
   std::vector<int> *proj_cluster_id = new std::vector<int>;
@@ -866,7 +927,7 @@ int main(int argc, char* argv[])
       
       for (size_t j = 0; j!= temp_clusters.size(); j++){
 	PR3DCluster *cluster = temp_clusters.at(j);
-	cluster->get_projection(proj_channel,proj_timeslice,proj_charge);
+	cluster->get_projection(proj_channel,proj_timeslice,proj_charge, global_wc_map);
       }
       proj_cluster_id->push_back(cluster_id);
       proj_cluster_channel->push_back(proj_channel);
