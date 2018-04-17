@@ -315,7 +315,14 @@ void WireCell2dToy::ToyLightReco::Process_beam_wfs(){
   par[1] = 0.45;
   par[2] = 3.07;
   f3.SetParameters(par);
+
   
+  // prepare for global L1 fit ...
+  // std::vector<double> global_vals_y;
+  // std::vector<double> global_vals_x;
+  // std::vector<int> global_vals_bin;
+  // std::vector<int> global_vals_pmtid;
+  // std::vector<double> global_sols;
   
   TH1F *hrc = new TH1F("hrc","hrc",1500,0,1500);
   TH1F *hspe = new TH1F("hspe","hspe",1500,0,1500);
@@ -427,6 +434,10 @@ void WireCell2dToy::ToyLightReco::Process_beam_wfs(){
 			       fb->GetBinContent(6*i+5) +
 			       fb->GetBinContent(6*i+6) );
     }
+    for (int i=0;i!=250;i++){
+      hdecon[j]->SetBinContent(i+1,hrebin->GetBinContent(i+1));
+    }
+    
     
     // work on the L1 ... 
     std::vector<double> vals_y;
@@ -439,14 +450,17 @@ void WireCell2dToy::ToyLightReco::Process_beam_wfs(){
 	vals_y.push_back(content);
 	vals_x.push_back(hrebin->GetBinCenter(i+1));
 	vals_bin.push_back(i);
+
+	// global_vals_y.push_back(content);
+	// global_vals_x.push_back(hrebin->GetBinCenter(i+1));
+	// global_vals_bin.push_back(i);
+	// global_vals_pmtid.push_back(j);
       }
-      // if (content <0) content =0;
-      //W(i) = content;
     }
+
     int nbin_fit = vals_x.size();
     VectorXd W = VectorXd::Zero(nbin_fit);
     MatrixXd G = MatrixXd::Zero(nbin_fit,nbin_fit);
-    
     for (int i=0;i!=nbin_fit;i++){
       W(i) = vals_y.at(i) / sqrt(vals_y.at(i));
       double t1 = vals_x.at(i); // measured time
@@ -459,7 +473,6 @@ void WireCell2dToy::ToyLightReco::Process_beam_wfs(){
 	}else{
 	  continue;
 	}
-	//std::cout << i << " " << k << " " << G(i,k) << std::endl;
       }
     }
     
@@ -468,33 +481,16 @@ void WireCell2dToy::ToyLightReco::Process_beam_wfs(){
     m2.SetData(G, W);
     m2.Fit();
     VectorXd beta = m2.Getbeta();
-    
-    // double sum1 = 0, sum2 = 0;
-    // for (int i=0;i!=nbin_fit;i++){
-    //   sum1 += beta(i);
-    // }
-    // for (int i=0;i!=250;i++){
-    //   sum2 += hrebin->GetBinContent(i+1);
-    // }
-    // std::cout << j << " " << sum1 << " " << sum2 << std::endl;
-    
-    
-    for (int i=0;i!=250;i++){
-      // 
-      hdecon[j]->SetBinContent(i+1,hrebin->GetBinContent(i+1));
-    }
     for (int i=0;i!=nbin_fit;i++){
+      //global_sols.push_back(beta(i));
       hl1[j]->SetBinContent(vals_bin.at(i)+1,beta(i));
     }
+    
 
     delete hrebin;
     delete hflag;
-    
-    // rebin ...
-
     delete fb;
     delete ifft;
-    
     delete hm;
     delete hp;
     delete hm_rc;
@@ -502,6 +498,78 @@ void WireCell2dToy::ToyLightReco::Process_beam_wfs(){
     delete hm_spe;
     delete hp_spe;
   }
+
+  // std::set<int> global_fired_bin_set;
+  // for (size_t i=0;i!=global_vals_bin.size();i++){
+  //   if (global_fired_bin_set.find(global_vals_bin.at(i))==global_fired_bin_set.end()){
+  //     global_fired_bin_set.insert(global_vals_bin.at(i));
+  //   }
+  // }
+  // std::vector<int> global_fired_bin;
+  // std::copy(global_fired_bin_set.begin(), global_fired_bin_set.end(), std::back_inserter(global_fired_bin));
+  // std::vector<double> global_sum_sols;
+  // global_sum_sols.resize(global_fired_bin.size(),0);
+  // for (size_t i=0;i!=global_fired_bin.size();i++){
+  //   for (size_t j=0;j!=global_vals_x.size();j++){
+  //     if (global_vals_bin.at(j)==global_fired_bin.at(i))
+  // 	global_sum_sols.at(i)+=global_sols.at(j);
+  //   }
+  // }
+  // global_sols.insert(global_sols.end(),global_sum_sols.begin(),global_sum_sols.end());
+
+  
+  // //std::cout << global_vals_x.size() << std::endl;
+  // VectorXd W_tot = VectorXd::Zero(global_vals_x.size());
+  // MatrixXd G_tot = MatrixXd::Zero(global_vals_x.size(),global_vals_x.size() + global_fired_bin.size()); // unknown to measurement
+  // //MatrixXd G_tot = MatrixXd::Zero(global_vals_x.size(),global_vals_x.size()); // unknown to measurement
+  // MatrixXd F_tot = MatrixXd::Zero(global_fired_bin.size(),global_vals_x.size()+global_fired_bin.size()); //unknow to constraints 
+
+  // for (size_t i=0;i!=global_vals_x.size();i++){
+  //   W_tot(i) = global_vals_y.at(i) / sqrt(global_vals_y.at(i));
+  //   double t1 = global_vals_x.at(i); // measured time
+  //   for (size_t k=0;k!=global_vals_x.size();k++){
+  //     if (global_vals_pmtid.at(i)!=global_vals_pmtid.at(k)) continue;
+  //     double t2 = global_vals_x.at(k); // real time 
+  //     if (t1>t2) {
+  // 	G_tot(i,k) = (0.75 * (exp(-((t1-t2)*6*15.625/1000.-3*15.625/1000.)/1.5)-exp(-((t1-t2)*6*15.625/1000.+3*15.625/1000.)/1.5))) / sqrt(global_vals_y.at(i));
+  //     }else if (t1==t2){
+  // 	G_tot(i,k) = (0.25 + 0.75 *(1-exp(-3*15.625/1000./1.5))) / sqrt(global_vals_y.at(i));
+  //     }else{
+  // 	continue;
+  //     }
+  //   }
+  // }
+  // for (size_t i=0;i!=global_fired_bin.size();i++){
+  //   for (size_t j=0;j!=global_vals_x.size();j++){
+  //     if (global_vals_bin.at(j)==global_fired_bin.at(i)){
+  // 	//std::cout << i << " " << j << " " << global_vals_pmtid.at(j) << " " << global_fired_bin.at(i) << std::endl;
+  // 	F_tot(i,j)=1./0.001;
+  //     }
+  //   }
+  //   F_tot(i,global_vals_x.size()+i)=-1./0.001;
+  // }
+  
+  // // now the global fit ... 
+  // MatrixXd GT_tot = G_tot.transpose();
+  // MatrixXd FT_tot = F_tot.transpose();
+  // VectorXd Wp = GT_tot * W_tot;
+  // MatrixXd Gp = GT_tot * G_tot + FT_tot * F_tot;
+
+  // double lambda = 0.1;//1/2.;
+  // WireCell::LassoModel m3(lambda, 100000, 0.05);
+  // m3.SetData(Gp, Wp);
+  // for (size_t i=0;i!=global_vals_x.size();i++){
+  //   m3.SetLambdaWeight(i,0.0);
+  // }
+  // m3.Set_init_values(global_sols);
+  // m3.Fit();
+  // VectorXd beta = m3.Getbeta();
+  // for (size_t i=0;i!=global_vals_x.size();i++){
+  //   //std::cout << global_vals_pmtid.at(i) << " " << global_vals_bin.at(i) << " " << beta(i) << std::endl;
+  //   hl1[global_vals_pmtid.at(i)]->SetBinContent(global_vals_bin.at(i)+1,beta(i));
+  // }
+  // // finish the global fit ...
+  
   
   // Now need to define the flash, 8 us, 85 bins out of 250 bins
   // PE, multiplicity threshold  

@@ -2,8 +2,9 @@
 // So a dummy noise fillter implemented in jump_no_noise instead of jump
 // Hanyu WEI, Apr 19, 2017
 // 
-// Attention to total charge for input, seems threshold exits there
-//
+// Attention:
+// 1. CellTreeFrameSink should use TH1F for TClonesArray
+// 2. Gaussian Filter for charge extraction
 #include "WireCellSst/GeomDataSource.h"
 #include "WireCellSst/DatauBooNEFrameDataSource.h"
 #include "WireCellSst/ToyuBooNESliceDataSource.h"
@@ -213,8 +214,8 @@ int main(int argc, char* argv[])
     }
   }
   
-  const Frame& frame1 = roi_fds.get();
-  //const Frame& frame1 = roi_gaus_fds.get();
+  //const Frame& frame1 = roi_fds.get();
+  const Frame& frame1 = roi_gaus_fds.get();
   ntraces = frame1.traces.size();
   for (size_t ind=0; ind<ntraces; ++ind) {
     const Trace& trace = frame1.traces[ind];
@@ -251,6 +252,9 @@ int main(int argc, char* argv[])
   for (Int_t i=0;i!=wplane_rms.size();i++){
     hw_threshold->SetBinContent(i+1,wplane_rms.at(i)*3.0 * nrebin );
   }
+ 
+
+  
   // save original data ... 
   const char* tpath = "/Event/Sim";
   TFile tfile(root_file,"read");
@@ -266,6 +270,7 @@ int main(int argc, char* argv[])
   tree->SetBranchStatus("raw_wf",1);
   tree->SetBranchAddress("raw_wf", &esignal);
   tree->GetEntry(eve_num);
+  
   
   int nchannels = channelid->size();
   TH2I *htemp2;
@@ -290,7 +295,8 @@ int main(int argc, char* argv[])
       chid -= nwire_u + nwire_v;
     }
     
-    htemp3->Reset();
+  
+  htemp3->Reset();
     for (int ibin=0; ibin != total_time_bin; ibin++) {
       int tt = ibin+1;
       htemp2->SetBinContent(chid+1,tt,int(signal->GetBinContent(ibin+1)));
@@ -329,6 +335,7 @@ int main(int argc, char* argv[])
 
   Trun->Fill();
 
+  
   TTree *T_lf = new TTree("T_lf","T_lf");
   Int_t channel;
   T_lf->SetDirectory(file);
@@ -338,7 +345,7 @@ int main(int argc, char* argv[])
     T_lf->Fill();
   }
 
-
+  
   TTree *T_bad = new TTree("T_bad","T_bad");
   Int_t chid, plane;
   Int_t start_time,end_time;
@@ -368,7 +375,6 @@ int main(int argc, char* argv[])
     end_time = it->second.second;
     T_bad->Fill();
   }
-  
 
 
 

@@ -26,12 +26,12 @@ using namespace std;
 int main(int argc, char* argv[])
 {
   if (argc < 3) {
-    cerr << "usage: wire-cell-uboone /path/to/ChannelWireGeometry.txt /path/to/imaging.root" << endl;
+    cerr << "usage: wire-cell-space-charge-boundary /path/to/ChannelWireGeometry.txt /path/to/imaging.root" << endl;
     return 1;
   }
   TH1::AddDirectory(kFALSE);
   
-  int flag_pos_corr = 0; // correct X position after matching ... 
+  int flag_pos_corr = 1; // correct X position after matching ... 
   for(Int_t i = 1; i != argc; i++){
      switch(argv[i][1]){
      case 'c':
@@ -435,7 +435,7 @@ int main(int argc, char* argv[])
    //  WireCell2dToy::uBooNE_light_reco uboone_flash(root_file);
    WireCell2dToy::ToyLightReco uboone_flash(filename, 1); // 1: imagingoutput, "Trun"; default/not specfified: path "Event/Sim"
    uboone_flash.load_event_raw(0);
-   cout << em("flash reconstruction") << std::endl;
+ 
 
    // prepare light matching ....
    WireCell::OpflashSelection& flashes = uboone_flash.get_flashes();
@@ -454,7 +454,7 @@ int main(int argc, char* argv[])
    //
 
    
-   TFile *file1 = new TFile(Form("match_%d_%d_%d.root",run_no,subrun_no,event_no),"RECREATE");
+   TFile *file1 = new TFile(Form("boundary_%d_%d_%d.root",run_no,subrun_no,event_no),"RECREATE");
    TTree *T_match = new TTree("T_match","T_match");
    T_match->SetDirectory(file1);
    Int_t ncluster=0;
@@ -475,6 +475,7 @@ int main(int argc, char* argv[])
      
      Opflash *flash = bundle->get_flash();
      PR3DCluster *main_cluster = bundle->get_main_cluster();
+     
      if (flash!=0){
        auto it1 = find(flashes.begin(),flashes.end(),flash);
        flash_id = flash->get_flash_id();
@@ -589,6 +590,18 @@ int main(int argc, char* argv[])
      FlashTPCBundle *bundle = *it;
      PR3DCluster *main_cluster = bundle->get_main_cluster();//std::get<0>(*it);
      Opflash *flash = bundle->get_flash();//std::get<1>(*it);
+
+     // examine the bundle ...
+     if (flash==0) continue; // no flash ...
+     if (bundle->get_ks_dis()>0.25 && bundle->get_chi2()>bundle->get_ndf()*16) continue; // does not match well ...
+     // not the cutoff ... 
+     if (main_cluster->get_time_cells_set_map().begin()->first==0) continue;
+     if (main_cluster->get_time_cells_set_map().rbegin()->first>=2396) continue;
+     
+     
+     
+     // to be finished ... 
+
      double offset_x ;
      if (flash!=0){
        offset_x = (flash->get_time() - time_offset)*2./nrebin*time_slice_width;
@@ -601,12 +614,15 @@ int main(int argc, char* argv[])
 
      ncluster = main_cluster->get_cluster_id();
 
+     // only push main cluster ... 
      PR3DClusterSelection temp_clusters;
      temp_clusters.push_back(main_cluster);
-     for (auto it1 = group_clusters[main_cluster].begin(); it1!=group_clusters[main_cluster].end(); it1++){
-       temp_clusters.push_back((*it1).first);
-       //std::cout << (*it1).second/units::cm << std::endl;
-     }
+
+     //     for (auto it1 = group_clusters[main_cluster].begin(); it1!=group_clusters[main_cluster].end(); it1++){
+     //     temp_clusters.push_back((*it1).first);
+     //     std::cout << (*it1).second/units::cm << std::endl;
+     //}
+     
      for (size_t j = 0; j!= temp_clusters.size(); j++){
        SMGCSelection& mcells = temp_clusters.at(j)->get_mcells();
        //ncluster = temp_clusters.at(0)->get_cluster_id();
@@ -832,113 +848,12 @@ int main(int argc, char* argv[])
     T_flash->Fill();
   }
 
-  // form a global map with the current map information
-  std::map<int,std::map<const GeomWire*, SMGCSelection > > global_wc_map;
-  for (size_t i=0; i!=live_clusters.size();i++){
-    PR3DCluster *cluster = live_clusters.at(i);
-    SMGCSelection& mcells = cluster->get_mcells();
-    for (auto it = mcells.begin(); it!= mcells.end(); it++){
-      SlimMergeGeomCell *mcell = *it;
-      int time_slice = mcell->GetTimeSlice();
-      if (global_wc_map.find(time_slice)==global_wc_map.end()){
-	std::map<const GeomWire*, SMGCSelection> temp_wc_map;
-	global_wc_map[time_slice] = temp_wc_map;
-      }
-      std::map<const GeomWire*, SMGCSelection>& timeslice_wc_map = global_wc_map[time_slice];
-      
-      GeomWireSelection& uwires = mcell->get_uwires();
-      GeomWireSelection& vwires = mcell->get_vwires();
-      GeomWireSelection& wwires = mcell->get_wwires();
-      std::vector<WirePlaneType_t> bad_planes = mcell->get_bad_planes();
-      if (find(bad_planes.begin(),bad_planes.end(),WirePlaneType_t(0))==bad_planes.end()){
-	for (int j=0;j!=uwires.size();j++){
-	  const GeomWire *wire = uwires.at(j);
-	  if (timeslice_wc_map.find(wire)==timeslice_wc_map.end()){
-	    SMGCSelection temp_mcells;
-	    temp_mcells.push_back(mcell);
-	    timeslice_wc_map[wire] = temp_mcells;
-	  }else{
-	    timeslice_wc_map[wire].push_back(mcell);
-	  }
-	}
-      }
-      if (find(bad_planes.begin(),bad_planes.end(),WirePlaneType_t(1))==bad_planes.end()){
-	for (int j=0;j!=vwires.size();j++){
-	  const GeomWire *wire = vwires.at(j);
-	  if (timeslice_wc_map.find(wire)==timeslice_wc_map.end()){
-	    SMGCSelection temp_mcells;
-	    temp_mcells.push_back(mcell);
-	    timeslice_wc_map[wire] = temp_mcells;
-	  }else{
-	    timeslice_wc_map[wire].push_back(mcell);
-	  }
-	}
-      }
-      if (find(bad_planes.begin(),bad_planes.end(),WirePlaneType_t(2))==bad_planes.end()){
-	for (int j=0;j!=wwires.size();j++){
-	  const GeomWire *wire = wwires.at(j);
-	  if (timeslice_wc_map.find(wire)==timeslice_wc_map.end()){
-	    SMGCSelection temp_mcells;
-	    temp_mcells.push_back(mcell);
-	    timeslice_wc_map[wire] = temp_mcells;
-	  }else{
-	    timeslice_wc_map[wire].push_back(mcell);
-	  }
-	}
-      }
-    }
-  }
-  
-  //
- 
-  
-  
-  // now save the projected charge information ... 
-  TTree *T_proj = new TTree("T_proj","T_proj");
-  std::vector<int> *proj_cluster_id = new std::vector<int>;
-  std::vector<std::vector<int>> *proj_cluster_channel = new std::vector<std::vector<int>>;
-  std::vector<std::vector<int>> *proj_cluster_timeslice= new std::vector<std::vector<int>>;
-  std::vector<std::vector<int>> *proj_cluster_charge= new std::vector<std::vector<int>>;
-  T_proj->Branch("cluster_id",&proj_cluster_id);
-  T_proj->Branch("channel",&proj_cluster_channel);
-  T_proj->Branch("time_slice",&proj_cluster_timeslice);
-  T_proj->Branch("charge",&proj_cluster_charge);
-  
-  T_proj->SetDirectory(file1);
-  
-  for (auto it = matched_bundles.begin(); it!= matched_bundles.end(); it++){
-    FlashTPCBundle *bundle = *it;
-    PR3DCluster *main_cluster = bundle->get_main_cluster();
-    Opflash *flash = bundle->get_flash();
-    if (flash!=0){
-      
-      // now prepare saving it
-      int cluster_id = main_cluster->get_cluster_id();
 
-      PR3DClusterSelection temp_clusters;
-      temp_clusters.push_back(main_cluster);
-      for (auto it1 = group_clusters[main_cluster].begin(); it1!=group_clusters[main_cluster].end(); it1++){
-	temp_clusters.push_back((*it1).first);
-      }
 
-      std::vector<int> proj_channel;
-      std::vector<int> proj_timeslice;
-      std::vector<int> proj_charge;
-      
-      for (size_t j = 0; j!= temp_clusters.size(); j++){
-	PR3DCluster *cluster = temp_clusters.at(j);
-	cluster->get_projection(proj_channel,proj_timeslice,proj_charge, global_wc_map);
-      }
-      proj_cluster_id->push_back(cluster_id);
-      proj_cluster_channel->push_back(proj_channel);
-      proj_cluster_timeslice->push_back(proj_timeslice);
-      proj_cluster_charge->push_back(proj_charge);
-      
-    }
-  }
-  T_proj->Fill();
+
+
 
    
-  file1->Write();
-  file1->Close();
+   file1->Write();
+   file1->Close();
 }

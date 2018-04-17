@@ -322,16 +322,42 @@ std::map<PR3DCluster*,std::vector<std::pair<PR3DCluster*,double>>> WireCell2dToy
   
   // Clustering_dis(live_clusters,cluster_length_map);
   //  cerr << em("clustering isolated piece") << std::endl;
+
+  {
+    
+    
+    // int num_long_ones = 0;
+    // for (auto it=live_clusters.begin(); it!=live_clusters.end();it++){
+    //   PR3DCluster *cluster = *it;
+    //   if (cluster_length_map.find(cluster)!=cluster_length_map.end()){
+    // // 	std::cout << cluster_length_map[cluster]/units::cm << std::endl;
+    // 	if (cluster_length_map[cluster]/units::cm >100)
+    // 	  num_long_ones ++;
+    //   }else{
+    // // 	std::cout << "Bad " << std::endl;
+    //   }
+    // }
+    // std::cout << cluster_length_map.size() << " Xin " << live_clusters.size() << " " << num_long_ones << std::endl;
+    
+    std::vector<std::pair<PR3DCluster*,double>> temp_pair_vec;
+    for (auto it = cluster_length_map.begin(); it!=cluster_length_map.end();it++){
+      temp_pair_vec.push_back(std::make_pair(it->first, it->second));
+    }
+    sort(temp_pair_vec.begin(), temp_pair_vec.end(), sortbysec);
+    live_clusters.clear();
+    for (auto it = temp_pair_vec.begin(); it!=temp_pair_vec.end();it++){
+      live_clusters.push_back(it->first);
+    }
+  }
   
   for (size_t i=0;i!=live_clusters.size();i++){
     PR3DCluster *cluster = live_clusters.at(i);
+
     cluster->set_cluster_id(i+1);
+    // if (cluster_length_map[cluster]>100*units::cm)
+    //   std::cout << cluster->get_cluster_id() << " " << cluster_length_map[cluster]/units::cm << std::endl;
   }
-
- 
-
   
-
 
    // need to further cluster things ...
   std::map<PR3DCluster*,std::vector<std::pair<PR3DCluster*,double>>> group_clusters =  WireCell2dToy::Clustering_isolated(live_clusters, cluster_length_map);

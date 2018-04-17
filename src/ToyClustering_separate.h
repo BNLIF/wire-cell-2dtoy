@@ -1297,7 +1297,8 @@ void WireCell2dToy::Clustering_separate(WireCell::PR3DClusterSelection& live_clu
 	  new_clusters.push_back(cluster1);
 	 
 	  del_clusters.push_back(cluster);
-	  delete cluster;
+	  cluster->Del_graph();
+	  //delete cluster;
 	   
 	  for (size_t k=2;k<sep_clusters.size();k++){
 	    new_clusters.push_back(sep_clusters.at(k));
@@ -1368,7 +1369,8 @@ void WireCell2dToy::Clustering_separate(WireCell::PR3DClusterSelection& live_clu
 	      new_clusters.push_back(cluster3);
 	      
 	      temp_del_clusters.push_back(cluster2);
-	      delete cluster2;
+	      cluster2->Del_graph();
+	      //delete cluster2;
 	      
 	      for (size_t k=2;k<sep_clusters.size();k++){
 		new_clusters.push_back(sep_clusters.at(k));
@@ -1395,7 +1397,8 @@ void WireCell2dToy::Clustering_separate(WireCell::PR3DClusterSelection& live_clu
 		  new_clusters.push_back(cluster5);
 		  
 		  temp_del_clusters.push_back(cluster4);
-		  delete cluster4;
+		  cluster4->Del_graph();
+		  //		  delete cluster4;
 		  
 		  for (size_t k=2;k<sep_clusters.size();k++){
 		    new_clusters.push_back(sep_clusters.at(k));
@@ -1431,7 +1434,8 @@ void WireCell2dToy::Clustering_separate(WireCell::PR3DClusterSelection& live_clu
 	      new_clusters.push_back(cluster5);
 	      
 	      temp_del_clusters.push_back(final_sep_cluster);
-	      delete final_sep_cluster;
+	      final_sep_cluster->Del_graph();
+	      // delete final_sep_cluster;
 
 	      for (size_t k=2;k<sep_clusters.size();k++){
 		new_clusters.push_back(sep_clusters.at(k));
@@ -1448,7 +1452,8 @@ void WireCell2dToy::Clustering_separate(WireCell::PR3DClusterSelection& live_clu
 	  }
 
 	  temp_del_clusters.push_back(final_sep_cluster);
-	  delete final_sep_cluster;
+	  final_sep_cluster->Del_graph();
+	  //delete final_sep_cluster;
 	  
 	  //	  std::cerr << em("sep sep5") << std::endl;
 	  
@@ -1460,9 +1465,9 @@ void WireCell2dToy::Clustering_separate(WireCell::PR3DClusterSelection& live_clu
 	  
 	  
 	  
-	  //	  for (auto it = temp_del_clusters.begin(); it!= temp_del_clusters.end(); it++){
-	  // delete *it;
-	  //}
+	  for (auto it = temp_del_clusters.begin(); it!= temp_del_clusters.end(); it++){
+	    delete *it;
+	  }
 	  //	  std::cerr << em("sep del sep1") << std::endl;
 	  
 	}else if (cluster_length_map[cluster]<6*units::m){
@@ -1474,7 +1479,8 @@ void WireCell2dToy::Clustering_separate(WireCell::PR3DClusterSelection& live_clu
 	  new_clusters.push_back(cluster1);
 	  
 	  del_clusters.push_back(cluster);
-	  delete cluster;
+	  cluster->Del_graph();
+	  //delete cluster;
 	  
 	  for (size_t k=2;k<sep_clusters.size();k++){
 	    new_clusters.push_back(sep_clusters.at(k));
@@ -1491,11 +1497,12 @@ void WireCell2dToy::Clustering_separate(WireCell::PR3DClusterSelection& live_clu
 	    new_clusters.push_back(*it);
 	  }
 	  temp_del_clusters.push_back(final_sep_cluster);
-	  delete final_sep_cluster;
+	  final_sep_cluster->Del_graph();
+	  //	  delete final_sep_cluster;
 	  
-	  //	  for (auto it = temp_del_clusters.begin(); it!= temp_del_clusters.end(); it++){
-	  //  delete *it;
-	  //}
+	  for (auto it = temp_del_clusters.begin(); it!= temp_del_clusters.end(); it++){
+	    delete *it;
+	  }
 	  
 	}
       } // else ... 
@@ -1513,10 +1520,10 @@ void WireCell2dToy::Clustering_separate(WireCell::PR3DClusterSelection& live_clu
     PR3DCluster *ocluster = (*it);
     cluster_length_map.erase(ocluster);
     live_clusters.erase(find(live_clusters.begin(), live_clusters.end(), ocluster));
-    //delete ocluster;
+    delete ocluster;
   }
-  //  std::cerr << em("sep del sep2") << std::endl;
-  //std::cout << live_clusters.size() << " " << cluster_length_map.size() << std::endl;
+  // std::cerr << em("sep del sep2") << std::endl;
+  // std::cout << live_clusters.size() << " " << cluster_length_map.size() << std::endl;
 }
 
 
