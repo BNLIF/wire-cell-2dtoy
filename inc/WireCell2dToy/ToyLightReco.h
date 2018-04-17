@@ -58,6 +58,8 @@ namespace WireCell2dToy{
     WireCell::OpflashSelection& get_cosmic_flashes(){return cosmic_flashes;};
     WireCell::OpflashSelection& get_beam_flashes(){return beam_flashes;};
 
+    void clear_flashes(){ beam_flashes.clear(); cosmic_flashes.clear(); flashes.clear(); };
+
   private:
     bool delete_status;
 
