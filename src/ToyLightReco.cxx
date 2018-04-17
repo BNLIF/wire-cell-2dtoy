@@ -21,6 +21,41 @@ WireCell2dToy::ToyLightReco::ToyLightReco(const char* root_file, bool imagingout
     T = (TTree*)file->Get("/Event/Sim");
   }
 
+  cosmic_hg_wf = new TClonesArray;
+  cosmic_lg_wf = new TClonesArray;
+  beam_hg_wf = new TClonesArray;
+  beam_lg_wf = new TClonesArray;
+  cosmic_hg_opch = new std::vector<short>;
+  cosmic_lg_opch = new std::vector<short>;
+  beam_hg_opch = new std::vector<short>;
+  beam_lg_opch = new std::vector<short>;
+  cosmic_hg_timestamp = new std::vector<double>;
+  cosmic_lg_timestamp = new std::vector<double>;
+  beam_hg_timestamp = new std::vector<double>;
+  beam_lg_timestamp = new std::vector<double>;
+  op_gain = new std::vector<float>;
+  op_gainerror = new std::vector<float>;
+  
+
+  T->SetBranchAddress("cosmic_hg_wf",&cosmic_hg_wf);
+  T->SetBranchAddress("cosmic_lg_wf",&cosmic_lg_wf);
+  T->SetBranchAddress("beam_hg_wf",&beam_hg_wf);
+  T->SetBranchAddress("beam_lg_wf",&beam_lg_wf);
+  T->SetBranchAddress("cosmic_hg_opch",&cosmic_hg_opch);
+  T->SetBranchAddress("cosmic_lg_opch",&cosmic_lg_opch);
+  T->SetBranchAddress("beam_hg_opch",&beam_hg_opch);
+  T->SetBranchAddress("beam_lg_opch",&beam_lg_opch);
+  T->SetBranchAddress("cosmic_hg_timestamp",&cosmic_hg_timestamp);
+  T->SetBranchAddress("cosmic_lg_timestamp",&cosmic_lg_timestamp);
+  T->SetBranchAddress("beam_hg_timestamp",&beam_hg_timestamp);
+  T->SetBranchAddress("beam_lg_timestamp",&beam_lg_timestamp);
+  T->SetBranchAddress("op_gain",&op_gain);
+  T->SetBranchAddress("op_gainerror",&op_gainerror);
+  T->SetBranchAddress("triggerTime",&triggerTime);
+
+
+  
+
   hraw = new TH1F*[32];
   hdecon = new TH1F*[32];
   hl1 = new TH1F*[32];
@@ -34,15 +69,15 @@ WireCell2dToy::ToyLightReco::ToyLightReco(const char* root_file, bool imagingout
   h_l1_mult = new TH1F("h_l1_mult","h_l1_mult",250,0,250);
   h_l1_totPE = new TH1F("h_l1_totPE","h_l1_totPE",250,0,250);
 
-  fop_wf_beam = new TClonesArray("TH1S");
-  fop_femch_beam = new std::vector<short>;
-  fop_timestamp_beam = new std::vector<double>;
-  ctr_beam = 0;
+  // fop_wf_beam = new TClonesArray("TH1S");
+  // fop_femch_beam = new std::vector<short>;
+  // fop_timestamp_beam = new std::vector<double>;
+  // ctr_beam = 0;
 
-  fop_wf_cosmic = new TClonesArray("TH1S");
-  fop_femch_cosmic = new std::vector<short>;
-  fop_timestamp_cosmic = new std::vector<double>;
-  ctr_cosmic = 0;
+  // fop_wf_cosmic = new TClonesArray("TH1S");
+  // fop_femch_cosmic = new std::vector<short>;
+  // fop_timestamp_cosmic = new std::vector<double>;
+  // ctr_cosmic = 0;
 
   fop_wf = new TClonesArray("TH1S");
   fop_femch = new std::vector<short>;
@@ -71,13 +106,13 @@ WireCell2dToy::ToyLightReco::~ToyLightReco(){
   delete h_l1_mult;
   delete h_l1_totPE;
 
-  delete fop_wf_beam;
-  delete fop_femch_beam;
-  delete fop_timestamp_beam;
+  // delete fop_wf_beam;
+  // delete fop_femch_beam;
+  // delete fop_timestamp_beam;
 
-  delete fop_wf_cosmic;
-  delete fop_femch_cosmic;
-  delete fop_timestamp_cosmic;
+  // delete fop_wf_cosmic;
+  // delete fop_femch_cosmic;
+  // delete fop_timestamp_cosmic;
 
   delete fop_wf;
   delete fop_femch;
@@ -95,13 +130,13 @@ WireCell2dToy::ToyLightReco::~ToyLightReco(){
   h_l1_mult = nullptr;
   h_l1_totPE = nullptr;
 
-  fop_wf_beam = nullptr;
-  fop_femch_beam = nullptr;
-  fop_timestamp_beam = nullptr;
+  // fop_wf_beam = nullptr;
+  // fop_femch_beam = nullptr;
+  // fop_timestamp_beam = nullptr;
 
-  fop_wf_cosmic = nullptr;
-  fop_femch_cosmic = nullptr;
-  fop_timestamp_cosmic = nullptr;
+  // fop_wf_cosmic = nullptr;
+  // fop_femch_cosmic = nullptr;
+  // fop_timestamp_cosmic = nullptr;
 
   fop_wf = nullptr;
   fop_femch = nullptr;
@@ -113,39 +148,19 @@ WireCell2dToy::ToyLightReco::~ToyLightReco(){
   delete_status = false;
 }
 
+
+void WireCell2dToy::ToyLightReco::clear_flashes(){
+  
+
+  
+  // clear flashes and actually delete them ... 
+  beam_flashes.clear();
+  cosmic_flashes.clear();
+  flashes.clear(); 
+}
+
 void WireCell2dToy::ToyLightReco::load_event_raw(int eve_num){
-
-  TClonesArray* cosmic_hg_wf = new TClonesArray;
-  TClonesArray* cosmic_lg_wf = new TClonesArray;
-  TClonesArray* beam_hg_wf = new TClonesArray;
-  TClonesArray* beam_lg_wf = new TClonesArray;
-  std::vector<short> *cosmic_hg_opch = new std::vector<short>;
-  std::vector<short> *cosmic_lg_opch = new std::vector<short>;
-  std::vector<short> *beam_hg_opch = new std::vector<short>;
-  std::vector<short> *beam_lg_opch = new std::vector<short>;
-  std::vector<double> *cosmic_hg_timestamp = new std::vector<double>;
-  std::vector<double> *cosmic_lg_timestamp = new std::vector<double>;
-  std::vector<double> *beam_hg_timestamp = new std::vector<double>;
-  std::vector<double> *beam_lg_timestamp = new std::vector<double>;
-  std::vector<float> *op_gain = new std::vector<float>;
-  std::vector<float> *op_gainerror = new std::vector<float>;
-  //double triggerTime;
-
-  T->SetBranchAddress("cosmic_hg_wf",&cosmic_hg_wf);
-  T->SetBranchAddress("cosmic_lg_wf",&cosmic_lg_wf);
-  T->SetBranchAddress("beam_hg_wf",&beam_hg_wf);
-  T->SetBranchAddress("beam_lg_wf",&beam_lg_wf);
-  T->SetBranchAddress("cosmic_hg_opch",&cosmic_hg_opch);
-  T->SetBranchAddress("cosmic_lg_opch",&cosmic_lg_opch);
-  T->SetBranchAddress("beam_hg_opch",&beam_hg_opch);
-  T->SetBranchAddress("beam_lg_opch",&beam_lg_opch);
-  T->SetBranchAddress("cosmic_hg_timestamp",&cosmic_hg_timestamp);
-  T->SetBranchAddress("cosmic_lg_timestamp",&cosmic_lg_timestamp);
-  T->SetBranchAddress("beam_hg_timestamp",&beam_hg_timestamp);
-  T->SetBranchAddress("beam_lg_timestamp",&beam_lg_timestamp);
-  T->SetBranchAddress("op_gain",&op_gain);
-  T->SetBranchAddress("op_gainerror",&op_gainerror);
-  T->SetBranchAddress("triggerTime",&triggerTime);
+  
 
   T->GetEntry(eve_num);
 
@@ -245,7 +260,7 @@ void WireCell2dToy::ToyLightReco::update_pmt_map(){
   }
 }
 
-    
+
     
 void WireCell2dToy::ToyLightReco::sort_flashes(){
   OpFlashSet cosmic_set;

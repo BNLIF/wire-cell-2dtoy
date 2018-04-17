@@ -58,7 +58,7 @@ namespace WireCell2dToy{
     WireCell::OpflashSelection& get_cosmic_flashes(){return cosmic_flashes;};
     WireCell::OpflashSelection& get_beam_flashes(){return beam_flashes;};
 
-    void clear_flashes(){ beam_flashes.clear(); cosmic_flashes.clear(); flashes.clear(); };
+    void clear_flashes();
 
   private:
     bool delete_status;
@@ -89,6 +89,22 @@ namespace WireCell2dToy{
     WireCell::OpflashSelection flashes;
     // WireCell::COphitSelection op_hits;
 
+    TClonesArray* cosmic_hg_wf;
+    TClonesArray* cosmic_lg_wf;
+    TClonesArray* beam_hg_wf;
+    TClonesArray* beam_lg_wf;
+    std::vector<short> *cosmic_hg_opch;
+    std::vector<short> *cosmic_lg_opch;
+    std::vector<short> *beam_hg_opch;
+    std::vector<short> *beam_lg_opch;
+    std::vector<double> *cosmic_hg_timestamp;
+    std::vector<double> *cosmic_lg_timestamp;
+    std::vector<double> *beam_hg_timestamp;
+    std::vector<double> *beam_lg_timestamp;
+    std::vector<float> *op_gain;
+    std::vector<float> *op_gainerror;
+    
+
     double triggerTime;
     double gain[32];
     double beam_dt[32];
@@ -101,15 +117,15 @@ namespace WireCell2dToy{
     TH1F *h_l1_mult;
     TH1F *h_l1_totPE;
     
-    TClonesArray *fop_wf_beam;
-    std::vector<short> *fop_femch_beam;
-    std::vector<double> *fop_timestamp_beam;
-    int ctr_beam;
+    /* TClonesArray *fop_wf_beam; */
+    /* std::vector<short> *fop_femch_beam; */
+    /* std::vector<double> *fop_timestamp_beam; */
+    /* int ctr_beam; */
 
-    TClonesArray *fop_wf_cosmic;
-    std::vector<short> *fop_femch_cosmic;
-    std::vector<double> *fop_timestamp_cosmic;
-    int ctr_cosmic;
+    /* TClonesArray *fop_wf_cosmic; */
+    /* std::vector<short> *fop_femch_cosmic; */
+    /* std::vector<double> *fop_timestamp_cosmic; */
+    /* int ctr_cosmic; */
 
     TClonesArray *fop_wf;
     std::vector<short> *fop_femch;
