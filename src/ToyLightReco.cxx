@@ -84,11 +84,14 @@ WireCell2dToy::ToyLightReco::ToyLightReco(const char* root_file, bool imagingout
   fop_timestamp = new std::vector<double>;
   ctr = 0;
 
-  delete_status = true;
+  //delete_status = true;
 }
 
 WireCell2dToy::ToyLightReco::~ToyLightReco(){
-  if(delete_status){
+  //  if(delete_status){
+
+  clear_flashes();
+  
   for (int i=0;i!=32;i++){
     delete hraw[i];
     hraw[i] = nullptr;
@@ -100,70 +103,122 @@ WireCell2dToy::ToyLightReco::~ToyLightReco(){
   delete hraw;
   delete hdecon;
   delete hl1;
-
+  
   delete h_totPE;
   delete h_mult;
   delete h_l1_mult;
   delete h_l1_totPE;
-
+  
   // delete fop_wf_beam;
   // delete fop_femch_beam;
   // delete fop_timestamp_beam;
-
+  
   // delete fop_wf_cosmic;
   // delete fop_femch_cosmic;
   // delete fop_timestamp_cosmic;
-
+  
+  
+  
   delete fop_wf;
   delete fop_femch;
   delete fop_timestamp;
+
+  delete cosmic_hg_wf;
+  delete cosmic_lg_wf;
+  delete beam_hg_wf;
+  delete beam_lg_wf;
+  delete cosmic_hg_opch;
+  delete cosmic_lg_opch;
+  delete beam_hg_opch;
+  delete beam_lg_opch;
+  delete cosmic_hg_timestamp;
+  delete cosmic_lg_timestamp;
+  delete beam_hg_timestamp;
+  delete beam_lg_timestamp;
+  delete op_gain;
+  delete op_gainerror;
+
+
   
   delete T;
   delete file;
-
-  hraw = nullptr;
-  hdecon = nullptr;
-  hl1 = nullptr;
   
-  h_totPE = nullptr;
-  h_mult = nullptr;
-  h_l1_mult = nullptr;
-  h_l1_totPE = nullptr;
-
+  // hraw = nullptr;
+  // hdecon = nullptr;
+  // hl1 = nullptr;
+  
+  // h_totPE = nullptr;
+  // h_mult = nullptr;
+  // h_l1_mult = nullptr;
+  // h_l1_totPE = nullptr;
+  
   // fop_wf_beam = nullptr;
   // fop_femch_beam = nullptr;
   // fop_timestamp_beam = nullptr;
-
+  
   // fop_wf_cosmic = nullptr;
   // fop_femch_cosmic = nullptr;
   // fop_timestamp_cosmic = nullptr;
-
-  fop_wf = nullptr;
-  fop_femch = nullptr;
-  fop_timestamp = nullptr;
-
-  T = nullptr;
-  file = nullptr;
-  }
-  delete_status = false;
+  
+  // fop_wf = nullptr;
+  // fop_femch = nullptr;
+  // fop_timestamp = nullptr;
+  
+  // T = nullptr;
+  // file = nullptr;
+  // }
+  //  delete_status = false;
 }
 
 
 void WireCell2dToy::ToyLightReco::clear_flashes(){
-  
 
-  
   // clear flashes and actually delete them ... 
+  for (auto it = beam_flashes.begin(); it!=beam_flashes.end(); it++){
+    delete (*it);
+  }
+  for (auto it=cosmic_flashes.begin(); it!= cosmic_flashes.end(); it++){
+    delete (*it);
+  }
   beam_flashes.clear();
   cosmic_flashes.clear();
-  flashes.clear(); 
+  flashes.clear();
+  
+  // clear ophits
+  for (auto it = op_hits.begin(); it!=op_hits.end(); it++){
+    delete (*it);
+  }
+  op_hits.clear();
+
+
+  //clear histograms ..
+  for (size_t i=0;i!=32;i++){
+    hraw[i]->Reset();
+    hdecon[i]->Reset();
+    hl1[i]->Reset();
+  }
+  h_totPE->Reset();
+  h_mult->Reset();
+  h_l1_mult->Reset();
+  h_l1_totPE->Reset();
+ 
+  
+  // delete other stuff
+  // for (size_t i=0; i!=fop_wf->GetEntries(); i++){
+  //   TH1S *hsignal = (TH1S*)fop_wf->At(i);
+  //   delete hsignal;
+  // }
+  
+  fop_wf->Delete();
+  fop_timestamp->clear();
+  fop_femch->clear();
+  
 }
 
 void WireCell2dToy::ToyLightReco::load_event_raw(int eve_num){
   
-
   T->GetEntry(eve_num);
-
+  
   WireCell2dToy::pmtMapSet beamHG = makePmtContainer(true, true, beam_hg_wf, beam_hg_opch, beam_hg_timestamp);
   WireCell2dToy::pmtMapSet beamLG = makePmtContainer(false, true, beam_lg_wf, beam_lg_opch, beam_lg_timestamp);
   WireCell2dToy::pmtMapSet cosmicHG = makePmtContainer(true, false, cosmic_hg_wf, cosmic_hg_opch, cosmic_hg_timestamp);
@@ -181,34 +236,39 @@ void WireCell2dToy::ToyLightReco::load_event_raw(int eve_num){
   
   dumpPmtVec(beamMerge, cosmicMerge);
 
+ 
+  
+
   std::vector<COphitSelection> ophits_group;
   COphitSelection left_ophits;
   for (int i=32;i!=fop_femch->size();i++){
     COphit *op_hit = new COphit(fop_femch->at(i), (TH1S*)fop_wf->At(i), fop_timestamp->at(i) - triggerTime, op_gain->at(fop_femch->at(i)), op_gainerror->at(fop_femch->at(i)));
+    op_hits.push_back(op_hit);
+     
     if (op_hit->get_type()){ // what type  good baseline ???
       bool flag_used = false;
       if (ophits_group.size()==0){
-	COphitSelection ophits;
-	ophits.push_back(op_hit);
-	ophits_group.push_back(ophits);
-	flag_used = true;
+  	COphitSelection ophits;
+  	ophits.push_back(op_hit);
+  	ophits_group.push_back(ophits);
+  	flag_used = true;
       }else{
-	for (size_t j=0; j!=ophits_group.size();j++){
-	  for (size_t k=0; k!= ophits_group.at(j).size(); k++){
-	    if (fabs(op_hit->get_time() - ophits_group.at(j).at(k)->get_time()) < 0.1 ){  // time unit??? 0.1 us?
-	      ophits_group.at(j).push_back(op_hit);
-	      flag_used = true;
-	      break;
-	    }
-	  }
-	  if (flag_used)
-	    break;
-	}
+  	for (size_t j=0; j!=ophits_group.size();j++){
+  	  for (size_t k=0; k!= ophits_group.at(j).size(); k++){
+  	    if (fabs(op_hit->get_time() - ophits_group.at(j).at(k)->get_time()) < 0.1 ){  // time unit??? 0.1 us?
+  	      ophits_group.at(j).push_back(op_hit);
+  	      flag_used = true;
+  	      break;
+  	    }
+  	  }
+  	  if (flag_used)
+  	    break;
+  	}
       }
       if (!flag_used){
-	COphitSelection ophits;
-	ophits.push_back(op_hit);
-	ophits_group.push_back(ophits);
+  	COphitSelection ophits;
+  	ophits.push_back(op_hit);
+  	ophits_group.push_back(ophits);
       }
     }else{
       left_ophits.push_back(op_hit);
@@ -219,14 +279,14 @@ void WireCell2dToy::ToyLightReco::load_event_raw(int eve_num){
     bool flag_used = false;
     for (size_t j=0; j!=ophits_group.size();j++){
       for (size_t k=0; k!= ophits_group.at(j).size(); k++){
-	if (fabs(left_ophits.at(i)->get_time() - ophits_group.at(j).at(k)->get_time())<0.1){ // time unit??? 0.1 us?
-	  ophits_group.at(j).push_back(left_ophits.at(i));
-	  flag_used = true;
-	  break;
-	}
+  	if (fabs(left_ophits.at(i)->get_time() - ophits_group.at(j).at(k)->get_time())<0.1){ // time unit??? 0.1 us?
+  	  ophits_group.at(j).push_back(left_ophits.at(i));
+  	  flag_used = true;
+  	  break;
+  	}
       }
       if (flag_used)
-	break;
+  	break;
     }
   }
 
@@ -276,7 +336,7 @@ void WireCell2dToy::ToyLightReco::sort_flashes(){
   }
   beam_flashes.clear();
   std::copy(beam_set.begin(), beam_set.end(), std::back_inserter(beam_flashes));
-
+  
   // std::cout << flashes.size() << std::endl;
   OpFlashSet all_set;
   for (auto it=flashes.begin(); it!=flashes.end(); it++){
@@ -754,7 +814,7 @@ WireCell2dToy::pmtMapSet WireCell2dToy::ToyLightReco::makePmtContainer(bool high
       disc.isolated = true;
       disc.highGain = true;
       result[disc.channel].insert(disc);
-      h->Delete();
+      // h->Delete();
     }
   }
   else if(high == false){
@@ -764,7 +824,7 @@ WireCell2dToy::pmtMapSet WireCell2dToy::ToyLightReco::makePmtContainer(bool high
       TH1S *h = (TH1S*)wf->At(i);
       if( (beam == true && h->GetNbinsX()<refSize) ||
 	  (beam == false && h->GetNbinsX()>refSize) ){
-	h->Delete();
+	//	h->Delete();
 	continue;
       }
       disc.channel = chan->at(i)-100;
@@ -789,7 +849,7 @@ WireCell2dToy::pmtMapSet WireCell2dToy::ToyLightReco::makePmtContainer(bool high
       }
       //      std::cout <<  disc.channel << " A " << disc.wfm.at(0) << std::endl;
       result[disc.channel].insert(disc);
-      h->Delete();
+      // h->Delete();
     }
   }
   return result;

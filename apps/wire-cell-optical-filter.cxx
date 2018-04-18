@@ -77,10 +77,11 @@ int main(int argc, char* argv[])
   T->SetBranchAddress("multiplicity", &multiplicity);
       
   for(int z=0; z<berm_entries; z++){
+    //for(int z=0; z<1; z++){
     T->GetEntry(z);
-    if(run_no != 5124) continue;
-    if(subrun_no != 7) continue;
-    if(event_no != 396) continue;
+    // if(run_no != 5124) continue;
+    // if(subrun_no != 7) continue;
+    // if(event_no != 396) continue;
 
     uboone_flash.load_event_raw(z);
     bool beamspill = false;
@@ -105,7 +106,6 @@ int main(int argc, char* argv[])
       if(triggerbits==512){ low = 3.45; high = 5.45; } // ext bnb
       if(time > low && time < high && type == 2){ beamspill = true; }
       bermFile<<run_no<<" "<<subrun_no<<" "<<event_no<<" "<<ph<<" "<<mult<<" "<<time<<" "<<pe<<endl;
-      delete flash;
     }
 
     if(beamspill){

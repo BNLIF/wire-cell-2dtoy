@@ -61,7 +61,7 @@ namespace WireCell2dToy{
     void clear_flashes();
 
   private:
-    bool delete_status;
+    //    bool delete_status;
 
   protected:
     void Process_beam_wfs();
@@ -87,7 +87,7 @@ namespace WireCell2dToy{
     WireCell::OpflashSelection cosmic_flashes;
     WireCell::OpflashSelection beam_flashes;
     WireCell::OpflashSelection flashes;
-    // WireCell::COphitSelection op_hits;
+    WireCell::COphitSelection op_hits;
 
     TClonesArray* cosmic_hg_wf;
     TClonesArray* cosmic_lg_wf;
