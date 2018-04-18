@@ -21,115 +21,21 @@ WireCell2dToy::ToyLightReco::ToyLightReco(const char* root_file, bool imagingout
     T = (TTree*)file->Get("/Event/Sim");
   }
 
-  hraw = new TH1F*[32];
-  hdecon = new TH1F*[32];
-  hl1 = new TH1F*[32];
-  for (int i=0;i!=32;i++){
-    hraw[i] = new TH1F(Form("hraw_%d",i),Form("hraw_%d",i),1500,0,1500);
-    hdecon[i] = new TH1F(Form("hdecon_%d",i),Form("hdecon_%d",i),250,0,250);
-    hl1[i] = new TH1F(Form("hl1_%d",i),Form("hl1_%d",i),250,0,250);
-  }
-  h_totPE = new TH1F("h_totPE","h_totPE",250,0,250);
-  h_mult = new TH1F("h_mult","h_mult",250,0,250);
-  h_l1_mult = new TH1F("h_l1_mult","h_l1_mult",250,0,250);
-  h_l1_totPE = new TH1F("h_l1_totPE","h_l1_totPE",250,0,250);
-
-  fop_wf_beam = new TClonesArray("TH1S");
-  fop_femch_beam = new std::vector<short>;
-  fop_timestamp_beam = new std::vector<double>;
-  ctr_beam = 0;
-
-  fop_wf_cosmic = new TClonesArray("TH1S");
-  fop_femch_cosmic = new std::vector<short>;
-  fop_timestamp_cosmic = new std::vector<double>;
-  ctr_cosmic = 0;
-
-  fop_wf = new TClonesArray("TH1S");
-  fop_femch = new std::vector<short>;
-  fop_timestamp = new std::vector<double>;
-  ctr = 0;
-
-  delete_status = true;
-}
-
-WireCell2dToy::ToyLightReco::~ToyLightReco(){
-  if(delete_status){
-  for (int i=0;i!=32;i++){
-    delete hraw[i];
-    hraw[i] = nullptr;
-    delete hdecon[i];
-    hdecon[i] = nullptr;
-    delete hl1[i];
-    hl1[i] = nullptr;
-  }
-  delete hraw;
-  delete hdecon;
-  delete hl1;
-
-  delete h_totPE;
-  delete h_mult;
-  delete h_l1_mult;
-  delete h_l1_totPE;
-
-  delete fop_wf_beam;
-  delete fop_femch_beam;
-  delete fop_timestamp_beam;
-
-  delete fop_wf_cosmic;
-  delete fop_femch_cosmic;
-  delete fop_timestamp_cosmic;
-
-  delete fop_wf;
-  delete fop_femch;
-  delete fop_timestamp;
+  cosmic_hg_wf = new TClonesArray;
+  cosmic_lg_wf = new TClonesArray;
+  beam_hg_wf = new TClonesArray;
+  beam_lg_wf = new TClonesArray;
+  cosmic_hg_opch = new std::vector<short>;
+  cosmic_lg_opch = new std::vector<short>;
+  beam_hg_opch = new std::vector<short>;
+  beam_lg_opch = new std::vector<short>;
+  cosmic_hg_timestamp = new std::vector<double>;
+  cosmic_lg_timestamp = new std::vector<double>;
+  beam_hg_timestamp = new std::vector<double>;
+  beam_lg_timestamp = new std::vector<double>;
+  op_gain = new std::vector<float>;
+  op_gainerror = new std::vector<float>;
   
-  delete T;
-  delete file;
-
-  hraw = nullptr;
-  hdecon = nullptr;
-  hl1 = nullptr;
-  
-  h_totPE = nullptr;
-  h_mult = nullptr;
-  h_l1_mult = nullptr;
-  h_l1_totPE = nullptr;
-
-  fop_wf_beam = nullptr;
-  fop_femch_beam = nullptr;
-  fop_timestamp_beam = nullptr;
-
-  fop_wf_cosmic = nullptr;
-  fop_femch_cosmic = nullptr;
-  fop_timestamp_cosmic = nullptr;
-
-  fop_wf = nullptr;
-  fop_femch = nullptr;
-  fop_timestamp = nullptr;
-
-  T = nullptr;
-  file = nullptr;
-  }
-  delete_status = false;
-}
-
-void WireCell2dToy::ToyLightReco::load_event_raw(int eve_num){
-
-  TClonesArray* cosmic_hg_wf = new TClonesArray;
-  TClonesArray* cosmic_lg_wf = new TClonesArray;
-  TClonesArray* beam_hg_wf = new TClonesArray;
-  TClonesArray* beam_lg_wf = new TClonesArray;
-  std::vector<short> *cosmic_hg_opch = new std::vector<short>;
-  std::vector<short> *cosmic_lg_opch = new std::vector<short>;
-  std::vector<short> *beam_hg_opch = new std::vector<short>;
-  std::vector<short> *beam_lg_opch = new std::vector<short>;
-  std::vector<double> *cosmic_hg_timestamp = new std::vector<double>;
-  std::vector<double> *cosmic_lg_timestamp = new std::vector<double>;
-  std::vector<double> *beam_hg_timestamp = new std::vector<double>;
-  std::vector<double> *beam_lg_timestamp = new std::vector<double>;
-  std::vector<float> *op_gain = new std::vector<float>;
-  std::vector<float> *op_gainerror = new std::vector<float>;
-  //double triggerTime;
 
   T->SetBranchAddress("cosmic_hg_wf",&cosmic_hg_wf);
   T->SetBranchAddress("cosmic_lg_wf",&cosmic_lg_wf);
@@ -147,8 +53,172 @@ void WireCell2dToy::ToyLightReco::load_event_raw(int eve_num){
   T->SetBranchAddress("op_gainerror",&op_gainerror);
   T->SetBranchAddress("triggerTime",&triggerTime);
 
-  T->GetEntry(eve_num);
 
+  
+
+  hraw = new TH1F*[32];
+  hdecon = new TH1F*[32];
+  hl1 = new TH1F*[32];
+  for (int i=0;i!=32;i++){
+    hraw[i] = new TH1F(Form("hraw_%d",i),Form("hraw_%d",i),1500,0,1500);
+    hdecon[i] = new TH1F(Form("hdecon_%d",i),Form("hdecon_%d",i),250,0,250);
+    hl1[i] = new TH1F(Form("hl1_%d",i),Form("hl1_%d",i),250,0,250);
+  }
+  h_totPE = new TH1F("h_totPE","h_totPE",250,0,250);
+  h_mult = new TH1F("h_mult","h_mult",250,0,250);
+  h_l1_mult = new TH1F("h_l1_mult","h_l1_mult",250,0,250);
+  h_l1_totPE = new TH1F("h_l1_totPE","h_l1_totPE",250,0,250);
+
+  // fop_wf_beam = new TClonesArray("TH1S");
+  // fop_femch_beam = new std::vector<short>;
+  // fop_timestamp_beam = new std::vector<double>;
+  // ctr_beam = 0;
+
+  // fop_wf_cosmic = new TClonesArray("TH1S");
+  // fop_femch_cosmic = new std::vector<short>;
+  // fop_timestamp_cosmic = new std::vector<double>;
+  // ctr_cosmic = 0;
+
+  fop_wf = new TClonesArray("TH1S");
+  fop_femch = new std::vector<short>;
+  fop_timestamp = new std::vector<double>;
+  ctr = 0;
+
+  //delete_status = true;
+}
+
+WireCell2dToy::ToyLightReco::~ToyLightReco(){
+  //  if(delete_status){
+
+  clear_flashes();
+  
+  for (int i=0;i!=32;i++){
+    delete hraw[i];
+    hraw[i] = nullptr;
+    delete hdecon[i];
+    hdecon[i] = nullptr;
+    delete hl1[i];
+    hl1[i] = nullptr;
+  }
+  delete hraw;
+  delete hdecon;
+  delete hl1;
+  
+  delete h_totPE;
+  delete h_mult;
+  delete h_l1_mult;
+  delete h_l1_totPE;
+  
+  // delete fop_wf_beam;
+  // delete fop_femch_beam;
+  // delete fop_timestamp_beam;
+  
+  // delete fop_wf_cosmic;
+  // delete fop_femch_cosmic;
+  // delete fop_timestamp_cosmic;
+  
+  
+  
+  delete fop_wf;
+  delete fop_femch;
+  delete fop_timestamp;
+
+  delete cosmic_hg_wf;
+  delete cosmic_lg_wf;
+  delete beam_hg_wf;
+  delete beam_lg_wf;
+  delete cosmic_hg_opch;
+  delete cosmic_lg_opch;
+  delete beam_hg_opch;
+  delete beam_lg_opch;
+  delete cosmic_hg_timestamp;
+  delete cosmic_lg_timestamp;
+  delete beam_hg_timestamp;
+  delete beam_lg_timestamp;
+  delete op_gain;
+  delete op_gainerror;
+
+
+  
+  delete T;
+  delete file;
+  
+  // hraw = nullptr;
+  // hdecon = nullptr;
+  // hl1 = nullptr;
+  
+  // h_totPE = nullptr;
+  // h_mult = nullptr;
+  // h_l1_mult = nullptr;
+  // h_l1_totPE = nullptr;
+  
+  // fop_wf_beam = nullptr;
+  // fop_femch_beam = nullptr;
+  // fop_timestamp_beam = nullptr;
+  
+  // fop_wf_cosmic = nullptr;
+  // fop_femch_cosmic = nullptr;
+  // fop_timestamp_cosmic = nullptr;
+  
+  // fop_wf = nullptr;
+  // fop_femch = nullptr;
+  // fop_timestamp = nullptr;
+  
+  // T = nullptr;
+  // file = nullptr;
+  // }
+  //  delete_status = false;
+}
+
+
+void WireCell2dToy::ToyLightReco::clear_flashes(){
+
+  // clear flashes and actually delete them ... 
+  for (auto it = beam_flashes.begin(); it!=beam_flashes.end(); it++){
+    delete (*it);
+  }
+  for (auto it=cosmic_flashes.begin(); it!= cosmic_flashes.end(); it++){
+    delete (*it);
+  }
+  beam_flashes.clear();
+  cosmic_flashes.clear();
+  flashes.clear();
+  
+  // clear ophits
+  for (auto it = op_hits.begin(); it!=op_hits.end(); it++){
+    delete (*it);
+  }
+  op_hits.clear();
+
+
+  //clear histograms ..
+  for (size_t i=0;i!=32;i++){
+    hraw[i]->Reset();
+    hdecon[i]->Reset();
+    hl1[i]->Reset();
+  }
+  h_totPE->Reset();
+  h_mult->Reset();
+  h_l1_mult->Reset();
+  h_l1_totPE->Reset();
+ 
+  
+  // delete other stuff
+  // for (size_t i=0; i!=fop_wf->GetEntries(); i++){
+  //   TH1S *hsignal = (TH1S*)fop_wf->At(i);
+  //   delete hsignal;
+  // }
+  
+  fop_wf->Delete();
+  fop_timestamp->clear();
+  fop_femch->clear();
+  
+}
+
+void WireCell2dToy::ToyLightReco::load_event_raw(int eve_num){
+  
+  T->GetEntry(eve_num);
+  
   WireCell2dToy::pmtMapSet beamHG = makePmtContainer(true, true, beam_hg_wf, beam_hg_opch, beam_hg_timestamp);
   WireCell2dToy::pmtMapSet beamLG = makePmtContainer(false, true, beam_lg_wf, beam_lg_opch, beam_lg_timestamp);
   WireCell2dToy::pmtMapSet cosmicHG = makePmtContainer(true, false, cosmic_hg_wf, cosmic_hg_opch, cosmic_hg_timestamp);
@@ -166,34 +236,39 @@ void WireCell2dToy::ToyLightReco::load_event_raw(int eve_num){
   
   dumpPmtVec(beamMerge, cosmicMerge);
 
+ 
+  
+
   std::vector<COphitSelection> ophits_group;
   COphitSelection left_ophits;
   for (int i=32;i!=fop_femch->size();i++){
     COphit *op_hit = new COphit(fop_femch->at(i), (TH1S*)fop_wf->At(i), fop_timestamp->at(i) - triggerTime, op_gain->at(fop_femch->at(i)), op_gainerror->at(fop_femch->at(i)));
+    op_hits.push_back(op_hit);
+     
     if (op_hit->get_type()){ // what type  good baseline ???
       bool flag_used = false;
       if (ophits_group.size()==0){
-	COphitSelection ophits;
-	ophits.push_back(op_hit);
-	ophits_group.push_back(ophits);
-	flag_used = true;
+  	COphitSelection ophits;
+  	ophits.push_back(op_hit);
+  	ophits_group.push_back(ophits);
+  	flag_used = true;
       }else{
-	for (size_t j=0; j!=ophits_group.size();j++){
-	  for (size_t k=0; k!= ophits_group.at(j).size(); k++){
-	    if (fabs(op_hit->get_time() - ophits_group.at(j).at(k)->get_time()) < 0.1 ){  // time unit??? 0.1 us?
-	      ophits_group.at(j).push_back(op_hit);
-	      flag_used = true;
-	      break;
-	    }
-	  }
-	  if (flag_used)
-	    break;
-	}
+  	for (size_t j=0; j!=ophits_group.size();j++){
+  	  for (size_t k=0; k!= ophits_group.at(j).size(); k++){
+  	    if (fabs(op_hit->get_time() - ophits_group.at(j).at(k)->get_time()) < 0.1 ){  // time unit??? 0.1 us?
+  	      ophits_group.at(j).push_back(op_hit);
+  	      flag_used = true;
+  	      break;
+  	    }
+  	  }
+  	  if (flag_used)
+  	    break;
+  	}
       }
       if (!flag_used){
-	COphitSelection ophits;
-	ophits.push_back(op_hit);
-	ophits_group.push_back(ophits);
+  	COphitSelection ophits;
+  	ophits.push_back(op_hit);
+  	ophits_group.push_back(ophits);
       }
     }else{
       left_ophits.push_back(op_hit);
@@ -204,14 +279,14 @@ void WireCell2dToy::ToyLightReco::load_event_raw(int eve_num){
     bool flag_used = false;
     for (size_t j=0; j!=ophits_group.size();j++){
       for (size_t k=0; k!= ophits_group.at(j).size(); k++){
-	if (fabs(left_ophits.at(i)->get_time() - ophits_group.at(j).at(k)->get_time())<0.1){ // time unit??? 0.1 us?
-	  ophits_group.at(j).push_back(left_ophits.at(i));
-	  flag_used = true;
-	  break;
-	}
+  	if (fabs(left_ophits.at(i)->get_time() - ophits_group.at(j).at(k)->get_time())<0.1){ // time unit??? 0.1 us?
+  	  ophits_group.at(j).push_back(left_ophits.at(i));
+  	  flag_used = true;
+  	  break;
+  	}
       }
       if (flag_used)
-	break;
+  	break;
     }
   }
 
@@ -245,7 +320,7 @@ void WireCell2dToy::ToyLightReco::update_pmt_map(){
   }
 }
 
-    
+
     
 void WireCell2dToy::ToyLightReco::sort_flashes(){
   OpFlashSet cosmic_set;
@@ -261,7 +336,7 @@ void WireCell2dToy::ToyLightReco::sort_flashes(){
   }
   beam_flashes.clear();
   std::copy(beam_set.begin(), beam_set.end(), std::back_inserter(beam_flashes));
-
+  
   // std::cout << flashes.size() << std::endl;
   OpFlashSet all_set;
   for (auto it=flashes.begin(); it!=flashes.end(); it++){
@@ -739,7 +814,7 @@ WireCell2dToy::pmtMapSet WireCell2dToy::ToyLightReco::makePmtContainer(bool high
       disc.isolated = true;
       disc.highGain = true;
       result[disc.channel].insert(disc);
-      h->Delete();
+      // h->Delete();
     }
   }
   else if(high == false){
@@ -749,7 +824,7 @@ WireCell2dToy::pmtMapSet WireCell2dToy::ToyLightReco::makePmtContainer(bool high
       TH1S *h = (TH1S*)wf->At(i);
       if( (beam == true && h->GetNbinsX()<refSize) ||
 	  (beam == false && h->GetNbinsX()>refSize) ){
-	h->Delete();
+	//	h->Delete();
 	continue;
       }
       disc.channel = chan->at(i)-100;
@@ -774,7 +849,7 @@ WireCell2dToy::pmtMapSet WireCell2dToy::ToyLightReco::makePmtContainer(bool high
       }
       //      std::cout <<  disc.channel << " A " << disc.wfm.at(0) << std::endl;
       result[disc.channel].insert(disc);
-      h->Delete();
+      // h->Delete();
     }
   }
   return result;

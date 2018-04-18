@@ -78,6 +78,14 @@ bool flashFilter(const char* file, int eve_num, unsigned int triggerbits)
   // light reco and apply a [3, 5] ([3.45, 5.45]) us cut on BNB (extBNB) trigger
   WireCell2dToy::ToyLightReco flash(file, 1);
   flash.load_event_raw(eve_num);
+  
+  // flash.clear_flashes();
+  // flash.load_event_raw(eve_num);
+
+  // flash.clear_flashes();
+  // flash.clear_flashes();
+  // flash.load_event_raw(eve_num);
+  
   WireCell::OpflashSelection& flashes = flash.get_flashes();
   bool beamspill = false;
   for(auto it = flashes.begin(); it!=flashes.end(); it++){
