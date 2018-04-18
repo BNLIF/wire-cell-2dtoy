@@ -214,6 +214,7 @@ int main(int argc, char* argv[])
     TTree *clusters = (TTree*)file->Get("T_cluster");
     TTree *intime_cluster;
     bool through = false;
+    bool matched = false;
 
     // read in
     TH2I* hucharge = new TH2I("hucharge","",2400, 0, 2400, 2400, 0, 2400);
@@ -264,6 +265,7 @@ int main(int argc, char* argv[])
             //cout<<"# of charges : "<<charge.size()<<endl;
 
             if(charge.size()>1000){
+		matched = true;
             for(int p=0; p<charge.size(); p++)
             {
                 if(channel.at(p)<2400) {
@@ -419,7 +421,7 @@ int main(int argc, char* argv[])
     cout<<"W time tick (2 us) range: "<<wtime_min<<"---"<<wtime_max<<endl;
     */
     // quantile of charge scale histogram
-    if(!through){
+    if(matched){
     Double_t x[2]={0.30, 0.99};
     Double_t y[2];
    
