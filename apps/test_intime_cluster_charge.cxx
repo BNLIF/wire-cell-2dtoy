@@ -162,6 +162,22 @@ int main(int argc, char* argv[])
     proj->SetBranchAddress("time_slice", &time_slice_vec);
     proj->SetBranchAddress("charge", &charge_vec);
 
+    // Trun info
+    TTree* Trun = (TTree*)file->Get("Trun");
+    int eventNo;
+    int runNo;
+    int subRunNo;
+    unsigned int triggerBits;
+    Trun->SetBranchAddress("eventNo", &eventNo);
+    Trun->SetBranchAddress("runNo", &runNo);
+    Trun->SetBranchAddress("subRunNo", &subRunNo);
+    Trun->SetBranchAddress("triggerBits", &triggerBits);
+    Trun->GetEntry(0);
+
+    double lowerwindow = 0;
+    double upperwindow = 0;
+    if(triggerBits==2048) { lowerwindow = 3; upperwindow = 5; }// bnb
+    if(triggerBits==512) { lowerwindow = 3.45; upperwindow = 5.45; } // extbnb
 
     // flash id and time
     TTree *flash = (TTree*)file->Get("T_flash");
@@ -174,7 +190,7 @@ int main(int argc, char* argv[])
     for(int i=0; i<flash->GetEntries(); i++)
     {
         flash->GetEntry(i);
-        if(flash_time<6 && flash_time>2) flash_time_map[flashes_id] = flash_time;
+        if(flash_time<upperwindow && flash_time>lowerwindow) flash_time_map[flashes_id] = flash_time;
     }
 
 
@@ -216,6 +232,7 @@ int main(int argc, char* argv[])
     bool through = true;
     bool thiscluster = false;
     bool matched = false;
+
 
     // read in
     TH2I* hucharge = new TH2I("hucharge","",2400, 0, 2400, 2400, 0, 2400);
@@ -456,15 +473,6 @@ int main(int argc, char* argv[])
         }
     }
 
-    // Trun info
-    TTree* Trun = (TTree*)file->Get("Trun");
-    int eventNo;
-    int runNo;
-    int subRunNo;
-    Trun->SetBranchAddress("eventNo", &eventNo);
-    Trun->SetBranchAddress("runNo", &runNo);
-    Trun->SetBranchAddress("subRunNo", &subRunNo);
-    Trun->GetEntry(0);
     
     
     TTree* T_flag = new TTree("T_flag","T_flag");
