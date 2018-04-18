@@ -213,7 +213,8 @@ int main(int argc, char* argv[])
     // clusters
     TTree *clusters = (TTree*)file->Get("T_cluster");
     TTree *intime_cluster;
-    bool through = false;
+    bool through = true;
+    bool thiscluster = false;
     bool matched = false;
 
     // read in
@@ -265,7 +266,8 @@ int main(int argc, char* argv[])
             //cout<<"# of charges : "<<charge.size()<<endl;
 
             if(charge.size()>1000){
-		matched = true;
+		    matched = true;
+            thiscluster=false;
             for(int p=0; p<charge.size(); p++)
             {
                 if(channel.at(p)<2400) {
@@ -398,12 +400,13 @@ int main(int argc, char* argv[])
                     cout<<"Mean/RMS: "<<Mean/RMS<<" RMS: "<<RMS<<endl;
                     //c->SaveAs("c.png");
                     if(RMS<5) { // need more study on this value
-                        through=true; 
-                        cout<<"Through-going muon!"<<endl;
+                        thiscluster=true; 
+                        cout<<"This cluster is through muon!"<<endl;
                     }
 
                 }
             }
+            through = through&&thiscluster; 
             } // cluster size 
             else
             {
@@ -411,6 +414,9 @@ int main(int argc, char* argv[])
             }
             } // intime cluster
         }
+    }
+    if(through && matched){ 
+        cout<<"Through-going muon!"<<endl;
     }
     /*  
     cout<<"U channel range: "<<uchannel_min<<"---"<<uchannel_max<<endl;
@@ -459,12 +465,13 @@ int main(int argc, char* argv[])
     Trun->SetBranchAddress("runNo", &runNo);
     Trun->SetBranchAddress("subRunNo", &subRunNo);
     Trun->GetEntry(0);
-
+    
+    
     TTree* T_flag = new TTree("T_flag","T_flag");
     T_flag->Branch("throughmuon",&through,"throughmuon/O");
     T_flag->SetDirectory(file);
     T_flag->Fill();
-
+   
 
     TString fileoutput;
     fileoutput.Form("intime_charge_%d_%d_%d", runNo, subRunNo, eventNo);
