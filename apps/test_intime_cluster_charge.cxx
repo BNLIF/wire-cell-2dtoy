@@ -409,14 +409,14 @@ int main(int argc, char* argv[])
                     // debug
                     //TCanvas *c = new TCanvas();
                     //hdist->Draw();
-                    Double_t xxx[2] = {0.16, 0.84};
+                    Double_t xxx[2] = {0.01, 0.68};
                     Double_t vvv[2];
                     hdist->GetQuantiles(2, vvv, xxx);
-                    Double_t RMS = 0.5*(vvv[1] - vvv[0]);
-                    Double_t Mean = 0.5*(vvv[1] + vvv[0]);
+                    Double_t RMS = vvv[1];
+                    Double_t Mean = vvv[0];
                     cout<<"Mean/RMS: "<<Mean/RMS<<" RMS: "<<RMS<<endl;
                     //c->SaveAs("c.png");
-                    if(RMS<5) { // need more study on this value
+                    if(RMS<8) { // need more study on this value
                         thiscluster=true; 
                         cout<<"This cluster is through muon!"<<endl;
                     }
