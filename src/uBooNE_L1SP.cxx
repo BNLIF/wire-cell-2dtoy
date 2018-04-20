@@ -334,8 +334,9 @@ void WireCell2dToy::uBooNE_L1SP::L1_fit(int wire_index, int start_tick, int end_
        
       // add the software filter ... 
       TH1F hl1_signal("hl1_signal","hl1_signal",nbin_fit,0,nbin_fit);
+      // the factor of 4 for the induction is based on Brian's new study ...
       for (int j=0;j!=nbin_fit;j++){
-	hl1_signal.SetBinContent(j+1,final_beta(j)+final_beta(nbin_fit+j)*2.0);
+	hl1_signal.SetBinContent(j+1,final_beta(j)+final_beta(nbin_fit+j)*4.0);
       }
       
       TH1F hl2_signal("hl2_signal","hl2_signal",nbin_fit,0,nbin_fit);
