@@ -739,7 +739,7 @@ void WireCell2dToy::ToyLightReco::Process_beam_wfs(){
     //check with the next bin content ...
     Opflash *flash = new Opflash(hdecon, beam_dt[0], start_bin, end_bin);
     flash->Add_l1info(h_l1_totPE, h_l1_mult, beam_dt[0], start_bin, end_bin);
-    //std::cout << flash->get_time() << " " <<flash->get_total_PE() << " " << flash->get_num_fired() << std::endl;
+    // std::cout << flash->get_time() << " " <<flash->get_total_PE() << " " << flash->get_num_fired() << std::endl;
     beam_flashes.push_back(flash);
   }
 
@@ -747,6 +747,7 @@ void WireCell2dToy::ToyLightReco::Process_beam_wfs(){
   
   for (size_t i=0; i!=cosmic_flashes.size();i++){
     Opflash *cflash = cosmic_flashes.at(i);
+    //std::cout << cflash->get_time() << std::endl;
     bool save = true;
     for (size_t j=0; j!=beam_flashes.size();j++){
       Opflash *bflash = beam_flashes.at(j);
@@ -758,8 +759,9 @@ void WireCell2dToy::ToyLightReco::Process_beam_wfs(){
     }
     if (save){
       flashes.push_back(cflash);
-      if (prev_cflash==0){
-	prev_cflash = cflash;
+      if (prev_cflash==0 ){
+	if (cflash->get_time()<0)
+	  prev_cflash = cflash;
       }else{
 	if (cflash->get_time() < 0 && cflash->get_time() > prev_cflash->get_time())
 	  prev_cflash = cflash;
@@ -769,6 +771,8 @@ void WireCell2dToy::ToyLightReco::Process_beam_wfs(){
   for (size_t j=0; j!=beam_flashes.size();j++){
     Opflash *bflash = beam_flashes.at(j);
     if (prev_cflash!=0){
+      
+      //std::cout << prev_cflash->get_time() << std::endl;
       if (bflash->get_time() - prev_cflash->get_time() < 2.4 && // veto for 3 us
 	  bflash->get_total_PE() < 0.7 * prev_cflash->get_total_PE())
 	continue;
