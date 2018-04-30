@@ -207,22 +207,22 @@ int main(int argc, char* argv[])
   Trun->SetBranchAddress("toffset_uw",&toffset_2);
   Trun->SetBranchAddress("toffset_u",&toffset_3);
   Trun->SetBranchAddress("total_time_bin",&total_time_bin);
-  Trun->SetBranchAddress("recon_threshold",&recon_threshold);
+  // Trun->SetBranchAddress("recon_threshold",&recon_threshold);
   Trun->SetBranchAddress("frame_length",&frame_length);
-  Trun->SetBranchAddress("max_events",&max_events);
+  //Trun->SetBranchAddress("max_events",&max_events);
   Trun->SetBranchAddress("eve_num",&eve_num);
   Trun->SetBranchAddress("nrebin",&nrebin);
-  Trun->SetBranchAddress("threshold_u",&threshold_u);
-  Trun->SetBranchAddress("threshold_v",&threshold_v);
-  Trun->SetBranchAddress("threshold_w",&threshold_w);
-  Trun->SetBranchAddress("threshold_ug",&threshold_ug);
-  Trun->SetBranchAddress("threshold_vg",&threshold_vg);
-  Trun->SetBranchAddress("threshold_wg",&threshold_wg);
+  //Trun->SetBranchAddress("threshold_u",&threshold_u);
+  //Trun->SetBranchAddress("threshold_v",&threshold_v);
+  //Trun->SetBranchAddress("threshold_w",&threshold_w);
+  //Trun->SetBranchAddress("threshold_ug",&threshold_ug);
+  //Trun->SetBranchAddress("threshold_vg",&threshold_vg);
+  //Trun->SetBranchAddress("threshold_wg",&threshold_wg);
   Trun->SetBranchAddress("time_offset",&time_offset);
   
   Trun->GetEntry(0);
 
-  TTree *T_op = (TTree*)file1->Get("T_op");
+  //  TTree *T_op = (TTree*)file1->Get("T_op");
   
   GeomWireSelection wires_u = gds.wires_in_plane(WirePlaneType_t(0));
   GeomWireSelection wires_v = gds.wires_in_plane(WirePlaneType_t(1));
@@ -237,7 +237,7 @@ int main(int argc, char* argv[])
   ChirpMap uplane_map;
   ChirpMap vplane_map;
   ChirpMap wplane_map;
-  TTree *T_chirp = (TTree*)file1->Get("T_chirp");
+  TTree *T_chirp = (TTree*)file1->Get("T_bad");
   Int_t chid=0, plane=0;
   Int_t start_time=0, end_time=0;
   T_chirp->SetBranchAddress("chid",&chid);
@@ -281,15 +281,16 @@ int main(int argc, char* argv[])
   TH2F *hv_decon = (TH2F*)file1->Get("hv_decon");
   TH2F *hw_decon = (TH2F*)file1->Get("hw_decon");
 
+  TH2F *hu_raw = (TH2F*)file1->Get("hu_raw");
   TH2F *hv_raw = (TH2F*)file1->Get("hv_raw");
-  
+  TH2F *hw_raw = (TH2F*)file1->Get("hw_raw");
   
   WireCell2dToy::pdDataFDS roi_fds(gds,hu_decon,hv_decon,hw_decon,eve_num);
   roi_fds.jump(eve_num);
 
-  TH2F *hu_decon_g = (TH2F*)file1->Get("hu_decon_g");
-  TH2F *hv_decon_g = (TH2F*)file1->Get("hv_decon_g");
-  TH2F *hw_decon_g = (TH2F*)file1->Get("hw_decon_g");
+  TH2F *hu_decon_g = (TH2F*)file1->Get("hu_decon");
+  TH2F *hv_decon_g = (TH2F*)file1->Get("hv_decon");
+  TH2F *hw_decon_g = (TH2F*)file1->Get("hw_decon");
 
   //The last input is the time offset
   // if it is + 2.8, it will shift L1SP decon result to later time by 2.8 us
@@ -436,6 +437,7 @@ int main(int argc, char* argv[])
    
   l1sp.AddWireTime_Raw();
   cerr << em("finish raw signal examination") << endl;
+  
   l1sp.Form_rois(6);
   cerr << em("finish L1SP") << endl;
   
@@ -490,7 +492,9 @@ int main(int argc, char* argv[])
   cerr << em("finish tiling") << endl;
 
   TFile *file2 = new TFile("temp_l1sp.root","RECREATE");
+  hu_raw->SetDirectory(file2);
   hv_raw->SetDirectory(file2);
+  hw_raw->SetDirectory(file2);
   hu_decon->SetDirectory(file2);
   hv_decon->SetDirectory(file2);
   hw_decon->SetDirectory(file2);
