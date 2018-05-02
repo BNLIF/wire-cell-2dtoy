@@ -464,13 +464,16 @@ int main(int argc, char* argv[])
    }
    
    TTree *T_cluster ;
-   Double_t x,y,z;
+   Double_t x,y,z,q,nq;
    
    T_cluster = new TTree("T_cluster","T_cluster");
    T_cluster->Branch("cluster_id",&ncluster,"cluster_id/I");
    T_cluster->Branch("x",&x,"x/D");
    T_cluster->Branch("y",&y,"y/D");
    T_cluster->Branch("z",&z,"z/D");
+   T_cluster->Branch("q",&q,"q/D");
+   T_cluster->Branch("nq",&nq,"nq/D");
+	 
    T_cluster->SetDirectory(file1);
 
    TTree *T_rec = new TTree("T_rec","T_rec");
@@ -503,13 +506,19 @@ int main(int argc, char* argv[])
      for (size_t i=0;i!=mcells.size();i++){
        PointVector ps = mcells.at(i)->get_sampling_points();
        int time_slice = mcells.at(i)->GetTimeSlice();
-       if (ps.size()==0) std::cout << "zero sampling points!" << std::endl;
-       for (int k=0;k!=ps.size();k++){
-    	 x = ps.at(k).x/units::cm;//time_slice*nrebin/2.*unit_dis/10. - frame_length/2.*unit_dis/10.;
-    	 y = ps.at(k).y/units::cm;
-    	 z = ps.at(k).z/units::cm;
-    	 T_cluster->Fill();
+       if (ps.size()==0){
+	 std::cout << "zero sampling points!" << std::endl;
+       }else{
+	 q = mcells.at(i)->get_q() / ps.size();
+	 nq = ps.size();
+	 for (int k=0;k!=ps.size();k++){
+	   x = (ps.at(k).x)/units::cm ;
+	   y = ps.at(k).y/units::cm;
+	   z = ps.at(k).z/units::cm;
+	   T_cluster->Fill();
+	 }
        }
+
      }
 
      // save wcps

@@ -2419,7 +2419,7 @@ int main(int argc, char* argv[])
    
    // std::cout << cluster_set.size() << std::endl;
    // save cluster into the output file ... 
-   Double_t x,y,z;
+   Double_t x,y,z,q,nq;
    //save cluster
    Int_t ncluster = 0;
    TTree *T_cluster ;
@@ -2429,6 +2429,9 @@ int main(int argc, char* argv[])
      T_cluster->Branch("x",&x,"x/D");
      T_cluster->Branch("y",&y,"y/D");
      T_cluster->Branch("z",&z,"z/D");
+     T_cluster->Branch("q",&q,"q/D");
+     T_cluster->Branch("nq",&nq,"nq/D");
+     
      T_cluster->SetDirectory(file);
    }
    
@@ -2442,6 +2445,15 @@ int main(int argc, char* argv[])
        if (save_file==1){
 	 int time_slice_save = mcell->GetTimeSlice();
 	 GeomCellSelection temp_cells = lowmemtiling[time_slice_save]->create_single_cells((SlimMergeGeomCell*)mcell);
+
+	 nq = temp_cells.size();
+	 if (nq>0){
+	   q = chargesolver[time_slice_save]->get_mcell_charge(mcell) / (temp_cells.size() * 1.0) ;
+	 }else{
+	   q = 0;
+	 }
+	 
+	 
 	 for (int j=0; j!=temp_cells.size();j++){
 	   Point p = temp_cells.at(j)->center();
 	   x = mcell->GetTimeSlice()*nrebin/2.*unit_dis/10. - frame_length/2.*unit_dis/10.;
