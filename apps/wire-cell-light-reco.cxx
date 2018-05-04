@@ -161,6 +161,9 @@ int main(int argc, char* argv[])
   T_flash->Branch("l1_fired_pe",&l1_fired_pe);
 
   WireCell::OpflashSelection& flashes = uboone_flash.get_flashes();
+
+  //std::cout << flashes.size() << std::endl;
+  
   for (auto it = flashes.begin(); it!=flashes.end(); it++){
     fired_channels.clear();
     

@@ -244,6 +244,8 @@ void WireCell2dToy::ToyLightReco::load_event_raw(int eve_num){
   for (int i=32;i!=fop_femch->size();i++){
     COphit *op_hit = new COphit(fop_femch->at(i), (TH1S*)fop_wf->At(i), fop_timestamp->at(i) - triggerTime, op_gain->at(fop_femch->at(i)), op_gainerror->at(fop_femch->at(i)));
     op_hits.push_back(op_hit);
+
+    //std::cout << i << " " << fop_timestamp->at(i) << " " <<  triggerTime << std::endl;
      
     if (op_hit->get_type()){ // what type  good baseline ???
       bool flag_used = false;
@@ -292,9 +294,20 @@ void WireCell2dToy::ToyLightReco::load_event_raw(int eve_num){
 
   for (size_t j=0; j!=ophits_group.size();j++){
     Opflash *flash = new Opflash(ophits_group.at(j));
-    cosmic_flashes.push_back(flash);
+    if (flash->get_total_PE()!=0){
+      cosmic_flashes.push_back(flash);
+    }else{
+      delete flash;
+    }
+    //    std::cout << ophits_group.at(j).size() << " " << flash->get_time() << std::endl;
   }
- 
+
+  // std::cout << cosmic_flashes.size() << std::endl;
+
+  // for (auto flash : cosmic_flashes){
+  //   std::cout << flash->get_time() << std::endl;
+  // }
+  
   for (int i=0;i!=32;i++){
     TH1S *hsignal = (TH1S*)fop_wf->At(i);
     for (int j=0;j!=1500;j++){
@@ -303,10 +316,25 @@ void WireCell2dToy::ToyLightReco::load_event_raw(int eve_num){
     gain[i] = op_gain->at(i);
     beam_dt[i] = fop_timestamp->at(i) - triggerTime;
   }
+
+
+  
   
   Process_beam_wfs();
+
+  // std::cout << beam_flashes.size() << std::endl;
+
+  // for (auto flash : beam_flashes){
+  //   std::cout << flash->get_time() << std::endl;
+  // }
+  
+  
   sort_flashes();
 
+
+  
+  // std::cout << " " << cosmic_flashes.size() << " " << beam_flashes.size() << " " << flashes.size() << std::endl;
+  
   // update map
   update_pmt_map();
   
