@@ -447,36 +447,36 @@ int main(int argc, char* argv[])
    ct_point_cloud.AddPoints(timesliceId,timesliceChannel,raw_charge,raw_charge_err);
    ct_point_cloud.build_kdtree_index();
 
-   // test the usage of this CT point cloud
-   {
-     std::cout << live_clusters.at(0)->get_mcells().front()->get_sampling_points().front().x/units::cm << " " << live_clusters.at(0)->get_mcells().front()->get_sampling_points().front().y/units::cm << " " << live_clusters.at(0)->get_mcells().front()->get_sampling_points().front().z/units::cm << std::endl;
-     std::cout << live_clusters.at(0)->get_mcells().front()->GetTimeSlice() << std::endl;
-     for (auto it = live_clusters.at(0)->get_mcells().front()->get_uwires().begin(); it!= live_clusters.at(0)->get_mcells().front()->get_uwires().end(); it++){
-       std::cout << "U: " << (*it)->index() << " " << live_clusters.at(0)->get_mcells().front()->Get_Wire_Charge(*it) <<std::endl;
-     }
-     for (auto it = live_clusters.at(0)->get_mcells().front()->get_vwires().begin(); it!= live_clusters.at(0)->get_mcells().front()->get_vwires().end(); it++){
-       std::cout << "V: " << 2400+(*it)->index() << " " << live_clusters.at(0)->get_mcells().front()->Get_Wire_Charge(*it) <<std::endl;
-     }
-     for (auto it = live_clusters.at(0)->get_mcells().front()->get_wwires().begin(); it!= live_clusters.at(0)->get_mcells().front()->get_wwires().end(); it++){
-       std::cout << "W: " << 4800+(*it)->index() << " " << live_clusters.at(0)->get_mcells().front()->Get_Wire_Charge(*it) << std::endl;
-     }
+   // // test the usage of this CT point cloud
+   // {
+   //   std::cout << live_clusters.at(0)->get_mcells().front()->get_sampling_points().front().x/units::cm << " " << live_clusters.at(0)->get_mcells().front()->get_sampling_points().front().y/units::cm << " " << live_clusters.at(0)->get_mcells().front()->get_sampling_points().front().z/units::cm << std::endl;
+   //   std::cout << live_clusters.at(0)->get_mcells().front()->GetTimeSlice() << std::endl;
+   //   for (auto it = live_clusters.at(0)->get_mcells().front()->get_uwires().begin(); it!= live_clusters.at(0)->get_mcells().front()->get_uwires().end(); it++){
+   //     std::cout << "U: " << (*it)->index() << " " << live_clusters.at(0)->get_mcells().front()->Get_Wire_Charge(*it) <<std::endl;
+   //   }
+   //   for (auto it = live_clusters.at(0)->get_mcells().front()->get_vwires().begin(); it!= live_clusters.at(0)->get_mcells().front()->get_vwires().end(); it++){
+   //     std::cout << "V: " << 2400+(*it)->index() << " " << live_clusters.at(0)->get_mcells().front()->Get_Wire_Charge(*it) <<std::endl;
+   //   }
+   //   for (auto it = live_clusters.at(0)->get_mcells().front()->get_wwires().begin(); it!= live_clusters.at(0)->get_mcells().front()->get_wwires().end(); it++){
+   //     std::cout << "W: " << 4800+(*it)->index() << " " << live_clusters.at(0)->get_mcells().front()->Get_Wire_Charge(*it) << std::endl;
+   //   }
 
-     // ct_point_cloud.Print(live_clusters.at(0)->get_mcells().front()->get_sampling_points().front());
-     // std::cout << ct_point_cloud.get_num_points(0) << " " << ct_point_cloud.get_num_points(1) << " " << ct_point_cloud.get_num_points(2) << std::endl;
+   //   ct_point_cloud.Print(live_clusters.at(0)->get_mcells().front()->get_sampling_points().front());
+   //   std::cout << ct_point_cloud.get_num_points(0) << " " << ct_point_cloud.get_num_points(1) << " " << ct_point_cloud.get_num_points(2) << std::endl;
      
-     // WireCell::CTPointCloud<double> nearby_points = ct_point_cloud.get_closest_points(live_clusters.at(0)->get_mcells().front()->get_sampling_points().front(),1*units::cm,0);
-     // for (size_t i=0;i!=nearby_points.pts.size();i++){
-     //   std::cout << "U1: " << nearby_points.pts.at(i).channel << " " << nearby_points.pts.at(i).time_slice << " " << nearby_points.pts.at(i).charge << std::endl;
-     // }
-     // nearby_points = ct_point_cloud.get_closest_points(live_clusters.at(0)->get_mcells().front()->get_sampling_points().front(),1*units::cm,1);
-     // for (size_t i=0;i!=nearby_points.pts.size();i++){
-     //   std::cout << "V1: " << nearby_points.pts.at(i).channel << " " << nearby_points.pts.at(i).time_slice << " " << nearby_points.pts.at(i).charge << std::endl;
-     // }
-     // nearby_points = ct_point_cloud.get_closest_points(live_clusters.at(0)->get_mcells().front()->get_sampling_points().front(),1*units::cm,2);
-     // for (size_t i=0;i!=nearby_points.pts.size();i++){
-     //   std::cout << "W1: " << nearby_points.pts.at(i).channel << " " << nearby_points.pts.at(i).time_slice << " " << nearby_points.pts.at(i).charge << std::endl;
-     // }
-   }
+   //   WireCell::CTPointCloud<double> nearby_points = ct_point_cloud.get_closest_points(live_clusters.at(0)->get_mcells().front()->get_sampling_points().front(),1*units::cm,0);
+   //   for (size_t i=0;i!=nearby_points.pts.size();i++){
+   //     std::cout << "U1: " << nearby_points.pts.at(i).channel << " " << nearby_points.pts.at(i).time_slice << " " << nearby_points.pts.at(i).charge << std::endl;
+   //   }
+   //   nearby_points = ct_point_cloud.get_closest_points(live_clusters.at(0)->get_mcells().front()->get_sampling_points().front(),1*units::cm,1);
+   //   for (size_t i=0;i!=nearby_points.pts.size();i++){
+   //     std::cout << "V1: " << nearby_points.pts.at(i).channel << " " << nearby_points.pts.at(i).time_slice << " " << nearby_points.pts.at(i).charge << std::endl;
+   //   }
+   //   nearby_points = ct_point_cloud.get_closest_points(live_clusters.at(0)->get_mcells().front()->get_sampling_points().front(),1*units::cm,2);
+   //   for (size_t i=0;i!=nearby_points.pts.size();i++){
+   //     std::cout << "W1: " << nearby_points.pts.at(i).channel << " " << nearby_points.pts.at(i).time_slice << " " << nearby_points.pts.at(i).charge << std::endl;
+   //   }
+   // }
    
    
    // finish creating global CT point cloud 
