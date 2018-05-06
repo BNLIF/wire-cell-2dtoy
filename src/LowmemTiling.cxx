@@ -984,19 +984,20 @@ WireCell::SlimMergeGeomCell* WireCell2dToy::LowmemTiling::create_slim_merge_cell
   
   float tolerance = 0.1 * units::mm / 2.;
 
-  std::set<const GeomWire*> allowed_wires;
-  GeomWireSelection temp_wires = uwire->get_allwire();
-  for (auto it = temp_wires.begin(); it!= temp_wires.end(); it++){
-    allowed_wires.insert(*it);
-  }
-  temp_wires = vwire->get_allwire();
-  for (auto it = temp_wires.begin(); it!= temp_wires.end(); it++){
-    allowed_wires.insert(*it);
-  }
-  temp_wires = wwire->get_allwire();
-  for (auto it = temp_wires.begin(); it!=temp_wires.end(); it++){
-    allowed_wires.insert(*it);
-  }
+  // // these are allowed wires
+  // std::set<const GeomWire*> allowed_wires;
+  // GeomWireSelection temp_wires = uwire->get_allwire();
+  // for (auto it = temp_wires.begin(); it!= temp_wires.end(); it++){
+  //   allowed_wires.insert(*it);
+  // }
+  // temp_wires = vwire->get_allwire();
+  // for (auto it = temp_wires.begin(); it!= temp_wires.end(); it++){
+  //   allowed_wires.insert(*it);
+  // }
+  // temp_wires = wwire->get_allwire();
+  // for (auto it = temp_wires.begin(); it!=temp_wires.end(); it++){
+  //   allowed_wires.insert(*it);
+  // }
   
   // find U plane wires
   float dis_u[3];
@@ -1417,7 +1418,7 @@ WireCell::SlimMergeGeomCell* WireCell2dToy::LowmemTiling::create_slim_merge_cell
 	float charge = 0;
 	if (wirechargemap.find(uwire1)!=wirechargemap.end())
 	  charge = wirechargemap[uwire1];
-	if (allowed_wires.find(uwire1)!=allowed_wires.end())
+	//	if (allowed_wires.find(uwire1)!=allowed_wires.end())
 	  mcell->AddWire(uwire1,WirePlaneType_t(0),charge);
 
 	// if (k==uwire_min->index()){
@@ -1432,7 +1433,7 @@ WireCell::SlimMergeGeomCell* WireCell2dToy::LowmemTiling::create_slim_merge_cell
 	float charge = 0;
 	if (wirechargemap.find(vwire1)!=wirechargemap.end())
 	  charge = wirechargemap[vwire1];
-	if (allowed_wires.find(vwire1)!=allowed_wires.end())
+	//	if (allowed_wires.find(vwire1)!=allowed_wires.end())
 	  mcell->AddWire(vwire1,WirePlaneType_t(1),charge);
 	
 	// if (k==vwire_min->index()){
@@ -1447,7 +1448,7 @@ WireCell::SlimMergeGeomCell* WireCell2dToy::LowmemTiling::create_slim_merge_cell
 	float charge = 0;
 	if (wirechargemap.find(wwire1)!=wirechargemap.end())
 	  charge = wirechargemap[wwire1];
-	if (allowed_wires.find(wwire1)!=allowed_wires.end())
+	//	if (allowed_wires.find(wwire1)!=allowed_wires.end())
 	  mcell->AddWire(wwire1,WirePlaneType_t(2),charge);
 	
 	// if (k==wwire_min->index()){

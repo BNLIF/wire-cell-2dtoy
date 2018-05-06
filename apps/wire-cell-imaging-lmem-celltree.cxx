@@ -137,9 +137,9 @@ int main(int argc, char* argv[])
  
   int beam = -1; // 0: bnb; 1: extbnb
 
-  int save_file = 0; //
+  int save_file = 2; //
   // 1 for debug mode for bee ...
-
+  // 2 for 
   for(Int_t i = 3; i != argc; i++){
      switch(argv[i][1]){
      case 't':
