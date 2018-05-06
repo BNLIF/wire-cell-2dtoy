@@ -92,16 +92,16 @@ int main(int argc, char* argv[])
   Trun->SetBranchAddress("nrebin",&nrebin);
   Trun->SetBranchAddress("time_offset",&time_offset);
   
-   std::vector<float> *op_gain = new std::vector<float>;
-   std::vector<float> *op_gainerror = new std::vector<float>;
-   double triggerTime;
+  std::vector<float> *op_gain = new std::vector<float>;
+  std::vector<float> *op_gainerror = new std::vector<float>;
+  double triggerTime;
   
- Trun->SetBranchAddress("op_gain",&op_gain); 
- Trun->SetBranchAddress("op_gainerror",&op_gainerror); 
- Trun->SetBranchAddress("triggerTime",&triggerTime); 
-   
+  Trun->SetBranchAddress("op_gain",&op_gain); 
+  Trun->SetBranchAddress("op_gainerror",&op_gainerror); 
+  Trun->SetBranchAddress("triggerTime",&triggerTime); 
+  
   Trun->GetEntry(0);
-
+  
   //std::cout << nrebin << " " << time_offset << std::endl;
   
   // define singleton ... 
