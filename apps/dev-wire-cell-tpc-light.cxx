@@ -3,6 +3,8 @@
 #include "WireCellData/SlimMergeGeomCell.h"
 #include "WireCellData/TPCParams.h"
 #include "WireCellData/Singleton.h"
+#include "WireCellData/ToyCTPointCloud.h"
+
 #include "WireCell2dToy/ExecMon.h"
 #include "WireCell2dToy/CalcPoints.h"
 #include "WireCell2dToy/ToyClustering.h"
@@ -82,6 +84,11 @@ int main(int argc, char* argv[])
   int frame_length;
   int eve_num;
   float unit_dis;
+
+  std::vector<int> *timesliceId = new std::vector<int>;
+  std::vector<std::vector<int>> *timesliceChannel = new std::vector<std::vector<int>>;
+  std::vector<std::vector<int>> *raw_charge = new std::vector<std::vector<int>>;
+  std::vector<std::vector<int>> *raw_charge_err = new std::vector<std::vector<int>>;
   
   Trun->SetBranchAddress("eventNo",&event_no);
   Trun->SetBranchAddress("runNo",&run_no);
@@ -92,6 +99,12 @@ int main(int argc, char* argv[])
   Trun->SetBranchAddress("nrebin",&nrebin);
   Trun->SetBranchAddress("time_offset",&time_offset);
   
+  Trun->SetBranchAddress("timesliceId",&timesliceId);
+  Trun->SetBranchAddress("timesliceChannel",&timesliceChannel);
+  Trun->SetBranchAddress("raw_charge",&raw_charge);
+  Trun->SetBranchAddress("raw_charge_err",&raw_charge_err);
+  
+  
   std::vector<float> *op_gain = new std::vector<float>;
   std::vector<float> *op_gainerror = new std::vector<float>;
   double triggerTime;
@@ -101,6 +114,9 @@ int main(int argc, char* argv[])
   Trun->SetBranchAddress("triggerTime",&triggerTime); 
   
   Trun->GetEntry(0);
+
+  
+
   
   //std::cout << nrebin << " " << time_offset << std::endl;
   
@@ -128,6 +144,10 @@ int main(int argc, char* argv[])
   mp.set_first_u_dis(first_u_dis);
   mp.set_first_v_dis(first_v_dis);
   mp.set_first_w_dis(first_w_dis);
+
+
+ 
+
   
   std::map<int,std::pair<double,double>> dead_u_index;
   std::map<int,std::pair<double,double>> dead_v_index;
@@ -380,16 +400,22 @@ int main(int argc, char* argv[])
    // 	       << live_clusters.at(i)->get_num_time_slices() << std::endl;
    // }
    // std::cout << dead_clusters.size() << std::endl;
-   for (size_t i=0;i!=dead_clusters.size();i++){
-     dead_clusters.at(i)->Remove_duplicated_mcells();
-     // std::cout << dead_clusters.at(i)->get_cluster_id() << " " 
-     // 	       << dead_clusters.at(i)->get_num_mcells() << " "
-     // 	       << dead_clusters.at(i)->get_num_time_slices() << std::endl;
-   }
+  for (size_t i=0;i!=dead_clusters.size();i++){
+    dead_clusters.at(i)->Remove_duplicated_mcells();
+    // std::cout << dead_clusters.at(i)->get_cluster_id() << " " 
+    // 	       << dead_clusters.at(i)->get_num_mcells() << " "
+    // 	       << dead_clusters.at(i)->get_num_time_slices() << std::endl;
+  }
+  
+  
+ 
+  
+  
+  
   
    
-   cout << em("load clusters from file") << endl;
-
+  cout << em("load clusters from file") << endl;
+  
   
 
    // Start to add X, Y, Z points
@@ -407,6 +433,55 @@ int main(int argc, char* argv[])
    }
    cout << em("Add X, Y, Z points") << std::endl;
 
+
+   // create global CT point cloud ...
+   double_t first_t_dis = live_clusters.at(0)->get_mcells().front()->GetTimeSlice()*time_slice_width - live_clusters.at(0)->get_mcells().front()->get_sampling_points().front().x;
+   double offset_t = first_t_dis/time_slice_width;
+   
+   
+   ToyCTPointCloud ct_point_cloud(0,2399,2400,4799,4800,8255, // channel range
+				  offset_t, -first_u_dis/pitch_u, -first_v_dis/pitch_v, -first_w_dis/pitch_w, // offset
+				  1./time_slice_width, 1./pitch_u, 1./pitch_v, 1./pitch_w, // slope
+				  angle_u,angle_v,angle_w// angle
+				  );
+   ct_point_cloud.AddPoints(timesliceId,timesliceChannel,raw_charge,raw_charge_err);
+   ct_point_cloud.build_kdtree_index();
+
+   // test the usage of this CT point cloud
+   {
+     std::cout << live_clusters.at(0)->get_mcells().front()->get_sampling_points().front().x/units::cm << " " << live_clusters.at(0)->get_mcells().front()->get_sampling_points().front().y/units::cm << " " << live_clusters.at(0)->get_mcells().front()->get_sampling_points().front().z/units::cm << std::endl;
+     std::cout << live_clusters.at(0)->get_mcells().front()->GetTimeSlice() << std::endl;
+     for (auto it = live_clusters.at(0)->get_mcells().front()->get_uwires().begin(); it!= live_clusters.at(0)->get_mcells().front()->get_uwires().end(); it++){
+       std::cout << "U: " << (*it)->index() << " " << live_clusters.at(0)->get_mcells().front()->Get_Wire_Charge(*it) <<std::endl;
+     }
+     for (auto it = live_clusters.at(0)->get_mcells().front()->get_vwires().begin(); it!= live_clusters.at(0)->get_mcells().front()->get_vwires().end(); it++){
+       std::cout << "V: " << 2400+(*it)->index() << " " << live_clusters.at(0)->get_mcells().front()->Get_Wire_Charge(*it) <<std::endl;
+     }
+     for (auto it = live_clusters.at(0)->get_mcells().front()->get_wwires().begin(); it!= live_clusters.at(0)->get_mcells().front()->get_wwires().end(); it++){
+       std::cout << "W: " << 4800+(*it)->index() << " " << live_clusters.at(0)->get_mcells().front()->Get_Wire_Charge(*it) << std::endl;
+     }
+
+     // ct_point_cloud.Print(live_clusters.at(0)->get_mcells().front()->get_sampling_points().front());
+     // std::cout << ct_point_cloud.get_num_points(0) << " " << ct_point_cloud.get_num_points(1) << " " << ct_point_cloud.get_num_points(2) << std::endl;
+     
+     // WireCell::CTPointCloud<double> nearby_points = ct_point_cloud.get_closest_points(live_clusters.at(0)->get_mcells().front()->get_sampling_points().front(),1*units::cm,0);
+     // for (size_t i=0;i!=nearby_points.pts.size();i++){
+     //   std::cout << "U1: " << nearby_points.pts.at(i).channel << " " << nearby_points.pts.at(i).time_slice << " " << nearby_points.pts.at(i).charge << std::endl;
+     // }
+     // nearby_points = ct_point_cloud.get_closest_points(live_clusters.at(0)->get_mcells().front()->get_sampling_points().front(),1*units::cm,1);
+     // for (size_t i=0;i!=nearby_points.pts.size();i++){
+     //   std::cout << "V1: " << nearby_points.pts.at(i).channel << " " << nearby_points.pts.at(i).time_slice << " " << nearby_points.pts.at(i).charge << std::endl;
+     // }
+     // nearby_points = ct_point_cloud.get_closest_points(live_clusters.at(0)->get_mcells().front()->get_sampling_points().front(),1*units::cm,2);
+     // for (size_t i=0;i!=nearby_points.pts.size();i++){
+     //   std::cout << "W1: " << nearby_points.pts.at(i).channel << " " << nearby_points.pts.at(i).time_slice << " " << nearby_points.pts.at(i).charge << std::endl;
+     // }
+   }
+   
+   
+   // finish creating global CT point cloud 
+
+   
    
    // WireCell2dToy::Clustering_live_dead(live_clusters, dead_clusters);
    // cerr << em("Clustering live and dead clusters") << std::endl;
@@ -445,6 +520,11 @@ int main(int argc, char* argv[])
 
 
 
+   
+
+
+
+   
    //   cout<<"BUGGGG"<<endl;
    
 

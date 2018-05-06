@@ -983,6 +983,20 @@ WireCell::SlimMergeGeomCell* WireCell2dToy::LowmemTiling::create_slim_merge_cell
   float w_pitch = gds.pitch(kYwire);
   
   float tolerance = 0.1 * units::mm / 2.;
+
+  std::set<const GeomWire*> allowed_wires;
+  GeomWireSelection temp_wires = uwire->get_allwire();
+  for (auto it = temp_wires.begin(); it!= temp_wires.end(); it++){
+    allowed_wires.insert(*it);
+  }
+  temp_wires = vwire->get_allwire();
+  for (auto it = temp_wires.begin(); it!= temp_wires.end(); it++){
+    allowed_wires.insert(*it);
+  }
+  temp_wires = wwire->get_allwire();
+  for (auto it = temp_wires.begin(); it!=temp_wires.end(); it++){
+    allowed_wires.insert(*it);
+  }
   
   // find U plane wires
   float dis_u[3];
@@ -1403,7 +1417,9 @@ WireCell::SlimMergeGeomCell* WireCell2dToy::LowmemTiling::create_slim_merge_cell
 	float charge = 0;
 	if (wirechargemap.find(uwire1)!=wirechargemap.end())
 	  charge = wirechargemap[uwire1];
-	mcell->AddWire(uwire1,WirePlaneType_t(0),charge);
+	if (allowed_wires.find(uwire1)!=allowed_wires.end())
+	  mcell->AddWire(uwire1,WirePlaneType_t(0),charge);
+
 	// if (k==uwire_min->index()){
 	//   mwire_u = new MergeGeomWire(ident,*uwire1);
 	// }else{
@@ -1416,7 +1432,9 @@ WireCell::SlimMergeGeomCell* WireCell2dToy::LowmemTiling::create_slim_merge_cell
 	float charge = 0;
 	if (wirechargemap.find(vwire1)!=wirechargemap.end())
 	  charge = wirechargemap[vwire1];
-	mcell->AddWire(vwire1,WirePlaneType_t(1),charge);
+	if (allowed_wires.find(vwire1)!=allowed_wires.end())
+	  mcell->AddWire(vwire1,WirePlaneType_t(1),charge);
+	
 	// if (k==vwire_min->index()){
 	//   mwire_v = new MergeGeomWire(ident,*vwire1);
 	// }else{
@@ -1429,7 +1447,9 @@ WireCell::SlimMergeGeomCell* WireCell2dToy::LowmemTiling::create_slim_merge_cell
 	float charge = 0;
 	if (wirechargemap.find(wwire1)!=wirechargemap.end())
 	  charge = wirechargemap[wwire1];
-	mcell->AddWire(wwire1,WirePlaneType_t(2),charge);
+	if (allowed_wires.find(wwire1)!=allowed_wires.end())
+	  mcell->AddWire(wwire1,WirePlaneType_t(2),charge);
+	
 	// if (k==wwire_min->index()){
 	//   mwire_w = new MergeGeomWire(ident,*wwire1);
 	// }else{
@@ -1438,8 +1458,8 @@ WireCell::SlimMergeGeomCell* WireCell2dToy::LowmemTiling::create_slim_merge_cell
       }
       
      
-      
-      return mcell;
+      if (mcell->get_uwires().size()>0 && mcell->get_vwires().size()>0 && mcell->get_wwires().size()>0)
+	return mcell;
     }
   }
   
@@ -2433,6 +2453,16 @@ void WireCell2dToy::LowmemTiling::reset_cells(){
 void WireCell2dToy::LowmemTiling::init_good_cells(const WireCell::Slice& slice, const WireCell::Slice& slice_err, std::vector<float>& uplane_rms, std::vector<float>& vplane_rms, std::vector<float>& wplane_rms){
   // form good wires group
   form_fired_merge_wires(slice, slice_err);
+
+
+  // for (int j=0;j!=fired_wire_v.size();j++){
+  //   MergeGeomWire *vwire = (MergeGeomWire *)fired_wire_v.at(j);
+  //   GeomWireSelection temp_wires = vwire->get_allwire();
+  //   for (size_t i=0;i!=temp_wires.size();i++){
+  //     std::cout << j << " "<< i << " " << temp_wires.at(i)->index()+2400 << std::endl;
+  //   }
+  // }
+  
   
   bool flag_two_wire_cell = true;
   bool flag_one_wire_cell = false;
@@ -2753,6 +2783,16 @@ void WireCell2dToy::LowmemTiling::init_good_cells(const WireCell::Slice& slice, 
     }
     
   }
+
+
+  // for (auto it = two_good_wire_cells.begin(); it!=two_good_wire_cells.end(); it++){
+  //   SlimMergeGeomCell *mcell = (SlimMergeGeomCell*)(*it);
+  //   for (auto it = mcell->get_vwires().begin(); it!= mcell->get_vwires().end(); it++){
+  //     std::cout << "V: " << 2400+(*it)->index() << " " << wirechargemap[*it] <<std::endl;
+  //    }
+  // }
+
+  
 
   if (flag_one_wire_cell)
     create_one_good_wire_cells();
@@ -4532,7 +4572,7 @@ void WireCell2dToy::LowmemTiling::form_fired_merge_wires(const WireCell::Slice& 
       wirecharge_errmap[wire] = charge_err;
 
       // if (charge_err==0)
-      // 	std::cout << wirechargemap[wire] << " " << wirecharge_errmap[wire] << std::endl;
+      // std::cout << group.at(i).first << " " << wire->index() << " " << wirechargemap[wire] << " " << wirecharge_errmap[wire] << std::endl;
       
     }else{
       //wirechargemap[wire] += charge;
