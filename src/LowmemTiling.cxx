@@ -984,20 +984,20 @@ WireCell::SlimMergeGeomCell* WireCell2dToy::LowmemTiling::create_slim_merge_cell
   
   float tolerance = 0.1 * units::mm / 2.;
 
-  // // these are allowed wires
-  // std::set<const GeomWire*> allowed_wires;
-  // GeomWireSelection temp_wires = uwire->get_allwire();
-  // for (auto it = temp_wires.begin(); it!= temp_wires.end(); it++){
-  //   allowed_wires.insert(*it);
-  // }
-  // temp_wires = vwire->get_allwire();
-  // for (auto it = temp_wires.begin(); it!= temp_wires.end(); it++){
-  //   allowed_wires.insert(*it);
-  // }
-  // temp_wires = wwire->get_allwire();
-  // for (auto it = temp_wires.begin(); it!=temp_wires.end(); it++){
-  //   allowed_wires.insert(*it);
-  // }
+  //these are allowed wires
+  std::set<const GeomWire*> allowed_wires;
+  GeomWireSelection temp_wires = uwire->get_allwire();
+  for (auto it = temp_wires.begin(); it!= temp_wires.end(); it++){
+    allowed_wires.insert(*it);
+  }
+  temp_wires = vwire->get_allwire();
+  for (auto it = temp_wires.begin(); it!= temp_wires.end(); it++){
+    allowed_wires.insert(*it);
+  }
+  temp_wires = wwire->get_allwire();
+  for (auto it = temp_wires.begin(); it!=temp_wires.end(); it++){
+    allowed_wires.insert(*it);
+  }
   
   // find U plane wires
   float dis_u[3];
@@ -1138,9 +1138,18 @@ WireCell::SlimMergeGeomCell* WireCell2dToy::LowmemTiling::create_slim_merge_cell
     
     int ident = holder.get_cell_no();
    
-    
-
+   
     const GeomWire* uwire_min = gds.closest(u_min,WirePlaneType_t(0));
+    if (uwire_min!=0){
+      if (allowed_wires.find(uwire_min) == allowed_wires.end()){
+     	uwire_min = gds.by_planeindex(WirePlaneType_t(0),uwire_min->index()+1);
+    	if (uwire_min!=0)
+    	  if (allowed_wires.find(uwire_min) == allowed_wires.end()){
+    	    uwire_min = gds.by_planeindex(WirePlaneType_t(0),uwire_min->index()+1);
+    	  }
+      }
+    }
+    
     if (uwire_min == 0 ){
       if (u_min <= gds.wire_dist(*uwire_1)){
 	uwire_min = uwire_1;
@@ -1161,12 +1170,32 @@ WireCell::SlimMergeGeomCell* WireCell2dToy::LowmemTiling::create_slim_merge_cell
 	uwire_max = uwire_2;
       }
     }
+    if (uwire_max!=0){
+      if (allowed_wires.find(uwire_max) == allowed_wires.end()){
+     	uwire_max = gds.by_planeindex(WirePlaneType_t(0),uwire_max->index()-1);
+    	if (uwire_max!=0)
+    	  if (allowed_wires.find(uwire_max) == allowed_wires.end()){
+    	    uwire_max = gds.by_planeindex(WirePlaneType_t(0),uwire_max->index()-1);
+    	  }
+      }
+    }
+
+    
     // if (uwire_max->index() < uwire_1->index()){
     //   uwire_max = uwire_1;
     // }else if (uwire_max->index() > uwire_2->index()){
     //   uwire_max = uwire_2;
     // }
     const GeomWire* vwire_min = gds.closest(v_min,WirePlaneType_t(1));
+    if (vwire_min!=0){
+      if (allowed_wires.find(vwire_min) == allowed_wires.end()){
+     	vwire_min = gds.by_planeindex(WirePlaneType_t(1),vwire_min->index()+1);
+    	if (vwire_min!=0)
+    	  if (allowed_wires.find(vwire_min) == allowed_wires.end()){
+    	    vwire_min = gds.by_planeindex(WirePlaneType_t(1),vwire_min->index()+1);
+    	  }
+      }
+    }
     if (vwire_min == 0 ){
       if (v_min <= gds.wire_dist(*vwire_1)){
 	vwire_min = vwire_1;
@@ -1180,6 +1209,15 @@ WireCell::SlimMergeGeomCell* WireCell2dToy::LowmemTiling::create_slim_merge_cell
     //   vwire_min = vwire_2;
     // }
     const GeomWire* vwire_max = gds.closest(v_max,WirePlaneType_t(1));
+    if (vwire_max!=0){
+      if (allowed_wires.find(vwire_max) == allowed_wires.end()){
+     	vwire_max = gds.by_planeindex(WirePlaneType_t(1),vwire_max->index()-1);
+    	if (vwire_max!=0)
+    	  if (allowed_wires.find(vwire_max) == allowed_wires.end()){
+    	    vwire_max = gds.by_planeindex(WirePlaneType_t(1),vwire_max->index()-1);
+    	  }
+      }
+    }
     if (vwire_max == 0 ){
       if (v_max <= gds.wire_dist(*vwire_1)){
 	vwire_max = vwire_1;
@@ -1193,6 +1231,15 @@ WireCell::SlimMergeGeomCell* WireCell2dToy::LowmemTiling::create_slim_merge_cell
     //   vwire_max = vwire_2;
     // }
     const GeomWire* wwire_min = gds.closest(w_min,WirePlaneType_t(2));//.bounds(w_min,WirePlaneType_t(2)).second;
+    if (wwire_min!=0){
+      if (allowed_wires.find(wwire_min) == allowed_wires.end()){
+     	wwire_min = gds.by_planeindex(WirePlaneType_t(2),wwire_min->index()+1);
+    	if (wwire_min!=0)
+    	  if (allowed_wires.find(wwire_min) == allowed_wires.end()){
+    	    wwire_min = gds.by_planeindex(WirePlaneType_t(2),wwire_min->index()+1);
+    	  }
+      }
+    }
     if (wwire_min == 0 ){
       if (w_min <= gds.wire_dist(*wwire_1)){
 	wwire_min = wwire_1;
@@ -1206,6 +1253,15 @@ WireCell::SlimMergeGeomCell* WireCell2dToy::LowmemTiling::create_slim_merge_cell
     //   wwire_min = wwire_2;
     // }
     const GeomWire* wwire_max = gds.closest(w_max,WirePlaneType_t(2));//.bounds(w_max,WirePlaneType_t(2)).first;
+    if (wwire_max!=0){
+      if (allowed_wires.find(wwire_max) == allowed_wires.end()){
+     	wwire_max = gds.by_planeindex(WirePlaneType_t(2),wwire_max->index()-1);
+    	if (wwire_max!=0)
+    	  if (allowed_wires.find(wwire_max) == allowed_wires.end()){
+    	    wwire_max = gds.by_planeindex(WirePlaneType_t(2),wwire_max->index()-1);
+    	  }
+      }
+    }
     if (wwire_max == 0 ){
       if (w_max <= gds.wire_dist(*wwire_1)){
 	wwire_max = wwire_1;
@@ -1213,6 +1269,8 @@ WireCell::SlimMergeGeomCell* WireCell2dToy::LowmemTiling::create_slim_merge_cell
 	wwire_max = wwire_2;
       }
     }
+
+    
     // if (wwire_max->index() < wwire_1->index()){
     //   wwire_max = wwire_1;
     // }else if (wwire_max->index() > wwire_2->index()){
@@ -1235,44 +1293,59 @@ WireCell::SlimMergeGeomCell* WireCell2dToy::LowmemTiling::create_slim_merge_cell
     
     GeomWireSelection ugroup,vgroup,wgroup;
     // find U group
-    if (uwire_min!=0)
-      ugroup.push_back(uwire_min);
+    if (uwire_min!=0){
+      if (allowed_wires.find(uwire_min)!=allowed_wires.end())
+	ugroup.push_back(uwire_min);
+    }
     if (uwire_max!=uwire_min&&uwire_max!=0){
-      ugroup.push_back(uwire_max);
+      if (allowed_wires.find(uwire_max)!=allowed_wires.end())
+	ugroup.push_back(uwire_max);
       const GeomWire* uwire_p1 = gds.by_planeindex(WirePlaneType_t(0),uwire_min->index()+1);
       if (uwire_p1!=uwire_max&&uwire_p1!=0){
-	ugroup.push_back(uwire_p1);
+	if (allowed_wires.find(uwire_p1)!=allowed_wires.end())
+	  ugroup.push_back(uwire_p1);
 	const GeomWire* uwire_n1 = gds.by_planeindex(WirePlaneType_t(0),uwire_max->index()-1);
 	if (uwire_n1!=uwire_p1&&uwire_n1!=0){
-	  ugroup.push_back(uwire_n1);
+	  if (allowed_wires.find(uwire_n1)!=allowed_wires.end())
+	    ugroup.push_back(uwire_n1);
 	}
       }
     }
     // find V group
-    if (vwire_min!=0)
+    if (vwire_min!=0){
+      if (allowed_wires.find(vwire_min)!=allowed_wires.end())
       vgroup.push_back(vwire_min);
+    }
     if (vwire_max!=vwire_min&&vwire_max!=0){
-      vgroup.push_back(vwire_max);
+      if (allowed_wires.find(vwire_max)!=allowed_wires.end())
+	vgroup.push_back(vwire_max);
       const GeomWire* vwire_p1 = gds.by_planeindex(WirePlaneType_t(1),vwire_min->index()+1);
-      if (vwire_p1!=vwire_max&&vwire_p1!=0){
-	vgroup.push_back(vwire_p1);
+       if (vwire_p1!=vwire_max&&vwire_p1!=0){
+	 if (allowed_wires.find(vwire_p1)!=allowed_wires.end())
+	  vgroup.push_back(vwire_p1);
 	const GeomWire* vwire_n1 = gds.by_planeindex(WirePlaneType_t(1),vwire_max->index()-1);
 	if (vwire_n1!=vwire_p1&&vwire_n1!=0){
-	  vgroup.push_back(vwire_n1);
+	  if (allowed_wires.find(vwire_n1)!=allowed_wires.end())
+	    vgroup.push_back(vwire_n1);
 	}
       }
     }
     // find W group
-    if (wwire_min!=0)
-      wgroup.push_back(wwire_min);
+    if (wwire_min!=0){
+      if (allowed_wires.find(wwire_min)!=allowed_wires.end())
+	wgroup.push_back(wwire_min);
+    }
     if (wwire_max!=wwire_min&&wwire_max!=0){
-      wgroup.push_back(wwire_max);
+      if (allowed_wires.find(wwire_max)!=allowed_wires.end())
+	wgroup.push_back(wwire_max);
       const GeomWire* wwire_p1 = gds.by_planeindex(WirePlaneType_t(2),wwire_min->index()+1);
       if (wwire_p1!=wwire_max&&wwire_p1!=0){
-	wgroup.push_back(wwire_p1);
+	if (allowed_wires.find(wwire_p1)!=allowed_wires.end())
+	  wgroup.push_back(wwire_p1);
 	const GeomWire* wwire_n1 = gds.by_planeindex(WirePlaneType_t(2),wwire_max->index()-1);
 	if (wwire_n1!=wwire_p1&&wwire_n1!=0){
-	  wgroup.push_back(wwire_n1);
+	  if (allowed_wires.find(wwire_n1)!=allowed_wires.end())
+	    wgroup.push_back(wwire_n1);
 	}
       }
     }
