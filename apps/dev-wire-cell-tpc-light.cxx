@@ -502,6 +502,7 @@ int main(int argc, char* argv[])
      live_clusters.at(i)->dijkstra_shortest_paths(wcps.first);
      live_clusters.at(i)->cal_shortest_path(wcps.second);
      live_clusters.at(i)->fine_tracking();
+     live_clusters.at(i)->collect_charge_trajectory(ct_point_cloud);
    }
    cerr << em("Create Graph in all clusters") << std::endl;
    
@@ -998,31 +999,31 @@ int main(int argc, char* argv[])
     FlashTPCBundle *bundle = *it;
     PR3DCluster *main_cluster = bundle->get_main_cluster();
     Opflash *flash = bundle->get_flash();
-    if (flash!=0){
+    //  if (flash!=0){
       
       // now prepare saving it
-      int cluster_id = main_cluster->get_cluster_id();
-
-      PR3DClusterSelection temp_clusters;
-      temp_clusters.push_back(main_cluster);
-      for (auto it1 = group_clusters[main_cluster].begin(); it1!=group_clusters[main_cluster].end(); it1++){
-	temp_clusters.push_back((*it1).first);
-      }
-
-      std::vector<int> proj_channel;
-      std::vector<int> proj_timeslice;
-      std::vector<int> proj_charge;
-      
-      for (size_t j = 0; j!= temp_clusters.size(); j++){
-	PR3DCluster *cluster = temp_clusters.at(j);
-	cluster->get_projection(proj_channel,proj_timeslice,proj_charge, global_wc_map);
-      }
-      proj_cluster_id->push_back(cluster_id);
-      proj_cluster_channel->push_back(proj_channel);
-      proj_cluster_timeslice->push_back(proj_timeslice);
-      proj_cluster_charge->push_back(proj_charge);
-      
+    int cluster_id = main_cluster->get_cluster_id();
+    
+    PR3DClusterSelection temp_clusters;
+    temp_clusters.push_back(main_cluster);
+    for (auto it1 = group_clusters[main_cluster].begin(); it1!=group_clusters[main_cluster].end(); it1++){
+      temp_clusters.push_back((*it1).first);
     }
+    
+    std::vector<int> proj_channel;
+    std::vector<int> proj_timeslice;
+    std::vector<int> proj_charge;
+    
+    for (size_t j = 0; j!= temp_clusters.size(); j++){
+      PR3DCluster *cluster = temp_clusters.at(j);
+      cluster->get_projection(proj_channel,proj_timeslice,proj_charge, global_wc_map);
+    }
+    proj_cluster_id->push_back(cluster_id);
+    proj_cluster_channel->push_back(proj_channel);
+    proj_cluster_timeslice->push_back(proj_timeslice);
+    proj_cluster_charge->push_back(proj_charge);
+    
+      // }
   }
   T_proj->Fill();
 
