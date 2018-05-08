@@ -3,7 +3,10 @@
 
 #include "WireCellData/Units.h"
 #include "WireCellData/Point.h"
+#include "WireCellData/SlimMergeGeomCell.h"
+
 #include <vector>
+#include <map>
 
 namespace WireCell2dToy{
   class ToyFiducial{
@@ -40,8 +43,12 @@ namespace WireCell2dToy{
     std::vector<double> boundary_xy_x, boundary_xy_y;
     std::vector<double> boundary_xz_x, boundary_xz_z;
     
-    // dead regions
-
+    // dead regions ... 
+    WireCell::SMGCSelection mcells;
+    std::map<WireCell::SlimMergeGeomCell*, std::pair<int,int>> mcell_time_map;
+    
+    // conversion between positions to the channel and time ???
+    
     
   };
 }
