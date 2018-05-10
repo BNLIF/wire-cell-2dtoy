@@ -108,14 +108,44 @@ bool WireCell2dToy::ToyFiducial::inside_dead_region(WireCell::Point& p){
   if (ch_u <0 || ch_u>=2400)  return false;
   if (ch_v <2400 || ch_v>=4800)  return false;
   if (ch_w <4800 || ch_w>=7256)  return false;
-  
-  
-  
-  // find the dead region given the U, V, and W number
-  
 
+  std::set<SlimMergeGeomCell*> dead_u_mcells;
+  std::set<SlimMergeGeomCell*> dead_v_mcells;
+  std::set<SlimMergeGeomCell*> dead_w_mcells;
+
+  if (ch_mcell_set_map.find(ch_u)!=ch_mcell_set_map.end())
+    dead_u_mcells = ch_mcell_set_map[ch_u];
+  if (ch_mcell_set_map.find(ch_v)!=ch_mcell_set_map.end())
+    dead_v_mcells = ch_mcell_set_map[ch_v];
+  if (ch_mcell_set_map.find(ch_w)!=ch_mcell_set_map.end())
+    dead_w_mcells = ch_mcell_set_map[ch_w];
+
+  // find the dead region given the U, V, and W number
+  std::set<SlimMergeGeomCell*> results;
+  for (auto it = dead_u_mcells.begin(); it!=dead_u_mcells.end(); it++){
+    if (dead_v_mcells.find(*it)!=dead_v_mcells.end()){
+      // compare UV sets
+      results.insert(*it);
+    }else if (dead_w_mcells.find(*it)!=dead_w_mcells.end()){
+      // compare UW sets
+      results.insert(*it);
+    }
+  }
+  // compare VW sets ...
+  for (auto it = dead_v_mcells.begin(); it!=dead_v_mcells.end(); it++){
+    if (dead_w_mcells.find(*it)!=dead_w_mcells.end()){
+      // compare UW sets
+      results.insert(*it);
+    }
+  }
+  
   
   // Check the T number for the remaining T ... 
+  for (auto it = results.begin(); it!=results.end(); it++){
+    if (mcell_time_map[*it].first <= time_slice &&
+	time_slice <= mcell_time_map[*it].second)
+      return true;
+  }
   
   return false;
 }
