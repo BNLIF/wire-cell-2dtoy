@@ -82,15 +82,42 @@ WireCell2dToy::ToyFiducial::~ToyFiducial(){
 }
 
 
-bool WireCell2dToy::ToyFiducial::inside_fiducial_volume(WireCell::Point &p, double offset_x){
+bool WireCell2dToy::ToyFiducial::inside_fiducial_volume(WireCell::Point& p, double offset_x){
   int c1 = pnpoly(boundary_xy_x, boundary_xy_y, p.x-offset_x, p.y);
   int c2 = pnpoly(boundary_xz_x, boundary_xz_z, p.x-offset_x, p.z);
+  
   
   if (c1 && c2){
     return true;
   }else{
     return false;
   }
+}
+
+bool WireCell2dToy::ToyFiducial::inside_dead_region(WireCell::Point& p){
+  // convert the position into U, V, W, and T number ...
+  int time_slice = p.x * slope_t + offset_t;
+  double pos_u = cos(angle_u) * p.z - sin(angle_u) *p.y;
+  double pos_v = cos(angle_v) * p.z - sin(angle_v) *p.y;
+  double pos_w = cos(angle_w) * p.z - sin(angle_w) *p.y;
+  int ch_u = pos_u * slope_u + offset_u;
+  int ch_v = pos_v * slope_v + offset_v + 2400;
+  int ch_w = pos_w * slope_w + offset_w + 4800;
+
+  if (time_slice <0 || time_slice >=2398) return false;
+  if (ch_u <0 || ch_u>=2400)  return false;
+  if (ch_v <2400 || ch_v>=4800)  return false;
+  if (ch_w <4800 || ch_w>=7256)  return false;
+  
+  
+  
+  // find the dead region given the U, V, and W number
+  
+
+  
+  // Check the T number for the remaining T ... 
+  
+  return false;
 }
 
 

@@ -16,7 +16,8 @@ namespace WireCell2dToy{
     ~ToyFiducial();
 
     bool inside_fiducial_volume(WireCell::Point& p, double offset_x=0);
-    
+    bool inside_dead_region(WireCell::Point& p);
+      
     void AddDeadRegion(WireCell::SlimMergeGeomCell* mcell, std::vector<int>& time_slices);
     
   protected:
