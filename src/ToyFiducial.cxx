@@ -104,7 +104,7 @@ bool WireCell2dToy::ToyFiducial::inside_dead_region(WireCell::Point& p){
   int ch_v = pos_v * slope_v + offset_v + 2400;
   int ch_w = pos_w * slope_w + offset_w + 4800;
 
-  //  std::cout << ch_u << " " << ch_v << " " << ch_w << " " << time_slice << std::endl;
+  //std::cout << ch_u << " " << ch_v << " " << ch_w << " " << time_slice << std::endl;
   //  std::cout << slope_w << " " << offset_w << " " << pos_w << std::endl;
   
   if (time_slice <0 || time_slice >=2398) return false;
@@ -123,7 +123,7 @@ bool WireCell2dToy::ToyFiducial::inside_dead_region(WireCell::Point& p){
   if (ch_mcell_set_map.find(ch_w)!=ch_mcell_set_map.end())
     dead_w_mcells = ch_mcell_set_map[ch_w];
   
-  std::cout << ch_u << " " << ch_v << " " << ch_w << " " << dead_u_mcells.size() << " " << dead_v_mcells.size() << " " << dead_w_mcells.size() << std::endl;
+  // std::cout << ch_u << " " << ch_v << " " << ch_w << " " << dead_u_mcells.size() << " " << dead_v_mcells.size() << " " << dead_w_mcells.size() << std::endl;
   
   // find the dead region given the U, V, and W number
   std::set<SlimMergeGeomCell*> results;

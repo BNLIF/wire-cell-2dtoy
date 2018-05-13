@@ -447,23 +447,25 @@ int main(int argc, char* argv[])
 
    // test the fiducial volume cut 
    fid->set_offset_t(offset_t);
-   {
-     WireCell::Point p(30.0*units::cm,30*units::cm,30*units::cm);
-     WireCell::Point p1(110.0*units::cm,0*units::cm,0*units::cm);
+   // {
+   //   WireCell::Point p(30.0*units::cm,30*units::cm,30*units::cm);
+   //   WireCell::Point p1(110.0*units::cm,0*units::cm,0*units::cm);
      
-     std::cout << fid->inside_fiducial_volume(p) << " " << fid->inside_fiducial_volume(p1) << std::endl;
-
-     for (int i=0;i!=1000;i++){
-       for (int j=0;j!=1000;j++){
-	 //	 WireCell::Point p2(302.8*units::cm, 42.5*units::cm+3*units::cm, 738.4*units::cm);
-	 WireCell::Point p2(302.8*units::cm, -116*units::cm + 233*units::cm/1000.*j , 1037*units::cm/1000.*i);
-	 if (fid->inside_dead_region(p2))
-	   std::cout << "Xin: " << p2.y/units::cm << " " << p2.z/units::cm << std::endl;
-	   //     	 std::cout << fid->inside_dead_region(p2) << std::endl;
-       }
-     }
-   }
-			//
+   //   std::cout << fid->inside_fiducial_volume(p) << " " << fid->inside_fiducial_volume(p1) << std::endl;
+   //   WireCell::Point p2(-100*units::cm, 42.5*units::cm+3*units::cm, 738.4*units::cm);
+   //   std::cout << fid->inside_dead_region(p2) << std::endl;
+     
+   //   // for (int i=0;i!=1000;i++){
+   //   //   for (int j=0;j!=1000;j++){
+   //   // 	 //	 
+   //   // 	 WireCell::Point p2(302.8*units::cm, -116*units::cm + 233*units::cm/1000.*j , 1037*units::cm/1000.*i);
+   //   // 	 if (fid->inside_dead_region(p2))
+   //   // 	   std::cout << "Xin: " << p2.y/units::cm << " " << p2.z/units::cm << std::endl;
+	       	 
+   //   //   }
+   //   // }
+   // }
+			
    
    
    ToyCTPointCloud ct_point_cloud(0,2399,2400,4799,4800,8255, // channel range
