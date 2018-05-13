@@ -13,7 +13,7 @@
 
 
 #include "WireCell2dToy/ToyMatching.h"
-
+#include "WireCell2dToy/ToyFiducial.h"
 
 #include "TH1F.h"
 #include "TH2F.h"
@@ -230,6 +230,12 @@ int main(int argc, char* argv[])
   TDC->SetBranchAddress("wire_index_w",&wire_index_w_vec);
 
 
+  WireCell2dToy::ToyFiducial *fid = new WireCell2dToy::ToyFiducial(3,800,-first_u_dis/pitch_u, -first_v_dis/pitch_v, -first_w_dis/pitch_w,
+								   1./time_slice_width, 1./pitch_u, 1./pitch_v, 1./pitch_w, // slope
+								   angle_u,angle_v,angle_w,// angle
+								   3*units::cm);
+  
+
   // load cells ... 
   GeomCellSelection mcells;
   PR3DClusterSelection live_clusters;
@@ -388,6 +394,7 @@ int main(int argc, char* argv[])
       for (int j=0;j!=ntime_slice_vec->at(i);j++){
           cluster->AddCell(mcell,time_slices.at(j));
       }
+      fid->AddDeadRegion(mcell,time_slices);
 
       prev_cluster_id=cluster_id;
       ident++;
@@ -437,6 +444,26 @@ int main(int argc, char* argv[])
    // create global CT point cloud ...
    double_t first_t_dis = live_clusters.at(0)->get_mcells().front()->GetTimeSlice()*time_slice_width - live_clusters.at(0)->get_mcells().front()->get_sampling_points().front().x;
    double offset_t = first_t_dis/time_slice_width;
+
+   // test the fiducial volume cut 
+   fid->set_offset_t(offset_t);
+   {
+     WireCell::Point p(30.0*units::cm,30*units::cm,30*units::cm);
+     WireCell::Point p1(110.0*units::cm,0*units::cm,0*units::cm);
+     
+     std::cout << fid->inside_fiducial_volume(p) << " " << fid->inside_fiducial_volume(p1) << std::endl;
+
+     for (int i=0;i!=1000;i++){
+       for (int j=0;j!=1000;j++){
+	 //	 WireCell::Point p2(302.8*units::cm, 42.5*units::cm+3*units::cm, 738.4*units::cm);
+	 WireCell::Point p2(302.8*units::cm, -116*units::cm + 233*units::cm/1000.*j , 1037*units::cm/1000.*i);
+	 if (fid->inside_dead_region(p2))
+	   std::cout << "Xin: " << p2.y/units::cm << " " << p2.z/units::cm << std::endl;
+	   //     	 std::cout << fid->inside_dead_region(p2) << std::endl;
+       }
+     }
+   }
+			//
    
    
    ToyCTPointCloud ct_point_cloud(0,2399,2400,4799,4800,8255, // channel range
@@ -447,6 +474,9 @@ int main(int argc, char* argv[])
    ct_point_cloud.AddPoints(timesliceId,timesliceChannel,raw_charge,raw_charge_err);
    ct_point_cloud.build_kdtree_index();
 
+
+   
+   
    // // test the usage of this CT point cloud
    // {
    //   std::cout << live_clusters.at(0)->get_mcells().front()->get_sampling_points().front().x/units::cm << " " << live_clusters.at(0)->get_mcells().front()->get_sampling_points().front().y/units::cm << " " << live_clusters.at(0)->get_mcells().front()->get_sampling_points().front().z/units::cm << std::endl;

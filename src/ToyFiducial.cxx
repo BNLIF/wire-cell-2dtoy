@@ -104,10 +104,13 @@ bool WireCell2dToy::ToyFiducial::inside_dead_region(WireCell::Point& p){
   int ch_v = pos_v * slope_v + offset_v + 2400;
   int ch_w = pos_w * slope_w + offset_w + 4800;
 
+  //  std::cout << ch_u << " " << ch_v << " " << ch_w << " " << time_slice << std::endl;
+  //  std::cout << slope_w << " " << offset_w << " " << pos_w << std::endl;
+  
   if (time_slice <0 || time_slice >=2398) return false;
   if (ch_u <0 || ch_u>=2400)  return false;
   if (ch_v <2400 || ch_v>=4800)  return false;
-  if (ch_w <4800 || ch_w>=7256)  return false;
+  if (ch_w <4800 || ch_w>=8256)  return false;
 
   std::set<SlimMergeGeomCell*> dead_u_mcells;
   std::set<SlimMergeGeomCell*> dead_v_mcells;
@@ -119,7 +122,9 @@ bool WireCell2dToy::ToyFiducial::inside_dead_region(WireCell::Point& p){
     dead_v_mcells = ch_mcell_set_map[ch_v];
   if (ch_mcell_set_map.find(ch_w)!=ch_mcell_set_map.end())
     dead_w_mcells = ch_mcell_set_map[ch_w];
-
+  
+  std::cout << ch_u << " " << ch_v << " " << ch_w << " " << dead_u_mcells.size() << " " << dead_v_mcells.size() << " " << dead_w_mcells.size() << std::endl;
+  
   // find the dead region given the U, V, and W number
   std::set<SlimMergeGeomCell*> results;
   for (auto it = dead_u_mcells.begin(); it!=dead_u_mcells.end(); it++){
@@ -161,6 +166,8 @@ void WireCell2dToy::ToyFiducial::AddDeadRegion(WireCell::SlimMergeGeomCell* mcel
   GeomWireSelection& uwires = mcell->get_uwires();
   GeomWireSelection& vwires = mcell->get_vwires();
   GeomWireSelection& wwires = mcell->get_wwires();
+
+  // std::cout << uwires.size() << " " << vwires.size() << " " << wwires.size() << " " << start_time << " " << end_time << std::endl;
   
   std::vector<WirePlaneType_t> bad_planes = mcell->get_bad_planes();
 
@@ -198,7 +205,7 @@ void WireCell2dToy::ToyFiducial::AddDeadRegion(WireCell::SlimMergeGeomCell* mcel
     int start_ch = wwires.front()->channel() - dead_region_ch_ext;
     if (start_ch <4800) start_ch = 4800;
     int end_ch = wwires.back()->channel() + dead_region_ch_ext;
-    if (end_ch>=7256) end_ch = 7255;
+    if (end_ch>=8256) end_ch = 8255;
     for (int i = start_ch; i<=end_ch;i++){
       if (ch_mcell_set_map.find(i)==ch_mcell_set_map.end()){
 	std::set<SlimMergeGeomCell*> mcells_set;
