@@ -1461,7 +1461,9 @@ FlashTPCBundleSelection WireCell2dToy::tpc_light_match(int time_offset, int nreb
     }
    
     // Need some organization ...
+
     
+    // find clusters that share the same flash
     
     FlashTPCBundleSelection results_bundles;
     // return bundles ...    
