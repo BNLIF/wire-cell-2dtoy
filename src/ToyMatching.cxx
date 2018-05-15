@@ -1459,10 +1459,12 @@ FlashTPCBundleSelection WireCell2dToy::tpc_light_match(int time_offset, int nreb
 	//std::cout << i << " Q " <<  tpc_index << " " << flash->get_flash_id() << " " << total_pairs.at(i).second->get_cluster_id() << " " << total_weights.at(i) << " " << beta(i)  << " " << flash->get_time() << std::endl;
       }
     }
+   
+    // Need some organization ...
     
-    // return bundles ...
+    
     FlashTPCBundleSelection results_bundles;
-    
+    // return bundles ...    
     for (auto it = group_clusters.begin(); it!=group_clusters.end(); it++){
       PR3DCluster* main_cluster = it->first;
       if (map_tpc_index.find(main_cluster)!=map_tpc_index.end()){
@@ -1486,10 +1488,8 @@ FlashTPCBundleSelection WireCell2dToy::tpc_light_match(int time_offset, int nreb
 	results_bundles.push_back(bundle);
       }
     }
-    return results_bundles;
-
-    // Need some organization ... 
     
+    return results_bundles;
     
   }
   

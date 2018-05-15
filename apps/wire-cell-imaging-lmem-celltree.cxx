@@ -139,7 +139,9 @@ int main(int argc, char* argv[])
 
   int save_file = 2; //
   // 1 for debug mode for bee ...
-  // 2 for 
+  // 2 for
+  int flag_l1 = 0; // do not run l1sp code ... 
+  
   for(Int_t i = 3; i != argc; i++){
      switch(argv[i][1]){
      case 't':
@@ -159,6 +161,9 @@ int main(int argc, char* argv[])
        break;
      case 'f':
        beam = atoi(&argv[i][2]);
+       break;
+     case 'l':
+       flag_l1 = atoi(&argv[i][2]);
        break;
      }
   }
@@ -698,64 +703,67 @@ if(beamspill || beam==-1){
     lowmemtiling[i]->init_good_cells(slice,slice_err,uplane_rms,vplane_rms,wplane_rms);
 
     //  std::cout << lowmemtiling[i]->get_two_bad_wire_cells().size() << std::endl;
-    
-    GeomWireSelection wires = lowmemtiling[i]->find_L1SP_wires();
-    l1sp.AddWires(i,wires);
+
+    if (flag_l1){
+      GeomWireSelection wires = lowmemtiling[i]->find_L1SP_wires();
+      l1sp.AddWires(i,wires);
+    }
   }
 
   cout << em("finish initial tiling") << endl;
 
 
 
+  if (flag_l1){
+    l1sp.AddWireTime_Raw();
+    l1sp.Form_rois(6);
   
-  l1sp.AddWireTime_Raw();
-  l1sp.Form_rois(6);
+    roi_fds.refresh(hu_decon,hv_decon,hw_decon,eve_num);
+    roi_gaus_fds.refresh(hu_decon_g,hv_decon_g,hw_decon_g,eve_num);
+    error_fds.refresh(hu_decon_g, hv_decon_g, hw_decon_g, eve_num);
+    
   
-  roi_fds.refresh(hu_decon,hv_decon,hw_decon,eve_num);
-  roi_gaus_fds.refresh(hu_decon_g,hv_decon_g,hw_decon_g,eve_num);
-  error_fds.refresh(hu_decon_g, hv_decon_g, hw_decon_g, eve_num);
- 
-  
-  std::set<int>& time_slice_set = l1sp.get_time_slice_set();
-  for (auto it = time_slice_set.begin(); it!= time_slice_set.end(); it++){
-    int time_slice = *it;
-    //std::cout << time_slice << std::endl;
-    if (time_slice >= start_num && time_slice <=end_num){
+    std::set<int>& time_slice_set = l1sp.get_time_slice_set();
+    for (auto it = time_slice_set.begin(); it!= time_slice_set.end(); it++){
+      int time_slice = *it;
+      //std::cout << time_slice << std::endl;
+      if (time_slice >= start_num && time_slice <=end_num){
       
-      sds.jump(time_slice);
-      WireCell::Slice& slice = sds.get();
-      WireCell::Slice& slice_err = sds.get_error();
+	sds.jump(time_slice);
+	WireCell::Slice& slice = sds.get();
+	WireCell::Slice& slice_err = sds.get_error();
+	
+	
+	// std::cout << lowmemtiling[time_slice]->get_wire_charge_error_map().size() << std::endl;
+	// WireCell::WireChargeMap& wire_charge_err_map = lowmemtiling[time_slice]->get_wire_charge_error_map();
+	// for (auto it1= wire_charge_err_map.begin(); it1 != wire_charge_err_map.end(); it1++){
+	// 	if ((*it1).second==0)
+	// 	  std::cout << "A: " << (*it1).second << std::endl;
+	// }
+	
+	//lowmemtiling[time_slice]->reset_cells();
+	delete lowmemtiling[time_slice];
+	lowmemtiling[time_slice] = new WireCell2dToy::LowmemTiling(time_slice,nrebin,gds,WCholder);
+	if (time_slice==start_num){
+	  lowmemtiling[time_slice]->init_bad_cells(uplane_map,vplane_map,wplane_map);
+	}else{
+	  lowmemtiling[time_slice]->check_bad_cells(lowmemtiling[time_slice-1],uplane_map,vplane_map,wplane_map);
+	}
+	lowmemtiling[time_slice]->init_good_cells(slice,slice_err,uplane_rms,vplane_rms,wplane_rms);
 
-
-      // std::cout << lowmemtiling[time_slice]->get_wire_charge_error_map().size() << std::endl;
-      // WireCell::WireChargeMap& wire_charge_err_map = lowmemtiling[time_slice]->get_wire_charge_error_map();
-      // for (auto it1= wire_charge_err_map.begin(); it1 != wire_charge_err_map.end(); it1++){
-      // 	if ((*it1).second==0)
-      // 	  std::cout << "A: " << (*it1).second << std::endl;
-      // }
-      
-      //lowmemtiling[time_slice]->reset_cells();
-      delete lowmemtiling[time_slice];
-      lowmemtiling[time_slice] = new WireCell2dToy::LowmemTiling(time_slice,nrebin,gds,WCholder);
-      if (time_slice==start_num){
-	 lowmemtiling[time_slice]->init_bad_cells(uplane_map,vplane_map,wplane_map);
-       }else{
-	 lowmemtiling[time_slice]->check_bad_cells(lowmemtiling[time_slice-1],uplane_map,vplane_map,wplane_map);
-       }
-      lowmemtiling[time_slice]->init_good_cells(slice,slice_err,uplane_rms,vplane_rms,wplane_rms);
-
-      //std::cout << lowmemtiling[time_slice]->get_two_bad_wire_cells().size() << std::endl;
-      // std::cout << lowmemtiling[time_slice]->get_wire_charge_error_map().size() << std::endl;
-      // {
-      // 	WireCell::WireChargeMap& wire_charge_err_map = lowmemtiling[time_slice]->get_wire_charge_error_map();
-      // 	for (auto it1= wire_charge_err_map.begin(); it1 != wire_charge_err_map.end(); it1++){
-      // 	  if ((*it1).second==0)
-      // 	    std::cout << "B: " << (*it1).second << std::endl;
-      // 	} 
-      // }
+	//std::cout << lowmemtiling[time_slice]->get_two_bad_wire_cells().size() << std::endl;
+	// std::cout << lowmemtiling[time_slice]->get_wire_charge_error_map().size() << std::endl;
+	// {
+	// 	WireCell::WireChargeMap& wire_charge_err_map = lowmemtiling[time_slice]->get_wire_charge_error_map();
+	// 	for (auto it1= wire_charge_err_map.begin(); it1 != wire_charge_err_map.end(); it1++){
+	// 	  if ((*it1).second==0)
+	// 	    std::cout << "B: " << (*it1).second << std::endl;
+	// 	} 
+	// }
+      }
     }
   }
-
+  
   delete hu_decon;
   delete hv_decon;
   delete hw_decon;
@@ -771,7 +779,8 @@ if(beamspill || beam==-1){
   calibGaussian_wf->Clear("C");
   nf_wf->Clear("C"); 
 
-  cout << em("finish L1SP and retiling") << endl;
+  if (flag_l1)
+    cout << em("finish L1SP and retiling") << endl;
   
   // to save original charge info (after L1SP) into output Trun
   std::vector<int> *timesliceId = new std::vector<int>;

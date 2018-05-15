@@ -536,6 +536,7 @@ int main(int argc, char* argv[])
      live_clusters.at(i)->fine_tracking();
      live_clusters.at(i)->collect_charge_trajectory(ct_point_cloud);
    }
+   
    cerr << em("Create Graph in all clusters") << std::endl;
    
    // processing light information

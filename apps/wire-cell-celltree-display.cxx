@@ -275,7 +275,7 @@ int main(int argc, char* argv[])
 
   
 
-  TFile *file = new TFile(Form("nsp_2D_display_%d_%d_%d.root",run_no,subrun_no,event_no),"RECREATE");
+  TFile *file = new TFile(Form("celltree_2D_display_%d_%d_%d.root",run_no,subrun_no,event_no),"RECREATE");
   
   
   TTree *Trun = new TTree("Trun","Trun");
@@ -389,6 +389,8 @@ int main(int argc, char* argv[])
       hu_decon_g->SetBinContent(i+1,j+1,0);
     }
   }
+
+  
   
   for (auto it = uplane_map.begin(); it!=uplane_map.end(); it++){
     int ch = it->first;
@@ -399,6 +401,8 @@ int main(int argc, char* argv[])
       hu_decon_g->SetBinContent(ch+1,j+1,0);
     }
   }
+
+
   for (auto it = vplane_map.begin(); it!=vplane_map.end(); it++){
     int ch = it->first;
     int start = it->second.first/nrebin;
@@ -421,8 +425,8 @@ int main(int argc, char* argv[])
     }
   }
 
-  
-  
+  //  std::cout << "Xin1 " << " " << uplane_rms.size() << " " << std::endl;  
+ 
 
   int tpc_status = WireCell2dToy::Noisy_Event_ID(hu_decon, hv_decon, hw_decon, uplane_rms, vplane_rms, wplane_rms, uplane_map, vplane_map, wplane_map, hu_decon_g, hv_decon_g, hw_decon_g, nrebin, hv_raw, true);
   WireCell2dToy::Organize_Dead_Channels(uplane_map, vplane_map, wplane_map, hv_raw->GetNbinsY()-1,nrebin);
