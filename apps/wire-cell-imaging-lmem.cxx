@@ -109,6 +109,8 @@ int main(int argc, char* argv[])
   int save_file = 0; //
   // 1 for debug mode for bee ...
 
+  int flag_l1 = 0; // do not run l1sp code 
+  
   for(Int_t i = 1; i != argc; i++){
      switch(argv[i][1]){
      case 't':
@@ -125,6 +127,9 @@ int main(int argc, char* argv[])
        break;
      case 'b':
        nt_off2 = atoi(&argv[i][2]);
+       break;
+     case 'l':
+       flag_l1 = atoi(&argv[i][2]);
        break;
      }
   }
@@ -586,10 +591,10 @@ int main(int argc, char* argv[])
     lowmemtiling[i]->init_good_cells(slice,slice_err,uplane_rms,vplane_rms,wplane_rms);
 
     //  std::cout << lowmemtiling[i]->get_two_bad_wire_cells().size() << std::endl;
-    
-    GeomWireSelection wires = lowmemtiling[i]->find_L1SP_wires();
-    l1sp.AddWires(i,wires);
-
+    if (flag_l1){
+      GeomWireSelection wires = lowmemtiling[i]->find_L1SP_wires();
+      l1sp.AddWires(i,wires);
+    }
     
   }
 
@@ -599,7 +604,7 @@ int main(int argc, char* argv[])
 
   cout << em("finish initial tiling") << endl;
 
-  if (1){
+  if (flag_l1){
     l1sp.AddWireTime_Raw();
     l1sp.Form_rois(6);
     
