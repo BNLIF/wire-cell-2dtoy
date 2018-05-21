@@ -1560,7 +1560,7 @@ void WireCell2dToy::organize_matched_bundles(WireCell::FlashTPCBundleSelection& 
     for (auto it1 = old_bundles.begin(); it1!=old_bundles.end(); it1++){
       FlashTPCBundle* bundle = (*it1);
       if (bundle!=best_bundle){
-	std::cout << best_bundle->examine_bundle(bundle,cos_pe_low, cos_pe_mid) << std::endl;
+	std::cout << bundle->get_ks_dis() << " " << bundle->get_chi2() << " " << bundle->get_ndf()<< " " << best_bundle->examine_bundle(bundle,cos_pe_low, cos_pe_mid) << std::endl;
       }
     }
     std::cout << std::endl;
