@@ -1459,11 +1459,6 @@ FlashTPCBundleSelection WireCell2dToy::tpc_light_match(int time_offset, int nreb
 	//std::cout << i << " Q " <<  tpc_index << " " << flash->get_flash_id() << " " << total_pairs.at(i).second->get_cluster_id() << " " << total_weights.at(i) << " " << beta(i)  << " " << flash->get_time() << std::endl;
       }
     }
-   
-    // Need some organization ...
-
-    
-    // find clusters that share the same flash
     
     FlashTPCBundleSelection results_bundles;
     // return bundles ...    
@@ -1490,9 +1485,52 @@ FlashTPCBundleSelection WireCell2dToy::tpc_light_match(int time_offset, int nreb
 	results_bundles.push_back(bundle);
       }
     }
+
+
     
+    organize_matched_bundles(results_bundles,live_clusters, cos_pe_low, cos_pe_mid);
     return results_bundles;
-    
   }
+}
+
+
+void WireCell2dToy::organize_matched_bundles(WireCell::FlashTPCBundleSelection& results_bundles, WireCell::PR3DClusterSelection& live_clusters, Double_t *cos_pe_low, Double_t *cos_pe_mid){
+  std::map<Opflash*, FlashTPCBundleSelection> flash_bundles_map;
+
+  // get all the flashes and associated bundles for more than one bundle ... 
+  for (auto it = results_bundles.begin(); it!= results_bundles.end(); it++){
+    FlashTPCBundle *bundle = (*it);
+    Opflash *flash = bundle->get_flash();
+    if (flash!=0){
+      if (flash_bundles_map.find(flash)==flash_bundles_map.end()){
+	FlashTPCBundleSelection bundles;
+	bundles.push_back(bundle);
+	flash_bundles_map[flash] = bundles;
+      }else{
+	flash_bundles_map[flash].push_back(bundle);
+      }
+    }
+  }
+
+  OpflashSelection flashes;
+  for (auto it= flash_bundles_map.begin(); it!=flash_bundles_map.end(); it++){
+    if (it->second.size()==1){
+      flashes.push_back(it->first);
+      //      flash_bundles_map.erase(it);
+      //      std::cout << it->second.size() << std::endl;
+      //      }else{
+      //      std::cout << "A: " << it->second.size() << std::endl;
+    }
+  }
+  for (auto it = flashes.begin(); it!=flashes.end(); it++){
+    flash_bundles_map.erase(*it);
+  }
+  
+  // for (auto it= flash_bundles_map.begin(); it!=flash_bundles_map.end(); it++){
+  //   std::cout << it->second.size() << std::endl;
+  // }
+
+  // 
+
   
 }

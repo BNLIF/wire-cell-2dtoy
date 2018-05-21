@@ -11,6 +11,9 @@ namespace WireCell2dToy{
   int convert_xyz_voxel_id(WireCell::Point& p);
 
   WireCell::FlashTPCBundleSelection tpc_light_match(int time_offset, int nrebin, std::map<WireCell::PR3DCluster*,std::vector<std::pair<WireCell::PR3DCluster*,double>>>& group_clusters, WireCell::OpflashSelection& flashes, WireCell::PR3DClusterSelection& live_clusters);
+
+  void organize_matched_bundles(WireCell::FlashTPCBundleSelection& results_bundles, WireCell::PR3DClusterSelection& live_clusters, Double_t *cos_pe_low, Double_t *cos_pe_mid);
+  
   // std::vector<std::tuple<WireCell::PR3DCluster*, WireCell::Opflash*, double, std::vector<double>>> tpc_light_match(int time_offset, int nrebin, std::map<WireCell::PR3DCluster*,std::vector<std::pair<WireCell::PR3DCluster*,double>>>& group_clusters, WireCell::OpflashSelection& flashes);
 }
 
