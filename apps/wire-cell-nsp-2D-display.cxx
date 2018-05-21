@@ -285,6 +285,8 @@ int main(int argc, char* argv[])
 
   for (size_t ind=0; ind < nchannels; ++ind) {
     TH1F* signal = dynamic_cast<TH1F*>(esignal->At(ind));
+
+    //TH1S* signal = dynamic_cast<TH1S*>(esignal->At(ind));
     int chid = channelid->at(ind);
      
     WirePlaneType_t plane = gds.by_channel(chid).at(0)->plane();
