@@ -621,9 +621,11 @@ int main(int argc, char* argv[])
 
      PR3DClusterSelection temp_clusters;
      temp_clusters.push_back(main_cluster);
-     for (auto it1 = group_clusters[main_cluster].begin(); it1!=group_clusters[main_cluster].end(); it1++){
-       temp_clusters.push_back((*it1).first);
-       //std::cout << (*it1).second/units::cm << std::endl;
+     for (auto it1 = bundle->get_other_clusters().begin(); it1!=bundle->get_other_clusters().end();it1++){
+       temp_clusters.push_back(*it1);
+       // for (auto it1 = group_clusters[main_cluster].begin(); it1!=group_clusters[main_cluster].end(); it1++){
+       //   temp_clusters.push_back((*it1).first);
+       // std::cout << (*it1).second/units::cm << std::endl;
      }
      for (size_t j = 0; j!= temp_clusters.size(); j++){
        SMGCSelection& mcells = temp_clusters.at(j)->get_mcells();

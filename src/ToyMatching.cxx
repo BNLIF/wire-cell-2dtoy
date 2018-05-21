@@ -1531,6 +1531,7 @@ void WireCell2dToy::organize_matched_bundles(WireCell::FlashTPCBundleSelection& 
     FlashTPCBundleSelection& old_bundles = it->second;
     Opflash *flash = it->first;
     
+    FlashTPCBundleSelection to_be_removed;
     // bool flag_close_to_PMT = false;
     // bool flag_at_x_boundary = false;
     // PR3DClusterSelection main_clusters;
@@ -1548,22 +1549,37 @@ void WireCell2dToy::organize_matched_bundles(WireCell::FlashTPCBundleSelection& 
 	best_value = value;
 	best_bundle = bundle;
       }
+      
       // std::cout << bundle->get_ks_dis() << " " << bundle->get_chi2() << " " << bundle->get_ndf() << std::endl;
-      // flag_close_to_PMT = flag_close_to_PMT || bundle->get_flag_close_to_PMT();
-      // flag_at_x_boundary = flag_at_x_boundary || bundle->get_flag_at_x_boundary();
-      // main_clusters.push_back(bundle->get_main_cluster());
-      // std::copy(bundle->get_other_clusters().begin(), bundle->get_other_clusters().end(), std::back_inserter(other_clusters));
-      // std::copy(bundle->get_more_clusters().begin(), bundle->get_more_clusters().end(), std::back_inserter(more_clusters));
     }
-    std::cout << best_bundle->get_ks_dis() << " " << best_bundle->get_chi2() << " " << best_bundle->get_ndf() << std::endl;
+    
+    //  std::cout << best_bundle->get_ks_dis() << " " << best_bundle->get_chi2() << " " << best_bundle->get_ndf() << std::endl;
     
     for (auto it1 = old_bundles.begin(); it1!=old_bundles.end(); it1++){
       FlashTPCBundle* bundle = (*it1);
       if (bundle!=best_bundle){
-	std::cout << bundle->get_ks_dis() << " " << bundle->get_chi2() << " " << bundle->get_ndf()<< " " << best_bundle->examine_bundle(bundle,cos_pe_low, cos_pe_mid) << std::endl;
+	//	std::cout << bundle->get_ks_dis() << " " << bundle->get_chi2() << " " << bundle->get_ndf()<< " " << best_bundle->examine_bundle(bundle,cos_pe_low, cos_pe_mid) << std::endl;
+	
+	if (best_bundle->examine_bundle(bundle,cos_pe_low, cos_pe_mid)){
+	  // std::cout << best_bundle->get_other_clusters().size() << std::endl;
+	  best_bundle->add_bundle(bundle,cos_pe_low,cos_pe_mid);
+
+	  // update group clusters ... 
+	  
+	  
+	  // std::cout << best_bundle->get_other_clusters().size() << std::endl;
+	  to_be_removed.push_back(bundle);
+	}else{
+	  bundle->set_flash(0);
+	}
       }
     }
-    std::cout << std::endl;
+
+    for (auto it = to_be_removed.begin(); it!=to_be_removed.end(); it++){
+      results_bundles.erase(find(results_bundles.begin(),results_bundles.end(),*it));
+    }
+    
+    // std::cout << std::endl;
     
     //   std::cout << it->second.size() << std::endl;
   }
