@@ -573,7 +573,12 @@ int main(int argc, char* argv[])
    for (size_t i=0;i!=live_clusters.size();i++){
      //    std::cout << live_clusters.at(i)->get_mcells().size() << " " << live_clusters.at(i)->get_num_time_slices() << std::endl;
      live_clusters.at(i)->Create_graph();
+
      std::pair<WCPointCloud<double>::WCPoint,WCPointCloud<double>::WCPoint> wcps = live_clusters.at(i)->get_highest_lowest_wcps();
+     // std::pair<WCPointCloud<double>::WCPoint,WCPointCloud<double>::WCPoint> wcps = live_clusters.at(i)->get_extreme_wcps();
+
+     //  std::cout << wcps.first.x/units::cm << " " << wcps.first.y/units::cm << " " << wcps.first.z/units::cm << " " << wcps.second.x/units::cm << " " << wcps.second.y/units::cm << " " << wcps.second.z/units::cm << std::endl;
+     
      live_clusters.at(i)->dijkstra_shortest_paths(wcps.first);
      live_clusters.at(i)->cal_shortest_path(wcps.second);
      live_clusters.at(i)->fine_tracking();
@@ -743,7 +748,7 @@ int main(int argc, char* argv[])
      }
      for (size_t j = 0; j!= temp_clusters.size(); j++){
        
-       //  ncluster = temp_clusters.at(j)->get_cluster_id();
+       //ncluster = temp_clusters.at(j)->get_cluster_id();
        
        SMGCSelection& mcells = temp_clusters.at(j)->get_mcells();
        //ncluster = temp_clusters.at(0)->get_cluster_id();
