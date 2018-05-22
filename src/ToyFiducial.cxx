@@ -98,16 +98,18 @@ bool WireCell2dToy::ToyFiducial::check_dead_volume(WireCell::Point& p, TVector3&
 	if (inside_dead_region(temp_p))
 	  num_points_dead ++;
 	temp_p.x += dir.X() * step;
-	temp_p.y += dir.X() * step;
-	temp_p.z += dir.X() * step;
+	temp_p.y += dir.Y() * step;
+	temp_p.z += dir.Z() * step;
       }
 
+      std::cout << num_points << " " << num_points_dead << std::endl;
+      
       if (num_points_dead > 0.9*num_points){
 	return false;
       }else{
 	return true;
       }
-      //      std::cout << num_points << " " << num_points_dead << std::endl;
+      
     }
   }
 }

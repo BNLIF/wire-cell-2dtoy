@@ -649,7 +649,7 @@ int main(int argc, char* argv[])
        double offset_x = (flash->get_time() - time_offset)*2./nrebin*time_slice_width;
        bool flag_inside_p1 = fid->inside_fiducial_volume(p1,offset_x);
        bool flag_inside_p2 = fid->inside_fiducial_volume(p2,offset_x);
-       //std::cout << main_cluster->get_cluster_id() << " " << (p1.x-offset_x)/units::cm << " " << p1.y/units::cm << " " << p1.z/units::cm << " " << (p2.x-offset_x)/units::cm << " " << p2.y/units::cm << " " << p2.z/units::cm << " " << fid->inside_fiducial_volume(p1,offset_x) << " " << fid->inside_fiducial_volume(p2,offset_x) << std::endl;
+       std::cout << main_cluster->get_cluster_id() << " " << (p1.x-offset_x)/units::cm << " " << p1.y/units::cm << " " << p1.z/units::cm << " " << (p2.x-offset_x)/units::cm << " " << p2.y/units::cm << " " << p2.z/units::cm << " " << fid->inside_fiducial_volume(p1,offset_x) << " " << fid->inside_fiducial_volume(p2,offset_x) << std::endl;
        
        // check the dead region ...
        if (flag_inside_p1){
@@ -662,7 +662,7 @@ int main(int argc, char* argv[])
 	 // define a  local direction ...
 	 TVector3 dir = main_cluster->VHoughTrans(p2,30*units::cm);
 	 dir *= (-1);
-	 flag_inside_p1=fid->check_dead_volume(p1,dir,1*units::cm,offset_x);
+	 flag_inside_p2=fid->check_dead_volume(p2,dir,1*units::cm,offset_x);
        }
        
        if ((!flag_inside_p1)&&(!flag_inside_p2)){
