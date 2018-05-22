@@ -1595,10 +1595,11 @@ void WireCell2dToy::organize_matched_bundles(WireCell::FlashTPCBundleSelection& 
     for (auto it = to_be_removed.begin(); it!=to_be_removed.end(); it++){
       results_bundles.erase(find(results_bundles.begin(),results_bundles.end(),*it));
     }
+
+    if (best_bundle!=0){
+      best_bundle->examine_merge_clusters();
+    }
     
-    // std::cout << std::endl;
-    
-    //   std::cout << it->second.size() << std::endl;
   }
 
   // 

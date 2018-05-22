@@ -742,6 +742,9 @@ int main(int argc, char* argv[])
        //std::cout << (*it1).second/units::cm << std::endl;
      }
      for (size_t j = 0; j!= temp_clusters.size(); j++){
+       
+       //ncluster = temp_clusters.at(j)->get_cluster_id();
+       
        SMGCSelection& mcells = temp_clusters.at(j)->get_mcells();
        //ncluster = temp_clusters.at(0)->get_cluster_id();
        for (size_t i=0;i!=mcells.size();i++){
