@@ -81,6 +81,37 @@ WireCell2dToy::ToyFiducial::ToyFiducial(int dead_region_ch_ext, double offset_t,
 WireCell2dToy::ToyFiducial::~ToyFiducial(){
 }
 
+bool WireCell2dToy::ToyFiducial::check_dead_volume(WireCell::Point& p, TVector3& dir, double step, double offset_x){
+  if (!inside_fiducial_volume(p,offset_x)){
+    return false;
+  }else{
+    if (dir.Mag()==0){
+      return true;
+    }else{
+      dir *= 1./dir.Mag();
+      Point temp_p = p;
+      int num_points = 0;
+      int num_points_dead = 0;
+      while(inside_fiducial_volume(temp_p,offset_x)){
+
+	num_points ++;
+	if (inside_dead_region(temp_p))
+	  num_points_dead ++;
+	temp_p.x += dir.X() * step;
+	temp_p.y += dir.X() * step;
+	temp_p.z += dir.X() * step;
+      }
+
+      if (num_points_dead > 0.9*num_points){
+	return false;
+      }else{
+	return true;
+      }
+      //      std::cout << num_points << " " << num_points_dead << std::endl;
+    }
+  }
+}
+
 
 bool WireCell2dToy::ToyFiducial::inside_fiducial_volume(WireCell::Point& p, double offset_x){
   int c1 = pnpoly(boundary_xy_x, boundary_xy_y, p.x-offset_x, p.y);

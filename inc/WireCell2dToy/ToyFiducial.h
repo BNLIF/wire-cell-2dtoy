@@ -5,6 +5,8 @@
 #include "WireCellData/Point.h"
 #include "WireCellData/SlimMergeGeomCell.h"
 
+#include "TVector3.h"
+
 #include <vector>
 #include <map>
 
@@ -20,6 +22,7 @@ namespace WireCell2dToy{
     
     bool inside_fiducial_volume(WireCell::Point& p, double offset_x=0);
     bool inside_dead_region(WireCell::Point& p);
+    bool check_dead_volume(WireCell::Point& p, TVector3& dir, double step = 1.0*units::cm, double offset_x=0);
       
     void AddDeadRegion(WireCell::SlimMergeGeomCell* mcell, std::vector<int>& time_slices);
     

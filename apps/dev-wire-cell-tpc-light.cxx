@@ -598,13 +598,21 @@ int main(int argc, char* argv[])
    Double_t pe_pred[32];
    Double_t pe_meas[32];
    Double_t pe_meas_err[32];
+   Int_t event_type=0;
+
+   // 1: neutrino candidate
+   // 2: light mismatch
+   // 3: through-going muon
+   // 4: stopped muon
+   
    T_match->Branch("tpc_cluster_id",&ncluster,"tpc_cluster_id/I");
    T_match->Branch("flash_id",&flash_id,"flash_id/I");
    T_match->Branch("strength",&strength,"strength/D");
    T_match->Branch("pe_pred",pe_pred,"pe_pred[32]/D");
    T_match->Branch("pe_meas",pe_meas,"pe_meas[32]/D");
    T_match->Branch("pe_meas_err",pe_meas_err,"pe_meas_err[32]/D");
-
+   T_match->Branch("event_type",&event_type,"event_type/I");
+   
    for (auto it = matched_bundles.begin(); it!=matched_bundles.end(); it++){
      FlashTPCBundle *bundle = *it;
      
@@ -630,6 +638,38 @@ int main(int argc, char* argv[])
        }
      }
      ncluster = main_cluster->get_cluster_id();
+
+     // check if this is through going muon ...
+     event_type = 0;
+     if (flash!=0){
+       // check the fiducial volume ...
+       std::pair<WCPointCloud<double>::WCPoint,WCPointCloud<double>::WCPoint> wcps = main_cluster->get_extreme_wcps();
+       Point p1(wcps.first.x,wcps.first.y,wcps.first.z);
+       Point p2(wcps.second.x,wcps.second.y,wcps.second.z);
+       double offset_x = (flash->get_time() - time_offset)*2./nrebin*time_slice_width;
+       bool flag_inside_p1 = fid->inside_fiducial_volume(p1,offset_x);
+       bool flag_inside_p2 = fid->inside_fiducial_volume(p2,offset_x);
+       //std::cout << main_cluster->get_cluster_id() << " " << (p1.x-offset_x)/units::cm << " " << p1.y/units::cm << " " << p1.z/units::cm << " " << (p2.x-offset_x)/units::cm << " " << p2.y/units::cm << " " << p2.z/units::cm << " " << fid->inside_fiducial_volume(p1,offset_x) << " " << fid->inside_fiducial_volume(p2,offset_x) << std::endl;
+       
+       // check the dead region ...
+       if (flag_inside_p1){
+	 // define a local direction ...
+	 TVector3 dir = main_cluster->VHoughTrans(p1,30*units::cm);
+	 dir *= (-1);
+	 flag_inside_p1=fid->check_dead_volume(p1,dir,1*units::cm,offset_x);
+       }
+       if (flag_inside_p2){
+	 // define a  local direction ...
+	 TVector3 dir = main_cluster->VHoughTrans(p2,30*units::cm);
+	 dir *= (-1);
+	 flag_inside_p1=fid->check_dead_volume(p1,dir,1*units::cm,offset_x);
+       }
+       
+       if ((!flag_inside_p1)&&(!flag_inside_p2)){
+	 event_type |= 1UL << 3; // through going muon ... 
+       }
+     }
+     
      T_match->Fill();
    }
 
