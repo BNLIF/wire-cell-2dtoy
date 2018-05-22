@@ -527,17 +527,7 @@ int main(int argc, char* argv[])
    
    
    
-   for (size_t i=0;i!=live_clusters.size();i++){
-     //    std::cout << live_clusters.at(i)->get_mcells().size() << " " << live_clusters.at(i)->get_num_time_slices() << std::endl;
-     live_clusters.at(i)->Create_graph();
-     std::pair<WCPointCloud<double>::WCPoint,WCPointCloud<double>::WCPoint> wcps = live_clusters.at(i)->get_highest_lowest_wcps();
-     live_clusters.at(i)->dijkstra_shortest_paths(wcps.first);
-     live_clusters.at(i)->cal_shortest_path(wcps.second);
-     live_clusters.at(i)->fine_tracking();
-     live_clusters.at(i)->collect_charge_trajectory(ct_point_cloud);
-   }
-   
-   cerr << em("Create Graph in all clusters") << std::endl;
+  
    
    // processing light information
    //const char* root_file = argv[3];
@@ -565,8 +555,34 @@ int main(int argc, char* argv[])
    //   std::vector<std::tuple<WireCell::PR3DCluster*, WireCell::Opflash*, double, std::vector<double>>> matched_results = WireCell2dToy::tpc_light_match(time_offset,nrebin,group_clusters,flashes);
    FlashTPCBundleSelection matched_bundles = WireCell2dToy::tpc_light_match(time_offset,nrebin,group_clusters,flashes,live_clusters);
    cout << em("TPC Light Matching") << std::endl;
-   
 
+   // create the live clusters ...
+   //std::cout << live_clusters.size() << std::endl;
+   live_clusters.clear();
+
+   for (auto it = matched_bundles.begin(); it!= matched_bundles.end(); it++){
+     FlashTPCBundle *bundle = *it;
+     PR3DCluster *main_cluster = bundle->get_main_cluster();
+     live_clusters.push_back(main_cluster);
+     for (auto it1 = bundle->get_other_clusters().begin(); it1!=bundle->get_other_clusters().end();it1++){
+       live_clusters.push_back(*it1);
+     }
+   }
+   //std::cout << live_clusters.size() << std::endl;
+
+   for (size_t i=0;i!=live_clusters.size();i++){
+     //    std::cout << live_clusters.at(i)->get_mcells().size() << " " << live_clusters.at(i)->get_num_time_slices() << std::endl;
+     live_clusters.at(i)->Create_graph();
+     std::pair<WCPointCloud<double>::WCPoint,WCPointCloud<double>::WCPoint> wcps = live_clusters.at(i)->get_highest_lowest_wcps();
+     live_clusters.at(i)->dijkstra_shortest_paths(wcps.first);
+     live_clusters.at(i)->cal_shortest_path(wcps.second);
+     live_clusters.at(i)->fine_tracking();
+     live_clusters.at(i)->collect_charge_trajectory(ct_point_cloud);
+   }
+   
+   cerr << em("Create Graph in all clusters") << std::endl;
+
+   
    
    TFile *file1 = new TFile(Form("match_%d_%d_%d.root",run_no,subrun_no,event_no),"RECREATE");
    TTree *T_match = new TTree("T_match","T_match");

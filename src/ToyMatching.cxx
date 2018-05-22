@@ -142,6 +142,15 @@ FlashTPCBundleSelection WireCell2dToy::tpc_light_match(int time_offset, int nreb
   const int num_flashes = flashes.size();
   const int num_tpc_objs = group_clusters.size();
 
+
+  // {
+  //   int temp_num = 0;
+  //   for (auto it = group_clusters.begin(); it!= group_clusters.end(); it++){
+  //     temp_num += it->second.size()+1;
+  //   }
+  //   std::cout << live_clusters.size() << " " << temp_num << std::endl;
+  // }
+  
   //std::cout << num_flashes << " " << num_tpc_objs << std::endl;
   double high_x_cut = 256 * units::cm;
   double high_x_cut_ext1 = + 1.2*units::cm;
@@ -1476,12 +1485,20 @@ FlashTPCBundleSelection WireCell2dToy::tpc_light_match(int time_offset, int nreb
 	  Opflash *flash = 0;
 	  double strength  =0;
 	  FlashTPCBundle *bundle = new FlashTPCBundle(flash,main_cluster,-1,tpc_index);
+	  PR3DClusterSelection& other_clusters = bundle->get_other_clusters();
+	  for (auto it1 = it->second.begin(); it1!= it->second.end(); it1++){
+	    other_clusters.push_back(it1->first);
+	  }
 	  results_bundles.push_back(bundle);
 	}
       }else{
 	Opflash *flash = 0;
 	double strength  =0;
 	FlashTPCBundle *bundle = new FlashTPCBundle(flash,main_cluster,-1,-1);
+	PR3DClusterSelection& other_clusters = bundle->get_other_clusters();
+	for (auto it1 = it->second.begin(); it1!= it->second.end(); it1++){
+	  other_clusters.push_back(it1->first);
+	}
 	results_bundles.push_back(bundle);
       }
     }
