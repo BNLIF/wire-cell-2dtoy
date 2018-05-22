@@ -39,7 +39,7 @@ int WireCell2dToy::convert_xyz_voxel_id(WireCell::Point &p){
 
 
 //std::vector<std::tuple<PR3DCluster*, Opflash*, double, std::vector<double>>> WireCell2dToy::tpc_light_match(int time_offset, int nrebin, std::map<WireCell::PR3DCluster*,std::vector<std::pair<WireCell::PR3DCluster*,double>>>& group_clusters, WireCell::OpflashSelection& flashes){
-FlashTPCBundleSelection WireCell2dToy::tpc_light_match(int time_offset, int nrebin, std::map<WireCell::PR3DCluster*,std::vector<std::pair<WireCell::PR3DCluster*,double>>>& group_clusters, WireCell::OpflashSelection& flashes, WireCell::PR3DClusterSelection& live_clusters){
+FlashTPCBundleSelection WireCell2dToy::tpc_light_match(int time_offset, int nrebin, std::map<WireCell::PR3DCluster*,std::vector<std::pair<WireCell::PR3DCluster*,double>>>& group_clusters, WireCell::OpflashSelection& flashes){
   TChain *T = new TChain("/pmtresponse/PhotonLibraryData","/pmtresponse/PhotonLibraryData");
   T->AddFile("./uboone_photon_library.root");
   //  std::cout << T->GetEntries();
@@ -1505,13 +1505,13 @@ FlashTPCBundleSelection WireCell2dToy::tpc_light_match(int time_offset, int nreb
 
 
     
-    organize_matched_bundles(results_bundles,live_clusters, cos_pe_low, cos_pe_mid);
+    organize_matched_bundles(results_bundles, cos_pe_low, cos_pe_mid);
     return results_bundles;
   }
 }
 
 
-void WireCell2dToy::organize_matched_bundles(WireCell::FlashTPCBundleSelection& results_bundles, WireCell::PR3DClusterSelection& live_clusters, Double_t *cos_pe_low, Double_t *cos_pe_mid){
+void WireCell2dToy::organize_matched_bundles(WireCell::FlashTPCBundleSelection& results_bundles,  Double_t *cos_pe_low, Double_t *cos_pe_mid){
   std::map<Opflash*, FlashTPCBundleSelection> flash_bundles_map;
 
   // get all the flashes and associated bundles for more than one bundle ... 
