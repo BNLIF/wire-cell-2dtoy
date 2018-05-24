@@ -1175,12 +1175,12 @@ FlashTPCBundleSelection WireCell2dToy::tpc_light_match(int time_offset, int nreb
     
     // std::cout << "After Cleaning 3 : " << cluster_bundles_map.size() << " A " << flash_bundles_map.size() << " " << all_bundles.size() << std::endl;
     
-    // std::cout << std::endl << std::endl;
+    // // std::cout << std::endl << std::endl;
     // for (auto it = all_bundles.begin(); it!=all_bundles.end();it++){
     //   FlashTPCBundle *bundle = *it;
       
-    //   if ( bundle->get_consistent_flag() || bundle->get_flag_at_x_boundary())
-    // 	std::cout << bundle->get_flash()->get_flash_id() << " " << bundle->get_main_cluster()->get_cluster_id() << " " << bundle->get_flag_at_x_boundary() << " " << bundle->get_ks_dis() << " " << bundle->get_chi2() << " " << bundle->get_ndf() << " " << bundle->get_consistent_flag() << std::endl;
+    // //   if ( bundle->get_consistent_flag() || bundle->get_flag_at_x_boundary())
+    //   std::cout << bundle->get_flash()->get_flash_id() << " " << bundle->get_main_cluster()->get_cluster_id() << " " << bundle->get_flag_at_x_boundary() << " " << bundle->get_ks_dis() << " " << bundle->get_chi2() << " " << bundle->get_ndf() << " " << bundle->get_consistent_flag() << std::endl;
     // }
     // std::cout << std::endl << std::endl;
 
@@ -1227,6 +1227,8 @@ FlashTPCBundleSelection WireCell2dToy::tpc_light_match(int time_offset, int nreb
 	for (size_t j=0;j!=32;j++){
 	  double pe = flash->get_PE(j);
 	  double pe_err = sqrt(pow(flash->get_PE_err(j)*fudge_factor2,2) + pow(pe*fudge_factor1,2));
+	  // if (pe/pe_err>0)
+	  //   std::cout << i << " A " << j << " " << pe/pe_err << std::endl;
 	  
 	  M(32*i+j) = pe/pe_err;
 	  R(32*i+j,num_unknowns+i) = pe/pe_err; // flash alone term
@@ -1356,7 +1358,7 @@ FlashTPCBundleSelection WireCell2dToy::tpc_light_match(int time_offset, int nreb
       }
     }
     
-    //    std::cout << "After Cleaning 4 : " << cluster_bundles_map.size() << " A " << flash_bundles_map.size() << " " << all_bundles.size() << std::endl;
+    //   std::cout << "After Cleaning 4 : " << cluster_bundles_map.size() << " A " << flash_bundles_map.size() << " " << all_bundles.size() << std::endl;
     
     // regularization strength ... 
     double lambda = 0.1; // note the coefficient is all around 1
@@ -1503,6 +1505,14 @@ FlashTPCBundleSelection WireCell2dToy::tpc_light_match(int time_offset, int nreb
       }
     }
 
+    // std::cout << "Final: " << std::endl;
+    // for (auto it = results_bundles.begin(); it!= results_bundles.end(); it++){
+    //   FlashTPCBundle *bundle = (*it);
+    //   Opflash *flash = bundle->get_flash();
+    //   if (flash!=0){
+    // 	std::cout << flash->get_flash_id() << " " << flash->get_time() << " " << bundle->get_main_cluster()->get_cluster_id() << std::endl;
+    //   }
+    // }
 
     
     organize_matched_bundles(results_bundles, cos_pe_low, cos_pe_mid);
@@ -1519,6 +1529,8 @@ void WireCell2dToy::organize_matched_bundles(WireCell::FlashTPCBundleSelection& 
     FlashTPCBundle *bundle = (*it);
     Opflash *flash = bundle->get_flash();
     if (flash!=0){
+      // std::cout << flash->get_flash_id() << " " << flash->get_time() << " " << bundle->get_main_cluster()->get_cluster_id() << std::endl;
+      
       if (flash_bundles_map.find(flash)==flash_bundles_map.end()){
 	FlashTPCBundleSelection bundles;
 	bundles.push_back(bundle);
@@ -1529,18 +1541,22 @@ void WireCell2dToy::organize_matched_bundles(WireCell::FlashTPCBundleSelection& 
     }
   }
 
-  OpflashSelection flashes;
-  for (auto it= flash_bundles_map.begin(); it!=flash_bundles_map.end(); it++){
-    if (it->second.size()==1){
-      flashes.push_back(it->first);
-      //      flash_bundles_map.erase(it);
-      //      std::cout << it->second.size() << std::endl;
-      //      }else{
-      //      std::cout << "A: " << it->second.size() << std::endl;
+  {
+    OpflashSelection flashes;
+    for (auto it= flash_bundles_map.begin(); it!=flash_bundles_map.end(); it++){
+      // std::cout << it->first->get_flash_id() << " " << it->first->get_time() << " " << it->second.size() << std::endl;
+      
+      if (it->second.size()==1){
+	flashes.push_back(it->first);
+	//      flash_bundles_map.erase(it);
+	//      std::cout << it->second.size() << std::endl;
+	//      }else{
+	//      std::cout << "A: " << it->second.size() << std::endl;
+      }
     }
-  }
-  for (auto it = flashes.begin(); it!=flashes.end(); it++){
-    flash_bundles_map.erase(*it);
+    for (auto it = flashes.begin(); it!=flashes.end(); it++){
+      flash_bundles_map.erase(*it);
+    }
   }
 
   
@@ -1559,7 +1575,7 @@ void WireCell2dToy::organize_matched_bundles(WireCell::FlashTPCBundleSelection& 
     FlashTPCBundle* best_bundle = 0;
     double best_value = 1e9;
 
-    //std::cout << "Flash: " << flash->get_flash_id() << std::endl;
+    //  std::cout << "Flash: " << flash->get_flash_id() << std::endl;
     
     for (auto it1 = old_bundles.begin(); it1!=old_bundles.end(); it1++){
       FlashTPCBundle* bundle = (*it1);
@@ -1579,7 +1595,7 @@ void WireCell2dToy::organize_matched_bundles(WireCell::FlashTPCBundleSelection& 
       if (bundle!=best_bundle){
 	//	std::cout << bundle->get_ks_dis() << " " << bundle->get_chi2() << " " << bundle->get_ndf()<< " " << best_bundle->examine_bundle(bundle,cos_pe_low, cos_pe_mid) << std::endl;
 	
-	if (best_bundle->examine_bundle1(bundle,cos_pe_low, cos_pe_mid)){
+	if (best_bundle->examine_bundle_rank(bundle,cos_pe_low, cos_pe_mid)){
 	  // std::cout << best_bundle->get_other_clusters().size() << std::endl;
 	  best_bundle->add_bundle(bundle,cos_pe_low,cos_pe_mid);
 
