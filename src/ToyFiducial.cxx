@@ -84,10 +84,47 @@ bool WireCell2dToy::ToyFiducial::check_tgm(WireCell::FlashTPCBundle *bundle, dou
 
   std::vector<std::vector<WCPointCloud<double>::WCPoint>> out_vec_wcps = main_cluster->get_extreme_wcps();
 
-  
+  // int max_group = 0;
+  // int max_count = out_vec_wcps.at(max_group).size();
+
+  // for (size_t i=1; i!=out_vec_wcps.size();i++){
+  //   if (out_vec_wcps.at(i).size() > max_count){
+  //     max_group = i;
+  //     max_count = out_vec_wcps.at(max_group).size();
+  //   }
+  // }
+
+
+  // take a look at the first point ...
+  for (size_t i=0;i!=out_vec_wcps.size();i++){
+    bool flag_p1_inside = true;
+    for (size_t j=0;j!=out_vec_wcps.at(i).size();j++){
+      Point p1(out_vec_wcps.at(i).at(j).x,out_vec_wcps.at(i).at(j).y,out_vec_wcps.at(i).at(j).z);
+      flag_p1_inside = flag_p1_inside && inside_fiducial_volume(p1,offset_x);
+    }
+    
+    
+    // loop through the remaining groups and check ...
+    for (size_t k=i+1;k!=out_vec_wcps.size();k++){
+      bool flag_p2_inside = true;
+      for(size_t j=0;j!=out_vec_wcps.at(k).size();j++){
+	Point p2(out_vec_wcps.at(k).at(j).x,out_vec_wcps.at(k).at(j).y,out_vec_wcps.at(k).at(j).z);
+	flag_p2_inside = flag_p2_inside && inside_fiducial_volume(p2,offset_x);
+      }
+      std::cout << out_vec_wcps.at(i).at(0).x/units::cm << " " << out_vec_wcps.at(i).at(0).y/units::cm << " " << out_vec_wcps.at(i).at(0).z/units::cm << " " ;
+      std::cout << out_vec_wcps.at(k).at(0).x/units::cm << " " << out_vec_wcps.at(k).at(0).y/units::cm << " " << out_vec_wcps.at(k).at(0).z/units::cm << " " <<  flag_p1_inside << " " << flag_p2_inside << std::endl;
+      
+      if ((!flag_p1_inside) && (!flag_p2_inside))
+	return true;
+      
+    }
+  }
   
 
   return false;
+
+  // also check against the dead channel ...  
+
   
   // // check the fiducial volume ...
   // std::pair<WCPointCloud<double>::WCPoint,WCPointCloud<double>::WCPoint> wcps = main_cluster->get_main_axis_wcps();
