@@ -643,13 +643,8 @@ int main(int argc, char* argv[])
      event_type = 0;
      if (flash!=0){
        double offset_x = (flash->get_time() - time_offset)*2./nrebin*time_slice_width;
-
-       bool flag_tgm = fid->check_tgm(bundle,offset_x);
-       
-       if (flag_tgm)
+       if (fid->check_tgm(bundle,offset_x))
 	 event_type |= 1UL << 3;
-       
-       
      }
      
      T_match->Fill();
