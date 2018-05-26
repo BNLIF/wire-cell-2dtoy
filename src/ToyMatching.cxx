@@ -1541,23 +1541,23 @@ void WireCell2dToy::organize_matched_bundles(WireCell::FlashTPCBundleSelection& 
     }
   }
 
-  {
-    OpflashSelection flashes;
-    for (auto it= flash_bundles_map.begin(); it!=flash_bundles_map.end(); it++){
-      // std::cout << it->first->get_flash_id() << " " << it->first->get_time() << " " << it->second.size() << std::endl;
+  // {
+  //   OpflashSelection flashes;
+  //   for (auto it= flash_bundles_map.begin(); it!=flash_bundles_map.end(); it++){
+  //     // std::cout << it->first->get_flash_id() << " " << it->first->get_time() << " " << it->second.size() << std::endl;
       
-      if (it->second.size()==1){
-	flashes.push_back(it->first);
-	//      flash_bundles_map.erase(it);
-	//      std::cout << it->second.size() << std::endl;
-	//      }else{
-	//      std::cout << "A: " << it->second.size() << std::endl;
-      }
-    }
-    for (auto it = flashes.begin(); it!=flashes.end(); it++){
-      flash_bundles_map.erase(*it);
-    }
-  }
+  //     if (it->second.size()==1){
+  // 	flashes.push_back(it->first);
+  // 	//      flash_bundles_map.erase(it);
+  // 	//      std::cout << it->second.size() << std::endl;
+  // 	//      }else{
+  // 	//      std::cout << "A: " << it->second.size() << std::endl;
+  //     }
+  //   }
+  //   for (auto it = flashes.begin(); it!=flashes.end(); it++){
+  //     flash_bundles_map.erase(*it);
+  //   }
+  // }
 
   
   for (auto it= flash_bundles_map.begin(); it!=flash_bundles_map.end(); it++){

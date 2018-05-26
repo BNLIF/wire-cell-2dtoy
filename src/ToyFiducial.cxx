@@ -66,16 +66,24 @@ WireCell2dToy::ToyFiducial::ToyFiducial(int dead_region_ch_ext, double offset_t,
   boundary_xy_x.push_back(m_sc_top_2_x-boundary_dis_cut); boundary_xy_y.push_back(m_sc_top_2_y-boundary_dis_cut);
   boundary_xy_x.push_back(m_sc_top_1_x-boundary_dis_cut); boundary_xy_y.push_back(m_sc_top_1_y-boundary_dis_cut);
   boundary_xy_x.push_back(m_anode + boundary_dis_cut); boundary_xy_y.push_back(m_top - boundary_dis_cut);
-
+  // boundary_xy_x.push_back(m_anode + boundary_dis_cut); boundary_xy_y.push_back(m_bottom + boundary_dis_cut);
+  
+  // for (size_t i=0;i!=boundary_xy_x.size();i++){
+  //   std::cout << boundary_xy_x.at(i)/units::cm << " XY " << boundary_xy_y.at(i)/units::cm << std::endl;
+  // }
   
   boundary_xz_x.clear(); boundary_xz_z.clear();
-  boundary_xz_x.push_back(m_anode + boundary_dis_cut); boundary_xz_z.push_back(m_upstream + boundary_dis_cut+2*units::cm);
-  boundary_xz_x.push_back(m_sc_upstream_1_x - boundary_dis_cut); boundary_xz_z.push_back(m_sc_upstream_1_z + boundary_dis_cut+2*units::cm);
-  boundary_xz_x.push_back(m_sc_upstream_2_x - boundary_dis_cut); boundary_xz_z.push_back(m_sc_upstream_2_z + boundary_dis_cut+2*units::cm);
-  boundary_xz_x.push_back(m_sc_downstream_2_x - boundary_dis_cut); boundary_xz_z.push_back(m_sc_downstream_2_z - boundary_dis_cut-2*units::cm);
-  boundary_xz_x.push_back(m_sc_downstream_1_x - boundary_dis_cut); boundary_xz_z.push_back(m_sc_downstream_1_z - boundary_dis_cut-2*units::cm);
-  boundary_xz_x.push_back(m_anode + boundary_dis_cut); boundary_xz_z.push_back(m_downstream - boundary_dis_cut-2*units::cm);
-  
+  boundary_xz_x.push_back(m_anode + boundary_dis_cut); boundary_xz_z.push_back(m_upstream + boundary_dis_cut+1*units::cm);
+  boundary_xz_x.push_back(m_sc_upstream_1_x - boundary_dis_cut); boundary_xz_z.push_back(m_sc_upstream_1_z + boundary_dis_cut+1*units::cm);
+  boundary_xz_x.push_back(m_sc_upstream_2_x - boundary_dis_cut); boundary_xz_z.push_back(m_sc_upstream_2_z + boundary_dis_cut+1*units::cm);
+  boundary_xz_x.push_back(m_sc_downstream_2_x - boundary_dis_cut); boundary_xz_z.push_back(m_sc_downstream_2_z - boundary_dis_cut-1*units::cm);
+  boundary_xz_x.push_back(m_sc_downstream_1_x - boundary_dis_cut); boundary_xz_z.push_back(m_sc_downstream_1_z - boundary_dis_cut-1*units::cm);
+  boundary_xz_x.push_back(m_anode + boundary_dis_cut); boundary_xz_z.push_back(m_downstream - boundary_dis_cut-1*units::cm);
+  // boundary_xz_x.push_back(m_anode + boundary_dis_cut); boundary_xz_z.push_back(m_upstream + boundary_dis_cut+2*units::cm);
+
+  // for (size_t i=0;i!=boundary_xz_x.size();i++){
+  //   std::cout << boundary_xz_x.at(i)/units::cm << " XZ " << boundary_xz_z.at(i)/units::cm << std::endl;
+  // }
 }
 
 bool WireCell2dToy::ToyFiducial::check_tgm(WireCell::FlashTPCBundle *bundle, double offset_x){
@@ -98,26 +106,45 @@ bool WireCell2dToy::ToyFiducial::check_tgm(WireCell::FlashTPCBundle *bundle, dou
   // take a look at the first point ...
   for (size_t i=0;i!=out_vec_wcps.size();i++){
     bool flag_p1_inside = true;
+    int p1_index = -1;
     for (size_t j=0;j!=out_vec_wcps.at(i).size();j++){
       Point p1(out_vec_wcps.at(i).at(j).x,out_vec_wcps.at(i).at(j).y,out_vec_wcps.at(i).at(j).z);
       flag_p1_inside = flag_p1_inside && inside_fiducial_volume(p1,offset_x);
+      if (!flag_p1_inside){
+	p1_index = j;
+	break;
+      }
     }
     
     
     // loop through the remaining groups and check ...
     for (size_t k=i+1;k!=out_vec_wcps.size();k++){
       bool flag_p2_inside = true;
+      int p2_index = -1;
       for(size_t j=0;j!=out_vec_wcps.at(k).size();j++){
 	Point p2(out_vec_wcps.at(k).at(j).x,out_vec_wcps.at(k).at(j).y,out_vec_wcps.at(k).at(j).z);
 	flag_p2_inside = flag_p2_inside && inside_fiducial_volume(p2,offset_x);
+	if (!flag_p2_inside){
+	  p2_index = j;
+	  break;
+	}
       }
-      // std::cout << out_vec_wcps.at(i).at(0).x/units::cm << " " << out_vec_wcps.at(i).at(0).y/units::cm << " " << out_vec_wcps.at(i).at(0).z/units::cm << " " ;
-      // std::cout << out_vec_wcps.at(k).at(0).x/units::cm << " " << out_vec_wcps.at(k).at(0).y/units::cm << " " << out_vec_wcps.at(k).at(0).z/units::cm << " " <<  flag_p1_inside << " " << flag_p2_inside << std::endl;
+      
+
+      // if (main_cluster->get_cluster_id()==13){
+      // 	std::cout << out_vec_wcps.at(i).at(0).x/units::cm << " " << out_vec_wcps.at(i).at(0).y/units::cm << " " << out_vec_wcps.at(i).at(0).z/units::cm << " " ;
+      // 	std::cout << out_vec_wcps.at(k).at(0).x/units::cm << " " << out_vec_wcps.at(k).at(0).y/units::cm << " " << out_vec_wcps.at(k).at(0).z/units::cm << " " <<  flag_p1_inside << " " << flag_p2_inside << " " << out_vec_wcps.size() << std::endl;
+      // }
       
       if ((!flag_p1_inside) && (!flag_p2_inside)){
-
-	// if not a neutrino candidate ... to be worked out ... 
-	return true;
+	// if not a neutrino candidate ... to be worked out ...
+	 // Point p1(out_vec_wcps.at(i).at(p1_index).x,out_vec_wcps.at(i).at(p1_index).y,out_vec_wcps.at(i).at(p1_index).z);
+	 // Point p2(out_vec_wcps.at(k).at(p2_index).x,out_vec_wcps.at(k).at(p2_index).y,out_vec_wcps.at(k).at(p2_index).z);
+	 // std::cout << p1.x/units::cm << " " << p1.y/units::cm << " " << p1.z/units::cm << " " << inside_fiducial_volume(p1,offset_x) << " A " << p2.x/units::cm << " " << p2.y/units::cm << " " << p2.z/units::cm << " " << inside_fiducial_volume(p2,offset_x) << " " << offset_x/units::cm << std::endl;
+	
+	
+	if (!main_cluster->check_neutrino_candidate(out_vec_wcps.at(i).at(p1_index),out_vec_wcps.at(k).at(p2_index)))
+	  return true;
       }
 
       // check dead region ...
@@ -137,20 +164,21 @@ bool WireCell2dToy::ToyFiducial::check_tgm(WireCell::FlashTPCBundle *bundle, dou
 	}
 
 	if ((!flag_p1_inside) && (!flag_p2_inside)){
-	  // if not a neutrino candidate ... to be worked out ... 
-	  return true;
+	  // if not a neutrino candidate ... to be worked out ...
+	  if (!main_cluster->check_neutrino_candidate(out_vec_wcps.at(i).at(0),out_vec_wcps.at(k).at(0)))
+	    return true;
 	}
       }
       
-      // check signal processing ...
-      {
-	if (flag_p1_inside)
-	  ;
+      // // check signal processing ...
+      // {
+      // 	if (flag_p1_inside)
+      // 	  ;
 
-	if (flag_p2_inside)
-	  ;
+      // 	if (flag_p2_inside)
+      // 	  ;
 	
-      }
+      // }
       
     }
   }
@@ -272,9 +300,12 @@ bool WireCell2dToy::ToyFiducial::check_dead_volume(WireCell::Point& p, TVector3&
 
 
 bool WireCell2dToy::ToyFiducial::inside_fiducial_volume(WireCell::Point& p, double offset_x){
+
   int c1 = pnpoly(boundary_xy_x, boundary_xy_y, p.x-offset_x, p.y);
   int c2 = pnpoly(boundary_xz_x, boundary_xz_z, p.x-offset_x, p.z);
-  
+
+  //  std::cout << (p.x-offset_x)/units::cm << " " << p.y/units::cm << " " << p.z/units::cm << std::endl;
+  //std::cout << c1 << " " << c2 << std::endl;
   
   if (c1 && c2){
     return true;
