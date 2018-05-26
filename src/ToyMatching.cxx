@@ -1615,7 +1615,8 @@ void WireCell2dToy::organize_matched_bundles(WireCell::FlashTPCBundleSelection& 
     }
 
     if (best_bundle!=0){
-      best_bundle->examine_merge_clusters();
+      if (flash->get_type()==2) // beam discriminator ... 
+	best_bundle->examine_merge_clusters();
     }
     
   }
