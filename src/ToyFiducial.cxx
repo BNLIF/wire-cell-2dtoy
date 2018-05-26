@@ -137,7 +137,6 @@ bool WireCell2dToy::ToyFiducial::check_tgm(WireCell::FlashTPCBundle *bundle, dou
 	}
 
 	if ((!flag_p1_inside) && (!flag_p2_inside)){
-	  
 	  // if not a neutrino candidate ... to be worked out ... 
 	  return true;
 	}
@@ -251,6 +250,9 @@ bool WireCell2dToy::ToyFiducial::check_dead_volume(WireCell::Point& p, TVector3&
 	num_points ++;
 	if (inside_dead_region(temp_p))
 	  num_points_dead ++;
+
+	if (num_points - num_points_dead >=4) return true;
+	
 	temp_p.x += dir.X() * step;
 	temp_p.y += dir.Y() * step;
 	temp_p.z += dir.Z() * step;
