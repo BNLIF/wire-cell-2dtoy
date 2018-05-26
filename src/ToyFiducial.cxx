@@ -111,11 +111,47 @@ bool WireCell2dToy::ToyFiducial::check_tgm(WireCell::FlashTPCBundle *bundle, dou
 	Point p2(out_vec_wcps.at(k).at(j).x,out_vec_wcps.at(k).at(j).y,out_vec_wcps.at(k).at(j).z);
 	flag_p2_inside = flag_p2_inside && inside_fiducial_volume(p2,offset_x);
       }
-      std::cout << out_vec_wcps.at(i).at(0).x/units::cm << " " << out_vec_wcps.at(i).at(0).y/units::cm << " " << out_vec_wcps.at(i).at(0).z/units::cm << " " ;
-      std::cout << out_vec_wcps.at(k).at(0).x/units::cm << " " << out_vec_wcps.at(k).at(0).y/units::cm << " " << out_vec_wcps.at(k).at(0).z/units::cm << " " <<  flag_p1_inside << " " << flag_p2_inside << std::endl;
+      // std::cout << out_vec_wcps.at(i).at(0).x/units::cm << " " << out_vec_wcps.at(i).at(0).y/units::cm << " " << out_vec_wcps.at(i).at(0).z/units::cm << " " ;
+      // std::cout << out_vec_wcps.at(k).at(0).x/units::cm << " " << out_vec_wcps.at(k).at(0).y/units::cm << " " << out_vec_wcps.at(k).at(0).z/units::cm << " " <<  flag_p1_inside << " " << flag_p2_inside << std::endl;
       
-      if ((!flag_p1_inside) && (!flag_p2_inside))
+      if ((!flag_p1_inside) && (!flag_p2_inside)){
+
+	// if not a neutrino candidate ... to be worked out ... 
 	return true;
+      }
+
+      // check dead region ...
+      {
+	if (flag_p1_inside){
+	  Point p1(out_vec_wcps.at(i).at(0).x,out_vec_wcps.at(i).at(0).y,out_vec_wcps.at(i).at(0).z);
+	  TVector3 dir = main_cluster->VHoughTrans(p1,30*units::cm);
+	  dir *= (-1);
+	  flag_p1_inside=check_dead_volume(p1,dir,1*units::cm,offset_x);
+	}
+
+	if (flag_p2_inside){
+	  Point p2(out_vec_wcps.at(k).at(0).x,out_vec_wcps.at(k).at(0).y,out_vec_wcps.at(k).at(0).z);
+	  TVector3 dir = main_cluster->VHoughTrans(p2,30*units::cm);
+	  dir *= (-1);
+	  flag_p2_inside=check_dead_volume(p2,dir,1*units::cm,offset_x);
+	}
+
+	if ((!flag_p1_inside) && (!flag_p2_inside)){
+	  
+	  // if not a neutrino candidate ... to be worked out ... 
+	  return true;
+	}
+      }
+      
+      // check signal processing ...
+      {
+	if (flag_p1_inside)
+	  ;
+
+	if (flag_p2_inside)
+	  ;
+	
+      }
       
     }
   }
@@ -124,14 +160,10 @@ bool WireCell2dToy::ToyFiducial::check_tgm(WireCell::FlashTPCBundle *bundle, dou
   return false;
 
   // also check against the dead channel ...  
-
-  
   // // check the fiducial volume ...
   // std::pair<WCPointCloud<double>::WCPoint,WCPointCloud<double>::WCPoint> wcps = main_cluster->get_main_axis_wcps();
-  
   // Point p1(wcps.first.x,wcps.first.y,wcps.first.z);
   // Point p2(wcps.second.x,wcps.second.y,wcps.second.z);
-    
   // //double offset_x = (flash->get_time() - time_offset)*2./nrebin*time_slice_width;
   // bool flag_inside_p1 = inside_fiducial_volume(p1,offset_x);
   // bool flag_inside_p2 = inside_fiducial_volume(p2,offset_x);
