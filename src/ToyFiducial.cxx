@@ -135,7 +135,7 @@ bool WireCell2dToy::ToyFiducial::check_tgm(WireCell::FlashTPCBundle *bundle, dou
       // if (main_cluster->get_cluster_id()==13){
        
       // }
-      //std::cout << main_cluster->get_cluster_id() << std::endl;
+      //  std::cout << main_cluster->get_cluster_id() << " " << i << " " << k << " " << p1_index << " " << p2_index << " " << flag_p1_inside << " " << flag_p2_inside << std::endl;
 	
       if ((!flag_p1_inside) && (!flag_p2_inside)){
 	// if not a neutrino candidate ... to be worked out ...
@@ -144,8 +144,10 @@ bool WireCell2dToy::ToyFiducial::check_tgm(WireCell::FlashTPCBundle *bundle, dou
 	 // std::cout << p1.x/units::cm << " " << p1.y/units::cm << " " << p1.z/units::cm << " " << inside_fiducial_volume(p1,offset_x) << " A " << p2.x/units::cm << " " << p2.y/units::cm << " " << p2.z/units::cm << " " << inside_fiducial_volume(p2,offset_x) << " " << offset_x/units::cm << std::endl;
 
 
-	// std::cout << main_cluster->get_cluster_id() << " " << (out_vec_wcps.at(i).at(p1_index).x-offset_x)/units::cm << " " << out_vec_wcps.at(i).at(p1_index).y/units::cm << " " << out_vec_wcps.at(i).at(p1_index).z/units::cm << " " ;
-	// std::cout << (out_vec_wcps.at(k).at(p2_index).x-offset_x)/units::cm << " " << out_vec_wcps.at(k).at(p2_index).y/units::cm << " " << out_vec_wcps.at(k).at(p2_index).z/units::cm << " " <<  flag_p1_inside << " " << flag_p2_inside << " " << out_vec_wcps.size() << std::endl;
+	//	std::cout << main_cluster->get_cluster_id() << " " << (out_vec_wcps.at(i).at(p1_index).x-offset_x)/units::cm << " " << out_vec_wcps.at(i).at(p1_index).y/units::cm << " " << out_vec_wcps.at(i).at(p1_index).z/units::cm << " " ;
+	//std::cout << (out_vec_wcps.at(k).at(p2_index).x-offset_x)/units::cm << " " << out_vec_wcps.at(k).at(p2_index).y/units::cm << " " << out_vec_wcps.at(k).at(p2_index).z/units::cm << " " <<  flag_p1_inside << " " << flag_p2_inside << " " << out_vec_wcps.size() << std::endl;
+
+	//std::cout << p1_index << " " << p2_index << std::endl;
 	
 	// check two points in between
 	bool flag_check = false;
@@ -175,27 +177,34 @@ bool WireCell2dToy::ToyFiducial::check_tgm(WireCell::FlashTPCBundle *bundle, dou
 			  out_vec_wcps.at(i).at(0).z-out_vec_wcps.at(k).at(0).z);
 
 	//	std::cout << main_cluster->get_cluster_id() << " " << fabs((3.1415926/2.-dir_test.Angle(dir_main))/3.1415926*180.) << std::endl;
-	
-	if (fabs((3.1415926/2.-dir_test.Angle(dir_main))/3.1415926*180.)>75 || i==0 && k==1)
+
 	// check dead region ...
-	{
-	  if (flag_p1_inside){
+	if (fabs((3.1415926/2.-dir_test.Angle(dir_main))/3.1415926*180.)>75 || i==0 && k==1)
+	  {
+	  bool flag_p1_inside_p = flag_p1_inside;
+	  if (flag_p1_inside_p){
 	    Point p1(out_vec_wcps.at(i).at(0).x,out_vec_wcps.at(i).at(0).y,out_vec_wcps.at(i).at(0).z);
 	    TVector3 dir = main_cluster->VHoughTrans(p1,30*units::cm);
 	    dir *= (-1);
+
+	    //	    std::cout << p1.x/units::cm << " " << p1.y/units::cm << " " << p1.z/units::cm << " " << dir.X() << " " << dir.Y() << dir.Z() << std::endl;
+	    
 	    if (fabs((3.1415926/2.-dir.Angle(dir_main))/3.1415926*180.)>60 )
-	      flag_p1_inside=check_dead_volume(p1,dir,1*units::cm,offset_x);
+	      flag_p1_inside_p=check_dead_volume(p1,dir,1*units::cm,offset_x);
 	  }
-	  
-	  if (flag_p2_inside){
+
+	  bool flag_p2_inside_p = flag_p2_inside;
+	  if (flag_p2_inside_p){
 	    Point p2(out_vec_wcps.at(k).at(0).x,out_vec_wcps.at(k).at(0).y,out_vec_wcps.at(k).at(0).z);
 	    TVector3 dir = main_cluster->VHoughTrans(p2,30*units::cm);
 	    dir *= (-1);
+
+	    //	    std::cout << p2.x/units::cm << " " << p2.y/units::cm << " " << p2.z/units::cm << " " << dir.X() << " " << dir.Y() << dir.Z() << std::endl;
 	    if (fabs((3.1415926/2.-dir.Angle(dir_main))/3.1415926*180.)>60 )
-	      flag_p2_inside=check_dead_volume(p2,dir,1*units::cm,offset_x);
+	      flag_p2_inside_p=check_dead_volume(p2,dir,1*units::cm,offset_x);
 	  }
 	  
-	  if ((!flag_p1_inside) && (!flag_p2_inside)){
+	  if ((!flag_p1_inside_p) && (!flag_p2_inside_p)){
 	    if (flash->get_type()==2){
 	      // if not a neutrino candidate ... to be worked out ...
 	      if (!main_cluster->check_neutrino_candidate(out_vec_wcps.at(i).at(0),out_vec_wcps.at(k).at(0)))
