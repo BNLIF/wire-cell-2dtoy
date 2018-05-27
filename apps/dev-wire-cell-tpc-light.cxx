@@ -233,7 +233,7 @@ int main(int argc, char* argv[])
   WireCell2dToy::ToyFiducial *fid = new WireCell2dToy::ToyFiducial(3,800,-first_u_dis/pitch_u, -first_v_dis/pitch_v, -first_w_dis/pitch_w,
 								   1./time_slice_width, 1./pitch_u, 1./pitch_v, 1./pitch_w, // slope
 								   angle_u,angle_v,angle_w,// angle
-								   2*units::cm);
+								   3*units::cm);
   
 
   // {
@@ -774,7 +774,7 @@ int main(int argc, char* argv[])
      }
      for (size_t j = 0; j!= temp_clusters.size(); j++){
        
-       ncluster = temp_clusters.at(j)->get_cluster_id();
+       //       ncluster = temp_clusters.at(j)->get_cluster_id();
        
        SMGCSelection& mcells = temp_clusters.at(j)->get_mcells();
        //ncluster = temp_clusters.at(0)->get_cluster_id();
