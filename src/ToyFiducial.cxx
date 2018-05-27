@@ -431,9 +431,9 @@ bool WireCell2dToy::ToyFiducial::check_neutrino_candidate(WireCell::PR3DCluster 
 	if ((3.1415926-temp1.Angle(temp2))/3.1415926*180. >30 ||
 	    (3.1415926-temp1.Angle(temp2))/3.1415926*180. >25 && temp1.Mag()>15*units::cm && temp2.Mag()>15*units::cm){
 
-	  if ((!inside_fiducial_volume(path_wcps_vec.at(i),offset_x)) ||
-	      inside_dead_region(path_wcps_vec.at(i))&&(3.1415926-temp1.Angle(temp2))/3.1415926*180<45 ||
-	      path_wcps_vec.at(i).x<5*units::cm){
+	  if ((!inside_fiducial_volume(path_wcps_vec.at(i),offset_x)) || // must be in fiducial
+	      inside_dead_region(path_wcps_vec.at(i))&&(3.1415926-temp1.Angle(temp2))/3.1415926*180<45 || // not in dead_volume
+	      path_wcps_vec.at(i).x<5*units::cm){ // should not too close to anode 
 	  }else{
 	    return true;
 	  }
