@@ -161,10 +161,10 @@ bool WireCell2dToy::ToyFiducial::check_tgm(WireCell::FlashTPCBundle *bundle, dou
 	
 	if (flag_check){
 	  if (flash->get_type()==2){
-	    if (!main_cluster->check_neutrino_candidate(out_vec_wcps.at(i).at(p1_index),out_vec_wcps.at(k).at(p2_index)))
+	    if (!check_neutrino_candidate(main_cluster,out_vec_wcps.at(i).at(p1_index),out_vec_wcps.at(k).at(p2_index),offset_x))
 	      return true;
 	  }else{
-	    return true;
+	    return true; // through going muon ...
 	  }
 	}else{
 	  if (out_vec_wcps.size()==2)
@@ -207,8 +207,7 @@ bool WireCell2dToy::ToyFiducial::check_tgm(WireCell::FlashTPCBundle *bundle, dou
 	  
 	  if ((!flag_p1_inside_p) && (!flag_p2_inside_p)){
 	    if (flash->get_type()==2){
-	      // if not a neutrino candidate ... to be worked out ...
-	      if (!main_cluster->check_neutrino_candidate(out_vec_wcps.at(i).at(0),out_vec_wcps.at(k).at(0)))
+	      if (!check_neutrino_candidate(main_cluster,out_vec_wcps.at(i).at(0),out_vec_wcps.at(k).at(0),offset_x))
 		return true;
 	    }else{
 	      return true;
@@ -302,6 +301,148 @@ bool WireCell2dToy::ToyFiducial::check_tgm(WireCell::FlashTPCBundle *bundle, dou
        // 	   }
        // 	 }
 
+  
+  return false;
+}
+
+bool WireCell2dToy::ToyFiducial::check_neutrino_candidate(WireCell::PR3DCluster *main_cluster,WCPointCloud<double>::WCPoint& wcp1 ,WCPointCloud<double>::WCPoint& wcp2, double offset_x){
+  main_cluster->Create_graph();
+  main_cluster->dijkstra_shortest_paths(wcp1);
+  main_cluster->cal_shortest_path(wcp2);
+
+  std::list<WCPointCloud<double>::WCPoint>& path_wcps = main_cluster->get_path_wcps();
+
+  PointVector path_wcps_vec;  
+  // if (fine_tracking_path.size()==0){
+  double low_dis_limit = 0.5*units::cm;
+  for (auto it = path_wcps.begin(); it!=path_wcps.end(); it++){
+    if (path_wcps_vec.size()==0){
+      Point p((*it).x,(*it).y,(*it).z);
+      path_wcps_vec.push_back(p);
+    }else{
+      double dis = sqrt(pow((*it).x - path_wcps_vec.back().x,2)
+			+pow((*it).y - path_wcps_vec.back().y,2)
+			+pow((*it).z - path_wcps_vec.back().z,2));
+      if (dis > low_dis_limit){
+	Point p((*it).x,(*it).y,(*it).z);
+	path_wcps_vec.push_back(p);
+      }
+    }
+  }    
+  // }else{
+  //   path_wcps_vec = fine_tracking_path;
+  // }
+  
+  
+  // if (cluster_id == 13){
+  //   std::cout << wcp1.x/units::cm << " " << wcp1.y/units::cm << " " << wcp1.z/units::cm << " " << wcp2.x/units::cm << " " << wcp2.y/units::cm << " " << wcp2.z/units::cm << std::endl;
+  int count = 0;
+  TVector3 drift_dir(1,0,0);
+  for (size_t i=5;i+5<path_wcps_vec.size();i++){
+    TVector3 dir1(path_wcps_vec.at(i).x - path_wcps_vec.at(i-5).x,
+		  path_wcps_vec.at(i).y - path_wcps_vec.at(i-5).y,
+		  path_wcps_vec.at(i).z - path_wcps_vec.at(i-5).z);
+    TVector3 dir2(path_wcps_vec.at(i).x - path_wcps_vec.at(i+5).x,
+		  path_wcps_vec.at(i).y - path_wcps_vec.at(i+5).y,
+		  path_wcps_vec.at(i).z - path_wcps_vec.at(i+5).z);
+    
+    TVector3 dir3, dir4, dir5, dir6;
+    {
+      PointVector pts;
+      double temp_x = 0;
+      double temp_y = 0;
+      double temp_z = 0;
+      double temp_count = 0;
+      for (size_t j=1;j!=15;j++){
+       	if (i>=j){
+	  Point pt(path_wcps_vec.at(i-j).x,path_wcps_vec.at(i-j).y,path_wcps_vec.at(i-j).z);
+	  
+	  if (j<=12&&j>2){
+	    temp_x += pt.x;
+	    temp_y += pt.y;
+	    temp_z += pt.z;
+	    temp_count ++;
+	  }
+	  pts.push_back(pt);
+	}
+	Point pt(path_wcps_vec.at(i).x,path_wcps_vec.at(i).y,path_wcps_vec.at(i).z);
+	dir3 = main_cluster->calc_PCA_dir(pt,pts);
+	dir5.SetXYZ(temp_x/temp_count - path_wcps_vec.at(i).x,
+		    temp_y/temp_count - path_wcps_vec.at(i).y,
+		    temp_z/temp_count - path_wcps_vec.at(i).z);
+	if (dir3.Angle(dir1)>3.1415926/2.)
+	  dir3 *= -1;
+      }
+    }
+    {
+      PointVector pts;
+      double temp_x = 0;
+      double temp_y = 0;
+      double temp_z = 0;
+      double temp_count = 0;
+      for (size_t j=1;j!=15;j++){
+	if (i+j<path_wcps_vec.size()){
+	  Point pt(path_wcps_vec.at(i+j).x,path_wcps_vec.at(i+j).y,path_wcps_vec.at(i+j).z);
+	  if (j<=12&&j>2){
+	    temp_x += pt.x;
+	    temp_y += pt.y;
+	    temp_z += pt.z;
+	    temp_count ++;
+	  }
+	  pts.push_back(pt);
+	}
+      }
+      Point pt(path_wcps_vec.at(i).x,path_wcps_vec.at(i).y,path_wcps_vec.at(i).z);
+      dir4 = main_cluster->calc_PCA_dir(pt,pts);
+      dir6.SetXYZ(temp_x/temp_count - path_wcps_vec.at(i).x,
+      		  temp_y/temp_count - path_wcps_vec.at(i).y,
+      		  temp_z/temp_count - path_wcps_vec.at(i).z);
+      if (dir4.Angle(dir2)>3.1415926/2.)
+	dir4 *= -1;
+    }
+
+    int cut1 = 0;
+    if ((3.1415926 - dir1.Angle(dir2))/3.1415926*180.>30) cut1++;
+    if ((3.1415926 - dir3.Angle(dir4))/3.1415926*180.>30) cut1++;
+    if ((3.1415926 - dir5.Angle(dir6))/3.1415926*180.>30) cut1++;
+    int cut2 = 0;
+    if (fabs(3.1415926/2.-drift_dir.Angle(dir1-dir2))/3.1415926*180. > 5) cut2++;
+    if (fabs(3.1415926/2.-drift_dir.Angle(dir3-dir4))/3.1415926*180. > 5) cut2++;
+    if (fabs(3.1415926/2.-drift_dir.Angle(dir5-dir6))/3.1415926*180. > 5) cut2++;
+    
+    //   std::cout << i << " " << path_wcps_vec.at(i).x/units::cm << " " << path_wcps_vec.at(i).y/units::cm << " " << path_wcps_vec.at(i).z/units::cm << " " << (3.1415926 - dir1.Angle(dir2))/3.1415926*180. << " " << (3.1415926 - dir3.Angle(dir4))/3.1415926*180. << " " << (3.1415926 - dir5.Angle(dir6))/3.1415926*180. << " " << fabs(3.1415926/2.-drift_dir.Angle(dir1-dir2))/3.1415926*180. << " " << fabs(3.1415926/2.-drift_dir.Angle(dir3-dir4))/3.1415926*180. << " " << fabs(3.1415926/2.-drift_dir.Angle(dir5-dir6))/3.1415926*180. << " " << cut1 << " " << cut2 << std::endl;
+
+   
+    
+    
+    if (cut1>=3 && cut2>=2){
+      count ++;
+      if (count >=3){
+	TVector3 temp1(path_wcps_vec.at(i).x-wcp1.x,
+		       path_wcps_vec.at(i).y-wcp1.y,
+		       path_wcps_vec.at(i).z-wcp1.z);
+	TVector3 temp2(path_wcps_vec.at(i).x-wcp2.x,
+		       path_wcps_vec.at(i).y-wcp2.y,
+		       path_wcps_vec.at(i).z-wcp2.z);
+
+	//	std::cout << "A: " << (3.1415926-temp1.Angle(temp2))/3.1415926*180. << " " << temp1.Mag()/units::cm << " " << temp2.Mag()/units::cm << std::endl;
+
+
+	if ((3.1415926-temp1.Angle(temp2))/3.1415926*180. >30 ||
+	    (3.1415926-temp1.Angle(temp2))/3.1415926*180. >25 && temp1.Mag()>15*units::cm && temp2.Mag()>15*units::cm){
+
+	  if ((!inside_fiducial_volume(path_wcps_vec.at(i),offset_x)) ||
+	      inside_dead_region(path_wcps_vec.at(i))&&(3.1415926-temp1.Angle(temp2))/3.1415926*180<45){
+	  }else{
+	    return true;
+	  }
+	}
+	
+      }
+    }else{
+      count = 0 ;
+    }
+  }
   
   return false;
 }

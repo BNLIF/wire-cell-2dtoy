@@ -20,7 +20,7 @@ namespace WireCell2dToy{
 
     void set_offset_t(double value){offset_t=value;};
     
-    
+    bool check_neutrino_candidate(WireCell::PR3DCluster *main_cluster, WireCell::WCPointCloud<double>::WCPoint& wcp1 ,WireCell::WCPointCloud<double>::WCPoint& wcp2, double offset_x);
     bool inside_fiducial_volume(WireCell::Point& p, double offset_x=0);
     bool inside_dead_region(WireCell::Point& p);
     bool check_dead_volume(WireCell::Point& p, TVector3& dir, double step = 1.0*units::cm, double offset_x=0);
