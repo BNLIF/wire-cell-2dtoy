@@ -337,6 +337,8 @@ bool WireCell2dToy::ToyFiducial::check_neutrino_candidate(WireCell::PR3DCluster 
   // if (cluster_id == 13){
   //   std::cout << wcp1.x/units::cm << " " << wcp1.y/units::cm << " " << wcp1.z/units::cm << " " << wcp2.x/units::cm << " " << wcp2.y/units::cm << " " << wcp2.z/units::cm << std::endl;
   int count = 0;
+  double max_angle=0;
+  Point max_point(0,0,0);
   TVector3 drift_dir(1,0,0);
   for (size_t i=5;i+5<path_wcps_vec.size();i++){
     TVector3 dir1(path_wcps_vec.at(i).x - path_wcps_vec.at(i-5).x,
@@ -416,6 +418,11 @@ bool WireCell2dToy::ToyFiducial::check_neutrino_candidate(WireCell::PR3DCluster 
     
     
     if (cut1>=3 && cut2>=2){
+      if ((3.1415926 - dir3.Angle(dir4))/3.1415926*180. > max_angle){
+	max_angle = (3.1415926 - dir3.Angle(dir4))/3.1415926*180.;
+	max_point = path_wcps_vec.at(i);
+      }
+      
       count ++;
       if (count >=3){
 	TVector3 temp1(path_wcps_vec.at(i).x-wcp1.x,
@@ -431,9 +438,9 @@ bool WireCell2dToy::ToyFiducial::check_neutrino_candidate(WireCell::PR3DCluster 
 	if ((3.1415926-temp1.Angle(temp2))/3.1415926*180. >30 ||
 	    (3.1415926-temp1.Angle(temp2))/3.1415926*180. >25 && temp1.Mag()>15*units::cm && temp2.Mag()>15*units::cm){
 
-	  if ((!inside_fiducial_volume(path_wcps_vec.at(i),offset_x)) || // must be in fiducial
-	      inside_dead_region(path_wcps_vec.at(i))&&(3.1415926-temp1.Angle(temp2))/3.1415926*180<45 || // not in dead_volume
-	      path_wcps_vec.at(i).x<5*units::cm){ // should not too close to anode 
+	  if ((!inside_fiducial_volume(max_point,offset_x)) || // must be in fiducial
+	      inside_dead_region(max_point)&&(3.1415926-temp1.Angle(temp2))/3.1415926*180<45 // not in dead_volume
+	      ){ // should not too close to anode 
 	  }else{
 	    return true;
 	  }
@@ -442,6 +449,10 @@ bool WireCell2dToy::ToyFiducial::check_neutrino_candidate(WireCell::PR3DCluster 
       }
     }else{
       count = 0 ;
+      max_angle = 0;
+      max_point.x = 0;
+      max_point.y = 0;
+      max_point.z = 0;
     }
   }
   
