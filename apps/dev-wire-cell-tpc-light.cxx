@@ -579,18 +579,33 @@ int main(int argc, char* argv[])
    //std::cout << live_clusters.size() << std::endl;
 
    for (size_t i=0;i!=live_clusters.size();i++){
-     //    std::cout << live_clusters.at(i)->get_mcells().size() << " " << live_clusters.at(i)->get_num_time_slices() << std::endl;
+
+     //if (live_clusters.at(i)->get_cluster_id()!=3) continue;
+
+     //  std::cout << i << " " << live_clusters.at(i)->get_cluster_id() << " " << live_clusters.at(i)->get_mcells().size() << " " << live_clusters.at(i)->get_num_time_slices() << std::endl;
+     
      live_clusters.at(i)->Create_graph();
 
      std::pair<WCPointCloud<double>::WCPoint,WCPointCloud<double>::WCPoint> wcps = live_clusters.at(i)->get_highest_lowest_wcps();
      // std::pair<WCPointCloud<double>::WCPoint,WCPointCloud<double>::WCPoint> wcps = live_clusters.at(i)->get_extreme_wcps();
 
-     //  std::cout << wcps.first.x/units::cm << " " << wcps.first.y/units::cm << " " << wcps.first.z/units::cm << " " << wcps.second.x/units::cm << " " << wcps.second.y/units::cm << " " << wcps.second.z/units::cm << std::endl;
+     // std::cout << wcps.first.x/units::cm << " " << wcps.first.y/units::cm << " " << wcps.first.z/units::cm << " " << wcps.second.x/units::cm << " " << wcps.second.y/units::cm << " " << wcps.second.z/units::cm << std::endl;
      
      live_clusters.at(i)->dijkstra_shortest_paths(wcps.first);
+
+     //std::cout << "shortest path start point" << std::endl;
+     
      live_clusters.at(i)->cal_shortest_path(wcps.second);
+
+     //std::cout << "shortest path end point" << std::endl;
+     
      live_clusters.at(i)->fine_tracking();
+
+     //std::cout << "fine tracking" << std::endl;
+     
      live_clusters.at(i)->collect_charge_trajectory(ct_point_cloud);
+
+     //std::cout << "Collect points" << std::endl;
    }
    
    cerr << em("Create Graph in all clusters") << std::endl;
@@ -658,6 +673,8 @@ int main(int argc, char* argv[])
      
      T_match->Fill();
    }
+
+   cerr << em("test TGM") << std::endl;
 
    
    // for (auto it = matched_results.begin(); it!=matched_results.end(); it++){

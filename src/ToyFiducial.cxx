@@ -213,9 +213,9 @@ bool WireCell2dToy::ToyFiducial::check_tgm(WireCell::FlashTPCBundle *bundle, dou
 	    TVector3 tempV3(fabs(dir.X()), sqrt(dir.Y()*dir.Y()+dir.Z()*dir.Z())*sin(angle3),0);
 	    double angle3_1 = tempV3.Angle(drift_dir)/3.1415926*180.;
 
-	    //	    std::cout << "A: " << p1.x/units::cm << " " << p1.y/units::cm << " " << p1.z/units::cm << " " << angle1_1 << " " << angle2_1 << " " << angle3_1 << std::endl;
+	    //   std::cout << "A: " << p1.x/units::cm << " " << p1.y/units::cm << " " << p1.z/units::cm << " " << angle1_1 << " " << angle2_1 << " " << angle3_1 << std::endl;
 
-	    if ( (p1.x-offset_x < 15*units::cm || p1.x-offset_x > 241 *units::cm) && (angle1_1 < 10 || angle2_1 < 10 || angle3_1 < 5)){
+	    if ( (angle1_1 < 10 || angle2_1 < 10 || angle3_1 < 5)){
 	      flag_p1_inside_p = flag_p1_inside_p && check_signal_processing(p1,dir,ct_point_cloud,1*units::cm,offset_x);
 	    }
 	    
@@ -245,7 +245,7 @@ bool WireCell2dToy::ToyFiducial::check_tgm(WireCell::FlashTPCBundle *bundle, dou
 
 	    //	    std::cout << "B: " << p2.x/units::cm << " " << p2.y/units::cm << " " << p2.z/units::cm << " " <<  angle1_1 << " " << angle2_1 << " " << angle3_1 << std::endl;
 
-	    if ( (p2.x-offset_x < 15*units::cm || p2.x-offset_x > 241 *units::cm) && (angle1_1 < 10 || angle2_1 < 10 || angle3_1 < 5)){
+	    if ( (angle1_1 < 10 || angle2_1 < 10 || angle3_1 < 5)){
 	      flag_p2_inside_p = flag_p2_inside_p && check_signal_processing(p2,dir,ct_point_cloud,1*units::cm,offset_x);
 	    }
 	    
@@ -525,21 +525,25 @@ bool WireCell2dToy::ToyFiducial::check_signal_processing(WireCell::Point& p, TVe
     int num_points = 0;
     int num_points_dead = 0;
 
+    //  std::cerr << temp_p.x/units::cm << " " << temp_p.y/units::cm << " " << temp_p.z/units::cm << std::endl;
+    
     while(inside_fiducial_volume(temp_p,offset_x)){
       num_points ++;
       //if (inside_dead_region(temp_p))
       //	num_points_dead ++;
 
+      //      std::cerr << temp_p.x/units::cm << " " << temp_p.y/units::cm << " " << temp_p.z/units::cm << " ";
+      
       WireCell::CTPointCloud<double> cloud_u = ct_point_cloud.get_closest_points(temp_p,1.2*units::cm,0);
       WireCell::CTPointCloud<double> cloud_v = ct_point_cloud.get_closest_points(temp_p,1.2*units::cm,1);
       WireCell::CTPointCloud<double> cloud_w = ct_point_cloud.get_closest_points(temp_p,1.2*units::cm,2);
-
-      // std::cout << cloud_u.pts.size() << " " << cloud_v.pts.size() << " " << cloud_w.pts.size() << std::endl;
-
-      if (cloud_u.pts.size()>0 || cloud_v.pts.size()>0 || cloud_w.pts.size() > 0)
-	num_points_dead++;
       
-      if (num_points - num_points_dead >=4) return true;
+      //      std::cerr << cloud_u.pts.size() << " " << cloud_v.pts.size() << " " << cloud_w.pts.size() << std::endl;
+
+      if (cloud_u.pts.size()>0 || cloud_v.pts.size()>0 || cloud_w.pts.size() > 0 || inside_dead_region(temp_p))
+      	num_points_dead++;
+      
+      if (num_points - num_points_dead >=5) return true;
 	
       temp_p.x += dir.X() * step;
       temp_p.y += dir.Y() * step;
