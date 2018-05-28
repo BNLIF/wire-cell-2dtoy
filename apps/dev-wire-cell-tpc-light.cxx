@@ -652,7 +652,7 @@ int main(int argc, char* argv[])
      if (flash!=0){
        //std::cout << "Flash: " << flash->get_flash_id() << " " << flash->get_time() << std::endl;
        double offset_x = (flash->get_time() - time_offset)*2./nrebin*time_slice_width;
-       if (fid->check_tgm(bundle,offset_x))
+       if (fid->check_tgm(bundle,offset_x, ct_point_cloud))
 	 event_type |= 1UL << 3;
      }
      
