@@ -255,7 +255,7 @@ int main(int argc, char* argv[])
   ChirpMap uplane_map;
   ChirpMap vplane_map;
   ChirpMap wplane_map;
-  TTree *T_chirp = (TTree*)file1->Get("T_chirp");
+  TTree *T_chirp = (TTree*)file1->Get("T_bad");
   Int_t chid=0, plane=0;
   Int_t start_time=0, end_time=0;
   T_chirp->SetBranchAddress("chid",&chid);

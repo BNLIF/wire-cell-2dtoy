@@ -48,6 +48,49 @@ bool boundary(TVector3 v)
     return isBound1||isBound2;
 }
 
+void set_plot_style()
+{
+    TStyle* myStyle = new TStyle("myStyle","My ROOT plot style");
+    // plot style
+    //myStyle->SetPalette(kInvertedDarkBodyRadiator); 
+    //myStyle->SetPalette(kRainBow);
+    const Int_t NRGBs = 5;
+    const Int_t NCont = 255;
+
+    Double_t stops[NRGBs] = { 0.00, 0.34, 0.61, 0.84, 1.00 };
+    Double_t red[NRGBs]   = { 0.00, 0.00, 0.87, 1.00, 0.51 };
+    Double_t green[NRGBs] = { 0.00, 0.81, 1.00, 0.20, 0.00 };
+    Double_t blue[NRGBs]  = { 0.51, 1.00, 0.12, 0.00, 0.00 };
+    TColor::CreateGradientColorTable(NRGBs, stops, red, green, blue, NCont);
+    myStyle->SetNumberContours(NCont);
+    myStyle->SetOptStat(0);
+    
+    myStyle->SetLabelFont(62,"xyz");
+    myStyle->SetLabelSize(0.05,"xyz");
+    myStyle->SetTitleFont(62, "xyz");
+    myStyle->SetTitleSize(0.06,"xyz");
+    myStyle->SetTitleOffset(1.3, "y");
+    myStyle->SetTitleOffset(0.8, "x");
+    myStyle->SetTitleOffset(1.5, "z");
+    
+    // only 5 in x to avoid label overlaps
+    myStyle->SetNdivisions(505, "x");
+
+    // set the margin sizes
+    myStyle->SetPadTopMargin(0.05);
+    myStyle->SetPadRightMargin(0.2); // increase for colz plots
+    myStyle->SetPadBottomMargin(0.1);
+    myStyle->SetPadLeftMargin(0.15);
+    myStyle->SetFrameBorderMode(0);
+    myStyle->SetCanvasBorderMode(0);
+    myStyle->SetPadBorderMode(0);
+    myStyle->SetCanvasColor(0);
+    myStyle->SetPadColor(0);
+
+    gROOT->SetStyle("myStyle");
+    gROOT->ForceStyle();
+}
+
 
 int main(int argc, char* argv[])
 {
@@ -56,7 +99,9 @@ int main(int argc, char* argv[])
         return 1;
     }
     TH1::AddDirectory(kFALSE);
-    
+
+    set_plot_style();
+
     TString fileinput = argv[1];
     TFile *file = new TFile(fileinput, "READ");
 
@@ -84,7 +129,7 @@ int main(int argc, char* argv[])
 
     double lowerwindow = 0;
     double upperwindow = 0;
-    if(triggerBits==2048) { lowerwindow = 3; upperwindow = 6; }// bnb
+    if(triggerBits==2048) { lowerwindow = 3; upperwindow = 5; }// bnb
     if(triggerBits==512) { lowerwindow = 3.45; upperwindow = 5.45; } // extbnb
 
     // flash id and time
@@ -137,10 +182,20 @@ int main(int argc, char* argv[])
     // clusters
     TTree *clusters = (TTree*)file->Get("T_cluster");
     TTree *intime_cluster;
-    bool through = true; //any part of cluster touch the boundary within 10 cm
+    bool through = true; //any part of cluster touch the boundary within 5 cm
     bool thiscluster = false;
     bool matched = false;
 
+    // read in
+    TH2I* hucharge = new TH2I("hucharge","",2400, 0, 2400, 2400, 0, 2400);
+    TH2I* hvcharge = new TH2I("hvcharge","",2400, 2400, 4800, 2400, 0, 2400);
+    TH2I* hwcharge = new TH2I("hwcharge","",3456, 4800, 8256, 2400, 0, 2400);
+
+    // charge scale
+    TH1F* huscale = new TH1F("huscale","",1e4,0,1e5);
+    TH1F* hvscale = new TH1F("hvscale","",1e4,0,1e5);
+    TH1F* hwscale = new TH1F("hwscale","",1e4,0,1e5);
+ 
     // channel range
     int uchannel_min = 10000;
     int uchannel_max = 0;
@@ -171,6 +226,21 @@ int main(int argc, char* argv[])
     int wtime0_min = 3000;
     int wtime0_max = 0;
 
+    // 3D ranges
+    double xmin=300;
+    double xmax=0;
+    double ymin=150;
+    double ymax=-150;
+    double zmin=1200;
+    double zmax=0;
+
+    double xmin0=300;
+    double xmax0=0;
+    double ymin0=150;
+    double ymax0=-150;
+    double zmin0=1200;
+    double zmax0=0;
+  
     //cout<<"READ: "<<proj->GetEntries()<<endl; // should be 1
     for(int entry=0; entry<proj->GetEntries(); entry++)
     {
@@ -196,30 +266,6 @@ int main(int argc, char* argv[])
             if(charge.size()>1000){
 		    matched = true;
             thiscluster=false;
-            for(int p=0; p<charge.size(); p++)
-            {
-                if(channel.at(p)<2400) {
-                    //cout<<"U plane: "<<channel.at(p)<<endl;
-                    uchannel_min = uchannel_min<channel.at(p)?uchannel_min:channel.at(p);
-                    uchannel_max = uchannel_max>channel.at(p)?uchannel_max:channel.at(p);
-                    utime_min = utime_min<time.at(p)?utime_min:time.at(p);
-                    utime_max = utime_max>time.at(p)?utime_max:time.at(p);
-                }
-                if(channel.at(p)>=2400 && channel.at(p)<4800) {
-                    //cout<<"V plane: "<<channel.at(p)<<endl;
-                    vchannel_min = vchannel_min<channel.at(p)?vchannel_min:channel.at(p);
-                    vchannel_max = vchannel_max>channel.at(p)?vchannel_max:channel.at(p);
-                    vtime_min = vtime_min<time.at(p)?vtime_min:time.at(p);
-                    vtime_max = vtime_max>time.at(p)?vtime_max:time.at(p);
-                }
-                if(channel.at(p)>=4800) {
-                    //cout<<"W plane: "<<channel.at(p)<<endl;
-                    wchannel_min = wchannel_min<channel.at(p)?wchannel_min:channel.at(p);
-                    wchannel_max = wchannel_max>channel.at(p)?wchannel_max:channel.at(p);
-                    wtime_min = wtime_min<time.at(p)?wtime_min:time.at(p);
-                    wtime_max = wtime_max>time.at(p)?wtime_max:time.at(p);
-                }
-            }
  
             // on boundary
             TString String_clusterid;
@@ -238,14 +284,57 @@ int main(int argc, char* argv[])
             {
                 intime_cluster->GetEntry(i);
                 TVector3 v0(cx, cy, cz);
-                if(boundary(v0)){
+                //if(boundary(v0)){
+                if(0){
                     thiscluster=true;
                     cout<<"This cluter is on boundary!"<<endl;
                     break;
                 }
+                else{
+                    xmin = xmin<cx?xmin:cx;
+                    xmax = xmax>cx?xmax:cx;
+                    ymin = ymin<cy?ymin:cy;
+                    ymax = ymax>cy?ymax:cy;
+                    zmin = zmin<cz?zmin:cz;
+                    zmax = zmax>cz?zmax:cz;
+                }
             }
             // update cluster range if not on boundary
             if(!thiscluster){
+                xmin0 = xmin0<xmin?xmin0:xmin;
+                xmax0 = xmax0>xmax?xmax0:xmax;
+                ymin0 = ymin0<ymin?ymin0:ymin;
+                ymax0 = ymax0>ymax?ymax0:ymax;
+                zmin0 = zmin0<zmin?zmin0:zmin;
+                zmax0 = zmax0>zmax?zmax0:zmax;
+
+                for(int p=0; p<charge.size(); p++)
+                {
+                    if(channel.at(p)<2400) {
+                        //cout<<"U plane: "<<channel.at(p)<<endl;
+                        hucharge->SetBinContent(channel.at(p)+1, time.at(p), charge.at(p)+hucharge->GetBinContent(channel.at(p)+1, time.at(p)));
+                        uchannel_min = uchannel_min<channel.at(p)?uchannel_min:channel.at(p);
+                        uchannel_max = uchannel_max>channel.at(p)?uchannel_max:channel.at(p);
+                        utime_min = utime_min<time.at(p)?utime_min:time.at(p);
+                        utime_max = utime_max>time.at(p)?utime_max:time.at(p);
+                    }
+                    if(channel.at(p)>=2400 && channel.at(p)<4800) {
+                        //cout<<"V plane: "<<channel.at(p)<<endl;
+                        hvcharge->SetBinContent(channel.at(p)-2399, time.at(p), charge.at(p)+hvcharge->GetBinContent(channel.at(p)-2399, time.at(p)));
+                        vchannel_min = vchannel_min<channel.at(p)?vchannel_min:channel.at(p);
+                        vchannel_max = vchannel_max>channel.at(p)?vchannel_max:channel.at(p);
+                        vtime_min = vtime_min<time.at(p)?vtime_min:time.at(p);
+                        vtime_max = vtime_max>time.at(p)?vtime_max:time.at(p);
+                    }
+                    if(channel.at(p)>=4800) {
+                        //cout<<"W plane: "<<channel.at(p)<<endl;
+                        hwcharge->SetBinContent(channel.at(p)-4799, time.at(p), charge.at(p)+hwcharge->GetBinContent(channel.at(p)-4799, time.at(p)));
+                        wchannel_min = wchannel_min<channel.at(p)?wchannel_min:channel.at(p);
+                        wchannel_max = wchannel_max>channel.at(p)?wchannel_max:channel.at(p);
+                        wtime_min = wtime_min<time.at(p)?wtime_min:time.at(p);
+                        wtime_max = wtime_max>time.at(p)?wtime_max:time.at(p);
+                    }
+                }
                 uchannel0_min = uchannel0_min<uchannel_min?uchannel0_min:uchannel_min;
                 vchannel0_min = vchannel0_min<vchannel_min?vchannel0_min:vchannel_min;
                 wchannel0_min = wchannel0_min<wchannel_min?wchannel0_min:wchannel_min;
@@ -274,6 +363,13 @@ int main(int argc, char* argv[])
             wtime_min = 3000;
             wtime_max = 0;
 
+            xmin = 300;
+            xmax = 0;
+            ymin = 150;
+            ymax = -150;
+            zmin = 1200;
+            zmax = 0;
+            
             through = through&&thiscluster; 
             } // cluster size
             else{
@@ -287,13 +383,93 @@ int main(int argc, char* argv[])
     }
 
     if(!through && matched){
+        cout<<"Run-subRun-eventNo: "<<runNo<<" "<<subRunNo<<" "<<eventNo<<endl;
         cout<<"One candidate: "<<endl;
         cout<<"U channel range: "<<uchannel0_min<<" - "<<uchannel0_max<<endl;
-        cout<<"V channel range: "<<vchannel0_min<<" -"<<vchannel0_max<<endl;
+        cout<<"V channel range: "<<vchannel0_min<<" - "<<vchannel0_max<<endl;
         cout<<"W channel range: "<<wchannel0_min<<" - "<<wchannel0_max<<endl;
         cout<<"U time tick (2 us) range: "<<utime0_min<<" - "<<utime0_max<<endl;
         cout<<"V time tick (2 us) range: "<<vtime0_min<<" - "<<vtime0_max<<endl;
         cout<<"W time tick (2 us) range: "<<wtime0_min<<" - "<<wtime0_max<<endl;
+        cout<<"X range: "<<xmin0<<" - "<<xmax0<<endl;
+        cout<<"Y range: "<<ymin0<<" - "<<ymax0<<endl;
+        cout<<"Z range: "<<zmin0<<" - "<<zmax0<<endl;
+
+        // 2D charge plots
+        Double_t x[2]={0.30, 0.99};
+        Double_t y[2];
+
+        for(int i=uchannel0_min+1; i<=uchannel0_max+1; i++)
+        {
+            for(int j=utime0_min; j<=utime0_max; j++)
+            {
+                int uq = hucharge->GetBinContent(i, j);
+                if(uq>0) huscale->Fill(uq);
+            }
+        }
+        for(int i=vchannel0_min+1; i<=vchannel0_max+1; i++)
+        {
+            for(int j=vtime0_min; j<=vtime0_max; j++)
+            {
+                int vq = hvcharge->GetBinContent(i-2399, j);
+                if(vq>0) hvscale->Fill(vq);
+            }
+        }
+        for(int i=wchannel0_min+1; i<=wchannel0_max+1; i++)
+        {
+            for(int j=wtime0_min; j<=wtime0_max; j++)
+            {
+                int wq = hwcharge->GetBinContent(i-4799, j);
+                if(wq>0) hwscale->Fill(wq);
+            }
+        }
+
+        TString fileoutput;
+        fileoutput.Form("intime_chargeNue_%d_%d_%d", runNo, subRunNo, eventNo);
+        //TFile* ff = new TFile(fileoutput+".root","RECREATE");
+        TCanvas *c = new TCanvas("c","",1800, 500);
+        c->UseCurrentStyle();
+        c->Divide(3,1);
+
+        c->cd(1);
+        huscale->GetQuantiles(2, y, x);
+        //cout<<"U charge range: "<<y[0]<<" "<<y[1]<<endl;
+        //Zeroout(hucharge);
+        hucharge->GetZaxis()->SetRangeUser(y[0], y[1]);
+        hucharge->GetXaxis()->SetRangeUser((uchannel0_min-10)>0?(uchannel0_min-10):0, (uchannel0_max+10)<2400?(uchannel0_max+10):2400);
+        hucharge->GetYaxis()->SetRangeUser((utime0_min-15)>0?(utime0_min-15):0, (utime0_max+15)<2400?(utime0_max+15):2400);
+        hucharge->Draw("colz");
+        hucharge->GetXaxis()->SetTitle("Wire");
+        hucharge->GetYaxis()->SetTitle("Time tick [2 #mus]");
+        hucharge->GetZaxis()->SetTitle("Charge [e-]");
+
+        c->cd(2);
+        hvscale->GetQuantiles(2, y, x);
+        //cout<<"V charge range: "<<y[0]<<" "<<y[1]<<endl;
+        //Zeroout(hvcharge);
+        hvcharge->GetZaxis()->SetRangeUser(y[0], y[1]);
+        hvcharge->GetXaxis()->SetRangeUser((vchannel0_min-10)>2400?(vchannel0_min-10):2400, (vchannel0_max+10)<4800?(vchannel0_max+10):4800);
+        hvcharge->GetYaxis()->SetRangeUser((vtime0_min-15)>0?(vtime0_min-15):0, (vtime0_max+15)<2400?(vtime0_max+15):2400);
+        hvcharge->Draw("colz");
+        hvcharge->GetXaxis()->SetTitle("Wire");
+        hvcharge->GetYaxis()->SetTitle("Time tick [2 #mus]");
+        hvcharge->GetZaxis()->SetTitle("Charge [e-]");
+
+        c->cd(3);
+        hwscale->GetQuantiles(2, y, x);
+        //cout<<"W charge range: "<<y[0]<<" "<<y[1]<<endl;
+        //Zeroout(hwcharge);
+        hwcharge->GetZaxis()->SetRangeUser(y[0], y[1]);
+        hwcharge->GetXaxis()->SetRangeUser((wchannel0_min-10)>4800?(wchannel0_min-10):4800, (wchannel0_max+10)<8256?(wchannel0_max+10):8256);
+        hwcharge->GetYaxis()->SetRangeUser((wtime0_min-15)>0?(wtime0_min-15):0, (wtime0_max+15)<2400?(wtime0_max+15):2400);
+        hwcharge->Draw("colz");
+        hwcharge->GetXaxis()->SetTitle("Wire");
+        hwcharge->GetYaxis()->SetTitle("Time tick [2 #mus]");
+        hwcharge->GetZaxis()->SetTitle("Charge [e-]");
+
+
+        c->SaveAs(fileoutput+".png");
+
     }
 
     file->Close();

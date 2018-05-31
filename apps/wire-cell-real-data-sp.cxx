@@ -125,7 +125,7 @@ int main(int argc, char* argv[])
   //float unit_dis = 1.119;  // 70 KV @ 273 V/cm
   //float unit_dis = 1.105;  // doc-db 6683 matched with 256 cm
   //Note: the above one is still on the high end, 
-  float unit_dis = 1.101; // match 256 cm
+  float unit_dis = 1.119; // match 256 cm
 
   
   float toffset_1=0.0; //(nt_off1 * 0.2 - 1.0 );  // time offset between u/v 
@@ -134,7 +134,7 @@ int main(int argc, char* argv[])
   
   int save_image_outline_flag = 0; // prescale flag 
   
-  int total_time_bin = 9594;
+  int total_time_bin = 9592;
   int recon_threshold = 2000;
   int frame_length = 3200;
   int max_events = 100;
@@ -163,7 +163,7 @@ int main(int argc, char* argv[])
   float threshold_vg = 822.81;
   float threshold_wg = 510.84;
   
-  int time_offset = 4; // Now the time offset is taken care int he signal processing, so we just need the overall offset ... 
+  int time_offset = -92; // Now the time offset is taken care int he signal processing, so we just need the overall offset ... 
   
 
 
@@ -325,7 +325,7 @@ int main(int argc, char* argv[])
 
   Trun->Fill();
 
-  TTree *T_chirp = new TTree("T_chirp","T_chirp");
+  TTree *T_chirp = new TTree("T_bad","T_bad");
   Int_t chid, plane;
   Int_t start_time,end_time;
   T_chirp->Branch("chid",&chid,"chid/I");
@@ -364,20 +364,22 @@ int main(int argc, char* argv[])
   hw_threshold->SetDirectory(file);
   
  for (Int_t i=0;i!=uplane_rms.size();i++){
-   hu_threshold->SetBinContent(i+1,uplane_rms.at(i));
+   hu_threshold->SetBinContent(i+1,uplane_rms.at(i)*3.0*nrebin);
   }
   for (Int_t i=0;i!=vplane_rms.size();i++){
-    hv_threshold->SetBinContent(i+1,vplane_rms.at(i));
+    hv_threshold->SetBinContent(i+1,vplane_rms.at(i)*3.0*nrebin);
   }
   for (Int_t i=0;i!=wplane_rms.size();i++){
-    hw_threshold->SetBinContent(i+1,wplane_rms.at(i));
+    hw_threshold->SetBinContent(i+1,wplane_rms.at(i)*3.0*nrebin);
   }
 
 
-  //TH2F *hu_raw = new TH2F("hu_raw","hu_raw",nwire_u,-0.5,nwire_u-0.5,total_time_bin,0,total_time_bin);
+  TH2F *hu_raw = new TH2F("hu_raw","hu_raw",nwire_u,-0.5,nwire_u-0.5,total_time_bin,0,total_time_bin);
   TH2F *hv_raw = new TH2F("hv_raw","hv_raw",nwire_v,-0.5+nwire_u,nwire_v-0.5+nwire_u,total_time_bin,0,total_time_bin);
-  //TH2F *hw_raw = new TH2F("hw_raw","hw_raw",nwire_w,-0.5+nwire_u+nwire_v,nwire_w-0.5+nwire_u+nwire_v,total_time_bin,0,total_time_bin);
+  TH2F *hw_raw = new TH2F("hw_raw","hw_raw",nwire_w,-0.5+nwire_u+nwire_v,nwire_w-0.5+nwire_u+nwire_v,total_time_bin,0,total_time_bin);
+  hu_raw->SetDirectory(file);
   hv_raw->SetDirectory(file);
+  hw_raw->SetDirectory(file);
   TH2F *htemp;
   
   const Frame& frame = data_fds->get();
@@ -389,16 +391,16 @@ int main(int argc, char* argv[])
     int nbins = trace.charge.size();
     WirePlaneType_t plane = gds.by_channel(chid).at(0)->plane();
     if (plane == WirePlaneType_t(0)){
-      // htemp = hu_raw;
-      continue;
+       htemp = hu_raw;
+      //continue;
     }else if (plane == WirePlaneType_t(1)){
       htemp = hv_raw;
       chid -= nwire_u;
-      if (chid < 1166 || chid > 1905) continue;
+      //if (chid < 1166 || chid > 1905) continue;
     }else if (plane == WirePlaneType_t(2)){
-      //htemp = hw_raw;
+      htemp = hw_raw;
       chid -= nwire_u + nwire_v;
-      continue;
+      //continue;
     }
     for (int i = tbin;i!=tbin+nbins;i++){
       int tt = i+1;
