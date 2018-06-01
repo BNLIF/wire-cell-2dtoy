@@ -125,7 +125,7 @@ int main(int argc, char* argv[])
   //float unit_dis = 1.119;  // 70 KV @ 273 V/cm
   //float unit_dis = 1.105;  // doc-db 6683 matched with 256 cm
   //Note: the above one is still on the high end, 
-  float unit_dis = 1.119; // match 256 cm
+  float unit_dis = 1.114; // match 256 cm
 
   
   float toffset_1=0.0; //(nt_off1 * 0.2 - 1.0 );  // time offset between u/v 
@@ -364,13 +364,13 @@ int main(int argc, char* argv[])
   hw_threshold->SetDirectory(file);
   
  for (Int_t i=0;i!=uplane_rms.size();i++){
-   hu_threshold->SetBinContent(i+1,uplane_rms.at(i)*3.0*nrebin);
+   hu_threshold->SetBinContent(i+1,uplane_rms.at(i));
   }
   for (Int_t i=0;i!=vplane_rms.size();i++){
-    hv_threshold->SetBinContent(i+1,vplane_rms.at(i)*3.0*nrebin);
+    hv_threshold->SetBinContent(i+1,vplane_rms.at(i));
   }
   for (Int_t i=0;i!=wplane_rms.size();i++){
-    hw_threshold->SetBinContent(i+1,wplane_rms.at(i)*3.0*nrebin);
+    hw_threshold->SetBinContent(i+1,wplane_rms.at(i));
   }
 
 
