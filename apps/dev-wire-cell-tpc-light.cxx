@@ -635,6 +635,19 @@ int main(int argc, char* argv[])
    T_match->Branch("pe_meas",pe_meas,"pe_meas[32]/D");
    T_match->Branch("pe_meas_err",pe_meas_err,"pe_meas_err[32]/D");
    T_match->Branch("event_type",&event_type,"event_type/I");
+
+   bool flag_close_to_PMT;
+   bool flag_at_x_boundary;
+   double ks_dis;
+   double chi2;
+   int ndf;
+
+   T_match->Branch("flag_close_to_PMT",&flag_close_to_PMT,"flag_close_to_PMT/B");
+   T_match->Branch("flag_at_x_boundary",&flag_at_x_boundary,"flag_at_x_boundary/B");
+   T_match->Branch("ks_dis",&ks_dis,"ks_dis/D");
+   T_match->Branch("chi2",&chi2,"chi2/D");
+   T_match->Branch("ndf",&ndf,"ndf/I");
+   
    
    for (auto it = matched_bundles.begin(); it!=matched_bundles.end(); it++){
      FlashTPCBundle *bundle = *it;
@@ -651,6 +664,13 @@ int main(int argc, char* argv[])
      	 pe_meas[i] = flash->get_PE(i);
      	 pe_meas_err[i] = flash->get_PE_err(i);
        }
+       flag_close_to_PMT = bundle->get_flag_close_to_PMT();
+       flag_at_x_boundary = bundle->get_flag_at_x_boundary();
+       ks_dis = bundle->get_ks_dis();
+       chi2 = bundle->get_chi2();
+       ndf = bundle->get_ndf();
+       
+       
      }else{
        flash_id = -1;
        strength = 0;
@@ -659,6 +679,11 @@ int main(int argc, char* argv[])
      	 pe_meas[i] = 0;
      	 pe_meas_err[i] = 0.;
        }
+       flag_close_to_PMT = false;
+       flag_at_x_boundary = false;
+       ks_dis = 1;
+       chi2 = 1e9;
+       ndf = 32;
      }
      ncluster = main_cluster->get_cluster_id();
 
@@ -669,6 +694,8 @@ int main(int argc, char* argv[])
        double offset_x = (flash->get_time() - time_offset)*2./nrebin*time_slice_width;
        if (fid->check_tgm(bundle,offset_x, ct_point_cloud))
 	 event_type |= 1UL << 3;
+
+       
      }
      
      T_match->Fill();
