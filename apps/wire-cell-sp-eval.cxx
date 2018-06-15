@@ -163,7 +163,7 @@ int main(int argc, char* argv[])
   float threshold_vg = 822.81;
   float threshold_wg = 510.84;
   
-  int time_offset = -92; // Now the time offset is taken care int he signal processing, so we just need the overall offset ... 
+  int time_offset = -90; // Now the time offset is taken care int he signal processing, so we just need the overall offset ... 
   
 
 

@@ -164,7 +164,7 @@ int main(int argc, char* argv[])
        << endl;
       
   //Note: the above one is still on the high end, 
-  float unit_dis = 1.101; // match 256 cm
+  float unit_dis = 1.114; // match 256 cm
 
   //**** time offset for 58kV ****// 
   float toffset_1=0.0; //(nt_off1 * 0.2 - 1.0 );  // time offset between u/v 
