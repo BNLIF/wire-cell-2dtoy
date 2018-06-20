@@ -94,7 +94,7 @@ bool GeomWireSelectionCompare(GeomWireSelection a, GeomWireSelection b) {
 int main(int argc, char* argv[])
 {
   if (argc < 3) {
-    cerr << "usage: wire-cell-uboone /path/to/ChannelWireGeometry.txt /path/to/celltree.root -t[0,1] -s[0,1,2]" << endl;
+    cerr << "usage: wire-cell-uboone /path/to/ChannelWireGeometry.txt /path/to/celltree.root /path/to/true.root -t[0,1] -s[0,1,2]" << endl;
     return 1;
   }
 
@@ -205,10 +205,18 @@ int main(int argc, char* argv[])
   float threshold_wg = 510.84;
   
 
-  int time_offset = 4; // Now the time offset is taken care int he signal processing, so we just need the overall offset ... 
+  int time_offset = 0; // Now the time offset is taken care int he signal processing, so we just need the overall offset ... 
   
+  //root file saving truth info
+  const char* true_file;
+  if(argv[3][0] != '-'){
+    true_file = argv[3];  
+  }
+  TFile* file0 = new TFile(true_file);
+  TTree* T_true = (TTree*)file0->Get("T_true");
+  TTree* T_track = (TTree*)file0->Get("T_track");
 
-  const char* root_file = argv[2];  
+  const char* root_file = argv[2];
   int run_no, subrun_no, event_no;
   
   cout << em("load data") << endl;
@@ -525,13 +533,27 @@ int main(int argc, char* argv[])
 
   // start_num = 50;
   // end_num = 100;
-  
+ 
+
+
+
+
+
   TFile *file = new TFile(Form("result_%d_%d_%d.root",run_no,subrun_no,event_no),"RECREATE");
 
-  if (T_op!=0){
-    T_op->CloneTree()->Write();
+  if(T_true!=0 && save_file==1){
+    T_true->CloneTree();
   }
-  Trun->CloneTree()->Write();
+  if(T_track!=0 && save_file==1){
+    T_track->CloneTree();
+  }
+  file0->Close();
+  file0->Delete();
+
+  if (T_op!=0){
+    T_op->CloneTree();
+  }
+  Trun->CloneTree();
   
   Int_t n_cells;
   Int_t n_good_wires;

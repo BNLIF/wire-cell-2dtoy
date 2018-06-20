@@ -3,6 +3,8 @@
 #include "TCanvas.h"
 #include "TPolyLine3D.h"
 #include "TH3D.h"
+#include "TH2D.h"
+#include "TMath.h"
 
 #include <iostream>
 #include <map>
@@ -11,13 +13,67 @@
 #include "TMatrixDSymEigen.h"
 #include "TVector3.h"
 
+#include "TStyle.h"
+#include "TColor.h"
+#include "TROOT.h"
+
 using namespace std;
+
+void set_plot_style()
+{
+    TStyle* myStyle = new TStyle("myStyle","My ROOT plot style");
+    // plot style
+    //myStyle->SetPalette(kInvertedDarkBodyRadiator); 
+    //myStyle->SetPalette(kRainBow);
+    const Int_t NRGBs = 5;
+    const Int_t NCont = 255;
+
+    Double_t stops[NRGBs] = { 0.00, 0.34, 0.61, 0.84, 1.00 };
+    Double_t red[NRGBs]   = { 0.00, 0.00, 0.87, 1.00, 0.51 };
+    Double_t green[NRGBs] = { 0.00, 0.81, 1.00, 0.20, 0.00 };
+    Double_t blue[NRGBs]  = { 0.51, 1.00, 0.12, 0.00, 0.00 };
+    TColor::CreateGradientColorTable(NRGBs, stops, red, green, blue, NCont);
+    myStyle->SetNumberContours(NCont);
+    myStyle->SetOptStat(0);
+    
+    myStyle->SetLabelFont(62,"xyz");
+    myStyle->SetLabelSize(0.05,"xyz");
+    myStyle->SetTitleFont(62, "xyz");
+    myStyle->SetTitleSize(0.06,"xyz");
+    myStyle->SetTitleOffset(1.3, "y");
+    myStyle->SetTitleOffset(0.8, "x");
+    myStyle->SetTitleOffset(1.5, "z");
+    
+    // only 5 in x to avoid label overlaps
+    myStyle->SetNdivisions(505, "x");
+
+    // set the margin sizes
+    myStyle->SetPadTopMargin(0.05);
+    myStyle->SetPadRightMargin(0.2); // increase for colz plots
+    myStyle->SetPadBottomMargin(0.1);
+    myStyle->SetPadLeftMargin(0.15);
+    myStyle->SetFrameBorderMode(0);
+    myStyle->SetCanvasBorderMode(0);
+    myStyle->SetPadBorderMode(0);
+    myStyle->SetCanvasColor(0);
+    myStyle->SetPadColor(0);
+
+    gROOT->SetStyle("myStyle");
+    gROOT->ForceStyle();
+}
 
 int main(int argc, char* argv[])
 {
     const char* inputroot = argv[1];
     int cluster_check=-1; // specify cluster_id to check 
     if(argc==3) cluster_check=atoi(argv[2]);
+
+    // 2D plot
+    TH2D* hntrack = new TH2D("hntrack","number of tracks",10,0,1,10,0,TMath::Pi());
+    TH2D* hltrack = new TH2D("hltrack","length of tracks",10,0,1,10,0,TMath::Pi());
+    TH2D* hntrack_true = new TH2D("hntrack_true","number of tracks",10,0,1,10,0,TMath::Pi());
+    TH2D* hltrack_true = new TH2D("hltrack_true","length of tracks",10,0,1,10,0,TMath::Pi());
+
 
     // check
     TH3D* hrec = new TH3D("hrec","",25,0,256,25,-115,117,100,0,1037);
@@ -203,14 +259,17 @@ int main(int argc, char* argv[])
         leval1->SetPoint(1, end.X(), end.Y(), end.Z());
         leval2->SetPoint(0, start2.X(), start2.Y(), start2.Z());
         leval2->SetPoint(1, end2.X(), end2.Y(), end2.Z());
+            
+        // fill histogram
+        hntrack->Fill(costheta_y, phi);
+        hltrack->Fill(costheta_y, phi, length/100.0);
         }
-
     }// each cluster
 
 
     //check
     if(cluster_check!=-1){
-    TCanvas* canv = new TCanvas("canv","",400,1600);
+    TCanvas* canv_check = new TCanvas("canv_check","",400,1600);
     hrec->Draw();
     leval1->Draw("same l");
     leval2->Draw("same l");
@@ -219,8 +278,66 @@ int main(int argc, char* argv[])
     leval2->SetLineColor(kGreen);
     leval2->SetLineStyle(kDashed);
     leval2->SetLineWidth(2);
-    canv->SaveAs("check.root");
+    canv_check->SaveAs("check.root");
     }
+
+    TTree* tracks = (TTree*)f->Get("T_track");
+    double x0,y0,z0;
+    double x1,y1,z1;
+    tracks->SetBranchAddress("x0",&x0);
+    tracks->SetBranchAddress("y0",&y0);
+    tracks->SetBranchAddress("z0",&z0);
+    tracks->SetBranchAddress("x1",&x1);
+    tracks->SetBranchAddress("y1",&y1);
+    tracks->SetBranchAddress("z1",&z1);
+   
+
+    for(int nt=0; nt<tracks->GetEntries(); nt++)
+    {
+        tracks->GetEntry(nt);
+        TVector3 start0(x0, y0, z0);
+        TVector3 end1(x1, y1, z1);
+        TVector3 dir = end1 - start0;
+        double cosy = dir.Y()/dir.Mag();
+        double phiz = TMath::ACos(dir.Z()/TMath::Sqrt(dir.X()*dir.X()+dir.Z()*dir.Z()));
+    
+        hntrack_true->Fill(cosy, phiz);
+        hltrack_true->Fill(cosy, phiz, dir.Mag()/100.0);
+    }
+
+    // Truth vs Recon
+    TH2D* hntrack_comp = new TH2D("hntrack_comp","number of tracks",10,0,1,10,0,TMath::Pi());
+    TH2D* hltrack_comp = new TH2D("hltrack_comp","length of tracks",10,0,1,10,0,TMath::Pi());
+    for(int m=1; m<=hntrack_comp->GetNbinsX(); m++)
+    {
+        for(int n=1; n<=hntrack_comp->GetNbinsY(); n++)
+        {
+            if(hntrack_true->GetBinContent(m,n)!=0){
+                hntrack_comp->SetBinContent(m,n, hntrack->GetBinContent(m,n)/hntrack_true->GetBinContent(m,n)-1.0 );
+                hltrack_comp->SetBinContent(m,n, hltrack->GetBinContent(m,n)/hltrack_true->GetBinContent(m,n)-1.0 );
+            }
+        }
+    }
+
+
+    set_plot_style();
+    TCanvas* canv = new TCanvas("canv","",1200,1600);
+    canv->Divide(3,2);
+    canv->cd(1);
+    hntrack->Draw("colz");
+    canv->cd(2);
+    hntrack_true->Draw("colz");
+    canv->cd(3);
+    hntrack_comp->Draw("colz");
+    hntrack_comp->GetXaxis()->SetTitle("cos(theta_y)");
+    hntrack_comp->GetYaxis()->SetTitle("phi_xz");
+    canv->cd(4);
+    hltrack->Draw("colz");
+    canv->cd(5);
+    hltrack_true->Draw("colz");
+    canv->cd(6);
+    hltrack_comp->Draw("colz");
+    canv->SaveAs("eval.root");
 
     return 0;
 }
