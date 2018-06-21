@@ -64,17 +64,60 @@ void set_plot_style()
 
 int main(int argc, char* argv[])
 {
+    if(argc < 3){
+        cout<<"Usage: wire-cell-track-eval input.root outputname.root [option: cluster_id]"<<endl;
+        exit(1);
+    }
     const char* inputroot = argv[1];
+    const char* outputroot = argv[2];
     int cluster_check=-1; // specify cluster_id to check 
-    if(argc==3) cluster_check=atoi(argv[2]);
+    if(argc==4) cluster_check=atoi(argv[3]);
 
-    // 2D plot
+
+    // 2D plot, for each wire plane's coordinate, theta_y: 0-pi/2, theta_xz (phi): 0-pi 
     TH2D* hntrack = new TH2D("hntrack","number of tracks",10,0,1,10,0,TMath::Pi());
     TH2D* hltrack = new TH2D("hltrack","length of tracks",10,0,1,10,0,TMath::Pi());
     TH2D* hntrack_true = new TH2D("hntrack_true","number of tracks",10,0,1,10,0,TMath::Pi());
     TH2D* hltrack_true = new TH2D("hltrack_true","length of tracks",10,0,1,10,0,TMath::Pi());
 
+    // rotation matrix to convert collection plane (default detector) coordinate to inductions plane
+    TMatrixD Muplane(3,3);
+    TMatrixD Mvplane(3,3);
+    double angle = 60./180*TMath::Pi();
+    double cosine = TMath::Cos(angle);
+    double sine = TMath::Sin(angle);
+    Muplane(0,0) = 1.;
+    Muplane(0,1) = 0;
+    Muplane(0,2) = 0;
+    Muplane(1,0) = 0;
+    Muplane(1,1) = cosine;
+    Muplane(1,2) = sine;
+    Muplane(2,0) = 0;
+    Muplane(2,1) = -sine;
+    Muplane(2,2) = cosine;
 
+    Mvplane(0,0) = 1.;
+    Mvplane(0,1) = 0;
+    Mvplane(0,2) = 0;
+    Mvplane(1,0) = 0;
+    Mvplane(1,1) = cosine;
+    Mvplane(1,2) = -sine;
+    Mvplane(2,0) = 0;
+    Mvplane(2,1) = sine;
+    Mvplane(2,2) = cosine;
+
+
+    TH2D* hntrack_u = new TH2D("hntrack_u","number of tracks",10,0,1,10,0,TMath::Pi());
+    TH2D* hltrack_u = new TH2D("hltrack_u","length of tracks",10,0,1,10,0,TMath::Pi());
+    TH2D* hntrack_true_u = new TH2D("hntrack_true_u","number of tracks",10,0,1,10,0,TMath::Pi());
+    TH2D* hltrack_true_u = new TH2D("hltrack_true_u","length of tracks",10,0,1,10,0,TMath::Pi());
+
+    TH2D* hntrack_v = new TH2D("hntrack_v","number of tracks",10,0,1,10,0,TMath::Pi());
+    TH2D* hltrack_v = new TH2D("hltrack_v","length of tracks",10,0,1,10,0,TMath::Pi());
+    TH2D* hntrack_true_v = new TH2D("hntrack_true_v","number of tracks",10,0,1,10,0,TMath::Pi());
+    TH2D* hltrack_true_v = new TH2D("hltrack_true_v","length of tracks",10,0,1,10,0,TMath::Pi());
+
+    
     // check
     TH3D* hrec = new TH3D("hrec","",25,0,256,25,-115,117,100,0,1037);
     TPolyLine3D *leval1 = new TPolyLine3D(2);
@@ -234,26 +277,43 @@ int main(int argc, char* argv[])
         
         double costheta_y = track_dir.Y()/track_dir.Mag();
         double phi = TMath::ACos(track_dir.Z()/TMath::Sqrt(track_dir.X()*track_dir.X()+track_dir.Z()*track_dir.Z()));
+        
+
+        TVector3 track_dir_u = Muplane*track_dir;
+        if(track_dir_u.Y()<0) track_dir_u *= -1.0;
+        double costheta_y_u = track_dir_u.Y()/track_dir_u.Mag();
+        double phi_u = TMath::ACos(track_dir_u.Z()/TMath::Sqrt(track_dir_u.X()*track_dir_u.X()+track_dir_u.Z()*track_dir_u.Z()));
+        TVector3 track_dir_v = Mvplane*track_dir;
+        if(track_dir_v.Y()<0) track_dir_v *= -1.0;
+        double costheta_y_v = track_dir_v.Y()/track_dir_v.Mag();
+        double phi_v = TMath::ACos(track_dir_v.Z()/TMath::Sqrt(track_dir_v.X()*track_dir_v.X()+track_dir_v.Z()*track_dir_v.Z()));
+        
         TVector3 center = 0.5*(start+end);
         double length = (end - start).Mag();
         TVector3 center2(mx, my, mz);
         TVector3 start2 = center2-0.5*length*track_dir;
         TVector3 end2 = center2+0.5*length*track_dir;
 
+        // debug
+        if(costheta_y >= 1 || costheta_y <=0 || phi >= TMath::Pi() || phi <= 0) {
+            track_dir.Print();
+            cout<<"length: "<<length<<endl;
+        }
+        
         // check
         if(i==cluster_check || cluster_check==-1){
         //cout<<"Direction: "<<track_dir.X()<<" "<<track_dir.Y()<<" "<<track_dir.Z()<<endl;
-        cout<<"Cluster_id:"<<i<<endl;
-        cout<<"Length: "<<length<<endl;
-        cout<<"Direction: "<<costheta_y<<" "<<phi<<endl;
-        cout<<"Center1: "<<center.X()<<" "<<center.Y()<<" "<<center.Z()<<endl;
-        cout<<"Center2: "<<mx<<" "<<my<<" "<<mz<<endl;
-        cout<<"Start1: "<<start.X()<<" "<<start.Y()<<" "<<start.Z()<<endl;
-        cout<<"End1: "<<end.X()<<" "<<end.Y()<<" "<<end.Z()<<endl;
-        cout<<"Start2: "<<start2.X()<<" "<<start2.Y()<<" "<<start2.Z()<<endl;
-        cout<<"End2: "<<end2.X()<<" "<<end2.Y()<<" "<<end2.Z()<<endl;
-        cout<<"Start Difference: "<<100*(start2.X()-start.X())/start2.X()<<" "<<100*(start2.Y()-start.Y())/start2.Y()<<" "<<100*(start2.Z()-start.Z())/start2.Z()<<endl;
-        cout<<"End Difference: "<<100*(end2.X()-end.X())/end2.X()<<" "<<100*(end2.Y()-end.Y())/end2.Y()<<" "<<100*(end2.Z()-end.Z())/end2.Z()<<endl;
+        /* cout<<"Cluster_id:"<<i<<endl; */
+        /* cout<<"Length: "<<length<<endl; */
+        /* cout<<"Direction: "<<costheta_y<<" "<<phi<<endl; */
+        /* cout<<"Center1: "<<center.X()<<" "<<center.Y()<<" "<<center.Z()<<endl; */
+        /* cout<<"Center2: "<<mx<<" "<<my<<" "<<mz<<endl; */
+        /* cout<<"Start1: "<<start.X()<<" "<<start.Y()<<" "<<start.Z()<<endl; */
+        /* cout<<"End1: "<<end.X()<<" "<<end.Y()<<" "<<end.Z()<<endl; */
+        /* cout<<"Start2: "<<start2.X()<<" "<<start2.Y()<<" "<<start2.Z()<<endl; */
+        /* cout<<"End2: "<<end2.X()<<" "<<end2.Y()<<" "<<end2.Z()<<endl; */
+        /* cout<<"Start Difference: "<<100*(start2.X()-start.X())/start2.X()<<" "<<100*(start2.Y()-start.Y())/start2.Y()<<" "<<100*(start2.Z()-start.Z())/start2.Z()<<endl; */
+        /* cout<<"End Difference: "<<100*(end2.X()-end.X())/end2.X()<<" "<<100*(end2.Y()-end.Y())/end2.Y()<<" "<<100*(end2.Z()-end.Z())/end2.Z()<<endl; */
 
         leval1->SetPoint(0, start.X(), start.Y(), start.Z());
         leval1->SetPoint(1, end.X(), end.Y(), end.Z());
@@ -261,10 +321,36 @@ int main(int argc, char* argv[])
         leval2->SetPoint(1, end2.X(), end2.Y(), end2.Z());
             
         // fill histogram
+        if(length>90.0){ // PCA failure
         hntrack->Fill(costheta_y, phi);
         hltrack->Fill(costheta_y, phi, length/100.0);
+        hntrack_u->Fill(costheta_y_u, phi_u);
+        hltrack_u->Fill(costheta_y_u, phi_u, length/100.0);
+        hntrack_v->Fill(costheta_y_v, phi_v);
+        hltrack_v->Fill(costheta_y_v, phi_v, length/100.0);
+        }
         }
     }// each cluster
+
+    //average length
+    for(int m=1; m<=hntrack->GetNbinsX(); m++)
+    {
+        for(int n=1; n<=hntrack->GetNbinsY(); n++)
+        {
+            if(hntrack->GetBinContent(m,n)!=0)
+            {
+                hltrack->SetBinContent(m,n,hltrack->GetBinContent(m,n)/hntrack->GetBinContent(m,n));
+            }
+            if(hntrack_u->GetBinContent(m,n)!=0)
+            {
+                hltrack_u->SetBinContent(m,n,hltrack_u->GetBinContent(m,n)/hntrack_u->GetBinContent(m,n));
+            }
+            if(hntrack_v->GetBinContent(m,n)!=0)
+            {
+                hltrack_v->SetBinContent(m,n,hltrack_v->GetBinContent(m,n)/hntrack_v->GetBinContent(m,n));
+            }
+        }
+    }
 
 
     //check
@@ -298,16 +384,54 @@ int main(int argc, char* argv[])
         TVector3 start0(x0, y0, z0);
         TVector3 end1(x1, y1, z1);
         TVector3 dir = end1 - start0;
+        if(dir.Y()<0) dir *= -1.0;
         double cosy = dir.Y()/dir.Mag();
         double phiz = TMath::ACos(dir.Z()/TMath::Sqrt(dir.X()*dir.X()+dir.Z()*dir.Z()));
-    
+        TVector3 dir_u = Muplane*dir;
+        if(dir_u.Y()<0) dir_u *= -1.0;
+        double cosy_u = dir_u.Y()/dir_u.Mag();
+        double phiz_u = TMath::ACos(dir_u.Z()/TMath::Sqrt(dir_u.X()*dir_u.X()+dir_u.Z()*dir_u.Z()));
+        TVector3 dir_v = Mvplane*dir;
+        if(dir_v.Y()<0) dir_v *= -1.0;
+        double cosy_v = dir_v.Y()/dir_v.Mag();
+        double phiz_v = TMath::ACos(dir_v.Z()/TMath::Sqrt(dir_v.X()*dir_v.X()+dir_v.Z()*dir_v.Z()));
+
+
         hntrack_true->Fill(cosy, phiz);
         hltrack_true->Fill(cosy, phiz, dir.Mag()/100.0);
+        hntrack_true_u->Fill(cosy_u, phiz_u);
+        hltrack_true_u->Fill(cosy_u, phiz_u, dir_u.Mag()/100.0);
+        hntrack_true_v->Fill(cosy_v, phiz_v);
+        hltrack_true_v->Fill(cosy_v, phiz_v, dir_v.Mag()/100.0);
     }
 
+    //average length
+    for(int m=1; m<=hntrack->GetNbinsX(); m++)
+    {
+        for(int n=1; n<=hntrack->GetNbinsY(); n++)
+        {
+            if(hntrack->GetBinContent(m,n)!=0)
+            {
+                hltrack->SetBinContent(m,n,hltrack->GetBinContent(m,n)/hntrack->GetBinContent(m,n));
+            }
+            if(hntrack_u->GetBinContent(m,n)!=0)
+            {
+                hltrack_u->SetBinContent(m,n,hltrack_u->GetBinContent(m,n)/hntrack_u->GetBinContent(m,n));
+            }
+            if(hntrack_v->GetBinContent(m,n)!=0)
+            {
+                hltrack_v->SetBinContent(m,n,hltrack_v->GetBinContent(m,n)/hntrack_v->GetBinContent(m,n));
+            }
+        }
+    }
+    
     // Truth vs Recon
     TH2D* hntrack_comp = new TH2D("hntrack_comp","number of tracks",10,0,1,10,0,TMath::Pi());
     TH2D* hltrack_comp = new TH2D("hltrack_comp","length of tracks",10,0,1,10,0,TMath::Pi());
+    TH2D* hntrack_comp_u = new TH2D("hntrack_comp_u","number of tracks",10,0,1,10,0,TMath::Pi());
+    TH2D* hltrack_comp_u = new TH2D("hltrack_comp_u","length of tracks",10,0,1,10,0,TMath::Pi());
+    TH2D* hntrack_comp_v = new TH2D("hntrack_comp_v","number of tracks",10,0,1,10,0,TMath::Pi());
+    TH2D* hltrack_comp_v = new TH2D("hltrack_comp_v","length of tracks",10,0,1,10,0,TMath::Pi());
     for(int m=1; m<=hntrack_comp->GetNbinsX(); m++)
     {
         for(int n=1; n<=hntrack_comp->GetNbinsY(); n++)
@@ -316,11 +440,20 @@ int main(int argc, char* argv[])
                 hntrack_comp->SetBinContent(m,n, hntrack->GetBinContent(m,n)/hntrack_true->GetBinContent(m,n)-1.0 );
                 hltrack_comp->SetBinContent(m,n, hltrack->GetBinContent(m,n)/hltrack_true->GetBinContent(m,n)-1.0 );
             }
+            if(hntrack_true_u->GetBinContent(m,n)!=0){
+                hntrack_comp_u->SetBinContent(m,n, hntrack_u->GetBinContent(m,n)/hntrack_true_u->GetBinContent(m,n)-1.0 );
+                hltrack_comp_u->SetBinContent(m,n, hltrack_u->GetBinContent(m,n)/hltrack_true_u->GetBinContent(m,n)-1.0 );
+            }
+            if(hntrack_true_v->GetBinContent(m,n)!=0){
+                hntrack_comp_v->SetBinContent(m,n, hntrack_v->GetBinContent(m,n)/hntrack_true_v->GetBinContent(m,n)-1.0 );
+                hltrack_comp_v->SetBinContent(m,n, hltrack_v->GetBinContent(m,n)/hltrack_true_v->GetBinContent(m,n)-1.0 );
+            }
         }
     }
 
 
     set_plot_style();
+    TFile* output = new TFile(outputroot, "RECREATE");
     TCanvas* canv = new TCanvas("canv","",1200,1600);
     canv->Divide(3,2);
     canv->cd(1);
@@ -337,7 +470,46 @@ int main(int argc, char* argv[])
     hltrack_true->Draw("colz");
     canv->cd(6);
     hltrack_comp->Draw("colz");
-    canv->SaveAs("eval.root");
+    canv->Write();
+
+    TCanvas* canv2 = new TCanvas("canv2","",1200,1600);
+    canv2->Divide(3,2);
+    canv2->cd(1);
+    hntrack_comp_u->Draw("colz");
+    canv2->cd(2);
+    hntrack_comp_v->Draw("colz");
+    canv2->cd(3);
+    hntrack_comp->Draw("colz");
+    hntrack_comp->GetXaxis()->SetTitle("cos(theta_y)");
+    hntrack_comp->GetYaxis()->SetTitle("phi_xz");
+    canv2->cd(4);
+    hltrack_comp_u->Draw("colz");
+    canv2->cd(5);
+    hltrack_comp_v->Draw("colz");
+    canv2->cd(6);
+    hltrack_comp->Draw("colz");
+    canv2->Write();
+
+    hntrack->Write();
+    hntrack_true->Write();
+    hntrack_comp->Write();
+    hntrack_u->Write();
+    hntrack_true_u->Write();
+    hntrack_comp_u->Write();
+    hntrack_v->Write();
+    hntrack_true_v->Write();
+    hntrack_comp_v->Write();
+
+    hltrack->Write();
+    hltrack_true->Write();
+    hltrack_comp->Write();
+    hltrack_u->Write();
+    hltrack_true_u->Write();
+    hltrack_comp_u->Write();
+    hltrack_v->Write();
+    hltrack_true_v->Write();
+    hltrack_comp_v->Write();
+
 
     return 0;
 }
