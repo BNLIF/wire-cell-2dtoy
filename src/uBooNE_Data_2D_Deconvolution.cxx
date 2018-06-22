@@ -143,13 +143,14 @@ WireCell2dToy::uBooNEData2DDeconvolutionFDS::uBooNEData2DDeconvolutionFDS(TH2I *
 }
 
 
-WireCell2dToy::uBooNEData2DDeconvolutionFDS::uBooNEData2DDeconvolutionFDS(WireCell::FrameDataSource& fds1, const WireCell::GeomDataSource& gds,WireCell::ChirpMap& umap, WireCell::ChirpMap& vmap, WireCell::ChirpMap& wmap, int nframes_total, float time_offset_uv, float time_offset_uw, float overall_time_offset)
+WireCell2dToy::uBooNEData2DDeconvolutionFDS::uBooNEData2DDeconvolutionFDS(WireCell::FrameDataSource& fds1, const WireCell::GeomDataSource& gds,WireCell::ChirpMap& umap, WireCell::ChirpMap& vmap, WireCell::ChirpMap& wmap, int nframes_total, float time_offset_uv, float time_offset_uw, float overall_time_offset, int flag_sim)
   : fds(&fds1)
   , gds(gds)
   , max_frames(nframes_total)
   , time_offset_uv(time_offset_uv)
   , time_offset_uw(time_offset_uw)
   , overall_time_offset(overall_time_offset)
+  , flag_sim(flag_sim)
   , umap(umap)
   , vmap(vmap)
   , wmap(wmap)
@@ -589,8 +590,14 @@ void WireCell2dToy::uBooNEData2DDeconvolutionFDS::Deconvolute_2D(int plane){
 	 // rho_u[chid][j] = hm.GetBinContent(j+1)/1.1/0.965;// * hm1.GetBinContent(j+1) / hm2.GetBinContent(j+1);
 	 // phi_u[chid][j] = hp.GetBinContent(j+1);// + hp1.GetBinContent(j+1) - hp2.GetBinContent(j+1);
 
-	 rho_u[chid][j] = hm.GetBinContent(j+1) * hm1.GetBinContent(j+1) / hm2.GetBinContent(j+1);
-	 phi_u[chid][j] = hp.GetBinContent(j+1) + hp1.GetBinContent(j+1) - hp2.GetBinContent(j+1);
+	 if(flag_sim){
+        rho_u[chid][j] = hm.GetBinContent(j+1);
+	    phi_u[chid][j] = hp.GetBinContent(j+1);
+     }
+     else{
+        rho_u[chid][j] = hm.GetBinContent(j+1) * hm1.GetBinContent(j+1) / hm2.GetBinContent(j+1);
+	    phi_u[chid][j] = hp.GetBinContent(j+1) + hp1.GetBinContent(j+1) - hp2.GetBinContent(j+1);
+     }
        }
        tbin_save[chid] = tbin;
      }else if (plane == 1){
@@ -598,8 +605,14 @@ void WireCell2dToy::uBooNEData2DDeconvolutionFDS::Deconvolute_2D(int plane){
 	 // rho_u[chid-nwire_u][j] = hm.GetBinContent(j+1)/1.1/0.965;// * hm1.GetBinContent(j+1) / hm2.GetBinContent(j+1);
 	 // phi_u[chid-nwire_u][j] = hp.GetBinContent(j+1);// + hp1.GetBinContent(j+1) - hp2.GetBinContent(j+1);
 
-	 rho_u[chid-nwire_u][j] = hm.GetBinContent(j+1) * hm1.GetBinContent(j+1) / hm2.GetBinContent(j+1);
-	 phi_u[chid-nwire_u][j] = hp.GetBinContent(j+1) + hp1.GetBinContent(j+1) - hp2.GetBinContent(j+1);
+	 if(flag_sim){
+        rho_u[chid-nwire_u][j] = hm.GetBinContent(j+1);
+	    phi_u[chid-nwire_u][j] = hp.GetBinContent(j+1);
+     }
+     else{
+	    rho_u[chid-nwire_u][j] = hm.GetBinContent(j+1) * hm1.GetBinContent(j+1) / hm2.GetBinContent(j+1);
+	    phi_u[chid-nwire_u][j] = hp.GetBinContent(j+1) + hp1.GetBinContent(j+1) - hp2.GetBinContent(j+1);
+     }
        }
        tbin_save[chid-nwire_u] = tbin;
      }else if (plane == 2){
@@ -607,8 +620,14 @@ void WireCell2dToy::uBooNEData2DDeconvolutionFDS::Deconvolute_2D(int plane){
 	 // rho_u[chid-nwire_u-nwire_v][j] = hm.GetBinContent(j+1)/1.1;// * hm1.GetBinContent(j+1) / hm2.GetBinContent(j+1);
 	 // phi_u[chid-nwire_u-nwire_v][j] = hp.GetBinContent(j+1);// + hp1.GetBinContent(j+1) - hp2.GetBinContent(j+1);
 
-	 rho_u[chid-nwire_u-nwire_v][j] = hm.GetBinContent(j+1) * hm1.GetBinContent(j+1) / hm2.GetBinContent(j+1);
-	 phi_u[chid-nwire_u-nwire_v][j] = hp.GetBinContent(j+1) + hp1.GetBinContent(j+1) - hp2.GetBinContent(j+1);
+	 if(flag_sim){
+        rho_u[chid-nwire_u-nwire_v][j] = hm.GetBinContent(j+1);
+	    phi_u[chid-nwire_u-nwire_v][j] = hp.GetBinContent(j+1);
+     }
+     else{
+	    rho_u[chid-nwire_u-nwire_v][j] = hm.GetBinContent(j+1) * hm1.GetBinContent(j+1) / hm2.GetBinContent(j+1);
+	    phi_u[chid-nwire_u-nwire_v][j] = hp.GetBinContent(j+1) + hp1.GetBinContent(j+1) - hp2.GetBinContent(j+1);
+     }
        }
        tbin_save[chid-nwire_u-nwire_v] = tbin;
      }

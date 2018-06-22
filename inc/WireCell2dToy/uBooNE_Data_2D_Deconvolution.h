@@ -14,7 +14,7 @@ namespace WireCell2dToy{
   class uBooNEData2DDeconvolutionFDS : public WireCell::FrameDataSource
   {
   public:
-    uBooNEData2DDeconvolutionFDS(WireCell::FrameDataSource& fds, const WireCell::GeomDataSource& gds, WireCell::ChirpMap& umap, WireCell::ChirpMap& vmap, WireCell::ChirpMap& wmap, int nframes_total = -1, float time_offset_uv = 0, float time_offset_uw = 0, float overall_time_offset = 0);
+    uBooNEData2DDeconvolutionFDS(WireCell::FrameDataSource& fds, const WireCell::GeomDataSource& gds, WireCell::ChirpMap& umap, WireCell::ChirpMap& vmap, WireCell::ChirpMap& wmap, int nframes_total = -1, float time_offset_uv = 0, float time_offset_uw = 0, float overall_time_offset = 0, int flag_sim = 0);
     
     uBooNEData2DDeconvolutionFDS(TH2I *hu_decon, TH2I *hv_decon, TH2I *hw_decon, TTree *T_bad, const WireCell::GeomDataSource& gds);
 
@@ -56,7 +56,9 @@ namespace WireCell2dToy{
     float time_offset_uv;
     float time_offset_uw;
     float overall_time_offset;
-    
+
+    int flag_sim;
+
     int nwire_u, nwire_v, nwire_w;
 
     TGraph **gu_2D_g;

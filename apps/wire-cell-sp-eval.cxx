@@ -200,7 +200,7 @@ int main(int argc, char* argv[])
   
 
   cout << "Deconvolution with Wiener filter" << endl; 
-  WireCell2dToy::uBooNEData2DDeconvolutionFDS *wien_fds = new WireCell2dToy::uBooNEData2DDeconvolutionFDS(*data_fds,gds,uplane_map, vplane_map, wplane_map,100,toffset_1,toffset_2,toffset_3);
+  WireCell2dToy::uBooNEData2DDeconvolutionFDS *wien_fds = new WireCell2dToy::uBooNEData2DDeconvolutionFDS(*data_fds,gds,uplane_map, vplane_map, wplane_map,100,toffset_1,toffset_2,toffset_3, 1); //default: 0 -- for data channel-by-channel correction; 1: for simulation without any channel-by-channel correction
   wien_fds->jump(eve_num);
 
   cout << em("2D deconvolution") << endl;
