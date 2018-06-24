@@ -59,7 +59,13 @@ WireCell::PR3DCluster* WireCell2dToy::Improve_PR3DCluster(WireCell::PR3DCluster*
       // std::cout << time_slice << " " << wire->channel() << " " << charge << " " << charge_err << std::endl;
     }
   }
-  //std::cout << u_time_chs.size() << " " << v_time_chs.size() << " " << w_time_chs.size() << " " << time_ch_charge_map.size() << std::endl;
+
+  // for (auto it = time_ch_charge_map.begin(); it!= time_ch_charge_map.end(); it++){
+  //   std::cout << it->first.first << " " << it->first.second << std::endl;
+  // }
+  
+  
+  // std::cout << u_time_chs.size() << " Xin1: " << v_time_chs.size() << " " << w_time_chs.size() << " " << time_ch_charge_map.size() << std::endl;
 
   {
     // add in missing pieces based on trajectory points
@@ -90,13 +96,70 @@ WireCell::PR3DCluster* WireCell2dToy::Improve_PR3DCluster(WireCell::PR3DCluster*
       }
     }
 
+    std::pair<int,int> uch_limits = ct_point_cloud.get_uch_limits();
+    std::pair<int,int> vch_limits = ct_point_cloud.get_vch_limits();
+    std::pair<int,int> wch_limits = ct_point_cloud.get_wch_limits();
+    
     for (auto it=path_pts.begin(); it!=path_pts.end(); it++){
       std::vector<int> results = ct_point_cloud.convert_3Dpoint_time_ch((*it));
-      // +- 2 time_slices;
-      // +- 2 wire channels ...
+
+      if (time_ch_charge_map.find(std::make_pair(results.at(0),results.at(1)))!=time_ch_charge_map.end() &&
+	  time_ch_charge_map.find(std::make_pair(results.at(0),results.at(2)))!=time_ch_charge_map.end() &&
+	  time_ch_charge_map.find(std::make_pair(results.at(0),results.at(3)))!=time_ch_charge_map.end() 
+) continue;
+      
+      for (int time_slice = results.at(0)-2; time_slice<=results.at(0)+2; time_slice ++){
+	if (time_slice <0) continue;
+	
+	if (u_time_chs.find(time_slice)==u_time_chs.end()){
+	  std::set<int> uchs;
+	  u_time_chs[time_slice] = uchs;
+	  std::set<int> vchs;
+	  v_time_chs[time_slice] = vchs;
+	  std::set<int> wchs;
+	  w_time_chs[time_slice] = wchs;
+	}
+	for (int ch = results.at(1)-2; ch<=results.at(1)+2; ch++){
+	  if (ch < uch_limits.first || ch > uch_limits.second ||
+	      fabs(ch - results.at(1)) + fabs(time_slice -results.at(0))>2)
+	    continue;
+	  u_time_chs[time_slice].insert(ch);
+	  if (time_ch_charge_map.find(std::make_pair(time_slice,ch))==time_ch_charge_map.end()){
+	    time_ch_charge_map[std::make_pair(time_slice,ch)]=0;
+	    time_ch_charge_err_map[std::make_pair(time_slice,ch)]=0;
+	    //std::cout << time_slice << " " << ch << std::endl;
+	  }
+	}
+	for (int ch = results.at(2)-2; ch<=results.at(2)+2; ch++){
+	  if (ch < vch_limits.first || ch > vch_limits.second ||
+	      fabs(ch - results.at(2)) + fabs(time_slice -results.at(0))>2)
+	    continue;
+	  v_time_chs[time_slice].insert(ch);
+	  if (time_ch_charge_map.find(std::make_pair(time_slice,ch))==time_ch_charge_map.end()){
+	    time_ch_charge_map[std::make_pair(time_slice,ch)]=0;
+	    time_ch_charge_err_map[std::make_pair(time_slice,ch)]=0;
+	    //std::cout << time_slice << " " << ch << std::endl;
+	  }
+	}
+	for (int ch = results.at(3)-2; ch<=results.at(3)+2; ch++){
+	  if (ch < wch_limits.first || ch > wch_limits.second ||
+	      fabs(ch - results.at(3)) + fabs(time_slice -results.at(0))>2)
+	    continue;
+	  w_time_chs[time_slice].insert(ch);
+	  if (time_ch_charge_map.find(std::make_pair(time_slice,ch))==time_ch_charge_map.end()){
+	    time_ch_charge_map[std::make_pair(time_slice,ch)]=0;
+	    time_ch_charge_err_map[std::make_pair(time_slice,ch)]=0;
+	    //std::cout << time_slice << " " << ch << std::endl;
+	  }
+	}	
+      }
+      
+
     }
-    std::cout << path_pts.size() << std::endl;
+
     
+    //std::cout << path_pts.size() << std::endl;
+    // std::cout << u_time_chs.size() << " Xin2: " << v_time_chs.size() << " " << w_time_chs.size() << " " << time_ch_charge_map.size() << std::endl;
   }
   
   
