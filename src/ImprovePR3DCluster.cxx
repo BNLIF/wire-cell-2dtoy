@@ -182,36 +182,76 @@ WireCell::PR3DCluster* WireCell2dToy::Improve_PR3DCluster(WireCell::PR3DCluster*
     //   std::cout << u_time_chs.size() << " Xin2: " << v_time_chs.size() << " " << w_time_chs.size() << " " << time_ch_charge_map.size() << std::endl;
   }
 
-  {
-    WireCell2dToy::WireCellHolder *WCholder = new WireCellHolder();
-    for (auto it = u_time_chs.begin(); it!= u_time_chs.end(); it++){
-      int time_slice = it->first;
-      WireCell2dToy::LowmemTiling tiling(time_slice,gds,*WCholder);
-      // recreate the merged wires
-      // recreate the merge cells
-      tiling.init_good_cells(u_time_chs, v_time_chs, w_time_chs);  
+  
+  WireCell2dToy::WireCellHolder *WCholder = new WireCellHolder();
+  for (auto it = u_time_chs.begin(); it!= u_time_chs.end(); it++){
+    int time_slice = it->first;
+    WireCell2dToy::LowmemTiling tiling(time_slice,gds,*WCholder);
+    // recreate the merged wires
+    // recreate the merge cells
+    tiling.init_good_cells(u_time_chs, v_time_chs, w_time_chs);  
+  }
+  
+  
+  // examine the newly create merged cells
+  std::map<int,SMGCSelection> old_time_mcells_map;
+  for (auto it = old_mcells.begin(); it!=old_mcells.end(); it++){
+    SlimMergeGeomCell *mcell = (*it);
+    int time_slice = mcell->GetTimeSlice();
+    if (old_time_mcells_map.find(time_slice)==old_time_mcells_map.end()){
+      SMGCSelection mcells;
+      mcells.push_back(mcell);
+      old_time_mcells_map[time_slice] = mcells;
+    }else{
+      old_time_mcells_map[time_slice].push_back(mcell);
     }
-
+  }
+  
+  std::map<int,SMGCSelection> new_time_mcells_map;
+  SMGCSet new_mcells_set;
+  
+  GeomCellSelection& temp_cells = WCholder->get_cells();
+  for (auto it = temp_cells.begin(); it!=temp_cells.end(); it++){
+    SlimMergeGeomCell *mcell = (SlimMergeGeomCell*)(*it);
+    int time_slice = mcell->GetTimeSlice();
+    bool flag_good = false;
     
-    // examine the newly create merged cells
-    std::map<int,SMGCSelection> old_time_mcells_map;
-    for (auto it = old_mcells.begin(); it!=old_mcells.end(); it++){
-      SlimMergeGeomCell *mcell = (*it);
-      int time_slice = mcell->GetTimeSlice();
-      if (old_time_mcells_map.find(time_slice)==old_time_mcells_map.end()){
-	SMGCSelection mcells;
-	mcells.push_back(mcell);
-	old_time_mcells_map[time_slice] = mcells;
-      }else{
-	old_time_mcells_map[time_slice].push_back(mcell);
+    if (!flag_good){
+      // -1 time slice
+      if (old_time_mcells_map.find(time_slice-1) != old_time_mcells_map.end()){
+	for (auto it1 = old_time_mcells_map[time_slice-1].begin(); it1!=old_time_mcells_map[time_slice-1].end(); it1++){
+	  if (mcell->Overlap_fast((*it1))){
+	    flag_good = true;
+	    break;
+	  }
+	}
+      }
+    }
+    if (!flag_good){
+      // same time_slice
+      if (old_time_mcells_map.find(time_slice) != old_time_mcells_map.end()){
+	for (auto it1 = old_time_mcells_map[time_slice].begin(); it1!=old_time_mcells_map[time_slice].end(); it1++){
+	  if (mcell->Overlap_fast((*it1))){
+	    flag_good = true;
+	    break;
+	  }
+	}
+      }
+    }
+    if (!flag_good){
+      // +1 time_slice
+      if (old_time_mcells_map.find(time_slice+1) != old_time_mcells_map.end()){
+	for (auto it1 = old_time_mcells_map[time_slice+1].begin(); it1!=old_time_mcells_map[time_slice+1].end(); it1++){
+	  if (mcell->Overlap_fast((*it1))){
+	    flag_good = true;
+	    break;
+	  }
+	}
       }
     }
     
-    std::map<int,SMGCSelection> new_time_mcells_map;
-    GeomCellSelection& temp_cells = WCholder->get_cells();
-    for (auto it = temp_cells.begin(); it!=temp_cells.end(); it++){
-      SlimMergeGeomCell *mcell = (SlimMergeGeomCell*)(*it);
-      int time_slice = mcell->GetTimeSlice();
+
+    if (flag_good){
       if (new_time_mcells_map.find(time_slice)==new_time_mcells_map.end()){
 	SMGCSelection mcells;
 	mcells.push_back(mcell);
@@ -219,21 +259,101 @@ WireCell::PR3DCluster* WireCell2dToy::Improve_PR3DCluster(WireCell::PR3DCluster*
       }else{
 	new_time_mcells_map[time_slice].push_back(mcell);
       }
+    }else{
+      new_mcells_set.insert(mcell);
     }
     
-    std::cout << cluster->get_cluster_id() << " " << old_mcells.size() << " " << u_time_chs.size() << " " << WCholder->get_ncell() << " " << WCholder->get_nwire() << std::endl;
-    
-    
-
-    
-    
-
-    
-    
-    // create a new cluster ...
   }
   
+  int prev_num_mcells = new_mcells_set.size()+1;
+  while(new_mcells_set.size() != prev_num_mcells && new_mcells_set.size() > 0){
+    prev_num_mcells = new_mcells_set.size();
+
+    SMGCSelection temp_mcells;
+    
+    //start to work on it ...
+    for (auto it= new_mcells_set.begin(); it!=new_mcells_set.end(); it++){
+      SlimMergeGeomCell *mcell = (*it);
+      int time_slice = mcell->GetTimeSlice();
+      bool flag_good = false;
+
+      if (!flag_good){
+	// -1 time slice
+	if (new_time_mcells_map.find(time_slice-1) != new_time_mcells_map.end()){
+	  for (auto it1 = new_time_mcells_map[time_slice-1].begin(); it1!=new_time_mcells_map[time_slice-1].end(); it1++){
+	    if (mcell->Overlap_fast((*it1))){
+	      flag_good = true;
+	      break;
+	    }
+	  }
+	}
+      }
+      if (!flag_good){
+	// same time_slice
+	if (new_time_mcells_map.find(time_slice) != new_time_mcells_map.end()){
+	  for (auto it1 = new_time_mcells_map[time_slice].begin(); it1!=new_time_mcells_map[time_slice].end(); it1++){
+	    if (mcell->Overlap_fast((*it1))){
+	      flag_good = true;
+	      break;
+	    }
+	  }
+	}
+      }
+      if (!flag_good){
+	// +1 time_slice
+	if (new_time_mcells_map.find(time_slice+1) != new_time_mcells_map.end()){
+	  for (auto it1 = new_time_mcells_map[time_slice+1].begin(); it1!=new_time_mcells_map[time_slice+1].end(); it1++){
+	    if (mcell->Overlap_fast((*it1))){
+	      flag_good = true;
+	      break;
+	    }
+	  }
+	}
+      }
+
+      if (flag_good){
+	temp_mcells.push_back(mcell);
+      }
+    }
+
+    for (auto it = temp_mcells.begin(); it!=temp_mcells.end(); it++){
+      SlimMergeGeomCell *mcell = (*it);
+      int time_slice = mcell->GetTimeSlice();
+
+      if (new_time_mcells_map.find(time_slice)==new_time_mcells_map.end()){
+	SMGCSelection mcells;
+	mcells.push_back(mcell);
+	new_time_mcells_map[time_slice] = mcells;
+      }else{
+	new_time_mcells_map[time_slice].push_back(mcell);
+      }
+      new_mcells_set.erase(mcell);
+    }
+    //  std::cout << new_mcells_set.size() << std::endl;
+  }
+
+  for (auto it=new_mcells_set.begin(); it!=new_mcells_set.end(); it++){
+    SlimMergeGeomCell *mcell = (*it);
+    delete mcell;
+  }
+  new_mcells_set.clear();
+
+  // create a new cluster ...
+  PR3DCluster *new_cluster = new PR3DCluster(cluster->get_cluster_id());
+  for (auto it = new_time_mcells_map.begin(); it!= new_time_mcells_map.end(); it++){
+    int time_slice = it->first;
+    SMGCSelection& temp_mcells = it->second;
+    for (auto it1 = temp_mcells.begin(); it1!=temp_mcells.end(); it1++){
+      SlimMergeGeomCell *mcell = (*it1);
+      new_cluster->AddCell(mcell,time_slice);
+    }
+  }
   
+  //std::cout << cluster->get_cluster_id() << " " << old_mcells.size() << " " << u_time_chs.size() << " " << WCholder->get_ncell() << " " << WCholder->get_nwire() << " " << new_mcells_set.size() << std::endl;
+  
+  
+  
+
   
   
   
@@ -241,5 +361,5 @@ WireCell::PR3DCluster* WireCell2dToy::Improve_PR3DCluster(WireCell::PR3DCluster*
   //std::vector<int> results = ct_point_cloud.convert_3Dpoint_time_ch(p);
   //std::cout << results.at(0) << " " << results.at(1) << " " << results.at(2) << " " << results.at(3) << std::endl;
   
-  return 0;
+  return new_cluster;
 }
