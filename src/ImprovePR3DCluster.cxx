@@ -65,7 +65,7 @@ WireCell::PR3DCluster* WireCell2dToy::Improve_PR3DCluster(WireCell::PR3DCluster*
   // }
   
   
-  // std::cout << u_time_chs.size() << " Xin1: " << v_time_chs.size() << " " << w_time_chs.size() << " " << time_ch_charge_map.size() << std::endl;
+  //  std::cout << u_time_chs.size() << " Xin1: " << v_time_chs.size() << " " << w_time_chs.size() << " " << time_ch_charge_map.size() << std::endl;
 
   {
     // add in missing pieces based on trajectory points
@@ -99,14 +99,36 @@ WireCell::PR3DCluster* WireCell2dToy::Improve_PR3DCluster(WireCell::PR3DCluster*
     std::pair<int,int> uch_limits = ct_point_cloud.get_uch_limits();
     std::pair<int,int> vch_limits = ct_point_cloud.get_vch_limits();
     std::pair<int,int> wch_limits = ct_point_cloud.get_wch_limits();
-    
+
+    std::vector<bool> path_pts_flag;
     for (auto it=path_pts.begin(); it!=path_pts.end(); it++){
       std::vector<int> results = ct_point_cloud.convert_3Dpoint_time_ch((*it));
 
-      if (time_ch_charge_map.find(std::make_pair(results.at(0),results.at(1)))!=time_ch_charge_map.end() &&
-	  time_ch_charge_map.find(std::make_pair(results.at(0),results.at(2)))!=time_ch_charge_map.end() &&
-	  time_ch_charge_map.find(std::make_pair(results.at(0),results.at(3)))!=time_ch_charge_map.end() 
-) continue;
+      if ((time_ch_charge_map.find(std::make_pair(results.at(0),results.at(1)))!=time_ch_charge_map.end() || time_ch_charge_map.find(std::make_pair(results.at(0),results.at(1)-1))!=time_ch_charge_map.end() || time_ch_charge_map.find(std::make_pair(results.at(0),results.at(1)+1))!=time_ch_charge_map.end()) &&
+	  (time_ch_charge_map.find(std::make_pair(results.at(0),results.at(2)))!=time_ch_charge_map.end() || time_ch_charge_map.find(std::make_pair(results.at(0),results.at(2)-1))!=time_ch_charge_map.end() || time_ch_charge_map.find(std::make_pair(results.at(0),results.at(2)+1))!=time_ch_charge_map.end()) &&
+	  (time_ch_charge_map.find(std::make_pair(results.at(0),results.at(3)))!=time_ch_charge_map.end() || time_ch_charge_map.find(std::make_pair(results.at(0),results.at(3)-1))!=time_ch_charge_map.end() || time_ch_charge_map.find(std::make_pair(results.at(0),results.at(3)+1))!=time_ch_charge_map.end()) 
+	  ){
+	path_pts_flag.push_back(true);
+      }else{
+	path_pts_flag.push_back(false);
+      }
+      //  std::cout << "Path: " << (*it).x/units::cm << " " << (*it).y/units::cm << " " << (*it).z/units::cm << " " << path_pts_flag.back() << std::endl;
+    }
+
+    // std::cout << path_pts.size() << " " << path_pts_flag.size() << " " << cluster->get_cluster_id() << std::endl;
+    
+    for (size_t i=0;i!=path_pts.size();i++){
+      std::vector<int> results = ct_point_cloud.convert_3Dpoint_time_ch(path_pts.at(i));
+
+      if (i==0){
+	if (path_pts_flag.at(i) && path_pts_flag.at(i+1)) continue;
+      }else if (i+1==path_pts.size()){
+	if (path_pts_flag.at(i) && path_pts_flag.at(i-1)) continue;
+      }else{
+	if (path_pts_flag.at(i-1) && path_pts_flag.at(i) && path_pts_flag.at(i+1)) continue;
+      }
+      
+    
       
       for (int time_slice = results.at(0)-2; time_slice<=results.at(0)+2; time_slice ++){
 	if (time_slice <0) continue;
@@ -153,24 +175,19 @@ WireCell::PR3DCluster* WireCell2dToy::Improve_PR3DCluster(WireCell::PR3DCluster*
 	  }
 	}	
       }
-      
-
     }
-
-    
     //std::cout << path_pts.size() << std::endl;
-    // std::cout << u_time_chs.size() << " Xin2: " << v_time_chs.size() << " " << w_time_chs.size() << " " << time_ch_charge_map.size() << std::endl;
+    //   std::cout << u_time_chs.size() << " Xin2: " << v_time_chs.size() << " " << w_time_chs.size() << " " << time_ch_charge_map.size() << std::endl;
+  }
+  
+  {
+    // recreate the merged wires
+    // recreate the merge cells
+    // examine the newly create merged cells
+    // create a new cluster ...
   }
   
   
-  // recreate the merged wires
-
-  // recreate the merge cells
-
-  // examine the newly create merged cells
-
-  
-  // create a new cluster ...
   
   
   
