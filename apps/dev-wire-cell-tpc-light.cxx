@@ -15,6 +15,9 @@
 #include "WireCell2dToy/ToyMatching.h"
 #include "WireCell2dToy/ToyFiducial.h"
 
+#include "WireCell2dToy/ImprovePR3DCluster.h"
+
+
 #include "TH1F.h"
 #include "TH2F.h"
 
@@ -597,6 +600,9 @@ int main(int argc, char* argv[])
      
      live_clusters.at(i)->cal_shortest_path(wcps.second);
 
+     // temp ... 
+     PR3DCluster *new_cluster = WireCell2dToy::Improve_PR3DCluster(live_clusters.at(i),ct_point_cloud);
+     
      //std::cout << "shortest path end point" << std::endl;
      
      live_clusters.at(i)->fine_tracking();
