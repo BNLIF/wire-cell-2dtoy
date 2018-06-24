@@ -1,4 +1,6 @@
 #include "WireCell2dToy/ImprovePR3DCluster.h"
+#include "WireCell2dToy/LowmemTiling.h"
+
 
 using namespace WireCell;
 
@@ -179,11 +181,25 @@ WireCell::PR3DCluster* WireCell2dToy::Improve_PR3DCluster(WireCell::PR3DCluster*
     //std::cout << path_pts.size() << std::endl;
     //   std::cout << u_time_chs.size() << " Xin2: " << v_time_chs.size() << " " << w_time_chs.size() << " " << time_ch_charge_map.size() << std::endl;
   }
-  
+
   {
+    WireCell2dToy::WireCellHolder *WCholder = new WireCellHolder();
+    for (auto it = u_time_chs.begin(); it!= u_time_chs.end(); it++){
+      int time_slice = it->first;
+      WireCell2dToy::LowmemTiling tiling(time_slice,gds,*WCholder);
+      tiling.init_good_cells(u_time_chs, v_time_chs, w_time_chs);
+
+      
+    }
+    std::cout << WCholder->get_ncell() << " " << WCholder->get_nwire() << std::endl;
+    WCholder->clear_wire();
+    
     // recreate the merged wires
+    
     // recreate the merge cells
+
     // examine the newly create merged cells
+    
     // create a new cluster ...
   }
   

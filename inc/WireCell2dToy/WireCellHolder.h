@@ -22,6 +22,9 @@ namespace WireCell2dToy{
     int get_cell_no(){return cell_no;};
     int get_wire_no(){return wire_no;};
 
+    void clear_cell();
+    void clear_wire();
+    
   protected:
     int ncell;
     int nwire;

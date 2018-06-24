@@ -2,6 +2,22 @@
 
 using namespace WireCell;
 
+WireCell2dToy::LowmemTiling::LowmemTiling(int time_slice,  WireCell::GeomDataSource& gds,WireCell2dToy::WireCellHolder& holder)
+  : gds(gds)
+  , nrebin(0)
+  , time_slice(time_slice)
+  , holder(holder)
+{
+  GeomWireSelection wires_u = gds.wires_in_plane(WirePlaneType_t(0));
+  GeomWireSelection wires_v = gds.wires_in_plane(WirePlaneType_t(1));
+  GeomWireSelection wires_w = gds.wires_in_plane(WirePlaneType_t(2));
+
+  nwire_u = wires_u.size();
+  nwire_v = wires_v.size();
+  nwire_w = wires_w.size();
+   
+}
+
 WireCell2dToy::LowmemTiling::LowmemTiling(int time_slice, int nrebin, WireCell::GeomDataSource& gds,WireCell2dToy::WireCellHolder& holder)
   : gds(gds)
   , nrebin(nrebin)
@@ -2524,6 +2540,14 @@ void WireCell2dToy::LowmemTiling::reset_cells(){
   
 }
 
+
+
+
+void WireCell2dToy::LowmemTiling::init_good_cells(std::map<int,std::set<int>>& u_time_chs, std::map<int,std::set<int>>& v_time_chs, std::map<int,std::set<int>>& w_time_chs){
+  form_fired_merge_wires(u_time_chs, v_time_chs, w_time_chs);
+}
+
+
 void WireCell2dToy::LowmemTiling::init_good_cells(const WireCell::Slice& slice, const WireCell::Slice& slice_err, std::vector<float>& uplane_rms, std::vector<float>& vplane_rms, std::vector<float>& wplane_rms){
   // form good wires group
   form_fired_merge_wires(slice, slice_err);
@@ -4626,6 +4650,108 @@ void WireCell2dToy::LowmemTiling::form_two_bad_cells(){
     } 
   }
 
+}
+
+
+void WireCell2dToy::LowmemTiling::form_fired_merge_wires(std::map<int,std::set<int>>& u_time_chs, std::map<int,std::set<int>>& v_time_chs, std::map<int,std::set<int>>& w_time_chs){
+  std::set<int> u_chs = u_time_chs[time_slice];
+  std::set<int> v_chs = v_time_chs[time_slice];
+  std::set<int> w_chs = w_time_chs[time_slice];
+
+  //std::cout << time_slice << " " << u_chs.size() << " " << v_chs.size() << " " << w_chs.size() << std::endl;
+  
+  // do U
+  MergeGeomWire *mwire = 0;
+  int ident = 0;
+  int last_wire = -1;
+  for (int i = 0; i!= nwire_u; i++){
+    const GeomWire *wire = gds.by_planeindex((WirePlaneType_t)0,i);
+    if (u_chs.find(wire->channel())!=u_chs.end()){
+      if (mwire == 0){
+	mwire = new MergeGeomWire(ident,*wire);
+	holder.AddWire(mwire);
+	//mwire->SetTimeSlice(time_slice);
+	wire_type_map[mwire] = true;
+	fired_wire_u.push_back(mwire);
+	ident ++;
+      }else{
+	if (i==last_wire+1){
+	  mwire->AddWire(*wire);
+	}else{
+	  // create a new wire
+	  mwire = new MergeGeomWire(ident,*wire);
+	  holder.AddWire(mwire);
+	  // mwire->SetTimeSlice(time_slice);
+	  wire_type_map[mwire] = true;
+	  fired_wire_u.push_back(mwire);
+	  ident ++;
+	}
+      }
+      last_wire = i;
+    }
+  }
+  
+  // V
+  mwire = 0;
+  last_wire = -1;
+  for (int i = 0; i!= nwire_v; i++){
+    const GeomWire *wire = gds.by_planeindex((WirePlaneType_t)1,i);
+    if (v_chs.find(wire->channel())!=v_chs.end()){
+      if (mwire == 0){
+	mwire = new MergeGeomWire(ident,*wire);
+	holder.AddWire(mwire);
+	//mwire->SetTimeSlice(time_slice);
+	wire_type_map[mwire] = true;
+	fired_wire_v.push_back(mwire);
+	ident ++;
+      }else{
+	if (i==last_wire+1){
+	  mwire->AddWire(*wire);
+	}else{
+	  // create a new wire
+	  mwire = new MergeGeomWire(ident,*wire);
+	  holder.AddWire(mwire);
+	  //mwire->SetTimeSlice(time_slice);
+	  wire_type_map[mwire] = true;
+	  fired_wire_v.push_back(mwire);
+	  ident ++;
+	}
+      }
+      last_wire = i;
+    }
+  }
+  
+  // W
+  mwire = 0;
+  last_wire = -1;
+  for (int i = 0; i!= nwire_w; i++){
+    const GeomWire *wire = gds.by_planeindex((WirePlaneType_t)2,i);
+    if (w_chs.find(wire->channel())!=w_chs.end()){
+      if (mwire == 0){
+	mwire = new MergeGeomWire(ident,*wire);
+	holder.AddWire(mwire);
+	//mwire->SetTimeSlice(time_slice);
+	wire_type_map[mwire] = true;
+	fired_wire_w.push_back(mwire);
+	ident ++;
+      }else{
+	if (i==last_wire+1){
+	  mwire->AddWire(*wire);
+	}else{
+	  // create a new wire
+	  mwire = new MergeGeomWire(ident,*wire);
+	  holder.AddWire(mwire);
+	  //mwire->SetTimeSlice(time_slice);
+	  wire_type_map[mwire] = true;
+	  fired_wire_w.push_back(mwire);
+	  ident ++;
+	}
+      }
+      last_wire = i;
+    }
+  }
+
+  
 }
 
 

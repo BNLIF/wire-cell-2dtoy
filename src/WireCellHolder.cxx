@@ -22,6 +22,20 @@ WireCell2dToy::WireCellHolder::~WireCellHolder(){
 }
 
 
+void WireCell2dToy::WireCellHolder::clear_cell(){
+  for (int i=0;i!=cells.size();i++){
+    delete cells.at(i);
+  }
+  cells.clear();
+}
+
+void WireCell2dToy::WireCellHolder::clear_wire(){
+  for (int i=0;i!=wires.size();i++){
+    delete wires.at(i);
+  }
+  wires.clear();
+}
+
 void WireCell2dToy::WireCellHolder::AddWire(GeomWire *wire){
   nwire++;
   wires.push_back(wire);
