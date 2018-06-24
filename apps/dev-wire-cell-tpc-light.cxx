@@ -581,6 +581,8 @@ int main(int argc, char* argv[])
    }
    //std::cout << live_clusters.size() << std::endl;
 
+   std::map<PR3DCluster*, PR3DCluster*> old_new_cluster_map;
+   
    for (size_t i=0;i!=live_clusters.size();i++){
 
      //if (live_clusters.at(i)->get_cluster_id()!=3) continue;
@@ -600,8 +602,18 @@ int main(int argc, char* argv[])
      
      live_clusters.at(i)->cal_shortest_path(wcps.second);
 
-     // temp ... 
-     PR3DCluster *new_cluster = WireCell2dToy::Improve_PR3DCluster(live_clusters.at(i),ct_point_cloud, gds);
+     {
+       // temp ... 
+       PR3DCluster *new_cluster = WireCell2dToy::Improve_PR3DCluster(live_clusters.at(i),ct_point_cloud, gds);
+       WireCell2dToy::calc_sampling_points(gds,new_cluster,nrebin, frame_length, unit_dis);
+       new_cluster->Create_point_cloud();
+       old_new_cluster_map[live_clusters.at(i)] = new_cluster;
+
+       new_cluster->Create_graph();
+       std::pair<WCPointCloud<double>::WCPoint,WCPointCloud<double>::WCPoint> new_wcps = new_cluster->get_highest_lowest_wcps();
+       new_cluster->dijkstra_shortest_paths(new_wcps.first);
+       new_cluster->cal_shortest_path(new_wcps.second);
+     }
      
      //std::cout << "shortest path end point" << std::endl;
      
@@ -850,22 +862,10 @@ int main(int argc, char* argv[])
    }
    
    for (size_t j = 0; j!= live_clusters.size(); j++){
-     // SMGCSelection& mcells = live_clusters.at(j)->get_mcells();
-     // ncluster = live_clusters.at(j)->get_cluster_id();
-     // for (size_t i=0;i!=mcells.size();i++){
-     //   PointVector ps = mcells.at(i)->get_sampling_points();
-     //   int time_slice = mcells.at(i)->GetTimeSlice();
-     //   if (ps.size()==0) std::cout << "zero sampling points!" << std::endl;
-     //   for (int k=0;k!=ps.size();k++){
-     // 	 x = ps.at(k).x/units::cm;//time_slice*nrebin/2.*unit_dis/10. - frame_length/2.*unit_dis/10.;
-     // 	 y = ps.at(k).y/units::cm;
-     // 	 z = ps.at(k).z/units::cm;
-     // 	 T_cluster->Fill();
-     //   }
-     // }
-
+     
      // save wcps
-     std::list<WCPointCloud<double>::WCPoint>& wcps_list = live_clusters.at(j)->get_path_wcps();
+     PR3DCluster *new_cluster = old_new_cluster_map[live_clusters.at(j)];
+     std::list<WCPointCloud<double>::WCPoint>& wcps_list = new_cluster->get_path_wcps();
      //ncluster = -1 * ncluster-100;
      for (auto it = wcps_list.begin(); it!=wcps_list.end(); it++){
        x = (*it).x/units::cm;
@@ -874,6 +874,20 @@ int main(int argc, char* argv[])
        T_rec->Fill();
      }
 
+     // PR3DCluster *new_cluster = old_new_cluster_map[live_clusters.at(j)];
+     // SMGCSelection& mcells = new_cluster->get_mcells();
+     // //ncluster = temp_clusters.at(0)->get_cluster_id();
+     // for (size_t i=0;i!=mcells.size();i++){
+     //   PointVector ps = mcells.at(i)->get_sampling_points();
+     //   int time_slice = mcells.at(i)->GetTimeSlice();
+     //   for (int k=0;k!=ps.size();k++){
+     // 	 x = ps.at(k).x/units::cm ;
+     // 	 y = ps.at(k).y/units::cm;
+     // 	 z = ps.at(k).z/units::cm;
+     // 	 T_rec->Fill();
+     //   }
+     // }
+     
      PointVector& pts = live_clusters.at(j)->get_fine_tracking_path();
      for (size_t i=0; i!=pts.size(); i++){
        x = pts.at(i).x/units::cm;

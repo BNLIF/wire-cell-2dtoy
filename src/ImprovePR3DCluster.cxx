@@ -106,14 +106,28 @@ WireCell::PR3DCluster* WireCell2dToy::Improve_PR3DCluster(WireCell::PR3DCluster*
     for (auto it=path_pts.begin(); it!=path_pts.end(); it++){
       std::vector<int> results = ct_point_cloud.convert_3Dpoint_time_ch((*it));
 
-      if ((time_ch_charge_map.find(std::make_pair(results.at(0),results.at(1)))!=time_ch_charge_map.end() || time_ch_charge_map.find(std::make_pair(results.at(0),results.at(1)-1))!=time_ch_charge_map.end() || time_ch_charge_map.find(std::make_pair(results.at(0),results.at(1)+1))!=time_ch_charge_map.end()) &&
-	  (time_ch_charge_map.find(std::make_pair(results.at(0),results.at(2)))!=time_ch_charge_map.end() || time_ch_charge_map.find(std::make_pair(results.at(0),results.at(2)-1))!=time_ch_charge_map.end() || time_ch_charge_map.find(std::make_pair(results.at(0),results.at(2)+1))!=time_ch_charge_map.end()) &&
-	  (time_ch_charge_map.find(std::make_pair(results.at(0),results.at(3)))!=time_ch_charge_map.end() || time_ch_charge_map.find(std::make_pair(results.at(0),results.at(3)-1))!=time_ch_charge_map.end() || time_ch_charge_map.find(std::make_pair(results.at(0),results.at(3)+1))!=time_ch_charge_map.end()) 
-	  ){
+      int nu = 0;
+      int nv = 0;
+      int nw = 0;
+
+      if (time_ch_charge_map.find(std::make_pair(results.at(0),results.at(1)))!=time_ch_charge_map.end()) nu ++;
+      if (time_ch_charge_map.find(std::make_pair(results.at(0),results.at(1)-1))!=time_ch_charge_map.end()) nu +=2;
+      if (time_ch_charge_map.find(std::make_pair(results.at(0),results.at(1)+1))!=time_ch_charge_map.end()) nu ++;
+
+      if (time_ch_charge_map.find(std::make_pair(results.at(0),results.at(2)))!=time_ch_charge_map.end()) nv ++;
+      if (time_ch_charge_map.find(std::make_pair(results.at(0),results.at(2)-1))!=time_ch_charge_map.end()) nv+=2;
+      if (time_ch_charge_map.find(std::make_pair(results.at(0),results.at(2)+1))!=time_ch_charge_map.end()) nv++;
+      
+      if (time_ch_charge_map.find(std::make_pair(results.at(0),results.at(3)))!=time_ch_charge_map.end()) nw++;
+      if (time_ch_charge_map.find(std::make_pair(results.at(0),results.at(3)-1))!=time_ch_charge_map.end()) nw += 2;
+      if (time_ch_charge_map.find(std::make_pair(results.at(0),results.at(3)+1))!=time_ch_charge_map.end()) nw ++;
+
+      if (nu>0&&nv>0&&nw>0&&nu+nv+nw>=6){
 	path_pts_flag.push_back(true);
       }else{
 	path_pts_flag.push_back(false);
       }
+      
       //  std::cout << "Path: " << (*it).x/units::cm << " " << (*it).y/units::cm << " " << (*it).z/units::cm << " " << path_pts_flag.back() << std::endl;
     }
 
@@ -132,7 +146,7 @@ WireCell::PR3DCluster* WireCell2dToy::Improve_PR3DCluster(WireCell::PR3DCluster*
       
     
       
-      for (int time_slice = results.at(0)-2; time_slice<=results.at(0)+2; time_slice ++){
+      for (int time_slice = results.at(0)-3; time_slice<=results.at(0)+3; time_slice ++){
 	if (time_slice <0) continue;
 	
 	if (u_time_chs.find(time_slice)==u_time_chs.end()){
@@ -143,9 +157,9 @@ WireCell::PR3DCluster* WireCell2dToy::Improve_PR3DCluster(WireCell::PR3DCluster*
 	  std::set<int> wchs;
 	  w_time_chs[time_slice] = wchs;
 	}
-	for (int ch = results.at(1)-2; ch<=results.at(1)+2; ch++){
+	for (int ch = results.at(1)-3; ch<=results.at(1)+3; ch++){
 	  if (ch < uch_limits.first || ch > uch_limits.second ||
-	      fabs(ch - results.at(1)) + fabs(time_slice -results.at(0))>2)
+	      fabs(ch - results.at(1)) + fabs(time_slice -results.at(0))>3)
 	    continue;
 	  u_time_chs[time_slice].insert(ch);
 	  if (time_ch_charge_map.find(std::make_pair(time_slice,ch))==time_ch_charge_map.end()){
@@ -154,9 +168,9 @@ WireCell::PR3DCluster* WireCell2dToy::Improve_PR3DCluster(WireCell::PR3DCluster*
 	    //std::cout << time_slice << " " << ch << std::endl;
 	  }
 	}
-	for (int ch = results.at(2)-2; ch<=results.at(2)+2; ch++){
+	for (int ch = results.at(2)-3; ch<=results.at(2)+3; ch++){
 	  if (ch < vch_limits.first || ch > vch_limits.second ||
-	      fabs(ch - results.at(2)) + fabs(time_slice -results.at(0))>2)
+	      fabs(ch - results.at(2)) + fabs(time_slice -results.at(0))>3)
 	    continue;
 	  v_time_chs[time_slice].insert(ch);
 	  if (time_ch_charge_map.find(std::make_pair(time_slice,ch))==time_ch_charge_map.end()){
@@ -165,9 +179,9 @@ WireCell::PR3DCluster* WireCell2dToy::Improve_PR3DCluster(WireCell::PR3DCluster*
 	    //std::cout << time_slice << " " << ch << std::endl;
 	  }
 	}
-	for (int ch = results.at(3)-2; ch<=results.at(3)+2; ch++){
+	for (int ch = results.at(3)-3; ch<=results.at(3)+3; ch++){
 	  if (ch < wch_limits.first || ch > wch_limits.second ||
-	      fabs(ch - results.at(3)) + fabs(time_slice -results.at(0))>2)
+	      fabs(ch - results.at(3)) + fabs(time_slice -results.at(0))>3)
 	    continue;
 	  w_time_chs[time_slice].insert(ch);
 	  if (time_ch_charge_map.find(std::make_pair(time_slice,ch))==time_ch_charge_map.end()){
@@ -350,11 +364,6 @@ WireCell::PR3DCluster* WireCell2dToy::Improve_PR3DCluster(WireCell::PR3DCluster*
   }
   
   //std::cout << cluster->get_cluster_id() << " " << old_mcells.size() << " " << u_time_chs.size() << " " << WCholder->get_ncell() << " " << WCholder->get_nwire() << " " << new_mcells_set.size() << std::endl;
-  
-  
-  
-
-  
   
   
   //Point p(150*units::cm, 35*units::cm, 532*units::cm);
