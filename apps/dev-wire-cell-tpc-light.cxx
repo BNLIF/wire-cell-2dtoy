@@ -601,7 +601,7 @@ int main(int argc, char* argv[])
      live_clusters.at(i)->cal_shortest_path(wcps.second);
 
      // temp ... 
-     PR3DCluster *new_cluster = WireCell2dToy::Improve_PR3DCluster(live_clusters.at(i),ct_point_cloud);
+     PR3DCluster *new_cluster = WireCell2dToy::Improve_PR3DCluster(live_clusters.at(i),ct_point_cloud, gds);
      
      //std::cout << "shortest path end point" << std::endl;
      
