@@ -187,18 +187,48 @@ WireCell::PR3DCluster* WireCell2dToy::Improve_PR3DCluster(WireCell::PR3DCluster*
     for (auto it = u_time_chs.begin(); it!= u_time_chs.end(); it++){
       int time_slice = it->first;
       WireCell2dToy::LowmemTiling tiling(time_slice,gds,*WCholder);
-      tiling.init_good_cells(u_time_chs, v_time_chs, w_time_chs);
-
-      
+      // recreate the merged wires
+      // recreate the merge cells
+      tiling.init_good_cells(u_time_chs, v_time_chs, w_time_chs);  
     }
-    std::cout << WCholder->get_ncell() << " " << WCholder->get_nwire() << std::endl;
-    WCholder->clear_wire();
-    
-    // recreate the merged wires
-    
-    // recreate the merge cells
 
+    
     // examine the newly create merged cells
+    std::map<int,SMGCSelection> old_time_mcells_map;
+    for (auto it = old_mcells.begin(); it!=old_mcells.end(); it++){
+      SlimMergeGeomCell *mcell = (*it);
+      int time_slice = mcell->GetTimeSlice();
+      if (old_time_mcells_map.find(time_slice)==old_time_mcells_map.end()){
+	SMGCSelection mcells;
+	mcells.push_back(mcell);
+	old_time_mcells_map[time_slice] = mcells;
+      }else{
+	old_time_mcells_map[time_slice].push_back(mcell);
+      }
+    }
+    
+    std::map<int,SMGCSelection> new_time_mcells_map;
+    GeomCellSelection& temp_cells = WCholder->get_cells();
+    for (auto it = temp_cells.begin(); it!=temp_cells.end(); it++){
+      SlimMergeGeomCell *mcell = (SlimMergeGeomCell*)(*it);
+      int time_slice = mcell->GetTimeSlice();
+      if (new_time_mcells_map.find(time_slice)==new_time_mcells_map.end()){
+	SMGCSelection mcells;
+	mcells.push_back(mcell);
+	new_time_mcells_map[time_slice] = mcells;
+      }else{
+	new_time_mcells_map[time_slice].push_back(mcell);
+      }
+    }
+    
+    std::cout << cluster->get_cluster_id() << " " << old_mcells.size() << " " << u_time_chs.size() << " " << WCholder->get_ncell() << " " << WCholder->get_nwire() << std::endl;
+    
+    
+
+    
+    
+
+    
     
     // create a new cluster ...
   }

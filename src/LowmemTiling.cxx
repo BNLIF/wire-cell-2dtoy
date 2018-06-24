@@ -2545,6 +2545,24 @@ void WireCell2dToy::LowmemTiling::reset_cells(){
 
 void WireCell2dToy::LowmemTiling::init_good_cells(std::map<int,std::set<int>>& u_time_chs, std::map<int,std::set<int>>& v_time_chs, std::map<int,std::set<int>>& w_time_chs){
   form_fired_merge_wires(u_time_chs, v_time_chs, w_time_chs);
+  
+  for (int i=0;i!=fired_wire_u.size();i++){
+    MergeGeomWire *uwire = (MergeGeomWire *)fired_wire_u.at(i);
+    for (int j=0;j!=fired_wire_v.size();j++){
+      MergeGeomWire *vwire = (MergeGeomWire *)fired_wire_v.at(j);
+      for (int k=0;k!=fired_wire_w.size();k++){
+	MergeGeomWire *wwire = (MergeGeomWire *)fired_wire_w.at(k);
+	SlimMergeGeomCell *mcell = create_slim_merge_cell(uwire,vwire,wwire);
+	
+	if (mcell !=0) {
+	  mcell->SetTimeSlice(time_slice);
+	  //	  three_good_wire_cells.push_back(mcell);
+	  holder.AddCell(mcell);
+	}
+	
+      }
+    }
+  }
 }
 
 
@@ -4669,7 +4687,6 @@ void WireCell2dToy::LowmemTiling::form_fired_merge_wires(std::map<int,std::set<i
     if (u_chs.find(wire->channel())!=u_chs.end()){
       if (mwire == 0){
 	mwire = new MergeGeomWire(ident,*wire);
-	holder.AddWire(mwire);
 	//mwire->SetTimeSlice(time_slice);
 	wire_type_map[mwire] = true;
 	fired_wire_u.push_back(mwire);
@@ -4680,7 +4697,6 @@ void WireCell2dToy::LowmemTiling::form_fired_merge_wires(std::map<int,std::set<i
 	}else{
 	  // create a new wire
 	  mwire = new MergeGeomWire(ident,*wire);
-	  holder.AddWire(mwire);
 	  // mwire->SetTimeSlice(time_slice);
 	  wire_type_map[mwire] = true;
 	  fired_wire_u.push_back(mwire);
@@ -4699,7 +4715,6 @@ void WireCell2dToy::LowmemTiling::form_fired_merge_wires(std::map<int,std::set<i
     if (v_chs.find(wire->channel())!=v_chs.end()){
       if (mwire == 0){
 	mwire = new MergeGeomWire(ident,*wire);
-	holder.AddWire(mwire);
 	//mwire->SetTimeSlice(time_slice);
 	wire_type_map[mwire] = true;
 	fired_wire_v.push_back(mwire);
@@ -4710,7 +4725,6 @@ void WireCell2dToy::LowmemTiling::form_fired_merge_wires(std::map<int,std::set<i
 	}else{
 	  // create a new wire
 	  mwire = new MergeGeomWire(ident,*wire);
-	  holder.AddWire(mwire);
 	  //mwire->SetTimeSlice(time_slice);
 	  wire_type_map[mwire] = true;
 	  fired_wire_v.push_back(mwire);
@@ -4729,7 +4743,6 @@ void WireCell2dToy::LowmemTiling::form_fired_merge_wires(std::map<int,std::set<i
     if (w_chs.find(wire->channel())!=w_chs.end()){
       if (mwire == 0){
 	mwire = new MergeGeomWire(ident,*wire);
-	holder.AddWire(mwire);
 	//mwire->SetTimeSlice(time_slice);
 	wire_type_map[mwire] = true;
 	fired_wire_w.push_back(mwire);
@@ -4740,7 +4753,6 @@ void WireCell2dToy::LowmemTiling::form_fired_merge_wires(std::map<int,std::set<i
 	}else{
 	  // create a new wire
 	  mwire = new MergeGeomWire(ident,*wire);
-	  holder.AddWire(mwire);
 	  //mwire->SetTimeSlice(time_slice);
 	  wire_type_map[mwire] = true;
 	  fired_wire_w.push_back(mwire);

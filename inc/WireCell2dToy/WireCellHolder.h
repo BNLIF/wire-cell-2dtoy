@@ -24,6 +24,8 @@ namespace WireCell2dToy{
 
     void clear_cell();
     void clear_wire();
+
+    WireCell::GeomCellSelection& get_cells(){return cells;};
     
   protected:
     int ncell;
