@@ -177,7 +177,7 @@ int main(int argc, char* argv[])
   int recon_threshold = 2000;
   int frame_length = 3200;
   int max_events = 100;
-  int eve_num;
+  int eve_num = 0;
   int nrebin = 4;
 
   TPCParams& mp = Singleton<TPCParams>::Instance();
@@ -348,7 +348,9 @@ int main(int argc, char* argv[])
   /*   } */
   /* } */
   //
+  
   TH2F *hv_raw = (TH2F*)file1->Get("hv_raw");
+  
   // V wire noisy channels 10 vetoed ...
   /* for (int i=3684;i!=3699;i++){ */
   /*   if (vplane_map.find(i-2400)==vplane_map.end()){ */

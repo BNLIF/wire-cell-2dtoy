@@ -274,29 +274,34 @@ int main(int argc, char* argv[])
                 end_proj = point_proj;
             } 
         }//each point
+       
+        // the start, end points are more precise than the PCA direction in case of a big blob (isochronous track)
+        TVector3 recon_dir = end - start;
+        if(recon_dir.Y()<0) recon_dir *= -1.0;
+        double costheta_y = recon_dir.Y()/recon_dir.Mag();
+        double phi = TMath::ACos(recon_dir.Z()/TMath::Sqrt(recon_dir.X()*recon_dir.X()+recon_dir.Z()*recon_dir.Z()));
         
-        double costheta_y = track_dir.Y()/track_dir.Mag();
-        double phi = TMath::ACos(track_dir.Z()/TMath::Sqrt(track_dir.X()*track_dir.X()+track_dir.Z()*track_dir.Z()));
-        
-
-        TVector3 track_dir_u = Muplane*track_dir;
-        if(track_dir_u.Y()<0) track_dir_u *= -1.0;
-        double costheta_y_u = track_dir_u.Y()/track_dir_u.Mag();
-        double phi_u = TMath::ACos(track_dir_u.Z()/TMath::Sqrt(track_dir_u.X()*track_dir_u.X()+track_dir_u.Z()*track_dir_u.Z()));
-        TVector3 track_dir_v = Mvplane*track_dir;
-        if(track_dir_v.Y()<0) track_dir_v *= -1.0;
-        double costheta_y_v = track_dir_v.Y()/track_dir_v.Mag();
-        double phi_v = TMath::ACos(track_dir_v.Z()/TMath::Sqrt(track_dir_v.X()*track_dir_v.X()+track_dir_v.Z()*track_dir_v.Z()));
+        TVector3 recon_dir_u = Muplane*recon_dir;
+        if(recon_dir_u.Y()<0) recon_dir_u *= -1.0;
+        double costheta_y_u = recon_dir_u.Y()/recon_dir_u.Mag();
+        double phi_u = TMath::ACos(recon_dir_u.Z()/TMath::Sqrt(recon_dir_u.X()*recon_dir_u.X()+recon_dir_u.Z()*recon_dir_u.Z()));
+       
+        TVector3 recon_dir_v = Mvplane*recon_dir;
+        if(recon_dir_v.Y()<0) recon_dir_v *= -1.0;
+        double costheta_y_v = recon_dir_v.Y()/recon_dir_v.Mag();
+        double phi_v = TMath::ACos(recon_dir_v.Z()/TMath::Sqrt(recon_dir_v.X()*recon_dir_v.X()+recon_dir_v.Z()*recon_dir_v.Z()));
         
         TVector3 center = 0.5*(start+end);
-        double length = (end - start).Mag();
+        double length = recon_dir.Mag();
+     
+        // PCA track info (not used)
         TVector3 center2(mx, my, mz);
         TVector3 start2 = center2-0.5*length*track_dir;
         TVector3 end2 = center2+0.5*length*track_dir;
 
         // debug
         if(costheta_y >= 1 || costheta_y <=0 || phi >= TMath::Pi() || phi <= 0) {
-            track_dir.Print();
+            recon_dir.Print();
             cout<<"length: "<<length<<endl;
         }
         
@@ -333,24 +338,24 @@ int main(int argc, char* argv[])
     }// each cluster
 
     //average length
-    for(int m=1; m<=hntrack->GetNbinsX(); m++)
-    {
-        for(int n=1; n<=hntrack->GetNbinsY(); n++)
-        {
-            if(hntrack->GetBinContent(m,n)!=0)
-            {
-                hltrack->SetBinContent(m,n,hltrack->GetBinContent(m,n)/hntrack->GetBinContent(m,n));
-            }
-            if(hntrack_u->GetBinContent(m,n)!=0)
-            {
-                hltrack_u->SetBinContent(m,n,hltrack_u->GetBinContent(m,n)/hntrack_u->GetBinContent(m,n));
-            }
-            if(hntrack_v->GetBinContent(m,n)!=0)
-            {
-                hltrack_v->SetBinContent(m,n,hltrack_v->GetBinContent(m,n)/hntrack_v->GetBinContent(m,n));
-            }
-        }
-    }
+    /* for(int m=1; m<=hntrack->GetNbinsX(); m++) */
+    /* { */
+    /*     for(int n=1; n<=hntrack->GetNbinsY(); n++) */
+    /*     { */
+    /*         if(hntrack->GetBinContent(m,n)!=0) */
+    /*         { */
+    /*             hltrack->SetBinContent(m,n,hltrack->GetBinContent(m,n)/hntrack->GetBinContent(m,n)); */
+    /*         } */
+    /*         if(hntrack_u->GetBinContent(m,n)!=0) */
+    /*         { */
+    /*             hltrack_u->SetBinContent(m,n,hltrack_u->GetBinContent(m,n)/hntrack_u->GetBinContent(m,n)); */
+    /*         } */
+    /*         if(hntrack_v->GetBinContent(m,n)!=0) */
+    /*         { */
+    /*             hltrack_v->SetBinContent(m,n,hltrack_v->GetBinContent(m,n)/hntrack_v->GetBinContent(m,n)); */
+    /*         } */
+    /*     } */
+    /* } */
 
 
     //check
@@ -406,24 +411,24 @@ int main(int argc, char* argv[])
     }
 
     //average length
-    for(int m=1; m<=hntrack->GetNbinsX(); m++)
-    {
-        for(int n=1; n<=hntrack->GetNbinsY(); n++)
-        {
-            if(hntrack->GetBinContent(m,n)!=0)
-            {
-                hltrack->SetBinContent(m,n,hltrack->GetBinContent(m,n)/hntrack->GetBinContent(m,n));
-            }
-            if(hntrack_u->GetBinContent(m,n)!=0)
-            {
-                hltrack_u->SetBinContent(m,n,hltrack_u->GetBinContent(m,n)/hntrack_u->GetBinContent(m,n));
-            }
-            if(hntrack_v->GetBinContent(m,n)!=0)
-            {
-                hltrack_v->SetBinContent(m,n,hltrack_v->GetBinContent(m,n)/hntrack_v->GetBinContent(m,n));
-            }
-        }
-    }
+    /* for(int m=1; m<=hntrack->GetNbinsX(); m++) */
+    /* { */
+    /*     for(int n=1; n<=hntrack->GetNbinsY(); n++) */
+    /*     { */
+    /*         if(hntrack->GetBinContent(m,n)!=0) */
+    /*         { */
+    /*             hltrack->SetBinContent(m,n,hltrack->GetBinContent(m,n)/hntrack->GetBinContent(m,n)); */
+    /*         } */
+    /*         if(hntrack_u->GetBinContent(m,n)!=0) */
+    /*         { */
+    /*             hltrack_u->SetBinContent(m,n,hltrack_u->GetBinContent(m,n)/hntrack_u->GetBinContent(m,n)); */
+    /*         } */
+    /*         if(hntrack_v->GetBinContent(m,n)!=0) */
+    /*         { */
+    /*             hltrack_v->SetBinContent(m,n,hltrack_v->GetBinContent(m,n)/hntrack_v->GetBinContent(m,n)); */
+    /*         } */
+    /*     } */
+    /* } */
     
     // Truth vs Recon
     TH2D* hntrack_comp = new TH2D("hntrack_comp","number of tracks",10,0,1,10,0,TMath::Pi());
