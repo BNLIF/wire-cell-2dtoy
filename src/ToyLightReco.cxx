@@ -220,23 +220,36 @@ void WireCell2dToy::ToyLightReco::load_event_raw(int eve_num){
   T->GetEntry(eve_num);
   
   WireCell2dToy::pmtMapSet beamHG = makePmtContainer(true, true, beam_hg_wf, beam_hg_opch, beam_hg_timestamp);
+
+  // std::cout << "1 " << std::endl;
+  
   WireCell2dToy::pmtMapSet beamLG = makePmtContainer(false, true, beam_lg_wf, beam_lg_opch, beam_lg_timestamp);
+
+  // std::cout << "1 " << std::endl;
   WireCell2dToy::pmtMapSet cosmicHG = makePmtContainer(true, false, cosmic_hg_wf, cosmic_hg_opch, cosmic_hg_timestamp);
+
+  //  std::cout << "1 " << std::endl;
   WireCell2dToy::pmtMapSet cosmicLG = makePmtContainer(false, false, cosmic_lg_wf, cosmic_lg_opch, cosmic_lg_timestamp);
 
+  // std::cout << "1 " << std::endl;
+  
   WireCell2dToy::pmtMapPair beamPair = makeBeamPairs(beamHG, beamLG);
   WireCell2dToy::pmtMapSetPair cosmicPair = makeCosmicPairs(cosmicHG, cosmicLG);
 
+  // std::cout << "1 " << std::endl;
+  
   WireCell2dToy::pmtMap beamMerge = mergeBeam(beamPair);
   WireCell2dToy::pmtMapSet cosmicMerge = mergeCosmic(cosmicPair);
 
+  // std::cout << "1 " << std::endl;
+  
   fop_wf->Clear();
   fop_timestamp->clear();
   fop_femch->clear();
   
   dumpPmtVec(beamMerge, cosmicMerge);
 
- 
+  //  std::cout << "test " << std::endl;
   
 
   std::vector<COphitSelection> ophits_group;
@@ -307,6 +320,8 @@ void WireCell2dToy::ToyLightReco::load_event_raw(int eve_num){
   // for (auto flash : cosmic_flashes){
   //   std::cout << flash->get_time() << std::endl;
   // }
+
+  
   
   for (int i=0;i!=32;i++){
     TH1S *hsignal = (TH1S*)fop_wf->At(i);
@@ -317,7 +332,7 @@ void WireCell2dToy::ToyLightReco::load_event_raw(int eve_num){
     beam_dt[i] = fop_timestamp->at(i) - triggerTime;
   }
 
-
+  
   
   
   Process_beam_wfs();
@@ -830,6 +845,7 @@ WireCell2dToy::pmtMapSet WireCell2dToy::ToyLightReco::makePmtContainer(bool high
 	disc.channel = chan->at(i);
       }
       else if(beam == false){
+	if(chan->at(i)>=232) continue;
 	disc.channel = chan->at(i)-200;
       }
       TH1S *h = (TH1S*)wf->At(i);

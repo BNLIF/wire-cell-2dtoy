@@ -147,10 +147,10 @@ int main(int argc, char* argv[])
   }
   else{
 	if(triggerbits==2048){  
-    	cout << "BNB Flash time filter: FAIL" << endl;
+    	cout << "BNB Flash time filter: FAIL " << argv[1]<< endl;
 	}  
 	if(triggerbits==512){  
-    	cout << "extBNB Flash time filter: FAIL" << endl;
+    	cout << "extBNB Flash time filter: FAIL "<< argv[1] << endl;
 	}  
   }
   return 0;
