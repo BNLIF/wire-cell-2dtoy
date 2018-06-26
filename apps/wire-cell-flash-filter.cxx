@@ -113,7 +113,8 @@ int main(int argc, char* argv[])
     cerr << "usage: wire-cell-uboone /path/to/celltree.root eve_num" << endl;
     return 1;
   }
-
+   TH1::AddDirectory(kFALSE);
+  
   const char* root_file = argv[1];  
   int eve_num = atoi(argv[2]);
 
@@ -138,10 +139,10 @@ int main(int argc, char* argv[])
   //cout << "Run No: " << run_no << " " << subrun_no << " " << event_no << endl;
   if(beamspill){
 	if(triggerbits==2048){  
-      	cout << "BNB Flash time filter: PASS"<<endl;
+	  cout << "BNB Flash time filter: PASS " << argv[1] << endl;
 	}
 	if(triggerbits==512){  
-      	cout << "extBNB Flash time filter: PASS"<<endl;
+      	cout << "extBNB Flash time filter: PASS "<< argv[1] << endl;
 	}
   }
   else{

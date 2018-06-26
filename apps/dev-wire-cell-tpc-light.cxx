@@ -72,9 +72,9 @@ int main(int argc, char* argv[])
   const GeomWire *uwire = gds.by_planeindex(WirePlaneType_t(0),0);
   const GeomWire *vwire = gds.by_planeindex(WirePlaneType_t(1),0);
   const GeomWire *wwire = gds.by_planeindex(WirePlaneType_t(2),0);
-  double first_u_dis = gds.wire_dist(*uwire) ;
-  double first_v_dis = gds.wire_dist(*vwire) ;
-  double first_w_dis = gds.wire_dist(*wwire) ; 
+  double first_u_dis = gds.wire_dist(*uwire) ; // first U wire center ...
+  double first_v_dis = gds.wire_dist(*vwire) ; // first V wire center ...
+  double first_w_dis = gds.wire_dist(*wwire) ; // first W wire center ... 
   
   
   TString filename = argv[2];
@@ -453,7 +453,7 @@ int main(int argc, char* argv[])
 
 
    // create global CT point cloud ...
-   double_t first_t_dis = live_clusters.at(0)->get_mcells().front()->GetTimeSlice()*time_slice_width - live_clusters.at(0)->get_mcells().front()->get_sampling_points().front().x;
+   double first_t_dis = live_clusters.at(0)->get_mcells().front()->GetTimeSlice()*time_slice_width - live_clusters.at(0)->get_mcells().front()->get_sampling_points().front().x;
    double offset_t = first_t_dis/time_slice_width;
 
    // test the fiducial volume cut 
