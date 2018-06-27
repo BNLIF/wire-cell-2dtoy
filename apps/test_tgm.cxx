@@ -93,8 +93,15 @@ int main(int argc, char* argv[])
   double lowerwindow = 0;
   double upperwindow = 0;
 
-  if(triggerbits==2048) { lowerwindow = 3.1875; upperwindow = 4.96875; }// bnb  
-  if(triggerbits==512) { lowerwindow = 3.5625; upperwindow = 5.34375; } // extbnb
+  //  if(triggerbits==2048) { lowerwindow = 3.1875; upperwindow = 4.96875; }// bnb  
+  //if(triggerbits==512) { lowerwindow = 3.5625; upperwindow = 5.34375; } // extbnb
+  // better timing ... 
+  if(triggerbits==2048) { lowerwindow = 3.1625; upperwindow = 4.96875; }// bnb  
+  if(triggerbits==512) { lowerwindow = 3.5375; upperwindow = 5.34375; } // extbnb
+  
+  //enlarge window ... 
+  //  if(triggerbits==2048) { lowerwindow = 3.0; upperwindow = 5.0; }// bnb  
+  // if(triggerbits==512) { lowerwindow = 3.45; upperwindow = 5.45; } // extbnb
 
   TTree *T_flash = (TTree*)file1->Get("T_flash");
   Double_t time;

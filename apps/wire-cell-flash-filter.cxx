@@ -132,6 +132,8 @@ int main(int argc, char* argv[])
   T->GetEntry(eve_num);
   //cout << em("load data") << endl;
 
+  //  std::cout << triggerbits << " " << argv[1] << std::endl;
+  
   // flash time filter
   bool beamspill = false;
   beamspill = flashFilter(root_file, eve_num, triggerbits);
