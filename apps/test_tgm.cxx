@@ -135,7 +135,11 @@ int main(int argc, char* argv[])
     for (int i=0;i!=T_match->GetEntries();i++){
       T_match->GetEntry(i);
       if (flash_id == saved_flash_id){
-	std::cout << runNo << "_" << subRunNo << "_" << eventNo << " " << flash_id << " " << tpc_cluster_id << " " << saved_time << " " << event_type << std::endl;
+	int flag_tgm = (event_type >> 3) & 1U;
+	int flag_low_energy = (event_type >> 4) & 1U;
+	int flag_lm = (event_type >> 1) & 1U;
+	
+	std::cout << runNo << "_" << subRunNo << "_" << eventNo << " " << flash_id << " " << tpc_cluster_id << " " << saved_time << " " << event_type << " " << flag_low_energy << " " << flag_lm << " " << flag_tgm << std::endl;
       }
     }
   }
