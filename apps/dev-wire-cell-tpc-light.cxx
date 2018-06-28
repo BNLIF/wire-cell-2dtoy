@@ -659,19 +659,34 @@ int main(int argc, char* argv[])
    double ks_dis;
    double chi2;
    int ndf;
+   double cluster_length;
 
    T_match->Branch("flag_close_to_PMT",&flag_close_to_PMT,"flag_close_to_PMT/B");
    T_match->Branch("flag_at_x_boundary",&flag_at_x_boundary,"flag_at_x_boundary/B");
    T_match->Branch("ks_dis",&ks_dis,"ks_dis/D");
    T_match->Branch("chi2",&chi2,"chi2/D");
    T_match->Branch("ndf",&ndf,"ndf/I");
-   
+   T_match->Branch("cluster_length",&cluster_length,"cluster_length/D");
    
    for (auto it = matched_bundles.begin(); it!=matched_bundles.end(); it++){
      FlashTPCBundle *bundle = *it;
      
      Opflash *flash = bundle->get_flash();
      PR3DCluster *main_cluster = bundle->get_main_cluster();
+     {
+       // calculate the length ...
+       TPCParams& mp = Singleton<TPCParams>::Instance();
+       double pitch_u = mp.get_pitch_u();
+       double pitch_v = mp.get_pitch_v();
+       double pitch_w = mp.get_pitch_w();
+       double angle_u = mp.get_angle_u();
+       double angle_v = mp.get_angle_v();
+       double angle_w = mp.get_angle_w();
+       double time_slice_width = mp.get_ts_width();
+       std::vector<int> range_v1 = main_cluster->get_uvwt_range();
+       cluster_length = sqrt(2./3. * (pow(pitch_u*range_v1.at(0),2) + pow(pitch_v*range_v1.at(1),2) + pow(pitch_w*range_v1.at(2),2)) + pow(time_slice_width*range_v1.at(3),2))/units::cm;
+     }
+     
      if (flash!=0){
        auto it1 = find(flashes.begin(),flashes.end(),flash);
        flash_id = flash->get_flash_id();

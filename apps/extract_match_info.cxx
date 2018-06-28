@@ -88,6 +88,7 @@ int main(int argc, char* argv[])
     Int_t ndf;
     Double_t pe[32];
     Double_t pe_pred[32];
+    Double_t cluster_length;
     
     
     T_match->SetBranchAddress("flash_id",&temp_flash_id);
@@ -101,9 +102,12 @@ int main(int argc, char* argv[])
     T_match->SetBranchAddress("chi2",&chi2);
     T_match->SetBranchAddress("ndf",&ndf);
     T_match->SetBranchAddress("pe_pred",pe_pred);
-
+    T_match->SetBranchAddress("pe_meas",pe);
+    T_match->SetBranchAddress("cluster_length",&cluster_length);
+    
     flag_save = false;
     double total_pred_pe;
+    double max_flash_pe;
     std::set<int> matched_flash_ids;
     std::map<int,int> entry_map;
     
@@ -124,9 +128,13 @@ int main(int argc, char* argv[])
       //std::cout << flag_close_to_PMT1 << " " << flag_at_x_boundary1 << std::endl;
       if (good_flash_ids.find(temp_flash_id)!=good_flash_ids.end()){
 	total_pred_pe = 0;
+	max_flash_pe = 0;
 	for (int j=0;j!=32;j++){
 	  total_pred_pe += pe_pred[j];
+	  if (pe[j] > max_flash_pe) max_flash_pe = pe[j];
 	}
+	
+	
 	flag_save = true;
       }
     }
@@ -136,7 +144,7 @@ int main(int argc, char* argv[])
       std::cout << runNo << " " << subRunNo << " " << eventNo << " " <<
 	temp_flash_id << " " << tpc_cluster_id << " " << time_map[temp_flash_id] << " " << pe_map[temp_flash_id] << " " << total_pred_pe << " " <<
 	event_type << " " << flag_close_to_PMT1 << " " << flag_at_x_boundary1 << " " <<
-	ks_dis << " " << chi2 << " " << ndf << std::endl;
+	ks_dis << " " << chi2 << " " << ndf << " " << max_flash_pe << " " << cluster_length << std::endl;
   }
   
   //   
