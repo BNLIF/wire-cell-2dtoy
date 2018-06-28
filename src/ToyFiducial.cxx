@@ -88,7 +88,7 @@ WireCell2dToy::ToyFiducial::ToyFiducial(int dead_region_ch_ext, double offset_t,
   // }
 }
 
-bool WireCell2dToy::ToyFiducial::check_low_energy(WireCell::FlashTPCBundle *bundle, double& cluster_length){
+int WireCell2dToy::ToyFiducial::check_LM(WireCell::FlashTPCBundle *bundle, double& cluster_length){
 
   PR3DCluster *main_cluster = bundle->get_main_cluster();
   Opflash *flash = bundle->get_flash();
@@ -106,17 +106,47 @@ bool WireCell2dToy::ToyFiducial::check_low_energy(WireCell::FlashTPCBundle *bund
   std::vector<int> range_v1 = main_cluster->get_uvwt_range();
   cluster_length = sqrt(2./3. * (pow(pitch_u*range_v1.at(0),2) + pow(pitch_v*range_v1.at(1),2) + pow(pitch_w*range_v1.at(2),2)) + pow(time_slice_width*range_v1.at(3),2))/units::cm;
 
-  Double_t total_pred_pe = 0;
+  double total_pred_pe = 0;
   std::vector<double>& pred_pe = bundle->get_pred_pmt_light();
   for (size_t i=0;i!=pred_pe.size();i++){
     total_pred_pe += pred_pe.at(i);
   }
+  double total_flash_pe = flash->get_total_PE();
 
   if (total_pred_pe < 25 || cluster_length < 10)
-    return true;
+    return 1;
+
+  bool flag_anode = bundle->get_flag_close_to_PMT();
+  bool flag_boundary = bundle->get_flag_at_x_boundary();
+
+  double ks_dis = bundle->get_ks_dis();
+  double chi2 = bundle->get_chi2();
+  double ndf = bundle->get_ndf();
+
+  double meas_pe[32];
+  double max_meas_pe = 0;
+  for (int i=0;i!=32;i++){
+    meas_pe[i] = flash->get_PE(i);
+    if (max_meas_pe < meas_pe[i]) max_meas_pe = meas_pe[i];
+  }
+
+  if (flash->get_type()==2){
+    if (!flag_boundary){
+      if (!( log10(total_pred_pe/total_flash_pe)>-0.55 &&
+	     ks_dis<0.45 &&
+	     ks_dis-0.15/1.4*log10(total_pred_pe/total_flash_pe)<0.32) )
+	return 2;
+      
+    }else{
+      if (!(ks_dis<0.6 && (log10(total_pred_pe/total_flash_pe)>-1.4 && flag_anode || log10(total_pred_pe/total_flash_pe)>-0.55) &&
+	    log10(total_flash_pe)+1.8*log10(total_pred_pe/total_flash_pe)>1.25 &&
+	    max_meas_pe/total_flash_pe+0.17/0.5*log10(total_pred_pe/total_flash_pe)>-0.05))
+	return 2;
+    }
+  }
   
   
-  return false;
+  return 0;
 }
 
 bool WireCell2dToy::ToyFiducial::check_tgm(WireCell::FlashTPCBundle *bundle, double offset_x, WireCell::ToyCTPointCloud& ct_point_cloud){

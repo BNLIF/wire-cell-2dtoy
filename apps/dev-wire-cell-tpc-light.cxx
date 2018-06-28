@@ -715,9 +715,12 @@ int main(int argc, char* argv[])
        double offset_x = (flash->get_time() - time_offset)*2./nrebin*time_slice_width;
        if (fid->check_tgm(bundle,offset_x, ct_point_cloud))
 	 event_type |= 1UL << 3; // 3rd bit for TGM
-       if (fid->check_low_energy(bundle,cluster_length))
+       int temp_flag = fid->check_LM(bundle,cluster_length);
+       if (temp_flag==1){
 	 event_type |= 1UL << 4; // 4th bit for low energy ...
-       
+       }else if (temp_flag==2){
+	 event_type |= 1UL << 1; // 1st bit for light mismatch ...
+       }
      }
      
      T_match->Fill();

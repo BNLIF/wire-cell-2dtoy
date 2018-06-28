@@ -30,7 +30,7 @@ namespace WireCell2dToy{
 
     bool check_tgm(WireCell::FlashTPCBundle *bundle, double offset_x, WireCell::ToyCTPointCloud& ct_point_cloud);
 
-    bool check_low_energy(WireCell::FlashTPCBundle *bundle, double& cluster_length);
+    int check_LM(WireCell::FlashTPCBundle *bundle, double& cluster_length);
       
     void AddDeadRegion(WireCell::SlimMergeGeomCell* mcell, std::vector<int>& time_slices);
     
