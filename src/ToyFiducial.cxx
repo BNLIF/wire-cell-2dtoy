@@ -113,6 +113,8 @@ int WireCell2dToy::ToyFiducial::check_LM(WireCell::FlashTPCBundle *bundle, doubl
   }
   double total_flash_pe = flash->get_total_PE();
 
+  //std::cout << main_cluster->get_cluster_id() << " " << cluster_length << std::endl;
+  
   if (total_pred_pe < 25 || cluster_length < 10)
     return 1;
 
