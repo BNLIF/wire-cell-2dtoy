@@ -673,19 +673,7 @@ int main(int argc, char* argv[])
      
      Opflash *flash = bundle->get_flash();
      PR3DCluster *main_cluster = bundle->get_main_cluster();
-     {
-       // calculate the length ...
-       TPCParams& mp = Singleton<TPCParams>::Instance();
-       double pitch_u = mp.get_pitch_u();
-       double pitch_v = mp.get_pitch_v();
-       double pitch_w = mp.get_pitch_w();
-       double angle_u = mp.get_angle_u();
-       double angle_v = mp.get_angle_v();
-       double angle_w = mp.get_angle_w();
-       double time_slice_width = mp.get_ts_width();
-       std::vector<int> range_v1 = main_cluster->get_uvwt_range();
-       cluster_length = sqrt(2./3. * (pow(pitch_u*range_v1.at(0),2) + pow(pitch_v*range_v1.at(1),2) + pow(pitch_w*range_v1.at(2),2)) + pow(time_slice_width*range_v1.at(3),2))/units::cm;
-     }
+     cluster_length = -1;
      
      if (flash!=0){
        auto it1 = find(flashes.begin(),flashes.end(),flash);
@@ -726,8 +714,9 @@ int main(int argc, char* argv[])
        //std::cout << "Flash: " << flash->get_flash_id() << " " << flash->get_time() << std::endl;
        double offset_x = (flash->get_time() - time_offset)*2./nrebin*time_slice_width;
        if (fid->check_tgm(bundle,offset_x, ct_point_cloud))
-	 event_type |= 1UL << 3;
-
+	 event_type |= 1UL << 3; // 3rd bit for TGM
+       if (fid->check_low_energy(bundle,cluster_length))
+	 event_type |= 1UL << 4; // 4th bit for low energy ...
        
      }
      

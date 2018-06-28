@@ -1,4 +1,6 @@
 #include "WireCell2dToy/ToyFiducial.h"
+#include "WireCellData/TPCParams.h"
+#include "WireCellData/Singleton.h"
 
 using namespace WireCell;
 
@@ -84,6 +86,37 @@ WireCell2dToy::ToyFiducial::ToyFiducial(int dead_region_ch_ext, double offset_t,
   // for (size_t i=0;i!=boundary_xz_x.size();i++){
   //   std::cout << boundary_xz_x.at(i)/units::cm << " XZ " << boundary_xz_z.at(i)/units::cm << std::endl;
   // }
+}
+
+bool WireCell2dToy::ToyFiducial::check_low_energy(WireCell::FlashTPCBundle *bundle, double& cluster_length){
+
+  PR3DCluster *main_cluster = bundle->get_main_cluster();
+  Opflash *flash = bundle->get_flash();
+
+  // calculate the length ...
+  
+  TPCParams& mp = Singleton<TPCParams>::Instance();
+  double pitch_u = mp.get_pitch_u();
+  double pitch_v = mp.get_pitch_v();
+  double pitch_w = mp.get_pitch_w();
+  double angle_u = mp.get_angle_u();
+  double angle_v = mp.get_angle_v();
+  double angle_w = mp.get_angle_w();
+  double time_slice_width = mp.get_ts_width();
+  std::vector<int> range_v1 = main_cluster->get_uvwt_range();
+  cluster_length = sqrt(2./3. * (pow(pitch_u*range_v1.at(0),2) + pow(pitch_v*range_v1.at(1),2) + pow(pitch_w*range_v1.at(2),2)) + pow(time_slice_width*range_v1.at(3),2))/units::cm;
+
+  Double_t total_pred_pe = 0;
+  std::vector<double>& pred_pe = bundle->get_pred_pmt_light();
+  for (size_t i=0;i!=pred_pe.size();i++){
+    total_pred_pe += pred_pe.at(i);
+  }
+
+  if (total_pred_pe < 25 || cluster_length < 10)
+    return true;
+  
+  
+  return false;
 }
 
 bool WireCell2dToy::ToyFiducial::check_tgm(WireCell::FlashTPCBundle *bundle, double offset_x, WireCell::ToyCTPointCloud& ct_point_cloud){
