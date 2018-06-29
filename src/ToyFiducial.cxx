@@ -151,9 +151,14 @@ int WireCell2dToy::ToyFiducial::check_LM(WireCell::FlashTPCBundle *bundle, doubl
   return 0;
 }
 
-bool WireCell2dToy::ToyFiducial::check_tgm(WireCell::FlashTPCBundle *bundle, double offset_x, WireCell::ToyCTPointCloud& ct_point_cloud){
+bool WireCell2dToy::ToyFiducial::check_tgm(WireCell::FlashTPCBundle *bundle, double offset_x, WireCell::ToyCTPointCloud& ct_point_cloud,std::map<PR3DCluster*, PR3DCluster*>& old_new_cluster_map){
 
   PR3DCluster *main_cluster = bundle->get_main_cluster();
+
+  // replace it with the better one, which takes into account the dead channels ... 
+  if (old_new_cluster_map.find(main_cluster)!=old_new_cluster_map.end())
+    main_cluster = old_new_cluster_map[main_cluster];
+  
   Opflash *flash = bundle->get_flash();
 
   std::vector<std::vector<WCPointCloud<double>::WCPoint>> out_vec_wcps = main_cluster->get_extreme_wcps();
@@ -205,7 +210,7 @@ bool WireCell2dToy::ToyFiducial::check_tgm(WireCell::FlashTPCBundle *bundle, dou
       }
       
 
-      // if (main_cluster->get_cluster_id()==8){
+      // if (main_cluster->get_cluster_id()==10){
       // 	std::cout << main_cluster->get_cluster_id() << " " << i << " " <<
       // 	  out_vec_wcps.at(i).at(0).x/units::cm << " " << out_vec_wcps.at(i).at(0).y/units::cm << " " << out_vec_wcps.at(i).at(0).z/units::cm << " " << 
       // 	  k << " " << out_vec_wcps.at(k).at(0).x/units::cm << " " << out_vec_wcps.at(k).at(0).y/units::cm << " " << out_vec_wcps.at(k).at(0).z/units::cm <<
@@ -240,12 +245,13 @@ bool WireCell2dToy::ToyFiducial::check_tgm(WireCell::FlashTPCBundle *bundle, dou
 		   out_vec_wcps.at(i).at(p1_index).z+ (out_vec_wcps.at(k).at(p2_index).z - out_vec_wcps.at(i).at(p1_index).z)/4.*(kk+1));
 	  flag_check = flag_check || inside_fiducial_volume(p3,offset_x);
 	}
-	//std::cout << flag_check << " " << out_vec_wcps.size() << std::endl;
+	// if (main_cluster->get_cluster_id()==10)
+	//   std::cout << flag_check << " " << out_vec_wcps.size() << std::endl;
 	
 	if (flag_check){
 	  if (flash->get_type()==2){
 
-	    // if (main_cluster->get_cluster_id()==8){
+	    // if (main_cluster->get_cluster_id()==27){
 	    //   std::cout << check_neutrino_candidate(main_cluster,out_vec_wcps.at(i).at(p1_index),out_vec_wcps.at(k).at(p2_index),offset_x) << std::endl;
 	    // }
 
@@ -255,8 +261,35 @@ bool WireCell2dToy::ToyFiducial::check_tgm(WireCell::FlashTPCBundle *bundle, dou
 	    return true; // through going muon ...
 	  }
 	}else{
-	  if (out_vec_wcps.size()==2)
+	  
+	  if (out_vec_wcps.size()==2){
 	    return true;
+	  }else{
+	    
+	    bool flag_check_again = false;
+
+	    for (int kkk = 0;kkk!=out_vec_wcps.size(); kkk++){
+	      if (kkk==i || kkk==k) continue;
+	      for (int kk=0;kk!=4;kk++){
+		Point p3(out_vec_wcps.at(i).at(p1_index).x+ (out_vec_wcps.at(kkk).at(0).x - out_vec_wcps.at(i).at(p1_index).x)/4.*(kk+1),
+			 out_vec_wcps.at(i).at(p1_index).y+ (out_vec_wcps.at(kkk).at(0).y - out_vec_wcps.at(i).at(p1_index).y)/4.*(kk+1),
+			 out_vec_wcps.at(i).at(p1_index).z+ (out_vec_wcps.at(kkk).at(0).z - out_vec_wcps.at(i).at(p1_index).z)/4.*(kk+1));
+		flag_check_again = flag_check_again || inside_fiducial_volume(p3,offset_x);
+	      }
+	      
+	      for (int kk=0;kk!=3;kk++){
+		Point p3(out_vec_wcps.at(kkk).at(0).x+ (out_vec_wcps.at(k).at(p2_index).x - out_vec_wcps.at(i).at(0).x)/4.*(kk+1),
+			 out_vec_wcps.at(kkk).at(0).y+ (out_vec_wcps.at(k).at(p2_index).y - out_vec_wcps.at(i).at(0).y)/4.*(kk+1),
+			 out_vec_wcps.at(kkk).at(0).z+ (out_vec_wcps.at(k).at(p2_index).z - out_vec_wcps.at(i).at(0).z)/4.*(kk+1));
+		flag_check_again = flag_check_again || inside_fiducial_volume(p3,offset_x);
+	      }
+	    }
+	    if (!flag_check_again)
+	      return true;
+	    
+	  }
+	  
+	  
 	}
       }else{
 	Vector main_dir = main_cluster->get_PCA_axis(0);
@@ -671,7 +704,7 @@ bool WireCell2dToy::ToyFiducial::check_dead_volume(WireCell::Point& p, TVector3&
 	temp_p.z += dir.Z() * step;
       }
 
-      //std::cout << p.x/units::cm << " " << p.y/units::cm << " " << p.z/units::cm << " " << num_points << " " << num_points_dead << std::endl;
+      // std::cout << p.x/units::cm << " " << p.y/units::cm << " " << p.z/units::cm << " " << num_points << " " << num_points_dead << std::endl;
       
       if (num_points_dead > 0.9*num_points){
 	return false;
