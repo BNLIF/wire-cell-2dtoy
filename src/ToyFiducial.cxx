@@ -163,6 +163,7 @@ bool WireCell2dToy::ToyFiducial::check_tgm(WireCell::FlashTPCBundle *bundle, dou
   Opflash *flash = bundle->get_flash();
 
   std::vector<std::vector<WCPointCloud<double>::WCPoint>> out_vec_wcps = main_cluster1->get_extreme_wcps();
+  
 
   // int max_group = 0;
   // int max_count = out_vec_wcps.at(max_group).size();
@@ -214,7 +215,7 @@ bool WireCell2dToy::ToyFiducial::check_tgm(WireCell::FlashTPCBundle *bundle, dou
       }
       
 
-      // if (main_cluster->get_cluster_id()==1){
+      // if (main_cluster->get_cluster_id()==7){
       // 	std::cout << main_cluster->get_cluster_id() << " " << i << " " <<
       // 	  out_vec_wcps.at(i).at(0).x/units::cm << " " << out_vec_wcps.at(i).at(0).y/units::cm << " " << out_vec_wcps.at(i).at(0).z/units::cm << " " << 
       // 	  k << " " << out_vec_wcps.at(k).at(0).x/units::cm << " " << out_vec_wcps.at(k).at(0).y/units::cm << " " << out_vec_wcps.at(k).at(0).z/units::cm <<
@@ -249,8 +250,8 @@ bool WireCell2dToy::ToyFiducial::check_tgm(WireCell::FlashTPCBundle *bundle, dou
 		   out_vec_wcps.at(i).at(p1_index).z+ (out_vec_wcps.at(k).at(p2_index).z - out_vec_wcps.at(i).at(p1_index).z)/4.*(kk+1));
 	  flag_check = flag_check || inside_fiducial_volume(p3,offset_x);
 	}
-	// if (main_cluster->get_cluster_id()==11)
-	//   std::cout << flag_check << " " << out_vec_wcps.size() << std::endl;
+	// if (main_cluster->get_cluster_id()==7)
+	// std::cout << flag_check << " " << out_vec_wcps.size() << std::endl;
 	
 	if (flag_check){
 	  if (flash->get_type()==2){
@@ -262,9 +263,11 @@ bool WireCell2dToy::ToyFiducial::check_tgm(WireCell::FlashTPCBundle *bundle, dou
 	    double temp_length = sqrt(pow(out_vec_wcps.at(i).at(p1_index).x-out_vec_wcps.at(k).at(p2_index).x,2)+
 				      pow(out_vec_wcps.at(i).at(p1_index).y-out_vec_wcps.at(k).at(p2_index).y,2)+
 				      pow(out_vec_wcps.at(i).at(p1_index).z-out_vec_wcps.at(k).at(p2_index).z,2));
-	    
+
+	    //std::cout << temp_length/units::cm << " " << length_limit/units::cm << std::endl;
+	       
 	    if ( (!check_neutrino_candidate(main_cluster1,out_vec_wcps.at(i).at(p1_index),out_vec_wcps.at(k).at(p2_index),offset_x)) &&
-		 temp_length > 0.5*length_limit)
+		 temp_length > 0.45*length_limit)
 	      return true;
 	  }else{
 	    return true; // through going muon ...
@@ -300,7 +303,7 @@ bool WireCell2dToy::ToyFiducial::check_tgm(WireCell::FlashTPCBundle *bundle, dou
 					pow(out_vec_wcps.at(i).at(p1_index).y-out_vec_wcps.at(k).at(p2_index).y,2)+
 					pow(out_vec_wcps.at(i).at(p1_index).z-out_vec_wcps.at(k).at(p2_index).z,2));
 	      
-	      if ( (!check_neutrino_candidate(main_cluster1,out_vec_wcps.at(i).at(p1_index),out_vec_wcps.at(k).at(p2_index),offset_x)) && temp_length > 0.5*length_limit)
+	      if ( (!check_neutrino_candidate(main_cluster1,out_vec_wcps.at(i).at(p1_index),out_vec_wcps.at(k).at(p2_index),offset_x)) && temp_length > 0.45*length_limit)
 		return true;
 	    }	    
 	  }
@@ -392,7 +395,7 @@ bool WireCell2dToy::ToyFiducial::check_tgm(WireCell::FlashTPCBundle *bundle, dou
 					pow(out_vec_wcps.at(i).at(0).z-out_vec_wcps.at(k).at(0).z,2));
 	    
 	      if ((!check_neutrino_candidate(main_cluster1,out_vec_wcps.at(i).at(0),out_vec_wcps.at(k).at(0),offset_x)) &&
-		  temp_length > 0.5*length_limit
+		  temp_length > 0.45*length_limit
 		  )
 		return true;
 	    }else{
@@ -620,7 +623,7 @@ bool WireCell2dToy::ToyFiducial::check_neutrino_candidate(WireCell::PR3DCluster 
 		       path_wcps_vec.at(i).y-wcp2.y,
 		       path_wcps_vec.at(i).z-wcp2.z);
 
-	//std::cout << "A: " << (3.1415926-temp1.Angle(temp2))/3.1415926*180. << " " << temp1.Mag()/units::cm << " " << temp2.Mag()/units::cm << std::endl;
+	//	std::cout << "A: " << (3.1415926-temp1.Angle(temp2))/3.1415926*180. << " " << temp1.Mag()/units::cm << " " << temp2.Mag()/units::cm << std::endl;
 
 
 	if (((3.1415926-temp1.Angle(temp2))/3.1415926*180. >35 && fabs(3.1415926/2.-drift_dir.Angle(temp1+temp2))/3.1415926*180. > 5|| (3.1415926-temp1.Angle(temp2))/3.1415926*180. >60 ) ||
@@ -649,6 +652,7 @@ bool WireCell2dToy::ToyFiducial::check_neutrino_candidate(WireCell::PR3DCluster 
 	     (3.1415926-temp1.Angle(temp2))/3.1415926*180. >60 )
 	    && temp1.Mag()>5*units::cm && temp2.Mag()>5*units::cm 
 	    ){
+	  //	  std::cout << "AAA" << std::endl; 
 
       	  if ((!inside_fiducial_volume(max_point,offset_x)) || // must be in fiducial
       	      inside_dead_region(max_point)&&(3.1415926-temp1.Angle(temp2))/3.1415926*180<45 // not in dead_volume
