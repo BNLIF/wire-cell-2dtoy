@@ -585,7 +585,10 @@ bool WireCell2dToy::ToyFiducial::check_neutrino_candidate(WireCell::PR3DCluster 
       TVector3 tempV3(fabs(dir.X()), sqrt(dir.Y()*dir.Y()+dir.Z()*dir.Z())*sin(angle3),0);
       double angle3_1 = tempV3.Angle(drift_dir)/3.1415926*180.;
 
-      if ( (angle1_1 < 10 || angle2_1 < 10 || angle3_1 < 5)){
+      double angle4 = fabs(3.1415926/2.-drift_dir.Angle(dir))/3.1415926*180.;
+      
+      
+      if ( (angle1_1 < 10 || angle2_1 < 10 || angle3_1 < 5 || angle4 < 5.)){
 	flag_2view_check = false;
       }
       
@@ -628,18 +631,20 @@ bool WireCell2dToy::ToyFiducial::check_neutrino_candidate(WireCell::PR3DCluster 
   	num_nth =0;
 	min_dis = 1e9;
       }else{
-	double dis1 = sqrt(pow(path_wcps_vec1.at(i).x-wcp1.x,2)+pow(path_wcps_vec1.at(i).y-wcp1.y,2)+pow(path_wcps_vec1.at(i).z-wcp1.z,2));
-	double dis2 = sqrt(pow(path_wcps_vec1.at(i).x-wcp2.x,2)+pow(path_wcps_vec1.at(i).y-wcp2.y,2)+pow(path_wcps_vec1.at(i).z-wcp2.z,2));
-	if (dis1 < min_dis) min_dis = dis1;
-	if (dis2 < min_dis) min_dis = dis2;
-  	num_nth ++;
-	// num_total_dead ++;
-	// std::cout << min_dis/units::cm << " " << flag_2view_check << " " << path_wcps_vec1.at(i).x/units::cm << " " 
-	//  	  << path_wcps_vec1.at(i).y/units::cm << " "
-	//  	  << path_wcps_vec1.at(i).z/units::cm << " "
-	//    	  << num_nth << " " << cloud_u.pts.size() << " " << cloud_v.pts.size() << " "<< cloud_w.pts.size() << std::endl;
+	if (inside_fiducial_volume(path_wcps_vec1.at(i),offset_x)){
+	  double dis1 = sqrt(pow(path_wcps_vec1.at(i).x-wcp1.x,2)+pow(path_wcps_vec1.at(i).y-wcp1.y,2)+pow(path_wcps_vec1.at(i).z-wcp1.z,2));
+	  double dis2 = sqrt(pow(path_wcps_vec1.at(i).x-wcp2.x,2)+pow(path_wcps_vec1.at(i).y-wcp2.y,2)+pow(path_wcps_vec1.at(i).z-wcp2.z,2));
+	  if (dis1 < min_dis) min_dis = dis1;
+	  if (dis2 < min_dis) min_dis = dis2;
+	  num_nth ++;
+	  // num_total_dead ++;
+	  // std::cout << min_dis/units::cm << " " << flag_2view_check << " " << path_wcps_vec1.at(i).x/units::cm << " " 
+	  // 	    << path_wcps_vec1.at(i).y/units::cm << " "
+	  // 	    << path_wcps_vec1.at(i).z/units::cm << " "
+	  // 	    << num_nth << " " << cloud_u.pts.size() << " " << cloud_v.pts.size() << " "<< cloud_w.pts.size() << std::endl;
+	}
 	//std::cout << num_nth << std::endl;
-	if (num_nth>=5 && min_dis < 25*units::cm) return true; // too big a gap ... 4 cm cut ...
+	if (num_nth>9 && min_dis < 25*units::cm) return true; // too big a gap ... 4 cm cut ...
       }
     }
   }
