@@ -587,7 +587,7 @@ int main(int argc, char* argv[])
 
      //if (live_clusters.at(i)->get_cluster_id()!=3) continue;
 
-     //  std::cout << i << " " << live_clusters.at(i)->get_cluster_id() << " " << live_clusters.at(i)->get_mcells().size() << " " << live_clusters.at(i)->get_num_time_slices() << std::endl;
+     //std::cout << i << " " << live_clusters.at(i)->get_cluster_id() << " " << live_clusters.at(i)->get_mcells().size() << " " << live_clusters.at(i)->get_num_time_slices() << std::endl;
      
      live_clusters.at(i)->Create_graph();
 
