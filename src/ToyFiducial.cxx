@@ -215,7 +215,7 @@ bool WireCell2dToy::ToyFiducial::check_tgm(WireCell::FlashTPCBundle *bundle, dou
       }
       
 
-      // if (main_cluster->get_cluster_id()==7){
+      // if (main_cluster->get_cluster_id()==10){
       // 	std::cout << main_cluster->get_cluster_id() << " " << i << " " <<
       // 	  out_vec_wcps.at(i).at(0).x/units::cm << " " << out_vec_wcps.at(i).at(0).y/units::cm << " " << out_vec_wcps.at(i).at(0).z/units::cm << " " << 
       // 	  k << " " << out_vec_wcps.at(k).at(0).x/units::cm << " " << out_vec_wcps.at(k).at(0).y/units::cm << " " << out_vec_wcps.at(k).at(0).z/units::cm <<
@@ -237,7 +237,7 @@ bool WireCell2dToy::ToyFiducial::check_tgm(WireCell::FlashTPCBundle *bundle, dou
 	//	std::cout << p1.x/units::cm << " " << p1.y/units::cm << " " << p1.z/units::cm << " " << inside_fiducial_volume(p1,offset_x) << " A " << p2.x/units::cm << " " << p2.y/units::cm << " " << p2.z/units::cm << " " << inside_fiducial_volume(p2,offset_x) << " " << offset_x/units::cm << std::endl;
 
 
-	// std::cout << main_cluster->get_cluster_id() << " " << (out_vec_wcps.at(i).at(p1_index).x-offset_x)/units::cm << " " << out_vec_wcps.at(i).at(p1_index).y/units::cm << " " << out_vec_wcps.at(i).at(p1_index).z/units::cm << " " ;
+	// std::cout << main_cluster->get_cluster_id() << " " << (out_vec_wcps.at(i).at(p1_index).x-offset_x)/units::cm <<3=r-t=-[\] " " << out_vec_wcps.at(i).at(p1_index).y/units::cm << " " << out_vec_wcps.at(i).at(p1_index).z/units::cm << " " ;
 	// std::cout << (out_vec_wcps.at(k).at(p2_index).x-offset_x)/units::cm << " " << out_vec_wcps.at(k).at(p2_index).y/units::cm << " " << out_vec_wcps.at(k).at(p2_index).z/units::cm << " " <<  flag_p1_inside << " " << flag_p2_inside << " " << out_vec_wcps.size() << std::endl;
 
 	//std::cout << p1_index << " " << p2_index << std::endl;
@@ -256,19 +256,22 @@ bool WireCell2dToy::ToyFiducial::check_tgm(WireCell::FlashTPCBundle *bundle, dou
 	if (flag_check){
 	  if (flash->get_type()==2){
 
-	    // if (main_cluster->get_cluster_id()==17){
-	    //   std::cout << check_neutrino_candidate(main_cluster1,out_vec_wcps.at(i).at(p1_index),out_vec_wcps.at(k).at(p2_index),offset_x) << std::endl;
-	    //   std::cout << check_neutrino_candidate(main_cluster1,out_vec_wcps.at(0).at(0),out_vec_wcps.at(1).at(0),offset_x) << std::endl;
-	    // }
 	    double temp_length = sqrt(pow(out_vec_wcps.at(i).at(p1_index).x-out_vec_wcps.at(k).at(p2_index).x,2)+
 				      pow(out_vec_wcps.at(i).at(p1_index).y-out_vec_wcps.at(k).at(p2_index).y,2)+
 				      pow(out_vec_wcps.at(i).at(p1_index).z-out_vec_wcps.at(k).at(p2_index).z,2));
 
 	    //std::cout << temp_length/units::cm << " " << length_limit/units::cm << std::endl;
-	       
-	    if ( (!check_neutrino_candidate(main_cluster1,out_vec_wcps.at(i).at(p1_index),out_vec_wcps.at(k).at(p2_index),offset_x)) &&
-		 temp_length > 0.45*length_limit)
-	      return true;
+
+	    if (i==0&&k==1){
+	      if ( (!check_neutrino_candidate(main_cluster1,out_vec_wcps.at(i).at(p1_index),out_vec_wcps.at(k).at(p2_index),offset_x,ct_point_cloud,false)) &&
+		   temp_length > 0.45*length_limit)
+		return true;
+	    }else{
+	      if ( (!check_neutrino_candidate(main_cluster1,out_vec_wcps.at(i).at(p1_index),out_vec_wcps.at(k).at(p2_index),offset_x,ct_point_cloud)) &&
+		   temp_length > 0.45*length_limit)
+		return true;
+	    }
+	    
 	  }else{
 	    return true; // through going muon ...
 	  }
@@ -303,8 +306,13 @@ bool WireCell2dToy::ToyFiducial::check_tgm(WireCell::FlashTPCBundle *bundle, dou
 					pow(out_vec_wcps.at(i).at(p1_index).y-out_vec_wcps.at(k).at(p2_index).y,2)+
 					pow(out_vec_wcps.at(i).at(p1_index).z-out_vec_wcps.at(k).at(p2_index).z,2));
 	      
-	      if ( (!check_neutrino_candidate(main_cluster1,out_vec_wcps.at(i).at(p1_index),out_vec_wcps.at(k).at(p2_index),offset_x)) && temp_length > 0.45*length_limit)
-		return true;
+	      if (i==0&&k==1){
+		if ( (!check_neutrino_candidate(main_cluster1,out_vec_wcps.at(i).at(p1_index),out_vec_wcps.at(k).at(p2_index),offset_x,ct_point_cloud,false)) && temp_length > 0.45*length_limit)
+		  return true;
+	      }else{
+		if ( (!check_neutrino_candidate(main_cluster1,out_vec_wcps.at(i).at(p1_index),out_vec_wcps.at(k).at(p2_index),offset_x,ct_point_cloud)) && temp_length > 0.45*length_limit)
+		  return true;
+	      }
 	    }	    
 	  }
 	}
@@ -393,11 +401,17 @@ bool WireCell2dToy::ToyFiducial::check_tgm(WireCell::FlashTPCBundle *bundle, dou
 	      double temp_length = sqrt(pow(out_vec_wcps.at(i).at(0).x-out_vec_wcps.at(k).at(0).x,2)+
 					pow(out_vec_wcps.at(i).at(0).y-out_vec_wcps.at(k).at(0).y,2)+
 					pow(out_vec_wcps.at(i).at(0).z-out_vec_wcps.at(k).at(0).z,2));
-	    
-	      if ((!check_neutrino_candidate(main_cluster1,out_vec_wcps.at(i).at(0),out_vec_wcps.at(k).at(0),offset_x)) &&
-		  temp_length > 0.45*length_limit
-		  )
-		return true;
+	      if (i==0&&k==1){
+		if ((!check_neutrino_candidate(main_cluster1,out_vec_wcps.at(i).at(0),out_vec_wcps.at(k).at(0),offset_x,ct_point_cloud,false)) &&
+		    temp_length > 0.45*length_limit
+		    )
+		  return true;
+	      }else{
+		if ((!check_neutrino_candidate(main_cluster1,out_vec_wcps.at(i).at(0),out_vec_wcps.at(k).at(0),offset_x,ct_point_cloud)) &&
+		    temp_length > 0.45*length_limit
+		    )
+		  return true;
+	      }
 	    }else{
 	      return true;
 	    }
@@ -493,14 +507,16 @@ bool WireCell2dToy::ToyFiducial::check_tgm(WireCell::FlashTPCBundle *bundle, dou
   return false;
 }
 
-bool WireCell2dToy::ToyFiducial::check_neutrino_candidate(WireCell::PR3DCluster *main_cluster,WCPointCloud<double>::WCPoint& wcp1 ,WCPointCloud<double>::WCPoint& wcp2, double offset_x){
+bool WireCell2dToy::ToyFiducial::check_neutrino_candidate(WireCell::PR3DCluster *main_cluster,WCPointCloud<double>::WCPoint& wcp1 ,WCPointCloud<double>::WCPoint& wcp2, double offset_x, WireCell::ToyCTPointCloud& ct_point_cloud,bool flag_2view_check){
   main_cluster->Create_graph();
   
   main_cluster->dijkstra_shortest_paths(wcp1);
   main_cluster->cal_shortest_path(wcp2);
 
   std::list<WCPointCloud<double>::WCPoint>& path_wcps = main_cluster->get_path_wcps();
-
+  
+  
+  
   PointVector path_wcps_vec;  
   // if (fine_tracking_path.size()==0){
   double low_dis_limit = 0.5*units::cm;
@@ -518,9 +534,84 @@ bool WireCell2dToy::ToyFiducial::check_neutrino_candidate(WireCell::PR3DCluster 
       }
     }
   }    
-  // }else{
-  //   path_wcps_vec = fine_tracking_path;
-  // }
+
+  
+  //check whether path is good ... 
+  {
+    int num_nth = 0;
+
+    // bool flag_2view_check = true;
+    
+    // U and V induction view checks
+    if (flag_2view_check){
+      TVector3 drift_dir(1,0,0);
+      // hard coded for U and V plane ... 
+      TVector3 U_dir(0,cos(60./180.*3.1415926),sin(60./180.*3.1415926));
+      TVector3 V_dir(0,cos(60./180.*3.1415926),-sin(60./180.*3.1415926));
+      TVector3 W_dir(0,1,0);
+
+      TVector3 dir(wcp2.x-wcp1.x,wcp2.y-wcp1.y,wcp2.z-wcp1.z);
+      
+      TVector3 dir_1(0,dir.Y(),dir.Z());
+      double angle1 = dir_1.Angle(U_dir);
+      TVector3 tempV1(fabs(dir.X()), sqrt(dir.Y()*dir.Y()+dir.Z()*dir.Z())*sin(angle1),0);
+      double angle1_1 = tempV1.Angle(drift_dir)/3.1415926*180.;
+
+      double angle2 = dir_1.Angle(V_dir);
+      TVector3 tempV2(fabs(dir.X()), sqrt(dir.Y()*dir.Y()+dir.Z()*dir.Z())*sin(angle2),0);
+      double angle2_1 = tempV2.Angle(drift_dir)/3.1415926*180.;
+      
+      //      double angle3 = dir_1.Angle(W_dir);
+      //TVector3 tempV3(fabs(dir.X()), sqrt(dir.Y()*dir.Y()+dir.Z()*dir.Z())*sin(angle3),0);
+      //double angle3_1 = tempV3.Angle(drift_dir)/3.1415926*180.;
+
+      if ( (angle1_1 < 10 || angle2_1 < 10)){
+	flag_2view_check = false;
+      }
+      
+    }
+    
+    for (int i=0;i!=path_wcps_vec.size();i++){
+      WireCell::CTPointCloud<double> cloud_u = ct_point_cloud.get_closest_points(path_wcps_vec.at(i),low_dis_limit*2,0);
+      WireCell::CTPointCloud<double> cloud_v = ct_point_cloud.get_closest_points(path_wcps_vec.at(i),low_dis_limit*2,1);
+      WireCell::CTPointCloud<double> cloud_w = ct_point_cloud.get_closest_points(path_wcps_vec.at(i),low_dis_limit*2,2);
+
+      bool flag_reset = false;
+
+      if (flag_2view_check){
+	if (cloud_u.pts.size() >0 && cloud_v.pts.size() > 0 || // require two planes to be good ...
+	    cloud_u.pts.size() >0 && cloud_w.pts.size() > 0 ||
+	    cloud_v.pts.size() >0 && cloud_w.pts.size() > 0){
+	  flag_reset = true;
+	}else{
+	  if (inside_dead_region(path_wcps_vec.at(i)))
+	    flag_reset = true;
+	}
+      }else{
+	if (cloud_u.pts.size() >0  || // require one plane to be good ...
+	    cloud_v.pts.size() >0  ||
+	    cloud_w.pts.size() >0 ){
+	  flag_reset = true;
+	}else{
+	  if (inside_dead_region(path_wcps_vec.at(i)))
+	    flag_reset = true;
+	}
+      }
+      
+      
+      if (flag_reset){
+  	num_nth =0;
+      }else{
+  	num_nth ++;
+	//	 std::cout << path_wcps_vec.at(i).x/units::cm << " " 
+	//	  << path_wcps_vec.at(i).y/units::cm << " "
+	//	  << path_wcps_vec.at(i).z/units::cm << " "
+	//	  << num_nth << std::endl;
+	//	std::cout << num_nth << std::endl;
+	 if (num_nth>9) return true; // too big a gap ... 3 cm cut ...
+      }
+    }
+  }
   
   
   // if (cluster_id == 13){
@@ -748,6 +839,8 @@ bool WireCell2dToy::ToyFiducial::check_dead_volume(WireCell::Point& p, TVector3&
 	temp_p.x += dir.X() * step;
 	temp_p.y += dir.Y() * step;
 	temp_p.z += dir.Z() * step;
+
+	//	std::cout << temp_p.x/units::cm << " " << temp_p.y/units::cm << " " << temp_p.z/units::cm << std::endl;
       }
 
       // std::cout << p.x/units::cm << " " << p.y/units::cm << " " << p.z/units::cm << " " << num_points << " " << num_points_dead << std::endl;
