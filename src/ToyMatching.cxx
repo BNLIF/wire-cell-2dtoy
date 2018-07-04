@@ -969,10 +969,16 @@ FlashTPCBundleSelection WireCell2dToy::tpc_light_match(int time_offset, int nreb
 		    temp_bundles.push_back(bundle);
 		  }
 		}else{
-		  if (min_bundle->get_ks_dis() * pow(min_bundle->get_chi2()/min_bundle->get_ndf(),0.8) < 2.5 * bundle->get_ks_dis() * pow(bundle->get_chi2()/bundle->get_ndf(),0.8)){
-		    if (bundle!=min_bundle){
-		      temp_bundles.push_back(bundle);
-		    }
+		  if (bundle!=min_bundle){
+		    if (min_bundle->get_ks_dis() < 0.1){
+		      if (min_bundle->get_ks_dis() * pow(min_bundle->get_chi2()/min_bundle->get_ndf(),0.8) < 2.0 * bundle->get_ks_dis() * pow(bundle->get_chi2()/bundle->get_ndf(),0.8)){
+			temp_bundles.push_back(bundle);
+		      }
+		    }// else{
+		    //   if (min_bundle->get_ks_dis() * pow(min_bundle->get_chi2()/min_bundle->get_ndf(),0.8) < 3.33 * bundle->get_ks_dis() * pow(bundle->get_chi2()/bundle->get_ndf(),0.8)){
+		    // 	temp_bundles.push_back(bundle);
+		    //   }
+		    // }
 		  }
 		  // if (min_bundle->get_main_cluster()->get_cluster_id()==2)
 		  //   std::cout << min_bundle->get_ks_dis() * pow(min_bundle->get_chi2()/min_bundle->get_ndf(),0.8) << " " << bundle->get_ks_dis() * pow(bundle->get_chi2()/bundle->get_ndf(),0.8) << std::endl;
@@ -1117,17 +1123,17 @@ FlashTPCBundleSelection WireCell2dToy::tpc_light_match(int time_offset, int nreb
     
     // // finish further examine the bundle ... 
     
-    //  std::cout << "After Cleaning 2 : " << cluster_bundles_map.size() << " A " << flash_bundles_map.size() << " " << all_bundles.size() << std::endl;
+     std::cout << "After Cleaning 2 : " << cluster_bundles_map.size() << " A " << flash_bundles_map.size() << " " << all_bundles.size() << std::endl;
 
 
-    // // std::cout << std::endl << std::endl;
-    // for (auto it = all_bundles.begin(); it!=all_bundles.end();it++){
-    //   FlashTPCBundle *bundle = *it;
-      
-    //   if ( bundle->get_consistent_flag() || bundle->get_flag_at_x_boundary())
-    // 	std::cout << bundle->get_flash()->get_flash_id() << " " << bundle->get_main_cluster()->get_cluster_id() << " " << bundle->get_flag_at_x_boundary() << " " << bundle->get_ks_dis() << " " << bundle->get_chi2() << " " << bundle->get_ndf() << " " << bundle->get_consistent_flag()  << std::endl;
-    // }
     // std::cout << std::endl << std::endl;
+    for (auto it = all_bundles.begin(); it!=all_bundles.end();it++){
+      FlashTPCBundle *bundle = *it;
+      
+      if ( bundle->get_consistent_flag() || bundle->get_flag_at_x_boundary())
+    	std::cout << bundle->get_flash()->get_flash_id() << " " << bundle->get_main_cluster()->get_cluster_id() << " " << bundle->get_flag_at_x_boundary() << " " << bundle->get_ks_dis() << " " << bundle->get_chi2() << " " << bundle->get_ndf() << " " << bundle->get_consistent_flag()  << std::endl;
+    }
+    std::cout << std::endl << std::endl;
 
     
     // examining flash ... 
