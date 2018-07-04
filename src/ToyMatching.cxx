@@ -964,15 +964,15 @@ FlashTPCBundleSelection WireCell2dToy::tpc_light_match(int time_offset, int nreb
 	      
 	      
 	      if (flag_remove){
-		if (flash_good_bundles_map[bundle->get_flash()].size()>flash_good_bundles_map[min_bundle->get_flash()].size() && flash_good_bundles_map[min_bundle->get_flash()].size()==2){
+		if (flash_good_bundles_map[bundle->get_flash()].size()>flash_good_bundles_map[min_bundle->get_flash()].size() && flash_good_bundles_map[min_bundle->get_flash()].size()<=2){
 		  if (bundle!=min_bundle){
 		    temp_bundles.push_back(bundle);
 		  }
 		}else{
 		  if (bundle!=min_bundle){
 		    if (min_bundle->get_ks_dis() < 0.1){
-		      if (min_bundle->get_ks_dis() * pow(min_bundle->get_chi2()/min_bundle->get_ndf(),0.8) < 2.0 * bundle->get_ks_dis() * pow(bundle->get_chi2()/bundle->get_ndf(),0.8)){
-			temp_bundles.push_back(bundle);
+		      if (min_bundle->get_ks_dis() * pow(min_bundle->get_chi2()/min_bundle->get_ndf(),0.8) < 2.0 * bundle->get_ks_dis() * pow(bundle->get_chi2()/bundle->get_ndf(),0.8) && flash_good_bundles_map[bundle->get_flash()].size() > 1){
+		  	temp_bundles.push_back(bundle);
 		      }
 		    }// else{
 		    //   if (min_bundle->get_ks_dis() * pow(min_bundle->get_chi2()/min_bundle->get_ndf(),0.8) < 3.33 * bundle->get_ks_dis() * pow(bundle->get_chi2()/bundle->get_ndf(),0.8)){
@@ -1121,7 +1121,7 @@ FlashTPCBundleSelection WireCell2dToy::tpc_light_match(int time_offset, int nreb
     }
 
     
-    // // finish further examine the bundle ... 
+    // finish further examine the bundle ... 
     
     //  std::cout << "After Cleaning 2 : " << cluster_bundles_map.size() << " A " << flash_bundles_map.size() << " " << all_bundles.size() << std::endl;
 
