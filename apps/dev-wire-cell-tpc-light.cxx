@@ -72,9 +72,9 @@ int main(int argc, char* argv[])
   const GeomWire *uwire = gds.by_planeindex(WirePlaneType_t(0),0);
   const GeomWire *vwire = gds.by_planeindex(WirePlaneType_t(1),0);
   const GeomWire *wwire = gds.by_planeindex(WirePlaneType_t(2),0);
-  double first_u_dis = gds.wire_dist(*uwire) ;
-  double first_v_dis = gds.wire_dist(*vwire) ;
-  double first_w_dis = gds.wire_dist(*wwire) ; 
+  double first_u_dis = gds.wire_dist(*uwire) ; // first U wire center ...
+  double first_v_dis = gds.wire_dist(*vwire) ; // first V wire center ...
+  double first_w_dis = gds.wire_dist(*wwire) ; // first W wire center ... 
   
   
   TString filename = argv[2];
@@ -453,7 +453,7 @@ int main(int argc, char* argv[])
 
 
    // create global CT point cloud ...
-   double_t first_t_dis = live_clusters.at(0)->get_mcells().front()->GetTimeSlice()*time_slice_width - live_clusters.at(0)->get_mcells().front()->get_sampling_points().front().x;
+   double first_t_dis = live_clusters.at(0)->get_mcells().front()->GetTimeSlice()*time_slice_width - live_clusters.at(0)->get_mcells().front()->get_sampling_points().front().x;
    double offset_t = first_t_dis/time_slice_width;
 
    // test the fiducial volume cut 
@@ -587,7 +587,7 @@ int main(int argc, char* argv[])
 
      //if (live_clusters.at(i)->get_cluster_id()!=3) continue;
 
-     //  std::cout << i << " " << live_clusters.at(i)->get_cluster_id() << " " << live_clusters.at(i)->get_mcells().size() << " " << live_clusters.at(i)->get_num_time_slices() << std::endl;
+     //std::cout << i << " " << live_clusters.at(i)->get_cluster_id() << " " << live_clusters.at(i)->get_mcells().size() << " " << live_clusters.at(i)->get_num_time_slices() << std::endl;
      
      live_clusters.at(i)->Create_graph();
 
@@ -659,19 +659,22 @@ int main(int argc, char* argv[])
    double ks_dis;
    double chi2;
    int ndf;
+   double cluster_length;
 
    T_match->Branch("flag_close_to_PMT",&flag_close_to_PMT,"flag_close_to_PMT/B");
    T_match->Branch("flag_at_x_boundary",&flag_at_x_boundary,"flag_at_x_boundary/B");
    T_match->Branch("ks_dis",&ks_dis,"ks_dis/D");
    T_match->Branch("chi2",&chi2,"chi2/D");
    T_match->Branch("ndf",&ndf,"ndf/I");
-   
+   T_match->Branch("cluster_length",&cluster_length,"cluster_length/D");
    
    for (auto it = matched_bundles.begin(); it!=matched_bundles.end(); it++){
      FlashTPCBundle *bundle = *it;
      
      Opflash *flash = bundle->get_flash();
      PR3DCluster *main_cluster = bundle->get_main_cluster();
+     cluster_length = -1;
+     
      if (flash!=0){
        auto it1 = find(flashes.begin(),flashes.end(),flash);
        flash_id = flash->get_flash_id();
@@ -710,10 +713,15 @@ int main(int argc, char* argv[])
      if (flash!=0){
        //std::cout << "Flash: " << flash->get_flash_id() << " " << flash->get_time() << std::endl;
        double offset_x = (flash->get_time() - time_offset)*2./nrebin*time_slice_width;
-       if (fid->check_tgm(bundle,offset_x, ct_point_cloud))
-	 event_type |= 1UL << 3;
+       if (fid->check_tgm(bundle,offset_x, ct_point_cloud,old_new_cluster_map))
+	 event_type |= 1UL << 3; // 3rd bit for TGM
 
-       
+       int temp_flag = fid->check_LM(bundle,cluster_length);
+       if (temp_flag==1){
+	 event_type |= 1UL << 4; // 4th bit for low energy ...
+       }else if (temp_flag==2){
+	 event_type |= 1UL << 1; // 1st bit for light mismatch ...
+       }
      }
      
      T_match->Fill();
@@ -836,7 +844,7 @@ int main(int argc, char* argv[])
      }
      for (size_t j = 0; j!= temp_clusters.size(); j++){
        
-       //ncluster = temp_clusters.at(j)->get_cluster_id();
+       // ncluster = temp_clusters.at(j)->get_cluster_id();
        
        SMGCSelection& mcells = temp_clusters.at(j)->get_mcells();
        //ncluster = temp_clusters.at(0)->get_cluster_id();

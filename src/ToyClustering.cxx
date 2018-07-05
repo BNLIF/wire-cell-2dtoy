@@ -294,7 +294,7 @@ std::map<PR3DCluster*,std::vector<std::pair<PR3DCluster*,double>>> WireCell2dToy
   }
 
 
-   Clustering_connect1(live_clusters,cluster_length_map, global_point_cloud, dead_u_index, dead_v_index, dead_w_index);
+  Clustering_connect1(live_clusters,cluster_length_map, global_point_cloud, dead_u_index, dead_v_index, dead_w_index);
   cerr << em("connect 1") << std::endl;
 
 
@@ -314,6 +314,10 @@ std::map<PR3DCluster*,std::vector<std::pair<PR3DCluster*,double>>> WireCell2dToy
   }
   
   Clustering_examine_x_boundary(live_clusters,cluster_length_map);
+
+  // add a piece for separating over-clustered pieces ... 
+
+  
   // Now clustering the isolated pieces ....
   for (int i=0;i!=1;i++){
     Clustering_neutrino(live_clusters,cluster_length_map,i);
@@ -324,8 +328,6 @@ std::map<PR3DCluster*,std::vector<std::pair<PR3DCluster*,double>>> WireCell2dToy
   //  cerr << em("clustering isolated piece") << std::endl;
 
   {
-    
-    
     // int num_long_ones = 0;
     // for (auto it=live_clusters.begin(); it!=live_clusters.end();it++){
     //   PR3DCluster *cluster = *it;
@@ -359,7 +361,7 @@ std::map<PR3DCluster*,std::vector<std::pair<PR3DCluster*,double>>> WireCell2dToy
   }
   
 
-   // need to further cluster things ...
+  // need to further cluster things ... for the small and isolated pieces ... 
   std::map<PR3DCluster*,std::vector<std::pair<PR3DCluster*,double>>> group_clusters =  WireCell2dToy::Clustering_isolated(live_clusters, cluster_length_map);
   // cerr << em("Clustering isolated") << std::endl;
  

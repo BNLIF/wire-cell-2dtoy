@@ -242,7 +242,7 @@ int main(int argc, char* argv[])
   float threshold_wg = 510.84;
   
 
-  int time_offset = 4; // Now the time offset is taken care int he signal processing, so we just need the overall offset ... 
+  int time_offset = 4; // Now the time offset is taken care int he signal processing, so we just need the overall offset ... // us ... 
   
 
   int run_no, subrun_no, event_no;

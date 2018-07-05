@@ -93,8 +93,15 @@ int main(int argc, char* argv[])
   double lowerwindow = 0;
   double upperwindow = 0;
 
-  if(triggerbits==2048) { lowerwindow = 3.1875; upperwindow = 4.96875; }// bnb  
-  if(triggerbits==512) { lowerwindow = 3.5625; upperwindow = 5.34375; } // extbnb
+  //  if(triggerbits==2048) { lowerwindow = 3.1875; upperwindow = 4.96875; }// bnb  
+  //if(triggerbits==512) { lowerwindow = 3.5625; upperwindow = 5.34375; } // extbnb
+  // better timing ... 
+  // if(triggerbits==2048) { lowerwindow = 3.1625; upperwindow = 4.96875; }// bnb  
+  //if(triggerbits==512) { lowerwindow = 3.5375; upperwindow = 5.34375; } // extbnb
+  
+  //enlarge window ... 
+  if(triggerbits==2048) { lowerwindow = 3.0; upperwindow = 5.0; }// bnb  
+  if(triggerbits==512) { lowerwindow = 3.45; upperwindow = 5.45; } // extbnb
 
   TTree *T_flash = (TTree*)file1->Get("T_flash");
   Double_t time;
@@ -111,25 +118,36 @@ int main(int argc, char* argv[])
   T_match->SetBranchAddress("flash_id",&flash_id);
   T_match->SetBranchAddress("event_type",&event_type);
 
-  Int_t saved_flash_id = -1;
-  Double_t saved_time = 1e9;
+  std::set<int> saved_flash_ids;
+  std::map<int,double> saved_id_time_map;
+  //Int_t saved_flash_id = -1;
+  //Double_t saved_time = 1e9;
   
   for (int i=0;i!=T_flash->GetEntries();i++){
     T_flash->GetEntry(i);
     if (type==2){
       if ( time >= lowerwindow && time <=upperwindow){
-	saved_flash_id = flash_id;
-	saved_time = time;
+	saved_flash_ids.insert(flash_id);
+	saved_id_time_map[flash_id]=time;
+	//saved_times.push_back(time);
+	//saved_flash_id = flash_id;
+	//saved_time = time;
       }
     }
   }
 
-  if (saved_flash_id>0){
+  if (saved_flash_ids.size()>0){
     for (int i=0;i!=T_match->GetEntries();i++){
       T_match->GetEntry(i);
-      if (flash_id == saved_flash_id){
-	std::cout << runNo << "_" << subRunNo << "_" << eventNo << " " << flash_id << " " << tpc_cluster_id << " " << saved_time << " " << event_type << std::endl;
+      
+      if (saved_flash_ids.find(flash_id)!=saved_flash_ids.end()){
+	int flag_tgm = (event_type >> 3) & 1U;
+	int flag_low_energy = (event_type >> 4) & 1U;
+	int flag_lm = (event_type >> 1) & 1U;
+	
+	std::cout << runNo << "_" << subRunNo << "_" << eventNo << " " << flash_id << " " << tpc_cluster_id << " " << saved_id_time_map[flash_id] << " " << event_type << " " << flag_low_energy << " " << flag_lm << " " << flag_tgm << std::endl;
       }
+      
     }
   }
   
