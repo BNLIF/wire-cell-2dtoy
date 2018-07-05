@@ -73,7 +73,7 @@ int main(int argc, char* argv[])
   int cluster_check=-1; // specify cluster_id to check 
   if(argc==4) cluster_check=atoi(argv[3]);
 
-  cout<<" ---> test track-imaging"<<endl;
+  cout<<" ---> test track-imaging A"<<endl;
 
   return 0;
 }
