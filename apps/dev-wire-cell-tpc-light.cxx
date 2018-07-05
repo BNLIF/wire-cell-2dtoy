@@ -485,6 +485,7 @@ int main(int argc, char* argv[])
 				  angle_u,angle_v,angle_w// angle
 				  );
    ct_point_cloud.AddPoints(timesliceId,timesliceChannel,raw_charge,raw_charge_err);
+   ct_point_cloud.AddDeadChs(dead_u_index, dead_v_index, dead_w_index);
    ct_point_cloud.build_kdtree_index();
 
 
