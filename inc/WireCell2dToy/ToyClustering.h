@@ -63,6 +63,8 @@ namespace WireCell2dToy{
  
 
   void Clustering_examine_x_boundary(WireCell::PR3DClusterSelection& live_clusters,std::map<WireCell::PR3DCluster*,double>& cluster_length_map);
+
+  void Clustering_protect_overclustering(WireCell::PR3DClusterSelection& live_clusters,std::map<WireCell::PR3DCluster*,double>& cluster_length_map, WireCell::ToyCTPointCloud& ct_point_cloud);
   
   void Clustering_neutrino(WireCell::PR3DClusterSelection& live_clusters,std::map<WireCell::PR3DCluster*,double>& cluster_length_map, int num_try=0);
   

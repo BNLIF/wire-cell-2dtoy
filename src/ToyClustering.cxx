@@ -15,8 +15,10 @@ using namespace std;
 #include "ToyClustering_separate.h"
 #include "ToyClustering_deghost.h"
 #include "ToyClustering_connect.h"
-#include "ToyClustering_neutrino.h"
 
+#include "ToyClustering_protect_overclustering.h"
+
+#include "ToyClustering_neutrino.h"
 #include "ToyClustering_isolated.h"
 
 #include "WireCell2dToy/ExecMon.h"
@@ -316,7 +318,9 @@ std::map<PR3DCluster*,std::vector<std::pair<PR3DCluster*,double>>> WireCell2dToy
   Clustering_examine_x_boundary(live_clusters,cluster_length_map);
 
   // add a piece for separating over-clustered pieces ... 
-
+  // use graph theory ... 
+  Clustering_protect_overclustering(live_clusters, cluster_length_map, ct_point_cloud);
+  
   
   // Now clustering the isolated pieces ....
   for (int i=0;i!=1;i++){
