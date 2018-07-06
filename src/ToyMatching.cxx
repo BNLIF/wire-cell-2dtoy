@@ -1649,6 +1649,7 @@ void WireCell2dToy::organize_matched_bundles(WireCell::FlashTPCBundleSelection& 
       FlashTPCBundle* bundle = (*it1);
 
       double value = bundle->get_ks_dis() * pow(bundle->get_chi2()/std::max(bundle->get_ndf(),1),0.8);
+      
       if (bundle->get_flag_at_x_boundary()){
       	value *= 0.8;
 	if (bundle->get_flag_close_to_PMT()){
@@ -1674,6 +1675,8 @@ void WireCell2dToy::organize_matched_bundles(WireCell::FlashTPCBundleSelection& 
     
     for (auto it1 = old_bundles.begin(); it1!=old_bundles.end(); it1++){
       FlashTPCBundle* bundle = (*it1);
+      //  std::cout << bundle->get_flash()->get_flash_id() << " " << bundle->get_main_cluster()->get_cluster_id() << " " << bundle->get_ks_dis() << " " << bundle->get_chi2() << " " << bundle->get_ndf() << " " << bundle->get_flag_close_to_PMT() << std::endl;
+
       if (bundle!=best_bundle){
 	//	std::cout << bundle->get_ks_dis() << " " << bundle->get_chi2() << " " << bundle->get_ndf()<< " " << best_bundle->examine_bundle(bundle,cos_pe_low, cos_pe_mid) << std::endl;
 	

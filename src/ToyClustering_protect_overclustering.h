@@ -745,28 +745,28 @@ PR3DClusterSelection WireCell2dToy::Examine_overclustering(PR3DCluster *cluster,
       const int num1 = connected_components(*graph,&component1[0]);
       
       if (num1 >1){
-	std::cout << cluster->get_cluster_id() << " " << num << " " << num1 << std::endl;
+	//std::cout << cluster->get_cluster_id() << " " << num << " " << num1 << std::endl;
 	
 	// form new clusters ...
 	std::vector<SMGCSet> vec_mcells_set;
-	std::vector<bool> vec_flag;
+	//	std::vector<bool> vec_flag;
 	for (int ii=0;ii!=num1;ii++){
 	  SMGCSet mcells_set;
 	  vec_mcells_set.push_back(mcells_set);
-	  vec_flag.push_back(false);
+	  //  vec_flag.push_back(false);
 	}
 	
 	std::vector<int>::size_type i;
 	for (i=0;i!=component1.size(); ++i){
 	  vec_mcells_set.at(component1[i]).insert(cloud.pts[i].mcell);
 	  //      pt_clouds.at(component[i])->AddPoint(cloud.pts[i],cloud_u.pts[i],cloud_v.pts[i],cloud_w.pts[i]);
-	  if (!vec_flag.at(component1[i])){
-	    std::cout << "Vertex " << i << " " << cloud.pts[i].x << " " << cloud.pts[i].y << " " << cloud.pts[i].z << " " << cloud.pts[i].index_u << " " << cloud.pts[i].index_v << " " << cloud.pts[i].index_w << " " << cloud.pts[i].mcell << " " << cloud.pts[i].mcell->GetTimeSlice()  << " is in component " << component[i] << std::endl;
-	    vec_flag.at(component1[i]) = true;
-	  }
+	  /* if (!vec_flag.at(component1[i])){ */
+	  /*   std::cout << "Vertex " << i << " " << cloud.pts[i].x << " " << cloud.pts[i].y << " " << cloud.pts[i].z << " " << cloud.pts[i].index_u << " " << cloud.pts[i].index_v << " " << cloud.pts[i].index_w << " " << cloud.pts[i].mcell << " " << cloud.pts[i].mcell->GetTimeSlice()  << " is in component " << component[i] << std::endl; */
+	  /*   vec_flag.at(component1[i]) = true; */
+	  /* } */
 	}
 	for (int ii=0;ii!=num1;ii++){
-	  std::cout << ii << " " << vec_mcells_set.at(ii).size() << std::endl;
+	  //std::cout << ii << " " << vec_mcells_set.at(ii).size() << std::endl;
 	  
 	  PR3DCluster *cluster1 = new PR3DCluster(1);
 	  for (auto it = vec_mcells_set.at(ii).begin(); it!=vec_mcells_set.at(ii).end(); it++){
