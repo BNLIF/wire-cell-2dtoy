@@ -26,11 +26,7 @@ using namespace std;
 
 /*
   short cluster: satisfy "distance"
-
-
-
   Flag: multiple cluters to one track
-
 */
 
 
@@ -102,6 +98,19 @@ int main(int argc, char* argv[])
   TGraph *graph_ghost_yz = new TGraph();
   graph_ghost_yz->SetName(roostr);
 
+  std::map< int, std::vector<int> > map_non_ghost_track_clusters;
+  std::map<int,int> map_flag_cluster_used;
+
+  TGraph2D *graph_track_each[21];
+  for(int idx=0; idx<21; idx++) {
+    roostr = TString::Format("graph_track_each_%2d", idx);
+    graph_track_each[idx] = new TGraph2D();
+    graph_track_each[idx]->SetName(roostr);
+  }
+  int count_graph_track_each[21] = {0};
+
+  TGraph2D *graph_cluster_all = new TGraph2D();
+  graph_cluster_all->SetName("graph_cluster_all");
   
   //////////////////////////////////////////////////////////////////////////////////////////////// variable histgram end
   
@@ -147,18 +156,23 @@ int main(int argc, char* argv[])
   std::map<int, std::vector<double>> ypt;
   std::map<int, std::vector<double>> zpt;
 
-  
+  int track_id_debug = 0;
   TTree *truth = (TTree*)f->Get("T_true");
   truth->SetBranchAddress("x",&x);
   truth->SetBranchAddress("y",&y);
   truth->SetBranchAddress("z",&z);
-
+  truth->SetBranchAddress("track_id",&track_id_debug);
+  
   TGraph2D *gh_truth = new TGraph2D();
   gh_truth->SetName("gh_truth");
   
   for(long ientry=0; ientry<truth->GetEntries(); ientry++) {
     truth->GetEntry(ientry);
     gh_truth->SetPoint( ientry, x,y,z );
+
+    //////////
+    count_graph_track_each[track_id_debug]++;
+    graph_track_each[track_id_debug]->SetPoint( count_graph_track_each[track_id_debug]-1, x,y,z );    
   }
   
   
@@ -168,8 +182,6 @@ int main(int argc, char* argv[])
   std::map<int, TVector3> vc_cluster_end;
   std::map<int, double> vc_cluster_length;
   
-  TGraph2D *gh_tracks = new TGraph2D();
-
   TGraph2D *gh_ghost[100];
   for(int idx=0; idx<100; idx++) {
     gh_ghost[idx] = new TGraph2D();
@@ -201,8 +213,8 @@ int main(int argc, char* argv[])
       ypt[cluster_id].push_back(y);
       zpt[cluster_id].push_back(z);
     }
-    
-    gh_tracks->SetPoint(i, x,y,z);
+
+    graph_cluster_all->SetPoint(i, x,y,z);
   }
 
   // PCA (Priciple Component Analysis): Matrix Decomposition --> Coordinate Rotation
@@ -410,6 +422,10 @@ int main(int argc, char* argv[])
   std::map<int, int> vc_ghost_angle;
   std::map<int, int> vc_ghost_distance;
   std::map<int, int> vc_ghost_contain;
+
+  for( auto it_track=vc_track_dir.begin(); it_track!=vc_track_dir.end(); it_track++ ) {
+    map_non_ghost_track_clusters[it_track->first].push_back(-1);//
+  }
   
   for( auto it_cluster=vc_cluster_dir.begin(); it_cluster!=vc_cluster_dir.end(); it_cluster++ ) {// By default, all the cluster are ghosts
     vc_ghost_id[it_cluster->first] = it_cluster->first;
@@ -469,18 +485,63 @@ int main(int argc, char* argv[])
 	  if( value_cluster_start>min && value_cluster_start<max && value_cluster_end>min && value_cluster_end<max ) {// bool: contain
 	    // not ghost
 	    vc_ghost_id.erase( cluster_id );
+
 	    
+	    if( map_flag_cluster_used.find( cluster_id )!=map_flag_cluster_used.end() ) {
+	      map_flag_cluster_used[cluster_id] += 1;
+	      continue;
+	    }
+	    
+	    map_flag_cluster_used[cluster_id] = 1;
+	    map_non_ghost_track_clusters[track_id].push_back( cluster_id );
 	  }
 	  
 	}// bool: distance
-      }// bool: direction
-       
+      }// bool: direction       
     }// each cluster cluster
   }// each track cluster
 
 
+  map<int, int>flag_track2recon;// 0: inefficiency, 1: broken, 2: good
+  for( auto it=map_non_ghost_track_clusters.begin(); it!=map_non_ghost_track_clusters.end(); it++ ) {
+    int user_size = it->second.size() - 1;
+
+    cout<<it->first<<"\t"<<user_size<<endl;
+      
+    if( user_size==0 ) flag_track2recon[it->first] = 0;
+    if( user_size>1  ) flag_track2recon[it->first] = 1;
+    
+    if( user_size==1 ) {
+      flag_track2recon[it->first] = 2;
+
+      /// get cluster_id
+      int cluster_id = it->second.at(1);
+      double cluster_length = vc_cluster_length[cluster_id];
+
+      if( cluster_length<5 ) {// ghost ---> inefficinecy
+	flag_track2recon[it->first] = 0;
+	vc_ghost_id[cluster_id] = cluster_id;// pay attention
+      }
+      else if( cluster_length<95 ) {// broken
+	flag_track2recon[it->first] = 1;
+      }
+      
+    }
+    
+  }
+
+  
+  for( auto it=map_flag_cluster_used.begin(); it!=map_flag_cluster_used.end(); it++ ) {
+    if(it->second > 1) {
+      cout<<" -----------> WARNING : cluster "<<it->first<<" used "<<it->second<< " times." <<endl;
+    }
+  }
+  
   cout<<endl;
 
+  ///////////////////////////////////////////////////////////////////////////////////
+  ///////////////////////////////////////////////////////////////////////////////////
+  
   TCanvas *canv = new TCanvas("canv", "canv", 1000, 800);
   TH3D *h3 = new TH3D("h3", "h3", 100, 0, 300, 100, -150, 150, 100, 0, 1500);
   h3->SetStats(0);
@@ -523,13 +584,46 @@ int main(int argc, char* argv[])
     
   canv->SaveAs("canv.root");
 
+  ///////////////////////////////////////////////////////////////////////////////////
+  ///////////////////////////////////////////////////////////////////////////////////
 
-  /////// WRITE FILE
-  /////// WRITE FILE
+  roostr = "canv_visuliaztion_tracks_cluster";
+  TCanvas *canv_visuliaztion_tracks_cluster = new TCanvas(roostr, roostr, 1000, 800);
+
+  roostr = "h3_visuliaztion_tracks_cluster";
+  TH3D *h3_visuliaztion_tracks_cluster = new TH3D(roostr, roostr, 100, 0, 300, 100, -150, 150, 100, 0, 1500);
+  h3_visuliaztion_tracks_cluster->SetStats(0);
+  h3_visuliaztion_tracks_cluster->Draw();
+  h3_visuliaztion_tracks_cluster->SetXTitle("X axis");
+  h3_visuliaztion_tracks_cluster->SetYTitle("Y axis");
+  h3_visuliaztion_tracks_cluster->SetZTitle("Z axis");
+
+  int colors_vis[3] = {kRed, kOrange-3, kGreen};// inefficiency, broken, good
+  
+  for( auto it=vc_track_dir.begin(); it!=vc_track_dir.end(); it++ ) {
+    int id = it->first;
+    
+    graph_track_each[id]->Draw("same p");
+    graph_track_each[id]->SetMarkerColor( colors_vis[flag_track2recon[id]] );
+    graph_track_each[id]->SetMarkerStyle(4);
+    graph_track_each[id]->SetMarkerSize(0.5);
+  }
+
+  graph_cluster_all->Draw("same p");
+  graph_cluster_all->SetMarkerColor(kGray+2);
+  
+  for( auto it=vc_ghost_id.begin(); it!=vc_ghost_id.end(); it++ ) {
+    gh_ghost[it->first]->Draw("same p");
+    gh_ghost[it->first]->SetMarkerColor(kBlue);
+  }
+  
+  canv_visuliaztion_tracks_cluster->SaveAs("canv_visuliaztion_tracks_cluster.root");
+  
+  /////////////////////////////////////////////////////////////////////////////////// WRITE FILE
+  /////////////////////////////////////////////////////////////////////////////////// WRITE FILE
   
   TFile* output = new TFile(outputroot, "RECREATE");
   
-  //gh_tracks->Write();
   h1_ghost_track_length->Write();
   graph_ghost_yz->Write();
 
