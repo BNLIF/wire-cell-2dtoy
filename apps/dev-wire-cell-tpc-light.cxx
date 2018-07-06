@@ -485,6 +485,7 @@ int main(int argc, char* argv[])
 				  angle_u,angle_v,angle_w// angle
 				  );
    ct_point_cloud.AddPoints(timesliceId,timesliceChannel,raw_charge,raw_charge_err);
+   ct_point_cloud.AddDeadChs(dead_u_index, dead_v_index, dead_w_index);
    ct_point_cloud.build_kdtree_index();
 
 
@@ -529,7 +530,7 @@ int main(int argc, char* argv[])
    // WireCell2dToy::Clustering_live_dead(live_clusters, dead_clusters);
    // cerr << em("Clustering live and dead clusters") << std::endl;
 
-   std::map<PR3DCluster*,std::vector<std::pair<PR3DCluster*,double>>> group_clusters = WireCell2dToy::Clustering_jump_gap_cosmics(live_clusters, dead_clusters,dead_u_index, dead_v_index, dead_w_index, global_point_cloud);
+   std::map<PR3DCluster*,std::vector<std::pair<PR3DCluster*,double>>> group_clusters = WireCell2dToy::Clustering_jump_gap_cosmics(live_clusters, dead_clusters,dead_u_index, dead_v_index, dead_w_index, global_point_cloud, ct_point_cloud);
    cout << em("Clustering to jump gap in cosmics") << std::endl;
    
    // // need to further cluster things ...

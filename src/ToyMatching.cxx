@@ -814,7 +814,7 @@ FlashTPCBundleSelection WireCell2dToy::tpc_light_match(int time_offset, int nreb
 	  }
 
 	  if (min_bundle->get_ks_dis() < 0.18){
-	    //  std::cout << min_bundle->get_flash()->get_flash_id() << " Xin: " << min_bundle->get_main_cluster()->get_cluster_id() << std::endl;
+	    //std::cout << min_bundle->get_flash()->get_flash_id() << " Xin: " << min_bundle->get_main_cluster()->get_cluster_id() << std::endl;
 
 	    FlashTPCBundleSelection temp_bundles;
 	    
@@ -870,8 +870,10 @@ FlashTPCBundleSelection WireCell2dToy::tpc_light_match(int time_offset, int nreb
 		}
 	      }
 	      
-	      // if (min_bundle->get_main_cluster()->get_cluster_id()==22)
-	      //  	std::cout << min_bundle->get_flash()->get_flash_id() << " A " << min_bundle->get_main_cluster()->get_cluster_id() << " " << flag_remove << " " << flash_good_bundles_map[min_bundle->get_flash()].size()<< std::endl;
+	      // if (min_bundle->get_main_cluster()->get_cluster_id()==2){
+	      // 	std::cout << min_bundle->get_flash()->get_flash_id() << " A " << min_bundle->get_main_cluster()->get_cluster_id() << " " << flag_remove << " " << flash_good_bundles_map[min_bundle->get_flash()].size()<< std::endl;
+	      // 	flag_remove = true;
+	      // }
 	      
 	      if (flag_remove){
 		if (flash_good_bundles_map[bundle->get_flash()].size()>1){
@@ -950,17 +952,36 @@ FlashTPCBundleSelection WireCell2dToy::tpc_light_match(int time_offset, int nreb
 		}else if (min_bundle->get_ks_dis()<0.15 && min_bundle->get_chi2()/min_bundle->get_ndf() * 3 < bundle->get_chi2()/bundle->get_ndf()){
 		  flag_remove = true;
 		}
-	      }else if (flash_good_bundles_map[min_bundle->get_flash()].size()==2){
+	      }else if (flash_good_bundles_map[min_bundle->get_flash()].size()>=2){
 		if (min_bundle->get_ks_dis()<0.1 && min_bundle->get_chi2()/min_bundle->get_ndf() * 6 < bundle->get_chi2()/bundle->get_ndf()){
 		  flag_remove = true;
 		}
 	      }
+
+	      // if (min_bundle->get_main_cluster()->get_cluster_id()==2){
+	      // 	std::cout << min_bundle->get_flash()->get_flash_id() << " A " << min_bundle->get_main_cluster()->get_cluster_id() << " " << flag_remove << " " << flash_good_bundles_map[min_bundle->get_flash()].size()<< " " << flash_good_bundles_map[bundle->get_flash()].size() << " " << bundle->get_flash()->get_flash_id() << std::endl;
+	      // }
+	      
 	      
 	      if (flag_remove){
-		if (flash_good_bundles_map[bundle->get_flash()].size()>flash_good_bundles_map[min_bundle->get_flash()].size()){
+		if (flash_good_bundles_map[bundle->get_flash()].size()>flash_good_bundles_map[min_bundle->get_flash()].size() && flash_good_bundles_map[min_bundle->get_flash()].size()<=2){
 		  if (bundle!=min_bundle){
 		    temp_bundles.push_back(bundle);
 		  }
+		}else{
+		  if (bundle!=min_bundle){
+		    if (min_bundle->get_ks_dis() < 0.1){
+		      if (min_bundle->get_ks_dis() * pow(min_bundle->get_chi2()/min_bundle->get_ndf(),0.8) < 2.0 * bundle->get_ks_dis() * pow(bundle->get_chi2()/bundle->get_ndf(),0.8) && flash_good_bundles_map[bundle->get_flash()].size() > 1){
+		  	temp_bundles.push_back(bundle);
+		      }
+		    }// else{
+		    //   if (min_bundle->get_ks_dis() * pow(min_bundle->get_chi2()/min_bundle->get_ndf(),0.8) < 3.33 * bundle->get_ks_dis() * pow(bundle->get_chi2()/bundle->get_ndf(),0.8)){
+		    // 	temp_bundles.push_back(bundle);
+		    //   }
+		    // }
+		  }
+		  // if (min_bundle->get_main_cluster()->get_cluster_id()==2)
+		  //   std::cout << min_bundle->get_ks_dis() * pow(min_bundle->get_chi2()/min_bundle->get_ndf(),0.8) << " " << bundle->get_ks_dis() * pow(bundle->get_chi2()/bundle->get_ndf(),0.8) << std::endl;
 		}
 	      }
 	    }
@@ -1102,10 +1123,10 @@ FlashTPCBundleSelection WireCell2dToy::tpc_light_match(int time_offset, int nreb
     
     // finish further examine the bundle ... 
     
-    // std::cout << "After Cleaning 2 : " << cluster_bundles_map.size() << " A " << flash_bundles_map.size() << " " << all_bundles.size() << std::endl;
+    //  std::cout << "After Cleaning 2 : " << cluster_bundles_map.size() << " A " << flash_bundles_map.size() << " " << all_bundles.size() << std::endl;
 
 
-    // std::cout << std::endl << std::endl;
+    // // std::cout << std::endl << std::endl;
     // for (auto it = all_bundles.begin(); it!=all_bundles.end();it++){
     //   FlashTPCBundle *bundle = *it;
       

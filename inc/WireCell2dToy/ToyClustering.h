@@ -3,6 +3,7 @@
 
 #include "WireCellData/PR3DCluster.h"
 #include "WireCellData/DynamicToyPointCloud.h"
+#include "WireCellData/ToyCTPointCloud.h"
 //#include "WireCellSst/GeomDataSource.h"
 
 namespace WireCell2dToy{
@@ -13,6 +14,8 @@ namespace WireCell2dToy{
   bool is_angle_consistent(TVector3& dir1, TVector3& dir2, bool same_direction, double angle_cut, double angle_u, double angle_v, double angle_w, int num_cut = 2);
   
   
+  std::map<WireCell::PR3DCluster*,std::vector<std::pair<WireCell::PR3DCluster*,double>>> Clustering_jump_gap_cosmics(WireCell::PR3DClusterSelection& live_clusters, WireCell::PR3DClusterSelection& dead_clusters, std::map<int,std::pair<double,double>>& dead_u_index, std::map<int,std::pair<double,double>>& dead_v_index, std::map<int,std::pair<double,double>>& dead_w_index, WireCell::DynamicToyPointCloud& global_point_cloud, WireCell::ToyCTPointCloud& ct_point_cloud);
+
   std::map<WireCell::PR3DCluster*,std::vector<std::pair<WireCell::PR3DCluster*,double>>> Clustering_jump_gap_cosmics(WireCell::PR3DClusterSelection& live_clusters, WireCell::PR3DClusterSelection& dead_clusters, std::map<int,std::pair<double,double>>& dead_u_index, std::map<int,std::pair<double,double>>& dead_v_index, std::map<int,std::pair<double,double>>& dead_w_index, WireCell::DynamicToyPointCloud& global_point_cloud);
 
   
@@ -60,6 +63,10 @@ namespace WireCell2dToy{
  
 
   void Clustering_examine_x_boundary(WireCell::PR3DClusterSelection& live_clusters,std::map<WireCell::PR3DCluster*,double>& cluster_length_map);
+
+  void Clustering_protect_overclustering(WireCell::PR3DClusterSelection& live_clusters,std::map<WireCell::PR3DCluster*,double>& cluster_length_map, WireCell::ToyCTPointCloud& ct_point_cloud);
+  WireCell::PR3DClusterSelection Examine_overclustering(WireCell::PR3DCluster *cluster,  WireCell::ToyCTPointCloud& ct_point_cloud);
+  
   
   void Clustering_neutrino(WireCell::PR3DClusterSelection& live_clusters,std::map<WireCell::PR3DCluster*,double>& cluster_length_map, int num_try=0);
   
