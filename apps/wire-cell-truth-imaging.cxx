@@ -104,7 +104,7 @@ int main(int argc, char* argv[])
   
   int nt_off1 = 0; // not used
   int nt_off2 = 0; // not used
-  int dead_region = 0; // manually add dead channels
+  int dead_region = 0; // manually add dead channels 
 
   int save_file = 0; //
   // 1 for debug mode for bee ...
@@ -205,7 +205,7 @@ int main(int argc, char* argv[])
   float threshold_wg = 510.84;
   
 
-  int time_offset = 0; // Now the time offset is taken care int he signal processing, so we just need the overall offset ... 
+  int time_offset = 90; // no SP, so an overall offset is needed ... should be 90 ticks. 
   
   //root file saving truth info
   const char* true_file;
@@ -223,31 +223,7 @@ int main(int argc, char* argv[])
 
   // load Trun
   TFile *file1 = new TFile(root_file);
-  TTree *Trun = (TTree*)file1->Get("Trun");
   
-  Trun->SetBranchAddress("eventNo",&event_no);
-  Trun->SetBranchAddress("runNo",&run_no);
-  Trun->SetBranchAddress("subRunNo",&subrun_no);
-  Trun->SetBranchAddress("unit_dis",&unit_dis);
-  Trun->SetBranchAddress("toffset_uv",&toffset_1);
-  Trun->SetBranchAddress("toffset_uw",&toffset_2);
-  Trun->SetBranchAddress("toffset_u",&toffset_3);
-  Trun->SetBranchAddress("total_time_bin",&total_time_bin);
-  Trun->SetBranchAddress("recon_threshold",&recon_threshold);
-  Trun->SetBranchAddress("frame_length",&frame_length);
-  Trun->SetBranchAddress("max_events",&max_events);
-  Trun->SetBranchAddress("eve_num",&eve_num);
-  Trun->SetBranchAddress("nrebin",&nrebin);
-  Trun->SetBranchAddress("threshold_u",&threshold_u);
-  Trun->SetBranchAddress("threshold_v",&threshold_v);
-  Trun->SetBranchAddress("threshold_w",&threshold_w);
-  Trun->SetBranchAddress("threshold_ug",&threshold_ug);
-  Trun->SetBranchAddress("threshold_vg",&threshold_vg);
-  Trun->SetBranchAddress("threshold_wg",&threshold_wg);
-  Trun->SetBranchAddress("time_offset",&time_offset);
-  
-  Trun->GetEntry(0);
-
   TTree *T_op = (TTree*)file1->Get("T_op");
   
   GeomWireSelection wires_u = gds.wires_in_plane(WirePlaneType_t(0));
@@ -258,29 +234,118 @@ int main(int argc, char* argv[])
   int nwire_v = wires_v.size();
   int nwire_w = wires_w.size();
 
+  /* TTree *Trun = (TTree*)file1->Get("Trun"); */
+  
+  /* Trun->SetBranchAddress("eventNo",&event_no); */
+  /* Trun->SetBranchAddress("runNo",&run_no); */
+  /* Trun->SetBranchAddress("subRunNo",&subrun_no); */
+  /* Trun->SetBranchAddress("unit_dis",&unit_dis); */
+  /* Trun->SetBranchAddress("toffset_uv",&toffset_1); */
+  /* Trun->SetBranchAddress("toffset_uw",&toffset_2); */
+  /* Trun->SetBranchAddress("toffset_u",&toffset_3); */
+  /* Trun->SetBranchAddress("total_time_bin",&total_time_bin); */
+  /* Trun->SetBranchAddress("recon_threshold",&recon_threshold); */
+  /* Trun->SetBranchAddress("frame_length",&frame_length); */
+  /* Trun->SetBranchAddress("max_events",&max_events); */
+  /* Trun->SetBranchAddress("eve_num",&eve_num); */
+  /* Trun->SetBranchAddress("nrebin",&nrebin); */
+  /* Trun->SetBranchAddress("threshold_u",&threshold_u); */
+  /* Trun->SetBranchAddress("threshold_v",&threshold_v); */
+  /* Trun->SetBranchAddress("threshold_w",&threshold_w); */
+  /* Trun->SetBranchAddress("threshold_ug",&threshold_ug); */
+  /* Trun->SetBranchAddress("threshold_vg",&threshold_vg); */
+  /* Trun->SetBranchAddress("threshold_wg",&threshold_wg); */
+  /* Trun->SetBranchAddress("time_offset",&time_offset); */
+  
+  /* Trun->GetEntry(0); */
+
+  // in MC truth, no SP (except for smearing), convert TClonesArray to Hists
+  // like DatauBooNEFrameDataSource
+  const char* tpath = "/Event/Sim";
+  TTree* tree = dynamic_cast<TTree*>(file1->Get(tpath));
+  tree->SetBranchStatus("*",0);
+
+  tree->SetBranchStatus("eventNo",1);
+  tree->SetBranchAddress("eventNo" , &event_no);
+  tree->SetBranchStatus("runNo",1);
+  tree->SetBranchAddress("runNo"   , &run_no);
+  tree->SetBranchStatus("subRunNo",1);
+  tree->SetBranchAddress("subRunNo", &subrun_no);
+
+  std::vector<int> *channelid = new std::vector<int>;
+  TClonesArray* esignal = new TClonesArray;
+
+  tree->SetBranchStatus("raw_channelId",1);
+  tree->SetBranchAddress("raw_channelId", &channelid);
+  tree->SetBranchStatus("raw_wf",1);
+  tree->SetBranchAddress("raw_wf", &esignal);
+
+  tree->GetEntry(eve_num);
+  
+  int nchannels = channelid->size();
+  TH2F *hu_decon = new TH2F("hu_decon","hu_decon",nwire_u,-0.5,nwire_u-0.5,total_time_bin/nrebin,0,total_time_bin);
+  TH2F *hv_decon = new TH2F("hv_decon","hv_decon",nwire_v,-0.5+nwire_u,nwire_v-0.5+nwire_u,total_time_bin/nrebin,0,total_time_bin);
+  TH2F *hw_decon = new TH2F("hw_decon","hw_decon",nwire_w,-0.5+nwire_u+nwire_v,nwire_w-0.5+nwire_u+nwire_v,total_time_bin/nrebin,0,total_time_bin);
+
+  TH2F *htempp;
+  for (size_t ind=0; ind < nchannels; ++ind) {
+      TH1F* signal = dynamic_cast<TH1F*>(esignal->At(ind));
+      signal->Rebin(nrebin);
+
+      if((int)(signal->GetNbinsX()*1.0*nrebin/total_time_bin) != 1)
+      {
+          cout<<"Simulation total time bin ("<<signal->GetNbinsX()<<") inconsistent with this apps."<<endl;
+          exit(1);
+      }
+      if(!signal) continue;
+
+      int chid = channelid->at(ind);
+
+      if(chid < nwire_u){
+        htempp = hu_decon;
+      }
+      else if(chid < nwire_u + nwire_v){
+        htempp = hv_decon;
+        chid -= nwire_u;
+      }
+      else{
+        htempp = hw_decon;
+        chid -= nwire_u + nwire_v;
+      }
+      for(int tbin=1; tbin<=total_time_bin/nrebin; tbin++)
+      {
+          htempp->SetBinContent(chid+1, tbin, signal->GetBinContent(tbin-int(time_offset*1.0/nrebin)));
+      }
+  }
+  
+  TH2F *hu_decon_g = (TH2F*)hu_decon->Clone();
+  TH2F *hv_decon_g = (TH2F*)hv_decon->Clone();
+  TH2F *hw_decon_g = (TH2F*)hw_decon->Clone();
+
+
 
   cout << "Run No: " << run_no << " " << subrun_no << " " << event_no << endl;
   ChirpMap uplane_map;
   ChirpMap vplane_map;
   ChirpMap wplane_map;
-  TTree *T_chirp = (TTree*)file1->Get("T_bad");
-  Int_t chid=0, plane=0;
-  Int_t start_time=0, end_time=0;
-  T_chirp->SetBranchAddress("chid",&chid);
-  T_chirp->SetBranchAddress("plane",&plane);
-  T_chirp->SetBranchAddress("start_time",&start_time);
-  T_chirp->SetBranchAddress("end_time",&end_time);
-  for (Int_t i=0;i!=T_chirp->GetEntries();i++){
-    T_chirp->GetEntry(i);
-    std::pair<int,int> abc(start_time,end_time);
-    if (plane == 0){
-      uplane_map[chid] = abc;
-    }else if (plane == 1){
-      vplane_map[chid-nwire_u] = abc;
-    }else if (plane == 2){
-      wplane_map[chid-nwire_u-nwire_v] = abc;
-    }
-  }
+  /* TTree *T_chirp = (TTree*)file1->Get("T_bad"); */
+  /* Int_t chid=0, plane=0; */
+  /* Int_t start_time=0, end_time=0; */
+  /* T_chirp->SetBranchAddress("chid",&chid); */
+  /* T_chirp->SetBranchAddress("plane",&plane); */
+  /* T_chirp->SetBranchAddress("start_time",&start_time); */
+  /* T_chirp->SetBranchAddress("end_time",&end_time); */
+  /* for (Int_t i=0;i!=T_chirp->GetEntries();i++){ */
+  /*   T_chirp->GetEntry(i); */
+  /*   std::pair<int,int> abc(start_time,end_time); */
+  /*   if (plane == 0){ */
+  /*     uplane_map[chid] = abc; */
+  /*   }else if (plane == 1){ */
+  /*     vplane_map[chid-nwire_u] = abc; */
+  /*   }else if (plane == 2){ */
+  /*     wplane_map[chid-nwire_u-nwire_v] = abc; */
+  /*   } */
+  /* } */
   
   // If dead region mode, then manually add dead channels.
   if(dead_region)
@@ -299,7 +364,8 @@ int main(int argc, char* argv[])
           }
       }
   }
-   
+  
+  
   
   std::vector<float> uplane_rms;
   std::vector<float> vplane_rms;
@@ -308,9 +374,52 @@ int main(int argc, char* argv[])
   // These RMS values are for single ticks
   // Later they are applied to the rebinned data
   // Probably OK as the TPC signal processing already took care the fake hits ... 
-  TH1F *hu_threshold = (TH1F*)file1->Get("hu_threshold");
-  TH1F *hv_threshold = (TH1F*)file1->Get("hv_threshold");
-  TH1F *hw_threshold = (TH1F*)file1->Get("hw_threshold");
+  
+  /* TH1F *hu_threshold = (TH1F*)file1->Get("hu_threshold"); */
+  /* TH1F *hv_threshold = (TH1F*)file1->Get("hv_threshold"); */
+  /* TH1F *hw_threshold = (TH1F*)file1->Get("hw_threshold"); */
+  
+  // in MC truth, no threshold, the treshold comes from the best fit of simulation.
+  TH1F *hu_threshold = new TH1F("hu_threshold","hu_threshold",nwire_u,-0.5,-0.5+nwire_u);
+  TH1F *hv_threshold = new TH1F("hv_threshold","hv_threshold",nwire_v,-0.5+nwire_u,-0.5+nwire_u+nwire_v);
+  TH1F *hw_threshold = new TH1F("hw_threshold","hw_threshold",nwire_w,-0.5+nwire_u+nwire_v,-0.5+nwire_u+nwire_v+nwire_w);
+  // initialize: channel no. from 0
+  // U: min 68, max 121; linear <= channel 671  || >= 1728
+  // V: min 97, max 172; linear <= channel 3071 || >= 4128
+  // W: constant 60
+  for(int i=1; i<=hu_threshold->GetNbinsX(); i++)
+  {
+      double urms = 0;
+      if(i<=672){
+          urms = 68 + (i-1)*(121.-68.)/672;
+      }
+      if(i>=1729){
+          urms = 68 + (2400-i)*(121.-68.)/(2400-1728);
+      }
+      else{
+          urms = 121.0; 
+      }
+      hu_threshold->SetBinContent(i, urms);
+  }
+  for(int i=1; i<=hv_threshold->GetNbinsX(); i++)
+  {
+      double vrms = 0;
+      if(i<=672){
+          vrms = 97 + (i-1)*(172.-97.)/672;
+      }
+      if(i>=1729){
+          vrms = 97 + (2400-i)*(172.-97.)/(2400-1728);
+      }
+      else{
+          vrms = 172.0; 
+      }
+      hv_threshold->SetBinContent(i, vrms);
+  }
+  for(int i=1; i<=hw_threshold->GetNbinsX(); i++)
+  {
+      hw_threshold->SetBinContent(i, 60);
+  }
+  
   for (int i=0;i!=hu_threshold->GetNbinsX();i++){
     uplane_rms.push_back(hu_threshold->GetBinContent(i+1));
   }
@@ -320,14 +429,15 @@ int main(int argc, char* argv[])
   for (int i=0;i!=hw_threshold->GetNbinsX();i++){
     wplane_rms.push_back(hw_threshold->GetBinContent(i+1));
   }
+ 
+
+  /* TH2F *hu_decon = (TH2F*)file1->Get("hu_decon_g"); */
+  /* TH2F *hv_decon = (TH2F*)file1->Get("hv_decon_g"); */
+  /* TH2F *hw_decon = (TH2F*)file1->Get("hw_decon_g"); */
   
-  TH2F *hu_decon = (TH2F*)file1->Get("hu_decon");
-  TH2F *hv_decon = (TH2F*)file1->Get("hv_decon");
-  TH2F *hw_decon = (TH2F*)file1->Get("hw_decon");
-  
-  TH2F *hu_decon_g = (TH2F*)file1->Get("hu_decon_g");
-  TH2F *hv_decon_g = (TH2F*)file1->Get("hv_decon_g");
-  TH2F *hw_decon_g = (TH2F*)file1->Get("hw_decon_g");
+  /* TH2F *hu_decon_g = (TH2F*)file1->Get("hu_decon_g"); */
+  /* TH2F *hv_decon_g = (TH2F*)file1->Get("hv_decon_g"); */
+  /* TH2F *hw_decon_g = (TH2F*)file1->Get("hw_decon_g"); */
 
 
   // add a special treatment here ...
@@ -365,7 +475,7 @@ int main(int argc, char* argv[])
   /* } */
   //
   
-  TH2F *hv_raw = (TH2F*)file1->Get("hv_raw");
+  //TH2F *hv_raw = (TH2F*)file1->Get("hv_raw");
   
   // V wire noisy channels 10 vetoed ...
   /* for (int i=3684;i!=3699;i++){ */
@@ -398,36 +508,36 @@ int main(int argc, char* argv[])
   /* } */
 
   // loop through U/V/W plane to disable the bad channels completely
-  for (auto it = uplane_map.begin(); it!=uplane_map.end(); it++){
-    int ch = it->first;
-    int start = it->second.first/nrebin;
-    int end = it->second.second/nrebin;
-    for (int j=start; j!=end+1;j++){
-      hu_decon->SetBinContent(ch+1,j+1,0);
-      hu_decon_g->SetBinContent(ch+1,j+1,0);
-    }
-  }
-  for (auto it = vplane_map.begin(); it!=vplane_map.end(); it++){
-    int ch = it->first;
-    int start = it->second.first/nrebin;
-    int end = it->second.second/nrebin;
-    for (int j=start; j!=end+1;j++){
-      hv_decon->SetBinContent(ch+1,j+1,0);
-      hv_decon_g->SetBinContent(ch+1,j+1,0);
-    }
-    for (int j=it->second.first;j!=it->second.second+1;j++){
-      hv_raw->SetBinContent(ch+1,j+1,0);
-    }
-  }
-  for (auto it = wplane_map.begin(); it!=wplane_map.end(); it++){
-    int ch = it->first;
-    int start = it->second.first/nrebin;
-    int end = it->second.second/nrebin;
-    for (int j=start; j!=end+1;j++){
-      hw_decon->SetBinContent(ch+1,j+1,0);
-      hw_decon_g->SetBinContent(ch+1,j+1,0);
-    }
-  }
+  /* for (auto it = uplane_map.begin(); it!=uplane_map.end(); it++){ */
+  /*   int ch = it->first; */
+  /*   int start = it->second.first/nrebin; */
+  /*   int end = it->second.second/nrebin; */
+  /*   for (int j=start; j!=end+1;j++){ */
+  /*     hu_decon->SetBinContent(ch+1,j+1,0); */
+  /*     hu_decon_g->SetBinContent(ch+1,j+1,0); */
+  /*   } */
+  /* } */
+  /* for (auto it = vplane_map.begin(); it!=vplane_map.end(); it++){ */
+  /*   int ch = it->first; */
+  /*   int start = it->second.first/nrebin; */
+  /*   int end = it->second.second/nrebin; */
+  /*   for (int j=start; j!=end+1;j++){ */
+  /*     hv_decon->SetBinContent(ch+1,j+1,0); */
+  /*     hv_decon_g->SetBinContent(ch+1,j+1,0); */
+  /*   } */
+  /*   for (int j=it->second.first;j!=it->second.second+1;j++){ */
+  /*     hv_raw->SetBinContent(ch+1,j+1,0); */
+  /*   } */
+  /* } */
+  /* for (auto it = wplane_map.begin(); it!=wplane_map.end(); it++){ */
+  /*   int ch = it->first; */
+  /*   int start = it->second.first/nrebin; */
+  /*   int end = it->second.second/nrebin; */
+  /*   for (int j=start; j!=end+1;j++){ */
+  /*     hw_decon->SetBinContent(ch+1,j+1,0); */
+  /*     hw_decon_g->SetBinContent(ch+1,j+1,0); */
+  /*   } */
+  /* } */
 
   
 
@@ -435,40 +545,40 @@ int main(int argc, char* argv[])
 
   
 
-  WireCell2dToy::Noisy_Event_ID(hu_decon, hv_decon, hw_decon, uplane_rms, vplane_rms, wplane_rms, uplane_map, vplane_map, wplane_map, hu_decon_g, hv_decon_g, hw_decon_g, nrebin, hv_raw, true);
-  WireCell2dToy::Organize_Dead_Channels(uplane_map, vplane_map, wplane_map, hv_raw->GetNbinsY()-1,nrebin);
+  //WireCell2dToy::Noisy_Event_ID(hu_decon, hv_decon, hw_decon, uplane_rms, vplane_rms, wplane_rms, uplane_map, vplane_map, wplane_map, hu_decon_g, hv_decon_g, hw_decon_g, nrebin, hv_raw, true);
+  //WireCell2dToy::Organize_Dead_Channels(uplane_map, vplane_map, wplane_map, hv_raw->GetNbinsY()-1,nrebin);
 
     // loop through U/V/W plane to disable the bad channels completely
-  for (auto it = uplane_map.begin(); it!=uplane_map.end(); it++){
-    int ch = it->first;
-    int start = it->second.first/nrebin;
-    int end = it->second.second/nrebin;
-    for (int j=start; j!=end+1;j++){
-      hu_decon->SetBinContent(ch+1,j+1,0);
-      hu_decon_g->SetBinContent(ch+1,j+1,0);
-    }
-  }
-  for (auto it = vplane_map.begin(); it!=vplane_map.end(); it++){
-    int ch = it->first;
-    int start = it->second.first/nrebin;
-    int end = it->second.second/nrebin;
-    for (int j=start; j!=end+1;j++){
-      hv_decon->SetBinContent(ch+1,j+1,0);
-      hv_decon_g->SetBinContent(ch+1,j+1,0);
-    }
-    for (int j=it->second.first;j!=it->second.second+1;j++){
-      hv_raw->SetBinContent(ch+1,j+1,0);
-    }
-  }
-  for (auto it = wplane_map.begin(); it!=wplane_map.end(); it++){
-    int ch = it->first;
-    int start = it->second.first/nrebin;
-    int end = it->second.second/nrebin;
-    for (int j=start; j!=end+1;j++){
-      hw_decon->SetBinContent(ch+1,j+1,0);
-      hw_decon_g->SetBinContent(ch+1,j+1,0);
-    }
-  }
+  /* for (auto it = uplane_map.begin(); it!=uplane_map.end(); it++){ */
+  /*   int ch = it->first; */
+  /*   int start = it->second.first/nrebin; */
+  /*   int end = it->second.second/nrebin; */
+  /*   for (int j=start; j!=end+1;j++){ */
+  /*     hu_decon->SetBinContent(ch+1,j+1,0); */
+  /*     hu_decon_g->SetBinContent(ch+1,j+1,0); */
+  /*   } */
+  /* } */
+  /* for (auto it = vplane_map.begin(); it!=vplane_map.end(); it++){ */
+  /*   int ch = it->first; */
+  /*   int start = it->second.first/nrebin; */
+  /*   int end = it->second.second/nrebin; */
+  /*   for (int j=start; j!=end+1;j++){ */
+  /*     hv_decon->SetBinContent(ch+1,j+1,0); */
+  /*     hv_decon_g->SetBinContent(ch+1,j+1,0); */
+  /*   } */
+  /*   for (int j=it->second.first;j!=it->second.second+1;j++){ */
+  /*     hv_raw->SetBinContent(ch+1,j+1,0); */
+  /*   } */
+  /* } */
+  /* for (auto it = wplane_map.begin(); it!=wplane_map.end(); it++){ */
+  /*   int ch = it->first; */
+  /*   int start = it->second.first/nrebin; */
+  /*   int end = it->second.second/nrebin; */
+  /*   for (int j=start; j!=end+1;j++){ */
+  /*     hw_decon->SetBinContent(ch+1,j+1,0); */
+  /*     hw_decon_g->SetBinContent(ch+1,j+1,0); */
+  /*   } */
+  /* } */
 
 
   
@@ -478,7 +588,7 @@ int main(int argc, char* argv[])
   
   
   
-  WireCell2dToy::uBooNE_L1SP l1sp(hv_raw,hv_decon,hv_decon_g,nrebin);
+  //WireCell2dToy::uBooNE_L1SP l1sp(hv_raw,hv_decon,hv_decon_g,nrebin);
   
   WireCell2dToy::pdDataFDS roi_gaus_fds(gds,hu_decon_g,hv_decon_g,hw_decon_g,eve_num);
   roi_gaus_fds.jump(eve_num);
@@ -557,7 +667,7 @@ int main(int argc, char* argv[])
 
 
 
-  TFile *file = new TFile(Form("result_%d_%d_%d.root",run_no,subrun_no,event_no),"RECREATE");
+  TFile *file = new TFile(Form("nosp_image_%d_%d_%d.root",run_no,subrun_no,event_no),"RECREATE");
 
   if(T_true!=0 && save_file==1){
     T_true->CloneTree();
@@ -571,7 +681,7 @@ int main(int argc, char* argv[])
   if (T_op!=0){
     T_op->CloneTree();
   }
-  Trun->CloneTree();
+  //Trun->CloneTree();
   
   Int_t n_cells;
   Int_t n_good_wires;
@@ -631,10 +741,10 @@ int main(int argc, char* argv[])
     lowmemtiling[i]->init_good_cells(slice,slice_err,uplane_rms,vplane_rms,wplane_rms);
 
     //  std::cout << lowmemtiling[i]->get_two_bad_wire_cells().size() << std::endl;
-    if (flag_l1){
-      GeomWireSelection wires = lowmemtiling[i]->find_L1SP_wires();
-      l1sp.AddWires(i,wires);
-    }
+    /* if (flag_l1){ */
+    /*   GeomWireSelection wires = lowmemtiling[i]->find_L1SP_wires(); */
+    /*   l1sp.AddWires(i,wires); */
+    /* } */
     
   }
 
@@ -644,56 +754,56 @@ int main(int argc, char* argv[])
 
   cout << em("finish initial tiling") << endl;
 
-  if (flag_l1){
-    l1sp.AddWireTime_Raw();
-    l1sp.Form_rois(6);
+  /* if (flag_l1){ */
+  /*   l1sp.AddWireTime_Raw(); */
+  /*   l1sp.Form_rois(6); */
     
-    roi_fds.refresh(hu_decon,hv_decon,hw_decon,eve_num);
-    roi_gaus_fds.refresh(hu_decon_g,hv_decon_g,hw_decon_g,eve_num);
-    error_fds.refresh(hu_decon_g, hv_decon_g, hw_decon_g, eve_num);
+  /*   roi_fds.refresh(hu_decon,hv_decon,hw_decon,eve_num); */
+  /*   roi_gaus_fds.refresh(hu_decon_g,hv_decon_g,hw_decon_g,eve_num); */
+  /*   error_fds.refresh(hu_decon_g, hv_decon_g, hw_decon_g, eve_num); */
     
-    //    cout << em("finish L1SP ") << endl;
+  /*   //    cout << em("finish L1SP ") << endl; */
     
-    std::set<int>& time_slice_set = l1sp.get_time_slice_set();
-    for (auto it = time_slice_set.begin(); it!= time_slice_set.end(); it++){
-      int time_slice = *it;
-      //std::cout << time_slice << std::endl;
-      if (time_slice >= start_num && time_slice <=end_num){
+  /*   std::set<int>& time_slice_set = l1sp.get_time_slice_set(); */
+  /*   for (auto it = time_slice_set.begin(); it!= time_slice_set.end(); it++){ */
+  /*     int time_slice = *it; */
+  /*     //std::cout << time_slice << std::endl; */
+  /*     if (time_slice >= start_num && time_slice <=end_num){ */
 	
-	sds.jump(time_slice);
-	WireCell::Slice& slice = sds.get();
-	WireCell::Slice& slice_err = sds.get_error();
+	/* sds.jump(time_slice); */
+	/* WireCell::Slice& slice = sds.get(); */
+	/* WireCell::Slice& slice_err = sds.get_error(); */
 	
-	// std::cout << lowmemtiling[time_slice]->get_wire_charge_error_map().size() << std::endl;
-	// WireCell::WireChargeMap& wire_charge_err_map = lowmemtiling[time_slice]->get_wire_charge_error_map();
-	// for (auto it1= wire_charge_err_map.begin(); it1 != wire_charge_err_map.end(); it1++){
-	// 	if ((*it1).second==0)
-	// 	  std::cout << "A: " << (*it1).second << std::endl;
-	// }
-	//	lowmemtiling[time_slice]->reset_cells();
+	/* // std::cout << lowmemtiling[time_slice]->get_wire_charge_error_map().size() << std::endl; */
+	/* // WireCell::WireChargeMap& wire_charge_err_map = lowmemtiling[time_slice]->get_wire_charge_error_map(); */
+	/* // for (auto it1= wire_charge_err_map.begin(); it1 != wire_charge_err_map.end(); it1++){ */
+	/* // 	if ((*it1).second==0) */
+	/* // 	  std::cout << "A: " << (*it1).second << std::endl; */
+	/* // } */
+	/* //	lowmemtiling[time_slice]->reset_cells(); */
 
-	delete lowmemtiling[time_slice];
-	lowmemtiling[time_slice] = new WireCell2dToy::LowmemTiling(time_slice,nrebin,gds,WCholder);
-	if (time_slice==start_num){
-	  lowmemtiling[time_slice]->init_bad_cells(uplane_map,vplane_map,wplane_map);
-	}else{
-	  lowmemtiling[time_slice]->check_bad_cells(lowmemtiling[time_slice-1],uplane_map,vplane_map,wplane_map);
-	}
-	lowmemtiling[time_slice]->init_good_cells(slice,slice_err,uplane_rms,vplane_rms,wplane_rms);
+	/* delete lowmemtiling[time_slice]; */
+	/* lowmemtiling[time_slice] = new WireCell2dToy::LowmemTiling(time_slice,nrebin,gds,WCholder); */
+	/* if (time_slice==start_num){ */
+	  /* lowmemtiling[time_slice]->init_bad_cells(uplane_map,vplane_map,wplane_map); */
+	/* }else{ */
+	  /* lowmemtiling[time_slice]->check_bad_cells(lowmemtiling[time_slice-1],uplane_map,vplane_map,wplane_map); */
+	/* } */
+	/* lowmemtiling[time_slice]->init_good_cells(slice,slice_err,uplane_rms,vplane_rms,wplane_rms); */
 	
-	//std::cout << lowmemtiling[time_slice]->get_two_bad_wire_cells().size() << std::endl;
-	// std::cout << lowmemtiling[time_slice]->get_wire_charge_error_map().size() << std::endl;
-	// {
-	// 	WireCell::WireChargeMap& wire_charge_err_map = lowmemtiling[time_slice]->get_wire_charge_error_map();
-	// 	for (auto it1= wire_charge_err_map.begin(); it1 != wire_charge_err_map.end(); it1++){
-	// 	  if ((*it1).second==0)
-	// 	    std::cout << "B: " << (*it1).second << std::endl;
-	// 	} 
-	// }
-      }
-    }
-    cout << em("finish L1SP and retiling") << endl;
-  }
+	/* //std::cout << lowmemtiling[time_slice]->get_two_bad_wire_cells().size() << std::endl; */
+	/* // std::cout << lowmemtiling[time_slice]->get_wire_charge_error_map().size() << std::endl; */
+	/* // { */
+	/* // 	WireCell::WireChargeMap& wire_charge_err_map = lowmemtiling[time_slice]->get_wire_charge_error_map(); */
+	/* // 	for (auto it1= wire_charge_err_map.begin(); it1 != wire_charge_err_map.end(); it1++){ */
+	/* // 	  if ((*it1).second==0) */
+	/* // 	    std::cout << "B: " << (*it1).second << std::endl; */
+	/* // 	} */ 
+	/* // } */
+  /*     } */
+  /*   } */
+  /*   cout << em("finish L1SP and retiling") << endl; */
+  /* } */
   
   delete hu_decon;
   delete hv_decon;
@@ -701,7 +811,7 @@ int main(int argc, char* argv[])
   delete hu_decon_g;
   delete hv_decon_g;
   delete hw_decon_g;
-  delete hv_raw;
+  //delete hv_raw;
   delete hu_threshold;
   delete hv_threshold;
   delete hw_threshold;

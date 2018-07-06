@@ -76,7 +76,7 @@ int main(int argc, char* argv[])
   int save_file = 0;
   int nt_off1 = 0;
   int nt_off2 = 0;
-  int solve_charge = 1;
+  int dead_region = 0; //enable manully added dead region, -d1
   for(Int_t i = 1; i != argc; i++){
      switch(argv[i][1]){
      case 't':
@@ -86,7 +86,7 @@ int main(int argc, char* argv[])
        save_file = atoi(&argv[i][2]); 
        break;
      case 'd':
-       solve_charge = atoi(&argv[i][2]); 
+       dead_region = atoi(&argv[i][2]); 
        break;
      case 'a':
        nt_off1 = atoi(&argv[i][2]);
@@ -354,7 +354,29 @@ int main(int argc, char* argv[])
     end_time = it->second.second;
     T_chirp->Fill();
   }
-  
+ 
+  // If dead region mode, then manually add dead channels.
+  if(dead_region)
+  {
+      for(int ch = 0; ch< 8255; ch++)
+      {
+            chid = ch;
+            start_time = 0;
+            end_time = total_time_bin-1;
+          if( (ch>=296 && ch<=671) || (ch>=864 && ch<=911) ) {
+              plane = 0;
+              T_chirp->Fill();
+          }
+          if( ch>=3936 && ch<=3983 ) {
+              plane = 1;
+              T_chirp->Fill();
+          }
+          if( ch>=7136 && ch<=7263 ) {
+              plane = 2;
+              T_chirp->Fill();
+          }
+      }
+  }
 
   TH1F *hu_threshold = new TH1F("hu_threshold","hu_threshold",nwire_u,-0.5,-0.5+nwire_u);
   TH1F *hv_threshold = new TH1F("hv_threshold","hv_threshold",nwire_v,-0.5+nwire_u,-0.5+nwire_u+nwire_v);
