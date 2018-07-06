@@ -628,9 +628,15 @@ PR3DClusterSelection WireCell2dToy::Examine_overclustering(PR3DCluster *cluster,
 	    test_p.x = p1.x + (p2.x-p1.x)/num_steps*(ii+1);
 	    test_p.y = p1.y + (p2.y-p1.y)/num_steps*(ii+1);
 	    test_p.z = p1.z + (p2.z-p1.z)/num_steps*(ii+1);
-	    if (!ct_point_cloud.is_good_point(test_p))
+	    if (!ct_point_cloud.is_good_point(test_p)){
 	      num_bad ++;
+	      /* if (cluster->get_cluster_id()==11) */
+	      /* 	std::cout << test_p.x/units::cm << " " << test_p.y/units::cm << " " << test_p.z/units::cm << std::endl; */
+	    }
 	  }
+	  
+	  //  std::cout << cluster->get_cluster_id() << " " << j << " " << k << " " << num_bad << " " << num_steps << std::endl;
+	   
 	  if (num_bad > 7 ||
 	      num_bad > 2 && num_bad >=0.75*num_steps){
 	    index_index_dis[j][k] = std::make_tuple(-1,-1,1e9);
@@ -657,6 +663,8 @@ PR3DClusterSelection WireCell2dToy::Examine_overclustering(PR3DCluster *cluster,
 	    if (!ct_point_cloud.is_good_point(test_p))
 	      num_bad ++;
 	  }
+	  
+	  
 	  if (num_bad > 7 ||
 	      num_bad > 2 && num_bad >=0.75*num_steps){
 	    index_index_dis_dir1[j][k] = std::make_tuple(-1,-1,1e9);
@@ -684,6 +692,8 @@ PR3DClusterSelection WireCell2dToy::Examine_overclustering(PR3DCluster *cluster,
 	    if (!ct_point_cloud.is_good_point(test_p))
 	      num_bad ++;
 	  }
+	 
+	  
 	  if (num_bad > 7 ||
 	      num_bad > 2 && num_bad >=0.75*num_steps){
 	    index_index_dis_dir2[j][k] = std::make_tuple(-1,-1,1e9);
@@ -737,6 +747,27 @@ PR3DClusterSelection WireCell2dToy::Examine_overclustering(PR3DCluster *cluster,
       std::cout << cluster->get_cluster_id() << " " << num << " " << num1 << std::endl;
       if (num1 >1){
 	// form new clusters ...
+	std::vector<SMGCSet> vec_mcells_set;
+	for (int ii=0;ii!=num1;ii++){
+	  SMGCSet mcells_set;
+	  vec_mcells_set.push_back(mcells_set);
+	}
+	
+	std::vector<int>::size_type i;
+	for (i=0;i!=component1.size(); ++i){
+	  vec_mcells_set.at(component1[i]).insert(cloud.pts[i].mcell);
+	  //      pt_clouds.at(component[i])->AddPoint(cloud.pts[i],cloud_u.pts[i],cloud_v.pts[i],cloud_w.pts[i]);
+	  //   std::cout << "Vertex " << i << " " << cloud.pts[i].x << " " << cloud.pts[i].y << " " << cloud.pts[i].z << " " << cloud.pts[i].index_u << " " << cloud.pts[i].index_v << " " << cloud.pts[i].index_w << " " << cloud.pts[i].mcell << " " << cloud.pts[i].mcell->GetTimeSlice()  << " is in component " << component[i] << std::endl;
+	}
+	for (int ii=0;ii!=num1;ii++){
+	  PR3DCluster *cluster1 = new PR3DCluster(1);
+	  for (auto it = vec_mcells_set.at(ii).begin(); it!=vec_mcells_set.at(ii).end(); it++){
+	    SlimMergeGeomCell *mcell = (*it);
+	    //	  std::cout << vec_mcells_set.at(ii).size() << std::endl;
+	    cluster1->AddCell(mcell,mcell->GetTimeSlice());
+	  }
+	  new_clusters.push_back(cluster1);
+	}
 	
       }
     }

@@ -366,58 +366,95 @@ int main(int argc, char* argv[])
 
   TDC->GetEntry(0);
   for (int i=0;i!=cluster_id_vec->size();i++){
-      int cluster_id = cluster_id_vec->at(i);
-      SlimMergeGeomCell *mcell = new SlimMergeGeomCell(ident);
-      std::vector<int> time_slices = time_slices_vec->at(i);
-      std::vector<int> wire_index_u = wire_index_u_vec->at(i);
-      std::vector<int> wire_index_v = wire_index_v_vec->at(i);
-      std::vector<int> wire_index_w = wire_index_w_vec->at(i);
+    int cluster_id = cluster_id_vec->at(i);
+    SlimMergeGeomCell *mcell = new SlimMergeGeomCell(ident);
+    std::vector<int> time_slices = time_slices_vec->at(i);
+    std::vector<int> wire_index_u = wire_index_u_vec->at(i);
+    std::vector<int> wire_index_v = wire_index_v_vec->at(i);
+    std::vector<int> wire_index_w = wire_index_w_vec->at(i);
+    
+    mcell->SetTimeSlice(time_slices.at(0));
 
-      mcell->SetTimeSlice(time_slices.at(0));
-
-      if (flag_u_vec->at(i)==0){
-          mcell->add_bad_planes(WirePlaneType_t(0));
-      }
-      if (flag_v_vec->at(i)==0){
-          mcell->add_bad_planes(WirePlaneType_t(1));
-      }
-      if (flag_w_vec->at(i)==0){
-          mcell->add_bad_planes(WirePlaneType_t(2));
-      }
+    double temp_x1 = (time_slices.front()*nrebin/2.*unit_dis/10. - frame_length/2.*unit_dis/10.) * units::cm;
+    double temp_x2 = (time_slices.back()*nrebin/2.*unit_dis/10. - frame_length/2.*unit_dis/10.) * units::cm;
+    // std::cout << temp_x1/units::cm << " " << temp_x2/units::cm << std::endl;
+    
+    if (flag_u_vec->at(i)==0){
+      mcell->add_bad_planes(WirePlaneType_t(0));
       for (int j=0;j!=nwire_u_vec->at(i);j++){
-          const GeomWire *wire = gds.by_planeindex(WirePlaneType_t(0),wire_index_u.at(j));
-          mcell->AddWire(wire,WirePlaneType_t(0));
+	if (dead_u_index.find(wire_index_u.at(j))==dead_u_index.end()){
+	  dead_u_index[wire_index_u.at(j)] = std::make_pair(temp_x1-0.1*units::cm,temp_x2+0.1*units::cm);
+	}else{
+	  if (temp_x1-0.1*units::cm < dead_u_index[wire_index_u.at(j)].first){
+	    dead_u_index[wire_index_u.at(j)].first = temp_x1 - 0.1*units::cm;
+	  }else if (temp_x2+0.1*units::cm > dead_u_index[wire_index_u.at(j)].second){
+	    dead_u_index[wire_index_u.at(j)].second = temp_x2 + 0.1*units::cm;
+	  }
+	}
       }
+    }
+    if (flag_v_vec->at(i)==0){
+      mcell->add_bad_planes(WirePlaneType_t(1));
       for (int j=0;j!=nwire_v_vec->at(i);j++){
-          const GeomWire *wire = gds.by_planeindex(WirePlaneType_t(1),wire_index_v.at(j));
-          mcell->AddWire(wire,WirePlaneType_t(1));
+	if (dead_v_index.find(wire_index_v.at(j))==dead_v_index.end()){
+	  dead_v_index[wire_index_v.at(j)] = std::make_pair(temp_x1-0.1*units::cm,temp_x2+0.1*units::cm);
+	}else{
+	  if (temp_x1-0.1*units::cm < dead_v_index[wire_index_v.at(j)].first){
+	    dead_v_index[wire_index_v.at(j)].first = temp_x1 - 0.1*units::cm;
+	  }else if (temp_x2+0.1*units::cm > dead_v_index[wire_index_v.at(j)].second){
+	    dead_v_index[wire_index_v.at(j)].second = temp_x2 + 0.1*units::cm;
+	  }
+	}
       }
+    }
+    if (flag_w_vec->at(i)==0){
+      mcell->add_bad_planes(WirePlaneType_t(2));
       for (int j=0;j!=nwire_w_vec->at(i);j++){
-          const GeomWire *wire = gds.by_planeindex(WirePlaneType_t(2),wire_index_w.at(j));
-          mcell->AddWire(wire,WirePlaneType_t(2));
+	if (dead_w_index.find(wire_index_w.at(j))==dead_w_index.end()){
+	  dead_w_index[wire_index_w.at(j)] = std::make_pair(temp_x1-0.1*units::cm,temp_x2+0.1*units::cm);
+	}else{
+	  if (temp_x1-0.1*units::cm < dead_w_index[wire_index_w.at(j)].first){
+	    dead_w_index[wire_index_w.at(j)].first = temp_x1 - 0.1*units::cm;
+	  }else if (temp_x2+0.1*units::cm > dead_w_index[wire_index_w.at(j)].second){
+	    dead_w_index[wire_index_w.at(j)].second = temp_x2 + 0.1*units::cm;
+	  }
+	}
       }
-      mcells.push_back(mcell);
-
-      if (cluster_id!=prev_cluster_id){
-          cluster = new PR3DCluster(cluster_id);
-          dead_clusters.push_back(cluster);
-      }
-      for (int j=0;j!=ntime_slice_vec->at(i);j++){
-          cluster->AddCell(mcell,time_slices.at(j));
-      }
-      fid->AddDeadRegion(mcell,time_slices);
-
-      prev_cluster_id=cluster_id;
-      ident++;
+    }
+    for (int j=0;j!=nwire_u_vec->at(i);j++){
+      const GeomWire *wire = gds.by_planeindex(WirePlaneType_t(0),wire_index_u.at(j));
+      mcell->AddWire(wire,WirePlaneType_t(0));
+    }
+    for (int j=0;j!=nwire_v_vec->at(i);j++){
+      const GeomWire *wire = gds.by_planeindex(WirePlaneType_t(1),wire_index_v.at(j));
+      mcell->AddWire(wire,WirePlaneType_t(1));
+    }
+    for (int j=0;j!=nwire_w_vec->at(i);j++){
+      const GeomWire *wire = gds.by_planeindex(WirePlaneType_t(2),wire_index_w.at(j));
+      mcell->AddWire(wire,WirePlaneType_t(2));
+    }
+    mcells.push_back(mcell);
+    
+    if (cluster_id!=prev_cluster_id){
+      cluster = new PR3DCluster(cluster_id);
+      dead_clusters.push_back(cluster);
+    }
+    for (int j=0;j!=ntime_slice_vec->at(i);j++){
+      cluster->AddCell(mcell,time_slices.at(j));
+    }
+    fid->AddDeadRegion(mcell,time_slices);
+    
+    prev_cluster_id=cluster_id;
+    ident++;
   }
-
-   // std::cout << live_clusters.size() << std::endl;
-   // for (size_t i=0;i!=live_clusters.size();i++){
-   //   std::cout << live_clusters.at(i)->get_cluster_id() << " " 
-   // 	       << live_clusters.at(i)->get_num_mcells() << " "
-   // 	       << live_clusters.at(i)->get_num_time_slices() << std::endl;
-   // }
-   // std::cout << dead_clusters.size() << std::endl;
+  
+  // std::cout << live_clusters.size() << std::endl;
+  // for (size_t i=0;i!=live_clusters.size();i++){
+  //   std::cout << live_clusters.at(i)->get_cluster_id() << " " 
+  // 	       << live_clusters.at(i)->get_num_mcells() << " "
+  // 	       << live_clusters.at(i)->get_num_time_slices() << std::endl;
+  // }
+  // std::cout << dead_clusters.size() << std::endl;
   for (size_t i=0;i!=dead_clusters.size();i++){
     dead_clusters.at(i)->Remove_duplicated_mcells();
     // std::cout << dead_clusters.at(i)->get_cluster_id() << " " 
@@ -844,7 +881,8 @@ int main(int argc, char* argv[])
        //std::cout << (*it1).second/units::cm << std::endl;
      }
      for (size_t j = 0; j!= temp_clusters.size(); j++){
-       
+
+       // show individual clusters ... 
        // ncluster = temp_clusters.at(j)->get_cluster_id();
        
        SMGCSelection& mcells = temp_clusters.at(j)->get_mcells();
