@@ -1163,21 +1163,21 @@ FlashTPCBundleSelection WireCell2dToy::tpc_light_match(int time_offset, int nreb
     
     // finish further examine the bundle ... 
     
-     std::cout << "After Cleaning 2 : " << cluster_bundles_map.size() << " A " << flash_bundles_map.size() << " " << all_bundles.size() << std::endl;
+    //  std::cout << "After Cleaning 2 : " << cluster_bundles_map.size() << " A " << flash_bundles_map.size() << " " << all_bundles.size() << std::endl;
 
 
+    // // std::cout << std::endl << std::endl;
+    // for (auto it = all_bundles.begin(); it!=all_bundles.end();it++){
+    //   FlashTPCBundle *bundle = *it;
+      
+    //   //  if (bundle->get_flash()->get_flash_id()==29 && bundle->get_main_cluster()->get_cluster_id()==19)
+    //   //	bundle->set_consistent_flag(1);
+    //   //   if ( bundle->get_consistent_flag() || bundle->get_flag_at_x_boundary())
+    //   std::cout << bundle->get_flash()->get_flash_id() << " " << bundle->get_main_cluster()->get_cluster_id() << " " << bundle->get_flag_at_x_boundary() << " " << bundle->get_ks_dis() << " " << bundle->get_chi2() << " " << bundle->get_ndf() << " " << bundle->get_consistent_flag()  << std::endl;
+
+      
+    // }
     // std::cout << std::endl << std::endl;
-    for (auto it = all_bundles.begin(); it!=all_bundles.end();it++){
-      FlashTPCBundle *bundle = *it;
-      
-      //  if (bundle->get_flash()->get_flash_id()==29 && bundle->get_main_cluster()->get_cluster_id()==19)
-      //	bundle->set_consistent_flag(1);
-      //   if ( bundle->get_consistent_flag() || bundle->get_flag_at_x_boundary())
-      std::cout << bundle->get_flash()->get_flash_id() << " " << bundle->get_main_cluster()->get_cluster_id() << " " << bundle->get_flag_at_x_boundary() << " " << bundle->get_ks_dis() << " " << bundle->get_chi2() << " " << bundle->get_ndf() << " " << bundle->get_consistent_flag()  << std::endl;
-
-      
-    }
-    std::cout << std::endl << std::endl;
 
     
    
