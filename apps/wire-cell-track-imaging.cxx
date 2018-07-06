@@ -5,6 +5,7 @@
 #include "TH3D.h"
 #include "TH2D.h"
 #include "TMath.h"
+using namespace std;
 
 #include <iostream>
 #include <map>
@@ -20,7 +21,7 @@
 #include "TString.h"
 #include "TGraph2D.h"
 #include "TPolyLine3D.h"
-using namespace std;
+#include "TGraph.h"
 
 
 /*
@@ -92,6 +93,18 @@ int main(int argc, char* argv[])
 
   TString roostr = "";
 
+  //////////////////////////////////////////////////////////////////////////////////////////////// variable histgram start
+
+  roostr = "h1_ghost_track_length";
+  TH1D *h1_ghost_track_length = new TH1D(roostr, roostr, 100, 0, 100);
+  
+  roostr = "graph_ghost_yz";
+  TGraph *graph_ghost_yz = new TGraph();
+  graph_ghost_yz->SetName(roostr);
+
+  
+  //////////////////////////////////////////////////////////////////////////////////////////////// variable histgram end
+  
   // rotation matrix to convert collection plane (default detector) coordinate to inductions plane
   TMatrixD Muplane(3,3);
   TMatrixD Mvplane(3,3);
@@ -326,12 +339,6 @@ int main(int argc, char* argv[])
   ///////////////////////////////////////////////////////////////
 
   cout<<endl<<" -------> processing clusters in one track, and ghost"<<endl<<endl;
-  
-  // std::map<int, TVector3> vc_cluster_dir;
-  // std::map<int, TVector3> vc_cluster_start;
-  // std::map<int, TVector3> vc_cluster_end;
-  // std::map<int, double> vc_cluster_length;
-
 
   TTree* track_true = (TTree*)f->Get("T_track");
   double x0,y0,z0;
@@ -393,7 +400,8 @@ int main(int argc, char* argv[])
   */
 
   const double delta_arc_length = 0.85;
-  //double tolerance_parallel = delta_arc_length/vc_track_length[track_id];      
+  double tolerance_parallel = delta_arc_length/vc_track_length[track_id];      
+  tolerance_parallel = 0.06;
   double tolerance_distance2track = 2; // cm
   double tolerance_contain = 2;// cm
   double short_cluster = 5;
@@ -407,26 +415,45 @@ int main(int argc, char* argv[])
     vc_ghost_id[it_cluster->first] = it_cluster->first;
   }
 
-  for( auto it_track=vc_track_dir.begin(); it_track!=vc_track_dir.end(); it_track++ ) {// each track cluster
-    for( auto it_cluster=vc_cluster_dir.begin(); it_cluster!=vc_cluster_dir.end(); it_cluster++ ) {// each cluster cluster
-
+  for( auto it_cluster=vc_cluster_dir.begin(); it_cluster!=vc_cluster_dir.end(); it_cluster++ ) {// each cluster cluster
+    for( auto it_track=vc_track_dir.begin(); it_track!=vc_track_dir.end(); it_track++ ) {// each track cluster
+      
       int track_id = it_track->first;
       int cluster_id = it_cluster->first;
       
-      double tolerance_parallel = delta_arc_length/vc_track_length[track_id];      
-      tolerance_parallel = 5*tolerance_parallel;
-
-      TVector3 v3_trackXcluster = vc_track_dir[track_id].Cross( vc_cluster_dir[cluster_id] );
+      // if( it_cluster->first!=9 && it_cluster->first!=26 ) continue;
+      // int id = cluster_id;
+      // if( id!=13 && id!=16 && id!=18 && id!=19 ) continue;
       
-      if( v3_trackXcluster.Mag()<tolerance_parallel || vc_track_length[cluster_id]<short_cluster ) {// bool: direction || bool:short_cluster
-	// cout<<TString::Format(
-	// 		      " Tolerance %6.4f, Parallel of t/r  %3d %3d, angle between t/r %6.4f",
-	// 		      tolerance_parallel, track_id, cluster_id, v3_trackXcluster.Mag()
-	// 		      )<<endl;
-	// vc_track_dir[track_id].Print();
-	// vc_cluster_dir[cluster_id].Print();
+      /// angle
+      TVector3 v3_trackXcluster = vc_track_dir[track_id].Cross( vc_cluster_dir[cluster_id] );
 
-  
+      /// distance
+      TVector3 v3_cluster_start_2_track_end = vc_track_end[track_id] - vc_cluster_start[cluster_id];
+      TVector3 v3_startXend = v3_cluster_start_2_track_end.Cross( vc_track_dir[track_id] );
+      double distance_startXend = v3_startXend.Mag();
+      TVector3 v3_cluster_end_2_track_start = vc_track_start[track_id] - vc_cluster_end[cluster_id];
+      TVector3 v3_endXstart = v3_cluster_end_2_track_start.Cross( vc_track_dir[track_id] );
+      double distance_endXstart = v3_endXstart.Mag();
+      double distance_center = 0.5*(distance_startXend + distance_endXstart);
+
+      /// contain
+      double value_track_start = vc_track_start[track_id].Dot( vc_track_dir[track_id] );//A
+      double value_track_end = vc_track_end[track_id].Dot( vc_track_dir[track_id] );//B
+      double value_cluster_start = vc_cluster_start[cluster_id].Dot( vc_track_dir[track_id] );//C
+      double value_cluster_end = vc_cluster_end[cluster_id].Dot( vc_track_dir[track_id] );//D
+      double min = (value_track_start>value_track_end)?(value_track_end-tolerance_contain):(value_track_start-tolerance_contain);
+      double max = (value_track_start>value_track_end)?(value_track_start+tolerance_contain):(value_track_end+tolerance_contain);
+
+      // cout<<TString::Format(" cluster %2d , track %2d, angleT %5.3f, angle %5.3f, distance start/end %8.2f %8.2f, contain min/max %8.2f %8.2f, start/end, %8.2f %8.2f",
+      // 			    cluster_id, track_id,
+      // 			    tolerance_parallel, v3_trackXcluster.Mag(),
+      // 			    distance_startXend, distance_endXstart,
+      // 			    min, max, value_cluster_start, value_cluster_end )<<endl;
+
+      
+      if( v3_trackXcluster.Mag()<tolerance_parallel || vc_cluster_length[cluster_id]<short_cluster ) {// bool: direction || bool:short_cluster
+
 	// std::map<int, TVector3> vc_cluster_dir;
 	// std::map<int, TVector3> vc_cluster_start;
 	// std::map<int, TVector3> vc_cluster_end;
@@ -437,28 +464,12 @@ int main(int argc, char* argv[])
 	// std::map<int, TVector3> vc_track_end;
 	// std::map<int, double> vc_track_length;
 	
-	TVector3 v3_cluster_start_2_track_end = vc_track_end[track_id] - vc_cluster_start[cluster_id];
-	TVector3 v3_startXend = v3_cluster_start_2_track_end.Cross( vc_track_dir[track_id] );
-	double distance_startXend = v3_startXend.Mag();
+	if( distance_center<=tolerance_distance2track ) {// bool: distance
 
-	TVector3 v3_cluster_end_2_track_start = vc_track_start[track_id] - vc_cluster_end[cluster_id];
-	TVector3 v3_endXstart = v3_cluster_end_2_track_start.Cross( vc_track_dir[track_id] );
-	double distance_endXstart = v3_endXstart.Mag();
-
-	if( distance_startXend<=tolerance_distance2track && distance_endXstart<=tolerance_distance2track ) {// bool: distance
-
-	  double value_track_start = vc_track_start[track_id].Dot( vc_track_dir[track_id] );//A
-	  double value_track_end = vc_track_end[track_id].Dot( vc_track_dir[track_id] );//B
-
-	  double value_cluster_start = vc_cluster_start[cluster_id].Dot( vc_track_dir[track_id] );//C
-	  double value_cluster_end = vc_cluster_end[cluster_id].Dot( vc_track_dir[track_id] );//D
-
-	  double min = (value_track_start>value_track_end)?(value_track_end-tolerance_contain):(value_track_start-tolerance_contain);
-	  double max = (value_track_start>value_track_end)?(value_track_start+tolerance_contain):(value_track_end+tolerance_contain);
-	  
 	  if( value_cluster_start>min && value_cluster_start<max && value_cluster_end>min && value_cluster_end<max ) {// bool: contain
 	    // not ghost
 	    vc_ghost_id.erase( cluster_id );
+	    
 	  }
 	  
 	}// bool: distance
@@ -480,6 +491,8 @@ int main(int argc, char* argv[])
 
   int size_ghost = vc_ghost_id.size();
   cout<<" ---> number of ghost "<<size_ghost<<endl;
+
+  long count_graph_ghost_yz = 0;
   for( auto it=vc_ghost_id.begin(); it!=vc_ghost_id.end(); it++ ) {
     int id = it->first;
     cout<<TString::Format( " ---> ghost %3d, length %7.4f", id, vc_cluster_length[id] )<<endl;
@@ -490,9 +503,19 @@ int main(int argc, char* argv[])
       double y = ypt[id].at(j);
       double z = zpt[id].at(j);
       gh_ghost[id]->SetPoint(j, x,y,z);
+
+      count_graph_ghost_yz++;
+      graph_ghost_yz->SetPoint(count_graph_ghost_yz-1, z,y);      
     }
 
+
+    // if( id!=9 && id!=26 ) continue;
+    // if( id!=13 && id!=16 && id!=18 && id!=19 ) continue;
     gh_ghost[id]->Draw("same p");
+
+    /////// ghost histgram
+    /////// ghost histgram
+    h1_ghost_track_length->Fill( vc_cluster_length[id] );
   }
   
   gh_truth->SetMarkerColor(kRed);
@@ -500,7 +523,22 @@ int main(int argc, char* argv[])
     
   canv->SaveAs("canv.root");
 
+
+  /////// WRITE FILE
+  /////// WRITE FILE
   
+  TFile* output = new TFile(outputroot, "RECREATE");
+  
+  //gh_tracks->Write();
+  h1_ghost_track_length->Write();
+  graph_ghost_yz->Write();
+
+  
+  output->Close();
+
+  
+  return 0;
+
  
   // numbers of cycle = C_n^2 =  num_clusters*(num_clusters-1)/2 
 
@@ -538,17 +576,5 @@ int main(int argc, char* argv[])
       
   //   }
   // }
-
-
   
-  TFile* output = new TFile(outputroot, "RECREATE");
-  gh_tracks->Write();
-  // for(int idx=0; idx<vc_cluster_dir.size(); idx++) {
-  //   polyline[idx]->Write();
-  // }
-  output->Close();
-
-  
-  return 0;
-
 }
