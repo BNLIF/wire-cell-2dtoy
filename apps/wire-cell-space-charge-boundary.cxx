@@ -338,14 +338,50 @@ int main(int argc, char* argv[])
 
       mcell->SetTimeSlice(time_slices.at(0));
 
+      double temp_x1 = (time_slices.front()*nrebin/2.*unit_dis/10. - frame_length/2.*unit_dis/10.) * units::cm;
+      double temp_x2 = (time_slices.back()*nrebin/2.*unit_dis/10. - frame_length/2.*unit_dis/10.) * units::cm;
+      
       if (flag_u_vec->at(i)==0){
           mcell->add_bad_planes(WirePlaneType_t(0));
+	  for (int j=0;j!=nwire_u_vec->at(i);j++){
+	    if (dead_u_index.find(wire_index_u.at(j))==dead_u_index.end()){
+	      dead_u_index[wire_index_u.at(j)] = std::make_pair(temp_x1-0.1*units::cm,temp_x2+0.1*units::cm);
+	    }else{
+	      if (temp_x1-0.1*units::cm < dead_u_index[wire_index_u.at(j)].first){
+		dead_u_index[wire_index_u.at(j)].first = temp_x1 - 0.1*units::cm;
+	      }else if (temp_x2+0.1*units::cm > dead_u_index[wire_index_u.at(j)].second){
+		dead_u_index[wire_index_u.at(j)].second = temp_x2 + 0.1*units::cm;
+	      }
+	    }
+	  }
       }
       if (flag_v_vec->at(i)==0){
           mcell->add_bad_planes(WirePlaneType_t(1));
+	  for (int j=0;j!=nwire_v_vec->at(i);j++){
+	    if (dead_v_index.find(wire_index_v.at(j))==dead_v_index.end()){
+	      dead_v_index[wire_index_v.at(j)] = std::make_pair(temp_x1-0.1*units::cm,temp_x2+0.1*units::cm);
+	    }else{
+	      if (temp_x1-0.1*units::cm < dead_v_index[wire_index_v.at(j)].first){
+		dead_v_index[wire_index_v.at(j)].first = temp_x1 - 0.1*units::cm;
+	      }else if (temp_x2+0.1*units::cm > dead_v_index[wire_index_v.at(j)].second){
+		dead_v_index[wire_index_v.at(j)].second = temp_x2 + 0.1*units::cm;
+	      }
+	    }
+	  }
       }
       if (flag_w_vec->at(i)==0){
           mcell->add_bad_planes(WirePlaneType_t(2));
+	  for (int j=0;j!=nwire_w_vec->at(i);j++){
+	    if (dead_w_index.find(wire_index_w.at(j))==dead_w_index.end()){
+	      dead_w_index[wire_index_w.at(j)] = std::make_pair(temp_x1-0.1*units::cm,temp_x2+0.1*units::cm);
+	    }else{
+	      if (temp_x1-0.1*units::cm < dead_w_index[wire_index_w.at(j)].first){
+		dead_w_index[wire_index_w.at(j)].first = temp_x1 - 0.1*units::cm;
+	      }else if (temp_x2+0.1*units::cm > dead_w_index[wire_index_w.at(j)].second){
+		dead_w_index[wire_index_w.at(j)].second = temp_x2 + 0.1*units::cm;
+	      }
+	    }
+	  }
       }
       for (int j=0;j!=nwire_u_vec->at(i);j++){
           const GeomWire *wire = gds.by_planeindex(WirePlaneType_t(0),wire_index_u.at(j));
