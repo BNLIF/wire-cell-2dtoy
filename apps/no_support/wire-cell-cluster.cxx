@@ -1,47 +1,38 @@
-#include "WireCell2dToy/ToyTiling.h"
-#include "WireCell2dToy/ClusterDisplay.h"
-#include "WireCell2dToy/ToyCrawler.h"
-#include "WireCell2dToy/ToyTracking.h"
+#include "WireCellSst/GeomDataSource.h"
+#include "WireCellData/PR3DCluster.h"
+#include "WireCellData/SlimMergeGeomCell.h"
 #include "WireCellData/TPCParams.h"
 #include "WireCellData/Singleton.h"
-
-#include "WireCellData/MergeGeomCell.h"
-#include "WireCellData/MergeGeomWire.h"
-#include "WireCellData/SpaceCell.h"
-#include "WireCellData/MergeSpaceCell.h"
+#include "WireCell2dToy/ExecMon.h"
+#include "WireCell2dToy/CalcPoints.h"
+#include "WireCell2dToy/ToyClustering.h"
 
 
-
-#include "TApplication.h"
-#include "TString.h"
-#include "TCanvas.h"
-#include "TStyle.h"
-#include "TH1F.h"
-#include "TTree.h"
 #include "TFile.h"
-#include "TGraph2D.h"
-#include "TColor.h"
-#include "TVectorD.h"
-#include "TMatrixD.h"
-#include <iostream>
+#include "TTree.h"
+#include "TString.h"
 
 using namespace WireCell;
 using namespace std;
 
 int main(int argc, char* argv[])
 {
-   if (argc < 3) {
-    cerr << "usage: wire-cell-cluster /path/to/shower_3D.root cluster#" << endl;
+  if (argc < 3) {
+    cerr << "usage: wire-cell-uboone /path/to/ChannelWireGeometry.txt /path/to/celltree.root " << endl;
     return 1;
   }
-   
-   WireCellSst::GeomDataSource gds(argv[1]);
+
+  ExecMon em("starting");
+  //cerr << em("load geometry") << endl;
+
+  WireCellSst::GeomDataSource gds(argv[1]);
   std::vector<double> ex = gds.extent();
   cerr << "Extent: "
        << " x:" << ex[0]/units::mm << " mm"
        << " y:" << ex[1]/units::m << " m"
        << " z:" << ex[2]/units::m << " m"
        << endl;
+
   cout << "Pitch: " << gds.pitch(WirePlaneType_t(0)) 
        << " " << gds.pitch(WirePlaneType_t(1)) 
        << " " << gds.pitch(WirePlaneType_t(2))
@@ -51,28 +42,39 @@ int main(int argc, char* argv[])
        << " " << gds.angle(WirePlaneType_t(2))
        << endl;
 
+
+
+  // test geometry ...
+  const GeomWire *uwire = gds.by_planeindex(WirePlaneType_t(0),0);
+  const GeomWire *vwire = gds.by_planeindex(WirePlaneType_t(1),0);
+  const GeomWire *wwire = gds.by_planeindex(WirePlaneType_t(2),0);
+  double first_u_dis = gds.wire_dist(*uwire) ;
+  double first_v_dis = gds.wire_dist(*vwire) ;
+  double first_w_dis = gds.wire_dist(*wwire) ; 
+  
   
   TString filename = argv[2];
-  int ncluster = atoi(argv[3]);
-
-
   TFile *file = new TFile(filename);
-  TTree *T = (TTree*)file->Get("T");
-  TTree *TC = (TTree*)file->Get("TC");
   TTree *Trun = (TTree*)file->Get("Trun");
-  
-  float unit_dis;
-  int nrebin;
-  int total_time_bin;
-  Trun->SetBranchAddress("nrebin",&nrebin);
-  Trun->SetBranchAddress("unit_dis",&unit_dis);
-  Trun->SetBranchAddress("total_time_bin",&total_time_bin);
-  Trun->GetEntry(0);
-  
-  // unit_dis = 1.6;
-  // total_time_bin = 9600;
-  // nrebin = 4;
 
+  int run_no, subrun_no, event_no;
+  int time_offset;
+  int nrebin;
+  int frame_length;
+  int eve_num;
+  float unit_dis;
+  
+  Trun->SetBranchAddress("eventNo",&event_no);
+  Trun->SetBranchAddress("runNo",&run_no);
+  Trun->SetBranchAddress("subRunNo",&subrun_no);
+  Trun->SetBranchAddress("unit_dis",&unit_dis);
+  Trun->SetBranchAddress("frame_length",&frame_length);
+  Trun->SetBranchAddress("eve_num",&eve_num);
+  Trun->SetBranchAddress("nrebin",&nrebin);
+  Trun->SetBranchAddress("time_offset",&time_offset);
+  Trun->GetEntry(0);
+
+  // define singleton ... 
   TPCParams& mp = Singleton<TPCParams>::Instance();
   
   double pitch_u = gds.pitch(WirePlaneType_t(0));
@@ -80,208 +82,486 @@ int main(int argc, char* argv[])
   double pitch_w = gds.pitch(WirePlaneType_t(2));
   double time_slice_width = nrebin * unit_dis * 0.5 * units::mm;
 
+  double angle_u = gds.angle(WirePlaneType_t(0));
+  double angle_v = gds.angle(WirePlaneType_t(1));
+  double angle_w = gds.angle(WirePlaneType_t(2));
+
+  //std::cout << angle_u << " " << angle_v << " " << angle_w << std::endl;
+  
   mp.set_pitch_u(pitch_u);
   mp.set_pitch_v(pitch_v);
   mp.set_pitch_w(pitch_w);
+  mp.set_angle_u(angle_u);
+  mp.set_angle_v(angle_v);
+  mp.set_angle_w(angle_w);
   mp.set_ts_width(time_slice_width);
+  mp.set_first_u_dis(first_u_dis);
+  mp.set_first_v_dis(first_v_dis);
+  mp.set_first_w_dis(first_w_dis);
   
-  std::cout << "Singleton: " << mp.get_pitch_u() << " " << mp.get_pitch_v() << " " << mp.get_pitch_w() << " " << mp.get_ts_width() << std::endl;
 
-  //cout << nrebin << " " << unit_dis << " " << total_time_bin << endl;
-  const int ntime = total_time_bin/nrebin;
-  WireCell2dToy::ToyTiling **toytiling = new WireCell2dToy::ToyTiling*[ntime];
-  for (int i=0;i!=ntime;i++){
-    toytiling[i] = new WireCell2dToy::ToyTiling();
+
+  std::map<int,std::pair<double,double>> dead_u_index;
+  std::map<int,std::pair<double,double>> dead_v_index;
+  std::map<int,std::pair<double,double>> dead_w_index;
+  
+  // load mcell
+  
+  TTree *TC = (TTree*)file->Get("TC");
+  Int_t cluster_id;
+  Int_t time_slice;
+  Double_t q, uq, vq, wq, udq, vdq, wdq;
+  Int_t nwire_u=0, flag_u; //number of wires, dead?
+  Int_t nwire_v=0, flag_v;
+  Int_t nwire_w=0, flag_w;
+  Int_t wire_index_u[2400];
+  Int_t wire_index_v[2400];
+  Int_t wire_index_w[3256];
+  Double_t wire_charge_u[2400];
+  Double_t wire_charge_v[2400];
+  Double_t wire_charge_w[2400];
+  Double_t wire_charge_err_u[2400];
+  Double_t wire_charge_err_v[2400];
+  Double_t wire_charge_err_w[2400];
+  
+  TC->SetBranchAddress("cluster_id",&cluster_id);
+  TC->SetBranchAddress("time_slice",&time_slice);
+  TC->SetBranchAddress("q",&q);
+  TC->SetBranchAddress("uq",&uq);
+  TC->SetBranchAddress("vq",&vq);
+  TC->SetBranchAddress("wq",&wq);
+  TC->SetBranchAddress("udq",&udq);
+  TC->SetBranchAddress("vdq",&vdq);
+  TC->SetBranchAddress("wdq",&wdq);
+  TC->SetBranchAddress("nwire_u",&nwire_u);
+  TC->SetBranchAddress("nwire_v",&nwire_v);
+  TC->SetBranchAddress("nwire_w",&nwire_w);
+  TC->SetBranchAddress("flag_u",&flag_u);
+  TC->SetBranchAddress("flag_v",&flag_v);
+  TC->SetBranchAddress("flag_w",&flag_w);
+  TC->SetBranchAddress("wire_index_u",wire_index_u);
+  TC->SetBranchAddress("wire_index_v",wire_index_v);
+  TC->SetBranchAddress("wire_index_w",wire_index_w);
+  TC->SetBranchAddress("wire_charge_u",wire_charge_u);
+  TC->SetBranchAddress("wire_charge_v",wire_charge_v);
+  TC->SetBranchAddress("wire_charge_w",wire_charge_w);
+  TC->SetBranchAddress("wire_charge_err_u",wire_charge_err_u);
+  TC->SetBranchAddress("wire_charge_err_v",wire_charge_err_v);
+  TC->SetBranchAddress("wire_charge_err_w",wire_charge_err_w);
+
+
+  //load mcell
+  
+  TTree *TDC = (TTree*)file->Get("TDC");
+  int ntime_slice = 0,time_slices[2400];
+  TDC->SetBranchAddress("cluster_id",&cluster_id);
+  TDC->SetBranchAddress("ntime_slice",&ntime_slice);
+  TDC->SetBranchAddress("time_slice",time_slices);
+  
+  TDC->SetBranchAddress("nwire_u",&nwire_u);
+  TDC->SetBranchAddress("nwire_v",&nwire_v);
+  TDC->SetBranchAddress("nwire_w",&nwire_w);
+  TDC->SetBranchAddress("flag_u",&flag_u);
+  TDC->SetBranchAddress("flag_v",&flag_v);
+  TDC->SetBranchAddress("flag_w",&flag_w);
+  TDC->SetBranchAddress("wire_index_u",wire_index_u);
+  TDC->SetBranchAddress("wire_index_v",wire_index_v);
+  TDC->SetBranchAddress("wire_index_w",wire_index_w);
+
+  // load cells ... 
+  GeomCellSelection mcells;
+  PR3DClusterSelection live_clusters;
+  PR3DClusterSelection dead_clusters;
+  PR3DCluster *cluster;
+  int prev_cluster_id=-1;
+  int ident = 0;
+  for (int i=0;i!=TC->GetEntries();i++){
+    TC->GetEntry(i);
+    SlimMergeGeomCell *mcell = new SlimMergeGeomCell(ident);
+    mcell->SetTimeSlice(time_slice);
+
+    mcell->set_uq(uq);
+    mcell->set_vq(vq);
+    mcell->set_wq(wq);
+
+    mcell->set_udq(udq);
+    mcell->set_vdq(vdq);
+    mcell->set_wdq(wdq);
+
+    mcell->set_q(q);
+
+    double temp_x = (time_slice*nrebin/2.*unit_dis/10. - frame_length/2.*unit_dis/10.) * units::cm;
+
+    
+    if (flag_u==0){
+      mcell->add_bad_planes(WirePlaneType_t(0));
+      for (int i=0;i!=nwire_u;i++){
+	if (dead_u_index.find(wire_index_u[i])==dead_u_index.end()){
+	  dead_u_index[wire_index_u[i]] = std::make_pair(temp_x-0.1*units::cm,temp_x+0.1*units::cm);
+	}else{
+	  if (temp_x-0.1*units::cm < dead_u_index[wire_index_u[i]].first){
+	    dead_u_index[wire_index_u[i]].first = temp_x - 0.1*units::cm;
+	  }else if (temp_x+0.1*units::cm > dead_u_index[wire_index_u[i]].second){
+	    dead_u_index[wire_index_u[i]].second = temp_x + 0.1*units::cm;
+	  }
+	}
+	
+      }
+    }
+    if (flag_v==0){
+      mcell->add_bad_planes(WirePlaneType_t(1));
+      for (int i=0;i!=nwire_v;i++){
+	if (dead_v_index.find(wire_index_v[i])==dead_v_index.end()){
+	  dead_v_index[wire_index_v[i]] = std::make_pair(temp_x-0.1*units::cm,temp_x+0.1*units::cm);
+	}else{
+	  if (temp_x-0.1*units::cm < dead_v_index[wire_index_v[i]].first){
+	    dead_v_index[wire_index_v[i]].first = temp_x-0.1*units::cm;
+	  }else if (temp_x+0.1*units::cm > dead_v_index[wire_index_v[i]].second){
+	    dead_v_index[wire_index_v[i]].second = temp_x + 0.1*units::cm;
+	  }
+	}
+      }
+    }
+    if (flag_w==0){
+      mcell->add_bad_planes(WirePlaneType_t(2));
+      for (int i=0;i!=nwire_w;i++){
+	if (dead_w_index.find(wire_index_w[i])==dead_w_index.end()){
+	  dead_w_index[wire_index_w[i]] = std::make_pair(temp_x-0.1*units::cm,temp_x+0.1*units::cm);
+	}else{
+	  if (temp_x-0.1*units::cm < dead_w_index[wire_index_w[i]].first){
+	    dead_w_index[wire_index_w[i]].first = temp_x-0.1*units::cm;
+	  }else if (temp_x+0.1*units::cm > dead_w_index[wire_index_w[i]].second){
+	    dead_w_index[wire_index_w[i]].second = temp_x + 0.1*units::cm;
+	  }
+	}
+      }
+    }
+    for (int i=0;i!=nwire_u;i++){
+      const GeomWire *wire = gds.by_planeindex(WirePlaneType_t(0),wire_index_u[i]);
+      mcell->AddWire(wire,WirePlaneType_t(0),wire_charge_u[i],wire_charge_err_u[i]);
+    }
+    for (int i=0;i!=nwire_v;i++){
+      const GeomWire *wire = gds.by_planeindex(WirePlaneType_t(1),wire_index_v[i]);
+      mcell->AddWire(wire,WirePlaneType_t(1),wire_charge_v[i],wire_charge_err_v[i]);
+    }
+    for (int i=0;i!=nwire_w;i++){
+      const GeomWire *wire = gds.by_planeindex(WirePlaneType_t(2),wire_index_w[i]);
+      mcell->AddWire(wire,WirePlaneType_t(2),wire_charge_w[i],wire_charge_err_w[i]);
+    }
+    mcells.push_back(mcell);
+
+    if (cluster_id != prev_cluster_id){
+      cluster = new PR3DCluster(cluster_id);
+      live_clusters.push_back(cluster);
+    }
+    cluster->AddCell(mcell,time_slice);
+
+    prev_cluster_id = cluster_id;
+    ident++;
+  }
+  //  std::cout << live_clusters.size() << std::endl;
+
+  prev_cluster_id = -1;
+  // TDC
+   for (int i=0;i!=TDC->GetEntries();i++){
+    TDC->GetEntry(i);
+
+    SlimMergeGeomCell *mcell = new SlimMergeGeomCell(ident);
+    mcell->SetTimeSlice(time_slices[0]);
+
+    if (flag_u==0){
+      mcell->add_bad_planes(WirePlaneType_t(0));
+      // for (int i=0;i!=nwire_u;i++){
+      // 	dead_u_index.insert(wire_index_u[i]);
+      // }
+    }
+    if (flag_v==0){
+      mcell->add_bad_planes(WirePlaneType_t(1));
+      // for (int i=0;i!=nwire_v;i++){
+      // 	dead_v_index.insert(wire_index_v[i]);
+      // }
+    }
+    if (flag_w==0){
+      mcell->add_bad_planes(WirePlaneType_t(2));
+      // for (int i=0;i!=nwire_w;i++){
+      // 	dead_w_index.insert(wire_index_w[i]);
+      // }
+    }
+    for (int i=0;i!=nwire_u;i++){
+      const GeomWire *wire = gds.by_planeindex(WirePlaneType_t(0),wire_index_u[i]);
+      mcell->AddWire(wire,WirePlaneType_t(0));
+    }
+    for (int i=0;i!=nwire_v;i++){
+      const GeomWire *wire = gds.by_planeindex(WirePlaneType_t(1),wire_index_v[i]);
+      mcell->AddWire(wire,WirePlaneType_t(1));
+    }
+    for (int i=0;i!=nwire_w;i++){
+      const GeomWire *wire = gds.by_planeindex(WirePlaneType_t(2),wire_index_w[i]);
+      mcell->AddWire(wire,WirePlaneType_t(2));
+    }
+    mcells.push_back(mcell);
+
+    if (cluster_id!=prev_cluster_id){
+      cluster = new PR3DCluster(cluster_id);
+      dead_clusters.push_back(cluster);
+    }
+    for (int i=0;i!=ntime_slice;i++){
+      cluster->AddCell(mcell,time_slices[i]);
+    }
+    
+    prev_cluster_id=cluster_id;
+    ident++;
   }
 
+   // std::cout << live_clusters.size() << std::endl;
+   // for (size_t i=0;i!=live_clusters.size();i++){
+   //   std::cout << live_clusters.at(i)->get_cluster_id() << " " 
+   // 	       << live_clusters.at(i)->get_num_mcells() << " "
+   // 	       << live_clusters.at(i)->get_num_time_slices() << std::endl;
+   // }
+   // std::cout << dead_clusters.size() << std::endl;
+   for (size_t i=0;i!=dead_clusters.size();i++){
+     dead_clusters.at(i)->Remove_duplicated_mcells();
+     // std::cout << dead_clusters.at(i)->get_cluster_id() << " " 
+     // 	       << dead_clusters.at(i)->get_num_mcells() << " "
+     // 	       << dead_clusters.at(i)->get_num_time_slices() << std::endl;
+   }
 
-  int time_slice;
-  // WireCell2dToy::ToyTiling* tt = 0;
-  // T->SetBranchAddress("time_slice",&time_slice);
-  // T->SetBranchAddress("toytiling",&tt);
-
+   // for (auto it = dead_u_index.begin(); it!=dead_u_index.end(); it++){
+   //   std::cout << it->first << " " << it->second.first/units::cm << " " << it->second.second/units::cm << std::endl;
+   // }
   
-
-  //T->GetEntry(855);
-  // cout << tt->get_allwire().size() << " " << tt->get_allcell().size() << endl;
-
-  const GeomCell *cell = 0;//tt->get_allcell().at(5);
-  const GeomWire *wire = 0;//tt->get_allwire().at(3);
-  //cout << cell->cross_section() << " " << cell->center().y << endl;
-
-  // GeomCellMap cellmap = tt->cmap();
-  // GeomWireMap wiremap = tt->wmap();
-  // WireChargeMap wirechargemap = tt->wcmap();
-
-  // cout << wirechargemap[wire] << endl;
-  //GeomWireSelection wires = cellmap[cell];
-  //cout << wires.size() << " " << endl;
-  
-  double charge, x,y,z;
-  int cluster_num;
-  int mcell_id;
-  TC->SetBranchAddress("time_slice",&time_slice);
-  TC->SetBranchAddress("charge",&charge);
-  TC->SetBranchAddress("xx",&x);
-  TC->SetBranchAddress("yy",&y);
-  TC->SetBranchAddress("zz",&z);
-  TC->SetBranchAddress("ncluster",&cluster_num);
-  TC->SetBranchAddress("mcell_id",&mcell_id);
-  TC->SetBranchAddress("cell",&cell);
-  
-  int u_index, v_index, w_index;
-  double u_charge, v_charge, w_charge;
-  double u_charge_err, v_charge_err, w_charge_err;
-
-  TC->SetBranchAddress("u_index",&u_index);
-  TC->SetBranchAddress("v_index",&v_index);
-  TC->SetBranchAddress("w_index",&w_index);
-  TC->SetBranchAddress("u_charge",&u_charge);
-  TC->SetBranchAddress("v_charge",&v_charge);
-  TC->SetBranchAddress("w_charge",&w_charge);
-  TC->SetBranchAddress("u_charge_err",&u_charge_err);
-  TC->SetBranchAddress("v_charge_err",&v_charge_err);
-  TC->SetBranchAddress("w_charge_err",&w_charge_err);
-
-
-  
-
-  
-  int prev_mcell_id = -1;
-  MergeSpaceCellSelection mcells; // save all the cells
-  
-  int flag = 0;
-  SpaceCellSelection cells;
-
-
-  MergeSpaceCell *mcell=0;
-  
-  for (int i=0;i!=TC->GetEntries();i++){
-    //std::cout << i << std::endl;
-    TC->GetEntry(i);
    
-    //std::cout << i << std::endl;
+   //cerr << em("load clusters from file") << endl;
 
-    //cluster starting at 0
-    if (cluster_num == ncluster){
-      
-      if (flag == 0){
-	mcell = new MergeSpaceCell();
-	flag = 1;
-      }else if (flag==1 && mcell_id!=prev_mcell_id){
-	if (mcell->Get_all_spacecell().size()>0)
-	  mcells.push_back(mcell);
-	mcell = new MergeSpaceCell();
-      }
+  
 
-      // cout << x << " " << y << " " << z << " " << charge << endl;
-      
-      GeomCell *cell1 = new GeomCell(cell);
-      toytiling[time_slice]->AddCell(gds,cell1,u_index,v_index,w_index,u_charge,v_charge,w_charge,u_charge_err,v_charge_err,w_charge_err);
-      
+   // Start to add X, Y, Z points
+   // form boundaries for the bad cells ... 
+   for (size_t j = 0; j!= dead_clusters.size(); j++){
+     WireCell2dToy::calc_boundary_points_dead(gds,dead_clusters.at(j));
+   }
+   // form sampling points for the normal cells ...
+   for (size_t i=0; i!=live_clusters.size();i++){
+     WireCell2dToy::calc_sampling_points(gds,live_clusters.at(i),nrebin, frame_length, unit_dis);
+     // live_clusters.at(i)->Calc_PCA();
+   }
+   //  cerr << em("Add X, Y, Z points") << std::endl;
 
-      SpaceCell *space_cell = new SpaceCell(cluster_num,*cell1,x*units::cm,charge,unit_dis/10.*nrebin/2.*units::cm);
-      mcell->AddSpaceCell(space_cell);
-      cells.push_back(space_cell);
-      
+   // create global point cloud and mcell to cluster map ...
+   // ToyPointCloud *global_point_cloud =  new ToyPointCloud();
+   //std::map<SlimMergeGeomCell*,PR3DCluster*> mcell_cluster_map;
+   DynamicToyPointCloud global_point_cloud(angle_u,angle_v,angle_w);
+   for (size_t i=0;i!=live_clusters.size();i++){
+     live_clusters.at(i)->Create_point_cloud();
+     global_point_cloud.AddPoints(live_clusters.at(i),0);
+     // live_clusters.at(i)->Update_mcell_cluster_map(mcell_cluster_map);
+   }
+   //   global_point_cloud->build_kdtree_index();
+   cerr << em("Build local point clouds") << std::endl;
+   
 
-      prev_mcell_id = mcell_id;
+   WireCell2dToy::Clustering_jump_gap_cosmics(live_clusters, dead_clusters, dead_u_index, dead_v_index, dead_w_index, global_point_cloud);
+   cerr << em("Clustering to jump gap in cosmics") << std::endl;
+
+
+   
+   
+   for (size_t i=0;i!=live_clusters.size();i++){
+     //    std::cout << live_clusters.at(i)->get_mcells().size() << " " << live_clusters.at(i)->get_num_time_slices() << std::endl;
+     live_clusters.at(i)->Create_graph();
+     std::pair<WCPointCloud<double>::WCPoint,WCPointCloud<double>::WCPoint> wcps = live_clusters.at(i)->get_highest_lowest_wcps();
+     live_clusters.at(i)->dijkstra_shortest_paths(wcps.first);
+     live_clusters.at(i)->cal_shortest_path(wcps.second);
+     live_clusters.at(i)->fine_tracking();
+   }
+   
+   cerr << em("Trajectory fit in all clusters") << std::endl;
+   
+   // Point p1(337.346*units::cm,87.0524*units::cm,697.899*units::cm);
+   // for (int i=0;i!=live_clusters.size();i++){
+   //   if (live_clusters.at(i)->get_cluster_id()==10){
+   //     live_clusters.at(i)->Create_point_cloud();
+   //     Point p = live_clusters.at(i)->calc_ave_pos(p1,30*units::cm);
+   //     std::cout << "R: " << p.x/units::cm << " " << p.y/units::cm << " " << p.z/units::cm << " " << sqrt(pow(p1.x-p.x,2)+pow(p1.y-p.y,2)+pow(p1.z-p.z,2))/units::cm << std::endl;
+   //   }
+   // }
+   
+   
+   
+   
+   TFile *file1 = new TFile(Form("pr_%d_%d_%d.root",run_no,subrun_no,event_no),"RECREATE");
+
+   TTree *t_bad = new TTree("T_bad","T_bad");
+   t_bad->SetDirectory(file1);
+   Int_t bad_npoints;
+   Int_t ncluster;
+   Double_t bad_y[100],bad_z[100];
+   t_bad->Branch("cluster_id",&ncluster,"cluster_id/I");
+   t_bad->Branch("bad_npoints",&bad_npoints,"bad_npoints/I");
+   t_bad->Branch("bad_y",bad_y,"bad_y[bad_npoints]/D");
+   t_bad->Branch("bad_z",bad_z,"bad_z[bad_npoints]/D");
+   
+   for (size_t j = 0; j!= dead_clusters.size(); j++){
+     SMGCSelection& mcells = dead_clusters.at(j)->get_mcells();
+     ncluster = dead_clusters.at(j)->get_cluster_id();
+     for (size_t i=0;i!=mcells.size();i++){
+       PointVector ps = mcells.at(i)->boundary();
+       bad_npoints = ps.size();
+       for (int k=0;k!=bad_npoints;k++){
+	 bad_y[k] = ps.at(k).y/units::cm;
+	 bad_z[k] = ps.at(k).z/units::cm;
+       }
+       t_bad->Fill();
+     }
+   }
+   
+   TTree *T_cluster ;
+   Double_t x,y,z,nq;
+   
+   T_cluster = new TTree("T_cluster","T_cluster");
+   T_cluster->Branch("cluster_id",&ncluster,"cluster_id/I");
+   T_cluster->Branch("x",&x,"x/D");
+   T_cluster->Branch("y",&y,"y/D");
+   T_cluster->Branch("z",&z,"z/D");
+   T_cluster->Branch("q",&q,"q/D");
+   T_cluster->Branch("nq",&nq,"nq/D");
+   
+   T_cluster->SetDirectory(file1);
+
+   TTree *T_rec = new TTree("T_rec","T_rec");
+   T_rec->Branch("x",&x,"x/D");
+   T_rec->Branch("y",&y,"y/D");
+   T_rec->Branch("z",&z,"z/D");
+   T_rec->SetDirectory(file1);
+
+   Double_t charge_save=1, ncharge_save=1, chi2_save=1, ndf_save=1;
+   TTree *t_rec_charge = new TTree("T_rec_charge","T_rec_charge");
+   t_rec_charge->SetDirectory(file1);
+   t_rec_charge->Branch("x",&x,"x/D");
+   t_rec_charge->Branch("y",&y,"y/D");
+   t_rec_charge->Branch("z",&z,"z/D");
+   t_rec_charge->Branch("q",&charge_save,"q/D");
+   t_rec_charge->Branch("nq",&ncharge_save,"nq/D");
+   t_rec_charge->Branch("chi2",&chi2_save,"chi2/D");
+   t_rec_charge->Branch("ndf",&ndf_save,"ndf/D");
+   
+   // test ... 
+   // ncluster = 0;
+   // x=  0;
+   // y=0;
+   // z=0;
+   // T_cluster->Fill();
+   
+   for (size_t j = 0; j!= live_clusters.size(); j++){
+     SMGCSelection& mcells = live_clusters.at(j)->get_mcells();
+     ncluster = live_clusters.at(j)->get_cluster_id();
+     for (size_t i=0;i!=mcells.size();i++){
+       PointVector ps = mcells.at(i)->get_sampling_points();
+       int time_slice = mcells.at(i)->GetTimeSlice();
+       if (ps.size()==0){
+	 std::cout << "zero sampling points!" << std::endl;
+       }else{
+	 q = mcells.at(i)->get_q() / ps.size();
+	 nq = ps.size();
+	 for (int k=0;k!=ps.size();k++){
+	   x = ps.at(k).x/units::cm ;
+	   y = ps.at(k).y/units::cm;
+	   z = ps.at(k).z/units::cm;
+	   T_cluster->Fill();
+	 }
+       }
+       
+     }
+     
+     // save wcps
+     std::list<WCPointCloud<double>::WCPoint>& wcps_list = live_clusters.at(j)->get_path_wcps();
+     //ncluster = -1 * ncluster-100;
+     for (auto it = wcps_list.begin(); it!=wcps_list.end(); it++){
+       x = (*it).x/units::cm;
+       y = (*it).y/units::cm;
+       z = (*it).z/units::cm;
+       T_rec->Fill();
+     }
+
+     PointVector& pts = live_clusters.at(j)->get_fine_tracking_path();
+     for (size_t i=0; i!=pts.size(); i++){
+       x = pts.at(i).x/units::cm;
+       y = pts.at(i).y/units::cm;
+       z = pts.at(i).z/units::cm;
+       t_rec_charge->Fill();
+     }
+
+     
+
+     // // save mcells
+     // std::list<SlimMergeGeomCell*>& mcells_list = live_clusters.at(j)->get_path_mcells();
+     // ncluster = -1 * ncluster-100;
+     // for (auto it = mcells_list.begin(); it!=mcells_list.end(); it++){
+     //   Point p = (*it)->center();
+     //   x = p.x/units::cm;
+     //   y = p.y/units::cm;
+     //   z = p.z/units::cm;
+     //   T_cluster->Fill();
+     // }
+     
+     
+     // if (live_clusters.at(j)->get_num_mcells()>30){
+     //   // add PCA axis point
+     //   Vector center = live_clusters.at(j)->get_center();
+     //   Vector dir = live_clusters.at(j)->get_PCA_axis(0);
+     //   for (int i=-200;i!=200;i++){
+     // 	 x = (center.x + dir.x *(i*units::cm) )/units::cm;
+     // 	 y = (center.y + dir.y *(i*units::cm) )/units::cm;
+     // 	 z = (center.z + dir.z *(i*units::cm) )/units::cm;
+     // 	 T_cluster->Fill();
+     //   }
+     // }
     }
 
-  }
-  if (mcell!=0){
-    if (mcell->Get_all_spacecell().size()>0)
-      mcells.push_back(mcell);
-  }
-
-  // for (int i=0;i!=ntime;i++){
-  //   GeomCellSelection allcell = toytiling[i]->get_allcell();
-  //   GeomWireSelection allwire = toytiling[i]->get_allwire();
-  //   cout << "Single Cell: " << i << " "  << allcell.size() << " " << allwire.size() << endl;
-  // }
-
-
-  //cout << mcells.size() << endl;
-
-  // do the Toy Crawler
-  std::cout << "Crawling " << std::endl;
-  WireCell2dToy::ToyCrawler toycrawler(mcells);
-  //WireCell2dToy::ToyCrawler toycrawler(mcells,1,2); //cosmic tune?
-
-  // test
-  std::cout << "Tracking " << std::endl;
-  WireCell2dToy::ToyTracking toytracking(toycrawler);
-  MergeSpaceCellMap& mcells_map = toycrawler.Get_mcells_map();
-  //WireCell2dToy::ToyTracking toytracking(toycrawler,1); //cosmic tune?
-  toytracking.IterateMergeTracks(mcells_map);
-  
-  //std:cout << mcells.size() << " " << mcells_map.size() << std::endl;
-  // for (int i=0;i!=mcells.size();i++){
-  //   if (mcells_map.find(mcells.at(i)) == mcells_map.end()){
-  //     std::cout << i << std::endl;
-  //   }else{
-  //     std::cout << i << " " << mcells_map[mcells.at(i)].size() << std::endl;
-  //   }
-  // }
-  // for (auto it = mcells_map.begin();it!=mcells_map.end();it++){
-  //   auto it1 = find(mcells.begin(),mcells.end(),it->first);
-  //   if (it1 == mcells.end()){
-  //     std::cout << it->first->Get_all_spacecell().size() << " " 
-  //   		<< it->first->Get_Center().x/units::cm << " " 
-  //   		<< it->first->Get_Center().y/units::cm << " " 
-  //   		<< it->first->Get_Center().z/units::cm << " " 
-  // 		<< it->second.size() << std::endl;
-  //   }
-  // }
-
-
-  std::cout << "Good Tracks:     " << toytracking.get_good_tracks().size() <<std::endl;
-  std::cout << "Good Vertices:        " << toytracking.get_good_vertices().size() << std::endl;
-  std::cout << "Bad Tracks:      " << toytracking.get_bad_tracks().size() << std::endl;
-  std::cout << "Parallel Tracks: " << toytracking.get_parallel_tracks().size() << std::endl;
-  std::cout << "Showers:         " << toytracking.get_showers().size() << std::endl;
-
-
-  std::cout << "Drawing " << std::endl; 
-  TApplication theApp("theApp",&argc,argv);
-  theApp.SetReturnFromRun(true);
-  
-  TCanvas c1("ToyMC","ToyMC",800,600);
-  c1.Draw();
-  
-  WireCell2dToy::ClusterDisplay display(c1);
-  // display.DrawCluster(cells);
-  display.DrawCluster(mcells);
-  //display.DrawCluster(mcells,toytracking);
-  //display.DrawCrawler(toycrawler,"psame",1);
-
-  WCVertexSelection& vertices = toytracking.get_good_vertices();
-  //WCVertexSelection& vertices = toytracking.get_vertices();
-  display.DrawVertex(vertices,"psame");
-  
-
-
-  WCTrackSelection& bad_tracks = toytracking.get_bad_tracks();
-  //display.DrawTracks(bad_tracks,"same",2);
-
-  WCTrackSelection& short_tracks = toytracking.get_short_tracks();
-  //display.DrawTracks(short_tracks,"psame",4);
-
-  WCShowerSelection& showers =toytracking.get_showers();
-  if (showers.size() > 0)
-    display.DrawShower(showers.at(0),"psame",8);
-  // Point p;
-  // p.x = cells.at(0)->x();
-  // p.y = cells.at(0)->y();
-  // p.z = cells.at(0)->z();
-  // display.DrawHough(cells,p,-1,10*units::m);
-  
-
-  theApp.Run();
-  //std::cout << cells.size() << std::endl;
-  //successfully read the TC tree 
-  // TC->GetEntry(0);
-  //cout << x << " " << y << " " << z << " " << charge << " " << time_slice << " " << cluster_num << " " << cell->cross_section() << " " << cell->center().y << endl;
-    
-    
+   // ncluster = 0;
+   // for (auto it = dead_live_cluster_mapping.begin(); it!= dead_live_cluster_mapping.end(); it++){
+   //   std::vector<PR3DCluster*> clusters = (*it).second;
+   //   if (clusters.size()>1){
+   //     //std::cout << clusters.size() << std::endl;
+   //     for (auto it1 = clusters.begin(); it1!=clusters.end(); it1++){
+   // 	 PR3DCluster* cluster = (*it1);
+   // 	 ncluster = cluster->get_cluster_id();
+   // 	 SMGCSelection& mcells = cluster->get_mcells();
+   // 	 for (size_t i=0;i!=mcells.size();i++){
+   // 	   PointVector ps = mcells.at(i)->get_sampling_points();
+   // 	   for (int k=0;k!=ps.size();k++){
+   // 	     x = ps.at(k).x/units::cm;//time_slice*nrebin/2.*unit_dis/10. - frame_length/2.*unit_dis/10.;
+   // 	     y = ps.at(k).y/units::cm;
+   // 	     z = ps.at(k).z/units::cm;
+   // 	     T_cluster->Fill();
+   // 	   }
+   // 	 }
+   //     }
+   //   }
+   //   // ncluster++;
+   // }
+   // for (auto it = dead_live_mcells_mapping.begin(); it!= dead_live_mcells_mapping.end(); it++){
+   //   std::vector<std::vector<SlimMergeGeomCell*>> mcellss = (*it).second;
+   //   // std::cout << mcellss.size() << std::endl;
+   //   if (mcellss.size()>1){
+   //     for (auto it1 = mcellss.begin(); it1!=mcellss.end(); it1++){
+   // 	 std::vector<SlimMergeGeomCell*> mcells = (*it1);
+   // 	 for (size_t i=0;i!=mcells.size();i++){
+   // 	   PointVector ps = mcells.at(i)->get_sampling_points();
+   // 	   for (int k=0;k!=ps.size();k++){
+   // 	     x = ps.at(k).x/units::cm;//time_slice*nrebin/2.*unit_dis/10. - frame_length/2.*unit_dis/10.;
+   // 	     y = ps.at(k).y/units::cm;
+   // 	     z = ps.at(k).z/units::cm;
+   // 	     T_cluster->Fill();
+   // 	   }
+   // 	 }
+   //     }
+   //   }
+   //   ncluster++;
+   // }
+   
+   Trun->CloneTree()->Write();
+   file1->Write();
+   file1->Close();
 }
