@@ -329,7 +329,7 @@ std::map<PR3DCluster*,std::vector<std::pair<PR3DCluster*,double>>> WireCell2dToy
   }
   
   // Clustering_dis(live_clusters,cluster_length_map);
-  //  cerr << em("clustering isolated piece") << std::endl;
+  cerr << em("clustering isolated piece") << std::endl;
 
   {
     // int num_long_ones = 0;
