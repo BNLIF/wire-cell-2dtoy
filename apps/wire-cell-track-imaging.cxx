@@ -91,9 +91,6 @@ int main(int argc, char* argv[])
 
   //////////////////////////////////////////////////////////////////////////////////////////////// variable histgram start
 
-  roostr = "h1_ghost_track_length";
-  TH1D *h1_ghost_track_length = new TH1D(roostr, roostr, 100, 0, 100);
-  
   roostr = "graph_ghost_yz";
   TGraph *graph_ghost_yz = new TGraph();
   graph_ghost_yz->SetName(roostr);
@@ -114,9 +111,6 @@ int main(int argc, char* argv[])
 
   std::map< int, TVector3 > map_cluster_center;
 
-  roostr = "h1_flag_track_ghost";
-  TH1I *h1_flag_track_ghost = new TH1I( roostr, roostr, 5, 0.5, 5.5);// ghost, total_track, good, broken, inefficiency
-  
   //////////////////////////////////////////////////////////////////////////////////////////////// variable histgram end
   
   // rotation matrix to convert collection plane (default detector) coordinate to inductions plane
@@ -294,12 +288,9 @@ int main(int argc, char* argv[])
   std::map<int, TVector3> vc_cluster_end;
   std::map<int, double> vc_cluster_length;
   
-  TGraph2D *gh_ghost[100];
-  for(int idx=0; idx<100; idx++) {
-    gh_ghost[idx] = new TGraph2D();
-    roostr = TString::Format("gh_ghost_%03d", idx);
-  }
-
+  TGraph2D *gh_ghost_all = new TGraph2D();
+  gh_ghost_all->SetName("gh_ghost_all");
+  int count_gh_ghost_all = 0;
   
   cout<<endl;
   cout<<" -------> Points in cluster, entries: "<<clusters->GetEntries()<<endl;
@@ -446,7 +437,7 @@ int main(int argc, char* argv[])
       vc_cluster_end[i] = start;
     }
     vc_cluster_length[i] = cluster_dir.Mag();
-      
+
     ///////
     TVector3 cluster_dir_y = cluster_dir;
     if(cluster_dir_y.Y()<0) cluster_dir_y *= -1.0;
@@ -471,45 +462,7 @@ int main(int argc, char* argv[])
   ///////////////////////////////////////////////////////////////
   
   cout<<endl<<" -------> processing clusters in one track, and ghost"<<endl<<endl;
-  /*
-  TTree* track_true = (TTree*)f->Get("T_track");
-  double x0,y0,z0;
-  double x1,y1,z1;
-  int track_id;
-  track_true->SetBranchAddress("x0",&x0);
-  track_true->SetBranchAddress("y0",&y0);
-  track_true->SetBranchAddress("z0",&z0);
-  track_true->SetBranchAddress("x1",&x1);
-  track_true->SetBranchAddress("y1",&y1);
-  track_true->SetBranchAddress("z1",&z1);  
-  track_true->SetBranchAddress("track_id",&track_id);
-  std::map<int, TVector3> vc_track_dir;
-  std::map<int, TVector3> vc_track_start;
-  std::map<int, TVector3> vc_track_end;
-  std::map<int, double> vc_track_length;
-  int num_track_clusters = track_true->GetEntries();
-  for(int ientry=0; ientry<num_track_clusters; ientry++) {
-    track_true->GetEntry( ientry );
-    
-    TVector3 v3_start(x0, y0, z0);
-    TVector3 v3_end(x1, y1, z1);
 
-    TVector3 dir = v3_end - v3_start;
-    vc_track_length[track_id] = dir.Mag();
-    dir = 1./dir.Mag() * dir;
-    if( dir.Y()<0 ) dir *= -1.;
-    vc_track_dir[track_id] = dir;
-    
-    if( v3_start.Y() < v3_end.Y() ) {
-      vc_track_start[track_id] = v3_start;
-      vc_track_end[track_id] = v3_end;
-    }
-    else {
-      vc_track_start[track_id] = v3_end;
-      vc_track_end[track_id] = v3_start;
-    }
-  }
-  */
   int num_clusters = vc_cluster_dir.size();
   cout<<" -------> Cluster numbers: "<<num_clusters<<endl;
   cout<<" -------> Track numbers:   "<<num_track_clusters<<endl;
@@ -553,6 +506,7 @@ int main(int argc, char* argv[])
   for( auto it_cluster=vc_cluster_dir.begin(); it_cluster!=vc_cluster_dir.end(); it_cluster++ ) {// By default, all the cluster are ghosts
     vc_ghost_id[it_cluster->first] = it_cluster->first;
   }
+  
 
   for( auto it_cluster=vc_cluster_dir.begin(); it_cluster!=vc_cluster_dir.end(); it_cluster++ ) {// each cluster cluster
     for( auto it_track=vc_track_dir.begin(); it_track!=vc_track_dir.end(); it_track++ ) {// each track cluster
@@ -607,15 +561,15 @@ int main(int argc, char* argv[])
       bool flag_angle_LE_15 = false;
       if( v3_trackXcluster.Mag()<angle_15 ) flag_angle_LE_15 = true;
       
-      bool flag_distance_1_2cm = false;
-      if( distance_center< 2 && distance_center>1 ) flag_distance_1_2cm = true;
+      bool flag_distance_2_3cm = false;
+      if( distance_center< 3 && distance_center>2 ) flag_distance_2_3cm = true;
 
-      bool flag_distance_0_1cm = false;
-      if( distance_center<= 1 ) flag_distance_0_1cm = true;
+      bool flag_distance_0_2cm = false;
+      if( distance_center<= 2 ) flag_distance_0_2cm = true;
 
-      bool case_A = flag_contain && flag_length && (flag_distance_0_1cm||flag_distance_1_2cm);
-      bool case_B = flag_contain && flag_angle_LE_10 && flag_distance_1_2cm;
-      bool case_C = flag_contain && flag_angle_LE_15 && flag_distance_0_1cm;
+      bool case_A = flag_contain && flag_length && ( distance_center<2 );
+      bool case_B = flag_contain && flag_angle_LE_10 && flag_distance_2_3cm;
+      bool case_C = flag_contain && flag_angle_LE_15 && flag_distance_0_2cm;
       
       if( case_A || case_B || case_C ) {
       
@@ -631,7 +585,7 @@ int main(int argc, char* argv[])
 	
 	// not ghost
 	vc_ghost_id.erase( cluster_id );
-	    
+	  
 	if( map_flag_cluster_used.find( cluster_id )!=map_flag_cluster_used.end() ) {
 	  map_flag_cluster_used[cluster_id] += 1;
 	  continue;
@@ -685,7 +639,10 @@ int main(int argc, char* argv[])
 
   double x_sigma_cut = 1;// cm
   
-  for( auto it=vc_ghost_id.begin(); it!=vc_ghost_id.end(); it++ ) {
+  for( auto it=vc_cluster_dir.begin(); it!=vc_cluster_dir.end(); it++ ) {
+    
+    if( vc_ghost_id.find( it->first )==vc_ghost_id.end() ) continue;
+    
     int id = it->first;
     int cluster_id = id;
     
@@ -698,7 +655,11 @@ int main(int argc, char* argv[])
 	x2_bar += x*x/npts;
 	x_bar += x/npts;
       }
-      double sigma_x = sqrt( x2_bar - x_bar*x_bar );// standared deviation
+      
+      double var_x =  x2_bar - x_bar*x_bar;
+      if(var_x<=0) var_x = 0;
+      double sigma_x = sqrt( var_x );// standared deviation
+      //cout<<"DEBUG: x2_bar "<<x2_bar<<" x_bar*x_bar "<<x_bar*x_bar<<" difference "<<x2_bar - x_bar*x_bar<<endl;
       cout<<" WARNING : big blob "<<id<<"\t"<<vc_cluster_length[id]<<"\t"<<npts<<"\t"<<sigma_x<<endl;
 
       //////////////////////////////////////
@@ -755,11 +716,101 @@ int main(int argc, char* argv[])
 	}// for( auto it_track=vc_track_dir.begin(); it_track!=vc_track_dir.end(); it_track++ )
       }// if( sgima_x<1 )
     }// if( vc_cluster_length[id] > 10 ) 
-  }// for( auto it=vc_ghost_id.begin(); it!=vc_ghost_id.end(); it++ )
+  }// 
   
   cout<<endl;
 
-  
+  ///////////////////////////////////////////////////////////////////////////////////
+  ///////////////////////////////////////////////////////////////////////////////////
+
+ 
+  for( auto it=vc_cluster_dir.begin(); it!=vc_cluster_dir.end(); it++ ) {
+    
+    int id = it->first;
+    int cluster_id = id;
+    if( vc_ghost_id.find(id)==vc_ghost_id.end() ) continue;
+
+    //cout<<" ---> debug "<<cluster_id<<"\t"<<vc_ghost_id.size()<<endl;
+    
+    for( auto it_track=vc_track_dir.begin(); it_track!=vc_track_dir.end(); it_track++ ) {// each track cluster
+      int track_id = it_track->first;
+      //if( flag_track2recon[track_id]==2 ) continue;
+
+      bool flag_start_near = false;
+      bool flag_end_near = false;
+      
+      int npts = xpt[id].size();
+      int count_npts = 0;
+      
+      for(int idx=0; idx<npts; idx++) {
+	TVector3 ghost_point( xpt[id].at(idx), ypt[id].at(idx), zpt[id].at(idx) );
+	double distance_2start = ( vc_track_start[track_id]-ghost_point ).Mag();
+	double distance_2end = ( vc_track_end[track_id]-ghost_point ).Mag();
+	if( distance_2start<4 ) flag_start_near = true;// cm
+	if( distance_2end<4 ) flag_end_near = true;// cm
+	
+	/*         
+
+	                 - test_A
+		       -
+	             -
+	  <---------
+	  start   end
+
+
+
+               - test_B
+             -
+           -
+	  ---------->
+	  start     end
+
+	*/
+
+	
+	TVector3 this_point = ghost_point;
+	TVector3 this_point_2_next_start = vc_track_start[track_id] - this_point;
+        double distance_vertical = ( this_point_2_next_start.Cross( vc_track_dir[track_id] ) ).Mag();
+	double angle_end = (this_point-vc_track_end[track_id]).Dot( -1.*vc_track_dir[track_id] );
+	double angle_start = (this_point-vc_track_start[track_id]).Dot( vc_track_dir[track_id] );
+	double distance = 1e6;
+	if( angle_end * angle_start<0 ) distance = (distance_2start<distance_2end) ? distance_2start : distance_2end;
+	else distance = distance_vertical;
+
+	if( distance < 4 ) {// cm
+	  count_npts++;
+	}
+	
+      }// for(int idx=0; idx<npts; idx++)
+
+      if( count_npts==0 ) continue;
+      cout<<" ------------> percentage of points of cluster near to track : "<<count_npts*1./npts<<endl;
+
+      
+      if( count_npts*1./npts < 0.1 ) continue;
+
+
+      if( flag_start_near && flag_end_near ) {// good track
+	flag_track2recon[track_id] = 2;
+	vc_ghost_id.erase( cluster_id );
+	map_non_ghost_track_clusters[track_id].push_back( cluster_id );
+	cout<<" WARNING : big ghost in good track "<<cluster_id<<"\t"<<vc_cluster_length[cluster_id]<<endl;
+      }
+      else {// broken
+	if( flag_track2recon[track_id]!=2 ) flag_track2recon[track_id] = 1;
+	vc_ghost_id.erase( cluster_id );
+	map_non_ghost_track_clusters[track_id].push_back( cluster_id );
+	cout<<" WARNING : big ghost in broken track "<<cluster_id<<"\t"<<vc_cluster_length[cluster_id]<<endl;
+      }
+      
+    }
+    
+  }
+
+ 
+  ///////////////////////////////////////////////////////////////////////////////////
+  ///////////////////////////////////////////////////////////////////////////////////
+ 
   for( auto it=map_non_ghost_track_clusters.begin(); it!=map_non_ghost_track_clusters.end(); it++ ) {
     int user_size = it->second.size() - 1;
     cout<<it->first<<"\t"<<user_size<<endl;
@@ -767,13 +818,71 @@ int main(int argc, char* argv[])
   
   /////////////////////////////////////////////////////////////////////////////////// Fill
   ///////////////////////////////////////////////////////////////////////////////////
+     
+  // std::map<int, TVector3> vc_cluster_dir;
+  // std::map<int, TVector3> vc_cluster_start;
+  // std::map<int, TVector3> vc_cluster_end;
+  // std::map<int, double> vc_cluster_length;
+ 
+  // std::map<int, TVector3> vc_track_dir;
+  // std::map<int, TVector3> vc_track_start;
+  // std::map<int, TVector3> vc_track_end;
+  // std::map<int, double> vc_track_length;
+	
+  roostr = "h1_flag_track_ghost";
+  TH1I *h1_flag_track_ghost = new TH1I( roostr, roostr, 5, 0.5, 5.5);// ghost, total_track, good, broken, inefficiency
+  
+  roostr = "h1_good_track_length";
+  TH1D *h1_good_track_length = new TH1D(roostr, roostr, 150, 0, 150);
+ 
+  roostr = "h1_broken_track_length";
+  TH1D *h1_broken_track_length = new TH1D(roostr, roostr, 150, 0, 150);
 
+  roostr = "h2_good_track_phi_costheta";
+  TH2D *h2_good_track_phi_costheta = new TH2D(roostr, roostr, 10, 0, TMath::Pi(), 10, 0, 1);
+  
+  roostr = "h2_broken_track_phi_costheta";
+  TH2D *h2_broken_track_phi_costheta = new TH2D(roostr, roostr, 10, 0, TMath::Pi(), 10, 0, 1);
+  
+  roostr = "h2_ineff_track_phi_costheta";
+  TH2D *h2_ineff_track_phi_costheta = new TH2D(roostr, roostr, 10, 0, TMath::Pi(), 10, 0, 1);
+  
+  
   int num_ghost = vc_ghost_id.size();
   int num_tracks = flag_track2recon.size();
   int num_flag[3] = {0};
   for(auto it=flag_track2recon.begin(); it!=flag_track2recon.end(); it++ ) {
     int flag = it->second;
     num_flag[flag]++;
+
+    int track_id = it->first;
+
+    TVector3 dir = vc_track_dir[track_id];
+    double cosy = dir.Y()/dir.Mag();
+    double phiz = TMath::ACos(dir.Z()/TMath::Sqrt(dir.X()*dir.X()+dir.Z()*dir.Z()));
+    
+    ///////
+    if( flag==2 ) {
+      int cluster_id = map_non_ghost_track_clusters[it->first].at(1);
+      double length = vc_cluster_length[cluster_id] * fabs( vc_cluster_dir[cluster_id].Dot(vc_track_dir[track_id]) );      
+      h1_good_track_length->Fill( length );
+    }
+
+    if( flag==1 ) {
+      double length = 0;
+      for(int i=1; i<map_non_ghost_track_clusters[it->first].size(); i++) {
+	int cluster_id = map_non_ghost_track_clusters[it->first].at(i);
+	length += vc_cluster_length[cluster_id] * fabs( vc_cluster_dir[cluster_id].Dot(vc_track_dir[track_id]) );
+	//cout<<" debug : "<< it->first<<"\t"<<vc_cluster_length[ map_non_ghost_track_clusters[it->first].at(i) ]<<endl;
+      }
+      h1_broken_track_length->Fill( length );
+    }
+
+    ///////
+    if( flag==2 ) h2_good_track_phi_costheta->Fill( phiz, cosy );
+    if( flag==1 ) h2_broken_track_phi_costheta->Fill( phiz, cosy );
+    if( flag==0 ) h2_ineff_track_phi_costheta->Fill( phiz, cosy );
+    
   }
   int num_good = num_flag[2];
   int num_broken = num_flag[1];
@@ -784,18 +893,25 @@ int main(int argc, char* argv[])
   h1_flag_track_ghost->SetBinContent( 3, num_good );
   h1_flag_track_ghost->SetBinContent( 4, num_broken );
   h1_flag_track_ghost->SetBinContent( 5, num_ineff );
-  
-  ///////////////////////////////////////////////////////////////////////////////////
-  ///////////////////////////////////////////////////////////////////////////////////
-  
-  TCanvas *canv = new TCanvas("canv", "canv", 1000, 800);
-  TH3D *h3 = new TH3D("h3", "h3", 100, 0, 300, 100, -150, 150, 100, 0, 1500);
-  h3->SetStats(0);
-  h3->Draw();
-  h3->SetXTitle("X axis");
-  h3->SetYTitle("Y axis");
-  h3->SetZTitle("Z axis");
 
+  //////
+  //////
+
+  
+  ///////////////////////////////////////////////////////////////////////////////////
+  ///////////////////////////////////////////////////////////////////////////////////
+  
+  // TCanvas *canv = new TCanvas("canv", "canv", 1000, 800);
+  // TH3D *h3 = new TH3D("h3", "h3", 100, 0, 300, 100, -150, 150, 100, 0, 1500);
+  // h3->SetStats(0);
+  // h3->Draw();
+  // h3->SetXTitle("X axis");
+  // h3->SetYTitle("Y axis");
+  // h3->SetZTitle("Z axis");
+
+  roostr = "h1_ghost_track_length";
+  TH1D *h1_ghost_track_length = new TH1D(roostr, roostr, 150, 0, 150);
+  
   int size_ghost = vc_ghost_id.size();
   cout<<" ---> number of ghost "<<size_ghost<<endl;
 
@@ -809,7 +925,8 @@ int main(int argc, char* argv[])
       double x = xpt[id].at(j);
       double y = ypt[id].at(j);
       double z = zpt[id].at(j);
-      gh_ghost[id]->SetPoint(j, x,y,z);
+      count_gh_ghost_all++;
+      gh_ghost_all->SetPoint( count_gh_ghost_all-1, x,y,z );
 
       count_graph_ghost_yz++;
       graph_ghost_yz->SetPoint(count_graph_ghost_yz-1, z,y);      
@@ -818,17 +935,18 @@ int main(int argc, char* argv[])
 
     // if( id!=9 && id!=26 ) continue;
     // if( id!=13 && id!=16 && id!=18 && id!=19 ) continue;
-    gh_ghost[id]->Draw("same p");
 
     /////// ghost histgram
     /////// ghost histgram
     h1_ghost_track_length->Fill( vc_cluster_length[id] );
   }
-  
-  gh_truth->SetMarkerColor(kRed);
-  gh_truth->Draw("same p");
+
+  // if( gh_ghost_all->GetN()!=0 ) gh_ghost_all->Draw("same p");
     
-  canv->SaveAs("canv.root");
+  // gh_truth->SetMarkerColor(kRed);
+  // gh_truth->Draw("same p");
+    
+  // canv->SaveAs("canv.root");
 
   
 
@@ -859,12 +977,12 @@ int main(int argc, char* argv[])
 
   graph_cluster_all->Draw("same p");
   graph_cluster_all->SetMarkerColor(kGray+2);
-  
-  for( auto it=vc_ghost_id.begin(); it!=vc_ghost_id.end(); it++ ) {
-    gh_ghost[it->first]->Draw("same p");
-    gh_ghost[it->first]->SetMarkerColor(kBlue);
-    gh_ghost[it->first]->SetMarkerStyle(4);
-    gh_ghost[it->first]->SetMarkerSize(0.3);
+
+  if( gh_ghost_all->GetN()!=0 ) {
+    gh_ghost_all->Draw("same p");
+    gh_ghost_all->SetMarkerColor(kBlue);
+    gh_ghost_all->SetMarkerStyle(4);
+    gh_ghost_all->SetMarkerSize(0.3);
   }
   
   canv_visuliaztion_tracks_cluster->SaveAs("canv_visuliaztion_tracks_cluster.root");
@@ -873,7 +991,9 @@ int main(int argc, char* argv[])
   /////////////////////////////////////////////////////////////////////////////////// WRITE FILE
   
 
-  cout<<endl<<" --------> Number of  tracks "<< vc_track_dir.size() <<endl<<endl;
+  cout<<" --------> Number of tracks "<< vc_track_dir.size() <<endl;
+  cout<<" --------> Number of ghosts "<<size_ghost<<endl;
+
   cout<<" file "<<inputroot<<endl;
   
   TFile* output = new TFile(outputroot, "RECREATE");
@@ -884,7 +1004,13 @@ int main(int argc, char* argv[])
 
   ///////
   h1_flag_track_ghost->Write();
-  
+  h1_good_track_length->Write();
+  h1_broken_track_length->Write();
+
+  h2_good_track_phi_costheta->Write();
+  h2_broken_track_phi_costheta->Write();
+  h2_ineff_track_phi_costheta->Write();
+    
   output->Close();
 
   return 0;
