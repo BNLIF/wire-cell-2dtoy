@@ -650,9 +650,9 @@ bool WireCell2dToy::ToyFiducial::check_neutrino_candidate(WireCell::PR3DCluster 
 	  
 	  // if (main_cluster->get_cluster_id()==3)
 	  // std::cout << main_cluster->get_cluster_id() << " " << min_dis/units::cm << " " << flag_2view_check << " " << path_wcps_vec1.at(i).x/units::cm << " " 
-	  // 	    << path_wcps_vec1.at(i).y/units::cm << " "
-	  // 	    << path_wcps_vec1.at(i).z/units::cm << " "
-	  // 	    << num_nth << " " << cloud_u.pts.size() << " " << cloud_v.pts.size() << " "<< cloud_w.pts.size() << " " << num_bad << std::endl;
+	  //  	    << path_wcps_vec1.at(i).y/units::cm << " "
+	  //  	    << path_wcps_vec1.at(i).z/units::cm << " "
+	  //  	    << num_nth << " " << cloud_u.pts.size() << " " << cloud_v.pts.size() << " "<< cloud_w.pts.size() << " " << num_bad << std::endl;
 	  
 	}
 	//std::cout << num_nth << std::endl;

@@ -358,7 +358,7 @@ std::map<PR3DCluster*,std::vector<std::pair<PR3DCluster*,double>>> WireCell2dToy
   
   for (size_t i=0;i!=live_clusters.size();i++){
     PR3DCluster *cluster = live_clusters.at(i);
-
+    // cluster->Del_graph();
     cluster->set_cluster_id(i+1);
     // if (cluster_length_map[cluster]>100*units::cm)
     //   std::cout << cluster->get_cluster_id() << " " << cluster_length_map[cluster]/units::cm << std::endl;
