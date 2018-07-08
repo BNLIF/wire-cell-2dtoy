@@ -564,8 +564,8 @@ PR3DClusterSelection WireCell2dToy::Examine_overclustering(PR3DCluster *cluster,
 	  Point p1(wp1.x,wp1.y,wp1.z);
 	  Point p2(wp2.x,wp2.y,wp2.z);
 	  
-	  TVector3 dir1 = cluster->VHoughTrans(p1, 30*units::cm);
-	  TVector3 dir2 = cluster->VHoughTrans(p2, 30*units::cm);
+	  TVector3 dir1 = cluster->VHoughTrans(p1, 30*units::cm, pt_clouds.at(j));
+	  TVector3 dir2 = cluster->VHoughTrans(p2, 30*units::cm, pt_clouds.at(k));
 	  dir1 *= -1;
 	  dir2 *= -1;
 	  
@@ -585,7 +585,7 @@ PR3DClusterSelection WireCell2dToy::Examine_overclustering(PR3DCluster *cluster,
 	      if (dis1 < 1*units::cm)
 		num_cut_points ++;
 	    }
-	    if (num_cut_points <=8 && num_cut_points< 0.25 * num_points + 2 && dis > 5*units::cm)
+	    if (num_cut_points <=8 && num_cut_points< 0.25 * num_points + 2 && dis > 1*units::cm)
 	      index_index_dis_dir1[j][k] = std::make_tuple(std::get<0>(index_index_dis[j][k]), result1.first, result1.second);
 	  }
 	  
@@ -607,7 +607,7 @@ PR3DClusterSelection WireCell2dToy::Examine_overclustering(PR3DCluster *cluster,
 		num_cut_points ++;
 	    }
 	    
-	    if (num_cut_points <=8 && num_cut_points < 0.25 * num_points + 2 && dis > 5*units::cm)
+	    if (num_cut_points <=8 && num_cut_points < 0.25 * num_points + 2 && dis > 1*units::cm)
 	      index_index_dis_dir2[j][k] = std::make_tuple(result2.first, std::get<1>(index_index_dis[j][k]), result2.second);
 	  }
 	}
@@ -641,7 +641,8 @@ PR3DClusterSelection WireCell2dToy::Examine_overclustering(PR3DCluster *cluster,
 	      num_bad > 2 && num_bad >=0.75*num_steps){
 	    index_index_dis[j][k] = std::make_tuple(-1,-1,1e9);
 	  }
-	  //	    std::cout << j << " " << k << " " << num_bad << " " << num_steps << std::endl;
+	  /* if (cluster_id==3) */
+	  /*   std::cout << j << " " << k << " " << num_bad << " " << num_steps << std::endl; */
 	}
 	
 	// Now check the path ... 
@@ -669,7 +670,8 @@ PR3DClusterSelection WireCell2dToy::Examine_overclustering(PR3DCluster *cluster,
 	      num_bad > 2 && num_bad >=0.75*num_steps){
 	    index_index_dis_dir1[j][k] = std::make_tuple(-1,-1,1e9);
 	  }
-	  //	    std::cout << j << " " << k << " " << num_bad << " " << num_steps << std::endl;
+	  /* if (cluster_id==3) */
+	  /*   std::cout << "A: " << j << " " << k << " " << num_bad << " " << num_steps << std::endl; */
 	}
 	
 	
@@ -698,7 +700,9 @@ PR3DClusterSelection WireCell2dToy::Examine_overclustering(PR3DCluster *cluster,
 	      num_bad > 2 && num_bad >=0.75*num_steps){
 	    index_index_dis_dir2[j][k] = std::make_tuple(-1,-1,1e9);
 	  }
-	  //	    std::cout << j << " " << k << " " << num_bad << " " << num_steps << std::endl;
+
+	  /* if (cluster_id==3) */
+	  /*   std::cout << "B: " << j << " " << k << " " << num_bad << " " << num_steps << std::endl; */
 	}
 	
 	

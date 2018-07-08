@@ -627,7 +627,7 @@ int main(int argc, char* argv[])
 
      //std::cout << i << " " << live_clusters.at(i)->get_cluster_id() << " " << live_clusters.at(i)->get_mcells().size() << " " << live_clusters.at(i)->get_num_time_slices() << std::endl;
      
-     live_clusters.at(i)->Create_graph();
+     live_clusters.at(i)->Create_graph(ct_point_cloud);
 
      std::pair<WCPointCloud<double>::WCPoint,WCPointCloud<double>::WCPoint> wcps = live_clusters.at(i)->get_highest_lowest_wcps();
      // std::pair<WCPointCloud<double>::WCPoint,WCPointCloud<double>::WCPoint> wcps = live_clusters.at(i)->get_extreme_wcps();

@@ -638,13 +638,18 @@ bool WireCell2dToy::ToyFiducial::check_neutrino_candidate(WireCell::PR3DCluster 
 	  if (dis2 < min_dis) min_dis = dis2;
 	  num_nth ++;
 	  // num_total_dead ++;
-	  // std::cout << min_dis/units::cm << " " << flag_2view_check << " " << path_wcps_vec1.at(i).x/units::cm << " " 
-	  // 	    << path_wcps_vec1.at(i).y/units::cm << " "
-	  // 	    << path_wcps_vec1.at(i).z/units::cm << " "
-	  // 	    << num_nth << " " << cloud_u.pts.size() << " " << cloud_v.pts.size() << " "<< cloud_w.pts.size() << std::endl;
+	  
+	  // if (main_cluster->get_cluster_id()==3)
+	  //   std::cout << min_dis/units::cm << " " << flag_2view_check << " " << path_wcps_vec1.at(i).x/units::cm << " " 
+	  // 	      << path_wcps_vec1.at(i).y/units::cm << " "
+	  // 	      << path_wcps_vec1.at(i).z/units::cm << " "
+	  // 	      << num_nth << " " << cloud_u.pts.size() << " " << cloud_v.pts.size() << " "<< cloud_w.pts.size() << std::endl;
+
 	}
 	//std::cout << num_nth << std::endl;
+
 	if (num_nth>9 && min_dis < 25*units::cm) return true; // too big a gap ... 4 cm cut ...
+	//if (num_nth>9) return true; // too big a gap ... 4 cm cut ...
       }
     }
   }
