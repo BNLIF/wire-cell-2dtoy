@@ -647,7 +647,7 @@ int main(int argc, char* argv[])
        new_cluster->Create_point_cloud();
        old_new_cluster_map[live_clusters.at(i)] = new_cluster;
 
-       new_cluster->Create_graph();
+       new_cluster->Create_graph(ct_point_cloud);
        std::pair<WCPointCloud<double>::WCPoint,WCPointCloud<double>::WCPoint> new_wcps = new_cluster->get_highest_lowest_wcps();
        new_cluster->dijkstra_shortest_paths(new_wcps.first);
        new_cluster->cal_shortest_path(new_wcps.second);

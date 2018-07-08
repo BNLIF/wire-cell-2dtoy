@@ -163,6 +163,9 @@ bool WireCell2dToy::ToyFiducial::check_tgm(WireCell::FlashTPCBundle *bundle, dou
   Opflash *flash = bundle->get_flash();
 
   std::vector<std::vector<WCPointCloud<double>::WCPoint>> out_vec_wcps = main_cluster1->get_extreme_wcps();
+
+  // if (main_cluster->get_cluster_id()==6)
+  //std::cout << main_cluster << " " << main_cluster1 << std::endl;
   
 
   // int max_group = 0;
@@ -509,7 +512,7 @@ bool WireCell2dToy::ToyFiducial::check_tgm(WireCell::FlashTPCBundle *bundle, dou
 }
 
 bool WireCell2dToy::ToyFiducial::check_neutrino_candidate(WireCell::PR3DCluster *main_cluster,WCPointCloud<double>::WCPoint& wcp1 ,WCPointCloud<double>::WCPoint& wcp2, double offset_x, WireCell::ToyCTPointCloud& ct_point_cloud,bool flag_2view_check){
-  main_cluster->Create_graph();
+  main_cluster->Create_graph(ct_point_cloud);
   
   main_cluster->dijkstra_shortest_paths(wcp1);
   main_cluster->cal_shortest_path(wcp2);
@@ -640,11 +643,11 @@ bool WireCell2dToy::ToyFiducial::check_neutrino_candidate(WireCell::PR3DCluster 
 	  // num_total_dead ++;
 	  
 	  // if (main_cluster->get_cluster_id()==3)
-	  //   std::cout << min_dis/units::cm << " " << flag_2view_check << " " << path_wcps_vec1.at(i).x/units::cm << " " 
-	  // 	      << path_wcps_vec1.at(i).y/units::cm << " "
-	  // 	      << path_wcps_vec1.at(i).z/units::cm << " "
-	  // 	      << num_nth << " " << cloud_u.pts.size() << " " << cloud_v.pts.size() << " "<< cloud_w.pts.size() << std::endl;
-
+	  std::cout << main_cluster->get_cluster_id() << " " << min_dis/units::cm << " " << flag_2view_check << " " << path_wcps_vec1.at(i).x/units::cm << " " 
+		    << path_wcps_vec1.at(i).y/units::cm << " "
+		    << path_wcps_vec1.at(i).z/units::cm << " "
+		    << num_nth << " " << cloud_u.pts.size() << " " << cloud_v.pts.size() << " "<< cloud_w.pts.size() << std::endl;
+	  
 	}
 	//std::cout << num_nth << std::endl;
 

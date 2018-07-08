@@ -286,7 +286,7 @@ std::map<PR3DCluster*,std::vector<std::pair<PR3DCluster*,double>>> WireCell2dToy
   }
   
   // prepare for separating the connected pieces ... 
-  Clustering_separate(live_clusters,cluster_length_map, dead_u_index, dead_v_index, dead_w_index);
+  Clustering_separate(live_clusters,cluster_length_map, dead_u_index, dead_v_index, dead_w_index, ct_point_cloud);
   cerr << em("separate clusters") << std::endl;
 
 
@@ -307,7 +307,7 @@ std::map<PR3DCluster*,std::vector<std::pair<PR3DCluster*,double>>> WireCell2dToy
   
  
   // prepare for deghosting and clustering along track
-  Clustering_deghost(live_clusters,cluster_length_map, dead_u_index, dead_v_index, dead_w_index);
+  Clustering_deghost(ct_point_cloud, live_clusters,cluster_length_map, dead_u_index, dead_v_index, dead_w_index);
   cerr << em("deghost clusters") << std::endl;
 
   for (size_t i=0;i!=live_clusters.size();i++){
