@@ -599,6 +599,8 @@ bool WireCell2dToy::ToyFiducial::check_neutrino_candidate(WireCell::PR3DCluster 
 
     //int num_total_dead = 0;
     
+    int num_bad = 0;
+    
     for (int i=0;i!=path_wcps_vec1.size();i++){
       WireCell::CTPointCloud<double> cloud_u = ct_point_cloud.get_closest_points(path_wcps_vec1.at(i),low_dis_limit*2,0);
       WireCell::CTPointCloud<double> cloud_v = ct_point_cloud.get_closest_points(path_wcps_vec1.at(i),low_dis_limit*2,1);
@@ -626,6 +628,9 @@ bool WireCell2dToy::ToyFiducial::check_neutrino_candidate(WireCell::PR3DCluster 
 	}
       }
 
+      if (!ct_point_cloud.is_good_point(path_wcps_vec1.at(i)))
+	num_bad ++;
+      
       // std::cout << "O: " << path_wcps_vec1.at(i).x/units::cm << " " 
       // 		<< path_wcps_vec1.at(i).y/units::cm << " "
       // 		<< path_wcps_vec1.at(i).z/units::cm << " " << flag_reset << " " << cloud_u.pts.size() << " " << cloud_v.pts.size() << " "<< cloud_w.pts.size() << std::endl;
@@ -633,6 +638,7 @@ bool WireCell2dToy::ToyFiducial::check_neutrino_candidate(WireCell::PR3DCluster 
       if (flag_reset){
   	num_nth =0;
 	min_dis = 1e9;
+	num_bad = 0;
       }else{
 	if (inside_fiducial_volume(path_wcps_vec1.at(i),offset_x)){
 	  double dis1 = sqrt(pow(path_wcps_vec1.at(i).x-wcp1.x,2)+pow(path_wcps_vec1.at(i).y-wcp1.y,2)+pow(path_wcps_vec1.at(i).z-wcp1.z,2));
@@ -643,16 +649,16 @@ bool WireCell2dToy::ToyFiducial::check_neutrino_candidate(WireCell::PR3DCluster 
 	  // num_total_dead ++;
 	  
 	  // if (main_cluster->get_cluster_id()==3)
-	  std::cout << main_cluster->get_cluster_id() << " " << min_dis/units::cm << " " << flag_2view_check << " " << path_wcps_vec1.at(i).x/units::cm << " " 
-		    << path_wcps_vec1.at(i).y/units::cm << " "
-		    << path_wcps_vec1.at(i).z/units::cm << " "
-		    << num_nth << " " << cloud_u.pts.size() << " " << cloud_v.pts.size() << " "<< cloud_w.pts.size() << std::endl;
+	  // std::cout << main_cluster->get_cluster_id() << " " << min_dis/units::cm << " " << flag_2view_check << " " << path_wcps_vec1.at(i).x/units::cm << " " 
+	  // 	    << path_wcps_vec1.at(i).y/units::cm << " "
+	  // 	    << path_wcps_vec1.at(i).z/units::cm << " "
+	  // 	    << num_nth << " " << cloud_u.pts.size() << " " << cloud_v.pts.size() << " "<< cloud_w.pts.size() << " " << num_bad << std::endl;
 	  
 	}
 	//std::cout << num_nth << std::endl;
 
-	if (num_nth>9 && min_dis < 25*units::cm) return true; // too big a gap ... 4 cm cut ...
-	//if (num_nth>9) return true; // too big a gap ... 4 cm cut ...
+	//if (num_nth > 9 && min_dis < 25*units::cm && num_bad > 7) return true; // too big a gap ... 4 cm cut ...
+	if (num_nth > 7 && num_bad > 7) return true; // too big a gap ... 4 cm cut ...
       }
     }
   }
