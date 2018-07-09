@@ -884,11 +884,13 @@ int main(int argc, char* argv[])
  
     /////// Muplane
     TVector3 u_dir = Muplane * dir;
+    if( u_dir.Y()<0 ) u_dir *= -1.;
     double u_cosy = u_dir.Y()/u_dir.Mag();
     double u_phiz = TMath::ACos(u_dir.Z()/TMath::Sqrt(u_dir.X()*u_dir.X()+u_dir.Z()*u_dir.Z()));
     
     /////// Mvplane
     TVector3 v_dir = Mvplane * dir;
+    if( v_dir.Y()<0 ) v_dir *= -1.;
     double v_cosy = v_dir.Y()/v_dir.Mag();
     double v_phiz = TMath::ACos(v_dir.Z()/TMath::Sqrt(v_dir.X()*v_dir.X()+v_dir.Z()*v_dir.Z()));
    
