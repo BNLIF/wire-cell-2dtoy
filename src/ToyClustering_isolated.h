@@ -27,7 +27,7 @@ std::map<PR3DCluster*,std::vector<std::pair<PR3DCluster*,double>>> WireCell2dToy
       small_clusters.push_back(live_clusters.at(i));
     }else{
       if (cluster_length_map[live_clusters.at(i)] < 60*units::cm){
-	if (JudgeSeparateDec_1(live_clusters.at(i),drift_dir)){
+	if (JudgeSeparateDec_1(live_clusters.at(i),drift_dir, cluster_length_map[live_clusters.at(i)], time_slice_width)){
       	  std::vector<PR3DCluster*> sep_clusters = Separate_2(live_clusters.at(i),2.5*units::cm);
       	  int max = 0;
 	  double max_length = 0;

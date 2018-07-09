@@ -749,7 +749,7 @@ void WireCell2dToy::Clustering_neutrino(WireCell::PR3DClusterSelection& live_clu
 		flag_merge = false;
 	      }
 	      // std::cout << JudgeSeparateDec_1(cluster1,drift_dir) << " A2 " << cluster1->get_PCA_value(0) << " " << cluster1->get_PCA_value(1) << " " << flag_merge << std::endl; 
-	    }else if (JudgeSeparateDec_1(cluster2,drift_dir)){
+	    }else if (JudgeSeparateDec_1(cluster2,drift_dir, cluster_length_map[cluster2], time_slice_width)){
 
 	      if (dis2 < 5*units::cm){
 		flag_merge = cluster2->judge_vertex(test_pt1,2./3.);
@@ -1029,7 +1029,7 @@ void WireCell2dToy::Clustering_dis(WireCell::PR3DClusterSelection& live_clusters
       small_clusters.push_back(live_clusters.at(i));
     }else{
       if (cluster_length_map[live_clusters.at(i)] < 60*units::cm){
-	if (JudgeSeparateDec_1(live_clusters.at(i),drift_dir)){
+	if (JudgeSeparateDec_1(live_clusters.at(i),drift_dir, cluster_length_map[live_clusters.at(i)],time_slice_width)){
       	  std::vector<PR3DCluster*> sep_clusters = Separate_2(live_clusters.at(i),2.5*units::cm);
       	  int max = 0;
 	  double max_length = 0;

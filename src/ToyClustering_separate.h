@@ -9,7 +9,7 @@ bool sortbysec(const std::pair<PR3DCluster*,double> &a,
 
 
 
-bool WireCell2dToy::JudgeSeparateDec_1(WireCell::PR3DCluster* cluster, TVector3& drift_dir){
+bool WireCell2dToy::JudgeSeparateDec_1(WireCell::PR3DCluster* cluster, TVector3& drift_dir, double length, double time_slice_length){
   // get the main axis
   cluster->Calc_PCA();
   TVector3 dir1(cluster->get_PCA_axis(0).x,cluster->get_PCA_axis(0).y,cluster->get_PCA_axis(0).z);
@@ -17,13 +17,18 @@ bool WireCell2dToy::JudgeSeparateDec_1(WireCell::PR3DCluster* cluster, TVector3&
   TVector3 dir3(cluster->get_PCA_axis(2).x,cluster->get_PCA_axis(2).y,cluster->get_PCA_axis(2).z);
   
   double angle1 = fabs(dir2.Angle(drift_dir)-3.1415926/2.)/3.1415926*180.;
+
+  double temp_angle1 = asin(cluster->get_num_time_slices()*time_slice_length/length)/3.1415926*180.;
+  
+  
   double angle2 = fabs(dir3.Angle(drift_dir)-3.1415926/2.)/3.1415926*180.;
   double ratio1 = cluster->get_PCA_value(1)/cluster->get_PCA_value(0) ;
   double ratio2 = cluster->get_PCA_value(2)/cluster->get_PCA_value(0) ;
 
-  //  std::cout << " K : " << ratio1 << " " << ratio2 << " " << angle1 << " " << angle2 << " " << pow(10,exp(1.38115-1.19312*pow(angle1,1./3.))-2.2) << " " << pow(10,exp(1.38115-1.19312*pow(angle2,1./3.))-2.2) << std::endl;
+  // std::cout << " K : " << ratio1 << " " << ratio2 << " " << angle1 << " " << angle2 << " " << pow(10,exp(1.38115-1.19312*pow(angle1,1./3.))-2.2) << " " << pow(10,exp(1.38115-1.19312*pow(angle2,1./3.))-2.2) << " " << cluster->get_num_time_slices() << std::endl;
   
   if (ratio1 > pow(10,exp(1.38115-1.19312*pow(angle1,1./3.))-2.2) ||
+      ratio1 > pow(10,exp(1.38115-1.19312*pow(temp_angle1,1./3.))-2.2) ||
       ratio2 > pow(10,exp(1.38115-1.19312*pow(angle2,1./3.))-2.2) || ratio1 > 0.75)
     return true;
   return false;
@@ -1856,7 +1861,7 @@ void WireCell2dToy::Clustering_separate(WireCell::PR3DClusterSelection& live_clu
       
       
       
-      if (!flag_proceed && cluster_length_map[cluster]>100*units::cm && WireCell2dToy::JudgeSeparateDec_1(cluster,drift_dir) && independent_points.size()>0){
+      if (!flag_proceed && cluster_length_map[cluster]>100*units::cm && WireCell2dToy::JudgeSeparateDec_1(cluster,drift_dir,cluster_length_map[cluster], time_slice_width) && independent_points.size()>0){
 	bool flag_top = false;
 	for (size_t j=0;j!=independent_points.size();j++){
 	  if (independent_points.at(j).y > 101.5*units::cm){
@@ -1911,7 +1916,7 @@ void WireCell2dToy::Clustering_separate(WireCell::PR3DClusterSelection& live_clu
       
       if (flag_proceed){
       //   if (WireCell2dToy::JudgeSeparateDec_2(cluster,drift_dir,boundary_points,independent_points)){
-      	if (WireCell2dToy::JudgeSeparateDec_1(cluster,drift_dir)){
+      	if (WireCell2dToy::JudgeSeparateDec_1(cluster,drift_dir, cluster_length_map[cluster], time_slice_width)){
 	  //	  std::cerr << em("sep prepare sep") << std::endl;
 	  
 	  std::cout << "Separate cluster " << cluster->get_cluster_id() << std::endl;
@@ -1984,7 +1989,7 @@ void WireCell2dToy::Clustering_separate(WireCell::PR3DClusterSelection& live_clu
 
 	    
 	    // if (flag_proceed && WireCell2dToy::JudgeSeparateDec_1(cluster2,drift_dir)){ 
-	    if (WireCell2dToy::JudgeSeparateDec_1(cluster2,drift_dir) &&
+	    if (WireCell2dToy::JudgeSeparateDec_1(cluster2,drift_dir,length_1, time_slice_width) &&
 	       	WireCell2dToy::JudgeSeparateDec_2(cluster2,drift_dir,boundary_points,independent_points, length_1)){
 	      
 	      // std::cout << "Separate 2nd level" << std::endl;
@@ -2010,7 +2015,7 @@ void WireCell2dToy::Clustering_separate(WireCell::PR3DClusterSelection& live_clu
 	      if (length_1 > 100*units::cm){
 		boundary_points.clear();
 		independent_points.clear();
-		if (WireCell2dToy::JudgeSeparateDec_1(cluster4,drift_dir) &&
+		if (WireCell2dToy::JudgeSeparateDec_1(cluster4,drift_dir, length_1, time_slice_width) &&
 		    WireCell2dToy::JudgeSeparateDec_2(cluster4,drift_dir,boundary_points,independent_points, length_1)){
 		  //	std::cout << "Separate 3rd level" << std::endl;
 		  
@@ -2044,7 +2049,7 @@ void WireCell2dToy::Clustering_separate(WireCell::PR3DClusterSelection& live_clu
 	  if (length_1 > 60*units::cm){
 	    boundary_points.clear();
 	    independent_points.clear();
-	    WireCell2dToy::JudgeSeparateDec_1(final_sep_cluster,drift_dir);
+	    WireCell2dToy::JudgeSeparateDec_1(final_sep_cluster,drift_dir, length_1, time_slice_width);
 	    WireCell2dToy::JudgeSeparateDec_2(final_sep_cluster,drift_dir,boundary_points,independent_points, length_1);
 	    if (independent_points.size() > 0){
 	      
@@ -2360,7 +2365,7 @@ void WireCell2dToy::Clustering_separate(WireCell::PR3DClusterSelection& live_clu
       bool flag_proceed = WireCell2dToy::JudgeSeparateDec_2(cluster,drift_dir,boundary_points,independent_points, cluster_length_map[cluster]);
 
       /* if (cluster_length_map[cluster]>100*units::cm && independent_points.size()>0){ */
-      /* 	std::cout << cluster->get_cluster_id() << " A " << cluster_length_map[cluster]/units::cm << " " << flag_proceed << " " << WireCell2dToy::JudgeSeparateDec_1(cluster,drift_dir) << " " << independent_points.at(0).x/units::cm << " " << independent_points.at(0).y/units::cm << " " << independent_points.at(0).z/units::cm << " " << independent_points.size() << std::endl; */
+      /* 	std::cout << cluster->get_cluster_id() << " A " << cluster_length_map[cluster]/units::cm << " " << flag_proceed << " " << WireCell2dToy::JudgeSeparateDec_1(cluster,drift_dir,cluster_length_map[cluster], time_slice_width) << " " << independent_points.at(0).x/units::cm << " " << independent_points.at(0).y/units::cm << " " << independent_points.at(0).z/units::cm << " " << independent_points.size() << std::endl; */
       /* /\* /\\* 	/\\\* if (independent_points.size()==2){ *\\\/ *\\/ *\/ */
       /* /\* /\\* 	/\\\*   TVector3 main_dir(cluster->get_PCA_axis(0).x,cluster->get_PCA_axis(0).y,cluster->get_PCA_axis(0).z); *\\\/ *\\/ *\/ */
       /* /\* /\\* 	/\\\*   TVector3 main_dir1(independent_points.at(1).x - independent_points.at(0).x, *\\\/ *\\/ *\/ */
@@ -2372,7 +2377,7 @@ void WireCell2dToy::Clustering_separate(WireCell::PR3DClusterSelection& live_clu
       
       
       
-      if (!flag_proceed && cluster_length_map[cluster]>100*units::cm && WireCell2dToy::JudgeSeparateDec_1(cluster,drift_dir) && independent_points.size()>0){
+      if (!flag_proceed && cluster_length_map[cluster]>100*units::cm && WireCell2dToy::JudgeSeparateDec_1(cluster,drift_dir, cluster_length_map[cluster], time_slice_width) && independent_points.size()>0){
 	bool flag_top = false;
 	for (size_t j=0;j!=independent_points.size();j++){
 	  if (independent_points.at(j).y > 101.5*units::cm){
@@ -2427,7 +2432,7 @@ void WireCell2dToy::Clustering_separate(WireCell::PR3DClusterSelection& live_clu
       
       if (flag_proceed){
       //   if (WireCell2dToy::JudgeSeparateDec_2(cluster,drift_dir,boundary_points,independent_points)){
-      	if (WireCell2dToy::JudgeSeparateDec_1(cluster,drift_dir)){
+      	if (WireCell2dToy::JudgeSeparateDec_1(cluster,drift_dir, cluster_length_map[cluster], time_slice_width)){
 	  //	  std::cerr << em("sep prepare sep") << std::endl;
 	  
 	  std::cout << "Separate cluster " << cluster->get_cluster_id() << std::endl;
@@ -2500,7 +2505,7 @@ void WireCell2dToy::Clustering_separate(WireCell::PR3DClusterSelection& live_clu
 
 	    
 	    // if (flag_proceed && WireCell2dToy::JudgeSeparateDec_1(cluster2,drift_dir)){ 
-	    if (WireCell2dToy::JudgeSeparateDec_1(cluster2,drift_dir) &&
+	    if (WireCell2dToy::JudgeSeparateDec_1(cluster2,drift_dir, length_1, time_slice_width) &&
 	       	WireCell2dToy::JudgeSeparateDec_2(cluster2,drift_dir,boundary_points,independent_points, length_1)){
 	      
 	      // std::cout << "Separate 2nd level" << std::endl;
@@ -2526,7 +2531,7 @@ void WireCell2dToy::Clustering_separate(WireCell::PR3DClusterSelection& live_clu
 	      if (length_1 > 100*units::cm){
 		boundary_points.clear();
 		independent_points.clear();
-		if (WireCell2dToy::JudgeSeparateDec_1(cluster4,drift_dir) &&
+		if (WireCell2dToy::JudgeSeparateDec_1(cluster4,drift_dir, length_1, time_slice_width) &&
 		    WireCell2dToy::JudgeSeparateDec_2(cluster4,drift_dir,boundary_points,independent_points, length_1)){
 		  //	std::cout << "Separate 3rd level" << std::endl;
 		  
@@ -2560,7 +2565,7 @@ void WireCell2dToy::Clustering_separate(WireCell::PR3DClusterSelection& live_clu
 	  if (length_1 > 60*units::cm){
 	    boundary_points.clear();
 	    independent_points.clear();
-	    WireCell2dToy::JudgeSeparateDec_1(final_sep_cluster,drift_dir);
+	    WireCell2dToy::JudgeSeparateDec_1(final_sep_cluster,drift_dir, length_1, time_slice_width);
 	    WireCell2dToy::JudgeSeparateDec_2(final_sep_cluster,drift_dir,boundary_points,independent_points, length_1);
 	    if (independent_points.size() > 0){
 	      
