@@ -135,7 +135,7 @@ int WireCell2dToy::ToyFiducial::check_LM(WireCell::FlashTPCBundle *bundle, doubl
   if (flash->get_type()==2){
     if (!flag_boundary){
       if (!( log10(total_pred_pe/total_flash_pe)>-0.55 &&
-	     ks_dis<0.45 &&
+	     ks_dis<0.25 &&
 	     ks_dis-0.15/1.4*log10(total_pred_pe/total_flash_pe)<0.32) )
 	return 2;
       
