@@ -218,7 +218,7 @@ bool WireCell2dToy::ToyFiducial::check_tgm(WireCell::FlashTPCBundle *bundle, dou
       }
       
 
-      // if (main_cluster->get_cluster_id()==14){
+      // if (main_cluster->get_cluster_id()==7){
       //  	std::cout << main_cluster->get_cluster_id() << " " << i << " " <<
       //  	  out_vec_wcps.at(i).at(0).x/units::cm << " " << out_vec_wcps.at(i).at(0).y/units::cm << " " << out_vec_wcps.at(i).at(0).z/units::cm << " " << 
       //  	  k << " " << out_vec_wcps.at(k).at(0).x/units::cm << " " << out_vec_wcps.at(k).at(0).y/units::cm << " " << out_vec_wcps.at(k).at(0).z/units::cm <<
@@ -648,17 +648,17 @@ bool WireCell2dToy::ToyFiducial::check_neutrino_candidate(WireCell::PR3DCluster 
 	  num_nth ++;
 	  // num_total_dead ++;
 	  
-	  // if (main_cluster->get_cluster_id()==3)
-	  // std::cout << main_cluster->get_cluster_id() << " " << min_dis/units::cm << " " << flag_2view_check << " " << path_wcps_vec1.at(i).x/units::cm << " " 
-	  //  	    << path_wcps_vec1.at(i).y/units::cm << " "
-	  //  	    << path_wcps_vec1.at(i).z/units::cm << " "
-	  //  	    << num_nth << " " << cloud_u.pts.size() << " " << cloud_v.pts.size() << " "<< cloud_w.pts.size() << " " << num_bad << std::endl;
+	  // if (main_cluster->get_cluster_id()==7)
+	  //   std::cout << main_cluster->get_cluster_id() << " " << min_dis/units::cm << " " << flag_2view_check << " " << path_wcps_vec1.at(i).x/units::cm << " " 
+	  // 	      << path_wcps_vec1.at(i).y/units::cm << " "
+	  // 	      << path_wcps_vec1.at(i).z/units::cm << " "
+	  // 	      << num_nth << " " << cloud_u.pts.size() << " " << cloud_v.pts.size() << " "<< cloud_w.pts.size() << " " << num_bad << std::endl;
 	  
 	}
 	//std::cout << num_nth << std::endl;
 
-	//if (num_nth > 9 && min_dis < 25*units::cm && num_bad > 7) return true; // too big a gap ... 4 cm cut ...
-	if (num_nth > 7 && num_bad > 7) return true; // too big a gap ... 4 cm cut ...
+	if (num_nth > 7 && min_dis < 25*units::cm && num_bad > 7) return true; // too big a gap ... 4 cm cut ...
+	//if (num_nth > 7 && num_bad > 7) return true; // too big a gap ... 4 cm cut ...
       }
     }
   }
@@ -743,7 +743,7 @@ bool WireCell2dToy::ToyFiducial::check_neutrino_candidate(WireCell::PR3DCluster 
     if (fabs(3.1415926/2.-drift_dir.Angle(dir5-dir6))/3.1415926*180. > 5) cut2++;
 
     
-    // if (main_cluster->get_cluster_id()==14)
+    // if (main_cluster->get_cluster_id()==7)
     //   std::cout << i << " " << path_wcps_vec.at(i).x/units::cm << " " << path_wcps_vec.at(i).y/units::cm << " " << path_wcps_vec.at(i).z/units::cm << " " << (3.1415926 - dir1.Angle(dir2))/3.1415926*180. << " " << (3.1415926 - dir3.Angle(dir4))/3.1415926*180. << " " << (3.1415926 - dir5.Angle(dir6))/3.1415926*180. << " " << fabs(3.1415926/2.-drift_dir.Angle(dir1-dir2))/3.1415926*180. << " " << fabs(3.1415926/2.-drift_dir.Angle(dir3-dir4))/3.1415926*180. << " " << fabs(3.1415926/2.-drift_dir.Angle(dir5-dir6))/3.1415926*180. << " " << cut1 << " " << cut2 << std::endl;
   
    
@@ -764,7 +764,7 @@ bool WireCell2dToy::ToyFiducial::check_neutrino_candidate(WireCell::PR3DCluster 
 		       path_wcps_vec.at(i).y-wcp2.y,
 		       path_wcps_vec.at(i).z-wcp2.z);
 
-	// if (main_cluster->get_cluster_id()==14)
+	// if (main_cluster->get_cluster_id()==7)
 	//   std::cout << "A: " << (3.1415926-temp1.Angle(temp2))/3.1415926*180. << " " << fabs(3.1415926/2.-drift_dir.Angle(temp1+temp2))/3.1415926*180.<< " " << temp1.Mag()/units::cm << " " << temp2.Mag()/units::cm << std::endl;
 
 
@@ -773,7 +773,7 @@ bool WireCell2dToy::ToyFiducial::check_neutrino_candidate(WireCell::PR3DCluster 
 	    ((3.1415926-temp1.Angle(temp2))/3.1415926*180. >25 && fabs(3.1415926/2.-drift_dir.Angle(temp1+temp2))/3.1415926*180. > 5 || (3.1415926-temp1.Angle(temp2))/3.1415926*180. >60 )
 	    && temp1.Mag()>15*units::cm && temp2.Mag()>15*units::cm){
 
-	  // if (main_cluster->get_cluster_id()==14)
+	  // if (main_cluster->get_cluster_id()==7)
 	  //   std::cout << "B: " <<  (!inside_fiducial_volume(max_point,offset_x)) << " " << inside_dead_region(max_point) << std::endl;
 	  
 	  if ((!inside_fiducial_volume(max_point,offset_x)) || // must be in fiducial
