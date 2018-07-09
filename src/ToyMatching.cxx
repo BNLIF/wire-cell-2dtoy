@@ -276,8 +276,8 @@ FlashTPCBundleSelection WireCell2dToy::tpc_light_match(int time_offset, int nreb
 	  
 	}
 	
-	// if (flash->get_flash_id()==19 && main_cluster->get_cluster_id()==19 )
-	//  std::cout << flash->get_flash_id() << " "<< main_cluster->get_cluster_id() << " " << (first_pos_x-offset_x)/units::cm << " " << (last_pos_x-offset_x)/units::cm << std::endl;
+	// if (flash->get_flash_id()==16 && main_cluster->get_cluster_id()==13 )
+	//   std::cout << flash->get_flash_id() << " "<< main_cluster->get_cluster_id() << " " << (first_pos_x-offset_x)/units::cm << " " << (last_pos_x-offset_x)/units::cm << std::endl;
 
 	//	if (flash->get_flash_id()==14)
 	//      std::cout << flash->get_flash_id() << " " << main_cluster->get_cluster_id() << " " << offset_x/units::cm << " " << (first_pos_x-offset_x)/units::cm << " " << (last_pos_x-offset_x)/units::cm << " " << std::endl;
@@ -289,10 +289,13 @@ FlashTPCBundleSelection WireCell2dToy::tpc_light_match(int time_offset, int nreb
 	  
 	  bundle->set_spec_end_flag(flag_spec_end);
 	  
-  	  if (first_pos_x-offset_x <=low_x_cut + low_x_cut_ext2 && first_pos_x-offset_x > low_x_cut + low_x_cut_ext1 ){
-  	    bundle->set_flag_close_to_PMT(true);
+  	  if (first_pos_x-offset_x <=low_x_cut + low_x_cut_ext2 && first_pos_x-offset_x > low_x_cut + low_x_cut_ext1 - 1.0*units::cm ){
+  	    // bundle->set_flag_close_to_PMT(true);
+  	  //   bundle->set_flag_at_x_boundary(true);
+  	  // }else if (first_pos_x-offset_x <= low_x_cut + low_x_cut_ext1 && first_pos_x-offset_x > low_x_cut + low_x_cut_ext1 -1.0*units::cm){
+	    bundle->set_flag_close_to_PMT(true);
   	    bundle->set_flag_at_x_boundary(true);
-  	  }
+	  }
   	  if (last_pos_x-offset_x >= high_x_cut + high_x_cut_ext2 && last_pos_x-offset_x < high_x_cut + high_x_cut_ext1){
   	    bundle->set_flag_at_x_boundary(true);
   	  }
