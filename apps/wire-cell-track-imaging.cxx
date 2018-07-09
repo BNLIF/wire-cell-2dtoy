@@ -850,13 +850,24 @@ int main(int argc, char* argv[])
 
   roostr = "h2_good_track_phi_costheta";
   TH2D *h2_good_track_phi_costheta = new TH2D(roostr, roostr, 10, 0, TMath::Pi(), 10, 0, 1);
-  
   roostr = "h2_broken_track_phi_costheta";
   TH2D *h2_broken_track_phi_costheta = new TH2D(roostr, roostr, 10, 0, TMath::Pi(), 10, 0, 1);
-  
   roostr = "h2_ineff_track_phi_costheta";
   TH2D *h2_ineff_track_phi_costheta = new TH2D(roostr, roostr, 10, 0, TMath::Pi(), 10, 0, 1);
   
+  roostr = "h2_good_track_u_phi_costheta";
+  TH2D *h2_good_track_u_phi_costheta = new TH2D(roostr, roostr, 10, 0, TMath::Pi(), 10, 0, 1);
+  roostr = "h2_broken_track_u_phi_costheta";
+  TH2D *h2_broken_track_u_phi_costheta = new TH2D(roostr, roostr, 10, 0, TMath::Pi(), 10, 0, 1);
+  roostr = "h2_ineff_track_u_phi_costheta";
+  TH2D *h2_ineff_track_u_phi_costheta = new TH2D(roostr, roostr, 10, 0, TMath::Pi(), 10, 0, 1);
+  
+  roostr = "h2_good_track_v_phi_costheta";
+  TH2D *h2_good_track_v_phi_costheta = new TH2D(roostr, roostr, 10, 0, TMath::Pi(), 10, 0, 1);
+  roostr = "h2_broken_track_v_phi_costheta";
+  TH2D *h2_broken_track_v_phi_costheta = new TH2D(roostr, roostr, 10, 0, TMath::Pi(), 10, 0, 1);
+  roostr = "h2_ineff_track_v_phi_costheta";
+  TH2D *h2_ineff_track_v_phi_costheta = new TH2D(roostr, roostr, 10, 0, TMath::Pi(), 10, 0, 1);
   
   int num_ghost = vc_ghost_id.size();
   int num_tracks = flag_track2recon.size();
@@ -870,7 +881,17 @@ int main(int argc, char* argv[])
     TVector3 dir = vc_track_dir[track_id];
     double cosy = dir.Y()/dir.Mag();
     double phiz = TMath::ACos(dir.Z()/TMath::Sqrt(dir.X()*dir.X()+dir.Z()*dir.Z()));
+ 
+    /////// Muplane
+    TVector3 u_dir = Muplane * dir;
+    double u_cosy = u_dir.Y()/u_dir.Mag();
+    double u_phiz = TMath::ACos(u_dir.Z()/TMath::Sqrt(u_dir.X()*u_dir.X()+u_dir.Z()*u_dir.Z()));
     
+    /////// Mvplane
+    TVector3 v_dir = Mvplane * dir;
+    double v_cosy = v_dir.Y()/v_dir.Mag();
+    double v_phiz = TMath::ACos(v_dir.Z()/TMath::Sqrt(v_dir.X()*v_dir.X()+v_dir.Z()*v_dir.Z()));
+   
     ///////
     if( flag==2 ) {
       int cluster_id = map_non_ghost_track_clusters[it->first].at(1);
@@ -889,10 +910,22 @@ int main(int argc, char* argv[])
     }
 
     ///////
-    if( flag==2 ) h2_good_track_phi_costheta->Fill( phiz, cosy );
-    if( flag==1 ) h2_broken_track_phi_costheta->Fill( phiz, cosy );
-    if( flag==0 ) h2_ineff_track_phi_costheta->Fill( phiz, cosy );
-    
+    if( flag==2 ) {
+      h2_good_track_phi_costheta->Fill( phiz, cosy );
+      h2_good_track_u_phi_costheta->Fill( u_phiz, u_cosy );
+      h2_good_track_v_phi_costheta->Fill( v_phiz, v_cosy );
+    }
+    if( flag==1 ) {
+      h2_broken_track_phi_costheta->Fill( phiz, cosy );
+      h2_broken_track_u_phi_costheta->Fill( u_phiz, u_cosy );
+      h2_broken_track_v_phi_costheta->Fill( v_phiz, v_cosy );
+    }
+    if( flag==0 ) {
+      h2_ineff_track_phi_costheta->Fill( phiz, cosy );
+      h2_ineff_track_u_phi_costheta->Fill( u_phiz, u_cosy );
+      h2_ineff_track_v_phi_costheta->Fill( v_phiz, v_cosy );      
+    }
+      
   }
   int num_good = num_flag[2];
   int num_broken = num_flag[1];
@@ -1021,6 +1054,14 @@ int main(int argc, char* argv[])
   h2_good_track_phi_costheta->Write();
   h2_broken_track_phi_costheta->Write();
   h2_ineff_track_phi_costheta->Write();
+    
+  h2_good_track_u_phi_costheta->Write();
+  h2_broken_track_u_phi_costheta->Write();
+  h2_ineff_track_u_phi_costheta->Write();
+    
+  h2_good_track_v_phi_costheta->Write();
+  h2_broken_track_v_phi_costheta->Write();
+  h2_ineff_track_v_phi_costheta->Write();
     
   output->Close();
 
