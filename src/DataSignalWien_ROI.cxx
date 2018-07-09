@@ -9,6 +9,7 @@
 
 #include <set>
 #include <algorithm>
+#include <fstream>
 
 using namespace WireCell;
 
@@ -60,8 +61,116 @@ WireCell2dToy::DataSignalWienROIFDS::DataSignalWienROIFDS(WireCell::FrameDataSou
   hw_1D_g = new TH2I("hw_1D_g","hw_1D_g",nwire_w,0,nwire_w,bins_per_frame,0,bins_per_frame);
   hw_1D_g_gaus = new TH2I("hw_1D_g_gaus","hw_1D_g_gaus",nwire_w,0,nwire_w,bins_per_frame,0,bins_per_frame);
 
-  #include "data_70_ROI_11.txt"  //70kV 2D deconvolution for U
+  //#include "data_70_ROI_11.txt"  //70kV 2D deconvolution for U
+      Double_t u_1D_c_x[5000], u_1D_c_y[5000];
+  Double_t v_1D_c_x[5000], v_1D_c_y[5000];
+  Double_t w_1D_c_x[5000], w_1D_c_y[5000];
 
+  Double_t u_2D_g_0_x[5000], u_2D_g_0_y[5000];
+  Double_t u_2D_g_1_x[5000], u_2D_g_1_y[5000];
+  Double_t u_2D_g_2_x[5000], u_2D_g_2_y[5000];
+  Double_t u_2D_g_3_x[5000], u_2D_g_3_y[5000];
+  Double_t u_2D_g_4_x[5000], u_2D_g_4_y[5000];
+  Double_t u_2D_g_5_x[5000], u_2D_g_5_y[5000];
+  Double_t u_2D_g_6_x[5000], u_2D_g_6_y[5000];
+  Double_t u_2D_g_7_x[5000], u_2D_g_7_y[5000];
+  Double_t u_2D_g_8_x[5000], u_2D_g_8_y[5000];
+  Double_t u_2D_g_9_x[5000], u_2D_g_9_y[5000];
+  Double_t u_2D_g_10_x[5000], u_2D_g_10_y[5000];
+
+  Double_t v_2D_g_0_x[5000], v_2D_g_0_y[5000];
+  Double_t v_2D_g_1_x[5000], v_2D_g_1_y[5000];
+  Double_t v_2D_g_2_x[5000], v_2D_g_2_y[5000];
+  Double_t v_2D_g_3_x[5000], v_2D_g_3_y[5000];
+  Double_t v_2D_g_4_x[5000], v_2D_g_4_y[5000];
+  Double_t v_2D_g_5_x[5000], v_2D_g_5_y[5000];
+  Double_t v_2D_g_6_x[5000], v_2D_g_6_y[5000];
+  Double_t v_2D_g_7_x[5000], v_2D_g_7_y[5000];
+  Double_t v_2D_g_8_x[5000], v_2D_g_8_y[5000];
+  Double_t v_2D_g_9_x[5000], v_2D_g_9_y[5000];
+  Double_t v_2D_g_10_x[5000], v_2D_g_10_y[5000];
+
+  
+  Double_t w_1D_g_x[5000], w_1D_g_y[5000];
+
+  std::ifstream infile("run_data_70_2D_11.txt");
+  for (int i=0;i!=5000;i++){infile >> u_1D_c_x[i];};
+  for (int i=0;i!=5000;i++){infile >> u_1D_c_y[i];};
+  for (int i=0;i!=5000;i++){infile >> v_1D_c_x[i];};
+  for (int i=0;i!=5000;i++){infile >> v_1D_c_y[i];};
+  for (int i=0;i!=5000;i++){infile >> w_1D_c_x[i];};
+  for (int i=0;i!=5000;i++){infile >> w_1D_c_y[i];};
+
+  for (int i=0;i!=5000;i++){infile >> u_2D_g_0_x[i];};
+  for (int i=0;i!=5000;i++){infile >> u_2D_g_0_y[i];};
+  for (int i=0;i!=5000;i++){infile >> v_2D_g_0_x[i];};
+  for (int i=0;i!=5000;i++){infile >> v_2D_g_0_y[i];};
+  
+
+  for (int i=0;i!=5000;i++){infile >> u_2D_g_1_x[i];};
+  for (int i=0;i!=5000;i++){infile >> u_2D_g_1_y[i];};
+  for (int i=0;i!=5000;i++){infile >> v_2D_g_1_x[i];};
+  for (int i=0;i!=5000;i++){infile >> v_2D_g_1_y[i];};
+  
+
+  for (int i=0;i!=5000;i++){infile >> u_2D_g_2_x[i];};
+  for (int i=0;i!=5000;i++){infile >> u_2D_g_2_y[i];};
+  for (int i=0;i!=5000;i++){infile >> v_2D_g_2_x[i];};
+  for (int i=0;i!=5000;i++){infile >> v_2D_g_2_y[i];};
+  
+
+  for (int i=0;i!=5000;i++){infile >> u_2D_g_3_x[i];};
+  for (int i=0;i!=5000;i++){infile >> u_2D_g_3_y[i];};
+  for (int i=0;i!=5000;i++){infile >> v_2D_g_3_x[i];};
+  for (int i=0;i!=5000;i++){infile >> v_2D_g_3_y[i];};
+  
+
+  for (int i=0;i!=5000;i++){infile >> u_2D_g_4_x[i];};
+  for (int i=0;i!=5000;i++){infile >> u_2D_g_4_y[i];};
+  for (int i=0;i!=5000;i++){infile >> v_2D_g_4_x[i];};
+  for (int i=0;i!=5000;i++){infile >> v_2D_g_4_y[i];};
+  
+  for (int i=0;i!=5000;i++){infile >> u_2D_g_5_x[i];};
+  for (int i=0;i!=5000;i++){infile >> u_2D_g_5_y[i];};
+  for (int i=0;i!=5000;i++){infile >> v_2D_g_5_x[i];};
+  for (int i=0;i!=5000;i++){infile >> v_2D_g_5_y[i];};
+  
+
+  for (int i=0;i!=5000;i++){infile >> u_2D_g_6_x[i];};
+  for (int i=0;i!=5000;i++){infile >> u_2D_g_6_y[i];};
+  for (int i=0;i!=5000;i++){infile >> v_2D_g_6_x[i];};
+  for (int i=0;i!=5000;i++){infile >> v_2D_g_6_y[i];};
+  
+  
+  for (int i=0;i!=5000;i++){infile >> u_2D_g_7_x[i];};
+  for (int i=0;i!=5000;i++){infile >> u_2D_g_7_y[i];};
+  for (int i=0;i!=5000;i++){infile >> v_2D_g_7_x[i];};
+  for (int i=0;i!=5000;i++){infile >> v_2D_g_7_y[i];};
+  
+
+  for (int i=0;i!=5000;i++){infile >> u_2D_g_8_x[i];};
+  for (int i=0;i!=5000;i++){infile >> u_2D_g_8_y[i];};
+  for (int i=0;i!=5000;i++){infile >> v_2D_g_8_x[i];};
+  for (int i=0;i!=5000;i++){infile >> v_2D_g_8_y[i];};
+  
+
+  for (int i=0;i!=5000;i++){infile >> u_2D_g_9_x[i];};
+  for (int i=0;i!=5000;i++){infile >> u_2D_g_9_y[i];};
+  for (int i=0;i!=5000;i++){infile >> v_2D_g_9_x[i];};
+  for (int i=0;i!=5000;i++){infile >> v_2D_g_9_y[i];};
+  
+
+  
+  for (int i=0;i!=5000;i++){infile >> u_2D_g_10_x[i];};
+  for (int i=0;i!=5000;i++){infile >> u_2D_g_10_y[i];};
+  for (int i=0;i!=5000;i++){infile >> v_2D_g_10_x[i];};
+  for (int i=0;i!=5000;i++){infile >> v_2D_g_10_y[i];};
+
+  for (int i=0;i!=5000;i++){infile >> w_1D_g_x[i];};
+  for (int i=0;i!=5000;i++){infile >> w_1D_g_y[i];};
+  infile.close();
+
+  
   gu_1D_c = new TGraph(5000,u_1D_c_x, u_1D_c_y);
   gv_1D_c = new TGraph(5000,v_1D_c_x, v_1D_c_y);
   gw_1D_c = new TGraph(5000,w_1D_c_x, w_1D_c_y);
