@@ -242,8 +242,8 @@ int main(int argc, char* argv[])
 	  distance = distance_vertical;
 	}
 	
-	if( distance < 3 ) {// cm
-	  cout<<endl<<" WARNING : track crossing: distance between two tracks is very close ( < 3 cm )"<<endl<<endl;
+	if( distance < 2 ) {// cm
+	  cout<<endl<<" WARNING : track crossing: distance between two tracks is very close ( < 2 cm )"<<endl<<endl;
 	  cout<<this_id<<"\t"<<next_id<<"\t"<<distance<<endl;
 	  exit(0);
 	}
