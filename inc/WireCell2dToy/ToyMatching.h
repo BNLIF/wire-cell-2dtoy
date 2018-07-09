@@ -12,7 +12,7 @@ namespace WireCell2dToy{
 
   WireCell::FlashTPCBundleSelection tpc_light_match(int time_offset, int nrebin, std::map<WireCell::PR3DCluster*,std::vector<std::pair<WireCell::PR3DCluster*,double>>>& group_clusters, WireCell::OpflashSelection& flashes);
 
-  void organize_matched_bundles(WireCell::FlashTPCBundleSelection& results_bundles, Double_t *cos_pe_low, Double_t *cos_pe_mid);
+  void organize_matched_bundles(WireCell::FlashTPCBundleSelection& results_bundles, Double_t *cos_pe_low, Double_t *cos_pe_mid, std::map<std::pair<WireCell::Opflash*,WireCell::PR3DCluster*>,WireCell::FlashTPCBundle*>& fc_bundles_map);
   
   // std::vector<std::tuple<WireCell::PR3DCluster*, WireCell::Opflash*, double, std::vector<double>>> tpc_light_match(int time_offset, int nrebin, std::map<WireCell::PR3DCluster*,std::vector<std::pair<WireCell::PR3DCluster*,double>>>& group_clusters, WireCell::OpflashSelection& flashes);
 }
