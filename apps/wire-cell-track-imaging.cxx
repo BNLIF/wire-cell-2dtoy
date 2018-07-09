@@ -77,12 +77,22 @@ int main(int argc, char* argv[])
 {
   if(argc < 3){
     cout<<"Usage: wire-cell-track-eval input.root outputname.root [option: cluster_id]"<<endl;
-    exit(1);
+    return 1;
   }
   const char* inputroot = argv[1];
   const char* outputroot = argv[2];
-  int cluster_check=-1; // specify cluster_id to check 
-  if(argc==4) cluster_check=atoi(argv[3]);
+  int cluster_check=0; // track classification to check + clusters
+  //if(argc==4) cluster_check=atoi(argv[3]);
+    
+  for(int i=1; i!=argc; i++){
+      switch(argv[i][1]){
+          case 'c': {
+              cluster_check = atoi(&argv[i][2]); // 1
+              break;
+          }
+          default: break; // 0
+      }
+  }
 
   //cout<<" ---> test track-imaging A"<<endl;
   //cout<<" ---> test track-imaging B"<<endl;
@@ -953,6 +963,7 @@ int main(int argc, char* argv[])
   ///////////////////////////////////////////////////////////////////////////////////
   ///////////////////////////////////////////////////////////////////////////////////
 
+  if(cluster_check){
   roostr = "canv_visuliaztion_tracks_cluster";
   TCanvas *canv_visuliaztion_tracks_cluster = new TCanvas(roostr, roostr, 1000, 800);
 
@@ -984,9 +995,9 @@ int main(int argc, char* argv[])
     gh_ghost_all->SetMarkerStyle(4);
     gh_ghost_all->SetMarkerSize(0.3);
   }
-  
+
   canv_visuliaztion_tracks_cluster->SaveAs("canv_visuliaztion_tracks_cluster.root");
-  
+  }
   /////////////////////////////////////////////////////////////////////////////////// WRITE FILE
   /////////////////////////////////////////////////////////////////////////////////// WRITE FILE
   
