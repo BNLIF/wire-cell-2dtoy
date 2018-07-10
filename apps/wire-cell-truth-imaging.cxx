@@ -205,7 +205,7 @@ int main(int argc, char* argv[])
   float threshold_wg = 510.84;
   
 
-  int time_offset = 90; // no SP, so an overall offset is needed ... should be 90 ticks. 
+  int time_offset = 180; // no SP, so an overall offset is needed ... should be ~90*2 ticks [10 cm absolute time + 10 cm field response]. 
   
   //root file saving truth info
   const char* true_file;
@@ -667,7 +667,7 @@ int main(int argc, char* argv[])
 
 
 
-  TFile *file = new TFile(Form("nosp_image_%d_%d_%d.root",run_no,subrun_no,event_no),"RECREATE");
+  TFile *file = new TFile(Form("truth_image_%d_%d_%d.root",run_no,subrun_no,event_no),"RECREATE");
 
   if(T_true!=0 && save_file==1){
     T_true->CloneTree();
