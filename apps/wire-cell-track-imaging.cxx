@@ -797,7 +797,7 @@ int main(int argc, char* argv[])
       cout<<" ------------> percentage of points of cluster near to track : "<<count_npts*1./npts<<endl;
 
       
-      if( count_npts*1./npts < 0.5 ) continue; // equivalent to an angle cut
+      if( (count_npts*1./npts < 0.1 || vc_cluster_length[cluster_id]>5) && count_npts*1./npts < 0.5 )  continue; // equivalent to an angle cut
 
 
       if( flag_start_near && flag_end_near ) {// good track
@@ -902,23 +902,46 @@ int main(int argc, char* argv[])
     }
 
     if( flag==1 ) {
-      //double length = 0;
-      double min = 1e6;
-      double max = -1e6;
+      //store each cluster's min/max projective position along track direction
+      //then sorted by the min
+        std::vector< std::pair<double, double> > vec_min_max_proj;  
       for(int i=1; i<map_non_ghost_track_clusters[it->first].size(); i++) {
 	    int cluster_id = map_non_ghost_track_clusters[it->first].at(i);
 	//length += vc_cluster_length[cluster_id] * fabs( vc_cluster_dir[cluster_id].Dot(vc_track_dir[track_id]) );
 	//cout<<" debug : "<< it->first<<"\t"<<vc_cluster_length[ map_non_ghost_track_clusters[it->first].at(i) ]<<endl;
         double start_proj = vc_cluster_start[cluster_id].Dot(vc_track_dir[track_id]);
-        double end_proj = vc_cluster_end[cluster_id].Dot(vc_track_dir[track_id]);
-        min = min<start_proj?min:start_proj;
+        double end_proj = vc_cluster_end[cluster_id].Dot(vc_track_dir[track_id]); 
+        double min = min<start_proj?min:start_proj;
         min = min<end_proj?min:end_proj;
-        max = max>start_proj?max:start_proj;
+        double max = max>start_proj?max:start_proj;
         max = max>end_proj?max:end_proj;
+
+        std::pair<double, double> p(min, max);
+        vec_min_max_proj.push_back(p);
       }
-      //if(length>110) cout<<" debug: "<<"broken track length too large!"<<endl;
-      //h1_broken_track_length->Fill( length );
-      h1_broken_track_length->Fill( fabs(max-min) );
+
+      //sorted by ascending order of min
+      std::sort(vec_min_max_proj.begin(), vec_min_max_proj.end());
+      double previous_min=-1e6;
+      double previous_max=-1e6;
+      double length = 0;
+      for(int i=0; i<vec_min_max_proj.size(); i++)
+      {
+        double cluster_min = vec_min_max_proj.at(i).first;
+        double cluster_max = vec_min_max_proj.at(i).second;
+        if(previous_max>=cluster_min){
+            previous_max = cluster_max;
+        }
+        else{
+            length += previous_max - previous_min;
+            previous_max = cluster_max;
+            previous_min = cluster_min;
+        }
+      }
+      length += previous_max - previous_min;
+
+      h1_broken_track_length->Fill( length );
+      if(length>110) cout<<" WARNING : "<<"broken track length too large!"<<endl;
     }
 
     double val_u = u_cosy * fabs( TMath::Pi()/2 - u_phiz );
