@@ -911,9 +911,11 @@ int main(int argc, char* argv[])
 	//cout<<" debug : "<< it->first<<"\t"<<vc_cluster_length[ map_non_ghost_track_clusters[it->first].at(i) ]<<endl;
         double start_proj = vc_cluster_start[cluster_id].Dot(vc_track_dir[track_id]);
         double end_proj = vc_cluster_end[cluster_id].Dot(vc_track_dir[track_id]); 
-        double min = min<start_proj?min:start_proj;
+        double min = 1e6;
+        double max = -1e6;
+        min = min<start_proj?min:start_proj;
         min = min<end_proj?min:end_proj;
-        double max = max>start_proj?max:start_proj;
+        max = max>start_proj?max:start_proj;
         max = max>end_proj?max:end_proj;
 
         std::pair<double, double> p(min, max);
@@ -925,12 +927,14 @@ int main(int argc, char* argv[])
       double previous_min=-1e6;
       double previous_max=-1e6;
       double length = 0;
+      cout<<"Broken: Debug: track: "<<track_id<<endl;
       for(int i=0; i<vec_min_max_proj.size(); i++)
       {
         double cluster_min = vec_min_max_proj.at(i).first;
         double cluster_max = vec_min_max_proj.at(i).second;
+        cout<<"Debug: min: "<<cluster_min<<" max: "<<cluster_max<<endl;
         if(previous_max>=cluster_min){
-            previous_max = cluster_max;
+            if(previous_max<cluster_max) previous_max = cluster_max;
         }
         else{
             length += previous_max - previous_min;
@@ -940,6 +944,7 @@ int main(int argc, char* argv[])
       }
       length += previous_max - previous_min;
 
+      cout<<"Debug: length: "<<length<<endl;
       h1_broken_track_length->Fill( length );
       if(length>110) cout<<" WARNING : "<<"broken track length too large!"<<endl;
     }
