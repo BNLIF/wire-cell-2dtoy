@@ -884,11 +884,13 @@ int main(int argc, char* argv[])
  
     /////// Muplane
     TVector3 u_dir = Muplane * dir;
+    if( u_dir.Y()<0 ) u_dir *= -1.;
     double u_cosy = u_dir.Y()/u_dir.Mag();
     double u_phiz = TMath::ACos(u_dir.Z()/TMath::Sqrt(u_dir.X()*u_dir.X()+u_dir.Z()*u_dir.Z()));
     
     /////// Mvplane
     TVector3 v_dir = Mvplane * dir;
+    if( v_dir.Y()<0 ) v_dir *= -1.;
     double v_cosy = v_dir.Y()/v_dir.Mag();
     double v_phiz = TMath::ACos(v_dir.Z()/TMath::Sqrt(v_dir.X()*v_dir.X()+v_dir.Z()*v_dir.Z()));
    
@@ -909,21 +911,26 @@ int main(int argc, char* argv[])
       h1_broken_track_length->Fill( length );
     }
 
+    double val_u = u_cosy * fabs( TMath::Pi()/2 - u_phiz );
+    double val_v = v_cosy * fabs( TMath::Pi()/2 - v_phiz );
+    bool flag_u = false;
+    if( val_u < val_v ) flag_u = true;
+    
     ///////
     if( flag==2 ) {
       h2_good_track_phi_costheta->Fill( phiz, cosy );
-      h2_good_track_u_phi_costheta->Fill( u_phiz, u_cosy );
-      h2_good_track_v_phi_costheta->Fill( v_phiz, v_cosy );
+      if( flag_u ) h2_good_track_u_phi_costheta->Fill( u_phiz, u_cosy );
+      else h2_good_track_v_phi_costheta->Fill( v_phiz, v_cosy );
     }
     if( flag==1 ) {
       h2_broken_track_phi_costheta->Fill( phiz, cosy );
-      h2_broken_track_u_phi_costheta->Fill( u_phiz, u_cosy );
-      h2_broken_track_v_phi_costheta->Fill( v_phiz, v_cosy );
+      if( flag_u ) h2_broken_track_u_phi_costheta->Fill( u_phiz, u_cosy );
+      else h2_broken_track_v_phi_costheta->Fill( v_phiz, v_cosy );
     }
     if( flag==0 ) {
       h2_ineff_track_phi_costheta->Fill( phiz, cosy );
-      h2_ineff_track_u_phi_costheta->Fill( u_phiz, u_cosy );
-      h2_ineff_track_v_phi_costheta->Fill( v_phiz, v_cosy );      
+      if( flag_u ) h2_ineff_track_u_phi_costheta->Fill( u_phiz, u_cosy );
+      else h2_ineff_track_v_phi_costheta->Fill( v_phiz, v_cosy );      
     }
       
   }
