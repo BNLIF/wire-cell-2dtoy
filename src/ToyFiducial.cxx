@@ -358,6 +358,11 @@ bool WireCell2dToy::ToyFiducial::check_tgm(WireCell::FlashTPCBundle *bundle, dou
 	    TVector3 tempV3(fabs(dir.X()), sqrt(dir.Y()*dir.Y()+dir.Z()*dir.Z())*sin(angle3),0);
 	    double angle3_1 = tempV3.Angle(drift_dir)/3.1415926*180.;
 
+	    // not added for now, need to check to add this one in when more events are available ...
+	    // XQ, 7/11/2018
+	    double angle4 = fabs(3.1415926/2.-dir.Angle(drift_dir))/3.1415926*180.;
+
+
 	    //std::cout << "A: " << p1.x/units::cm << " " << p1.y/units::cm << " " << p1.z/units::cm << " " << angle1_1 << " " << angle2_1 << " " << angle3_1 << std::endl;
 
 	    if ( (angle1_1 < 10 || angle2_1 < 10 || angle3_1 < 5)){
