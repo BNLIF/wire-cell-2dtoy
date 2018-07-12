@@ -797,7 +797,7 @@ int main(int argc, char* argv[])
       cout<<" ------------> percentage of points of cluster near to track : "<<count_npts*1./npts<<endl;
 
       
-      if( (count_npts*1./npts < 0.1 || vc_cluster_length[cluster_id]>5) && count_npts*1./npts < 0.5 )  continue; // equivalent to an angle cut
+      if( (count_npts*1./npts < 0.1 || vc_cluster_length[cluster_id]>5) && count_npts*1./npts < 0.15 )  continue; // equivalent to an angle cut
 
 
       if( flag_start_near && flag_end_near ) {// good track
@@ -922,7 +922,7 @@ int main(int argc, char* argv[])
         vec_min_max_proj.push_back(p);
       }
 
-      //sorted by ascending order of min
+      //sorted by ascending order of fist element of pair, i.e. min
       std::sort(vec_min_max_proj.begin(), vec_min_max_proj.end());
       double previous_min=-1e6;
       double previous_max=-1e6;

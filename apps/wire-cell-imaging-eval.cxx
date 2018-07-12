@@ -285,9 +285,9 @@ int main(int argc, char* argv[])
   // If dead region mode, then manually add dead channels.
   if(dead_region)
   {
-      for(int ch = 0; ch< 8255; ch++)
+      std::pair<int,int> abc(0, total_time_bin-1);
+      for(int ch = 0; ch< 8256; ch++)
       {
-          std::pair<int,int> abc(0, total_time_bin-1);
           if( (ch>=296 && ch<=671) || (ch>=864 && ch<=911) ) {
             uplane_map[ch] = abc;
           }

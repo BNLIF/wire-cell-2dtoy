@@ -358,7 +358,7 @@ int main(int argc, char* argv[])
   // If dead region mode, then manually add dead channels.
   if(dead_region)
   {
-      for(int ch = 0; ch< 8255; ch++)
+      for(int ch = 0; ch< 8256; ch++)
       {
             chid = ch;
             start_time = 0;
