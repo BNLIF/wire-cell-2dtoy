@@ -60,6 +60,10 @@ WireCell2dToy::uBooNE_L1SP::uBooNE_L1SP(TH2F *hv_raw, TH2F *hv_decon, TH2F *hv_d
   Double_t w_2D_g_10_x[5000], w_2D_g_10_y[5000];
 
   std::ifstream infile("run_data_70_2D_11.txt");
+  if(!infile.good()) {
+      std::cerr<<"uBooNE Data 2D Deconvolution: "<<"run_data_70_2D_11.txt not found!"<<std::endl;
+      exit(0);
+  }
   for (int i=0;i!=5000;i++){infile >> u_1D_c_x[i];};
   for (int i=0;i!=5000;i++){infile >> u_1D_c_y[i];};
   for (int i=0;i!=5000;i++){infile >> v_1D_c_x[i];};

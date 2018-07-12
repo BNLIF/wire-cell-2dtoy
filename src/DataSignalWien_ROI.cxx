@@ -94,6 +94,10 @@ WireCell2dToy::DataSignalWienROIFDS::DataSignalWienROIFDS(WireCell::FrameDataSou
   Double_t w_1D_g_x[5000], w_1D_g_y[5000];
 
   std::ifstream infile("run_data_70_2D_11.txt");
+  if(!infile.good()) {
+      std::cerr<<"uBooNE Data 2D Deconvolution: "<<"run_data_70_2D_11.txt not found!"<<std::endl;
+      exit(0);
+  }
   for (int i=0;i!=5000;i++){infile >> u_1D_c_x[i];};
   for (int i=0;i!=5000;i++){infile >> u_1D_c_y[i];};
   for (int i=0;i!=5000;i++){infile >> v_1D_c_x[i];};
