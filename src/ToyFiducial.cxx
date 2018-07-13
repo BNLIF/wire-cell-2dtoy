@@ -268,7 +268,7 @@ int WireCell2dToy::ToyFiducial::check_LM_bdt(WireCell::FlashTPCBundle *bundle, d
     if (max_meas_pe < meas_pe[i]) max_meas_pe = meas_pe[i];
   }
 
-  /* INSERT HERE function to read histogram data from text file and write to TH1D* */
+  /* INSERT HERE BDT specific to x-extent boundary!!! */
   
   /* TEMPORARY*/
   //TFile f("lm_bdt.root","READ");
@@ -300,8 +300,6 @@ int WireCell2dToy::ToyFiducial::check_LM_bdt(WireCell::FlashTPCBundle *bundle, d
   int temp = -100;
   WireCell::LMBDT lm(total_pred_pe,total_meas_pe,max_meas_pe, ks_dis,
 		     chi2,ndf,cl,temp,flag_anode,flag_boundary); 
-  
-  //  std::cout<<"BDT score: "<< lm.get_BDT_score_max_significance(sig,bgd) << std::endl;
   
   if( !lm.isSignal(lm.get_BDT_score_max_significance(sig,bgd)) ){
     //f.Close();
