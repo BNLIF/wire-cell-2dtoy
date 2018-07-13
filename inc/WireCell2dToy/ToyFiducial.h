@@ -6,6 +6,7 @@
 #include "WireCellData/SlimMergeGeomCell.h"
 #include "WireCellData/FlashTPCBundle.h"
 #include "WireCellData/ToyCTPointCloud.h"
+#include "WireCellData/LMBDT.h"
 
 #include "TVector3.h"
 
@@ -31,6 +32,8 @@ namespace WireCell2dToy{
     bool check_tgm(WireCell::FlashTPCBundle *bundle, double offset_x, WireCell::ToyCTPointCloud& ct_point_cloud,std::map<WireCell::PR3DCluster*, WireCell::PR3DCluster*>& old_new_cluster_map);
 
     int check_LM(WireCell::FlashTPCBundle *bundle, double& cluster_length);
+    int check_LM_cuts(WireCell::FlashTPCBundle *bundle, double& cluster_length);
+    int check_LM_bdt(WireCell::FlashTPCBundle *bundle, double& cluster_length);
       
     void AddDeadRegion(WireCell::SlimMergeGeomCell* mcell, std::vector<int>& time_slices);
     

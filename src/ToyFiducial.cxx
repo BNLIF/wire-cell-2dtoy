@@ -151,6 +151,166 @@ int WireCell2dToy::ToyFiducial::check_LM(WireCell::FlashTPCBundle *bundle, doubl
   return 0;
 }
 
+int WireCell2dToy::ToyFiducial::check_LM_cuts(WireCell::FlashTPCBundle *bundle, double& cluster_length){
+
+  Opflash *flash = bundle->get_flash();
+  /* comment out for now... to make direct comparison to Xin's*/
+  /*
+  if(flash->get_type()!=2){
+    std::cout<<"NOT beam discriminator flash"<<std::endl;
+    return 0;
+  }
+  */
+  
+  /* calculate the length */
+  PR3DCluster *main_cluster = bundle->get_main_cluster();  
+  TPCParams& mp = Singleton<TPCParams>::Instance();
+  double pitch_u = mp.get_pitch_u();
+  double pitch_v = mp.get_pitch_v();
+  double pitch_w = mp.get_pitch_w();
+  double angle_u = mp.get_angle_u();
+  double angle_v = mp.get_angle_v();
+  double angle_w = mp.get_angle_w();
+  double time_slice_width = mp.get_ts_width();
+  std::vector<int> range_v1 = main_cluster->get_uvwt_range();
+  cluster_length = sqrt(2./3. * (pow(pitch_u*range_v1.at(0),2) + pow(pitch_v*range_v1.at(1),2) + pow(pitch_w*range_v1.at(2),2)) + pow(time_slice_width*range_v1.at(3),2))/units::cm;
+
+  /* predicted PE */
+  double total_pred_pe = 0;
+  std::vector<double>& pred_pe = bundle->get_pred_pmt_light();
+  for (size_t i=0;i!=pred_pe.size();i++){
+    total_pred_pe += pred_pe.at(i);
+  }
+
+  if(total_pred_pe < 25 || cluster_length < 10){
+    return 1; /* low energy event */
+  }
+
+  /* temporary... to make direct comparison to Xin's*/
+  if(flash->get_type()!=2) return 0;
+  
+  double total_meas_pe = flash->get_total_PE();
+  bool flag_anode = bundle->get_flag_close_to_PMT();
+  bool flag_boundary = bundle->get_flag_at_x_boundary();
+  double ks_dis = bundle->get_ks_dis();
+
+  if(flag_boundary){ /* at anode or cathode */
+    if(flag_anode){ /* at anode */
+      if( !(log(total_pred_pe/total_meas_pe)>-1.8 && ks_dis<0.8) ){
+	return 2; /* light mismatch */
+      }
+    }
+    else{ /* at cathode */
+      if( !(log(total_pred_pe/total_meas_pe)>-1.8 && ks_dis<0.45) ){
+	return 2;
+      }
+    }
+  }
+  else{ /* NOT at anode or cathode */
+    if( !(log(total_pred_pe/total_meas_pe)>-1.4 && ks_dis<0.25) ){
+      return 2;
+    }
+  }
+
+  return 0;
+}
+
+int WireCell2dToy::ToyFiducial::check_LM_bdt(WireCell::FlashTPCBundle *bundle, double& cluster_length){
+
+  Opflash *flash = bundle->get_flash();
+  /* comment out for now... to make direct comparison to Xin's*/
+  /*
+  if(flash->get_type()!=2){
+    std::cout<<"NOT beam discriminator flash"<<std::endl;
+    return 0;
+  }
+  */
+  
+  /* calculate the length */
+  PR3DCluster *main_cluster = bundle->get_main_cluster();  
+  TPCParams& mp = Singleton<TPCParams>::Instance();
+  double pitch_u = mp.get_pitch_u();
+  double pitch_v = mp.get_pitch_v();
+  double pitch_w = mp.get_pitch_w();
+  double angle_u = mp.get_angle_u();
+  double angle_v = mp.get_angle_v();
+  double angle_w = mp.get_angle_w();
+  double time_slice_width = mp.get_ts_width();
+  std::vector<int> range_v1 = main_cluster->get_uvwt_range();
+  cluster_length = sqrt(2./3. * (pow(pitch_u*range_v1.at(0),2) + pow(pitch_v*range_v1.at(1),2) + pow(pitch_w*range_v1.at(2),2)) + pow(time_slice_width*range_v1.at(3),2))/units::cm;
+
+  /* predicted PE */
+  float total_pred_pe = 0;
+  std::vector<double>& pred_pe = bundle->get_pred_pmt_light();
+  for (size_t i=0;i!=pred_pe.size();i++){
+    total_pred_pe += (float)pred_pe.at(i);
+  }
+
+  if(total_pred_pe < 25 || cluster_length < 10){
+    return 1; /* low energy event */
+  }
+
+  /* temporary... to make direct comparison to Xin's*/
+  if(flash->get_type()!=2) return 0;
+  
+  float total_meas_pe = (float)flash->get_total_PE();
+  int flag_anode = (int)bundle->get_flag_close_to_PMT();
+  int flag_boundary = (int)bundle->get_flag_at_x_boundary();
+  float ks_dis = (float)bundle->get_ks_dis();
+  float chi2 = (float)bundle->get_chi2();
+  float ndf = (float)bundle->get_ndf();
+  float cl = (float)cluster_length;
+  
+  float meas_pe[32];
+  float max_meas_pe = 0;
+  for (int i=0;i!=32;i++){
+    meas_pe[i] = (float)flash->get_PE(i);
+    if (max_meas_pe < meas_pe[i]) max_meas_pe = meas_pe[i];
+  }
+
+  /* INSERT HERE function to read histogram data from text file and write to TH1D* */
+  
+  /* TEMPORARY*/
+  //TFile f("lm_bdt.root","READ");
+  //TH1D *sig = (TH1D*)f.Get("MVA_BDT_effS");
+  //TH1D *bgd = (TH1D*)f.Get("MVA_BDT_effB");
+  std::ifstream inParams("lmHistParams.txt");
+  std::ifstream inSigFile("lmSigEff.txt");
+  std::ifstream inBgdFile("lmBgdEff.txt");
+  int bins = 0;
+  double binL = 0., binH = 0.;
+  for(int i=1; i<=3; i++){
+    if(i==1){ inParams >> bins; }
+    if(i==2){ inParams >> binL; }
+    if(i==3){ inParams >> binH; }
+  }
+  
+  //TH1D *sig = new TH1D("sig","",10000,-0.954531,0.957706);
+  //TH1D *bgd = new TH1D("bgd","",10000,-0.954531,0.957706);
+  TH1D *sig = new TH1D("sig","",bins,binL,binH);
+  TH1D *bgd = new TH1D("bgd","",bins,binL,binH);
+  double eff = 0.;
+  for(int i=1; i<=10000; i++){
+    inSigFile >> eff;
+    sig->SetBinContent(i, eff);
+    inBgdFile >> eff;
+    bgd->SetBinContent(i, eff);
+  }
+  
+  int temp = -100;
+  WireCell::LMBDT lm(total_pred_pe,total_meas_pe,max_meas_pe, ks_dis,
+		     chi2,ndf,cl,temp,flag_anode,flag_boundary); 
+  
+  //  std::cout<<"BDT score: "<< lm.get_BDT_score_max_significance(sig,bgd) << std::endl;
+  
+  if( !lm.isSignal(lm.get_BDT_score_max_significance(sig,bgd)) ){
+    //f.Close();
+    return 2;
+  }
+
+  return 0;
+}
+
 bool WireCell2dToy::ToyFiducial::check_tgm(WireCell::FlashTPCBundle *bundle, double offset_x, WireCell::ToyCTPointCloud& ct_point_cloud,std::map<PR3DCluster*, PR3DCluster*>& old_new_cluster_map){
 
   PR3DCluster *main_cluster = bundle->get_main_cluster();
