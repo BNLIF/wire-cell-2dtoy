@@ -62,7 +62,7 @@ WireCell2dToy::DataSignalWienROIFDS::DataSignalWienROIFDS(WireCell::FrameDataSou
   hw_1D_g_gaus = new TH2I("hw_1D_g_gaus","hw_1D_g_gaus",nwire_w,0,nwire_w,bins_per_frame,0,bins_per_frame);
 
   //#include "data_70_ROI_11.txt"  //70kV 2D deconvolution for U
-      Double_t u_1D_c_x[5000], u_1D_c_y[5000];
+  Double_t u_1D_c_x[5000], u_1D_c_y[5000];
   Double_t v_1D_c_x[5000], v_1D_c_y[5000];
   Double_t w_1D_c_x[5000], w_1D_c_y[5000];
 
@@ -93,7 +93,7 @@ WireCell2dToy::DataSignalWienROIFDS::DataSignalWienROIFDS(WireCell::FrameDataSou
   
   Double_t w_1D_g_x[5000], w_1D_g_y[5000];
 
-  std::ifstream infile("run_data_70_2D_11.txt");
+  std::ifstream infile("input_data_files/run_data_70_2D_11.txt");
   if(!infile.good()) {
       std::cerr<<"uBooNE Data 2D Deconvolution: "<<"run_data_70_2D_11.txt not found!"<<std::endl;
       exit(0);

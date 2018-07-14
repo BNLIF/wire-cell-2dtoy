@@ -274,9 +274,9 @@ int WireCell2dToy::ToyFiducial::check_LM_bdt(WireCell::FlashTPCBundle *bundle, d
   //TFile f("lm_bdt.root","READ");
   //TH1D *sig = (TH1D*)f.Get("MVA_BDT_effS");
   //TH1D *bgd = (TH1D*)f.Get("MVA_BDT_effB");
-  std::ifstream inParams("lmHistParams.txt");
-  std::ifstream inSigFile("lmSigEff.txt");
-  std::ifstream inBgdFile("lmBgdEff.txt");
+  std::ifstream inParams("input_data_files/lmHistParams.txt");
+  std::ifstream inSigFile("input_data_files/lmSigEff.txt");
+  std::ifstream inBgdFile("input_data_files/lmBgdEff.txt");
   int bins = 0;
   double binL = 0., binH = 0.;
   for(int i=1; i<=3; i++){

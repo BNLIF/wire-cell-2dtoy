@@ -233,7 +233,7 @@ WireCell2dToy::uBooNEData2DDeconvolutionFDS::uBooNEData2DDeconvolutionFDS(WireCe
   Double_t w_2D_g_9_x[5000], w_2D_g_9_y[5000];
   Double_t w_2D_g_10_x[5000], w_2D_g_10_y[5000];
 
-  std::ifstream infile("run_data_70_2D_11.txt");
+  std::ifstream infile("input_data_files/run_data_70_2D_11.txt");
   if(!infile.good()) {
       std::cerr<<"uBooNE Data 2D Deconvolution: "<<"run_data_70_2D_11.txt not found!"<<std::endl;
       exit(0);
@@ -668,7 +668,7 @@ void WireCell2dToy::uBooNEData2DDeconvolutionFDS::Deconvolute_2D(int plane){
      std::vector<float> temp(310,0);
      calib_ele_chan.at(i) = temp;
    }
-   std::ifstream infile("run_calib_resp_v1.txt");
+   std::ifstream infile("input_data_files/run_calib_resp_v1.txt");
    if(!infile.good()) {
        std::cerr<<"uBooNE Data 2D Deconvolution: "<<"run_calib_resp_v1.txt not found!"<<std::endl;
        exit(0);

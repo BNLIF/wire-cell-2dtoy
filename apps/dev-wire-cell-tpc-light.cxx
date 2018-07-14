@@ -466,7 +466,10 @@ int main(int argc, char* argv[])
  
   
   
-  
+  if (timesliceId->size()==0){
+     std::cout << "No points! Quit! " << std::endl;
+     return 0;
+   }
   
    
   cout << em("load clusters from file") << endl;
@@ -514,6 +517,7 @@ int main(int argc, char* argv[])
    //   // }
    // }
 			
+
    
    
    ToyCTPointCloud ct_point_cloud(0,2399,2400,4799,4800,8255, // channel range
