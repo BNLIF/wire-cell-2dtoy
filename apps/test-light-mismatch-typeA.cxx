@@ -17,7 +17,6 @@
 
 #include "WireCell2dToy/ImprovePR3DCluster.h"
 
-
 #include "TH1F.h"
 #include "TH2F.h"
 
@@ -27,6 +26,13 @@
 
 using namespace WireCell;
 using namespace std;
+
+/* 
+Mix matchng results within T_match tree 
+ensuring that correct matches are not paired
+--> provides a sample to test for LM event identification 
+*/
+
 
 int main(int argc, char* argv[])
 {
@@ -668,7 +674,7 @@ int main(int argc, char* argv[])
 
    
    
-   TFile *file1 = new TFile(Form("lm_%d_%d_%d.root",run_no,subrun_no,event_no),"RECREATE");
+   TFile *file1 = new TFile(Form("lmTypeA_%d_%d_%d.root",run_no,subrun_no,event_no),"RECREATE");
    TTree *T_match = new TTree("T_match","T_match");
    T_match->SetDirectory(file1);
    Int_t ncluster=0;
@@ -705,13 +711,14 @@ int main(int argc, char* argv[])
    T_match->Branch("chi2",&chi2,"chi2/D");
    T_match->Branch("ndf",&ndf,"ndf/I");
    T_match->Branch("cluster_length",&cluster_length,"cluster_length/D");
-   
+
    for (auto it = matched_bundles.begin(); it!=matched_bundles.end(); it++){
      FlashTPCBundle *bundle = *it;
      
      Opflash *flash = bundle->get_flash();
-     PR3DCluster *main_cluster = bundle->get_main_cluster();
-     //std::cout<<"cluster ID:   "<<main_cluster->get_cluster_id()<<std::endl;
+     //PR3DCluster *main_cluster = bundle->get_main_cluster();
+     FlashTPCBundle *bundleAlt = *(it+1);
+     PR3DCluster *main_cluster = bundleAlt->get_main_cluster();
      cluster_length = -1;
      
      if (flash!=0){
@@ -795,7 +802,7 @@ int main(int argc, char* argv[])
      }
      
      T_match->Fill();
-   }
+    }
 
    cerr << em("test TGM and LM") << std::endl;
 

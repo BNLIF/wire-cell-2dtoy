@@ -268,8 +268,6 @@ int WireCell2dToy::ToyFiducial::check_LM_bdt(WireCell::FlashTPCBundle *bundle, d
     if (max_meas_pe < meas_pe[i]) max_meas_pe = meas_pe[i];
   }
 
-  /* INSERT HERE BDT specific to x-extent boundary!!! */
-  
   /* TEMPORARY*/
   //TFile f("lm_bdt.root","READ");
   //TH1D *sig = (TH1D*)f.Get("MVA_BDT_effS");
@@ -285,8 +283,6 @@ int WireCell2dToy::ToyFiducial::check_LM_bdt(WireCell::FlashTPCBundle *bundle, d
     if(i==3){ inParams >> binH; }
   }
   
-  //TH1D *sig = new TH1D("sig","",10000,-0.954531,0.957706);
-  //TH1D *bgd = new TH1D("bgd","",10000,-0.954531,0.957706);
   TH1D *sig = new TH1D("sig","",bins,binL,binH);
   TH1D *bgd = new TH1D("bgd","",bins,binL,binH);
   double eff = 0.;
@@ -303,7 +299,7 @@ int WireCell2dToy::ToyFiducial::check_LM_bdt(WireCell::FlashTPCBundle *bundle, d
   
   if( !lm.isSignal(lm.get_BDT_score_max_significance(sig,bgd)) ){
     //f.Close();
-    return 2;
+    return 2; /* light mismatch event */
   }
 
   return 0;
