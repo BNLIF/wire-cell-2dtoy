@@ -1051,9 +1051,9 @@ int main(int argc, char* argv[])
    //   ncluster++;
    // }
    
-   //Trun->CloneTree()->Write();
-   Trun->CloneTree();
-   Trun->SetDirectory(file1);
+   Trun->CloneTree()->Write();
+   //Trun->CloneTree();
+   //Trun->SetDirectory(file1);
 
    
    TTree *t1 = new TTree("T_data","T_data");
