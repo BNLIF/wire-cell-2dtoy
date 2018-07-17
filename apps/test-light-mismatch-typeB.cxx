@@ -28,6 +28,11 @@
 using namespace WireCell;
 using namespace std;
 
+/*
+Re-move main cluster from beam-coincident flash-cluster match 
+& re-do matching with this cluster withheld
+*/
+
 int main(int argc, char* argv[])
 {
   if (argc < 3) {
@@ -602,9 +607,31 @@ int main(int argc, char* argv[])
    
 
    //   std::vector<std::tuple<WireCell::PR3DCluster*, WireCell::Opflash*, double, std::vector<double>>> matched_results = WireCell2dToy::tpc_light_match(time_offset,nrebin,group_clusters,flashes);
-   FlashTPCBundleSelection matched_bundles = WireCell2dToy::tpc_light_match(time_offset,nrebin,group_clusters,flashes);
+   FlashTPCBundleSelection imb = WireCell2dToy::tpc_light_match(time_offset,nrebin,group_clusters,flashes);
    cout << em("TPC Light Matching") << std::endl;
 
+   int cID = 0;
+   for(auto it = imb.begin(); it!=imb.end(); it++){
+     FlashTPCBundle *bundle = *it;
+     Opflash *f = bundle->get_flash();
+     if(f==0) continue;
+     if(f->get_type()!=2) continue;
+     if(f->get_time()<3.0) continue;
+     if(f->get_time()>5.0) continue;
+     PR3DCluster *main_cluster = bundle->get_main_cluster();
+     if(main_cluster==0) continue;
+     cID = main_cluster->get_cluster_id();
+     std::cout << "beam-coincident cluster ID: " << cID << std::endl;
+   }
+
+   for(auto it = group_clusters.begin(); it!=group_clusters.end(); it++){
+     PR3DCluster* main_cluster = it->first;
+     if(main_cluster->get_cluster_id()!=cID) continue;
+     group_clusters.erase(it);
+   }
+
+   FlashTPCBundleSelection matched_bundles = WireCell2dToy::tpc_light_match(time_offset,nrebin,group_clusters,flashes);
+   
    // create the live clusters ...
    //std::cout << live_clusters.size() << std::endl;
    live_clusters.clear();
@@ -668,7 +695,7 @@ int main(int argc, char* argv[])
 
    
    
-   TFile *file1 = new TFile(Form("lm_%d_%d_%d.root",run_no,subrun_no,event_no),"RECREATE");
+   TFile *file1 = new TFile(Form("lmTypeB_%d_%d_%d.root",run_no,subrun_no,event_no),"RECREATE");
    TTree *T_match = new TTree("T_match","T_match");
    T_match->SetDirectory(file1);
    Int_t ncluster=0;
@@ -711,12 +738,12 @@ int main(int argc, char* argv[])
      
      Opflash *flash = bundle->get_flash();
      PR3DCluster *main_cluster = bundle->get_main_cluster();
-     //std::cout<<"cluster ID:   "<<main_cluster->get_cluster_id()<<std::endl;
+     std::cout<<"cluster ID:   "<<main_cluster->get_cluster_id()<<std::endl;
      cluster_length = -1;
      
      if (flash!=0){
        auto it1 = find(flashes.begin(),flashes.end(),flash);
-       //std::cout<<"flash ID:   "<<flash->get_flash_id()<<std::endl;
+       std::cout<<"flash ID:   "<<flash->get_flash_id()<<std::endl;
        flash_id = flash->get_flash_id();
        strength = bundle->get_strength();
        std::vector<double> temp = bundle->get_pred_pmt_light();
