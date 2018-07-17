@@ -85,13 +85,13 @@ int main(int argc, char* argv[])
   //if(argc==4) cluster_check=atoi(argv[3]);
     
   for(int i=1; i!=argc; i++){
-      switch(argv[i][1]){
-          case 'c': {
-              cluster_check = atoi(&argv[i][2]); // 1
-              break;
-          }
-          default: break; // 0
-      }
+    switch(argv[i][1]){
+    case 'c': {
+      cluster_check = atoi(&argv[i][2]); // 1
+      break;
+    }
+    default: break; // 0
+    }
   }
 
   //cout<<" ---> test track-imaging A"<<endl;
@@ -217,19 +217,19 @@ int main(int argc, char* argv[])
 	
 	/*         
 
-	                 - test_A
-		       -
-	             -
-	  <---------
-	  start   end
+		   - test_A
+		   -
+		   -
+		   <---------
+		   start   end
 
 
 
-               - test_B
-             -
-           -
-	  ---------->
-	  start     end
+		   - test_B
+		   -
+		   -
+		   ---------->
+		   start     end
 
 	*/
 
@@ -616,7 +616,19 @@ int main(int argc, char* argv[])
     //cout<<it->first<<"\t"<<user_size<<endl;
       
     if( user_size==0 ) flag_track2recon[it->first] = 0;
-    if( user_size>1  ) flag_track2recon[it->first] = 1;
+    if( user_size>1  ) {
+
+      flag_track2recon[it->first] = 1;
+      
+      for(int idx=1; idx<=user_size; idx++) {
+	int cluster_id = it->second.at(idx);
+	double cluster_length = vc_cluster_length[cluster_id];
+	if( cluster_length>95 ) {
+	  flag_track2recon[it->first] = 2;
+	  break;
+	}
+      }// for(int idx=1; idx<=user_size; idx++)
+    }// if( user_size>1  )
     
     if( user_size==1 ) {
       flag_track2recon[it->first] = 2;
@@ -761,19 +773,19 @@ int main(int argc, char* argv[])
 	
 	/*         
 
-	                 - test_A
-		       -
-	             -
-	  <---------
-	  start   end
+		   - test_A
+		   -
+		   -
+		   <---------
+		   start   end
 
 
 
-               - test_B
-             -
-           -
-	  ---------->
-	  start     end
+		   - test_B
+		   -
+		   -
+		   ---------->
+		   start     end
 
 	*/
 
@@ -904,9 +916,9 @@ int main(int argc, char* argv[])
     if( flag==1 ) {
       //store each cluster's min/max projective position along track direction
       //then sorted by the min
-        std::vector< std::pair<double, double> > vec_min_max_proj;  
+      std::vector< std::pair<double, double> > vec_min_max_proj;  
       for(int i=1; i<map_non_ghost_track_clusters[it->first].size(); i++) {
-	    int cluster_id = map_non_ghost_track_clusters[it->first].at(i);
+	int cluster_id = map_non_ghost_track_clusters[it->first].at(i);
 	//length += vc_cluster_length[cluster_id] * fabs( vc_cluster_dir[cluster_id].Dot(vc_track_dir[track_id]) );
 	//cout<<" debug : "<< it->first<<"\t"<<vc_cluster_length[ map_non_ghost_track_clusters[it->first].at(i) ]<<endl;
         double start_proj = vc_cluster_start[cluster_id].Dot(vc_track_dir[track_id]);
@@ -929,19 +941,19 @@ int main(int argc, char* argv[])
       double length = 0;
       cout<<"Broken: Debug: track: "<<track_id<<endl;
       for(int i=0; i<vec_min_max_proj.size(); i++)
-      {
-        double cluster_min = vec_min_max_proj.at(i).first;
-        double cluster_max = vec_min_max_proj.at(i).second;
-        cout<<"Debug: min: "<<cluster_min<<" max: "<<cluster_max<<endl;
-        if(previous_max>=cluster_min){
+	{
+	  double cluster_min = vec_min_max_proj.at(i).first;
+	  double cluster_max = vec_min_max_proj.at(i).second;
+	  cout<<"Debug: min: "<<cluster_min<<" max: "<<cluster_max<<endl;
+	  if(previous_max>=cluster_min){
             if(previous_max<cluster_max) previous_max = cluster_max;
-        }
-        else{
+	  }
+	  else{
             length += previous_max - previous_min;
             previous_max = cluster_max;
             previous_min = cluster_min;
-        }
-      }
+	  }
+	}
       length += previous_max - previous_min;
 
       cout<<"Debug: length: "<<length<<endl;
@@ -1042,39 +1054,39 @@ int main(int argc, char* argv[])
   ///////////////////////////////////////////////////////////////////////////////////
 
   if(cluster_check){
-  roostr = "canv_visuliaztion_tracks_cluster";
-  TCanvas *canv_visuliaztion_tracks_cluster = new TCanvas(roostr, roostr, 1000, 800);
+    roostr = "canv_visuliaztion_tracks_cluster";
+    TCanvas *canv_visuliaztion_tracks_cluster = new TCanvas(roostr, roostr, 1000, 800);
 
-  roostr = "h3_visuliaztion_tracks_cluster";
-  TH3D *h3_visuliaztion_tracks_cluster = new TH3D(roostr, roostr, 100, 0, 300, 100, -150, 150, 100, 0, 1500);
-  h3_visuliaztion_tracks_cluster->SetStats(0);
-  h3_visuliaztion_tracks_cluster->Draw();
-  h3_visuliaztion_tracks_cluster->SetXTitle("X axis");
-  h3_visuliaztion_tracks_cluster->SetYTitle("Y axis");
-  h3_visuliaztion_tracks_cluster->SetZTitle("Z axis");
+    roostr = "h3_visuliaztion_tracks_cluster";
+    TH3D *h3_visuliaztion_tracks_cluster = new TH3D(roostr, roostr, 100, 0, 300, 100, -150, 150, 100, 0, 1500);
+    h3_visuliaztion_tracks_cluster->SetStats(0);
+    h3_visuliaztion_tracks_cluster->Draw();
+    h3_visuliaztion_tracks_cluster->SetXTitle("X axis");
+    h3_visuliaztion_tracks_cluster->SetYTitle("Y axis");
+    h3_visuliaztion_tracks_cluster->SetZTitle("Z axis");
 
-  int colors_vis[3] = {kRed, kOrange-3, kGreen};// inefficiency, broken, good
+    int colors_vis[3] = {kRed, kOrange-3, kGreen};// inefficiency, broken, good
   
-  for( auto it=vc_track_dir.begin(); it!=vc_track_dir.end(); it++ ) {
-    int id = it->first;
+    for( auto it=vc_track_dir.begin(); it!=vc_track_dir.end(); it++ ) {
+      int id = it->first;
     
-    graph_track_each[id]->Draw("same p");
-    graph_track_each[id]->SetMarkerColor( colors_vis[flag_track2recon[id]] );
-    graph_track_each[id]->SetMarkerStyle(4);
-    graph_track_each[id]->SetMarkerSize(0.5);
-  }
+      graph_track_each[id]->Draw("same p");
+      graph_track_each[id]->SetMarkerColor( colors_vis[flag_track2recon[id]] );
+      graph_track_each[id]->SetMarkerStyle(4);
+      graph_track_each[id]->SetMarkerSize(0.5);
+    }
 
-  graph_cluster_all->Draw("same p");
-  graph_cluster_all->SetMarkerColor(kGray+2);
+    graph_cluster_all->Draw("same p");
+    graph_cluster_all->SetMarkerColor(kGray+2);
 
-  if( gh_ghost_all->GetN()!=0 ) {
-    gh_ghost_all->Draw("same p");
-    gh_ghost_all->SetMarkerColor(kBlue);
-    gh_ghost_all->SetMarkerStyle(4);
-    gh_ghost_all->SetMarkerSize(0.3);
-  }
+    if( gh_ghost_all->GetN()!=0 ) {
+      gh_ghost_all->Draw("same p");
+      gh_ghost_all->SetMarkerColor(kBlue);
+      gh_ghost_all->SetMarkerStyle(4);
+      gh_ghost_all->SetMarkerSize(0.3);
+    }
 
-  canv_visuliaztion_tracks_cluster->SaveAs("canv_visuliaztion_tracks_cluster.root");
+    canv_visuliaztion_tracks_cluster->SaveAs("canv_visuliaztion_tracks_cluster.root");
   }
   /////////////////////////////////////////////////////////////////////////////////// WRITE FILE
   /////////////////////////////////////////////////////////////////////////////////// WRITE FILE
