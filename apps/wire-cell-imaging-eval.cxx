@@ -138,6 +138,8 @@ int main(int argc, char* argv[])
     std::cout << "Save file for bee. " << std::endl;
   }else if (save_file==0){
     std::cout << "Save file for pattern recognition. " << std::endl;
+  }else if (save_file==2){
+    std::cout << "Save file for clustering and imaging evaluation. " << std::endl;
   }
   
   // if (two_plane)
@@ -223,30 +225,30 @@ int main(int argc, char* argv[])
 
   // load Trun
   TFile *file1 = new TFile(root_file);
-  TTree *Trun = (TTree*)file1->Get("Trun");
+  TTree *Trun0 = (TTree*)file1->Get("Trun");
   
-  Trun->SetBranchAddress("eventNo",&event_no);
-  Trun->SetBranchAddress("runNo",&run_no);
-  Trun->SetBranchAddress("subRunNo",&subrun_no);
-  Trun->SetBranchAddress("unit_dis",&unit_dis);
-  Trun->SetBranchAddress("toffset_uv",&toffset_1);
-  Trun->SetBranchAddress("toffset_uw",&toffset_2);
-  Trun->SetBranchAddress("toffset_u",&toffset_3);
-  Trun->SetBranchAddress("total_time_bin",&total_time_bin);
-  Trun->SetBranchAddress("recon_threshold",&recon_threshold);
-  Trun->SetBranchAddress("frame_length",&frame_length);
-  Trun->SetBranchAddress("max_events",&max_events);
-  Trun->SetBranchAddress("eve_num",&eve_num);
-  Trun->SetBranchAddress("nrebin",&nrebin);
-  Trun->SetBranchAddress("threshold_u",&threshold_u);
-  Trun->SetBranchAddress("threshold_v",&threshold_v);
-  Trun->SetBranchAddress("threshold_w",&threshold_w);
-  Trun->SetBranchAddress("threshold_ug",&threshold_ug);
-  Trun->SetBranchAddress("threshold_vg",&threshold_vg);
-  Trun->SetBranchAddress("threshold_wg",&threshold_wg);
-  Trun->SetBranchAddress("time_offset",&time_offset);
+  Trun0->SetBranchAddress("eventNo",&event_no);
+  Trun0->SetBranchAddress("runNo",&run_no);
+  Trun0->SetBranchAddress("subRunNo",&subrun_no);
+  Trun0->SetBranchAddress("unit_dis",&unit_dis);
+  Trun0->SetBranchAddress("toffset_uv",&toffset_1);
+  Trun0->SetBranchAddress("toffset_uw",&toffset_2);
+  Trun0->SetBranchAddress("toffset_u",&toffset_3);
+  Trun0->SetBranchAddress("total_time_bin",&total_time_bin);
+  Trun0->SetBranchAddress("recon_threshold",&recon_threshold);
+  Trun0->SetBranchAddress("frame_length",&frame_length);
+  Trun0->SetBranchAddress("max_events",&max_events);
+  Trun0->SetBranchAddress("eve_num",&eve_num);
+  Trun0->SetBranchAddress("nrebin",&nrebin);
+  Trun0->SetBranchAddress("threshold_u",&threshold_u);
+  Trun0->SetBranchAddress("threshold_v",&threshold_v);
+  Trun0->SetBranchAddress("threshold_w",&threshold_w);
+  Trun0->SetBranchAddress("threshold_ug",&threshold_ug);
+  Trun0->SetBranchAddress("threshold_vg",&threshold_vg);
+  Trun0->SetBranchAddress("threshold_wg",&threshold_wg);
+  Trun0->SetBranchAddress("time_offset",&time_offset);
   
-  Trun->GetEntry(0);
+  Trun0->GetEntry(0);
 
   TTree *T_op = (TTree*)file1->Get("T_op");
   
@@ -435,7 +437,7 @@ int main(int argc, char* argv[])
 
   
 
-  WireCell2dToy::Noisy_Event_ID(hu_decon, hv_decon, hw_decon, uplane_rms, vplane_rms, wplane_rms, uplane_map, vplane_map, wplane_map, hu_decon_g, hv_decon_g, hw_decon_g, nrebin, hv_raw, true);
+  int tpc_status = WireCell2dToy::Noisy_Event_ID(hu_decon, hv_decon, hw_decon, uplane_rms, vplane_rms, wplane_rms, uplane_map, vplane_map, wplane_map, hu_decon_g, hv_decon_g, hw_decon_g, nrebin, hv_raw, true);
   WireCell2dToy::Organize_Dead_Channels(uplane_map, vplane_map, wplane_map, hv_raw->GetNbinsY()-1,nrebin);
 
     // loop through U/V/W plane to disable the bad channels completely
@@ -478,7 +480,7 @@ int main(int argc, char* argv[])
   
   
   
-  WireCell2dToy::uBooNE_L1SP l1sp(hv_raw,hv_decon,hv_decon_g,nrebin);
+  WireCell2dToy::uBooNE_L1SP l1sp(hv_raw,hv_decon,hv_decon_g,nrebin, 0.0);
   
   WireCell2dToy::pdDataFDS roi_gaus_fds(gds,hu_decon_g,hv_decon_g,hw_decon_g,eve_num);
   roi_gaus_fds.jump(eve_num);
@@ -559,10 +561,10 @@ int main(int argc, char* argv[])
 
   TFile *file = new TFile(Form("result_%d_%d_%d.root",run_no,subrun_no,event_no),"RECREATE");
 
-  if(T_true!=0 && save_file==1){
+  if(T_true!=0 && save_file!=0){
     T_true->CloneTree();
   }
-  if(T_track!=0 && save_file==1){
+  if(T_track!=0 && save_file!=0){
     T_track->CloneTree();
   }
   file0->Close();
@@ -571,7 +573,6 @@ int main(int argc, char* argv[])
   if (T_op!=0){
     T_op->CloneTree();
   }
-  Trun->CloneTree();
   
   Int_t n_cells;
   Int_t n_good_wires;
@@ -706,12 +707,100 @@ int main(int argc, char* argv[])
   delete hv_threshold;
   delete hw_threshold;
   
+
+  
+  // to save original charge info (after L1SP) into output Trun
+  std::vector<int> *timesliceId = new std::vector<int>;
+  std::vector<std::vector<int>> *timesliceChannel = new std::vector<std::vector<int>>;
+  std::vector<std::vector<int>> *raw_charge = new std::vector<std::vector<int>>;
+  std::vector<std::vector<int>> *raw_charge_err = new std::vector<std::vector<int>>;
+  //TClonesArray *raw_charge = new TClonesArray("TH1I");
+  //TH1::AddDirectory(kFALSE);
+  int raw_charge_ind = 0;
+  for (int i=start_num; i<=end_num; i++){
+      sds.jump(i);
+      //WireCell::Slice& slice = sds.get();
+      //WireCell::Slice& slice_err = sds.get_error();
+      WireCell::Channel::Group group = sds.get().group();
+      //cout<<"slice charge group size: "<<group.size()<<endl;
+      if(group.size()!=0){
+        WireCell::Channel::Group group_err = sds.get_error().group();
+        //TH1I *htemp = new ( (*raw_charge)[raw_charge_ind] ) TH1I("","", 8256, 0, 8256);
+        timesliceId->push_back(i);
+        std::vector<int> channel;
+        std::vector<int> charge;
+        std::vector<int> charge_err;
+        for(int j=0; j<group.size(); j++){
+            //int channel = group.at(j).first;
+            //float charge = group.at(j).second;
+            //float charge_err = group_err.at(j).second;
+                //cout <<"slice: "<<i<<" channel: "<<channel<<" charge: "<<charge<<" error: "<<charge_err<<endl;
+            if (group.at(j).first >= 8256) { cout << "ERROR: out of bound of MicroBooNE channels." << endl;}
+            //htemp->SetBinContent(channel+1, charge);    
+            //htemp->SetBinError(channel+1, charge_err);
+            channel.push_back(group.at(j).first);
+            charge.push_back(group.at(j).second);
+            charge_err.push_back(group_err.at(j).second);
+        }
+        //raw_charge_ind ++;
+        timesliceChannel->push_back(channel);
+        raw_charge->push_back(charge);
+        raw_charge_err->push_back(charge_err);
+      }
+  }
+
+  TTree *Trun = Trun0->CloneTree(0);
+  Trun->SetTitle("Trun");
+  Trun->SetName("Trun");
+  Trun->SetDirectory(file);
+  Trun0->GetEntry(eve_num);
+
+  /* int detector = 0; // MicroBooNE */ 
+  /* Trun->Branch("triggerBits",&triggerbits,"triggerBits/i"); */
+  /* Trun->Branch("triggerTime",&triggerTime, "triggerTime/D"); */
+  /* Trun->Branch("detector",&detector,"detector/I"); */
+
+  if(argv[4][0]!='-') event_no = atoi(argv[4]);
+
+  Trun->Branch("eventNo",&event_no,"eventNo/I");
+  Trun->Branch("runNo",&run_no,"runNo/I");
+  Trun->Branch("subRunNo",&subrun_no,"runRunNo/I");
+
+  Trun->Branch("unit_dis",&unit_dis,"unit_dis/F");
+  Trun->Branch("toffset_uv",&toffset_1,"toffset_uv/F");
+  Trun->Branch("toffset_uw",&toffset_2,"toffset_uw/F");
+  Trun->Branch("toffset_u",&toffset_3,"toffset_u/F");
+  Trun->Branch("total_time_bin",&total_time_bin,"total_time_bin/I");
+  Trun->Branch("recon_threshold",&recon_threshold,"recon_threshold/I");
+  Trun->Branch("frame_length",&frame_length,"frame_length/I");
+  Trun->Branch("max_events",&max_events,"max_events/I");
+  Trun->Branch("eve_num",&eve_num,"eve_num/I");
+  Trun->Branch("nrebin",&nrebin,"nrebin/I");
+  Trun->Branch("threshold_u",&threshold_u,"threshold_u/F");
+  Trun->Branch("threshold_v",&threshold_v,"threshold_v/F");
+  Trun->Branch("threshold_w",&threshold_w,"threshold_w/F");
+  Trun->Branch("threshold_ug",&threshold_ug,"threshold_ug/F");
+  Trun->Branch("threshold_vg",&threshold_vg,"threshold_vg/F");
+  Trun->Branch("threshold_wg",&threshold_wg,"threshold_wg/F");
+  Trun->Branch("time_offset",&time_offset,"time_offset/I");
+  Trun->Branch("tpc_status",&tpc_status,"tpc_status/I");
+  
+  Trun->Branch("timesliceId",&timesliceId);
+  //Trun->Branch("raw_charge",&raw_charge, 256000, 0);
+  Trun->Branch("timesliceChannel",&timesliceChannel);
+  Trun->Branch("raw_charge",&raw_charge);
+  Trun->Branch("raw_charge_err",&raw_charge_err);
+
+  Trun->Fill();
+  delete raw_charge;
+  delete raw_charge_err;
+  delete timesliceId;
+  delete timesliceChannel;
+
   file1->Close();
   delete file1;
+ 
 
-  
-
-  
   for (int i=start_num;i!=end_num+1;i++){
     
     // form clusters
@@ -2468,7 +2557,7 @@ int main(int argc, char* argv[])
    //save cluster
    Int_t ncluster = 0;
    TTree *T_cluster ;
-   if (save_file==1){
+   if (save_file!=0){
      T_cluster = new TTree("T_cluster","T_cluster");
      T_cluster->Branch("cluster_id",&ncluster,"cluster_id/I");
      T_cluster->Branch("x",&x,"x/D");
@@ -2487,7 +2576,7 @@ int main(int argc, char* argv[])
      for (int i=0; i!=(*it)->get_allcell().size();i++){
        SlimMergeGeomCell *mcell = (SlimMergeGeomCell*)((*it)->get_allcell().at(i));
        good_mcells.insert(mcell);
-       if (save_file==1){
+       if (save_file!=0){
 	 int time_slice_save = mcell->GetTimeSlice();
 	 GeomCellSelection temp_cells = lowmemtiling[time_slice_save]->create_single_cells((SlimMergeGeomCell*)mcell);
 
@@ -2521,10 +2610,10 @@ int main(int argc, char* argv[])
   for (int i=start_num;i!=end_num+1;i++){
     GeomCellSelection& allmcell = lowmemtiling[i]->get_two_bad_wire_cells();
     if (lowmemtiling[i]->get_regen_two_bad_wire_cells() || dead_cluster_set.empty()){
-      /* if (dead_cluster_set.empty()){ */
-	/* Slim3DDeadCluster *cluster = new Slim3DDeadCluster(*((SlimMergeGeomCell*)allmcell[0]),i); */
-	/* dead_cluster_set.insert(cluster); */
-      /* } */
+      if (dead_region && dead_cluster_set.empty()){
+	Slim3DDeadCluster *cluster = new Slim3DDeadCluster(*((SlimMergeGeomCell*)allmcell[0]),i);
+	dead_cluster_set.insert(cluster);
+      }
       for (int j=0;j<allmcell.size();j++){
 	int flag = 0;
 	int flag_save = 0;
@@ -2992,10 +3081,278 @@ int main(int argc, char* argv[])
     
   }
 
+  // save one event TC, TDC into one entry
+  if (save_file==2){
+    TTree *TC = new TTree("TC","TC");
+    TC->SetDirectory(file);
+    
+    std::vector<int> *cluster_id = new std::vector<int>;
+    std::vector<int> *time_slice = new std::vector<int>;
+    //std::vector<double> *x_save = new std::vector<double>;    
+    //std::vector<double> *y_save = new std::vector<double>;
+    //std::vector<double> *z_save = new std::vector<double>;
+    std::vector<double> *q = new std::vector<double>;    
+    std::vector<double> *uq = new std::vector<double>;
+    std::vector<double> *vq = new std::vector<double>;
+    std::vector<double> *wq = new std::vector<double>;    
+    std::vector<double> *udq = new std::vector<double>;
+    std::vector<double> *vdq = new std::vector<double>;   
+    std::vector<double> *wdq = new std::vector<double>;    
 
+    TC->Branch("cluster_id",&cluster_id);
 
-  
- 
+    TC->Branch("time_slice",&time_slice);
+
+    // TC->Branch("x",&x_save,"x/D");
+    // TC->Branch("y",&y_save,"y/D");
+    // TC->Branch("z",&z_save,"z/D");
+    TC->Branch("q",&q);
+    TC->Branch("uq",&uq);
+    TC->Branch("vq",&vq);
+    TC->Branch("wq",&wq);
+    TC->Branch("udq",&udq);
+    TC->Branch("vdq",&vdq);
+    TC->Branch("wdq",&wdq);
+    
+    std::vector<int> *nwire_u = new  std::vector<int>;
+    std::vector<int> *nwire_v = new  std::vector<int>;
+    std::vector<int> *nwire_w = new  std::vector<int>;
+    std::vector<int> *flag_u = new  std::vector<int>;
+    std::vector<int> *flag_v = new  std::vector<int>;
+    std::vector<int> *flag_w = new  std::vector<int>;
+    int flag_u_i;
+    int flag_v_i;
+    int flag_w_i;
+
+    std::vector<std::vector<int>> *wire_index_u = new std::vector<std::vector<int>>;
+    std::vector<std::vector<int>> *wire_index_v = new std::vector<std::vector<int>>;
+    std::vector<std::vector<int>> *wire_index_w = new std::vector<std::vector<int>>;
+    std::vector<std::vector<double>> *wire_charge_u = new std::vector<std::vector<double>>;
+    std::vector<std::vector<double>> *wire_charge_v = new std::vector<std::vector<double>>;
+    std::vector<std::vector<double>> *wire_charge_w = new std::vector<std::vector<double>>;
+    std::vector<std::vector<double>> *wire_charge_err_u = new std::vector<std::vector<double>>;
+    std::vector<std::vector<double>> *wire_charge_err_v = new std::vector<std::vector<double>>;
+    std::vector<std::vector<double>> *wire_charge_err_w = new std::vector<std::vector<double>>;
+
+    std::vector<int> wire_index_ui;
+    std::vector<int> wire_index_vi;
+    std::vector<int> wire_index_wi;
+    std::vector<double> wire_charge_ui;
+    std::vector<double> wire_charge_vi;
+    std::vector<double> wire_charge_wi;
+    std::vector<double> wire_charge_err_ui;
+    std::vector<double> wire_charge_err_vi;
+    std::vector<double> wire_charge_err_wi;
+
+    TC->Branch("nwire_u",&nwire_u);
+    TC->Branch("nwire_v",&nwire_v);
+    TC->Branch("nwire_w",&nwire_w);
+    TC->Branch("flag_u",&flag_u);
+    TC->Branch("flag_v",&flag_v);
+    TC->Branch("flag_w",&flag_w);
+    TC->Branch("wire_index_u",&wire_index_u);
+    TC->Branch("wire_index_v",&wire_index_v);
+    TC->Branch("wire_index_w",&wire_index_w);
+    TC->Branch("wire_charge_u",&wire_charge_u);
+    TC->Branch("wire_charge_v",&wire_charge_v);
+    TC->Branch("wire_charge_w",&wire_charge_w);
+    TC->Branch("wire_charge_err_u",&wire_charge_err_u);
+    TC->Branch("wire_charge_err_v",&wire_charge_err_v);
+    TC->Branch("wire_charge_err_w",&wire_charge_err_w);
+    
+    for (auto it = cluster_set.begin();it!=cluster_set.end();it++){
+    //  cluster_id->push_back((*it)->get_id());
+    
+      for (int i=0; i!=(*it)->get_allcell().size();i++){
+    cluster_id->push_back((*it)->get_id());
+	SlimMergeGeomCell *mcell = (SlimMergeGeomCell*)((*it)->get_allcell().at(i));
+	int time_slice_temp = mcell->GetTimeSlice();
+    time_slice->push_back(time_slice_temp);
+	q->push_back(chargesolver[time_slice_temp]->get_mcell_charge(mcell));
+	
+	GeomCellMap cell_wires_map = lowmemtiling[time_slice_temp]->get_cell_wires_map();
+	WireCell::WireChargeMap& wire_charge = lowmemtiling[time_slice_temp]->get_wire_charge_map();
+	WireCell::WireChargeMap& wire_charge_error = lowmemtiling[time_slice_temp]->get_wire_charge_error_map();
+	for (auto it1 = cell_wires_map[mcell].begin(); it1!= cell_wires_map[mcell].end(); it1++){
+	  MergeGeomWire *mwire = (MergeGeomWire*)(*it1);
+	  if (mwire->get_allwire().front()->iplane()==0){
+	    uq->push_back(wire_charge[mwire]);
+	    udq->push_back(wire_charge_error[mwire]);
+	  }else if(mwire->get_allwire().front()->iplane()==1){
+	    vq->push_back(wire_charge[mwire]);
+	    vdq->push_back(wire_charge_error[mwire]);
+	  }else if(mwire->get_allwire().front()->iplane()==2){
+	    wq->push_back(wire_charge[mwire]);
+	    wdq->push_back(wire_charge_error[mwire]);
+	  }
+	}
+	
+      
+	GeomWireSelection& uwires = mcell->get_uwires();
+	GeomWireSelection& vwires = mcell->get_vwires();
+	GeomWireSelection& wwires = mcell->get_wwires();
+	nwire_u->push_back(uwires.size());
+	nwire_v->push_back(vwires.size());
+	nwire_w->push_back(wwires.size());
+
+	std::vector<WirePlaneType_t> bad_planes = mcell->get_bad_planes();
+	flag_u_i = 1;
+      flag_v_i = 1;
+      flag_w_i = 1;
+	for (size_t j= 0 ; j!=bad_planes.size(); j++){
+	  if (bad_planes.at(j)==WirePlaneType_t(0)){
+	    flag_u_i = 0;
+	  }else if (bad_planes.at(j)==WirePlaneType_t(1)){
+	    flag_v_i = 0;
+	  }else if (bad_planes.at(j)==WirePlaneType_t(2)){
+	    flag_w_i = 0;
+	  }
+	} 
+      flag_u->push_back(flag_u_i);
+ 	flag_v->push_back(flag_v_i);
+ 	flag_w->push_back(flag_w_i);
+
+	for (int j=0;j!=uwires.size();j++){
+	  const GeomWire *wire = uwires.at(j);
+	  wire_index_ui.push_back(wire->index());
+	  wire_charge_ui.push_back(wire_charge[wire]);
+	  wire_charge_err_ui.push_back(wire_charge_error[wire]);
+	}
+	for (int j=0;j!=vwires.size();j++){
+	  const GeomWire *wire = vwires.at(j);
+	  wire_index_vi.push_back(wire->index());
+	  wire_charge_vi.push_back(wire_charge[wire]);
+	  wire_charge_err_vi.push_back(wire_charge_error[wire]);
+	}
+	for (int j=0;j!=wwires.size();j++){
+	  const GeomWire *wire = wwires.at(j);
+	  wire_index_wi.push_back(wire->index());
+	  wire_charge_wi.push_back(wire_charge[wire]);
+	  wire_charge_err_wi.push_back(wire_charge_error[wire]);
+	}
+		
+    wire_index_u->push_back(wire_index_ui);	
+    wire_index_v->push_back(wire_index_vi);	
+    wire_index_w->push_back(wire_index_wi);
+    wire_charge_u->push_back(wire_charge_ui);
+    wire_charge_v->push_back(wire_charge_vi);
+    wire_charge_w->push_back(wire_charge_wi);
+    wire_charge_err_u->push_back(wire_charge_err_ui);
+    wire_charge_err_v->push_back(wire_charge_err_vi);
+    wire_charge_err_w->push_back(wire_charge_err_wi);
+    wire_index_ui.clear();
+    wire_index_vi.clear();
+    wire_index_wi.clear();
+    wire_charge_ui.clear();
+    wire_charge_vi.clear();
+    wire_charge_wi.clear();
+    wire_charge_err_ui.clear();
+    wire_charge_err_vi.clear();
+    wire_charge_err_wi.clear();
+      } // each cell
+    } // end saving live stuff ...
+    
+    TC->Fill();
+    cluster_id->clear();
+    nwire_u->clear();
+    nwire_v->clear();
+    nwire_w->clear();
+    flag_u->clear();
+    flag_v->clear();
+    flag_w->clear();
+    wire_index_u->clear();
+    wire_index_v->clear();
+    wire_index_w->clear();
+
+    TTree *TDC = new TTree("TDC","TDC");
+    TDC->SetDirectory(file);
+
+    std::vector<int> *ntime_slice = new std::vector<int>;
+    std::vector<std::vector<int>> *time_slices = new std::vector<std::vector<int>>;
+    std::vector<int> time_slices_i;
+
+    TDC->Branch("cluster_id",&cluster_id);
+    TDC->Branch("ntime_slice",&ntime_slice);
+    TDC->Branch("time_slice",&time_slices);
+    
+    TDC->Branch("nwire_u",&nwire_u);
+    TDC->Branch("nwire_v",&nwire_v);
+    TDC->Branch("nwire_w",&nwire_w);
+    TDC->Branch("flag_u",&flag_u);
+    TDC->Branch("flag_v",&flag_v);
+    TDC->Branch("flag_w",&flag_w);
+    TDC->Branch("wire_index_u",&wire_index_u);
+    TDC->Branch("wire_index_v",&wire_index_v);
+    TDC->Branch("wire_index_w",&wire_index_w);
+
+    
+    for (auto it = dead_cluster_set.begin();it!=dead_cluster_set.end();it++){
+      //cluster_id = (*it)->get_id();
+      std::map<SlimMergeGeomCell*,std::set<int>>& results = (*it)->get_mcell_time_map();
+      for (auto it1 = results.begin(); it1!=results.end(); it1++){
+    cluster_id->push_back((*it)->get_id());
+	SlimMergeGeomCell* mcell = it1->first;
+	std::set<int>& times = it1->second;
+	ntime_slice->push_back(times.size());
+	int temp_num = 0;
+	for (auto it2 = times.begin(); it2!=times.end();it2++){
+	  time_slices_i.push_back(*it2);
+	  temp_num ++;
+	}
+    time_slices->push_back(time_slices_i);
+    time_slices_i.clear();
+
+	GeomWireSelection& uwires = mcell->get_uwires();
+    	GeomWireSelection& vwires = mcell->get_vwires();
+    	GeomWireSelection& wwires = mcell->get_wwires();
+    	nwire_u->push_back(uwires.size());
+    	nwire_v->push_back(vwires.size());
+    	nwire_w->push_back(wwires.size());
+
+    	std::vector<WirePlaneType_t> bad_planes = mcell->get_bad_planes();
+
+	flag_u_i = 1;
+      flag_v_i = 1;
+      flag_w_i = 1; 
+    	for (size_t j= 0 ; j!=bad_planes.size(); j++){
+    	  if (bad_planes.at(j)==WirePlaneType_t(0)){
+    	    flag_u_i = 0;
+    	  }else if (bad_planes.at(j)==WirePlaneType_t(1)){
+    	    flag_v_i = 0;
+    	  }else if (bad_planes.at(j)==WirePlaneType_t(2)){
+    	    flag_w_i = 0;
+    	  }
+    	}
+      flag_u->push_back(flag_u_i);
+ 	flag_v->push_back(flag_v_i);
+ 	flag_w->push_back(flag_w_i);
+	
+    	for (int j=0;j!=uwires.size();j++){
+    	  const GeomWire *wire = uwires.at(j);
+    	  wire_index_ui.push_back(wire->index());
+    	}
+    	for (int j=0;j!=vwires.size();j++){
+    	  const GeomWire *wire = vwires.at(j);
+    	  wire_index_vi.push_back(wire->index());
+    	}
+    	for (int j=0;j!=wwires.size();j++){
+    	  const GeomWire *wire = wwires.at(j);
+    	  wire_index_wi.push_back(wire->index());
+    	}
+
+        wire_index_u->push_back(wire_index_ui);
+        wire_index_v->push_back(wire_index_vi);
+        wire_index_w->push_back(wire_index_wi);
+        wire_index_ui.clear();
+        wire_index_vi.clear();
+        wire_index_wi.clear();
+      }
+    }
+    
+  TDC->Fill();
+  }
+
+   
   file->Write();
   file->Close();
   
