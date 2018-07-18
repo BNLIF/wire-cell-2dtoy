@@ -1048,6 +1048,62 @@ int main(int argc, char* argv[])
     
   // canv->SaveAs("canv.root");
 
+
+
+  /////////////////////////////////////////////////////////////////////////////////// drawgood
+  ///////////////////////////////////////////////////////////////////////////////////
+
+  roostr = "graph_good";
+  TGraph *graph_good = new TGraph();
+  graph_good->SetName(roostr);
+  
+  roostr = "graph_broken";
+  TGraph *graph_broken = new TGraph();
+  graph_broken->SetName(roostr);
+  
+  roostr = "graph_noGhost";
+  TGraph *graph_noGhost = new TGraph();
+  graph_noGhost->SetName(roostr);
+
+  long count_good = 0;
+  long count_broken = 0;
+  long count_noGhost = 0;
+
+  // std::map< int, std::vector<int> > map_non_ghost_track_clusters;
+  // map<int, int>flag_track2recon;// 0: inefficiency, 1: broken, 2: good
+  // std::map<int, std::vector<double>> xpt;
+
+  for(auto it_tk=flag_track2recon.begin(); it_tk!=flag_track2recon.end(); it_tk++ ) {
+    int track_id = it_tk->first;
+    int flag = it_tk->second;
+    if( flag==0 ) continue;
+
+    int user_size = map_non_ghost_track_clusters[track_id].size() - 1;
+    //cout<<TString::Format(" ---> %2d %2d %3d", track_id, flag, user_size)<<endl;
+
+    for(int ic=1; ic<=user_size; ic++) {
+      int cluster_id = map_non_ghost_track_clusters[track_id].at(ic);
+
+      int cluster_size = xpt[cluster_id].size();
+      for(int idx=0; idx<cluster_size; idx++) {
+	
+	if( flag==1 ) {
+	  count_broken++;
+	  graph_broken->SetPoint(count_broken-1, zpt[cluster_id].at(idx), ypt[cluster_id].at(idx) );
+	}
+	
+	if( flag==2 ) {
+	  count_good++;
+	  graph_good->SetPoint(count_good-1, zpt[cluster_id].at(idx), ypt[cluster_id].at(idx) );
+	}
+	
+	count_noGhost++;
+	graph_noGhost->SetPoint(count_noGhost-1, zpt[cluster_id].at(idx), ypt[cluster_id].at(idx) );
+      }
+    }
+
+    
+  }// for(auto it_tk=flag_track2recon.begin(); it_tk!=flag_track2recon.end(); it_tk++ )
   
 
   ///////////////////////////////////////////////////////////////////////////////////
@@ -1100,9 +1156,16 @@ int main(int argc, char* argv[])
   TFile* output = new TFile(outputroot, "RECREATE");
 
   ///////
-  h1_ghost_track_length->Write();
-  graph_ghost_yz->Write();
 
+  graph_good->SetMarkerColor(kGreen);
+  graph_broken->SetMarkerColor(kBlue);
+    
+  graph_good->Write();
+  graph_broken->Write();
+  graph_noGhost->Write();
+  graph_ghost_yz->Write();
+  h1_ghost_track_length->Write();
+  
   ///////
   h1_flag_track_ghost->Write();
   h1_good_track_length->Write();
@@ -1119,7 +1182,7 @@ int main(int argc, char* argv[])
   h2_good_track_v_phi_costheta->Write();
   h2_broken_track_v_phi_costheta->Write();
   h2_ineff_track_v_phi_costheta->Write();
-    
+  
   output->Close();
 
   return 0;
