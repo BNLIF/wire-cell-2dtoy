@@ -725,7 +725,28 @@ int main(int argc, char* argv[])
 	      if( flag_start_contain && flag_end_contain ) {// good track
 		flag_track2recon[track_id] = 2;		
 		vc_ghost_id.erase( cluster_id );
-		map_non_ghost_track_clusters[track_id].push_back( cluster_id );	
+		map_non_ghost_track_clusters[track_id].push_back( cluster_id );
+
+		///
+		int i = cluster_id;
+		int npts = xpt[i].size();
+		double start_proj = 1e6;
+		double end_proj  = -1e6;
+		
+		for(int j=0; j<npts; j++) {//each point
+		  TVector3 point(xpt[i].at(j), ypt[i].at(j), zpt[i].at(j));
+		  double point_proj = vc_track_dir[track_id].Dot(point);
+		  if(point_proj < start_proj)
+		    {
+		      start_proj = point_proj;
+		    }
+		  if(point_proj > end_proj)
+		    {
+		      end_proj = point_proj;
+		    } 
+		}//each point
+		vc_cluster_length[cluster_id] = (end_proj-start_proj);
+		
 	      }
 	      else if(flag_start_contain || flag_end_contain) {// broken
 		flag_track2recon[track_id] = 1;		
@@ -816,7 +837,30 @@ int main(int argc, char* argv[])
 	flag_track2recon[track_id] = 2;
 	vc_ghost_id.erase( cluster_id );
 	map_non_ghost_track_clusters[track_id].push_back( cluster_id );
+	//cout<<" WARNING : big ghost in good track "<<cluster_id<<"\t"<<vc_cluster_length[cluster_id]<<endl;
+
+
+	///
+	int i = cluster_id;
+	int npts = xpt[i].size();
+	double start_proj = 1e6;
+	double end_proj  = -1e6;
+		
+	for(int j=0; j<npts; j++) {//each point
+	  TVector3 point(xpt[i].at(j), ypt[i].at(j), zpt[i].at(j));
+	  double point_proj = vc_track_dir[track_id].Dot(point);
+	  if(point_proj < start_proj)
+	    {
+	      start_proj = point_proj;
+	    }
+	  if(point_proj > end_proj)
+	    {
+	      end_proj = point_proj;
+	    } 
+	}//each point
+	vc_cluster_length[cluster_id] = (end_proj-start_proj);
 	cout<<" WARNING : big ghost in good track "<<cluster_id<<"\t"<<vc_cluster_length[cluster_id]<<endl;
+	
       }
       else {// broken
 	if( flag_track2recon[track_id]!=2 ) flag_track2recon[track_id] = 1;
@@ -908,9 +952,29 @@ int main(int argc, char* argv[])
    
     ///////
     if( flag==2 ) {
-      int cluster_id = map_non_ghost_track_clusters[it->first].at(1);
-      double length = vc_cluster_length[cluster_id] * fabs( vc_cluster_dir[cluster_id].Dot(vc_track_dir[track_id]) );      
-      h1_good_track_length->Fill( length );
+      // int cluster_id = map_non_ghost_track_clusters[it->first].at(1);
+      // double length = vc_cluster_length[cluster_id] * fabs( vc_cluster_dir[cluster_id].Dot(vc_track_dir[track_id]) );      
+      // h1_good_track_length->Fill( length );
+
+      int user_size = map_non_ghost_track_clusters[it->first].size() - 1;
+      
+      if( user_size==1 ) {
+	int cluster_id = map_non_ghost_track_clusters[it->first].at(user_size);
+	//double length = vc_cluster_length[cluster_id] * fabs( vc_cluster_dir[cluster_id].Dot(vc_track_dir[track_id]) );
+	h1_good_track_length->Fill( vc_cluster_length[cluster_id] );
+      }
+      else {
+	double length_max = 0;
+	for(int idx=1; idx<=user_size; idx++) {
+	  int cluster_id = map_non_ghost_track_clusters[it->first].at(idx);
+	  //double length = vc_cluster_length[cluster_id] * fabs( vc_cluster_dir[cluster_id].Dot(vc_track_dir[track_id]) );
+	  double length = vc_cluster_length[cluster_id];
+	  if( length>length_max ) length_max = length;
+	}
+
+	h1_good_track_length->Fill( length_max );
+      }
+	
     }
 
     if( flag==1 ) {
