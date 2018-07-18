@@ -252,7 +252,7 @@ int WireCell2dToy::ToyFiducial::check_LM_bdt(WireCell::FlashTPCBundle *bundle, d
 
   /* temporary... to make direct comparison to Xin's*/
   if(flash->get_type()!=2) return 0;
-  
+    
   float total_meas_pe = (float)flash->get_total_PE();
   int flag_anode = (int)bundle->get_flag_close_to_PMT();
   int flag_boundary = (int)bundle->get_flag_at_x_boundary();
@@ -297,7 +297,8 @@ int WireCell2dToy::ToyFiducial::check_LM_bdt(WireCell::FlashTPCBundle *bundle, d
   WireCell::LMBDT lm(total_pred_pe,total_meas_pe,max_meas_pe, ks_dis,
 		     chi2,ndf,cl,temp,flag_anode,flag_boundary); 
   
-  if( !lm.isSignal(lm.get_BDT_score_max_significance(sig,bgd)) ){
+  //  if( !lm.isSignal(lm.get_BDT_score_max_significance(sig,bgd)) ){
+  if( !lm.isSignal(lm.get_BDT_score_eff_background(0.005,bgd)) ){
     //f.Close();
     return 2; /* light mismatch event */
   }
