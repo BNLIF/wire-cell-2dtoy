@@ -571,7 +571,7 @@ int main(int argc, char* argv[])
    // WireCell2dToy::Clustering_live_dead(live_clusters, dead_clusters);
    // cerr << em("Clustering live and dead clusters") << std::endl;
 
-   std::map<PR3DCluster*,std::vector<std::pair<PR3DCluster*,double>>> group_clusters = WireCell2dToy::Clustering_jump_gap_cosmics(live_clusters, dead_clusters,dead_u_index, dead_v_index, dead_w_index, global_point_cloud, ct_point_cloud);
+   std::map<PR3DCluster*,std::vector<std::pair<PR3DCluster*,double>>> group_clusters = WireCell2dToy::Clustering_jump_gap_cosmics(live_clusters, dead_clusters,dead_u_index, dead_v_index, dead_w_index, global_point_cloud, ct_point_cloud,false);
    cout << em("Clustering to jump gap in cosmics") << std::endl;
    
    // // need to further cluster things ...
@@ -588,87 +588,87 @@ int main(int argc, char* argv[])
    }
    
    
-// no flash in simulation at present, no flash-tpc matching  
-if(0){   
-   // processing light information
-   //const char* root_file = argv[3];
-   //  WireCell2dToy::uBooNE_light_reco uboone_flash(root_file);
-   WireCell2dToy::ToyLightReco uboone_flash(filename, 1); // 1: imagingoutput, "Trun"; default/not specfified: path "Event/Sim"
-   uboone_flash.load_event_raw(0);
-   cout << em("flash reconstruction") << std::endl;
-
-   // prepare light matching ....
-   WireCell::OpflashSelection& flashes = uboone_flash.get_flashes();
-   for (size_t i=0;i!=flashes.size(); i++){
-     flashes.at(i)->set_flash_id(i);
-   }
- 
-   //   cout<<"BUGGGG"<<endl;
-   //   std::vector<std::tuple<WireCell::PR3DCluster*, WireCell::Opflash*, double, std::vector<double>>> matched_results = WireCell2dToy::tpc_light_match(time_offset,nrebin,group_clusters,flashes);
-   FlashTPCBundleSelection matched_bundles = WireCell2dToy::tpc_light_match(time_offset,nrebin,group_clusters,flashes);
-   
-   // create the live clusters ...
-   //std::cout << live_clusters.size() << std::endl;
-   live_clusters.clear();
-
-   for (auto it = matched_bundles.begin(); it!= matched_bundles.end(); it++){
-     FlashTPCBundle *bundle = *it;
-     PR3DCluster *main_cluster = bundle->get_main_cluster();
-     live_clusters.push_back(main_cluster);
-     for (auto it1 = bundle->get_other_clusters().begin(); it1!=bundle->get_other_clusters().end();it1++){
-       live_clusters.push_back(*it1);
-     }
-   }
-   //std::cout << live_clusters.size() << std::endl;
-
-   std::map<PR3DCluster*, PR3DCluster*> old_new_cluster_map;
-   
-   for (size_t i=0;i!=live_clusters.size();i++){
-
-     //if (live_clusters.at(i)->get_cluster_id()!=3) continue;
-
-     //std::cout << i << " " << live_clusters.at(i)->get_cluster_id() << " " << live_clusters.at(i)->get_mcells().size() << " " << live_clusters.at(i)->get_num_time_slices() << std::endl;
+   // no flash in simulation at present, no flash-tpc matching  
+   if(0){   
+     // processing light information
+     //const char* root_file = argv[3];
+     //  WireCell2dToy::uBooNE_light_reco uboone_flash(root_file);
+     WireCell2dToy::ToyLightReco uboone_flash(filename, 1); // 1: imagingoutput, "Trun"; default/not specfified: path "Event/Sim"
+     uboone_flash.load_event_raw(0);
+     cout << em("flash reconstruction") << std::endl;
      
-     live_clusters.at(i)->Create_graph(ct_point_cloud);
-
-     std::pair<WCPointCloud<double>::WCPoint,WCPointCloud<double>::WCPoint> wcps = live_clusters.at(i)->get_highest_lowest_wcps();
-     // std::pair<WCPointCloud<double>::WCPoint,WCPointCloud<double>::WCPoint> wcps = live_clusters.at(i)->get_extreme_wcps();
-
-     // std::cout << wcps.first.x/units::cm << " " << wcps.first.y/units::cm << " " << wcps.first.z/units::cm << " " << wcps.second.x/units::cm << " " << wcps.second.y/units::cm << " " << wcps.second.z/units::cm << std::endl;
-     
-     live_clusters.at(i)->dijkstra_shortest_paths(wcps.first);
-
-     //std::cout << "shortest path start point" << std::endl;
-     
-     live_clusters.at(i)->cal_shortest_path(wcps.second);
-
-     {
-       // temp ... 
-       PR3DCluster *new_cluster = WireCell2dToy::Improve_PR3DCluster(live_clusters.at(i),ct_point_cloud, gds);
-       WireCell2dToy::calc_sampling_points(gds,new_cluster,nrebin, frame_length, unit_dis);
-       new_cluster->Create_point_cloud();
-       old_new_cluster_map[live_clusters.at(i)] = new_cluster;
-
-       new_cluster->Create_graph(ct_point_cloud);
-       std::pair<WCPointCloud<double>::WCPoint,WCPointCloud<double>::WCPoint> new_wcps = new_cluster->get_highest_lowest_wcps();
-       new_cluster->dijkstra_shortest_paths(new_wcps.first);
-       new_cluster->cal_shortest_path(new_wcps.second);
+     // prepare light matching ....
+     WireCell::OpflashSelection& flashes = uboone_flash.get_flashes();
+     for (size_t i=0;i!=flashes.size(); i++){
+       flashes.at(i)->set_flash_id(i);
      }
      
-     //std::cout << "shortest path end point" << std::endl;
+     //   cout<<"BUGGGG"<<endl;
+     //   std::vector<std::tuple<WireCell::PR3DCluster*, WireCell::Opflash*, double, std::vector<double>>> matched_results = WireCell2dToy::tpc_light_match(time_offset,nrebin,group_clusters,flashes);
+     FlashTPCBundleSelection matched_bundles = WireCell2dToy::tpc_light_match(time_offset,nrebin,group_clusters,flashes);
      
-     live_clusters.at(i)->fine_tracking();
-
-     //std::cout << "fine tracking" << std::endl;
+     // create the live clusters ...
+     //std::cout << live_clusters.size() << std::endl;
+     live_clusters.clear();
      
-     live_clusters.at(i)->collect_charge_trajectory(ct_point_cloud);
-
-     //std::cout << "Collect points" << std::endl;
-   }
-   
-   cerr << em("Create Graph in all clusters") << std::endl;
-
-}   
+     for (auto it = matched_bundles.begin(); it!= matched_bundles.end(); it++){
+       FlashTPCBundle *bundle = *it;
+       PR3DCluster *main_cluster = bundle->get_main_cluster();
+       live_clusters.push_back(main_cluster);
+       for (auto it1 = bundle->get_other_clusters().begin(); it1!=bundle->get_other_clusters().end();it1++){
+	 live_clusters.push_back(*it1);
+       }
+     }
+     //std::cout << live_clusters.size() << std::endl;
+     
+     std::map<PR3DCluster*, PR3DCluster*> old_new_cluster_map;
+     
+     for (size_t i=0;i!=live_clusters.size();i++){
+       
+       //if (live_clusters.at(i)->get_cluster_id()!=3) continue;
+       
+       //std::cout << i << " " << live_clusters.at(i)->get_cluster_id() << " " << live_clusters.at(i)->get_mcells().size() << " " << live_clusters.at(i)->get_num_time_slices() << std::endl;
+       
+       live_clusters.at(i)->Create_graph(ct_point_cloud);
+       
+       std::pair<WCPointCloud<double>::WCPoint,WCPointCloud<double>::WCPoint> wcps = live_clusters.at(i)->get_highest_lowest_wcps();
+       // std::pair<WCPointCloud<double>::WCPoint,WCPointCloud<double>::WCPoint> wcps = live_clusters.at(i)->get_extreme_wcps();
+       
+       // std::cout << wcps.first.x/units::cm << " " << wcps.first.y/units::cm << " " << wcps.first.z/units::cm << " " << wcps.second.x/units::cm << " " << wcps.second.y/units::cm << " " << wcps.second.z/units::cm << std::endl;
+       
+       live_clusters.at(i)->dijkstra_shortest_paths(wcps.first);
+       
+       //std::cout << "shortest path start point" << std::endl;
+       
+       live_clusters.at(i)->cal_shortest_path(wcps.second);
+       
+       {
+	 // temp ... 
+	 PR3DCluster *new_cluster = WireCell2dToy::Improve_PR3DCluster(live_clusters.at(i),ct_point_cloud, gds);
+	 WireCell2dToy::calc_sampling_points(gds,new_cluster,nrebin, frame_length, unit_dis);
+	 new_cluster->Create_point_cloud();
+	 old_new_cluster_map[live_clusters.at(i)] = new_cluster;
+	 
+	 new_cluster->Create_graph(ct_point_cloud);
+	 std::pair<WCPointCloud<double>::WCPoint,WCPointCloud<double>::WCPoint> new_wcps = new_cluster->get_highest_lowest_wcps();
+	 new_cluster->dijkstra_shortest_paths(new_wcps.first);
+	 new_cluster->cal_shortest_path(new_wcps.second);
+       }
+       
+       //std::cout << "shortest path end point" << std::endl;
+       
+       live_clusters.at(i)->fine_tracking();
+       
+       //std::cout << "fine tracking" << std::endl;
+       
+       live_clusters.at(i)->collect_charge_trajectory(ct_point_cloud);
+       
+       //std::cout << "Collect points" << std::endl;
+     }
+     
+     cerr << em("Create Graph in all clusters") << std::endl;
+     
+   }   
    
    TFile *file1 = new TFile(Form("cluster_%d_%d_%d.root",run_no,subrun_no,event_no),"RECREATE");
  

@@ -190,7 +190,7 @@ double WireCell2dToy::Find_Closeset_Points(WireCell::PR3DCluster *cluster1, Wire
 }
 
 
-std::map<PR3DCluster*,std::vector<std::pair<PR3DCluster*,double>>> WireCell2dToy::Clustering_jump_gap_cosmics(WireCell::PR3DClusterSelection& live_clusters, WireCell::PR3DClusterSelection& dead_clusters, std::map<int,std::pair<double,double>>& dead_u_index, std::map<int,std::pair<double,double>>& dead_v_index, std::map<int,std::pair<double,double>>& dead_w_index, WireCell::DynamicToyPointCloud& global_point_cloud, WireCell::ToyCTPointCloud& ct_point_cloud){
+std::map<PR3DCluster*,std::vector<std::pair<PR3DCluster*,double>>> WireCell2dToy::Clustering_jump_gap_cosmics(WireCell::PR3DClusterSelection& live_clusters, WireCell::PR3DClusterSelection& dead_clusters, std::map<int,std::pair<double,double>>& dead_u_index, std::map<int,std::pair<double,double>>& dead_v_index, std::map<int,std::pair<double,double>>& dead_w_index, WireCell::DynamicToyPointCloud& global_point_cloud, WireCell::ToyCTPointCloud& ct_point_cloud, bool flag_neutrino){
 
   
   ExecMon em("starting");
@@ -321,12 +321,12 @@ std::map<PR3DCluster*,std::vector<std::pair<PR3DCluster*,double>>> WireCell2dToy
   // use graph theory ... 
   Clustering_protect_overclustering(live_clusters, cluster_length_map, ct_point_cloud);
   
-  
-  // Now clustering the isolated pieces ....
-  for (int i=0;i!=1;i++){
-    Clustering_neutrino(live_clusters,cluster_length_map,i);
-    // std::cout << std::endl << std::endl;
-  }
+  if (flag_neutrino)
+    // Now clustering the isolated pieces ....
+    for (int i=0;i!=1;i++){
+      Clustering_neutrino(live_clusters,cluster_length_map,i);
+      // std::cout << std::endl << std::endl;
+    }
   
   // Clustering_dis(live_clusters,cluster_length_map);
   cerr << em("clustering isolated piece") << std::endl;
@@ -376,7 +376,7 @@ std::map<PR3DCluster*,std::vector<std::pair<PR3DCluster*,double>>> WireCell2dToy
 
 
 // old version of code to not break the old code ... 
-std::map<PR3DCluster*,std::vector<std::pair<PR3DCluster*,double>>> WireCell2dToy::Clustering_jump_gap_cosmics(WireCell::PR3DClusterSelection& live_clusters, WireCell::PR3DClusterSelection& dead_clusters, std::map<int,std::pair<double,double>>& dead_u_index, std::map<int,std::pair<double,double>>& dead_v_index, std::map<int,std::pair<double,double>>& dead_w_index, WireCell::DynamicToyPointCloud& global_point_cloud){
+std::map<PR3DCluster*,std::vector<std::pair<PR3DCluster*,double>>> WireCell2dToy::Clustering_jump_gap_cosmics(WireCell::PR3DClusterSelection& live_clusters, WireCell::PR3DClusterSelection& dead_clusters, std::map<int,std::pair<double,double>>& dead_u_index, std::map<int,std::pair<double,double>>& dead_v_index, std::map<int,std::pair<double,double>>& dead_w_index, WireCell::DynamicToyPointCloud& global_point_cloud, bool flag_neutrino){
 
   
   ExecMon em("starting");
@@ -505,12 +505,13 @@ std::map<PR3DCluster*,std::vector<std::pair<PR3DCluster*,double>>> WireCell2dToy
 
   // add a piece for separating over-clustered pieces ... 
 
-  
-  // Now clustering the isolated pieces ....
-  for (int i=0;i!=1;i++){
-    Clustering_neutrino(live_clusters,cluster_length_map,i);
-    // std::cout << std::endl << std::endl;
-  }
+
+  if (flag_neutrino)
+    // Now clustering the isolated pieces ....
+    for (int i=0;i!=1;i++){
+      Clustering_neutrino(live_clusters,cluster_length_map,i);
+      // std::cout << std::endl << std::endl;
+    }
   
   // Clustering_dis(live_clusters,cluster_length_map);
   //  cerr << em("clustering isolated piece") << std::endl;
