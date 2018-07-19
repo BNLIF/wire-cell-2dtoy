@@ -94,7 +94,7 @@ bool GeomWireSelectionCompare(GeomWireSelection a, GeomWireSelection b) {
 int main(int argc, char* argv[])
 {
   if (argc < 3) {
-    cerr << "usage: wire-cell-uboone /path/to/ChannelWireGeometry.txt /path/to/celltree.root /path/to/true.root -t[0,1] -s[0,1,2]" << endl;
+    cerr << "usage: wire-cell-uboone /path/to/ChannelWireGeometry.txt /path/to/celltree.root /path/to/true.root file_tag -t[0,1] -s[0,1,2]" << endl;
     return 1;
   }
 
