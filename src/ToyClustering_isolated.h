@@ -143,8 +143,10 @@ std::map<PR3DCluster*,std::vector<std::pair<PR3DCluster*,double>>> WireCell2dToy
   double big_dis_range_cut = 16*units::cm;
   for (size_t i=0;i!=big_clusters.size();i++){
     PR3DCluster *cluster1 = big_clusters.at(i);
+    cluster1->Create_point_cloud();
     for (size_t j=i+1; j!=big_clusters.size();j++){
       PR3DCluster *cluster2 = big_clusters.at(j);
+      cluster2->Create_point_cloud();
       ToyPointCloud *cloud1, *cloud2;
       double pca_ratio, small_cluster_length;
       if (cluster_length_map[cluster1] > cluster_length_map[cluster2]){
@@ -162,6 +164,8 @@ std::map<PR3DCluster*,std::vector<std::pair<PR3DCluster*,double>>> WireCell2dToy
 	pca_ratio = cluster1->get_PCA_value(1)/ cluster1->get_PCA_value(0);
 	small_cluster_length = cluster_length_map[cluster1];
       }
+      // std::cout << cluster1->get_num_mcells() << " " << cluster2->get_num_mcells() << " " << cluster1->get_point_cloud() << " " << cluster2->get_point_cloud() << std::endl;
+      
       std::tuple<int,int,double> results =  cloud2->get_closest_points(cloud1);
       double min_dis = std::get<2>(results);
       if (min_dis < big_dis_cut){
