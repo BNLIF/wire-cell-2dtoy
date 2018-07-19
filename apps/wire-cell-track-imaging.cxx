@@ -1118,16 +1118,18 @@ int main(int argc, char* argv[])
   ///////////////////////////////////////////////////////////////////////////////////
 
   roostr = "graph_good";
-  TGraph *graph_good = new TGraph();
-  graph_good->SetName(roostr);
+  TH2D *graph_good = new TH2D(roostr, roostr, 550, 0, 1100, 120, -120, 120);
+  // TGraph *graph_good = new TGraph();
+  // graph_good->SetName(roostr);
   
   roostr = "graph_broken";
-  TGraph *graph_broken = new TGraph();
-  graph_broken->SetName(roostr);
+  TH2D *graph_broken = new TH2D(roostr, roostr, 550, 0, 1100, 120, -120, 120);
+  // TGraph *graph_broken = new TGraph();
+  // graph_broken->SetName(roostr);
   
-  roostr = "graph_noGhost";
-  TGraph *graph_noGhost = new TGraph();
-  graph_noGhost->SetName(roostr);
+  // roostr = "graph_noGhost";
+  // TGraph *graph_noGhost = new TGraph();
+  // graph_noGhost->SetName(roostr);
 
   long count_good = 0;
   long count_broken = 0;
@@ -1153,22 +1155,45 @@ int main(int argc, char* argv[])
 	
 	if( flag==1 ) {
 	  count_broken++;
-	  graph_broken->SetPoint(count_broken-1, zpt[cluster_id].at(idx), ypt[cluster_id].at(idx) );
+	  //graph_broken->SetPoint(count_broken-1, zpt[cluster_id].at(idx), ypt[cluster_id].at(idx) );
+	  graph_broken->Fill( zpt[cluster_id].at(idx), ypt[cluster_id].at(idx) );
 	}
 	
 	if( flag==2 ) {
 	  count_good++;
-	  graph_good->SetPoint(count_good-1, zpt[cluster_id].at(idx), ypt[cluster_id].at(idx) );
+	  //graph_good->SetPoint(count_good-1, zpt[cluster_id].at(idx), ypt[cluster_id].at(idx) );
+	  graph_good->Fill( zpt[cluster_id].at(idx), ypt[cluster_id].at(idx) );
 	}
 	
 	count_noGhost++;
-	graph_noGhost->SetPoint(count_noGhost-1, zpt[cluster_id].at(idx), ypt[cluster_id].at(idx) );
+	//graph_noGhost->SetPoint(count_noGhost-1, zpt[cluster_id].at(idx), ypt[cluster_id].at(idx) );
       }
     }
 
     
   }// for(auto it_tk=flag_track2recon.begin(); it_tk!=flag_track2recon.end(); it_tk++ )
+
+
   
+  roostr = "graph_truth";
+  TH2D *graph_truth = new TH2D(roostr, roostr, 550, 0, 1100, 120, -120, 120);
+
+  roostr = "graph_truth_good";
+  TH2D *graph_truth_good = new TH2D(roostr, roostr, 550, 0, 1100, 120, -120, 120);
+  
+  roostr = "graph_truth_broken";
+  TH2D *graph_truth_broken = new TH2D(roostr, roostr, 550, 0, 1100, 120, -120, 120);
+  
+  
+  for(long ientry=0; ientry<truth->GetEntries(); ientry++) {
+    truth->GetEntry(ientry);
+    
+    graph_truth->Fill( z,y );
+
+    if( flag_track2recon[track_id]==2 ) graph_truth_good->Fill( z,y );
+    if( flag_track2recon[track_id]==1 ) graph_truth_broken->Fill( z,y );
+  }
+
 
   ///////////////////////////////////////////////////////////////////////////////////
   ///////////////////////////////////////////////////////////////////////////////////
@@ -1220,13 +1245,17 @@ int main(int argc, char* argv[])
   TFile* output = new TFile(outputroot, "RECREATE");
 
   ///////
-
+    
   graph_good->SetMarkerColor(kGreen);
   graph_broken->SetMarkerColor(kBlue);
-    
+  
+  graph_truth->Write();
+  graph_truth_good->Write();
+  graph_truth_broken->Write();
+  
   graph_good->Write();
   graph_broken->Write();
-  graph_noGhost->Write();
+  //graph_noGhost->Write();
   graph_ghost_yz->Write();
   h1_ghost_track_length->Write();
   
