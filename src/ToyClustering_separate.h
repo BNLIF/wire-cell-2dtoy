@@ -2593,7 +2593,7 @@ void WireCell2dToy::Clustering_separate(WireCell::PR3DClusterSelection& live_clu
 	  cluster->Del_graph();
 	  //delete cluster;
 
-	  if (sep_clusters.size()>=2.0){
+	  if (sep_clusters.size()>=2){
 	    for (size_t k=2;k<sep_clusters.size();k++){
 	      new_clusters.push_back(sep_clusters.at(k));
 	    }
