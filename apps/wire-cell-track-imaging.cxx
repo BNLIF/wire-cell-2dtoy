@@ -1075,6 +1075,13 @@ int main(int argc, char* argv[])
 
   roostr = "h1_ghost_track_length";
   TH1D *h1_ghost_track_length = new TH1D(roostr, roostr, 150, 0, 150);
+
+  roostr = "h2_long_ghost_y_phi_costheta";
+  TH2D *h2_long_ghost_y_phi_costheta = new TH2D(roostr, roostr, 10, 0, TMath::Pi(), 10, 0, 1);
+  roostr = "h2_long_ghost_u_phi_costheta";
+  TH2D *h2_long_ghost_u_phi_costheta = new TH2D(roostr, roostr, 10, 0, TMath::Pi(), 10, 0, 1);
+  roostr = "h2_long_ghost_v_phi_costheta";
+  TH2D *h2_long_ghost_v_phi_costheta = new TH2D(roostr, roostr, 10, 0, TMath::Pi(), 10, 0, 1);
   
   int size_ghost = vc_ghost_id.size();
   cout<<" ---> number of ghost "<<size_ghost<<endl;
@@ -1103,6 +1110,34 @@ int main(int argc, char* argv[])
     /////// ghost histgram
     /////// ghost histgram
     h1_ghost_track_length->Fill( vc_cluster_length[id] );
+
+
+    /////// long ghost: length > 20 cm
+    if( vc_cluster_length[id]<20 ) continue;
+    
+    /////// ghost-angle
+    /////// ghost-angle
+    TVector3 dir = vc_cluster_dir[id];
+    double cosy = dir.Y()/dir.Mag();
+    double phiz = TMath::ACos(dir.Z()/TMath::Sqrt(dir.X()*dir.X()+dir.Z()*dir.Z()));
+ 
+    /////// Muplane
+    TVector3 u_dir = Muplane * dir;
+    if( u_dir.Y()<0 ) u_dir *= -1.;
+    double u_cosy = u_dir.Y()/u_dir.Mag();
+    double u_phiz = TMath::ACos(u_dir.Z()/TMath::Sqrt(u_dir.X()*u_dir.X()+u_dir.Z()*u_dir.Z()));
+    
+    /////// Mvplane
+    TVector3 v_dir = Mvplane * dir;
+    if( v_dir.Y()<0 ) v_dir *= -1.;
+    double v_cosy = v_dir.Y()/v_dir.Mag();
+    double v_phiz = TMath::ACos(v_dir.Z()/TMath::Sqrt(v_dir.X()*v_dir.X()+v_dir.Z()*v_dir.Z()));
+
+    ///////
+    h2_long_ghost_y_phi_costheta->Fill( phiz, cosy );
+    h2_long_ghost_u_phi_costheta->Fill( u_phiz, u_cosy );
+    h2_long_ghost_v_phi_costheta->Fill( v_phiz, v_cosy );
+
   }
 
   // if( gh_ghost_all->GetN()!=0 ) gh_ghost_all->Draw("same p");
@@ -1275,6 +1310,10 @@ int main(int argc, char* argv[])
   h2_good_track_v_phi_costheta->Write();
   h2_broken_track_v_phi_costheta->Write();
   h2_ineff_track_v_phi_costheta->Write();
+
+  h2_long_ghost_y_phi_costheta->Write();
+  h2_long_ghost_u_phi_costheta->Write();
+  h2_long_ghost_v_phi_costheta->Write();
   
   output->Close();
 
