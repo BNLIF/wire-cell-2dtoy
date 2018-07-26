@@ -67,6 +67,8 @@
 #include "TColor.h"
 #include "TVectorD.h"
 #include "TMatrixD.h"
+#include "TRandom.h"
+#include "TF1.h"
 #include <iostream>
 
 using namespace WireCell;
@@ -110,7 +112,12 @@ int main(int argc, char* argv[])
   // 1 for debug mode for bee ...
 
   int flag_l1 = 0; // do not run l1sp code 
-  
+ 
+  int landau_fluc = 0; // landau fluctuation for each charge hit
+  gRandom->SetSeed(0);
+  TF1 *ld = new TF1("ld","[0]*TMath::Landau(x, 1.8, 0.15, 1)",0,10); // MPV: 1.8, psi: 0.15, 4*psi = FMHW
+  ld->SetParameter(0, 1);
+
   for(Int_t i = 1; i != argc; i++){
      switch(argv[i][1]){
      case 't':
@@ -130,6 +137,9 @@ int main(int argc, char* argv[])
        break;
      case 'l':
        flag_l1 = atoi(&argv[i][2]);
+       break;
+     case 'f':
+       landau_fluc = atoi(&argv[i][2]);
        break;
      }
   }
@@ -314,7 +324,9 @@ int main(int argc, char* argv[])
       }
       for(int tbin=1; tbin<=total_time_bin/nrebin; tbin++)
       {
-          htempp->SetBinContent(chid+1, tbin, signal->GetBinContent(tbin-int(time_offset*1.0/nrebin)));
+          Double_t random_factor = 1.0;
+          if(landau_fluc) random_factor = ld->GetRandom()/1.8;
+          htempp->SetBinContent(chid+1, tbin, random_factor*signal->GetBinContent(tbin-int(time_offset*1.0/nrebin)));
       }
   }
   

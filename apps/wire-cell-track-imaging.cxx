@@ -464,7 +464,7 @@ int main(int argc, char* argv[])
     TVector3 cluster_center( mx, my, mz );
     
     map_cluster_center[ i ] = cluster_center;
-    
+   
   }
 
   ///////////////////////////////////////////////////////////////
@@ -552,11 +552,11 @@ int main(int argc, char* argv[])
       double min = (value_track_start>value_track_end)?(value_track_end-tolerance_contain):(value_track_start-tolerance_contain);
       double max = (value_track_start>value_track_end)?(value_track_start+tolerance_contain):(value_track_end+tolerance_contain);
 
-      cout<<TString::Format(" cluster %2d , track %2d, angleT %5.3f, angle %5.3f, distance center %8.2f, contain min/max %8.2f %8.2f, start/end, %8.2f %8.2f",
-      			    cluster_id, track_id,
-      			    tolerance_parallel, v3_trackXcluster.Mag(),
-      			    distance_center,
-      			    min, max, value_cluster_start, value_cluster_end )<<endl;
+      /* cout<<TString::Format(" cluster %2d , track %2d, angleT %5.3f, angle %5.3f, distance center %8.2f, contain min/max %8.2f %8.2f, start/end, %8.2f %8.2f", */
+      /* 			    cluster_id, track_id, */
+      /* 			    tolerance_parallel, v3_trackXcluster.Mag(), */
+      /* 			    distance_center, */
+      /* 			    min, max, value_cluster_start, value_cluster_end )<<endl; */
 
 
       bool flag_contain = false;
@@ -859,14 +859,14 @@ int main(int argc, char* argv[])
 	    } 
 	}//each point
 	vc_cluster_length[cluster_id] = (end_proj-start_proj);
-	cout<<" WARNING : big ghost in good track "<<cluster_id<<"\t"<<vc_cluster_length[cluster_id]<<endl;
+	cout<<" WARNING : big ghost "<<cluster_id<<" in good track "<<track_id<<"\t"<<vc_cluster_length[cluster_id]<<endl;
 	
       }
       else {// broken
 	if( flag_track2recon[track_id]!=2 ) flag_track2recon[track_id] = 1;
 	vc_ghost_id.erase( cluster_id );
 	map_non_ghost_track_clusters[track_id].push_back( cluster_id );
-	cout<<" WARNING : big ghost in broken track "<<cluster_id<<"\t"<<vc_cluster_length[cluster_id]<<endl;
+	cout<<" WARNING : big ghost "<<cluster_id<<" in broken track "<<track_id<<"\t"<<vc_cluster_length[cluster_id]<<endl;
       }
       
     }
@@ -984,7 +984,7 @@ int main(int argc, char* argv[])
       for(int i=1; i<map_non_ghost_track_clusters[it->first].size(); i++) {
 	int cluster_id = map_non_ghost_track_clusters[it->first].at(i);
 	//length += vc_cluster_length[cluster_id] * fabs( vc_cluster_dir[cluster_id].Dot(vc_track_dir[track_id]) );
-	//cout<<" debug : "<< it->first<<"\t"<<vc_cluster_length[ map_non_ghost_track_clusters[it->first].at(i) ]<<endl;
+	//cout<<" debug : "<< it->first<<"\t"<<vc_cluster_length[ map_non_ghost_track_clusters[it->first].at(i) ]<<" "<<map_non_ghost_track_clusters[it->first].at(i)<<endl;
         double start_proj = vc_cluster_start[cluster_id].Dot(vc_track_dir[track_id]);
         double end_proj = vc_cluster_end[cluster_id].Dot(vc_track_dir[track_id]); 
         double min = 1e6;
@@ -993,7 +993,11 @@ int main(int argc, char* argv[])
         min = min<end_proj?min:end_proj;
         max = max>start_proj?max:start_proj;
         max = max>end_proj?max:end_proj;
-
+       
+        //cout<<"Debug: cluster_id: "<<cluster_id<<endl;
+        //cout<<"Debug: start: "<<vc_cluster_start[cluster_id].X()<<" "<<vc_cluster_start[cluster_id].Y()<<" "<<vc_cluster_start[cluster_id].Z()<<endl;
+        //cout<<"Debug: end: "<<vc_cluster_end[cluster_id].X()<<" "<<vc_cluster_end[cluster_id].Y()<<" "<<vc_cluster_end[cluster_id].Z()<<endl;
+        //cout<<"Debug: min: "<<min<<" max: "<<max<<endl;
         std::pair<double, double> p(min, max);
         vec_min_max_proj.push_back(p);
       }

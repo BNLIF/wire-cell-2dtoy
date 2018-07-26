@@ -67,6 +67,8 @@
 #include "TColor.h"
 #include "TVectorD.h"
 #include "TMatrixD.h"
+#include "TRandom.h"
+#include "TF1.h"
 #include <iostream>
 
 using namespace WireCell;
@@ -111,6 +113,11 @@ int main(int argc, char* argv[])
 
   int flag_l1 = 0; // do not run l1sp code 
   
+  int landau_fluc = 0; // landau fluctuation for each charge hit
+  gRandom->SetSeed(0);
+  TF1 *ld = new TF1("ld","[0]*TMath::Landau(x, 1.8, 0.15, 1)",0,10); // MPV: 1.8, psi: 0.15, 4*psi = FMHW
+  ld->SetParameter(0, 1);
+  
   for(Int_t i = 1; i != argc; i++){
      switch(argv[i][1]){
      case 't':
@@ -130,6 +137,9 @@ int main(int argc, char* argv[])
        break;
      case 'l':
        flag_l1 = atoi(&argv[i][2]);
+       break;
+     case 'f':
+       landau_fluc = atoi(&argv[i][2]);
        break;
      }
   }
@@ -331,6 +341,37 @@ int main(int argc, char* argv[])
   TH2F *hv_decon_g = (TH2F*)file1->Get("hv_decon_g");
   TH2F *hw_decon_g = (TH2F*)file1->Get("hw_decon_g");
 
+
+  if(landau_fluc){
+    Double_t random_factor = 1.0;
+    for(int i=1; i<=hu_decon->GetNbinsX(); i++){
+        for(int j=1; j<=hu_decon->GetNbinsY(); j++){
+            random_factor = ld->GetRandom()/1.8;
+            Double_t content = hu_decon->GetBinContent(i, j);
+            Double_t content_g = hu_decon_g->GetBinContent(i, j);
+            hu_decon->SetBinContent(i, j, content*random_factor);
+            hu_decon_g->SetBinContent(i, j, content_g*random_factor);
+        }
+    }
+    for(int i=1; i<=hv_decon->GetNbinsX(); i++){
+        for(int j=1; j<=hv_decon->GetNbinsY(); j++){
+            random_factor = ld->GetRandom()/1.8;
+            Double_t content = hv_decon->GetBinContent(i, j);
+            Double_t content_g = hv_decon_g->GetBinContent(i, j);
+            hv_decon->SetBinContent(i, j, content*random_factor);
+            hv_decon_g->SetBinContent(i, j, content_g*random_factor);
+        }
+    }
+    for(int i=1; i<=hw_decon->GetNbinsX(); i++){
+        for(int j=1; j<=hw_decon->GetNbinsY(); j++){
+            random_factor = ld->GetRandom()/1.8;
+            Double_t content = hw_decon->GetBinContent(i, j);
+            Double_t content_g = hw_decon_g->GetBinContent(i, j);
+            hw_decon->SetBinContent(i, j, content*random_factor);
+            hw_decon_g->SetBinContent(i, j, content_g*random_factor);
+        }
+    }
+  }
 
   // add a special treatment here ...
   /* for (int i=296; i!=671;i++){ */
