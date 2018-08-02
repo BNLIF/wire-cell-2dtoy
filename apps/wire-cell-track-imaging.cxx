@@ -1087,6 +1087,13 @@ int main(int argc, char* argv[])
   roostr = "h2_long_ghost_v_phi_costheta";
   TH2D *h2_long_ghost_v_phi_costheta = new TH2D(roostr, roostr, 10, 0, TMath::Pi(), 10, 0, 1);
   
+  roostr = "h2_ghost_y_phi_costheta";
+  TH2D *h2_ghost_y_phi_costheta = new TH2D(roostr, roostr, 10, 0, TMath::Pi(), 10, 0, 1);
+  roostr = "h2_ghost_u_phi_costheta";
+  TH2D *h2_ghost_u_phi_costheta = new TH2D(roostr, roostr, 10, 0, TMath::Pi(), 10, 0, 1);
+  roostr = "h2_ghost_v_phi_costheta";
+  TH2D *h2_ghost_v_phi_costheta = new TH2D(roostr, roostr, 10, 0, TMath::Pi(), 10, 0, 1);
+  
   int size_ghost = vc_ghost_id.size();
   cout<<" ---> number of ghost "<<size_ghost<<endl;
 
@@ -1115,9 +1122,7 @@ int main(int argc, char* argv[])
     /////// ghost histgram
     h1_ghost_track_length->Fill( vc_cluster_length[id] );
 
-
-    /////// long ghost: length > 20 cm
-    if( vc_cluster_length[id]<20 ) continue;
+    cout<<"length_ghost "<<vc_cluster_length[id]<<"\t"<<inputroot<<endl;
     
     /////// ghost-angle
     /////// ghost-angle
@@ -1138,9 +1143,17 @@ int main(int argc, char* argv[])
     double v_phiz = TMath::ACos(v_dir.Z()/TMath::Sqrt(v_dir.X()*v_dir.X()+v_dir.Z()*v_dir.Z()));
 
     ///////
-    h2_long_ghost_y_phi_costheta->Fill( phiz, cosy );
-    h2_long_ghost_u_phi_costheta->Fill( u_phiz, u_cosy );
-    h2_long_ghost_v_phi_costheta->Fill( v_phiz, v_cosy );
+    h2_ghost_y_phi_costheta->Fill( phiz, cosy );
+    h2_ghost_u_phi_costheta->Fill( u_phiz, u_cosy );
+    h2_ghost_v_phi_costheta->Fill( v_phiz, v_cosy );
+    
+    /////// long ghost: length > 20 cm
+    if( vc_cluster_length[id]>20 ) {
+      h2_long_ghost_y_phi_costheta->Fill( phiz, cosy );
+      h2_long_ghost_u_phi_costheta->Fill( u_phiz, u_cosy );
+      h2_long_ghost_v_phi_costheta->Fill( v_phiz, v_cosy );
+    }
+    
 
   }
 
@@ -1318,6 +1331,10 @@ int main(int argc, char* argv[])
   h2_long_ghost_y_phi_costheta->Write();
   h2_long_ghost_u_phi_costheta->Write();
   h2_long_ghost_v_phi_costheta->Write();
+  
+  h2_ghost_y_phi_costheta->Write();
+  h2_ghost_u_phi_costheta->Write();
+  h2_ghost_v_phi_costheta->Write();
   
   output->Close();
 
