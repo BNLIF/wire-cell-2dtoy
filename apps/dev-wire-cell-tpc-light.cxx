@@ -829,7 +829,7 @@ int main(int argc, char* argv[])
    
    TTree *T_cluster ;
    Double_t x,y,z,q,nq;
-   
+   Int_t temp_time_slice, ch_u, ch_v, ch_w;
    T_cluster = new TTree("T_cluster","T_cluster");
    T_cluster->Branch("cluster_id",&ncluster,"cluster_id/I");
    T_cluster->Branch("x",&x,"x/D");
@@ -837,6 +837,10 @@ int main(int argc, char* argv[])
    T_cluster->Branch("z",&z,"z/D");
    T_cluster->Branch("q",&q,"q/D");
    T_cluster->Branch("nq",&nq,"nq/D");
+   T_cluster->Branch("time_slice",&temp_time_slice,"time_slice/I");
+   T_cluster->Branch("ch_u",&ch_u,"ch_u/I");
+   T_cluster->Branch("ch_v",&ch_v,"ch_v/I");
+   T_cluster->Branch("ch_w",&ch_w,"ch_w/I");
    T_cluster->SetDirectory(file1);
 
    TTree *T_rec = new TTree("T_rec","T_rec");
@@ -894,6 +898,8 @@ int main(int argc, char* argv[])
        for (size_t i=0;i!=mcells.size();i++){
 	 PointVector ps = mcells.at(i)->get_sampling_points();
 	 int time_slice = mcells.at(i)->GetTimeSlice();
+
+	 //	 temp_time_slice = time_slice;
 	 
 	 if (ps.size()==0){
 	   std::cout << "zero sampling points!" << std::endl;
@@ -904,6 +910,12 @@ int main(int argc, char* argv[])
 	     x = (ps.at(k).x- offset_x)/units::cm ;
 	     y = ps.at(k).y/units::cm;
 	     z = ps.at(k).z/units::cm;
+	     std::vector<int> time_chs = ct_point_cloud.convert_3Dpoint_time_ch(ps.at(k));
+	     temp_time_slice = time_chs.at(0);
+	     ch_u = time_chs.at(1);
+	     ch_v = time_chs.at(2);
+	     ch_w = time_chs.at(3);
+	     
 	     T_cluster->Fill();
 	   }
 	 }

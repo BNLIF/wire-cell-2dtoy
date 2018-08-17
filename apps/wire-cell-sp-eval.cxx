@@ -363,18 +363,58 @@ int main(int argc, char* argv[])
             chid = ch;
             start_time = 0;
             end_time = total_time_bin-1;
-          if( (ch>=296 && ch<=671) || (ch>=864 && ch<=911) ) {
-              plane = 0;
-              T_chirp->Fill();
+          // if( (ch>=296 && ch<=671) || (ch>=864 && ch<=911) ) {
+          //     plane = 0;
+          //     T_chirp->Fill();
+          // }
+          // if( ch>=3936 && ch<=3983 ) {
+          //     plane = 1;
+          //     T_chirp->Fill();
+          // }
+          // if( ch>=7136 && ch<=7263 ) {
+          //     plane = 2;
+          //     T_chirp->Fill();
+          // }
+
+	  if( (ch>=864 && ch<=911) ||
+	      (ch>=296 && ch<=296) ||
+	      (ch>=298 && ch<=315) ||
+	      (ch>=317 && ch<=317) ||
+	      (ch>=319 && ch<=327) ||
+	      (ch>=336 && ch<=337) ||
+	      (ch>=343 && ch<=345) ||
+	      (ch>=348 && ch<=351) ||
+	      (ch>=376 && ch<=400) ||
+	      (ch>=410 && ch<=445) ||
+	      (ch>=447 && ch<=484) ||
+	      (ch>=501 && ch<=503) ||
+	      (ch>=505 && ch<=520) ||
+	      (ch>=522 && ch<=524) ||
+	      (ch>=536 && ch<=559) ||
+	      (ch>=561 && ch<=592) ||
+	      (ch>=595 && ch<=598) ||
+	      (ch>=600 && ch<=632) ||
+	      (ch>=634 && ch<=652) ||
+	      (ch>=654 && ch<=654) ||
+	      (ch>=656 && ch<=671)
+	      ) {
+	    plane = 0;
+	    T_chirp->Fill();
+	  }
+	  if( ch>=3936 && ch<=3983 ) {
+	    plane = 1;
+	    T_chirp->Fill();
           }
-          if( ch>=3936 && ch<=3983 ) {
-              plane = 1;
-              T_chirp->Fill();
-          }
-          if( ch>=7136 && ch<=7263 ) {
-              plane = 2;
-              T_chirp->Fill();
-          }
+	  if( (ch>=4800+2336 && ch<=4800+2399) ||
+	      (ch>=4800+2401 && ch<=4800+2414) ||
+	      (ch>=4800+2416 && ch<=4800+2463)
+	      ) {
+	    plane = 2;
+	    T_chirp->Fill();
+	  }
+	  
+
+	  
       }
   }
 
