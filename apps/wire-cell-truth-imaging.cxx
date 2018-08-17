@@ -113,7 +113,7 @@ int main(int argc, char* argv[])
 
   int flag_l1 = 0; // do not run l1sp code 
  
-  int landau_fluc = 0; // landau fluctuation for each charge hit
+  int landau_fluc = 0; // landau fluctuation for each charge hit, but on the present charge spectrum after sp, i.e. cannot fix any SP inefficiency
   gRandom->SetSeed(0);
   TF1 *ld = new TF1("ld","[0]*TMath::Landau(x, 1.8, 0.15, 1)",0,10); // MPV: 1.8, psi: 0.15, 4*psi = FMHW
   ld->SetParameter(0, 1);
@@ -215,7 +215,7 @@ int main(int argc, char* argv[])
   float threshold_wg = 510.84;
   
 
-  int time_offset = 180; // no SP, so an overall offset is needed ... should be ~90*2 ticks [10 cm absolute time + 10 cm field response]. 
+  int time_offset = 90; // us, no SP, so an overall offset is needed ... [10 cm absolute time, i.e. fiel response plane ]. Actually, 10cm - 6mm = 9.4cm, just make this consistent with SP
   
   //root file saving truth info
   const char* true_file;
@@ -326,7 +326,7 @@ int main(int argc, char* argv[])
       {
           Double_t random_factor = 1.0;
           if(landau_fluc) random_factor = ld->GetRandom()/1.8;
-          htempp->SetBinContent(chid+1, tbin, random_factor*signal->GetBinContent(tbin-int(time_offset*1.0/nrebin)));
+          htempp->SetBinContent(chid+1, tbin, random_factor*signal->GetBinContent(tbin-int(time_offset*2.0/nrebin))); // time_offset[us]/0.5us/nrebin
       }
   }
   
