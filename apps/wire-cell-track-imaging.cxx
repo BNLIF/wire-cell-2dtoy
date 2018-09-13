@@ -260,15 +260,18 @@ int main(int argc, char* argv[])
   Double_t x=0;
   Double_t y=0;
   Double_t z=0;
+  Double_t q=0;
   Int_t cluster_id=0;
   clusters->SetBranchAddress("x",&x);
   clusters->SetBranchAddress("y",&y);
   clusters->SetBranchAddress("z",&z);
+  clusters->SetBranchAddress("q",&q);
   clusters->SetBranchAddress("cluster_id",&cluster_id);
 
   std::map<int, std::vector<double>> xpt;
   std::map<int, std::vector<double>> ypt;
   std::map<int, std::vector<double>> zpt;
+  std::map<int, std::vector<double>> qpt;
 
   ///////////////////////////////////////////////////////////
   
@@ -316,15 +319,19 @@ int main(int argc, char* argv[])
       yvec.push_back(y);
       std::vector<double> zvec;
       zvec.push_back(z);
+      std::vector<double> qvec;
+      qvec.push_back(q);
 	
       xpt[cluster_id] = xvec;
       ypt[cluster_id] = yvec;
       zpt[cluster_id] = zvec;
+      qpt[cluster_id] = qvec;
     }
     else{
       xpt[cluster_id].push_back(x);
       ypt[cluster_id].push_back(y);
       zpt[cluster_id].push_back(z);
+      qpt[cluster_id].push_back(q);
     }
 
     graph_cluster_all->SetPoint(i, x,y,z);
@@ -1191,6 +1198,11 @@ int main(int argc, char* argv[])
   // map<int, int>flag_track2recon;// 0: inefficiency, 1: broken, 2: good
   // std::map<int, std::vector<double>> xpt;
 
+  /// chargeTTT
+  map<int, double>map_charge_TotMean_goodtrk;// [cluster_id]
+  map<int, int>map_charge_TotMean_goodtrk_from_clusterid;
+  
+
   for(auto it_tk=flag_track2recon.begin(); it_tk!=flag_track2recon.end(); it_tk++ ) {
     int track_id = it_tk->first;
     int flag = it_tk->second;
@@ -1215,6 +1227,10 @@ int main(int argc, char* argv[])
 	  count_good++;
 	  //graph_good->SetPoint(count_good-1, zpt[cluster_id].at(idx), ypt[cluster_id].at(idx) );
 	  graph_good->Fill( zpt[cluster_id].at(idx), ypt[cluster_id].at(idx) );
+
+	  /// chargeTTT
+	  map_charge_TotMean_goodtrk[cluster_id] += qpt[cluster_id].at(idx)/vc_cluster_length[cluster_id]/10; // 1m = 1000 mm; cm --> mm
+	  map_charge_TotMean_goodtrk_from_clusterid[cluster_id] = track_id;
 	}
 	
 	count_noGhost++;
@@ -1246,6 +1262,45 @@ int main(int argc, char* argv[])
     if( flag_track2recon[track_id]==1 ) graph_truth_broken->Fill( z,y );
   }
 
+  /// chargeTTT
+  roostr = "h1_charge_TotMean_goodtrack";
+  TH1D *h1_charge_TotMean_goodtrack = new TH1D(roostr, roostr, 600, 0, 6000);
+
+  roostr = "h1_charge_TotMean_goodtrack_y_phi_costheta";
+  TH2D *h1_charge_TotMean_goodtrack_y_phi_costheta = new TH2D(roostr, roostr,  10, 0, TMath::Pi(), 10, 0, 1);
+  
+  for(auto it_tk=map_charge_TotMean_goodtrk.begin(); it_tk!=map_charge_TotMean_goodtrk.end(); it_tk++ ) {
+    // cout<<" ---> "<<it_tk->first<<"\t"<<it_tk->second<<endl;
+    int cluster_id = it_tk->first;
+    int TotMean = it_tk->second;
+
+    h1_charge_TotMean_goodtrack->Fill( TotMean );
+    
+    //////////////////////////////////////
+    
+    int track_id = map_charge_TotMean_goodtrk_from_clusterid[cluster_id];
+    
+    TVector3 dir = vc_track_dir[track_id];
+    double cosy = dir.Y()/dir.Mag();
+    double phiz = TMath::ACos(dir.Z()/TMath::Sqrt(dir.X()*dir.X()+dir.Z()*dir.Z()));
+ 
+    /////// Muplane
+    TVector3 u_dir = Muplane * dir;
+    if( u_dir.Y()<0 ) u_dir *= -1.;
+    double u_cosy = u_dir.Y()/u_dir.Mag();
+    double u_phiz = TMath::ACos(u_dir.Z()/TMath::Sqrt(u_dir.X()*u_dir.X()+u_dir.Z()*u_dir.Z()));
+    
+    /////// Mvplane
+    TVector3 v_dir = Mvplane * dir;
+    if( v_dir.Y()<0 ) v_dir *= -1.;
+    double v_cosy = v_dir.Y()/v_dir.Mag();
+    double v_phiz = TMath::ACos(v_dir.Z()/TMath::Sqrt(v_dir.X()*v_dir.X()+v_dir.Z()*v_dir.Z()));
+
+    ///////
+    h1_charge_TotMean_goodtrack_y_phi_costheta->Fill( phiz, cosy, TotMean );
+    
+  }
+  
 
   ///////////////////////////////////////////////////////////////////////////////////
   ///////////////////////////////////////////////////////////////////////////////////
@@ -1335,7 +1390,10 @@ int main(int argc, char* argv[])
   h2_ghost_y_phi_costheta->Write();
   h2_ghost_u_phi_costheta->Write();
   h2_ghost_v_phi_costheta->Write();
-  
+
+  h1_charge_TotMean_goodtrack->Write();
+  h1_charge_TotMean_goodtrack_y_phi_costheta->Write();
+    
   output->Close();
 
   return 0;
