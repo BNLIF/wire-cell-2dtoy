@@ -439,7 +439,7 @@ int main(int argc, char* argv[])
       if(i<=672){
           urms = 68 + (i-1)*(121.-68.)/672;
       }
-      if(i>=1729){
+      else if(i>=1729){
           urms = 68 + (2400-i)*(121.-68.)/(2400-1728);
       }
       else{
@@ -453,7 +453,7 @@ int main(int argc, char* argv[])
       if(i<=672){
           vrms = 97 + (i-1)*(172.-97.)/672;
       }
-      if(i>=1729){
+      else if(i>=1729){
           vrms = 97 + (2400-i)*(172.-97.)/(2400-1728);
       }
       else{

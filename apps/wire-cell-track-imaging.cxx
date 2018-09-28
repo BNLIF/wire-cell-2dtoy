@@ -501,6 +501,8 @@ int main(int argc, char* argv[])
     sin(0.50) = 0.47943
   */
 
+  const double track_length_setting = 1;// cm
+
   const double delta_arc_length = 0.85;
   double tolerance_parallel = delta_arc_length/vc_track_length[track_id];      
   tolerance_parallel = 0.17365;// ---> 10 degree
@@ -630,7 +632,7 @@ int main(int argc, char* argv[])
       for(int idx=1; idx<=user_size; idx++) {
 	int cluster_id = it->second.at(idx);
 	double cluster_length = vc_cluster_length[cluster_id];
-	if( cluster_length>95 ) {
+	if( cluster_length>track_length_setting*0.95 ) {
 	  flag_track2recon[it->first] = 2;
 	  break;
 	}
@@ -650,7 +652,7 @@ int main(int argc, char* argv[])
       // 	bool flag = false;
       // }
       
-      if( cluster_length<95 ) {// broken
+      if( cluster_length<track_length_setting*0.95 ) {// broken
 	flag_track2recon[it->first] = 1;
       }
       
@@ -1229,7 +1231,8 @@ int main(int argc, char* argv[])
 	  graph_good->Fill( zpt[cluster_id].at(idx), ypt[cluster_id].at(idx) );
 
 	  /// chargeTTT
-	  map_charge_TotMean_goodtrk[cluster_id] += qpt[cluster_id].at(idx)/vc_cluster_length[cluster_id]/10; // 1m = 1000 mm; cm --> mm
+	  //map_charge_TotMean_goodtrk[cluster_id] += qpt[cluster_id].at(idx)/vc_cluster_length[cluster_id]/10; // 1m = 1000 mm; cm --> mm
+	  map_charge_TotMean_goodtrk[cluster_id] += qpt[cluster_id].at(idx);
 	  map_charge_TotMean_goodtrk_from_clusterid[cluster_id] = track_id;
 	}
 	
@@ -1264,7 +1267,7 @@ int main(int argc, char* argv[])
 
   /// chargeTTT
   roostr = "h1_charge_TotMean_goodtrack";
-  TH1D *h1_charge_TotMean_goodtrack = new TH1D(roostr, roostr, 600, 0, 6000);
+  TH1D *h1_charge_TotMean_goodtrack = new TH1D(roostr, roostr, 600, 0, 60000);
 
   roostr = "h1_charge_TotMean_goodtrack_y_phi_costheta";
   TH2D *h1_charge_TotMean_goodtrack_y_phi_costheta = new TH2D(roostr, roostr,  10, 0, TMath::Pi(), 10, 0, 1);
@@ -1272,9 +1275,11 @@ int main(int argc, char* argv[])
   for(auto it_tk=map_charge_TotMean_goodtrk.begin(); it_tk!=map_charge_TotMean_goodtrk.end(); it_tk++ ) {
     // cout<<" ---> "<<it_tk->first<<"\t"<<it_tk->second<<endl;
     int cluster_id = it_tk->first;
-    int TotMean = it_tk->second;
+    double TotMean = it_tk->second;
 
     h1_charge_TotMean_goodtrack->Fill( TotMean );
+
+    cout<<" ------> chargeTTT, length and meanCharge :"<<vc_cluster_length[cluster_id]/10<<"\t"<<TotMean<<endl;
     
     //////////////////////////////////////
     
