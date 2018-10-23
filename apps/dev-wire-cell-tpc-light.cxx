@@ -645,7 +645,7 @@ int main(int argc, char* argv[])
      live_clusters.at(i)->cal_shortest_path(wcps.second);
 
      {
-       // temp ... 
+       // add dead channels in??? 
        PR3DCluster *new_cluster = WireCell2dToy::Improve_PR3DCluster(live_clusters.at(i),ct_point_cloud, gds);
        WireCell2dToy::calc_sampling_points(gds,new_cluster,nrebin, frame_length, unit_dis);
        new_cluster->Create_point_cloud();
