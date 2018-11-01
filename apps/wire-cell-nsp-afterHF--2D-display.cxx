@@ -151,8 +151,28 @@ int main(int argc, char* argv[])
   TH2F *hu_decon = new TH2F("hu_decon","hu_decon",nwire_u,-0.5,nwire_u-0.5,total_time_bin/nrebin,0,total_time_bin);
   TH2F *hv_decon = new TH2F("hv_decon","hv_decon",nwire_v,-0.5+nwire_u,nwire_v-0.5+nwire_u,total_time_bin/nrebin,0,total_time_bin);
   TH2F *hw_decon = new TH2F("hw_decon","hw_decon",nwire_w,-0.5+nwire_u+nwire_v,nwire_w-0.5+nwire_u+nwire_v,total_time_bin/nrebin,0,total_time_bin);
-  
 
+  hu_orig->SetDirectory(file);
+  hv_orig->SetDirectory(file);
+  hw_orig->SetDirectory(file);
+  
+  hu_baseline->SetDirectory(file);
+  hv_baseline->SetDirectory(file);
+  hw_baseline->SetDirectory(file);
+
+  hu_threshold->SetDirectory(file);
+  hv_threshold->SetDirectory(file);
+  hw_threshold->SetDirectory(file);
+
+  hu_raw->SetDirectory(file);
+  hv_raw->SetDirectory(file);
+  hw_raw->SetDirectory(file);
+
+  hu_decon->SetDirectory(file);
+  hv_decon->SetDirectory(file);
+  hw_decon->SetDirectory(file);
+
+  
   TH2F *htemp;
   TH2F *htemp1;
   
