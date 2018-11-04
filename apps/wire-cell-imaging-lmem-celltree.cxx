@@ -1735,6 +1735,7 @@ if(beamspill || beam==-1){
     }
   }
   for (int i=start_num;i!=end_num+1;i++){
+    //std::cout << i << std::endl;
     WireCell::GeomCellMap& cell_map = lowmemtiling[i]->get_cell_wires_map();
     for (auto it = cell_map.begin(); it!=cell_map.end(); it++){
       SlimMergeGeomCell *mcell = (SlimMergeGeomCell*) it->first;
