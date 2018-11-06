@@ -754,6 +754,9 @@ int main(int argc, char* argv[])
      event_type = 0;
      if (flash!=0){
        //std::cout << "Flash: " << flash->get_flash_id() << " " << flash->get_time() << std::endl;
+
+       // Note, for BNB, flash time is aroudn 4us
+       // time offset happened to be 4us ...
        double offset_x = (flash->get_time() - time_offset)*2./nrebin*time_slice_width;
        if (fid->check_tgm(bundle,offset_x, ct_point_cloud,old_new_cluster_map))
 	 event_type |= 1UL << 3; // 3rd bit for TGM
