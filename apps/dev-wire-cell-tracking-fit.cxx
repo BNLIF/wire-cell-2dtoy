@@ -82,7 +82,7 @@ int main(int argc, char* argv[])
   TTree *Trun = (TTree*)file->Get("Trun");
 
   int run_no, subrun_no, event_no;
-  int time_offset;
+  int time_tick_offset;
   int nrebin;
   int frame_length;
   int eve_num;
@@ -100,7 +100,7 @@ int main(int argc, char* argv[])
   Trun->SetBranchAddress("frame_length",&frame_length);
   Trun->SetBranchAddress("eve_num",&eve_num);
   Trun->SetBranchAddress("nrebin",&nrebin);
-  Trun->SetBranchAddress("time_offset",&time_offset);
+  Trun->SetBranchAddress("time_offset",&time_tick_offset);
   
   Trun->SetBranchAddress("timesliceId",&timesliceId);
   Trun->SetBranchAddress("timesliceChannel",&timesliceChannel);
@@ -121,7 +121,7 @@ int main(int argc, char* argv[])
   
 
   
-  //std::cout << nrebin << " " << time_offset << std::endl;
+  //std::cout << nrebin << " " << time_tick_offset << std::endl;
   
   // define singleton ... 
   TPCParams& mp = Singleton<TPCParams>::Instance();
@@ -130,7 +130,7 @@ int main(int argc, char* argv[])
   double pitch_v = gds.pitch(WirePlaneType_t(1));
   double pitch_w = gds.pitch(WirePlaneType_t(2));
   double time_slice_width = nrebin * unit_dis * 0.5 * units::mm;
-
+  
   double angle_u = gds.angle(WirePlaneType_t(0));
   double angle_v = gds.angle(WirePlaneType_t(1));
   double angle_w = gds.angle(WirePlaneType_t(2));
@@ -148,6 +148,8 @@ int main(int argc, char* argv[])
   mp.set_first_v_dis(first_v_dis);
   mp.set_first_w_dis(first_w_dis);
 
+  mp.set_time_tick_offset(time_tick_offset);
+  mp.set_nrebin(nrebin);
 
  
 
@@ -605,8 +607,8 @@ int main(int argc, char* argv[])
    //   cout<<"BUGGGG"<<endl;
    
 
-   //   std::vector<std::tuple<WireCell::PR3DCluster*, WireCell::Opflash*, double, std::vector<double>>> matched_results = WireCell2dToy::tpc_light_match(time_offset,nrebin,group_clusters,flashes);
-   //   FlashTPCBundleSelection matched_bundles = WireCell2dToy::tpc_light_match(time_offset,nrebin,group_clusters,flashes);
+   //   std::vector<std::tuple<WireCell::PR3DCluster*, WireCell::Opflash*, double, std::vector<double>>> matched_results = WireCell2dToy::tpc_light_match(time_tick_offset,nrebin,group_clusters,flashes);
+   //   FlashTPCBundleSelection matched_bundles = WireCell2dToy::tpc_light_match(time_tick_offset,nrebin,group_clusters,flashes);
    //cout << em("TPC Light Matching") << std::endl;
 
    // create the live clusters ...
@@ -665,6 +667,8 @@ int main(int argc, char* argv[])
      
      live_clusters.at(i)->collect_charge_trajectory(ct_point_cloud);
 
+     live_clusters.at(i)->dQ_dx_fit();
+     
      //std::cout << "Collect points" << std::endl;
    }
    
@@ -753,7 +757,7 @@ int main(int argc, char* argv[])
    //   event_type = 0;
    //   if (flash!=0){
    //     //std::cout << "Flash: " << flash->get_flash_id() << " " << flash->get_time() << std::endl;
-   //     double offset_x = (flash->get_time() - time_offset)*2./nrebin*time_slice_width;
+   //     double offset_x = (flash->get_time() - time_tick_offset)*2./nrebin*time_slice_width;
    //     if (fid->check_tgm(bundle,offset_x, ct_point_cloud,old_new_cluster_map))
    // 	 event_type |= 1UL << 3; // 3rd bit for TGM
 
@@ -870,7 +874,7 @@ int main(int argc, char* argv[])
      //     Opflash *flash = bundle->get_flash();//std::get<1>(*it);
      double offset_x = 0 ;
      //if (flash!=0){
-     //  offset_x = (flash->get_time() - time_offset)*2./nrebin*time_slice_width;
+     //  offset_x = (flash->get_time() - time_tick_offset)*2./nrebin*time_slice_width;
      //     }else{
      // offset_x = 0;
      //}
