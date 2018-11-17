@@ -1016,10 +1016,14 @@ int main(int argc, char* argv[])
      // }
      
      PointVector& pts = live_clusters.at(j)->get_fine_tracking_path();
+     std::vector<double>& dQ = live_clusters.at(j)->get_dQ();
+     std::vector<double>& dx = live_clusters.at(j)->get_dx();
      for (size_t i=0; i!=pts.size(); i++){
        x = pts.at(i).x/units::cm;
        y = pts.at(i).y/units::cm;
        z = pts.at(i).z/units::cm;
+       charge_save = dQ.at(i);
+       ncharge_save = dx.at(i)/units::cm;
        t_rec_charge->Fill();
      }
 
