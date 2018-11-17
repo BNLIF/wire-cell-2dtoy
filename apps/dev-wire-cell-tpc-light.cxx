@@ -1203,10 +1203,12 @@ int main(int argc, char* argv[])
   std::vector<std::vector<int>> *proj_cluster_channel = new std::vector<std::vector<int>>;
   std::vector<std::vector<int>> *proj_cluster_timeslice= new std::vector<std::vector<int>>;
   std::vector<std::vector<int>> *proj_cluster_charge= new std::vector<std::vector<int>>;
+  std::vector<std::vector<int>> *proj_cluster_charge_err= new std::vector<std::vector<int>>;
   T_proj->Branch("cluster_id",&proj_cluster_id);
   T_proj->Branch("channel",&proj_cluster_channel);
   T_proj->Branch("time_slice",&proj_cluster_timeslice);
   T_proj->Branch("charge",&proj_cluster_charge);
+  T_proj->Branch("charge_err",&proj_cluster_charge_err);
   
   T_proj->SetDirectory(file1);
   
@@ -1230,15 +1232,17 @@ int main(int argc, char* argv[])
     std::vector<int> proj_channel;
     std::vector<int> proj_timeslice;
     std::vector<int> proj_charge;
+    std::vector<int> proj_charge_err;
     
     for (size_t j = 0; j!= temp_clusters.size(); j++){
       PR3DCluster *cluster = temp_clusters.at(j);
-      cluster->get_projection(proj_channel,proj_timeslice,proj_charge, global_wc_map);
+      cluster->get_projection(proj_channel,proj_timeslice,proj_charge, proj_charge_err,global_wc_map);
     }
     proj_cluster_id->push_back(cluster_id);
     proj_cluster_channel->push_back(proj_channel);
     proj_cluster_timeslice->push_back(proj_timeslice);
     proj_cluster_charge->push_back(proj_charge);
+    proj_cluster_charge_err->push_back(proj_charge_err);
     
       // }
   }
