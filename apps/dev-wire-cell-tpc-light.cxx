@@ -597,7 +597,64 @@ int main(int argc, char* argv[])
 
 
 
-   
+     // form a global map with the current map information
+  std::map<int,std::map<const GeomWire*, SMGCSelection > > global_wc_map;
+  for (size_t i=0; i!=live_clusters.size();i++){
+    PR3DCluster *cluster = live_clusters.at(i);
+    SMGCSelection& mcells = cluster->get_mcells();
+    for (auto it = mcells.begin(); it!= mcells.end(); it++){
+      SlimMergeGeomCell *mcell = *it;
+      int time_slice = mcell->GetTimeSlice();
+      if (global_wc_map.find(time_slice)==global_wc_map.end()){
+	std::map<const GeomWire*, SMGCSelection> temp_wc_map;
+	global_wc_map[time_slice] = temp_wc_map;
+      }
+      std::map<const GeomWire*, SMGCSelection>& timeslice_wc_map = global_wc_map[time_slice];
+      
+      GeomWireSelection& uwires = mcell->get_uwires();
+      GeomWireSelection& vwires = mcell->get_vwires();
+      GeomWireSelection& wwires = mcell->get_wwires();
+      std::vector<WirePlaneType_t> bad_planes = mcell->get_bad_planes();
+      if (find(bad_planes.begin(),bad_planes.end(),WirePlaneType_t(0))==bad_planes.end()){
+	for (int j=0;j!=uwires.size();j++){
+	  const GeomWire *wire = uwires.at(j);
+	  if (timeslice_wc_map.find(wire)==timeslice_wc_map.end()){
+	    SMGCSelection temp_mcells;
+	    temp_mcells.push_back(mcell);
+	    timeslice_wc_map[wire] = temp_mcells;
+	  }else{
+	    timeslice_wc_map[wire].push_back(mcell);
+	  }
+	}
+      }
+      if (find(bad_planes.begin(),bad_planes.end(),WirePlaneType_t(1))==bad_planes.end()){
+	for (int j=0;j!=vwires.size();j++){
+	  const GeomWire *wire = vwires.at(j);
+	  if (timeslice_wc_map.find(wire)==timeslice_wc_map.end()){
+	    SMGCSelection temp_mcells;
+	    temp_mcells.push_back(mcell);
+	    timeslice_wc_map[wire] = temp_mcells;
+	  }else{
+	    timeslice_wc_map[wire].push_back(mcell);
+	  }
+	}
+      }
+      if (find(bad_planes.begin(),bad_planes.end(),WirePlaneType_t(2))==bad_planes.end()){
+	for (int j=0;j!=wwires.size();j++){
+	  const GeomWire *wire = wwires.at(j);
+	  if (timeslice_wc_map.find(wire)==timeslice_wc_map.end()){
+	    SMGCSelection temp_mcells;
+	    temp_mcells.push_back(mcell);
+	    timeslice_wc_map[wire] = temp_mcells;
+	  }else{
+	    timeslice_wc_map[wire].push_back(mcell);
+	  }
+	}
+      }
+    }
+  }
+  
+  //
 
 
 
@@ -664,9 +721,28 @@ int main(int argc, char* argv[])
      //std::cout << "fine tracking" << std::endl;
      
      live_clusters.at(i)->collect_charge_trajectory(ct_point_cloud);
-
+     
      //std::cout << "Collect points" << std::endl;
    }
+
+
+   // do the dQ/dx fitting ... 
+   for (auto it = matched_bundles.begin(); it!= matched_bundles.end(); it++){
+     FlashTPCBundle *bundle = *it;
+     Opflash *flash = bundle->get_flash();
+     PR3DCluster *main_cluster = bundle->get_main_cluster();
+
+     if (flash!=0){
+       //
+       if (flash->get_time() > 2 && flash->get_time() < 6){
+	 std::cout << flash->get_time() << std::endl;
+	 main_cluster->dQ_dx_fit(global_wc_map, flash->get_time()*units::microsecond);
+       }
+     }
+     
+   }
+
+
    
    cerr << em("Create Graph in all clusters") << std::endl;
 
@@ -955,10 +1031,19 @@ int main(int argc, char* argv[])
      // }
      
      PointVector& pts = live_clusters.at(j)->get_fine_tracking_path();
+     std::vector<double>& dQ = live_clusters.at(j)->get_dQ();
+     std::vector<double>& dx = live_clusters.at(j)->get_dx();
+     ndf_save = live_clusters.at(j)->get_cluster_id();
+     //std::cout << ndf << std::endl;
      for (size_t i=0; i!=pts.size(); i++){
        x = pts.at(i).x/units::cm;
        y = pts.at(i).y/units::cm;
        z = pts.at(i).z/units::cm;
+       if (pts.size()==dQ.size()){
+	 charge_save = dQ.at(i);
+	 ncharge_save = dx.at(i)/units::cm;
+       }
+       
        t_rec_charge->Fill();
      }
 
@@ -1136,64 +1221,7 @@ int main(int argc, char* argv[])
     T_flash->Fill();
   }
 
-  // form a global map with the current map information
-  std::map<int,std::map<const GeomWire*, SMGCSelection > > global_wc_map;
-  for (size_t i=0; i!=live_clusters.size();i++){
-    PR3DCluster *cluster = live_clusters.at(i);
-    SMGCSelection& mcells = cluster->get_mcells();
-    for (auto it = mcells.begin(); it!= mcells.end(); it++){
-      SlimMergeGeomCell *mcell = *it;
-      int time_slice = mcell->GetTimeSlice();
-      if (global_wc_map.find(time_slice)==global_wc_map.end()){
-	std::map<const GeomWire*, SMGCSelection> temp_wc_map;
-	global_wc_map[time_slice] = temp_wc_map;
-      }
-      std::map<const GeomWire*, SMGCSelection>& timeslice_wc_map = global_wc_map[time_slice];
-      
-      GeomWireSelection& uwires = mcell->get_uwires();
-      GeomWireSelection& vwires = mcell->get_vwires();
-      GeomWireSelection& wwires = mcell->get_wwires();
-      std::vector<WirePlaneType_t> bad_planes = mcell->get_bad_planes();
-      if (find(bad_planes.begin(),bad_planes.end(),WirePlaneType_t(0))==bad_planes.end()){
-	for (int j=0;j!=uwires.size();j++){
-	  const GeomWire *wire = uwires.at(j);
-	  if (timeslice_wc_map.find(wire)==timeslice_wc_map.end()){
-	    SMGCSelection temp_mcells;
-	    temp_mcells.push_back(mcell);
-	    timeslice_wc_map[wire] = temp_mcells;
-	  }else{
-	    timeslice_wc_map[wire].push_back(mcell);
-	  }
-	}
-      }
-      if (find(bad_planes.begin(),bad_planes.end(),WirePlaneType_t(1))==bad_planes.end()){
-	for (int j=0;j!=vwires.size();j++){
-	  const GeomWire *wire = vwires.at(j);
-	  if (timeslice_wc_map.find(wire)==timeslice_wc_map.end()){
-	    SMGCSelection temp_mcells;
-	    temp_mcells.push_back(mcell);
-	    timeslice_wc_map[wire] = temp_mcells;
-	  }else{
-	    timeslice_wc_map[wire].push_back(mcell);
-	  }
-	}
-      }
-      if (find(bad_planes.begin(),bad_planes.end(),WirePlaneType_t(2))==bad_planes.end()){
-	for (int j=0;j!=wwires.size();j++){
-	  const GeomWire *wire = wwires.at(j);
-	  if (timeslice_wc_map.find(wire)==timeslice_wc_map.end()){
-	    SMGCSelection temp_mcells;
-	    temp_mcells.push_back(mcell);
-	    timeslice_wc_map[wire] = temp_mcells;
-	  }else{
-	    timeslice_wc_map[wire].push_back(mcell);
-	  }
-	}
-      }
-    }
-  }
-  
-  //
+
  
   
   
