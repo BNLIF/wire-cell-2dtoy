@@ -943,6 +943,22 @@ int main(int argc, char* argv[])
    t_rec_charge->Branch("pv",&pv,"pv/D");
    t_rec_charge->Branch("pw",&pw,"pw/D");
    t_rec_charge->Branch("pt",&pt,"pt/D");
+
+   TTree *T_proj_data = new TTree("T_proj_data","T_proj_data");
+   std::vector<int> *proj_data_cluster_id = new std::vector<int>;
+   std::vector<std::vector<int>> *proj_data_cluster_channel = new std::vector<std::vector<int>>;
+   std::vector<std::vector<int>> *proj_data_cluster_timeslice= new std::vector<std::vector<int>>;
+   std::vector<std::vector<int>> *proj_data_cluster_charge= new std::vector<std::vector<int>>;
+   std::vector<std::vector<int>> *proj_data_cluster_charge_err= new std::vector<std::vector<int>>;
+   std::vector<std::vector<int>> *proj_data_cluster_charge_pred= new std::vector<std::vector<int>>;
+   
+   T_proj_data->Branch("cluster_id",&proj_data_cluster_id);
+   T_proj_data->Branch("channel",&proj_data_cluster_channel);
+   T_proj_data->Branch("time_slice",&proj_data_cluster_timeslice);
+   T_proj_data->Branch("charge",&proj_data_cluster_charge);
+   T_proj_data->Branch("charge_err",&proj_data_cluster_charge_err);
+   T_proj_data->Branch("charge_pred",&proj_data_cluster_charge_pred);
+   T_proj_data->SetDirectory(file1);
    
    // note did not save the unmatched cluster ... 
    ncluster = 0;
@@ -1041,7 +1057,48 @@ int main(int argc, char* argv[])
      std::vector<double>& tpv = live_clusters.at(j)->get_pv();
      std::vector<double>& tpw = live_clusters.at(j)->get_pw();
      std::vector<double>& tpt = live_clusters.at(j)->get_pt();
+
+     std::map<std::pair<int,int>, std::tuple<double,double,double> > & proj_data_u_map = live_clusters.at(j)->get_proj_data_u_map();
+     std::map<std::pair<int,int>, std::tuple<double,double,double> > & proj_data_v_map = live_clusters.at(j)->get_proj_data_v_map();
+     std::map<std::pair<int,int>, std::tuple<double,double,double> > & proj_data_w_map = live_clusters.at(j)->get_proj_data_w_map();
+     
      ndf_save = live_clusters.at(j)->get_cluster_id();
+
+     if (pts.size()==dQ.size()){
+       proj_data_cluster_id->push_back(ndf_save);
+       std::vector<int> temp_channel;
+       std::vector<int> temp_timeslice;
+       std::vector<int> temp_charge;
+       std::vector<int> temp_charge_err;
+       std::vector<int> temp_charge_pred;
+       for (auto it = proj_data_u_map.begin(); it!=proj_data_u_map.end(); it++){
+	 temp_channel.push_back(it->first.first);
+	 temp_timeslice.push_back(it->first.second);
+	 temp_charge.push_back(std::get<0>(it->second));
+	 temp_charge_err.push_back(std::get<1>(it->second));
+	 temp_charge_pred.push_back(std::get<2>(it->second));
+       }
+       for (auto it = proj_data_v_map.begin(); it!=proj_data_v_map.end(); it++){
+	 temp_channel.push_back(it->first.first);
+	 temp_timeslice.push_back(it->first.second);
+	 temp_charge.push_back(std::get<0>(it->second));
+	 temp_charge_err.push_back(std::get<1>(it->second));
+	 temp_charge_pred.push_back(std::get<2>(it->second));
+       }
+       for (auto it = proj_data_w_map.begin(); it!=proj_data_w_map.end(); it++){
+	 temp_channel.push_back(it->first.first);
+	 temp_timeslice.push_back(it->first.second);
+	 temp_charge.push_back(std::get<0>(it->second));
+	 temp_charge_err.push_back(std::get<1>(it->second));
+	 temp_charge_pred.push_back(std::get<2>(it->second));
+       }
+       proj_data_cluster_channel->push_back(temp_channel);
+       proj_data_cluster_timeslice->push_back(temp_timeslice);
+       proj_data_cluster_charge->push_back(temp_charge);
+       proj_data_cluster_charge_err->push_back(temp_charge_err);
+       proj_data_cluster_charge_pred->push_back(temp_charge_pred);
+     }
+     
      //std::cout << ndf << std::endl;
      for (size_t i=0; i!=pts.size(); i++){
        x = pts.at(i).x/units::cm;
@@ -1054,6 +1111,10 @@ int main(int argc, char* argv[])
 	 pv = tpv.at(i);
 	 pw = tpw.at(i);
 	 pt = tpt.at(i);
+
+	 
+
+	 
        }else{
 	 charge_save = 0;
 	 ncharge_save = -1;
@@ -1295,7 +1356,7 @@ int main(int argc, char* argv[])
       // }
   }
   T_proj->Fill();
-
+  T_proj_data->Fill();
    
   file1->Write();
   file1->Close();
