@@ -906,14 +906,24 @@ int main(int argc, char* argv[])
    T_cluster->Branch("ch_w",&ch_w,"ch_w/I");
    T_cluster->SetDirectory(file1);
 
+   Double_t pu, pv, pw, pt;
+   Double_t charge_save=1, ncharge_save=1, chi2_save=1, ndf_save=1;
    TTree *T_rec = new TTree("T_rec","T_rec");
    T_rec->Branch("x",&x,"x/D");
    T_rec->Branch("y",&y,"y/D");
    T_rec->Branch("z",&z,"z/D");
+   T_rec->Branch("q",&charge_save,"q/D");
+   T_rec->Branch("nq",&ncharge_save,"nq/D");
+   T_rec->Branch("chi2",&chi2_save,"chi2/D");
+   T_rec->Branch("ndf",&ndf_save,"ndf/D");
+   T_rec->Branch("pu",&pu,"pu/D");
+   T_rec->Branch("pv",&pv,"pv/D");
+   T_rec->Branch("pw",&pw,"pw/D");
+   T_rec->Branch("pt",&pt,"pt/D");
    T_rec->SetDirectory(file1);
 
-   Double_t charge_save=1, ncharge_save=1, chi2_save=1, ndf_save=1;
-   Double_t pu, pv, pw, pt;
+  
+   
    TTree *t_rec_charge = new TTree("T_rec_charge","T_rec_charge");
    t_rec_charge->SetDirectory(file1);
    t_rec_charge->Branch("x",&x,"x/D");
@@ -1016,10 +1026,22 @@ int main(int argc, char* argv[])
      PR3DCluster *new_cluster = old_new_cluster_map[live_clusters.at(j)];
      std::list<WCPointCloud<double>::WCPoint>& wcps_list = new_cluster->get_path_wcps();
      //ncluster = -1 * ncluster-100;
+     ndf_save = live_clusters.at(j)->get_cluster_id();
+     charge_save = 0;
+     ncharge_save = 0;
+     chi2_save = 0;
      for (auto it = wcps_list.begin(); it!=wcps_list.end(); it++){
        x = (*it).x/units::cm;
        y = (*it).y/units::cm;
        z = (*it).z/units::cm;
+
+       Point temp_p((*it).x,(*it).y,(*it).z);
+       std::vector<int> time_chs = ct_point_cloud.convert_3Dpoint_time_ch(temp_p);
+       pt = time_chs.at(0);
+       pu = time_chs.at(1);
+       pv = time_chs.at(2);
+       pw = time_chs.at(3);
+       
        T_rec->Fill();
      }
 
