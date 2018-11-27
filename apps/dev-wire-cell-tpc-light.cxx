@@ -734,10 +734,10 @@ int main(int argc, char* argv[])
 
      if (flash!=0){
        //
-       if (flash->get_time() > 2 && flash->get_time() < 6){
-	 std::cout << flash->get_time() << std::endl;
-	 main_cluster->dQ_dx_fit(global_wc_map, flash->get_time()*units::microsecond);
-       }
+       //       if (flash->get_time() > 2 && flash->get_time() < 6){
+       std::cout << flash->get_time() << std::endl;
+       main_cluster->dQ_dx_fit(global_wc_map, flash->get_time()*units::microsecond);
+	 // }
      }
      
    }
@@ -929,6 +929,7 @@ int main(int argc, char* argv[])
    T_rec->SetDirectory(file1);
 
    Double_t charge_save=1, ncharge_save=1, chi2_save=1, ndf_save=1;
+   Double_t pu, pv, pw, pt;
    TTree *t_rec_charge = new TTree("T_rec_charge","T_rec_charge");
    t_rec_charge->SetDirectory(file1);
    t_rec_charge->Branch("x",&x,"x/D");
@@ -938,7 +939,10 @@ int main(int argc, char* argv[])
    t_rec_charge->Branch("nq",&ncharge_save,"nq/D");
    t_rec_charge->Branch("chi2",&chi2_save,"chi2/D");
    t_rec_charge->Branch("ndf",&ndf_save,"ndf/D");
-   
+   t_rec_charge->Branch("pu",&pu,"pu/D");
+   t_rec_charge->Branch("pv",&pv,"pv/D");
+   t_rec_charge->Branch("pw",&pw,"pw/D");
+   t_rec_charge->Branch("pt",&pt,"pt/D");
    
    // note did not save the unmatched cluster ... 
    ncluster = 0;
@@ -1033,6 +1037,10 @@ int main(int argc, char* argv[])
      PointVector& pts = live_clusters.at(j)->get_fine_tracking_path();
      std::vector<double>& dQ = live_clusters.at(j)->get_dQ();
      std::vector<double>& dx = live_clusters.at(j)->get_dx();
+     std::vector<double>& tpu = live_clusters.at(j)->get_pu();
+     std::vector<double>& tpv = live_clusters.at(j)->get_pv();
+     std::vector<double>& tpw = live_clusters.at(j)->get_pw();
+     std::vector<double>& tpt = live_clusters.at(j)->get_pt();
      ndf_save = live_clusters.at(j)->get_cluster_id();
      //std::cout << ndf << std::endl;
      for (size_t i=0; i!=pts.size(); i++){
@@ -1042,7 +1050,19 @@ int main(int argc, char* argv[])
        if (pts.size()==dQ.size()){
 	 charge_save = dQ.at(i);
 	 ncharge_save = dx.at(i)/units::cm;
+	 pu = tpu.at(i);
+	 pv = tpv.at(i);
+	 pw = tpw.at(i);
+	 pt = tpt.at(i);
+       }else{
+	 charge_save = 0;
+	 ncharge_save = -1;
+	 pu = -1;
+	 pv = -1;
+	 pw = -1;
+	 pt = -1;
        }
+       
        
        t_rec_charge->Fill();
      }
