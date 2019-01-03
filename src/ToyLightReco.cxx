@@ -415,7 +415,12 @@ void WireCell2dToy::ToyLightReco::Process_beam_wfs(){
     rc_tau[i] = 800;
   }
   rc_tau[28] = 28.6;
-  
+
+  // The RC constant below is NOT correct, the true RC constnat should be 1/tau
+  // We made a mistake in implementation.
+  // However, it does not matter too much, as we ensure the integral of SPE response to unity
+  // If we change the RC constant, we will need to change the normalization to make sure the integral is unity
+  // We may also need to examine the filter functions used in the signal processing ...
   TF1 f1("f1","1./19.6348*pow(x/[0],4)*exp(-x/[0])",0,1500); //RC-CR4 response 
   double par[4];
   par[0] = 8.18450e-01;
