@@ -89,7 +89,7 @@ namespace WireCell2dToy{
     void Print_maps();
     WireCell::GeomCellSelection local_deghosting(std::set<WireCell::SlimMergeGeomCell*>& potential_good_mcells, std::set<WireCell::SlimMergeGeomCell*>& good_mcells, bool flag_del = false);
 
-    void local_deghosting1(std::set<WireCell::SlimMergeGeomCell*>& good_mcells);
+    void local_deghosting1(std::set<WireCell::SlimMergeGeomCell*>& good_mcells, std::map<WireCell::SlimMergeGeomCell*, double>& map_mcell_charge);
 
     WireCell::GeomWireSelection find_L1SP_wires();
 

@@ -1676,7 +1676,7 @@ void WireCell2dToy::LowmemTiling::re_establish_maps(){
   }
 }
 
-void WireCell2dToy::LowmemTiling::local_deghosting1(std::set<WireCell::SlimMergeGeomCell*>& good_mcells){
+void WireCell2dToy::LowmemTiling::local_deghosting1(std::set<WireCell::SlimMergeGeomCell*>& good_mcells, std::map<WireCell::SlimMergeGeomCell*, double>& map_mcell_charge){
    
   std::map<const GeomWire*, float> wire_score_map;
   for (auto it = three_good_wire_cells.begin(); it!= three_good_wire_cells.end(); it++){
@@ -1806,6 +1806,9 @@ void WireCell2dToy::LowmemTiling::local_deghosting1(std::set<WireCell::SlimMerge
     }
 
     mcell_high_score_map[mcell] = std::max(std::max(score_u,score_v),score_w);
+
+    // if (time_slice == 2387)
+    //   std::cout << "ABC: " << time_slice << " " << uwires.front()->index() << " " << uwires.back()->index() << " " << vwires.front()->index()+2400 << " " << vwires.back()->index()+2400 << " " << wwires.front()->index()+4800 << " " << wwires.back()->index()+4800 << " " << mcell_high_score_map[mcell]  << std::endl;
   }
 
   for (auto it = three_good_wire_cells.begin(); it!= three_good_wire_cells.end(); it++){
@@ -1945,8 +1948,9 @@ void WireCell2dToy::LowmemTiling::local_deghosting1(std::set<WireCell::SlimMerge
 	    }
 	    int min_wire = std::max(mcell_lwire,mcell1_lwire);
 	    int max_wire = std::min(mcell_hwire,mcell1_hwire);
-	    //std::cout << "b: " << (max_wire - min_wire + 1.0)/(mcell_hwire - mcell_lwire + 1.0) << std::endl;
-	    if ((max_wire - min_wire + 1.0)/(mcell_hwire - mcell_lwire + 1.0)>=0.75){
+	    // if (time_slice == 2387)
+	    //   std::cout << "b: " << (max_wire - min_wire + 1.0)/(mcell_hwire - mcell_lwire + 1.0) << std::endl;
+	    if ((max_wire - min_wire + 1.0)/(mcell_hwire - mcell_lwire + 1.0)>=0.75 && map_mcell_charge[mcell1] > map_mcell_charge[mcell]*0.75){
 	      count ++;
 	      break;
 	    }
