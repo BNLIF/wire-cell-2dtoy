@@ -25,6 +25,12 @@ WireCell2dToy::ToyLightReco::ToyLightReco(const char* root_file, bool imagingout
   cosmic_lg_wf = new TClonesArray;
   beam_hg_wf = new TClonesArray;
   beam_lg_wf = new TClonesArray;
+
+  //  cosmic_hg_wf->BypassStreamer(kTRUE);
+  //cosmic_lg_wf->BypassStreamer(kTRUE);
+  //beam_hg_wf->BypassStreamer(kTRUE);
+  //beam_lg_wf->BypassStreamer(kTRUE);
+  
   cosmic_hg_opch = new std::vector<short>;
   cosmic_lg_opch = new std::vector<short>;
   beam_hg_opch = new std::vector<short>;
