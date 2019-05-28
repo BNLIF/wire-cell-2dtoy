@@ -17,7 +17,7 @@ namespace WireCell2dToy{
   class ToyFiducial{
   public:
     ToyFiducial(int dead_region_ch_ext = 3, double offset_t=800, double offset_u=0, double offset_v=0, double offset_w=0, double slope_t=1./2*units::mm, double slope_u=1./(3*units::mm), double slope_v=1./(3*units::mm), double slope_w=1./(3*units::mm), double angle_u=-1.047198, double angle=1.047198, double angle_w=0,
-		double boundary_dis_cut=2*units::cm, double top=117*units::cm, double bottom=-116*units::cm, double upstream=0*units::cm, double downstream=1037*units::cm, double anode = 0*units::cm, double cathode=256*units::cm);
+		double boundary_dis_cut=2*units::cm, double top=117*units::cm, double bottom=-116*units::cm, double upstream=0*units::cm, double downstream=1037*units::cm, double anode = 0*units::cm, double cathode=256*units::cm, int flag_data=1);
     ~ToyFiducial();
 
     void set_offset_t(double value){offset_t=value;};

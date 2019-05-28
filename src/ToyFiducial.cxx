@@ -16,7 +16,7 @@ int pnpoly(std::vector<double>& vertx, std::vector<double>& verty, double testx,
 }
 
 
-WireCell2dToy::ToyFiducial::ToyFiducial(int dead_region_ch_ext, double offset_t, double offset_u, double offset_v, double offset_w, double slope_t, double slope_u, double slope_v, double slope_w, double angle_u, double angle_v, double angle_w, double boundary_dis_cut, double top, double bottom, double upstream, double downstream, double anode, double cathode)
+WireCell2dToy::ToyFiducial::ToyFiducial(int dead_region_ch_ext, double offset_t, double offset_u, double offset_v, double offset_w, double slope_t, double slope_u, double slope_v, double slope_w, double angle_u, double angle_v, double angle_w, double boundary_dis_cut, double top, double bottom, double upstream, double downstream, double anode, double cathode, int flag_data)
   : dead_region_ch_ext(dead_region_ch_ext)
   , offset_t(offset_t)
   , offset_u(offset_u)
@@ -36,29 +36,61 @@ WireCell2dToy::ToyFiducial::ToyFiducial(int dead_region_ch_ext, double offset_t,
   , m_anode(anode)
   , m_cathode(cathode)
 {
-  m_sc_bottom_1_y=-116*units::cm;
-  m_sc_bottom_1_x=80*units::cm;
 
-  m_sc_bottom_2_y=-99*units::cm;
-  m_sc_bottom_2_x=256*units::cm;
-
-  m_sc_top_1_y = 116*units::cm; // used to be 118 cm
-  m_sc_top_1_x = 100*units::cm;
-
-  m_sc_top_2_y = 102*units::cm; // used to be 103 cm
-  m_sc_top_2_x = 256*units::cm;
-
-  m_sc_upstream_1_z = 0*units::cm;
-  m_sc_upstream_1_x = 120*units::cm;
-
-  m_sc_upstream_2_z = 11*units::cm;
-  m_sc_upstream_2_x = 256*units::cm;
-
-  m_sc_downstream_1_z=1037*units::cm;
-  m_sc_downstream_1_x=120*units::cm;
-
-  m_sc_downstream_2_z=1026*units::cm;
-  m_sc_downstream_2_x=256*units::cm;
+  if (flag_data){
+    std::cout << "Data Fiducial Volume! " << std::endl;
+    // data 
+    m_sc_bottom_1_y=-116*units::cm;
+    m_sc_bottom_1_x=80*units::cm;
+    
+    m_sc_bottom_2_y=-99*units::cm;
+    m_sc_bottom_2_x=256*units::cm;
+    
+    m_sc_top_1_y = 116*units::cm; // used to be 118 cm
+    m_sc_top_1_x = 100*units::cm;
+    
+    m_sc_top_2_y = 102*units::cm; // used to be 103 cm
+    m_sc_top_2_x = 256*units::cm;
+    
+    m_sc_upstream_1_z = 0*units::cm;
+    m_sc_upstream_1_x = 120*units::cm;
+    
+    m_sc_upstream_2_z = 11*units::cm;
+    m_sc_upstream_2_x = 256*units::cm;
+    
+    m_sc_downstream_1_z=1037*units::cm;
+    m_sc_downstream_1_x=120*units::cm;
+    
+    m_sc_downstream_2_z=1026*units::cm;
+    m_sc_downstream_2_x=256*units::cm;
+  }else{
+    // MC
+    std::cout << "MC Fiducial Volume! " << std::endl;
+     m_sc_bottom_1_y=-116*units::cm;
+    m_sc_bottom_1_x=80*units::cm;
+    
+    m_sc_bottom_2_y=-99*units::cm;
+    m_sc_bottom_2_x=256*units::cm;
+    
+    m_sc_top_1_y = 116*units::cm; // used to be 118 cm
+    m_sc_top_1_x = 100*units::cm;
+    
+    m_sc_top_2_y = 102*units::cm; // used to be 103 cm
+    m_sc_top_2_x = 256*units::cm;
+    
+    m_sc_upstream_1_z = 0*units::cm;
+    m_sc_upstream_1_x = 120*units::cm;
+    
+    m_sc_upstream_2_z = 11*units::cm;
+    m_sc_upstream_2_x = 256*units::cm;
+    
+    m_sc_downstream_1_z=1037*units::cm;
+    m_sc_downstream_1_x=120*units::cm;
+    
+    m_sc_downstream_2_z=1026*units::cm;
+    m_sc_downstream_2_x=256*units::cm;
+  }
+  
 
   //
   boundary_xy_x.clear(); boundary_xy_y.clear();
