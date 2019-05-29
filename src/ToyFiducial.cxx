@@ -338,6 +338,78 @@ int WireCell2dToy::ToyFiducial::check_LM_bdt(WireCell::FlashTPCBundle *bundle, d
   return 0;
 }
 
+bool WireCell2dToy::ToyFiducial::check_fully_contained(WireCell::FlashTPCBundle *bundle, double offset_x, WireCell::ToyCTPointCloud& ct_point_cloud,std::map<PR3DCluster*, PR3DCluster*>& old_new_cluster_map){
+  PR3DCluster *main_cluster = bundle->get_main_cluster();
+
+  //replace it with the better one, which takes into account the dead channels ... 
+  PR3DCluster *main_cluster1 = main_cluster;
+  if (old_new_cluster_map.find(main_cluster)!=old_new_cluster_map.end())
+    main_cluster1 = old_new_cluster_map[main_cluster];
+  
+  Opflash *flash = bundle->get_flash();
+  std::vector<std::vector<WCPointCloud<double>::WCPoint>> out_vec_wcps = main_cluster1->get_extreme_wcps();
+
+  TVector3 drift_dir(1,0,0);
+  // hard coded for U and V plane ... 
+  TVector3 U_dir(0,cos(60./180.*3.1415926),sin(60./180.*3.1415926));
+  TVector3 V_dir(0,cos(60./180.*3.1415926),-sin(60./180.*3.1415926));
+  TVector3 W_dir(0,1,0);
+
+  Vector main_dir = main_cluster->get_PCA_axis(0);
+  TVector3 dir_main(main_dir.x,main_dir.y,main_dir.z);
+  
+  for (size_t i=0;i!=out_vec_wcps.size();i++){
+    // check all the points ... 
+    for (size_t j=0;j!=out_vec_wcps.at(i).size();j++){
+      Point p1(out_vec_wcps.at(i).at(j).x,out_vec_wcps.at(i).at(j).y,out_vec_wcps.at(i).at(j).z);
+      if (!inside_fiducial_volume(p1,offset_x)){
+	return false;
+      }
+    }
+
+
+    Point p1(out_vec_wcps.at(i).at(0).x,out_vec_wcps.at(i).at(0).y,out_vec_wcps.at(i).at(0).z);
+    TVector3 dir = main_cluster->VHoughTrans(p1,30*units::cm);
+    dir *= (-1);
+
+    // check U and V and W
+    TVector3 dir_1(0,dir.Y(),dir.Z());
+    double angle1 = dir_1.Angle(U_dir);
+    TVector3 tempV1(fabs(dir.X()), sqrt(dir.Y()*dir.Y()+dir.Z()*dir.Z())*sin(angle1),0);
+    double angle1_1 = tempV1.Angle(drift_dir)/3.1415926*180.;
+    
+    double angle2 = dir_1.Angle(V_dir);
+    TVector3 tempV2(fabs(dir.X()), sqrt(dir.Y()*dir.Y()+dir.Z()*dir.Z())*sin(angle2),0);
+    double angle2_1 = tempV2.Angle(drift_dir)/3.1415926*180.;
+    
+    double angle3 = dir_1.Angle(W_dir);
+    TVector3 tempV3(fabs(dir.X()), sqrt(dir.Y()*dir.Y()+dir.Z()*dir.Z())*sin(angle3),0);
+    double angle3_1 = tempV3.Angle(drift_dir)/3.1415926*180.;
+    
+    // not added for now, need to check to add this one in when more events are available ...
+    // XQ, 7/11/2018
+    // double angle4 = fabs(3.1415926/2.-dir.Angle(drift_dir))/3.1415926*180.;
+
+
+    //std::cout << "A: " << p1.x/units::cm << " " << p1.y/units::cm << " " << p1.z/units::cm << " " << angle1_1 << " " << angle2_1 << " " << angle3_1 << std::endl;
+
+    if ( (angle1_1 < 10 || angle2_1 < 10 || angle3_1 < 5)){
+      if (!check_signal_processing(p1,dir,ct_point_cloud,1*units::cm,offset_x))
+	return false;
+    }
+	    
+    if (fabs((3.1415926/2.-dir.Angle(dir_main))/3.1415926*180.)>60 )
+      if (!check_dead_volume(p1,dir,1*units::cm,offset_x))
+	return false;
+    
+  }
+
+
+
+  
+  return true;
+}
+
 bool WireCell2dToy::ToyFiducial::check_tgm(WireCell::FlashTPCBundle *bundle, double offset_x, WireCell::ToyCTPointCloud& ct_point_cloud,std::map<PR3DCluster*, PR3DCluster*>& old_new_cluster_map){
 
   PR3DCluster *main_cluster = bundle->get_main_cluster();
