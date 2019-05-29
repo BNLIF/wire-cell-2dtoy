@@ -12,7 +12,7 @@ using namespace WireCell;
 using namespace Eigen;
 
 
-WireCell2dToy::ToyLightReco::ToyLightReco(const char* root_file, bool imagingoutput){
+WireCell2dToy::ToyLightReco::ToyLightReco(const char* root_file, bool imagingoutput, bool datatier){
   file = new TFile(root_file);
   if(imagingoutput){
     T = (TTree*)file->Get("Trun");
@@ -21,16 +21,12 @@ WireCell2dToy::ToyLightReco::ToyLightReco(const char* root_file, bool imagingout
     T = (TTree*)file->Get("/Event/Sim");
   }
 
+  f_datatier=datatier;
+  
   cosmic_hg_wf = new TClonesArray;
   cosmic_lg_wf = new TClonesArray;
   beam_hg_wf = new TClonesArray;
   beam_lg_wf = new TClonesArray;
-
-  //  cosmic_hg_wf->BypassStreamer(kTRUE);
-  //cosmic_lg_wf->BypassStreamer(kTRUE);
-  //beam_hg_wf->BypassStreamer(kTRUE);
-  //beam_lg_wf->BypassStreamer(kTRUE);
-  
   cosmic_hg_opch = new std::vector<short>;
   cosmic_lg_opch = new std::vector<short>;
   beam_hg_opch = new std::vector<short>;
@@ -356,8 +352,8 @@ void WireCell2dToy::ToyLightReco::load_event_raw(int eve_num){
   
   // std::cout << " " << cosmic_flashes.size() << " " << beam_flashes.size() << " " << flashes.size() << std::endl;
   
-  // update map
-  update_pmt_map();
+  // update map for data (no re-map for MC)
+  if(!f_datatier){ update_pmt_map(); }
   
 }
 
