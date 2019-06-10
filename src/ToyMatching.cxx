@@ -160,7 +160,7 @@ FlashTPCBundleSelection WireCell2dToy::tpc_light_match(int time_offset, int nreb
   double high_x_cut_ext2 = - 2.0*units::cm;
   double low_x_cut = 0*units::cm;
   double low_x_cut_ext1 = - 2*units::cm;
-  double low_x_cut_ext2 = + 2.0*units::cm;
+  double low_x_cut_ext2 = + 4.0*units::cm;
   double scaling_light_mag = 0.01 * 1.5;
 
   int solv_type = 1; // new matching code ... 
