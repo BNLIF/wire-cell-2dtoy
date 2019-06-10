@@ -282,8 +282,8 @@ FlashTPCBundleSelection WireCell2dToy::tpc_light_match(int time_offset, int nreb
 	// if (flash->get_flash_id()==16 && main_cluster->get_cluster_id()==13 )
 	//   std::cout << flash->get_flash_id() << " "<< main_cluster->get_cluster_id() << " " << (first_pos_x-offset_x)/units::cm << " " << (last_pos_x-offset_x)/units::cm << std::endl;
 
-	//	if (flash->get_flash_id()==14)
-	//      std::cout << flash->get_flash_id() << " " << main_cluster->get_cluster_id() << " " << offset_x/units::cm << " " << (first_pos_x-offset_x)/units::cm << " " << (last_pos_x-offset_x)/units::cm << " " << std::endl;
+	// if (flash->get_flash_id()==39)
+	//   std::cout << flash->get_flash_id() << " " << main_cluster->get_cluster_id() << " " << offset_x/units::cm << " " << (first_pos_x-offset_x)/units::cm << " " << (last_pos_x-offset_x)/units::cm << " " << std::endl;
 	
   	if (first_pos_x-offset_x > low_x_cut + low_x_cut_ext1 -1.0*units::cm &&
   	    last_pos_x-offset_x > low_x_cut &&
@@ -445,7 +445,7 @@ FlashTPCBundleSelection WireCell2dToy::tpc_light_match(int time_offset, int nreb
 	       bundle->get_ks_dis()<0.33 && bundle->get_chi2() < 50 * bundle->get_ndf()&&bundle->get_ndf()>=5 && bundle->get_flag_close_to_PMT())
 	    flag_consist = true;
 
-	  // if (main_cluster->get_cluster_id()==30)
+	  // if (main_cluster->get_cluster_id()==17)
 	  //   std::cout << bundle->get_flash()->get_flash_id() << " " << bundle->get_main_cluster()->get_cluster_id() << " " << bundle->get_flag_at_x_boundary() << " " << bundle->get_ks_dis() << " " << bundle->get_chi2() << " " << bundle->get_ndf() << " " << bundle->get_consistent_flag() << " " << bundle->get_flag_close_to_PMT() << " " << bundle->get_potential_bad_match_flag() << " " << flag_consist << std::endl;
 	  
 	}
