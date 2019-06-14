@@ -66,28 +66,28 @@ WireCell2dToy::ToyFiducial::ToyFiducial(int dead_region_ch_ext, double offset_t,
   }else{
     // MC
     std::cout << "MC Fiducial Volume! " << std::endl;
-     m_sc_bottom_1_y=-116*units::cm;
-    m_sc_bottom_1_x=80*units::cm;
+    m_sc_bottom_1_y=-116*units::cm;
+    m_sc_bottom_1_x=34*units::cm;
     
-    m_sc_bottom_2_y=-99*units::cm;
+    m_sc_bottom_2_y=-98*units::cm;
     m_sc_bottom_2_x=256*units::cm;
     
-    m_sc_top_1_y = 116*units::cm; // used to be 118 cm
-    m_sc_top_1_x = 100*units::cm;
+    m_sc_top_1_y = 116*units::cm;
+    m_sc_top_1_x = 70*units::cm;
     
-    m_sc_top_2_y = 102*units::cm; // used to be 103 cm
+    m_sc_top_2_y = 100*units::cm;
     m_sc_top_2_x = 256*units::cm;
     
     m_sc_upstream_1_z = 0*units::cm;
-    m_sc_upstream_1_x = 120*units::cm;
+    m_sc_upstream_1_x = 50*units::cm;
     
-    m_sc_upstream_2_z = 11*units::cm;
+    m_sc_upstream_2_z = 14*units::cm;
     m_sc_upstream_2_x = 256*units::cm;
     
     m_sc_downstream_1_z=1037*units::cm;
-    m_sc_downstream_1_x=120*units::cm;
+    m_sc_downstream_1_x=40*units::cm;
     
-    m_sc_downstream_2_z=1026*units::cm;
+    m_sc_downstream_2_z=1023*units::cm;
     m_sc_downstream_2_x=256*units::cm;
   }
   

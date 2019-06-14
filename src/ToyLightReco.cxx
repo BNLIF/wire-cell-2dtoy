@@ -12,7 +12,7 @@ using namespace WireCell;
 using namespace Eigen;
 
 
-WireCell2dToy::ToyLightReco::ToyLightReco(const char* root_file, bool imagingoutput, bool datatier){
+WireCell2dToy::ToyLightReco::ToyLightReco(const char* root_file, bool imagingoutput, bool overlayinput, bool remapchannel){
   file = new TFile(root_file);
   if(imagingoutput){
     T = (TTree*)file->Get("Trun");
@@ -21,7 +21,7 @@ WireCell2dToy::ToyLightReco::ToyLightReco(const char* root_file, bool imagingout
     T = (TTree*)file->Get("/Event/Sim");
   }
 
-  f_datatier=datatier;
+  f_remapchannel=remapchannel;
   
   cosmic_hg_wf = new TClonesArray;
   cosmic_lg_wf = new TClonesArray;
@@ -37,26 +37,34 @@ WireCell2dToy::ToyLightReco::ToyLightReco(const char* root_file, bool imagingout
   beam_lg_timestamp = new std::vector<double>;
   op_gain = new std::vector<float>;
   op_gainerror = new std::vector<float>;
-  
 
   T->SetBranchAddress("cosmic_hg_wf",&cosmic_hg_wf);
   T->SetBranchAddress("cosmic_lg_wf",&cosmic_lg_wf);
-  T->SetBranchAddress("beam_hg_wf",&beam_hg_wf);
-  T->SetBranchAddress("beam_lg_wf",&beam_lg_wf);
   T->SetBranchAddress("cosmic_hg_opch",&cosmic_hg_opch);
   T->SetBranchAddress("cosmic_lg_opch",&cosmic_lg_opch);
-  T->SetBranchAddress("beam_hg_opch",&beam_hg_opch);
-  T->SetBranchAddress("beam_lg_opch",&beam_lg_opch);
   T->SetBranchAddress("cosmic_hg_timestamp",&cosmic_hg_timestamp);
   T->SetBranchAddress("cosmic_lg_timestamp",&cosmic_lg_timestamp);
-  T->SetBranchAddress("beam_hg_timestamp",&beam_hg_timestamp);
-  T->SetBranchAddress("beam_lg_timestamp",&beam_lg_timestamp);
+    
+  if(overlayinput){
+    T->SetBranchAddress("mixer_beam_hg_wf",&beam_hg_wf);
+    T->SetBranchAddress("mixer_beam_lg_wf",&beam_lg_wf);
+    T->SetBranchAddress("mixer_beam_hg_opch",&beam_hg_opch);
+    T->SetBranchAddress("mixer_beam_lg_opch",&beam_lg_opch);
+    T->SetBranchAddress("mixer_beam_hg_timestamp",&beam_hg_timestamp);
+    T->SetBranchAddress("mixer_beam_lg_timestamp",&beam_lg_timestamp);
+  }
+  else{
+      T->SetBranchAddress("beam_hg_wf",&beam_hg_wf);
+      T->SetBranchAddress("beam_lg_wf",&beam_lg_wf);
+      T->SetBranchAddress("beam_hg_opch",&beam_hg_opch);
+      T->SetBranchAddress("beam_lg_opch",&beam_lg_opch);
+      T->SetBranchAddress("beam_hg_timestamp",&beam_hg_timestamp);
+      T->SetBranchAddress("beam_lg_timestamp",&beam_lg_timestamp);
+  }
+  
   T->SetBranchAddress("op_gain",&op_gain);
   T->SetBranchAddress("op_gainerror",&op_gainerror);
   T->SetBranchAddress("triggerTime",&triggerTime);
-
-
-  
 
   hraw = new TH1F*[32];
   hdecon = new TH1F*[32];
@@ -352,8 +360,8 @@ void WireCell2dToy::ToyLightReco::load_event_raw(int eve_num){
   
   // std::cout << " " << cosmic_flashes.size() << " " << beam_flashes.size() << " " << flashes.size() << std::endl;
   
-  // update map for data (no re-map for MC)
-  if(!f_datatier){ update_pmt_map(); }
+  // update map for data & overlay (no re-map for MC)
+  if(f_remapchannel){ update_pmt_map(); }
   
 }
 
