@@ -338,7 +338,7 @@ int WireCell2dToy::ToyFiducial::check_LM_bdt(WireCell::FlashTPCBundle *bundle, d
   return 0;
 }
 
-bool WireCell2dToy::ToyFiducial::check_fully_contained(WireCell::FlashTPCBundle *bundle, double offset_x, WireCell::ToyCTPointCloud& ct_point_cloud,std::map<PR3DCluster*, PR3DCluster*>& old_new_cluster_map){
+bool WireCell2dToy::ToyFiducial::check_fully_contained(WireCell::FlashTPCBundle *bundle, double offset_x, WireCell::ToyCTPointCloud& ct_point_cloud,std::map<PR3DCluster*, PR3DCluster*>& old_new_cluster_map, unsigned int* fail_mode){
   PR3DCluster *main_cluster = bundle->get_main_cluster();
 
   //replace it with the better one, which takes into account the dead channels ... 
@@ -363,7 +363,8 @@ bool WireCell2dToy::ToyFiducial::check_fully_contained(WireCell::FlashTPCBundle 
     for (size_t j=0;j!=out_vec_wcps.at(i).size();j++){
       Point p1(out_vec_wcps.at(i).at(j).x,out_vec_wcps.at(i).at(j).y,out_vec_wcps.at(i).at(j).z);
       if (!inside_fiducial_volume(p1,offset_x)){
-	return false;
+        if(fail_mode) *fail_mode |= 1U<<2;
+        return false;
       }
     }
 
@@ -394,13 +395,18 @@ bool WireCell2dToy::ToyFiducial::check_fully_contained(WireCell::FlashTPCBundle 
     //std::cout << "A: " << p1.x/units::cm << " " << p1.y/units::cm << " " << p1.z/units::cm << " " << angle1_1 << " " << angle2_1 << " " << angle3_1 << std::endl;
 
     if ( (angle1_1 < 10 || angle2_1 < 10 || angle3_1 < 5)){
-      if (!check_signal_processing(p1,dir,ct_point_cloud,1*units::cm,offset_x))
-	return false;
+      if (!check_signal_processing(p1,dir,ct_point_cloud,1*units::cm,offset_x)){
+        if(fail_mode) *fail_mode |= 1U<<1;
+        return false;
+      }
     }
 	    
-    if (fabs((3.1415926/2.-dir.Angle(dir_main))/3.1415926*180.)>60 )
-      if (!check_dead_volume(p1,dir,1*units::cm,offset_x))
-	return false;
+    if (fabs((3.1415926/2.-dir.Angle(dir_main))/3.1415926*180.)>60 ){
+      if (!check_dead_volume(p1,dir,1*units::cm,offset_x)){
+        if(fail_mode) *fail_mode |= 1U;
+        return false;
+      }
+    }
     
   }
 
