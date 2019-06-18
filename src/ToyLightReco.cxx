@@ -5,6 +5,7 @@
 
 #include "TH1S.h"
 #include "TF1.h"
+#include <TH2.h>
 #include "TVirtualFFT.h"
 #include <iostream>
 
@@ -840,7 +841,129 @@ void WireCell2dToy::ToyLightReco::Process_beam_wfs(){
   }
   // std::cout << cosmic_flashes.size() << " " << beam_flashes.size() << " " << flashes.size() << std::endl;
   
-  
+
+  //Run London's Patch Here:
+  //----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+  bool includePatch = true;
+  if(includePatch){
+	bool data = true;
+	double tMin, tMax;
+	if(data){
+		tMin = 3.1875;
+		tMax = 4.96875;
+	}else{
+		tMin = 3.1718;
+		tMax = 4.96876;
+	}	
+	double tBinWidth = .09375;
+	int bMin = ceil(tMin/tBinWidth);
+	int bMax = ceil(tMax/tBinWidth);
+	double priorFlashTime = -1;
+	int priorFlashBin = -1;
+	int flashBin = -1;
+	int bin = -1;
+	bool priorFlashFound = false;
+	bool finished = false;
+	bool baseline = true;
+	std::vector<TH1D> hdeconProjYList;
+	std::vector<double> totalPE;
+	//Store the PE info in hdecon2 ordered by OpChannel #, ignore negative PE, get projection over PMT for each time bin and total PE
+	TH2F* hdecon2 = new TH2F("hdecon2","PMT PE Across Time Bins",250,0,250,32,0,32);
+	for(int nBin=1;nBin<250;nBin++){
+		for(int nPMT=0;nPMT<32;nPMT++){hdecon2->SetBinContent(nBin,nPMT,std::max(0.,hdecon[nPMT]->GetBinContent(nBin)));}
+		hdeconProjYList.push_back( *(hdecon2->ProjectionY("PE over PMT for a given time bin",nBin,nBin)) );
+		totalPE.push_back(hdeconProjYList.back().Integral());
+	}
+	//Check for in/near-time flashes already reconstructed
+	int nFlashDebug = 0;
+	for (int nFlash=0;nFlash<int(flashes.size());nFlash++) {
+		double time = flashes[nFlash]->get_time();
+		if(time<tMax && time>tMin-8){baseline = false; priorFlashFound = true; priorFlashTime = time; nFlashDebug++;}
+	}
+	//If there is an in-time flash or a near-time flash, make sure not to trigger on the late-light
+	priorFlashBin = std::max(1,int(ceil(priorFlashTime/tBinWidth)));	//bin 1 corresponds to [0,94] ns
+	bin = std::max(bMin,1+priorFlashBin);					//Stat 1 bin after the flash
+
+	while(bin<bMax && !finished){
+		//Trigger on large KS values to find when the prior flash is over
+		TH1D* priorFlashProfile = new TH1D("priorFlashProfile","Averaged PE of Prior Flash",32,0,32);
+		for(int i=0;i<32;i++){
+			double avPE = ( hdecon2->GetBinContent(priorFlashBin,i) + hdecon2->GetBinContent(priorFlashBin+1,i) )/2;
+			priorFlashProfile->SetBinContent(i,avPE);
+		}
+		double ksPriorNew = priorFlashProfile->KolmogorovTest(&hdeconProjYList[bin-1],"M");
+		double avPriorPE = (totalPE[bin-2]+totalPE[bin-3])/2;
+		double avPriorPEWeight = (10-(10-1)*(ksPriorNew-.15)/(.5-.15));
+		if(	(priorFlashFound && !baseline &&
+			ksPriorNew >0.15 &&					//For prior flashes, trigger on large KS to signify departure from prior-flash late-light
+			totalPE[bin-1]>1.4+avPriorPE &&				//Also trigger by total PE reading
+			totalPE[bin-1]>1.15*avPriorPE &&
+			totalPE[bin-1]>1.4*avPriorPEWeight+avPriorPE &&
+			totalPE[bin-1]>(1.1+.05*avPriorPEWeight)*avPriorPE) ||
+			(baseline &&
+			totalPE[bin-1]>4 &&
+			totalPE[bin-1]>2+avPriorPE) ){
+			//Reject a candidate flash if it does not maintain consistent shape
+			TH1D* candidateFlashProfile = new TH1D("candidateFlashProfile","Averaged PE of Candiate Flash",32,0,32);
+			for(int i=0;i<32;i++){
+				double avPE = ( hdeconProjYList[bin-1].GetBinContent(i) + hdeconProjYList[bin].GetBinContent(i) )/2;
+				candidateFlashProfile->SetBinContent(i,avPE);
+			}
+			double ksNewTailAv = 0;
+			int numBins = 8;
+			for(int i=0;i<numBins;i++){
+				double ksNewTail = candidateFlashProfile->KolmogorovTest(&hdeconProjYList[bin-1+i],"M");
+				ksNewTailAv += ksNewTail;
+			}
+			ksNewTailAv /= numBins;
+			if(ksNewTailAv < 0.3){flashBin = bin; finished = true;}
+		}
+		bin++;
+	}
+	//Take any newly found flashes and add them to the list flashes
+	if(flashBin != -1){
+		//Find prior and posterior flashes so that they can be used in setting / updating end_bins and PE values
+		Opflash* priorFlash = NULL;
+		Opflash* posteriorFlash = NULL;
+		int previousFlashBin = -1;
+		int posteriorFlashBin = -1;
+		int nFlashPrior = -1;
+		int nFlashPosterior = -1;
+		int endBin = 250;
+		for(int nFlash=0;nFlash<int(flashes.size());nFlash++){
+			double timeLow   = flashes[nFlash]->get_low_time() -beam_dt[0];
+			double timeHigh  = flashes[nFlash]->get_high_time()-beam_dt[0];
+			int    binLow    = int(timeLow/tBinWidth);
+			if(binLow < flashBin-2 && (previousFlashBin==-1 || binLow>previousFlashBin)){
+				previousFlashBin = binLow;
+				nFlashPrior = nFlash;
+			} else if(binLow > flashBin && (posteriorFlashBin==-1 || binLow<posteriorFlashBin)){
+				posteriorFlashBin = binLow;
+				nFlashPosterior = nFlash;
+			}
+		}
+		//If there is a prior flash, update it
+		std::vector<Opflash*>::iterator it;
+		if(nFlashPrior != -1){
+   			Opflash *updatedPriorFlash = new Opflash(hdecon, beam_dt[0], previousFlashBin, flashBin-2);
+			it = flashes.begin() + nFlashPrior;
+			flashes.erase(it);
+			flashes.insert(it, updatedPriorFlash);
+		}
+		//If there is a posterior flash, update the last available bin for the new flash to use
+		if(nFlashPosterior != -1){endBin = std::min(250,int((flashes[nFlashPosterior]->get_low_time()-beam_dt[0])/tBinWidth));}
+		//Set the new flash
+		Opflash *newFlash = new Opflash(hdecon, beam_dt[0], flashBin-2, std::min(flashBin+78,endBin));
+		newFlash->set_flash_type(3);
+		if(nFlashPrior==-1){nFlashPrior = 0;}
+		it = flashes.begin() + nFlashPrior;
+		flashes.insert(it, newFlash);
+//std::cout << "New Flash Added! ---------------------------------------------------------------" << std::endl;
+	}
+  }
+
+  //---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------  
+
   delete hrc;
   delete hspe;
 }
