@@ -896,9 +896,9 @@ void WireCell2dToy::ToyLightReco::Process_beam_wfs(){
 		double avPriorPEWeight = (10-(10-1)*(ksPriorNew-.15)/(.5-.15));
 		if(	(priorFlashFound && !baseline &&
 			ksPriorNew >0.15 &&					//For prior flashes, trigger on large KS to signify departure from prior-flash late-light
-			totalPE[bin-1]>1.4+avPriorPE &&				//Also trigger by total PE reading
+			totalPE[bin-1]>3.3+avPriorPE &&				//Also trigger by total PE reading
 			totalPE[bin-1]>1.15*avPriorPE &&
-			totalPE[bin-1]>1.4*avPriorPEWeight+avPriorPE &&
+			totalPE[bin-1]>2+1.3*avPriorPEWeight+avPriorPE &&
 			totalPE[bin-1]>(1.1+.05*avPriorPEWeight)*avPriorPE) ||
 			(baseline &&
 			totalPE[bin-1]>4 &&
