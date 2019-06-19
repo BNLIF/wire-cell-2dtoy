@@ -5,7 +5,6 @@
 
 #include "TH1S.h"
 #include "TF1.h"
-#include <TH2.h>
 #include "TVirtualFFT.h"
 #include <iostream>
 
@@ -95,6 +94,8 @@ WireCell2dToy::ToyLightReco::ToyLightReco(const char* root_file, bool imagingout
   fop_timestamp = new std::vector<double>;
   ctr = 0;
 
+  hdecon2 = new TH2F("hdecon2","PMT PE Across Time Bins",250,0,250,32,0,32);
+  
   //delete_status = true;
 }
 
@@ -119,6 +120,8 @@ WireCell2dToy::ToyLightReco::~ToyLightReco(){
   delete h_mult;
   delete h_l1_mult;
   delete h_l1_totPE;
+
+  delete hdecon2;
   
   // delete fop_wf_beam;
   // delete fop_femch_beam;
@@ -868,7 +871,8 @@ void WireCell2dToy::ToyLightReco::Process_beam_wfs(){
 	std::vector<TH1D> hdeconProjYList;
 	std::vector<double> totalPE;
 	//Store the PE info in hdecon2 ordered by OpChannel #, ignore negative PE, get projection over PMT for each time bin and total PE
-	TH2F* hdecon2 = new TH2F("hdecon2","PMT PE Across Time Bins",250,0,250,32,0,32);
+	//TH2F* hdecon2 = new TH2F("hdecon2","PMT PE Across Time Bins",250,0,250,32,0,32);
+	hdecon2->Reset();
 	for(int nBin=1;nBin<250;nBin++){
 		for(int nPMT=0;nPMT<32;nPMT++){hdecon2->SetBinContent(nBin,nPMT,std::max(0.,hdecon[nPMT]->GetBinContent(nBin)));}
 		hdeconProjYList.push_back( *(hdecon2->ProjectionY("PE over PMT for a given time bin",nBin,nBin)) );

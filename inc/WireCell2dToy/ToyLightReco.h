@@ -7,6 +7,7 @@
 #include "TTree.h"
 #include "TObject.h"
 #include "TClonesArray.h"
+#include <TH2.h>
 #include <vector>
 
 namespace WireCell2dToy{
@@ -84,6 +85,7 @@ namespace WireCell2dToy{
 
     TFile *file;
     TTree *T;
+    TH2F *hdecon2;
     WireCell::OpflashSelection cosmic_flashes;
     WireCell::OpflashSelection beam_flashes;
     WireCell::OpflashSelection flashes;
