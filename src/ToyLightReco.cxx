@@ -95,6 +95,9 @@ WireCell2dToy::ToyLightReco::ToyLightReco(const char* root_file, bool imagingout
   ctr = 0;
 
   hdecon2 = new TH2F("hdecon2","PMT PE Across Time Bins",250,0,250,32,0,32);
+  priorFlashProfile = new TH1D("priorFlashProfile","Averaged PE of Prior Flash",32,0,32);
+  candidateFlashProfile = new TH1D("candidateFlashProfile","Averaged PE of Candiate Flash",32,0,32);
+
   
   //delete_status = true;
 }
@@ -122,6 +125,8 @@ WireCell2dToy::ToyLightReco::~ToyLightReco(){
   delete h_l1_totPE;
 
   delete hdecon2;
+  delete priorFlashProfile;
+  delete candidateFlashProfile;
   
   // delete fop_wf_beam;
   // delete fop_femch_beam;
@@ -883,6 +888,7 @@ void WireCell2dToy::ToyLightReco::Process_beam_wfs(){
 	for (int nFlash=0;nFlash<int(flashes.size());nFlash++) {
 		double time = flashes[nFlash]->get_time();
 		if(time<tMax && time>tMin-8){baseline = false; priorFlashFound = true; priorFlashTime = time; nFlashDebug++;}
+		if(time<tMax && time>tMin){finished = true;}
 	}
 	//If there is an in-time flash or a near-time flash, make sure not to trigger on the late-light
 	priorFlashBin = std::max(1,int(ceil(priorFlashTime/tBinWidth)));	//bin 1 corresponds to [0,94] ns
@@ -890,7 +896,7 @@ void WireCell2dToy::ToyLightReco::Process_beam_wfs(){
 
 	while(bin<bMax && !finished){
 		//Trigger on large KS values to find when the prior flash is over
-		TH1D* priorFlashProfile = new TH1D("priorFlashProfile","Averaged PE of Prior Flash",32,0,32);
+		priorFlashProfile->Reset();
 		for(int i=0;i<32;i++){
 			double avPE = ( hdecon2->GetBinContent(priorFlashBin,i) + hdecon2->GetBinContent(priorFlashBin+1,i) )/2;
 			priorFlashProfile->SetBinContent(i,avPE);
@@ -908,7 +914,7 @@ void WireCell2dToy::ToyLightReco::Process_beam_wfs(){
 			totalPE[bin-1]>4 &&
 			totalPE[bin-1]>2+avPriorPE) ){
 			//Reject a candidate flash if it does not maintain consistent shape
-			TH1D* candidateFlashProfile = new TH1D("candidateFlashProfile","Averaged PE of Candiate Flash",32,0,32);
+			candidateFlashProfile->Reset();
 			for(int i=0;i<32;i++){
 				double avPE = ( hdeconProjYList[bin-1].GetBinContent(i) + hdeconProjYList[bin].GetBinContent(i) )/2;
 				candidateFlashProfile->SetBinContent(i,avPE);
@@ -927,17 +933,17 @@ void WireCell2dToy::ToyLightReco::Process_beam_wfs(){
 	//Take any newly found flashes and add them to the list flashes
 	if(flashBin != -1){
 		//Find prior and posterior flashes so that they can be used in setting / updating end_bins and PE values
-		Opflash* priorFlash = NULL;
-		Opflash* posteriorFlash = NULL;
+		//Opflash* priorFlash = NULL;
+		//Opflash* posteriorFlash = NULL;
 		int previousFlashBin = -1;
 		int posteriorFlashBin = -1;
 		int nFlashPrior = -1;
 		int nFlashPosterior = -1;
 		int endBin = 250;
 		for(int nFlash=0;nFlash<int(flashes.size());nFlash++){
-			double timeLow   = flashes[nFlash]->get_low_time() -beam_dt[0];
-			double timeHigh  = flashes[nFlash]->get_high_time()-beam_dt[0];
-			int    binLow    = int(timeLow/tBinWidth);
+			double timeLow  = flashes[nFlash]->get_low_time() -beam_dt[0];
+			double timeHigh = flashes[nFlash]->get_high_time()-beam_dt[0];
+			int    binLow   = int(timeLow/tBinWidth);
 			if(binLow < flashBin-2 && (previousFlashBin==-1 || binLow>previousFlashBin)){
 				previousFlashBin = binLow;
 				nFlashPrior = nFlash;
@@ -951,8 +957,8 @@ void WireCell2dToy::ToyLightReco::Process_beam_wfs(){
 		if(nFlashPrior != -1){
    			Opflash *updatedPriorFlash = new Opflash(hdecon, beam_dt[0], previousFlashBin, flashBin-2);
 			it = flashes.begin() + nFlashPrior;
-			flashes.erase(it);
-			flashes.insert(it, updatedPriorFlash);
+			delete *it;
+			*it = updatedPriorFlash;
 		}
 		//If there is a posterior flash, update the last available bin for the new flash to use
 		if(nFlashPosterior != -1){endBin = std::min(250,int((flashes[nFlashPosterior]->get_low_time()-beam_dt[0])/tBinWidth));}
@@ -962,7 +968,6 @@ void WireCell2dToy::ToyLightReco::Process_beam_wfs(){
 		if(nFlashPrior==-1){nFlashPrior = 0;}
 		it = flashes.begin() + nFlashPrior;
 		flashes.insert(it, newFlash);
-//std::cout << "New Flash Added! ---------------------------------------------------------------" << std::endl;
 	}
   }
 

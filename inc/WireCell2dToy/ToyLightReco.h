@@ -86,6 +86,10 @@ namespace WireCell2dToy{
     TFile *file;
     TTree *T;
     TH2F *hdecon2;
+    TH1D* priorFlashProfile;
+    TH1D* candidateFlashProfile;
+    //Opflash *updatedPriorFlash;
+    //Opflash *newFlash;
     WireCell::OpflashSelection cosmic_flashes;
     WireCell::OpflashSelection beam_flashes;
     WireCell::OpflashSelection flashes;
