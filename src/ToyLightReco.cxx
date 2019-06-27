@@ -963,7 +963,7 @@ void WireCell2dToy::ToyLightReco::Process_beam_wfs(){
 		//If there is a posterior flash, update the last available bin for the new flash to use
 		if(nFlashPosterior != -1){endBin = std::min(250,int((flashes[nFlashPosterior]->get_low_time()-beam_dt[0])/tBinWidth));}
 		//Set the new flash
-		Opflash *newFlash = new Opflash(hdecon, beam_dt[0], flashBin-2, std::min(flashBin+78,endBin));
+		Opflash *newFlash = new Opflash(hdecon, beam_dt[0], flashBin-2, std::min(flashBin+76,endBin));
 		newFlash->set_flash_type(3);
 		if(nFlashPrior==-1){nFlashPrior = 0;}
 		it = flashes.begin() + nFlashPrior;
