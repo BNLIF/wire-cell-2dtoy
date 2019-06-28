@@ -12,7 +12,7 @@ using namespace WireCell;
 using namespace Eigen;
 
 
-WireCell2dToy::ToyLightReco::ToyLightReco(const char* root_file, bool imagingoutput, bool overlayinput, bool remapchannel){
+WireCell2dToy::ToyLightReco::ToyLightReco(const char* root_file, bool imagingoutput, int datatier){
   file = new TFile(root_file);
   if(imagingoutput){
     T = (TTree*)file->Get("Trun");
@@ -21,7 +21,7 @@ WireCell2dToy::ToyLightReco::ToyLightReco(const char* root_file, bool imagingout
     T = (TTree*)file->Get("/Event/Sim");
   }
 
-  f_remapchannel=remapchannel;
+  f_datatier=datatier;
   
   cosmic_hg_wf = new TClonesArray;
   cosmic_lg_wf = new TClonesArray;
@@ -45,7 +45,7 @@ WireCell2dToy::ToyLightReco::ToyLightReco(const char* root_file, bool imagingout
   T->SetBranchAddress("cosmic_hg_timestamp",&cosmic_hg_timestamp);
   T->SetBranchAddress("cosmic_lg_timestamp",&cosmic_lg_timestamp);
     
-  if(overlayinput){
+  if(datatier==1){ // overlay
     T->SetBranchAddress("mixer_beam_hg_wf",&beam_hg_wf);
     T->SetBranchAddress("mixer_beam_lg_wf",&beam_lg_wf);
     T->SetBranchAddress("mixer_beam_hg_opch",&beam_hg_opch);
@@ -370,7 +370,7 @@ void WireCell2dToy::ToyLightReco::load_event_raw(int eve_num){
   // std::cout << " " << cosmic_flashes.size() << " " << beam_flashes.size() << " " << flashes.size() << std::endl;
   
   // update map for data & overlay (no re-map for MC)
-  if(f_remapchannel){ update_pmt_map(); }
+  if(f_datatier==0 || f_datatier==1){ update_pmt_map(); }
   
 }
 
@@ -856,10 +856,10 @@ void WireCell2dToy::ToyLightReco::Process_beam_wfs(){
   if(includePatch){
 	bool data = true;
 	double tMin, tMax;
-	if(data){
+	if(f_datatier==0){ // data
 		tMin = 3.1875;
 		tMax = 4.96875;
-	}else{
+	}else{ // full MC...
 		tMin = 3.1718;
 		tMax = 4.96876;
 	}	

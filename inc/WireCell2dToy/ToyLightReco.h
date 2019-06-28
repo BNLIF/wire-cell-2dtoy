@@ -39,7 +39,7 @@ namespace WireCell2dToy{
   
   class ToyLightReco{
   public:
-    ToyLightReco(const char* root_file, bool imagingoutput=false, bool overlayinput=false, bool remapchannel=false);
+    ToyLightReco(const char* root_file, bool imagingoutput=false, int datatier=0);
     ~ToyLightReco();
 
     void load_event_raw(int eve_num); // raw data from swizzler
@@ -138,7 +138,7 @@ namespace WireCell2dToy{
     std::vector<double> *fop_timestamp;
     int ctr;
 
-    bool f_remapchannel;
+    int f_datatier;
   };
 }
 
