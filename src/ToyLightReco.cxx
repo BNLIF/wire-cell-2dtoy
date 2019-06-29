@@ -13,7 +13,8 @@ using namespace Eigen;
 
 
 WireCell2dToy::ToyLightReco::ToyLightReco(const char* root_file, bool imagingoutput, int datatier){
-  file = new TFile(root_file);
+  //file = new TFile(root_file);
+  file = TFile::Open(root_file);
   if(imagingoutput){
     T = (TTree*)file->Get("Trun");
   }
