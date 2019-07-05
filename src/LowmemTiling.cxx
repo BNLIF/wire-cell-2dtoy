@@ -2545,9 +2545,30 @@ void WireCell2dToy::LowmemTiling::reset_cells(){
 }
 
 
-
+void WireCell2dToy::LowmemTiling::init_good_cells_with_charge(std::map<int,std::set<int>>& u_time_chs, std::map<int,std::set<int>>& v_time_chs, std::map<int,std::set<int>>& w_time_chs, std::map<std::pair<int,int>,double>& time_ch_charge_map, std::map<std::pair<int,int>,double>& time_ch_charge_err_map){
+  form_fired_merge_wires_with_charge(u_time_chs, v_time_chs, w_time_chs, time_ch_charge_map, time_ch_charge_err_map);
+  
+  for (int i=0;i!=fired_wire_u.size();i++){
+    MergeGeomWire *uwire = (MergeGeomWire *)fired_wire_u.at(i);
+    for (int j=0;j!=fired_wire_v.size();j++){
+      MergeGeomWire *vwire = (MergeGeomWire *)fired_wire_v.at(j);
+      for (int k=0;k!=fired_wire_w.size();k++){
+	MergeGeomWire *wwire = (MergeGeomWire *)fired_wire_w.at(k);
+	SlimMergeGeomCell *mcell = create_slim_merge_cell(uwire,vwire,wwire);
+	
+	if (mcell !=0) {
+	  mcell->SetTimeSlice(time_slice);
+	  //	  three_good_wire_cells.push_back(mcell);
+	  holder.AddCell(mcell);
+	}
+	
+      }
+    }
+  }
+}
 
 void WireCell2dToy::LowmemTiling::init_good_cells(std::map<int,std::set<int>>& u_time_chs, std::map<int,std::set<int>>& v_time_chs, std::map<int,std::set<int>>& w_time_chs){
+  
   form_fired_merge_wires(u_time_chs, v_time_chs, w_time_chs);
   
   for (int i=0;i!=fired_wire_u.size();i++){
@@ -4674,6 +4695,121 @@ void WireCell2dToy::LowmemTiling::form_two_bad_cells(){
 
 }
 
+
+void WireCell2dToy::LowmemTiling::form_fired_merge_wires_with_charge(std::map<int,std::set<int>>& u_time_chs, std::map<int,std::set<int>>& v_time_chs, std::map<int,std::set<int>>& w_time_chs, std::map<std::pair<int,int>,double>& time_ch_charge_map, std::map<std::pair<int,int>,double>& time_ch_charge_err_map){
+  std::set<int> u_chs = u_time_chs[time_slice];
+  std::set<int> v_chs = v_time_chs[time_slice];
+  std::set<int> w_chs = w_time_chs[time_slice];
+
+  //std::cout << time_slice << " " << u_chs.size() << " " << v_chs.size() << " " << w_chs.size() << std::endl;
+  
+  // do U
+  MergeGeomWire *mwire = 0;
+  int ident = 0;
+  int last_wire = -1;
+  for (int i = 0; i!= nwire_u; i++){
+    const GeomWire *wire = gds.by_planeindex((WirePlaneType_t)0,i);
+    if (u_chs.find(wire->channel())!=u_chs.end()){
+      if (time_ch_charge_map.find(std::make_pair(time_slice,wire->channel()))!=time_ch_charge_map.end()){
+	wirechargemap[wire] = time_ch_charge_map[std::make_pair(time_slice,wire->channel())];
+	wirecharge_errmap[wire] = time_ch_charge_err_map[std::make_pair(time_slice,wire->channel())];
+      }else{
+	std::cout << "Mismatch maps in charges!";
+      }
+      if (mwire == 0){
+	mwire = new MergeGeomWire(ident,*wire);
+	//mwire->SetTimeSlice(time_slice);
+	wire_type_map[mwire] = true;
+	fired_wire_u.push_back(mwire);
+	ident ++;
+      }else{
+	if (i==last_wire+1){
+	  mwire->AddWire(*wire);
+	}else{
+	  // create a new wire
+	  mwire = new MergeGeomWire(ident,*wire);
+	  // mwire->SetTimeSlice(time_slice);
+	  wire_type_map[mwire] = true;
+	  fired_wire_u.push_back(mwire);
+	  ident ++;
+	}
+      }
+      last_wire = i;
+    }
+  }
+  
+  // V
+  mwire = 0;
+  last_wire = -1;
+  for (int i = 0; i!= nwire_v; i++){
+    const GeomWire *wire = gds.by_planeindex((WirePlaneType_t)1,i);
+    if (v_chs.find(wire->channel())!=v_chs.end()){
+      if (time_ch_charge_map.find(std::make_pair(time_slice,wire->channel()))!=time_ch_charge_map.end()){
+	wirechargemap[wire] = time_ch_charge_map[std::make_pair(time_slice,wire->channel())];
+	wirecharge_errmap[wire] = time_ch_charge_err_map[std::make_pair(time_slice,wire->channel())];
+      }else{
+	std::cout << "Mismatch maps in charges!";
+      }
+      
+      if (mwire == 0){
+	mwire = new MergeGeomWire(ident,*wire);
+	//mwire->SetTimeSlice(time_slice);
+	wire_type_map[mwire] = true;
+	fired_wire_v.push_back(mwire);
+	ident ++;
+      }else{
+	if (i==last_wire+1){
+	  mwire->AddWire(*wire);
+	}else{
+	  // create a new wire
+	  mwire = new MergeGeomWire(ident,*wire);
+	  //mwire->SetTimeSlice(time_slice);
+	  wire_type_map[mwire] = true;
+	  fired_wire_v.push_back(mwire);
+	  ident ++;
+	}
+      }
+      last_wire = i;
+    }
+  }
+  
+  // W
+  mwire = 0;
+  last_wire = -1;
+  for (int i = 0; i!= nwire_w; i++){
+    const GeomWire *wire = gds.by_planeindex((WirePlaneType_t)2,i);
+    if (w_chs.find(wire->channel())!=w_chs.end()){
+      if (time_ch_charge_map.find(std::make_pair(time_slice,wire->channel()))!=time_ch_charge_map.end()){
+	wirechargemap[wire] = time_ch_charge_map[std::make_pair(time_slice,wire->channel())];
+	wirecharge_errmap[wire] = time_ch_charge_err_map[std::make_pair(time_slice,wire->channel())];
+      }else{
+	std::cout << "Mismatch maps in charges!";
+      }
+      
+      if (mwire == 0){
+	mwire = new MergeGeomWire(ident,*wire);
+	//mwire->SetTimeSlice(time_slice);
+	wire_type_map[mwire] = true;
+	fired_wire_w.push_back(mwire);
+	ident ++;
+      }else{
+	if (i==last_wire+1){
+	  mwire->AddWire(*wire);
+	}else{
+	  // create a new wire
+	  mwire = new MergeGeomWire(ident,*wire);
+	  //mwire->SetTimeSlice(time_slice);
+	  wire_type_map[mwire] = true;
+	  fired_wire_w.push_back(mwire);
+	  ident ++;
+	}
+      }
+      last_wire = i;
+    }
+  }
+
+  
+}
 
 void WireCell2dToy::LowmemTiling::form_fired_merge_wires(std::map<int,std::set<int>>& u_time_chs, std::map<int,std::set<int>>& v_time_chs, std::map<int,std::set<int>>& w_time_chs){
   std::set<int> u_chs = u_time_chs[time_slice];

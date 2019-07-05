@@ -32,6 +32,7 @@ namespace WireCell2dToy{
 
     void form_fired_merge_wires(const WireCell::Slice& slice, const WireCell::Slice& slice_err);
     void form_fired_merge_wires(std::map<int,std::set<int>>& u_time_chs, std::map<int,std::set<int>>& v_time_chs, std::map<int,std::set<int>>& w_time_chs);
+    void form_fired_merge_wires_with_charge(std::map<int,std::set<int>>& u_time_chs, std::map<int,std::set<int>>& v_time_chs, std::map<int,std::set<int>>& w_time_chs, std::map<std::pair<int,int>,double>& time_ch_charge_map, std::map<std::pair<int,int>,double>& time_ch_charge_err_map);
     
     void form_two_bad_cells();
     void init_bad_cells(WireCell::ChirpMap& uplane_map, WireCell::ChirpMap& vplane_map, WireCell::ChirpMap& wplane_map);
@@ -40,6 +41,8 @@ namespace WireCell2dToy{
     void init_good_cells(const WireCell::Slice& slice, const WireCell::Slice& slice_err, std::vector<float>& uplane_rms, std::vector<float>& vplane_rms, std::vector<float>& wplane_rms);
     
     void init_good_cells(std::map<int,std::set<int>>& u_time_chs, std::map<int,std::set<int>>& v_time_chs, std::map<int,std::set<int>>& w_time_chs);
+    
+    void init_good_cells_with_charge(std::map<int,std::set<int>>& u_time_chs, std::map<int,std::set<int>>& v_time_chs, std::map<int,std::set<int>>& w_time_chs, std::map<std::pair<int,int>,double>& time_ch_charge_map, std::map<std::pair<int,int>,double>& time_ch_charge_err_map);
     
     WireCell::GeomCellSelection& get_two_bad_wire_cells(){return two_bad_wire_cells;};
     WireCell::GeomCellSelection& get_three_good_wire_cells(){return three_good_wire_cells;};
