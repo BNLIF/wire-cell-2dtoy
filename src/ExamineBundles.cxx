@@ -2,18 +2,38 @@
 
 using namespace WireCell;
 
-void WireCell2dToy::ExamineBundles(WireCell::FlashTPCBundleSelection& bundles, WireCell::ToyCTPointCloud& ct_point_cloud){
+FlashTPCBundleSelection WireCell2dToy::ExamineBundles(WireCell::FlashTPCBundleSelection bundles, WireCell::ToyCTPointCloud& ct_point_cloud){
 
   std::set<int> used_cluster_ids;
+  FlashTPCBundleSelection new_bundles;
   
   for (auto it = bundles.begin(); it!= bundles.end(); it++){
     FlashTPCBundle *bundle = *it;
-    ExamineBundle(bundle, used_cluster_ids, ct_point_cloud);
+    FlashTPCBundle *new_bundle = ExamineBundle(bundle, used_cluster_ids, ct_point_cloud);
+    new_bundles.push_back(new_bundle);  
   }
+
+  std::set<PR3DCluster*> orig_clusters;
+  for (size_t i=0;i!=bundles.size();i++){
+    FlashTPCBundle *bundle = bundles.at(i);
+    orig_clusters.insert(bundle->get_main_cluster());
+    //delete bundle->get_main_cluster();
+    for (size_t j=0;j!=bundle->get_other_clusters().size();j++){
+      orig_clusters.insert(bundle->get_other_clusters().at(j));
+      //delete bundle->get_other_clusters().at(j);
+    }
+    delete bundle;
+  }
+  for (auto it = orig_clusters.begin(); it!=orig_clusters.end(); it++){
+    delete (*it);
+  }
+  
+  return new_bundles;
   
 }
 
-void WireCell2dToy::ExamineBundle(WireCell::FlashTPCBundle* bundle, std::set<int>& used_cluster_ids, WireCell::ToyCTPointCloud& ct_point_cloud){
+WireCell::FlashTPCBundle* WireCell2dToy::ExamineBundle(WireCell::FlashTPCBundle* bundle, std::set<int>& used_cluster_ids, WireCell::ToyCTPointCloud& ct_point_cloud){
+  
   int cluster_id;
   if (used_cluster_ids.size()==0){
     cluster_id = 1;
@@ -22,28 +42,24 @@ void WireCell2dToy::ExamineBundle(WireCell::FlashTPCBundle* bundle, std::set<int
   }
   
   
-  std::set<PR3DCluster*> orig_clusters;
-  orig_clusters.insert(bundle->get_main_cluster());
-
-  PR3DClusterSelection& other_clusters = bundle->get_other_clusters();
-  PR3DClusterSelection& more_clusters = bundle->get_more_clusters();
-  for (auto it = other_clusters.begin(); it!=other_clusters.end();it++){
-    orig_clusters.insert(*it);
+  PR3DClusterSelection orig_clusters;
+  orig_clusters.push_back(bundle->get_main_cluster());
+  for (auto it1 = bundle->get_other_clusters().begin(); it1!=bundle->get_other_clusters().end();it1++){
+    orig_clusters.push_back(*it1);
   }
-  for (auto it = more_clusters.begin(); it!=more_clusters.end();it++){
-    orig_clusters.insert(*it);
+  
+  SMGCSelection orig_mcells;
+  for (auto it = orig_clusters.begin(); it!=orig_clusters.end();it++){
+    SMGCSelection& mcells = (*it)->get_mcells();
+    //std::cout << (*it)->get_cluster_id() << " " << mcells.size() << std::endl;
+    for (size_t i=0;i!=mcells.size();i++){
+      orig_mcells.push_back(mcells.at(i));
+    }
   }
 
   // create a new cluster
   PR3DCluster *new_cluster = new PR3DCluster(cluster_id);
-  
-  std::set<SlimMergeGeomCell*> orig_mcells;
-  for (auto it = orig_clusters.begin(); it!=orig_clusters.end();it++){
-    SMGCSelection& mcells = (*it)->get_mcells();
-    for (auto it1 = mcells.begin(); it1 != mcells.end();it1++){
-      orig_mcells.insert(*it1);
-    }
-  }
+   
   for (auto it = orig_mcells.begin(); it!=orig_mcells.end(); it++){
     new_cluster->AddCell(*it, (*it)->GetTimeSlice());
   }
@@ -62,20 +78,21 @@ void WireCell2dToy::ExamineBundle(WireCell::FlashTPCBundle* bundle, std::set<int
     }
   }
 
+  FlashTPCBundle *new_bundle =  new FlashTPCBundle(bundle->get_flash(), new_clusters.at(0), bundle->get_flash_index_id(), bundle->get_cluster_index_id());
+  new_bundle->set_strength(bundle->get_strength());
+  new_bundle->set_flag_close_to_PMT(bundle->get_flag_close_to_PMT());
+  new_bundle->set_flag_at_x_boundary(bundle->get_flag_at_x_boundary());
+  new_bundle->set_spec_end_flag(bundle->get_spec_end_flag());
+  new_bundle->set_potential_bad_match_flag(bundle->get_potential_bad_match_flag());
+  new_bundle->set_ks_dis(bundle->get_ks_dis());
+  new_bundle->set_ndf(bundle->get_ndf());
+  new_bundle->set_chi2(bundle->get_chi2());
+  new_bundle->set_consistent_flag(new_bundle->get_consistent_flag());
+  new_bundle->set_pred_pmt_light(bundle->get_pred_pmt_light());
   
-  //set the new clusters ... 
-  bundle->set_main_cluster(new_clusters.at(0));
-  other_clusters.clear();
-  more_clusters.clear();
-  for (size_t i=1; i<new_clusters.size();i++){
-    other_clusters.push_back(new_clusters.at(i));
-    more_clusters.push_back(new_clusters.at(i));
+  for (int i=1; i<new_clusters.size();i++){
+    new_bundle->add_other_cluster(new_clusters.at(i));
   }
   
-  // delete original cluster
-  for (auto it = orig_clusters.begin(); it!=orig_clusters.end(); it++){
-    delete (*it);
-  }
-  
-  
+  return new_bundle;
 }
