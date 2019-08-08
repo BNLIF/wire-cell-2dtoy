@@ -729,23 +729,35 @@ PR3DClusterSelection WireCell2dToy::Examine_overclustering(PR3DCluster *cluster,
     	}
       }
 
-      std::vector<boost::graph_traits < MCUGraph >::vertex_descriptor> predecessors(num_vertices(temp_graph));
-      
-      prim_minimum_spanning_tree( temp_graph , &predecessors[0], boost::root_vertex(1));
-      
-      for (size_t j=0;j!=predecessors.size();++j){
-	if (predecessors[j]!=j){
-	  if (j < predecessors[j]){
-	    index_index_dis_mst[j][predecessors[j]] = index_index_dis[j][predecessors[j]];
-	  }else{
-	    index_index_dis_mst[predecessors[j]][j] = index_index_dis[predecessors[j]][j];
-	  }
-	  //std::cout << j << " " << predecessors[j] << " " << std::endl;
-	}else{
-	  //std::cout << j << " " << std::endl;
+      {
+	std::vector<int> possible_root_vertex;
+	std::vector<int> component(num_vertices(temp_graph));
+	const int num1 = connected_components(temp_graph,&component[0]);
+	possible_root_vertex.resize(num1);
+	std::vector<int>::size_type i;
+	for (i=0;i!=component.size(); ++i){
+	  possible_root_vertex.at(component[i]) = i;
 	}
-      }
+    
+	for (size_t i=0;i!=possible_root_vertex.size();i++){
+	  std::vector<boost::graph_traits < MCUGraph >::vertex_descriptor> predecessors(num_vertices(temp_graph));
       
+	  prim_minimum_spanning_tree( temp_graph , &predecessors[0], boost::root_vertex(possible_root_vertex.at(i)));
+      
+	  for (size_t j=0;j!=predecessors.size();++j){
+	    if (predecessors[j]!=j){
+	      if (j < predecessors[j]){
+		index_index_dis_mst[j][predecessors[j]] = index_index_dis[j][predecessors[j]];
+	      }else{
+		index_index_dis_mst[predecessors[j]][j] = index_index_dis[predecessors[j]][j];
+	      }
+	      //std::cout << j << " " << predecessors[j] << " " << std::endl;
+	    }else{
+	      //std::cout << j << " " << std::endl;
+	    }
+	  }
+     	}
+      }
     }
 
 
@@ -765,22 +777,35 @@ PR3DClusterSelection WireCell2dToy::Examine_overclustering(PR3DCluster *cluster,
     	}
       }
 
-      std::vector<boost::graph_traits < MCUGraph >::vertex_descriptor> predecessors(num_vertices(temp_graph));
-      prim_minimum_spanning_tree( temp_graph , &predecessors[0], boost::root_vertex(1));
-      for (size_t j=0;j!=predecessors.size();++j){
-	if (predecessors[j]!=j){
-	  if (j < predecessors[j]){
-	    index_index_dis_dir_mst[j][predecessors[j]] = index_index_dis[j][predecessors[j]];
-	  }else{
-	    index_index_dis_dir_mst[predecessors[j]][j] = index_index_dis[predecessors[j]][j];
+      {
+	std::vector<int> possible_root_vertex;
+	std::vector<int> component(num_vertices(temp_graph));
+	const int num1 = connected_components(temp_graph,&component[0]);
+	possible_root_vertex.resize(num1);
+	std::vector<int>::size_type i;
+	for (i=0;i!=component.size(); ++i){
+	  possible_root_vertex.at(component[i]) = i;
+	}
+	
+	for (size_t i=0;i!=possible_root_vertex.size();i++){
+	  
+	  std::vector<boost::graph_traits < MCUGraph >::vertex_descriptor> predecessors(num_vertices(temp_graph));
+	  prim_minimum_spanning_tree( temp_graph , &predecessors[0], boost::root_vertex(possible_root_vertex.at(i)));
+	  for (size_t j=0;j!=predecessors.size();++j){
+	    if (predecessors[j]!=j){
+	      if (j < predecessors[j]){
+		index_index_dis_dir_mst[j][predecessors[j]] = index_index_dis[j][predecessors[j]];
+	      }else{
+		index_index_dis_dir_mst[predecessors[j]][j] = index_index_dis[predecessors[j]][j];
+	      }
+	      //std::cout << j << " " << predecessors[j] << " " << std::endl;
+	    }else{
+	      //std::cout << j << " " << std::endl;
+	    }
 	  }
-	  //std::cout << j << " " << predecessors[j] << " " << std::endl;
-	}else{
-	  //std::cout << j << " " << std::endl;
 	}
       }
     }
-
     
 	
     for (int j=0;j!=num;j++){
