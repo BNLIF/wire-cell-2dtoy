@@ -338,13 +338,24 @@ int WireCell2dToy::ToyFiducial::check_LM_bdt(WireCell::FlashTPCBundle *bundle, d
   return 0;
 }
 
-bool WireCell2dToy::ToyFiducial::check_fully_contained(WireCell::FlashTPCBundle *bundle, double offset_x, WireCell::ToyCTPointCloud& ct_point_cloud,std::map<PR3DCluster*, PR3DCluster*>& old_new_cluster_map, unsigned int* fail_mode){
-  PR3DCluster *main_cluster = bundle->get_main_cluster();
-
-  //replace it with the better one, which takes into account the dead channels ... 
-  PR3DCluster *main_cluster1 = main_cluster;
-  if (old_new_cluster_map.find(main_cluster)!=old_new_cluster_map.end())
-    main_cluster1 = old_new_cluster_map[main_cluster];
+bool WireCell2dToy::ToyFiducial::check_fully_contained(WireCell::FlashTPCBundle *bundle, double offset_x, WireCell::ToyCTPointCloud& ct_point_cloud,std::map<PR3DCluster*, PR3DCluster*>& old_new_cluster_map, unsigned int* fail_mode, int flag){
+  PR3DCluster *main_cluster; 
+  PR3DCluster *main_cluster1; 
+  if (flag==1){ // check the current
+    main_cluster = bundle->get_main_cluster();
+    main_cluster1  = main_cluster;
+    //replace it with the better one, which takes into account the dead channels ... 
+    if (old_new_cluster_map.find(main_cluster)!=old_new_cluster_map.end())
+      main_cluster1 = old_new_cluster_map[main_cluster];
+  }else{
+    main_cluster = bundle->get_orig_cluster();
+    main_cluster1  = main_cluster;
+    //replace it with the better one, which takes into account the dead channels ... 
+    if (old_new_cluster_map.find(main_cluster)!=old_new_cluster_map.end())
+      main_cluster1 = old_new_cluster_map[main_cluster];
+    if (main_cluster==0) return true;
+  }
+  
   
   Opflash *flash = bundle->get_flash();
   std::vector<std::vector<WCPointCloud<double>::WCPoint>> out_vec_wcps = main_cluster1->get_extreme_wcps();
@@ -416,14 +427,26 @@ bool WireCell2dToy::ToyFiducial::check_fully_contained(WireCell::FlashTPCBundle 
   return true;
 }
 
-bool WireCell2dToy::ToyFiducial::check_tgm(WireCell::FlashTPCBundle *bundle, double offset_x, WireCell::ToyCTPointCloud& ct_point_cloud,std::map<PR3DCluster*, PR3DCluster*>& old_new_cluster_map){
+bool WireCell2dToy::ToyFiducial::check_tgm(WireCell::FlashTPCBundle *bundle, double offset_x, WireCell::ToyCTPointCloud& ct_point_cloud,std::map<PR3DCluster*, PR3DCluster*>& old_new_cluster_map, int flag){
 
-  PR3DCluster *main_cluster = bundle->get_main_cluster();
+  PR3DCluster *main_cluster; 
+  PR3DCluster *main_cluster1; 
 
+  if (flag==1){ // check the current main cluster 
+    main_cluster = bundle->get_main_cluster();
+    main_cluster1 = main_cluster;
   //replace it with the better one, which takes into account the dead channels ... 
-  PR3DCluster *main_cluster1 = main_cluster;
-  if (old_new_cluster_map.find(main_cluster)!=old_new_cluster_map.end())
-    main_cluster1 = old_new_cluster_map[main_cluster];
+    if (old_new_cluster_map.find(main_cluster)!=old_new_cluster_map.end())
+      main_cluster1 = old_new_cluster_map[main_cluster];
+  }else if (flag==2){
+    main_cluster = bundle->get_orig_cluster();
+    main_cluster1 = main_cluster;
+  //replace it with the better one, which takes into account the dead channels ... 
+    if (old_new_cluster_map.find(main_cluster)!=old_new_cluster_map.end())
+      main_cluster1 = old_new_cluster_map[main_cluster];
+    if (main_cluster==0) return false;
+  }
+
   
   Opflash *flash = bundle->get_flash();
 

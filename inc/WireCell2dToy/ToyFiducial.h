@@ -29,8 +29,9 @@ namespace WireCell2dToy{
     
     bool check_signal_processing(WireCell::Point& p, TVector3& dir, WireCell::ToyCTPointCloud& ct_point_cloud, double step = 1.0*units::cm, double offset_x=0);
 
-    bool check_tgm(WireCell::FlashTPCBundle *bundle, double offset_x, WireCell::ToyCTPointCloud& ct_point_cloud,std::map<WireCell::PR3DCluster*, WireCell::PR3DCluster*>& old_new_cluster_map);
-    bool check_fully_contained(WireCell::FlashTPCBundle *bundle, double offset_x, WireCell::ToyCTPointCloud& ct_point_cloud,std::map<WireCell::PR3DCluster*, WireCell::PR3DCluster*>& old_new_cluster_map, unsigned int* fail_mode=nullptr);
+    bool check_tgm(WireCell::FlashTPCBundle *bundle, double offset_x, WireCell::ToyCTPointCloud& ct_point_cloud,std::map<WireCell::PR3DCluster*, WireCell::PR3DCluster*>& old_new_cluster_map, int flag = 1);
+    
+    bool check_fully_contained(WireCell::FlashTPCBundle *bundle, double offset_x, WireCell::ToyCTPointCloud& ct_point_cloud,std::map<WireCell::PR3DCluster*, WireCell::PR3DCluster*>& old_new_cluster_map, unsigned int* fail_mode=nullptr, int flag = 1);
     
     int check_LM(WireCell::FlashTPCBundle *bundle, double& cluster_length);
     int check_LM_cuts(WireCell::FlashTPCBundle *bundle, double& cluster_length);
