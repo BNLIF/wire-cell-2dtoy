@@ -235,7 +235,7 @@ void WireCell2dToy::ToyLightReco::clear_flashes(){
   
 }
 
-void WireCell2dToy::ToyLightReco::load_event_raw(int eve_num){
+void WireCell2dToy::ToyLightReco::load_event_raw(int eve_num, double tMin, double tMax){
   
   T->GetEntry(eve_num);
   
@@ -355,7 +355,7 @@ void WireCell2dToy::ToyLightReco::load_event_raw(int eve_num){
   
   
   
-  Process_beam_wfs();
+  Process_beam_wfs(tMin, tMax);
 
   // std::cout << beam_flashes.size() << std::endl;
 
@@ -410,7 +410,7 @@ void WireCell2dToy::ToyLightReco::sort_flashes(){
   // std::cout << flashes.size() << std::endl;
 }
 
-void WireCell2dToy::ToyLightReco::Process_beam_wfs(){
+void WireCell2dToy::ToyLightReco::Process_beam_wfs(double tMin, double tMax){
   // correct the baseline ...
   TH1F h1("h1","h1",200,-100,100);
   for (int i=0;i!=32;i++){
@@ -856,18 +856,10 @@ void WireCell2dToy::ToyLightReco::Process_beam_wfs(){
   bool includePatch = true;
   if(includePatch){
 	bool data = true;
-	double tMin, tMax;
-	if(f_datatier==0){ // data
-		tMin = 3.1875;
-		tMax = 4.96875;
-	}else{ // full MC...
-		tMin = 3.1718;
-		tMax = 4.96876;
-	}	
 	double tBinWidth = .09375;
-	int bMin = ceil(tMin/tBinWidth);
-	int bMax = ceil(tMax/tBinWidth);
-	double priorFlashTime = -1;
+	int bMin =  ceil((tMin-beam_dt[0])/tBinWidth-0.5);
+	int bMax = floor((tMax-beam_dt[0])/tBinWidth-0.5);
+	double priorFlashTime = -10;
 	int priorFlashBin = -1;
 	int flashBin = -1;
 	int bin = -1;
@@ -888,12 +880,12 @@ void WireCell2dToy::ToyLightReco::Process_beam_wfs(){
 	int nFlashDebug = 0;
 	for (int nFlash=0;nFlash<int(flashes.size());nFlash++) {
 		double time = flashes[nFlash]->get_time();
-		if(time<tMax && time>tMin-8){baseline = false; priorFlashFound = true; priorFlashTime = time; nFlashDebug++;}
+		if(time<tMax && time>tMin-8 && time>priorFlashTime){baseline = false; priorFlashFound = true; priorFlashTime = time; nFlashDebug++;}
 		if(time<tMax && time>tMin){finished = true;}
 	}
 	//If there is an in-time flash or a near-time flash, make sure not to trigger on the late-light
-	priorFlashBin = std::max(1,int(ceil(priorFlashTime/tBinWidth)));	//bin 1 corresponds to [0,94] ns
-	bin = std::max(bMin,1+priorFlashBin);					//Stat 1 bin after the flash
+	priorFlashBin = std::max(1,int((priorFlashTime-beam_dt[0])/tBinWidth-0.5));	//bin 1 corresponds to [0,94] ns
+	bin = std::max(bMin,1+priorFlashBin);						//Stat 1 bin after the flash
 
 	while(bin<bMax && !finished){
 		//Trigger on large KS values to find when the prior flash is over
@@ -934,18 +926,14 @@ void WireCell2dToy::ToyLightReco::Process_beam_wfs(){
 	//Take any newly found flashes and add them to the list flashes
 	if(flashBin != -1){
 		//Find prior and posterior flashes so that they can be used in setting / updating end_bins and PE values
-		//Opflash* priorFlash = NULL;
-		//Opflash* posteriorFlash = NULL;
 		int previousFlashBin = -1;
 		int posteriorFlashBin = -1;
 		int nFlashPrior = -1;
 		int nFlashPosterior = -1;
 		int endBin = 250;
 		for(int nFlash=0;nFlash<int(flashes.size());nFlash++){
-			double timeLow  = flashes[nFlash]->get_low_time() -beam_dt[0];
-			double timeHigh = flashes[nFlash]->get_high_time()-beam_dt[0];
-			int    binLow   = int(timeLow/tBinWidth);
-			if(binLow < flashBin-2 && (previousFlashBin==-1 || binLow>previousFlashBin)){
+			int binLow = int((flashes[nFlash]->get_low_time()-beam_dt[0])/tBinWidth);
+			if(binLow < flashBin-2 && binLow>flashBin-80 && (previousFlashBin==-1 || binLow>previousFlashBin)){
 				previousFlashBin = binLow;
 				nFlashPrior = nFlash;
 			} else if(binLow > flashBin && (posteriorFlashBin==-1 || binLow<posteriorFlashBin)){

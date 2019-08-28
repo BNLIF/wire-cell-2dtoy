@@ -42,7 +42,8 @@ namespace WireCell2dToy{
     ToyLightReco(const char* root_file, bool imagingoutput=false, int datatier=0);
     ~ToyLightReco();
 
-    void load_event_raw(int eve_num); // raw data from swizzler
+//    void load_event_raw(int eve_num, double tMin=3.5625, double tmax=5.34376); // raw data from swizzler
+    void load_event_raw(int eve_num, double tMin=3.5625, double tmax=5.34376); // raw data from swizzler
     TH1F* get_raw_hist(int ch){return hraw[ch];};
     TH1F* get_decon_hist(int ch){return hdecon[ch];};
     TH1F* get_l1_hist(int ch){return hl1[ch];};
@@ -65,7 +66,7 @@ namespace WireCell2dToy{
     //    bool delete_status;
 
   protected:
-    void Process_beam_wfs();
+    void Process_beam_wfs(double tMin=0, double tMax=0);
     void sort_flashes();
     void update_pmt_map();
     
@@ -88,8 +89,6 @@ namespace WireCell2dToy{
     TH2F *hdecon2;
     TH1D* priorFlashProfile;
     TH1D* candidateFlashProfile;
-    //Opflash *updatedPriorFlash;
-    //Opflash *newFlash;
     WireCell::OpflashSelection cosmic_flashes;
     WireCell::OpflashSelection beam_flashes;
     WireCell::OpflashSelection flashes;
