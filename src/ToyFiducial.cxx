@@ -38,7 +38,7 @@ WireCell2dToy::ToyFiducial::ToyFiducial(int dead_region_ch_ext, double offset_t,
 {
 
   if (flag_data){
-    std::cout << "Data Fiducial Volume! " << std::endl;
+    std::cout << "Data Reco Fiducial Volume! " << std::endl;
     // data 
     m_sc_bottom_1_y=-116*units::cm;
     m_sc_bottom_1_x=80*units::cm;
@@ -65,7 +65,7 @@ WireCell2dToy::ToyFiducial::ToyFiducial(int dead_region_ch_ext, double offset_t,
     m_sc_downstream_2_x=256*units::cm;
   }else{
     // MC
-    std::cout << "MC Fiducial Volume! " << std::endl;
+    std::cout << "MC Truth Fiducial Volume! " << std::endl;
     m_sc_bottom_1_y=-116*units::cm;
     m_sc_bottom_1_x=34*units::cm;
     

@@ -45,7 +45,11 @@ int WireCell2dToy::convert_xyz_voxel_id(WireCell::Point &p){
 FlashTPCBundleSelection WireCell2dToy::tpc_light_match(int time_offset, int nrebin, std::map<WireCell::PR3DCluster*,std::vector<std::pair<WireCell::PR3DCluster*,double>>>& group_clusters, WireCell::OpflashSelection& flashes){
   TChain *T = new TChain("/pmtresponse/PhotonLibraryData","/pmtresponse/PhotonLibraryData");
   T->AddFile("./uboone_photon_library.root");
-  //  std::cout << T->GetEntries();
+  //std::cout << T->GetEntries();
+  if (T->GetEntries()<=0) {
+      std::cout << "Error: 2dToy::tpc_light_match failed to read uboone_photon_library.root"<<std::endl;
+      exit(1);
+  }
   Int_t Voxel;
   Int_t OpChannel;
   Float_t Visibility;
