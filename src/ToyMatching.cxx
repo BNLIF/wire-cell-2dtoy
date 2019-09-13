@@ -1598,6 +1598,14 @@ FlashTPCBundleSelection WireCell2dToy::tpc_light_match(int time_offset, int nreb
     // return bundles ...    
     for (auto it = group_clusters.begin(); it!=group_clusters.end(); it++){
       PR3DCluster* main_cluster = it->first;
+
+      // {
+      // 	ToyPointCloud *pcloud = main_cluster->get_point_cloud();
+      // 	Point test_p(236.3*units::cm,13.4*units::cm,392.6*units::cm);
+      // 	if (pcloud->get_closest_dis(test_p) < 1*units::cm)
+      // 	  std::cout  << " C " << main_cluster->get_cluster_id() << " " << pcloud->get_closest_dis(test_p)/units::cm << std::endl;
+      // }
+      
       if (map_tpc_index.find(main_cluster)!=map_tpc_index.end()){
 	int tpc_index = map_tpc_index[main_cluster];
 	if (matched_pairs.find(tpc_index)!=matched_pairs.end()){
@@ -1776,6 +1784,10 @@ void WireCell2dToy::organize_matched_bundles(WireCell::FlashTPCBundleSelection& 
     }
 
     for (auto it = to_be_removed.begin(); it!=to_be_removed.end(); it++){
+
+      //FlashTPCBundle *bundle = *it;
+      //std::cout << bundle->get_flash()->get_flash_id() << " " << bundle->get_main_cluster()->get_cluster_id() << " " << bundle->get_ks_dis() << " " << bundle->get_chi2() << " " << bundle->get_ndf() << " " << bundle->get_flag_close_to_PMT() << std::endl;
+      
       results_bundles.erase(find(results_bundles.begin(),results_bundles.end(),*it));
     }
 
@@ -1796,12 +1808,17 @@ void WireCell2dToy::organize_matched_bundles(WireCell::FlashTPCBundleSelection& 
       bool flag_used = false;
       for (auto it1 = results_bundles.rbegin(); it1!=results_bundles.rend(); it1++){
 	FlashTPCBundle *best_bundle = (*it1);
-	if (best_bundle == bundle) continue;
+
+	if (find(second_round_bundles.begin(), second_round_bundles.end(), best_bundle) != second_round_bundles.end()) continue;
+	//if (best_bundle == bundle) continue;
+	
 	Opflash *flash = best_bundle->get_flash();
 	if (fc_bundles_map.find(std::make_pair(flash, main_cluster))!=fc_bundles_map.end()){
 	  FlashTPCBundle *test_bundle = fc_bundles_map[std::make_pair(flash, main_cluster)];
 	  tried_flashes.insert(flash);
 	  if (best_bundle->examine_bundle_rank(test_bundle,cos_pe_low, cos_pe_mid)){
+	    //  std::cout << flash->get_flash_id() << " " << best_bundle->get_main_cluster()->get_cluster_id() << " " << best_bundle << " " << bundle << std::endl;
+	    //std::cout << bundle->get_flash()->get_flash_id() << " " << bundle->get_main_cluster()->get_cluster_id() << " " << bundle->get_ks_dis() << " " << bundle->get_chi2() << " " << bundle->get_ndf() << " " << bundle->get_flag_close_to_PMT() << std::endl;
 	    best_bundle->add_bundle(test_bundle,cos_pe_low,cos_pe_mid);
 	    flag_used = true;
 	    break;
@@ -1822,6 +1839,9 @@ void WireCell2dToy::organize_matched_bundles(WireCell::FlashTPCBundleSelection& 
     }
     
     for (auto it = to_be_removed.begin(); it!=to_be_removed.end(); it++){
+      //      FlashTPCBundle *bundle = *it;
+      // std::cout << bundle << " " << bundle->get_flash()->get_flash_id() << " " << bundle->get_main_cluster()->get_cluster_id() << " " << bundle->get_ks_dis() << " " << bundle->get_chi2() << " " << bundle->get_ndf() << " " << bundle->get_flag_close_to_PMT() << std::endl;
+      
       results_bundles.erase(find(results_bundles.begin(),results_bundles.end(),*it));
     }
 
@@ -3444,6 +3464,8 @@ FlashTPCBundleSelection WireCell2dToy::tpc_light_match_ana(int time_offset, int 
     // return bundles ...    
     for (auto it = group_clusters.begin(); it!=group_clusters.end(); it++){
       PR3DCluster* main_cluster = it->first;
+      
+      
       if (map_tpc_index.find(main_cluster)!=map_tpc_index.end()){
 	int tpc_index = map_tpc_index[main_cluster];
 	if (matched_pairs.find(tpc_index)!=matched_pairs.end()){
@@ -3491,7 +3513,7 @@ FlashTPCBundleSelection WireCell2dToy::tpc_light_match_ana(int time_offset, int 
     // }
 
     
-     organize_matched_bundles(results_bundles, cos_pe_low, cos_pe_mid, fc_bundles_map);
+    organize_matched_bundles(results_bundles, cos_pe_low, cos_pe_mid, fc_bundles_map);
 
 
     // std::cout << "Final1: " << std::endl;
