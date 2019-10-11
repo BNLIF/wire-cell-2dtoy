@@ -238,6 +238,19 @@ void WireCell2dToy::ToyLightReco::clear_flashes(){
 void WireCell2dToy::ToyLightReco::load_event_raw(int eve_num, double tMin, double tMax){
   
   T->GetEntry(eve_num);
+
+  // hack to pretend one op_gain is zero
+  //op_gain->at(17) = 0;
+  //
+
+  //protection against the zero op gain
+  // actually happened after run 12809
+  for (size_t i=0;i!=op_gain->size();i++){
+    if (op_gain->at(i) == 0){
+      op_gain->at(i) = 130;
+      op_gainerror->at(i) = 130.;
+    }
+  }
   
   WireCell2dToy::pmtMapSet beamHG = makePmtContainer(true, true, beam_hg_wf, beam_hg_opch, beam_hg_timestamp);
 
