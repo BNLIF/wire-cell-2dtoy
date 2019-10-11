@@ -377,9 +377,19 @@ FlashTPCBundleSelection WireCell2dToy::tpc_light_match(int time_offset, int nreb
 	    
   	  } // loop over all clusters within this TPC object...
 
+	  // veto PMT 18 ([17])
+	  double norm_factor[32];
+	  for (int i=0;i!=32;i++){
+	    norm_factor[i] = 1;
+	  }
+	  if (flag_data){
+	    if (runno >= 12809)
+	      norm_factor[17] = 0;
+	  }
+	  
   	  double sum1 = 0, sum2 = 0, max_pe = 0;
   	  for (size_t i=0;i!=32;i++){
-  	    pred_pmt_light.at(i) *= scaling_light_mag;
+  	    pred_pmt_light.at(i) *= scaling_light_mag * norm_factor[i];
 
   	    sum1 += flash->get_PE(i);
   	    sum2 += pred_pmt_light.at(i);
