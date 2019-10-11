@@ -17,8 +17,8 @@
 using namespace Eigen;
 using namespace WireCell;
 
-//5590, 5934, 6207, 6427, 6617, 6854, 7059, 7305, 7648, 8199, 8518, 8871, 9209, 9468, 9652, 10478, 10701, 10924, 11197, 11605, 11816, 12021, 12344, 12505, 13521, 13725, 14034, 14256, 14527, 14773, 15013, 15426, 15922, 16218, 16643, 16977, 17417, 
-//1, 1, 1, 0.99, 1.01, 0.97, 0.97, 0.97, 0.97, 0.96, 0.97, 0.9, 0.83, 0.82, 0.8, 0.77, 0.77, 0.77, 0.76, 0.71, 0.73, 0.71, 0.7, 0.68, 0.64, 0.65, 0.65, 0.64, 0.64, 0.63, 0.63, 0.64, 0.64, 0.64, 0.64, 0.62, 0.62,
+//, 
+//,
 
 int WireCell2dToy::convert_xyz_voxel_id(WireCell::Point &p){
   // int voxel_x_id = std::round((p.x/units::cm+64.825-5.14667/2.)/5.14667);
@@ -45,7 +45,14 @@ int WireCell2dToy::convert_xyz_voxel_id(WireCell::Point &p){
 
 
 
-FlashTPCBundleSelection WireCell2dToy::tpc_light_match(int time_offset, int nrebin, std::map<WireCell::PR3DCluster*,std::vector<std::pair<WireCell::PR3DCluster*,double>>>& group_clusters, WireCell::OpflashSelection& flashes){
+FlashTPCBundleSelection WireCell2dToy::tpc_light_match(int time_offset, int nrebin, std::map<WireCell::PR3DCluster*,std::vector<std::pair<WireCell::PR3DCluster*,double>>>& group_clusters, WireCell::OpflashSelection& flashes, Int_t runno, bool flag_data){
+  Double_t yield_runno[37]={5590, 5934, 6207, 6427, 6617, 6854, 7059, 7305, 7648, 8199, 8518, 8871, 9209, 9468, 9652, 10478, 10701, 10924, 11197, 11605, 11816, 12021, 12344, 12505, 13521, 13725, 14034, 14256, 14527, 14773, 15013, 15426, 15922, 16218, 16643, 16977, 17417};
+  Double_t yield_ratio[37]={1, 1, 1, 0.99, 1.01, 0.97, 0.97, 0.97, 0.97, 0.96, 0.97, 0.9, 0.83, 0.82, 0.8, 0.77, 0.77, 0.77, 0.76, 0.71, 0.73, 0.71, 0.7, 0.68, 0.64, 0.65, 0.65, 0.64, 0.64, 0.63, 0.63, 0.64, 0.64, 0.64, 0.64, 0.62, 0.62};
+  Int_t start_runno = 5590;
+  Int_t end_runno = 17417;
+  TGraph gratio(37, yield_runno, yield_ratio);
+
+  
   TChain *T = new TChain("/pmtresponse/PhotonLibraryData","/pmtresponse/PhotonLibraryData");
   T->AddFile("./uboone_photon_library.root");
   //std::cout << T->GetEntries();
@@ -170,6 +177,22 @@ FlashTPCBundleSelection WireCell2dToy::tpc_light_match(int time_offset, int nreb
   double low_x_cut_ext2 = + 4.0*units::cm;
   double scaling_light_mag = 0.01 * 1.5;
 
+  // hack
+  //runno = 17394;
+  
+  // for data, scale down the light ...
+  if (flag_data){
+    double scaling_additional = 1;
+    if (runno < start_runno){
+      scaling_additional = yield_ratio[0];
+    }else if (runno > end_runno){
+      scaling_additional = yield_ratio[36];
+    }else{
+      scaling_additional = gratio.Eval(runno);
+    }
+    scaling_light_mag *= scaling_additional;
+  }
+  
   int solv_type = 1; // new matching code ... 
   
   if (solv_type==1){
@@ -1896,6 +1919,7 @@ void WireCell2dToy::organize_matched_bundles(WireCell::FlashTPCBundleSelection& 
 }
 
 
+/*
 
 FlashTPCBundleSelection WireCell2dToy::tpc_light_match_ana(int time_offset, int nrebin, std::map<WireCell::PR3DCluster*,std::vector<std::pair<WireCell::PR3DCluster*,double>>>& group_clusters, WireCell::OpflashSelection& flashes){
 
@@ -3536,4 +3560,5 @@ FlashTPCBundleSelection WireCell2dToy::tpc_light_match_ana(int time_offset, int 
     
     return results_bundles;
   }
-}
+  }
+*/
