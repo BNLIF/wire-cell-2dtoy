@@ -45,13 +45,14 @@ int WireCell2dToy::convert_xyz_voxel_id(WireCell::Point &p){
 
 
 
-FlashTPCBundleSelection WireCell2dToy::tpc_light_match(int time_offset, int nrebin, std::map<WireCell::PR3DCluster*,std::vector<std::pair<WireCell::PR3DCluster*,double>>>& group_clusters, WireCell::OpflashSelection& flashes, Int_t runno, bool flag_data){
+FlashTPCBundleSelection WireCell2dToy::tpc_light_match(int time_offset, int nrebin, std::map<WireCell::PR3DCluster*,std::vector<std::pair<WireCell::PR3DCluster*,double>>>& group_clusters, WireCell::OpflashSelection& flashes, Int_t runno, bool flag_data, bool flag_add_light_yield_err){
   Double_t yield_runno[37]={5590, 5934, 6207, 6427, 6617, 6854, 7059, 7305, 7648, 8199, 8518, 8871, 9209, 9468, 9652, 10478, 10701, 10924, 11197, 11605, 11816, 12021, 12344, 12505, 13521, 13725, 14034, 14256, 14527, 14773, 15013, 15426, 15922, 16218, 16643, 16977, 17417};
   Double_t yield_ratio[37]={1, 1, 1, 0.99, 1.01, 0.97, 0.97, 0.97, 0.97, 0.96, 0.97, 0.9, 0.83, 0.82, 0.8, 0.77, 0.77, 0.77, 0.76, 0.71, 0.73, 0.71, 0.7, 0.68, 0.64, 0.65, 0.65, 0.64, 0.64, 0.63, 0.63, 0.64, 0.64, 0.64, 0.64, 0.62, 0.62};
+  Double_t yield_ratio_err[37]={0, 0, 0, 0.01, 0, 0.01, 0.01, 0, 0.01, 0.02, 0.01, 0.03, 0.05, 0.06, 0.06, 0.07, 0.05, 0.08, 0.08, 0.09, 0.09, 0.1, 0.16, 0.1, 0.1, 0.1, 0.11, 0.1, 0.11, 0.11, 0.11, 0.1, 0.1, 0.11, 0.11, 0.1, 0.1};
   Int_t start_runno = 5590;
   Int_t end_runno = 17417;
   TGraph gratio(37, yield_runno, yield_ratio);
-
+  TGraph gratio_err(37, yield_runno, yield_ratio_err);
   
   TChain *T = new TChain("/pmtresponse/PhotonLibraryData","/pmtresponse/PhotonLibraryData");
   T->AddFile("./uboone_photon_library.root");
@@ -181,16 +182,23 @@ FlashTPCBundleSelection WireCell2dToy::tpc_light_match(int time_offset, int nreb
   //runno = 17394;
   
   // for data, scale down the light ...
+  double rel_light_yield_err = 0;
   if (flag_data){
     double scaling_additional = 1;
+    double scaling_additional_err = 0;
     if (runno < start_runno){
       scaling_additional = yield_ratio[0];
+      scaling_additional_err = yield_ratio_err[0];
     }else if (runno > end_runno){
       scaling_additional = yield_ratio[36];
+      scaling_additional_err = yield_ratio_err[36];
     }else{
       scaling_additional = gratio.Eval(runno);
+      scaling_additional_err = gratio_err.Eval(runno);
     }
     scaling_light_mag *= scaling_additional;
+    if (flag_add_light_yield_err)
+      rel_light_yield_err = scaling_additional_err/scaling_additional;
   }
   
   int solv_type = 1; // new matching code ... 
@@ -1381,7 +1389,7 @@ FlashTPCBundleSelection WireCell2dToy::tpc_light_match(int time_offset, int nreb
 	FlashTPCBundleSelection& bundles = it->second;
 	for (size_t j=0;j!=32;j++){
 	  double pe = flash->get_PE(j);
-	  double pe_err = sqrt(pow(flash->get_PE_err(j)*fudge_factor2,2) + pow(pe*fudge_factor1,2));
+	  double pe_err = sqrt(pow(flash->get_PE_err(j)*fudge_factor2,2) + pow(pe*fudge_factor1,2) + pow(pe*rel_light_yield_err,2));
 	  // if (pe/pe_err>0)
 	  //   std::cout << i << " A " << j << " " << pe/pe_err << std::endl;
 	  
@@ -1395,7 +1403,7 @@ FlashTPCBundleSelection WireCell2dToy::tpc_light_match(int time_offset, int nreb
 	  std::vector<double>& pred_pmt_light = bundle->get_pred_pmt_light();
 	  for (size_t k=0;k!=32;k++){
 	    double pe = flash->get_PE(k);
-	    double pe_err = sqrt(pow(flash->get_PE_err(k)*fudge_factor2,2) + pow(pe*fudge_factor1,2));
+	    double pe_err = sqrt(pow(flash->get_PE_err(k)*fudge_factor2,2) + pow(pe*fudge_factor1,2)+ pow(pe*rel_light_yield_err,2));
 	    R(32*i+k,total_pairs.end()-total_pairs.begin()) = 1./pe_err * pred_pmt_light.at(k);
 	  }
 	  
@@ -1549,7 +1557,7 @@ FlashTPCBundleSelection WireCell2dToy::tpc_light_match(int time_offset, int nreb
       FlashTPCBundleSelection& bundles = it->second;
       for (size_t j=0;j!=32;j++){
 	double pe = flash->get_PE(j);
-	double pe_err = sqrt(pow(flash->get_PE_err(j)*fudge_factor2,2) + pow(pe*fudge_factor1,2));
+	double pe_err = sqrt(pow(flash->get_PE_err(j)*fudge_factor2,2) + pow(pe*fudge_factor1,2)+ pow(pe*rel_light_yield_err,2));
 	
 	M(32*i+j) = pe/pe_err;
 	//	R(32*i+j,num_unknowns+i) = pe/pe_err; // flash alone term
@@ -1561,7 +1569,7 @@ FlashTPCBundleSelection WireCell2dToy::tpc_light_match(int time_offset, int nreb
 	std::vector<double>& pred_pmt_light = bundle->get_pred_pmt_light();
 	for (size_t k=0;k!=32;k++){
 	  double pe = flash->get_PE(k);
-	  double pe_err = sqrt(pow(flash->get_PE_err(k)*fudge_factor2,2) + pow(pe*fudge_factor1,2));
+	  double pe_err = sqrt(pow(flash->get_PE_err(k)*fudge_factor2,2) + pow(pe*fudge_factor1,2)+ pow(pe*rel_light_yield_err,2));
 	  R(32*i+k,total_pairs.end()-total_pairs.begin()) = 1./pe_err * pred_pmt_light.at(k);
 	}
 	
