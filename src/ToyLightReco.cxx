@@ -7,6 +7,7 @@
 #include "TF1.h"
 #include "TVirtualFFT.h"
 #include <iostream>
+#include <array>
 
 using namespace WireCell;
 using namespace Eigen;
