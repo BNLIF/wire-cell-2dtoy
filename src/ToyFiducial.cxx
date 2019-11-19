@@ -1702,8 +1702,10 @@ bool WireCell2dToy::ToyFiducial::inside_fiducial_volume(WireCell::Point& p, doub
 	if(index_y<0){index_y=0;} else if(index_y>9){index_y=9;}
 	if(index_z<0){index_z=0;} else if(index_z>9){index_z=9;}
 	if(tolerance_vec==NULL){
-		c1 = pnpoly(boundary_xy_x_array[index_z], boundary_xy_y_array[index_z], p.x-offset_x, p.y);
-		c2 = pnpoly(boundary_xz_x_array[index_y], boundary_xz_z_array[index_y], p.x-offset_x, p.z);
+//		c1 = pnpoly(boundary_xy_x_array[index_z], boundary_xy_y_array[index_z], p.x-offset_x, p.y);
+//		c2 = pnpoly(boundary_xz_x_array[index_y], boundary_xz_z_array[index_y], p.x-offset_x, p.z);
+		c1 = pnpoly(boundary_xy_x, boundary_xy_y, p.x-offset_x, p.y);
+		c2 = pnpoly(boundary_xz_x, boundary_xz_z, p.x-offset_x, p.z);
 	} else{
 		double tx =     tolerance_vec->at(0);
 		double ty_bot = tolerance_vec->at(1);
