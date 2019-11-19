@@ -71,7 +71,7 @@ namespace WireCell2dToy{
       return boundary_SCB_xz_z_array[index_y];
     }
     int check_boundary(std::vector<std::vector<WireCell::WCPointCloud<double>::WCPoint>> extreme_points, double offset_x, std::vector<double>* tol_vec);
-    void cosmic_tagger(WireCell::OpflashSelection& flashes,WireCell::FlashTPCBundleSelection *matched_bundles, WireCell::FlashTPCBundle* main_bundle, WireCell2dToy::Photon_Library *pl,
+    void cosmic_tagger(WireCell::OpflashSelection& flashes,WireCell::FlashTPCBundleSelection *matched_bundles, WireCell::FlashTPCBundle* main_bundle, WireCell::Photon_Library *pl,
       int time_offset, int nrebin, float unit_dis, WireCell::ToyCTPointCloud& ct_point_cloud,
       std::map<WireCell::PR3DCluster*, WireCell::PR3DCluster*>& old_new_cluster_map, int run_no, int subrun_no, int event_no, bool flag_data, bool debug_tagger=false);
     

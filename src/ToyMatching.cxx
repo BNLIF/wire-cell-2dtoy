@@ -40,6 +40,7 @@ int WireCell2dToy::convert_xyz_voxel_id(WireCell::Point &p){
   return voxel_id;
 } 
 
+/*
 WireCell2dToy::Photon_Library::Photon_Library(Int_t run_no, bool flag_data, bool flag_add_light_yield_err){
   rel_light_yield_err = 0;
   scaling_light_mag = 0.01 * 1.5;
@@ -139,7 +140,9 @@ WireCell2dToy::Photon_Library::Photon_Library(Int_t run_no, bool flag_data, bool
   }
 }
 
-void WireCell2dToy::calculate_pred_pe(int run_no, int time_offset, int nrebin, double time_slice_width, WireCell2dToy::Photon_Library *pl, FlashTPCBundle* bundle, std::vector<double>* pred_pmt_light,
+*/
+
+void WireCell2dToy::calculate_pred_pe(int run_no, int time_offset, int nrebin, double time_slice_width, WireCell::Photon_Library *pl, FlashTPCBundle* bundle, std::vector<double>* pred_pmt_light,
 				      std::vector<std::pair<WireCell::PR3DCluster*,double>>* additional_clusters, PR3DClusterSelection* other_clusters, PR3DClusterSelection* more_clusters, bool &flag_good_bundle, bool flag_data){
 
 	double rel_light_yield_err = pl->rel_light_yield_err;
@@ -346,7 +349,7 @@ void WireCell2dToy::calculate_pred_pe(int run_no, int time_offset, int nrebin, d
   	}
 }
 
-FlashTPCBundleSelection WireCell2dToy::tpc_light_match(int time_offset, int nrebin, WireCell2dToy::Photon_Library *pl, std::map<WireCell::PR3DCluster*,std::vector<std::pair<WireCell::PR3DCluster*,double>>>& group_clusters, WireCell::OpflashSelection& flashes, Int_t run_no, bool flag_data, bool flag_add_light_yield_err){
+FlashTPCBundleSelection WireCell2dToy::tpc_light_match(int time_offset, int nrebin, WireCell::Photon_Library *pl, std::map<WireCell::PR3DCluster*,std::vector<std::pair<WireCell::PR3DCluster*,double>>>& group_clusters, WireCell::OpflashSelection& flashes, Int_t run_no, bool flag_data, bool flag_add_light_yield_err){
 
   double rel_light_yield_err = pl->rel_light_yield_err;
   double scaling_light_mag = pl->scaling_light_mag;

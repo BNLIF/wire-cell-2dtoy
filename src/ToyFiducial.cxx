@@ -42,7 +42,7 @@ int WireCell2dToy::ToyFiducial::check_boundary(std::vector<std::vector<WireCell:
 }
 
 //Main cosmic tagger function
-void WireCell2dToy::ToyFiducial::cosmic_tagger(WireCell::OpflashSelection& flashes, FlashTPCBundleSelection *matched_bundles, FlashTPCBundle* main_bundle, WireCell2dToy::Photon_Library *pl, int time_offset, int nrebin, float unit_dis, WireCell::ToyCTPointCloud& ct_point_cloud,
+void WireCell2dToy::ToyFiducial::cosmic_tagger(WireCell::OpflashSelection& flashes, FlashTPCBundleSelection *matched_bundles, FlashTPCBundle* main_bundle, WireCell::Photon_Library *pl, int time_offset, int nrebin, float unit_dis, WireCell::ToyCTPointCloud& ct_point_cloud,
 						std::map<WireCell::PR3DCluster*, WireCell::PR3DCluster*>& old_new_cluster_map, int run_no, int subrun_no, int event_no, bool flag_data, bool debug_tagger){
 
 	//std::cout << "starting cosmic tagger ===================================================" << std::endl;
