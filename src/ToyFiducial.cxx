@@ -16,6 +16,278 @@ int pnpoly(std::vector<double>& vertx, std::vector<double>& verty, double testx,
 }
 
 
+//Helper function that returns the number of boundary contacts for a set of extreme points, drift offset, and tolerances
+//checks whether a given cluster's extreme points are touching any detector boundaries for a given flash time / drift offest_x
+//-2 means short track, -1 means outside boundary, 0 means inside boudnary, 1 means STM, 2 meanst TGM
+int WireCell2dToy::ToyFiducial::check_boundary(std::vector<std::vector<WireCell::WCPointCloud<double>::WCPoint>> extreme_points, double offset_x, std::vector<double>* tol_vec){
+
+	//Check whether the extreme points are contained within the boundary planes (allowing for tolerance), and if they are near a boundary.
+	bool front_flag = false;
+	bool back_flag = false;
+	for(int i=0;i<int(extreme_points.size());i++){
+		for(int ii=0;ii<int(extreme_points[i].size());ii++){
+			Point p(extreme_points[i][ii].x,extreme_points[i][ii].y,extreme_points[i][ii].z);
+			//Check whether the point is inside the extended fiducial volume
+			std::vector<double> neg_tol_vec = {-1*tol_vec->at(0),-1*tol_vec->at(1),-1*tol_vec->at(2),-1*tol_vec->at(3)};
+			if(!inside_fiducial_volume(p,offset_x,tol_vec)){
+				return -1;
+			//Now that the point is known to be within the extended fiducial volume, check whether it is near any TGM boundaries, but only if it is near a PCA endpoint
+			} else if(!inside_fiducial_volume(p,offset_x,&neg_tol_vec)){
+				if(i==0){front_flag = true;}
+				if(i==1){back_flag = true;}
+			}
+		}
+	}
+	return front_flag + back_flag;
+}
+
+//Main cosmic tagger function
+void WireCell2dToy::ToyFiducial::cosmic_tagger(WireCell::OpflashSelection& flashes, FlashTPCBundleSelection *matched_bundles, FlashTPCBundle* main_bundle, WireCell2dToy::Photon_Library *pl, int time_offset, int nrebin, float unit_dis, WireCell::ToyCTPointCloud& ct_point_cloud,
+						std::map<WireCell::PR3DCluster*, WireCell::PR3DCluster*>& old_new_cluster_map, int run_no, int subrun_no, int event_no, bool flag_data, bool debug_tagger){
+
+	//std::cout << "starting cosmic tagger ===================================================" << std::endl;
+
+	//Take in flash and cluster info
+	Opflash* main_flash = main_bundle->get_flash();
+	PR3DCluster *main_cluster = main_bundle->get_main_cluster();
+	std::vector<std::vector<WCPointCloud<double>::WCPoint>> extreme_points = main_cluster->get_extreme_wcps();
+	double time_slice_width = nrebin * unit_dis * 0.5 * units::mm;
+	double main_offset_x = (main_flash->get_time() - time_offset)*2./nrebin*time_slice_width;
+
+	//set tolerances
+	double ks_main_stm_tol = 0.08;					//This is the tolerance below which a flash is considered a very good match and should not be considered
+	double ks_main_tgm_tol = 0.00;					//TGM-with-flash is pure already, no need to screen by KS
+	double ks_main_tgm_nof_tol = 0.08;
+	double stm_flash_tol = 3.0*units::m;
+	double tgm_flash_tol = 3.0*units::m;
+	double stm_pe_frac_tol = 2.0;
+	double tgm_pe_frac_tol = 2.0;
+	std::vector<double> stm_tol_vec =     {1.0, 1.0, 1.5, 1.0};	//x, ybot, ytop, z
+	std::vector<double> tgm_tol_vec =     {2.0, 2.0, 3.0, 3.0};
+	std::vector<double> tgm_nof_tol_vec = {0.8, 1.0, 1.2, 1.0};
+	for(int i=0;i<4;i++){
+		stm_tol_vec[i] *= units::cm;
+		tgm_tol_vec[i] *= units::cm;
+		tgm_nof_tol_vec[i] *= units::cm;
+	}
+
+	//Get existing match parameters
+	//Later they are used to skip cases where the neutrino is already well matched
+	//Only KS is used right now
+	double chi2_main = main_bundle->get_chi2();
+	double ndf_main = main_bundle->get_ndf();
+	double ks_main = main_bundle->get_ks_dis();
+	bool bad_match_main = main_bundle->get_potential_bad_match_flag();
+	std::cout << "chi2/ndf = " << chi2_main/ndf_main << ",  \t  ks = " << ks_main << ",  \t  bm_flag = " << bad_match_main << std::endl;
+
+	//PMT map and geometry info
+	std::vector<int> OpDet_to_OpChannel_map = {4,2,5,0,6,1,3,9,11,7,12,8, 10,15,13,17,18,14,16,21,23,19,20,24,22,28,25,30,31,26,27,29};
+	std::vector<int> OpChannel_to_OpDet_map = {3,5,1,6,0,2,4,9,11,7,12,8,10,14,17,13,18,15,16,21,22,19,24,20,23,26,29,30,25,31,27,28};
+	std::vector<std::vector<double>> opDet_xyz_map = {{2.645, -28.625, 990.356},{2.682,  27.607, 989.712},{2.324, -56.514, 951.865},{2.458,  55.313, 951.861},{2.041, -56.309, 911.939},{2.265,  55.822, 911.066},{1.923, -0.722,  865.598},{1.795, -0.502,  796.208},{1.495, -56.284, 751.905},{1.559,  55.625, 751.884},{1.487, -56.408, 711.274},{1.438,  55.800, 711.073},{1.475, -0.051,  664.203},{1.448, -0.549,  585.284},{1.226,  55.822, 540.929},{1.479, -56.205, 540.616},{1.505, -56.323, 500.221},{1.116,  55.771, 500.134},{1.481, -0.875,  453.096},{1.014, -0.706,  373.839},{1.451, -57.022, 328.341},{0.913,  54.693, 328.212},{0.682,  54.646, 287.976},{1.092, -56.261, 287.639},{0.949, -0.829,  242.014},{0.658, -0.303,  173.743},{0.703,  55.249, 128.355},{0.821, -56.203, 128.179},{0.862, -56.615, 87.8695},{0.558,  55.249, 87.7605},{0.665,  27.431, 51.1015},{0.947, -28.576, 50.4745}};
+
+	//Vectors that store STM / TGM / TGM-noflash cases
+	std::vector<int> n_boundary_list;
+	std::vector<Opflash*> candidate_flash_list;
+	std::vector<double> candidate_offset_x_list;
+
+	//Check whether the track is at least 15 cm long
+	Point p0(extreme_points[0][0].x,extreme_points[0][0].y,extreme_points[0][0].z);
+	Point p1(extreme_points[1][0].x,extreme_points[1][0].y,extreme_points[1][0].z);
+	double distance = sqrt(pow(p0.x-p1.x,2)+pow(p0.y-p1.y,2)+pow(p0.z-p1.z,2));
+	if(distance > 10*units::cm){
+		//iterate over all the flashes to check each flash for STM/TGM conditions
+		for (auto it = flashes.begin(); it!= flashes.end(); it++){
+			Opflash *flash = (*it);
+			double offset_x = (flash->get_time() - time_offset)*2./nrebin*time_slice_width;
+
+			//Skip the already matched flash
+			if(flash->get_time() == main_flash->get_time()){
+				continue;
+			}
+			//Skip cases where the flash is clearly out of the beam window or on the anode side
+			if(extreme_points[0][0].x-offset_x < 128*units::cm-tgm_tol_vec[0] || extreme_points[0][0].x-offset_x > 256*units::cm+tgm_tol_vec[0]
+			|| extreme_points[1][0].x-offset_x < 128*units::cm-tgm_tol_vec[0] || extreme_points[1][0].x-offset_x > 256*units::cm+tgm_tol_vec[0]){
+				continue;
+			}
+			//Skip cases where the replacement flash is well matched
+			bool flash_well_matched = false;
+			for (auto it2 = matched_bundles->begin(); it2!= matched_bundles->end(); it2++){
+				FlashTPCBundle *old_bundle = *it2;
+				Opflash* old_flash = old_bundle->get_flash();
+				if(old_flash){
+					//find the previous bundle for the flash being iterated over, if it exists
+					if(flash->get_flash_id() == old_bundle->get_flash()->get_flash_id()){
+						double chi2 = old_bundle->get_chi2();
+						double ndf = old_bundle->get_ndf();
+						double ks = old_bundle->get_ks_dis();
+						bool bad_match = old_bundle->get_potential_bad_match_flag();
+						//std::cout << "flash # " << flash->get_flash_id() << ",  \t  chi2 = " << chi2 << ",  \t  ndf = " << ndf << ",  \t  ks = " << ks << ",  \t  bm_flag = " << bad_match << std::endl;
+						//Should only KS be used?  Anything useful at all?
+	//					if(chi2/ndf < 1.5 && ks < 0.1 && !bad_match){
+	//						flash_well_matched = true;
+	//					}
+						//don't keep searching after the flash-bundle match is found
+						break;
+					}
+				}
+			}
+			if(flash_well_matched){
+				continue;
+			}
+
+			//Flash PE Prediction
+			std::vector<std::pair<WireCell::PR3DCluster*,double>> additional_clusters;
+			PR3DClusterSelection other_clusters;
+			PR3DClusterSelection more_clusters;
+			bool flag_good_bundle;
+			FlashTPCBundle *new_bundle =  new FlashTPCBundle(flash, main_cluster,flash->get_flash_id(),main_cluster->get_cluster_id());
+			std::vector<double>& pred_pmt_light = new_bundle->get_pred_pmt_light();
+			WireCell2dToy::calculate_pred_pe(run_no, time_offset, nrebin, time_slice_width, pl, new_bundle, &pred_pmt_light, &additional_clusters, &other_clusters, &more_clusters, flag_good_bundle, flag_data);
+			//std::vector<double>& pred_pmt_light = main_bundle->get_pred_pmt_light();
+
+			//Compute the PE centroids for the flash PE and predicted PE
+			double pred_pe_tot = 0;
+			double flash_pe_tot = 0;
+			double pred_pe_z_centroid = 0;
+			double flash_pe_z_centroid = 0;
+			for(int i=0;i<int(pred_pmt_light.size());i++){
+				double flash_pe = flash->get_PE(i);
+				flash_pe_tot += flash_pe;
+				pred_pe_tot += pred_pmt_light[i];
+				flash_pe_z_centroid += flash_pe*opDet_xyz_map[i][2]*units::cm;
+				pred_pe_z_centroid += pred_pmt_light[i]*opDet_xyz_map[i][2]*units::cm;
+			}
+			flash_pe_z_centroid /= flash_pe_tot;
+			pred_pe_z_centroid  /= pred_pe_tot;
+			delete new_bundle;
+
+			//Geometry evaluation
+			//Call the helper function check_boundary to get the number of boundary intersections for a given flash
+			//Only store a STM / TGM if the flash/predicted-PE roughly match
+			int boundary_num_tgm = 0;
+			int boundary_num_stm = 0;
+			int boundary_num = 0;
+			//TGM-with-flash case
+			if(ks_main > ks_main_tgm_tol && flash_pe_tot < pred_pe_tot*tgm_pe_frac_tol && flash_pe_z_centroid > pred_pe_z_centroid-tgm_flash_tol && flash_pe_z_centroid < pred_pe_z_centroid+tgm_flash_tol){
+				boundary_num_tgm = check_boundary(extreme_points, offset_x, &tgm_tol_vec);
+			}
+			//STM-with-flash case
+			if(ks_main > ks_main_stm_tol && flash_pe_tot < pred_pe_tot*stm_pe_frac_tol && flash_pe_z_centroid > pred_pe_z_centroid-stm_flash_tol && flash_pe_z_centroid < pred_pe_z_centroid+stm_flash_tol){
+				boundary_num_stm = check_boundary(extreme_points, offset_x, &stm_tol_vec);
+			}
+			//TGM gets priority over STM
+			if(boundary_num_tgm==2)					{boundary_num = 2;}
+			else if(boundary_num_stm==1)				{boundary_num = 1;}
+			else if(boundary_num_tgm<0 || boundary_num_stm<0)	{boundary_num = -1;}
+
+			//Store a STM / TGM tag if appropriate
+			if(boundary_num==1 || (boundary_num==2 && check_tgm(main_bundle,offset_x,ct_point_cloud,old_new_cluster_map,1)) ){
+				n_boundary_list.push_back(boundary_num);
+				candidate_flash_list.push_back(flash);
+			}
+		}
+
+		//Check whether a TGM w/o flash hypothesis works
+		//Skip if the existing neutrino match is very good
+		if(ks_main > ks_main_tgm_nof_tol){
+			double max_offset =  1000000*units::cm;		//The max offset allowed in the +x direction.  The starting value is meant to be immediately overriden.
+			double offset_x = (main_bundle->get_flash()->get_time() - time_offset)*2./nrebin*time_slice_width;
+			double tx = tgm_nof_tol_vec[0];
+			double ty_bot = tgm_nof_tol_vec[1];
+			double ty_top = tgm_nof_tol_vec[2];
+			double tz = tgm_nof_tol_vec[3];
+			//Iterate extreme points.  For each, compute the drift distance until the boundary+tolerance is crossed.
+			//Set the max_offset variable to the lowest drift distance that causes any extreme point to (nearly) leave the boundary+tolerance.
+			for(int i=0;i<int(extreme_points.size());i++){
+				for(int ii=0;ii<int(extreme_points[i].size());ii++){
+					Point p(extreme_points[i][ii].x,extreme_points[i][ii].y,extreme_points[i][ii].z);
+
+					std::vector<double> boundary_points_xy_x = get_boundary_SCB_xy_x(p);
+					std::vector<double> boundary_points_xy_y = get_boundary_SCB_xy_y(p);
+					std::vector<double> boundary_points_xz_x = get_boundary_SCB_xz_x(p);
+					std::vector<double> boundary_points_xz_z = get_boundary_SCB_xz_z(p);
+					//Don't let the offset be larger than the distance to the cathode side
+					max_offset = std::min(max_offset,boundary_points_xy_x[2]-p.x+tx);
+					max_offset = std::min(max_offset,boundary_points_xz_x[2]-p.x+tx);
+
+					//Conditions in Y and Z for whether the endpoint will drift into the SCB before the cathode side
+					if     (p.y > boundary_points_xy_y[1] && p.y < boundary_points_xy_y[2]-ty_bot){
+						double x0 = boundary_points_xy_x[1];	double y0 = boundary_points_xy_y[1]-ty_bot;
+						double x1 = boundary_points_xy_x[2]+tx;	double y1 = boundary_points_xy_y[2]-ty_bot;
+						double x_intersection = x0 + (x1-x0)*(p.y-y0)/(y1-y0);
+						max_offset = std::min(max_offset,x_intersection-p.x);
+					} else if(p.y > boundary_points_xy_y[3]+ty_top && p.y < boundary_points_xy_y[4]){
+						double x0 = boundary_points_xy_x[3]+tx;	double y0 = boundary_points_xy_y[3]+ty_top;
+						double x1 = boundary_points_xy_x[4];	double y1 = boundary_points_xy_y[4]+ty_top;
+						double x_intersection = x0 + (x1-x0)*(p.y-y0)/(y1-y0);
+						max_offset = std::min(max_offset,x_intersection-p.x);
+					}
+					if     (p.z > boundary_points_xz_z[1] && p.z < boundary_points_xz_z[2]-tz){
+						double x0 = boundary_points_xz_x[1];	double z0 = boundary_points_xz_z[1]-tz;
+						double x1 = boundary_points_xz_x[2]+tx;	double z1 = boundary_points_xz_z[2]-tz;
+						double x_intersection = x0 + (x1-x0)*(p.z-z0)/(z1-z0);
+						max_offset = std::min(max_offset,x_intersection-p.x);
+					} else if(p.z > boundary_points_xz_z[3]+tz && p.z < boundary_points_xz_z[4]){
+						double x0 = boundary_points_xz_x[3]+tx;	double z0 = boundary_points_xz_z[3]+tz;
+						double x1 = boundary_points_xz_x[4];	double z1 = boundary_points_xz_z[4]+tz;
+						double x_intersection = x0 + (x1-x0)*(p.z-z0)/(z1-z0);
+						max_offset = std::min(max_offset,x_intersection-p.x);
+					}
+				}
+			}
+			//Keep the offset within the boundary, and then check for TGM conditions.  If so, insert to the list, and use n_boudnary id of 3 to clarify that no flash was used.
+			max_offset -= 0.01*units::cm;
+			int nboundaries = check_boundary(extreme_points,offset_x-max_offset, &tgm_nof_tol_vec);
+			if(nboundaries==2){
+				n_boundary_list.push_back(3);
+				candidate_offset_x_list.push_back(-offset_x+max_offset);
+			}
+		}
+
+	}
+
+	//Iterate the list and pick the highest priority tagging (TGM > TGM-noflash > STM > no tag)
+	int tag_type = 11;
+	for(int n_match = 0; n_match<int(n_boundary_list.size());n_match++){
+		if(n_boundary_list[n_match]==2)							{tag_type = 22;}
+		else if(n_boundary_list[n_match]==3 && tag_type != 22)				{tag_type = 24;}
+		else if(n_boundary_list[n_match]==1 && tag_type != 22 && tag_type != 24)	{tag_type = 23;}
+
+		//print out results for debugging purposes
+		if(debug_tagger){
+			if(n_match < int(candidate_flash_list.size())){
+				std::cout << "match type = " << n_boundary_list[n_match] << ", flash # = " << candidate_flash_list[n_match]->get_flash_id() << std::endl;		
+			} else {
+				std::cout << "match type = " << n_boundary_list[n_match] << std::endl;
+			}
+		}
+	}
+
+	//Write to file for debugging purposes
+	if(debug_tagger){
+		srand(time(NULL));
+		int random_number = std::rand();
+		std::ofstream debug_file;
+		std::string path = "/uboone/data/users/lcoopert/cosmic_tagger/data";
+//		debug_file.open(path+"/temp_numu_cc_all/numu_cc_tagger_results_"+std::to_string(random_number)+".txt", std::ios_base::app);
+		debug_file.open(path+"/temp_extbnb_all/extbnb_tagger_results_"+std::to_string(random_number)+".txt", std::ios_base::app);
+
+//		debug_file.open(path+"/temp_extbnb_test/extbnb_tagger_results_stm_"    +std::to_string(random_number)+".txt", std::ios_base::app);
+//		debug_file.open(path+"/temp_extbnb_test/extbnb_tagger_results_tgm_"    +std::to_string(random_number)+".txt", std::ios_base::app);
+//		debug_file.open(path+"/temp_extbnb_test/extbnb_tagger_results_tgm_nof_"+std::to_string(random_number)+".txt", std::ios_base::app);
+
+		debug_file << run_no << " " << subrun_no << " " << event_no << " " << tag_type << std::endl;
+		debug_file.close();
+		//std::cout << "run subrun event: " << run_no << " " << subrun_no << " " << event_no << ", tag_type = " << tag_type << std::endl;
+	}
+	//std::cout << "ending cosmic tagger =====================================================" << std::endl;
+
+}
+
+//-----------------------------------------------------------------------------------------------------------------------------------------------------------
+   
+
+/*
 WireCell2dToy::ToyFiducial::ToyFiducial(int dead_region_ch_ext, double offset_t, double offset_u, double offset_v, double offset_w, double slope_t, double slope_u, double slope_v, double slope_w, double angle_u, double angle_v, double angle_w, double boundary_dis_cut, double top, double bottom, double upstream, double downstream, double anode, double cathode, int flag_data)
   : dead_region_ch_ext(dead_region_ch_ext)
   , offset_t(offset_t)
@@ -118,6 +390,209 @@ WireCell2dToy::ToyFiducial::ToyFiducial(int dead_region_ch_ext, double offset_t,
   // for (size_t i=0;i!=boundary_xz_x.size();i++){
   //   std::cout << boundary_xz_x.at(i)/units::cm << " XZ " << boundary_xz_z.at(i)/units::cm << std::endl;
   // }
+}
+*/
+
+WireCell2dToy::ToyFiducial::ToyFiducial(int dead_region_ch_ext, double offset_t, double offset_u, double offset_v, double offset_w, double slope_t, double slope_u, double slope_v, double slope_w, double angle_u, double angle_v, double angle_w, double boundary_dis_cut, double top, double bottom, double upstream, double downstream, double anode, double cathode, int flag_data)
+  : dead_region_ch_ext(dead_region_ch_ext)
+  , offset_t(offset_t)
+  , offset_u(offset_u)
+  , offset_v(offset_v)
+  , offset_w(offset_w)
+  , slope_t(slope_t)
+  , slope_u(slope_u)
+  , slope_v(slope_v)
+  , slope_w(slope_w)
+  , angle_u(angle_u)
+  , angle_v(angle_v)
+  , angle_w(angle_w)
+  , m_top(top)
+  , m_bottom(bottom)
+  , m_upstream(upstream)
+  , m_downstream(downstream)
+  , m_anode(anode)
+  , m_cathode(cathode)
+{
+
+  //old -----------------------------
+  if (flag_data){
+    std::cout << "Data Fiducial Volume! " << std::endl;
+    // data 
+    m_sc_bottom_1_y=-116*units::cm;
+    m_sc_bottom_1_x=80*units::cm;
+    
+    m_sc_bottom_2_y=-99*units::cm;
+    m_sc_bottom_2_x=256*units::cm;
+    
+    m_sc_top_1_y = 116*units::cm; // used to be 118 cm
+    m_sc_top_1_x = 100*units::cm;
+    
+    m_sc_top_2_y = 102*units::cm; // used to be 103 cm
+    m_sc_top_2_x = 256*units::cm;
+    
+    m_sc_upstream_1_z = 0*units::cm;
+    m_sc_upstream_1_x = 120*units::cm;
+    
+    m_sc_upstream_2_z = 11*units::cm;
+    m_sc_upstream_2_x = 256*units::cm;
+    
+    m_sc_downstream_1_z=1037*units::cm;
+    m_sc_downstream_1_x=120*units::cm;
+    
+    m_sc_downstream_2_z=1026*units::cm;
+    m_sc_downstream_2_x=256*units::cm;
+  }else{
+    // MC
+    std::cout << "MC Fiducial Volume! " << std::endl;
+    m_sc_bottom_1_y=-116*units::cm;
+    m_sc_bottom_1_x=34*units::cm;
+    
+    m_sc_bottom_2_y=-98*units::cm;
+    m_sc_bottom_2_x=256*units::cm;
+    
+    m_sc_top_1_y = 116*units::cm;
+    m_sc_top_1_x = 70*units::cm;
+    
+    m_sc_top_2_y = 100*units::cm;
+    m_sc_top_2_x = 256*units::cm;
+    
+    m_sc_upstream_1_z = 0*units::cm;
+    m_sc_upstream_1_x = 50*units::cm;
+    
+    m_sc_upstream_2_z = 14*units::cm;
+    m_sc_upstream_2_x = 256*units::cm;
+    
+    m_sc_downstream_1_z=1037*units::cm;
+    m_sc_downstream_1_x=40*units::cm;
+    
+    m_sc_downstream_2_z=1023*units::cm;
+    m_sc_downstream_2_x=256*units::cm;
+  }
+  
+  //
+  boundary_xy_x.clear(); boundary_xy_y.clear();
+  boundary_xy_x.push_back(m_anode + boundary_dis_cut); boundary_xy_y.push_back(m_bottom + boundary_dis_cut);
+  boundary_xy_x.push_back(m_sc_bottom_1_x-boundary_dis_cut); boundary_xy_y.push_back(m_sc_bottom_1_y+boundary_dis_cut);
+  boundary_xy_x.push_back(m_sc_bottom_2_x-boundary_dis_cut); boundary_xy_y.push_back(m_sc_bottom_2_y+boundary_dis_cut);
+  boundary_xy_x.push_back(m_sc_top_2_x-boundary_dis_cut); boundary_xy_y.push_back(m_sc_top_2_y-boundary_dis_cut);
+  boundary_xy_x.push_back(m_sc_top_1_x-boundary_dis_cut); boundary_xy_y.push_back(m_sc_top_1_y-boundary_dis_cut);
+  boundary_xy_x.push_back(m_anode + boundary_dis_cut); boundary_xy_y.push_back(m_top - boundary_dis_cut);
+  
+  // for (size_t i=0;i!=boundary_xy_x.size();i++){
+  //   std::cout << boundary_xy_x.at(i)/units::cm << " XY " << boundary_xy_y.at(i)/units::cm << std::endl;
+  // }
+  
+  boundary_xz_x.clear(); boundary_xz_z.clear();
+  boundary_xz_x.push_back(m_anode + boundary_dis_cut); boundary_xz_z.push_back(m_upstream + boundary_dis_cut+1*units::cm);
+  boundary_xz_x.push_back(m_sc_upstream_1_x - boundary_dis_cut); boundary_xz_z.push_back(m_sc_upstream_1_z + boundary_dis_cut+1*units::cm);
+  boundary_xz_x.push_back(m_sc_upstream_2_x - boundary_dis_cut); boundary_xz_z.push_back(m_sc_upstream_2_z + boundary_dis_cut+1*units::cm);
+  boundary_xz_x.push_back(m_sc_downstream_2_x - boundary_dis_cut); boundary_xz_z.push_back(m_sc_downstream_2_z - boundary_dis_cut-1*units::cm);
+  boundary_xz_x.push_back(m_sc_downstream_1_x - boundary_dis_cut); boundary_xz_z.push_back(m_sc_downstream_1_z - boundary_dis_cut-1*units::cm);
+  boundary_xz_x.push_back(m_anode + boundary_dis_cut); boundary_xz_z.push_back(m_downstream - boundary_dis_cut-1*units::cm);
+  // boundary_xz_x.push_back(m_anode + boundary_dis_cut); boundary_xz_z.push_back(m_upstream + boundary_dis_cut+2*units::cm);
+
+  boundary_SCB_xy_x.clear(); boundary_SCB_xy_y.clear();
+  boundary_SCB_xz_x.clear(); boundary_SCB_xz_z.clear();
+
+  //define boundary_SCB_xy
+  boundary_SCB_xy_x.push_back(m_anode);				boundary_SCB_xy_y.push_back(m_bottom);
+  boundary_SCB_xy_x.push_back(m_sc_bottom_1_x);			boundary_SCB_xy_y.push_back(m_sc_bottom_1_y);
+  boundary_SCB_xy_x.push_back(m_sc_bottom_2_x);			boundary_SCB_xy_y.push_back(m_sc_bottom_2_y);
+  boundary_SCB_xy_x.push_back(m_sc_top_2_x);			boundary_SCB_xy_y.push_back(m_sc_top_2_y);
+  boundary_SCB_xy_x.push_back(m_sc_top_1_x);			boundary_SCB_xy_y.push_back(m_sc_top_1_y);
+  boundary_SCB_xy_x.push_back(m_anode);				boundary_SCB_xy_y.push_back(m_top);
+
+//why the extra 1cm on z???
+  //define boundary_SCB_xz
+  boundary_SCB_xz_x.push_back(m_anode);				boundary_SCB_xz_z.push_back(m_upstream+1*units::cm);
+  boundary_SCB_xz_x.push_back(m_sc_upstream_1_x);		boundary_SCB_xz_z.push_back(m_sc_upstream_1_z+1*units::cm);
+  boundary_SCB_xz_x.push_back(m_sc_upstream_2_x);		boundary_SCB_xz_z.push_back(m_sc_upstream_2_z+1*units::cm);
+  boundary_SCB_xz_x.push_back(m_sc_downstream_2_x);		boundary_SCB_xz_z.push_back(m_sc_downstream_2_z-1*units::cm);
+  boundary_SCB_xz_x.push_back(m_sc_downstream_1_x);		boundary_SCB_xz_z.push_back(m_sc_downstream_1_z-1*units::cm);
+  boundary_SCB_xz_x.push_back(m_anode);				boundary_SCB_xz_z.push_back(m_downstream-1*units::cm);
+
+  // for (size_t i=0;i!=boundary_xz_x.size();i++){
+  //   std::cout << boundary_xz_x.at(i)/units::cm << " XZ " << boundary_xz_z.at(i)/units::cm << std::endl;
+  // }
+
+//new -----------------------------------------
+
+  double YX_TOP_y1_array     = 116*units::cm;
+  double YX_TOP_x1_array[10] = {150.00, 132.56, 122.86, 119.46, 114.22, 110.90, 115.85, 113.48, 126.36, 144.21};
+  double YX_TOP_y2_array[10] = {110.00, 108.14, 106.77, 105.30, 103.40, 102.18, 101.76, 102.27, 102.75, 105.10};
+//  double YX_TOP_x1_array[10] = {100.00, 100.00, 100.00, 100.00, 100.00, 100.00, 100.00, 100.00, 100.00, 100.00};
+//  double YX_TOP_y2_array[10] = {102.00, 102.00, 102.00, 102.00, 102.00, 102.00, 102.00, 102.00, 102.00, 102.00};
+  double YX_TOP_x2_array = 256*units::cm;
+    
+  double YX_BOT_y1_array     = -115*units::cm;
+  double YX_BOT_x1_array[10] = {115.71, 98.05, 92.42, 91.14, 92.25, 85.38, 78.19, 74.46, 78.86, 108.90};
+  double YX_BOT_y2_array[10] = {-101.72, -99.46, -99.51, -100.43, -99.55, -98.56, -98.00, -98.30, -99.32, -104.20};
+//  double YX_BOT_x1_array[10] = {80.00,  80.00,  80.00,  80.00,  80.00,  80.00,  80.00,  80.00,  80.00,  80.00};
+//  double YX_BOT_y2_array[10] = {-99.00, -99.00, -99.00, -99.00, -99.00, -99.00, -99.00, -99.00, -99.00, -99.00};
+  double YX_BOT_x2_array = 256*units::cm;
+
+  double ZX_Up_z1_array = 0*units::cm;
+  double ZX_Up_x1_array = 120*units::cm;
+  double ZX_Up_z2_array = 11*units::cm;
+  double ZX_Up_x2_array = 256*units::cm;
+    
+  double ZX_Dw_z1_array     = 1037*units::cm;
+  double ZX_Dw_x1_array[10] = {120.00, 115.24, 108.50, 110.67, 120.90, 126.43, 140.51, 157.15, 120.00, 120.00};
+  double ZX_Dw_z2_array[10] = {1029.00, 1029.12, 1027.21, 1026.01, 1024.91, 1025.27, 1025.32, 1027.61, 1026.00, 1026.00};
+//  double ZX_Dw_x1_array[10] = {120.00,  120.00,  120.00,  120.00,  120.00,  120.00,  120.00,  120.00,  120.00,  120.00};
+//  double ZX_Dw_z2_array[10] = {1026.00, 1026.00, 1026.00, 1026.00, 1026.00, 1026.00, 1026.00, 1026.00, 1026.00, 1026.00};
+  double ZX_Dw_x2_array     = 256*units::cm;
+
+  for(int idx=0; idx<=9; idx++) {
+    YX_BOT_x1_array[idx] *= units::cm;
+    YX_BOT_y2_array[idx] *= units::cm;
+
+    YX_TOP_x1_array[idx] *= units::cm;
+    YX_TOP_y2_array[idx] *= units::cm;
+
+    ZX_Dw_x1_array[idx] *= units::cm;
+    ZX_Dw_z2_array[idx] *= units::cm;
+  }
+    boundary_xy_x_array.clear();						boundary_xy_y_array.clear();
+    boundary_xz_x_array.clear();						boundary_xz_z_array.clear();
+    boundary_SCB_xy_x_array.clear();						boundary_SCB_xy_y_array.clear();
+    boundary_SCB_xz_x_array.clear();						boundary_SCB_xz_z_array.clear();
+
+  for(int idx=0; idx<=9; idx++) {
+    boundary_xy_x_array.push_back({0,0,0,0,0,0});				boundary_xy_y_array.push_back({0,0,0,0,0,0});
+    boundary_xz_x_array.push_back({0,0,0,0,0,0});				boundary_xz_z_array.push_back({0,0,0,0,0,0});
+    boundary_SCB_xy_x_array.push_back({0,0,0,0,0,0});				boundary_SCB_xy_y_array.push_back({0,0,0,0,0,0});
+    boundary_SCB_xz_x_array.push_back({0,0,0,0,0,0});				boundary_SCB_xz_z_array.push_back({0,0,0,0,0,0});
+
+    boundary_xy_x_array[idx][0] = m_anode              + boundary_dis_cut;	boundary_xy_y_array[idx][0] = m_bottom             + boundary_dis_cut;
+    boundary_xy_x_array[idx][1] = YX_BOT_x1_array[idx] - boundary_dis_cut;	boundary_xy_y_array[idx][1] = YX_BOT_y1_array      + boundary_dis_cut;
+    boundary_xy_x_array[idx][2] = YX_BOT_x2_array      - boundary_dis_cut;	boundary_xy_y_array[idx][2] = YX_BOT_y2_array[idx] + boundary_dis_cut;
+    boundary_xy_x_array[idx][3] = YX_TOP_x2_array      - boundary_dis_cut;	boundary_xy_y_array[idx][3] = YX_TOP_y2_array[idx] - boundary_dis_cut;
+    boundary_xy_x_array[idx][4] = YX_TOP_x1_array[idx] - boundary_dis_cut;	boundary_xy_y_array[idx][4] = YX_TOP_y1_array      - boundary_dis_cut;
+    boundary_xy_x_array[idx][5] = m_anode              + boundary_dis_cut;	boundary_xy_y_array[idx][5] = m_top                - boundary_dis_cut;
+
+    boundary_xz_x_array[idx][0] = m_anode             + boundary_dis_cut;	boundary_xz_z_array[idx][0] = m_upstream          + boundary_dis_cut+1*units::cm;
+    boundary_xz_x_array[idx][1] = ZX_Up_x1_array      - boundary_dis_cut;	boundary_xz_z_array[idx][1] = ZX_Up_z1_array      + boundary_dis_cut+1*units::cm;
+    boundary_xz_x_array[idx][2] = ZX_Up_x2_array      - boundary_dis_cut;	boundary_xz_z_array[idx][2] = ZX_Up_z2_array      + boundary_dis_cut+1*units::cm;
+    boundary_xz_x_array[idx][3] = ZX_Dw_x2_array      - boundary_dis_cut;	boundary_xz_z_array[idx][3] = ZX_Dw_z2_array[idx] - boundary_dis_cut-1*units::cm;
+    boundary_xz_x_array[idx][4] = ZX_Dw_x1_array[idx] - boundary_dis_cut;	boundary_xz_z_array[idx][4] = ZX_Dw_z1_array      - boundary_dis_cut-1*units::cm;
+    boundary_xz_x_array[idx][5] = m_anode             + boundary_dis_cut;	boundary_xz_z_array[idx][5] = m_downstream        - boundary_dis_cut-1*units::cm;
+
+    boundary_SCB_xy_x_array[idx][0] = m_anode             ;			boundary_SCB_xy_y_array[idx][0] = m_bottom            ;
+    boundary_SCB_xy_x_array[idx][1] = YX_BOT_x1_array[idx];			boundary_SCB_xy_y_array[idx][1] = YX_BOT_y1_array     ;
+    boundary_SCB_xy_x_array[idx][2] = YX_BOT_x2_array     ;			boundary_SCB_xy_y_array[idx][2] = YX_BOT_y2_array[idx];
+    boundary_SCB_xy_x_array[idx][3] = YX_TOP_x2_array     ;			boundary_SCB_xy_y_array[idx][3] = YX_TOP_y2_array[idx];
+    boundary_SCB_xy_x_array[idx][4] = YX_TOP_x1_array[idx];			boundary_SCB_xy_y_array[idx][4] = YX_TOP_y1_array     ;
+    boundary_SCB_xy_x_array[idx][5] = m_anode             ;			boundary_SCB_xy_y_array[idx][5] = m_top               ;
+
+    boundary_SCB_xz_x_array[idx][0] = m_anode            ;			boundary_SCB_xz_z_array[idx][0] = m_upstream          +1*units::cm;
+    boundary_SCB_xz_x_array[idx][1] = ZX_Up_x1_array     ;			boundary_SCB_xz_z_array[idx][1] = ZX_Up_z1_array      +1*units::cm;
+    boundary_SCB_xz_x_array[idx][2] = ZX_Up_x2_array     ;			boundary_SCB_xz_z_array[idx][2] = ZX_Up_z2_array      +1*units::cm;
+    boundary_SCB_xz_x_array[idx][3] = ZX_Dw_x2_array     ;			boundary_SCB_xz_z_array[idx][3] = ZX_Dw_z2_array[idx] -1*units::cm;
+    boundary_SCB_xz_x_array[idx][4] = ZX_Dw_x1_array[idx];			boundary_SCB_xz_z_array[idx][4] = ZX_Dw_z1_array      -1*units::cm;
+    boundary_SCB_xz_x_array[idx][5] = m_anode            ;			boundary_SCB_xz_z_array[idx][5] = m_downstream        -1*units::cm;
+    
+  }  
 }
 
 int WireCell2dToy::ToyFiducial::check_LM(WireCell::FlashTPCBundle *bundle, double& cluster_length){
@@ -1202,11 +1677,72 @@ bool WireCell2dToy::ToyFiducial::check_dead_volume(WireCell::Point& p, TVector3&
   }
 }
 
-
+/*
 bool WireCell2dToy::ToyFiducial::inside_fiducial_volume(WireCell::Point& p, double offset_x){
 
   int c1 = pnpoly(boundary_xy_x, boundary_xy_y, p.x-offset_x, p.y);
   int c2 = pnpoly(boundary_xz_x, boundary_xz_z, p.x-offset_x, p.z);
+
+  //  std::cout << (p.x-offset_x)/units::cm << " " << p.y/units::cm << " " << p.z/units::cm << std::endl;
+  //std::cout << c1 << " " << c2 << std::endl;
+  
+  if (c1 && c2){
+    return true;
+  }else{
+    return false;
+  }
+}
+*/
+bool WireCell2dToy::ToyFiducial::inside_fiducial_volume(WireCell::Point& p, double offset_x, std::vector<double>* tolerance_vec){
+
+	int c1=0;
+	int c2=0;
+	int index_y = floor((p.y/units::cm+116)/24);
+	int index_z = floor(p.z/units::m);
+	if(index_y<0){index_y=0;} else if(index_y>9){index_y=9;}
+	if(index_z<0){index_z=0;} else if(index_z>9){index_z=9;}
+	if(tolerance_vec==NULL){
+		c1 = pnpoly(boundary_xy_x_array[index_z], boundary_xy_y_array[index_z], p.x-offset_x, p.y);
+		c2 = pnpoly(boundary_xz_x_array[index_y], boundary_xz_z_array[index_y], p.x-offset_x, p.z);
+	} else{
+		double tx =     tolerance_vec->at(0);
+		double ty_bot = tolerance_vec->at(1);
+		double ty_top = tolerance_vec->at(2);
+		double tz =     tolerance_vec->at(3);
+		//Adjust boundaries for tolerance, defined so that positive tolerance increases volume.
+								boundary_SCB_xy_y_array[index_z][0] -= ty_bot;
+								boundary_SCB_xy_y_array[index_z][1] -= ty_bot;
+		boundary_SCB_xy_x_array[index_z][2] += tx;	boundary_SCB_xy_y_array[index_z][2] -= ty_bot;
+		boundary_SCB_xy_x_array[index_z][3] += tx;	boundary_SCB_xy_y_array[index_z][3] += ty_top;
+								boundary_SCB_xy_y_array[index_z][4] += ty_top;
+								boundary_SCB_xy_y_array[index_z][5] += ty_top;
+		
+								boundary_SCB_xz_z_array[index_y][0] -= tz;
+								boundary_SCB_xz_z_array[index_y][1] -= tz;
+		boundary_SCB_xz_x_array[index_y][2] += tx;	boundary_SCB_xz_z_array[index_y][2] -= tz;
+		boundary_SCB_xz_x_array[index_y][3] += tx;	boundary_SCB_xz_z_array[index_y][3] += tz;
+								boundary_SCB_xz_z_array[index_y][4] += tz;
+								boundary_SCB_xz_z_array[index_y][5] += tz;		
+
+		c1 = pnpoly(boundary_SCB_xy_x_array[index_z], boundary_SCB_xy_y_array[index_z], p.x-offset_x, p.y);
+		c2 = pnpoly(boundary_SCB_xz_x_array[index_y], boundary_SCB_xz_z_array[index_y], p.x-offset_x, p.z);
+
+		//Revert tolerance shift
+								boundary_SCB_xy_y_array[index_z][0] += ty_bot;
+								boundary_SCB_xy_y_array[index_z][1] += ty_bot;
+		boundary_SCB_xy_x_array[index_z][2] -= tx;	boundary_SCB_xy_y_array[index_z][2] += ty_bot;
+		boundary_SCB_xy_x_array[index_z][3] -= tx;	boundary_SCB_xy_y_array[index_z][3] -= ty_top;
+								boundary_SCB_xy_y_array[index_z][4] -= ty_top;
+								boundary_SCB_xy_y_array[index_z][5] -= ty_top;
+		
+								boundary_SCB_xz_z_array[index_y][0] += tz;
+								boundary_SCB_xz_z_array[index_y][1] += tz;
+		boundary_SCB_xz_x_array[index_y][2] -= tx;	boundary_SCB_xz_z_array[index_y][2] += tz;
+		boundary_SCB_xz_x_array[index_y][3] -= tx;	boundary_SCB_xz_z_array[index_y][3] -= tz;
+								boundary_SCB_xz_z_array[index_y][4] -= tz;
+								boundary_SCB_xz_z_array[index_y][5] -= tz;
+
+	}
 
   //  std::cout << (p.x-offset_x)/units::cm << " " << p.y/units::cm << " " << p.z/units::cm << std::endl;
   //std::cout << c1 << " " << c2 << std::endl;

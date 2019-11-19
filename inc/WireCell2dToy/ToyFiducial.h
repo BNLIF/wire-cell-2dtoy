@@ -1,6 +1,8 @@
 #ifndef WIRECELL_UBOONE_TOYFIDUCIAL_H
 #define WIRECELL_UBOONE_TOYFIDUCIAL_H
 
+#include "WireCell2dToy/ToyMatching.h"
+
 #include "WireCellData/Units.h"
 #include "WireCellData/Point.h"
 #include "WireCellData/SlimMergeGeomCell.h"
@@ -9,9 +11,18 @@
 #include "WireCellData/LMBDT.h"
 
 #include "TVector3.h"
+#include "TFile.h"
+#include "TTree.h"
+#include "TString.h"
 
 #include <vector>
 #include <map>
+
+
+#include "WireCellData/Point.h"
+#include "WireCellData/ToyCTPointCloud.h"
+#include "WireCell2dToy/ImprovePR3DCluster.h"
+#include "WireCellData/PR3DCluster.h"
 
 namespace WireCell2dToy{
   class ToyFiducial{
@@ -23,7 +34,7 @@ namespace WireCell2dToy{
     void set_offset_t(double value){offset_t=value;};
     
     bool check_neutrino_candidate(WireCell::PR3DCluster *main_cluster, WireCell::WCPointCloud<double>::WCPoint& wcp1 ,WireCell::WCPointCloud<double>::WCPoint& wcp2, double offset_x, WireCell::ToyCTPointCloud& ct_point_cloud, bool flag_2view_check = true);
-    bool inside_fiducial_volume(WireCell::Point& p, double offset_x=0);
+    bool inside_fiducial_volume(WireCell::Point& p, double offset_x=0, std::vector<double>* tolerance_vec=NULL);
     bool inside_dead_region(WireCell::Point& p);
     bool check_dead_volume(WireCell::Point& p, TVector3& dir, double step = 1.0*units::cm, double offset_x=0);
     
@@ -38,6 +49,31 @@ namespace WireCell2dToy{
     int check_LM_bdt(WireCell::FlashTPCBundle *bundle, double& cluster_length);
       
     void AddDeadRegion(WireCell::SlimMergeGeomCell* mcell, std::vector<int>& time_slices);
+
+    std::vector<double> get_boundary_SCB_xy_x(WireCell::Point& p){
+      int index_z = floor(p.z/units::m);
+      if(index_z<0){index_z=0;} else if(index_z>9){index_z=9;}
+      return boundary_SCB_xy_x_array[index_z];
+    }
+    std::vector<double> get_boundary_SCB_xy_y(WireCell::Point& p){
+      int index_z = floor(p.z/units::m);
+      if(index_z<0){index_z=0;} else if(index_z>9){index_z=9;}
+      return boundary_SCB_xy_y_array[index_z];
+    }
+    std::vector<double> get_boundary_SCB_xz_x(WireCell::Point& p){
+      int index_y = floor((p.y/units::cm+116)/24);
+      if(index_y<0){index_y=0;} else if(index_y>9){index_y=9;}
+      return boundary_SCB_xz_x_array[index_y];
+    }
+    std::vector<double> get_boundary_SCB_xz_z(WireCell::Point& p){
+      int index_y = floor((p.y/units::cm+116)/24);
+      if(index_y<0){index_y=0;} else if(index_y>9){index_y=9;}
+      return boundary_SCB_xz_z_array[index_y];
+    }
+    int check_boundary(std::vector<std::vector<WireCell::WCPointCloud<double>::WCPoint>> extreme_points, double offset_x, std::vector<double>* tol_vec);
+    void cosmic_tagger(WireCell::OpflashSelection& flashes,WireCell::FlashTPCBundleSelection *matched_bundles, WireCell::FlashTPCBundle* main_bundle, WireCell2dToy::Photon_Library *pl,
+      int time_offset, int nrebin, float unit_dis, WireCell::ToyCTPointCloud& ct_point_cloud,
+      std::map<WireCell::PR3DCluster*, WireCell::PR3DCluster*>& old_new_cluster_map, int run_no, int subrun_no, int event_no, bool flag_data, bool debug_tagger=false);
     
   protected:
     // boundary
@@ -63,6 +99,13 @@ namespace WireCell2dToy{
 
     std::vector<double> boundary_xy_x, boundary_xy_y;
     std::vector<double> boundary_xz_x, boundary_xz_z;
+    std::vector<double> boundary_SCB_xy_x, boundary_SCB_xy_y;
+    std::vector<double> boundary_SCB_xz_x, boundary_SCB_xz_z;
+
+    std::vector<std::vector<double>> boundary_xy_x_array, boundary_xy_y_array;
+    std::vector<std::vector<double>> boundary_xz_x_array, boundary_xz_z_array;
+    std::vector<std::vector<double>> boundary_SCB_xy_x_array, boundary_SCB_xy_y_array;
+    std::vector<std::vector<double>> boundary_SCB_xz_x_array, boundary_SCB_xz_z_array;
     
     // dead regions ... 
     WireCell::SMGCSelection mcells;

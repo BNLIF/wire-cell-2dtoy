@@ -17,9 +17,6 @@
 using namespace Eigen;
 using namespace WireCell;
 
-//, 
-//,
-
 int WireCell2dToy::convert_xyz_voxel_id(WireCell::Point &p){
   // int voxel_x_id = std::round((p.x/units::cm+64.825-5.14667/2.)/5.14667);
   // int voxel_y_id = std::round((p.y/units::cm+193-5.14667/2.)/5.14667);
@@ -41,67 +38,20 @@ int WireCell2dToy::convert_xyz_voxel_id(WireCell::Point &p){
 
   int voxel_id = voxel_z_id*75*75 + voxel_y_id*75 + voxel_x_id;
   return voxel_id;
-}
+} 
 
-
-
-FlashTPCBundleSelection WireCell2dToy::tpc_light_match(int time_offset, int nrebin, std::map<WireCell::PR3DCluster*,std::vector<std::pair<WireCell::PR3DCluster*,double>>>& group_clusters, WireCell::OpflashSelection& flashes, Int_t runno, bool flag_data, bool flag_add_light_yield_err){
-  Double_t yield_runno[37]={5590, 5934, 6207, 6427, 6617, 6854, 7059, 7305, 7648, 8199, 8518, 8871, 9209, 9468, 9652, 10478, 10701, 10924, 11197, 11605, 11816, 12021, 12344, 12505, 13521, 13725, 14034, 14256, 14527, 14773, 15013, 15426, 15922, 16218, 16643, 16977, 17417};
+WireCell2dToy::Photon_Library::Photon_Library(Int_t run_no, bool flag_data, bool flag_add_light_yield_err){
+  rel_light_yield_err = 0;
+  scaling_light_mag = 0.01 * 1.5;
+  Double_t yield_run_no[37]={5590, 5934, 6207, 6427, 6617, 6854, 7059, 7305, 7648, 8199, 8518, 8871, 9209, 9468, 9652, 10478, 10701, 10924, 11197, 11605, 11816, 12021, 12344, 12505, 13521, 13725, 14034, 14256, 14527, 14773, 15013, 15426, 15922, 16218, 16643, 16977, 17417};
   Double_t yield_ratio[37]={1, 1, 1, 0.99, 1.01, 0.97, 0.97, 0.97, 0.97, 0.96, 0.97, 0.9, 0.83, 0.82, 0.8, 0.77, 0.77, 0.77, 0.76, 0.71, 0.73, 0.71, 0.7, 0.68, 0.64, 0.65, 0.65, 0.64, 0.64, 0.63, 0.63, 0.64, 0.64, 0.64, 0.64, 0.62, 0.62};
   Double_t yield_ratio_err[37]={0, 0, 0, 0.01, 0, 0.01, 0.01, 0, 0.01, 0.02, 0.01, 0.03, 0.05, 0.06, 0.06, 0.07, 0.05, 0.08, 0.08, 0.09, 0.09, 0.1, 0.16, 0.1, 0.1, 0.1, 0.11, 0.1, 0.11, 0.11, 0.11, 0.1, 0.1, 0.11, 0.11, 0.1, 0.1};
-  Int_t start_runno = 5590;
-  Int_t end_runno = 17417;
-  TGraph gratio(37, yield_runno, yield_ratio);
-  TGraph gratio_err(37, yield_runno, yield_ratio_err);
-  
-  TChain *T = new TChain("/pmtresponse/PhotonLibraryData","/pmtresponse/PhotonLibraryData");
-  T->AddFile("./uboone_photon_library.root");
-  //std::cout << T->GetEntries();
-  if (T->GetEntries()<=0) {
-      std::cout << "Error: 2dToy::tpc_light_match failed to read uboone_photon_library.root"<<std::endl;
-      exit(1);
-  }
-  Int_t Voxel;
-  Int_t OpChannel;
-  Float_t Visibility;
-  T->SetBranchAddress("Voxel",&Voxel);
-  T->SetBranchAddress("OpChannel",&OpChannel);
-  T->SetBranchAddress("Visibility",&Visibility);
+  Int_t start_run_no = 5590;
+  Int_t end_run_no = 17417;
+  TGraph gratio(37, yield_run_no, yield_ratio);
+  TGraph gratio_err(37, yield_run_no, yield_ratio_err);
 
-  // PMT data is based on OpChannel
-  // Library is NOT ...
-  // these are PE numbers ... 
-  // Double_t cos_pe_low[32]={11,11,11,11,10,
-  // 			   7,8,8,10,7,
-  // 			   11,11,11,11,10,
-  // 			   9,11,11,7,9,
-  // 			   11,10,11,11,11,
-  // 			   11,10,11,11,9,
-  // 			   10,11};
-  // Double_t cos_pe_mid[32]={34,32,28,35,22,
-  // 			   23,22,24,33,30,
-  // 			   35,35,33,36,33,
-  // 			   33,36,33,19,27,
-  // 			   32,23,42,32,33,
-  // 			   34,24,33,35,25,
-  // 			   32,34};
-
-  Double_t cos_pe_low[32]={11,11,11,11,10,
-			   7,8,8,10,7,
-			   11,11,11,11,10,
-			   9,11,11,7,9,
-			   11,10,11,11,11,
-			   11,11,10,11,11,
-			   9,10};
-  Double_t cos_pe_mid[32]={34,32,28,35,22,
-			   23,22,24,33,30,
-			   35,35,33,36,33,
-			   33,36,33,19,27,
-			   32,23,42,32,33,
-			   34,34,24,33,35,
-			   25,32};
-  
-  std::map<int,int> map_lib_pmt,map_pmt_lib;
+//  std::map<int,int> map_lib_pmt,map_pmt_lib;
   map_lib_pmt[1]=2; map_pmt_lib[2]=1; 
   map_lib_pmt[0]=4; map_pmt_lib[4]=0; 
   map_lib_pmt[3]=0; map_pmt_lib[0]=3; 
@@ -145,84 +95,69 @@ FlashTPCBundleSelection WireCell2dToy::tpc_light_match(int time_offset, int nreb
   // map_lib_pmt[30]=26; map_pmt_lib[26]=30; 
   // map_lib_pmt[29]=28; map_pmt_lib[28]=29;
   
-  std::vector<std::list<std::pair<int,float>>> photon_library;
-  photon_library.resize(400*75*75);
+  TChain *T = new TChain("/pmtresponse/PhotonLibraryData","/pmtresponse/PhotonLibraryData");
+  T->AddFile("./uboone_photon_library.root");
+  //std::cout << T->GetEntries();
+  if (T->GetEntries()<=0) {
+      std::cout << "Error: 2dToy::tpc_light_match failed to read uboone_photon_library.root"<<std::endl;
+      exit(1);
+  }
+  Int_t Voxel;
+  Int_t OpChannel;
+  Float_t Visibility;
+  T->SetBranchAddress("Voxel",&Voxel);
+  T->SetBranchAddress("OpChannel",&OpChannel);
+  T->SetBranchAddress("Visibility",&Visibility);
+
+//  std::vector<std::list<std::pair<int,float>>> photon_library;
+  library.resize(400*75*75);
   for (int i=0;i!=T->GetEntries();i++){
     T->GetEntry(i);
-    photon_library.at(Voxel).push_back(std::make_pair(OpChannel,Visibility));
+    library.at(Voxel).push_back(std::make_pair(OpChannel,Visibility));
   }
-
-  TPCParams& mp = Singleton<TPCParams>::Instance();
-  double time_slice_width = mp.get_ts_width();
   
-  //Figure out how to use library ... 
-  //flashes measurement = 32 * num_flashes 
-  const int num_flashes = flashes.size();
-  const int num_tpc_objs = group_clusters.size();
-
-
-  // {
-  //   int temp_num = 0;
-  //   for (auto it = group_clusters.begin(); it!= group_clusters.end(); it++){
-  //     temp_num += it->second.size()+1;
-  //   }
-  //   std::cout << live_clusters.size() << " " << temp_num << std::endl;
-  // }
-  
-  //std::cout << num_flashes << " " << num_tpc_objs << std::endl;
-  double high_x_cut = 256 * units::cm;
-  double high_x_cut_ext1 = + 1.2*units::cm;
-  double high_x_cut_ext2 = - 2.0*units::cm;
-  double low_x_cut = 0*units::cm;
-  double low_x_cut_ext1 = - 2*units::cm;
-  double low_x_cut_ext2 = + 4.0*units::cm;
-  double scaling_light_mag = 0.01 * 1.5;
-
   // hack
-  //runno = 17394;
+  //run_no = 17394;
   
   // for data, scale down the light ...
-  double rel_light_yield_err = 0;
   if (flag_data){
     double scaling_additional = 1;
     double scaling_additional_err = 0;
-    if (runno < start_runno){
+    if (run_no < start_run_no){
       scaling_additional = yield_ratio[0];
       scaling_additional_err = yield_ratio_err[0];
-    }else if (runno > end_runno){
+    }else if (run_no > end_run_no){
       scaling_additional = yield_ratio[36];
       scaling_additional_err = yield_ratio_err[36];
     }else{
-      scaling_additional = gratio.Eval(runno);
-      scaling_additional_err = gratio_err.Eval(runno);
+      scaling_additional = gratio.Eval(run_no);
+      scaling_additional_err = gratio_err.Eval(run_no);
     }
     scaling_light_mag *= scaling_additional;
     if (flag_add_light_yield_err)
       rel_light_yield_err = scaling_additional_err/scaling_additional;
   }
-  
-  int solv_type = 1; // new matching code ... 
-  
-  if (solv_type==1){
-    FlashTPCBundleSet all_bundles;
-    Flash_bundles_map flash_bundles_map;
-    Cluster_bundles_map cluster_bundles_map;
-    std::map<std::pair<Opflash*,PR3DCluster*>,FlashTPCBundle*> fc_bundles_map;
-      
-    int flash_index_id = 0;
-    for (auto it1 = flashes.begin(); it1!=flashes.end(); it1++){
-      Opflash *flash = (*it1);
-      double offset_x = (flash->get_time() - time_offset)*2./nrebin*time_slice_width;
-      int cluster_index_id = 0;
-      for (auto it2 = group_clusters.begin(); it2!=group_clusters.end(); it2++){
-  	PR3DCluster* main_cluster = it2->first;
-  	std::vector<std::pair<WireCell::PR3DCluster*,double>>& additional_clusters = it2->second;
-  	FlashTPCBundle *bundle = new FlashTPCBundle(flash, main_cluster, flash_index_id, cluster_index_id);
-  	bool flag_good_bundle = false;
-	
-  	std::vector<double>& pred_pmt_light = bundle->get_pred_pmt_light();
-  	PR3DClusterSelection& other_clusters = bundle->get_other_clusters();
-  	PR3DClusterSelection& more_clusters = bundle->get_more_clusters();
+}
+
+void WireCell2dToy::calculate_pred_pe(int run_no, int time_offset, int nrebin, double time_slice_width, WireCell2dToy::Photon_Library *pl, FlashTPCBundle* bundle, std::vector<double>* pred_pmt_light,
+				      std::vector<std::pair<WireCell::PR3DCluster*,double>>* additional_clusters, PR3DClusterSelection* other_clusters, PR3DClusterSelection* more_clusters, bool &flag_good_bundle, bool flag_data){
+
+	double rel_light_yield_err = pl->rel_light_yield_err;
+	double scaling_light_mag = pl->scaling_light_mag;
+	std::map<int,int>* map_lib_pmt = &pl->map_lib_pmt;
+	std::map<int,int>* map_pmt_lib = &pl->map_pmt_lib;
+	std::vector<std::list<std::pair<int,float>>>* photon_library = &pl->library;
+
+	double high_x_cut = 256 * units::cm;
+	double high_x_cut_ext1 = + 1.2*units::cm;
+	double high_x_cut_ext2 = - 2.0*units::cm;
+	double low_x_cut = 0*units::cm;
+	double low_x_cut_ext1 = - 2*units::cm;
+	double low_x_cut_ext2 = + 4.0*units::cm;
+
+	Opflash *flash = bundle->get_flash();
+	double offset_x = (flash->get_time() - time_offset)*2./nrebin*time_slice_width;
+  	PR3DCluster* main_cluster = bundle->get_main_cluster();
 
   	double first_pos_x = (*((main_cluster->get_time_cells_set_map().begin())->second.begin()))->get_sampling_points().front().x;
   	double last_pos_x = (*((main_cluster->get_time_cells_set_map().rbegin())->second.begin()))->get_sampling_points().front().x;
@@ -343,9 +278,9 @@ FlashTPCBundleSelection WireCell2dToy::tpc_light_match(int time_offset, int nreb
 
   	  PR3DClusterSelection temp_clusters;
   	  temp_clusters.push_back(main_cluster);
-  	  for (auto it3 = additional_clusters.begin(); it3!=additional_clusters.end(); it3++){
+  	  for (auto it3 = additional_clusters->begin(); it3!=additional_clusters->end(); it3++){
   	    temp_clusters.push_back(it3->first);
-  	    other_clusters.push_back(it3->first);
+  	    other_clusters->push_back(it3->first);
   	  }
 
   	  for (auto it3 = temp_clusters.begin(); it3!=temp_clusters.end(); it3++){
@@ -372,16 +307,16 @@ FlashTPCBundleSelection WireCell2dToy::tpc_light_match(int time_offset, int nreb
   		  p.z = pts.at(i).z;
 		  
 		  int voxel_id = WireCell2dToy::convert_xyz_voxel_id(p);
-		  std::list<std::pair<int,float>>& pmt_list = photon_library.at(voxel_id);
+		  std::list<std::pair<int,float>>& pmt_list = photon_library->at(voxel_id);
 		  
 		  for (auto it5 = pmt_list.begin(); it5!=pmt_list.end(); it5++){
-		    pred_pmt_light.at(map_lib_pmt[it5->first]) += charge * it5->second;
+		    pred_pmt_light->at((*map_lib_pmt)[it5->first]) += charge * it5->second;
 		  }
 		}
   	      }
   	    }
   	    if (flag_save)
-  	      more_clusters.push_back(*it3);
+  	      more_clusters->push_back(*it3);
 	    
   	  } // loop over all clusters within this TPC object...
 
@@ -391,24 +326,95 @@ FlashTPCBundleSelection WireCell2dToy::tpc_light_match(int time_offset, int nreb
 	    norm_factor[i] = 1;
 	  }
 	  if (flag_data){
-	    if (runno >= 12809)
+	    if (run_no >= 12809)
 	      norm_factor[17] = 0;
 	  }
 	  
   	  double sum1 = 0, sum2 = 0, max_pe = 0;
   	  for (size_t i=0;i!=32;i++){
-  	    pred_pmt_light.at(i) *= scaling_light_mag * norm_factor[i];
+  	    pred_pmt_light->at(i) *= scaling_light_mag * norm_factor[i];
 
   	    sum1 += flash->get_PE(i);
-  	    sum2 += pred_pmt_light.at(i);
-  	    if (pred_pmt_light.at(i) > max_pe)
-  	      max_pe = pred_pmt_light.at(i);
+  	    sum2 += pred_pmt_light->at(i);
+  	    if (pred_pmt_light->at(i) > max_pe)
+  	      max_pe = pred_pmt_light->at(i);
   	  }
 	  
 	  // if (sum2 < sum1 * 3){ // three times allowrance ... 
 	  flag_good_bundle = true;
 	  // }
   	}
+}
+
+FlashTPCBundleSelection WireCell2dToy::tpc_light_match(int time_offset, int nrebin, WireCell2dToy::Photon_Library *pl, std::map<WireCell::PR3DCluster*,std::vector<std::pair<WireCell::PR3DCluster*,double>>>& group_clusters, WireCell::OpflashSelection& flashes, Int_t run_no, bool flag_data, bool flag_add_light_yield_err){
+
+  double rel_light_yield_err = pl->rel_light_yield_err;
+  double scaling_light_mag = pl->scaling_light_mag;
+  std::map<int,int> *map_lib_pmt = &pl->map_lib_pmt;
+  std::map<int,int> *map_pmt_lib = &pl->map_pmt_lib;
+  std::vector<std::list<std::pair<int,float>>> *photon_library = &pl->library;
+
+  // PMT data is based on OpChannel
+  // Library is NOT ...
+  // these are PE numbers ... 
+  // Double_t cos_pe_low[32]={11,11,11,11,10,
+  // 			   7,8,8,10,7,
+  // 			   11,11,11,11,10,
+  // 			   9,11,11,7,9,
+  // 			   11,10,11,11,11,
+  // 			   11,10,11,11,9,
+  // 			   10,11};
+  // Double_t cos_pe_mid[32]={34,32,28,35,22,
+  // 			   23,22,24,33,30,
+  // 			   35,35,33,36,33,
+  // 			   33,36,33,19,27,
+  // 			   32,23,42,32,33,
+  // 			   34,24,33,35,25,
+  // 			   32,34};
+
+  Double_t cos_pe_low[32]={11,11,11,11,10,
+			   7,8,8,10,7,
+			   11,11,11,11,10,
+			   9,11,11,7,9,
+			   11,10,11,11,11,
+			   11,11,10,11,11,
+			   9,10};
+  Double_t cos_pe_mid[32]={34,32,28,35,22,
+			   23,22,24,33,30,
+			   35,35,33,36,33,
+			   33,36,33,19,27,
+			   32,23,42,32,33,
+			   34,34,24,33,35,
+			   25,32};
+
+  TPCParams& mp = Singleton<TPCParams>::Instance();
+  double time_slice_width = mp.get_ts_width();
+
+  int solv_type = 1; // new matching code ... 
+  
+  if (solv_type==1){
+    FlashTPCBundleSet all_bundles;
+    Flash_bundles_map flash_bundles_map;
+    Cluster_bundles_map cluster_bundles_map;
+    std::map<std::pair<Opflash*,PR3DCluster*>,FlashTPCBundle*> fc_bundles_map;
+      
+    int flash_index_id = 0;
+    for (auto it1 = flashes.begin(); it1!=flashes.end(); it1++){
+      Opflash *flash = (*it1);
+      double offset_x = (flash->get_time() - time_offset)*2./nrebin*time_slice_width;
+      int cluster_index_id = 0;
+      for (auto it2 = group_clusters.begin(); it2!=group_clusters.end(); it2++){
+  	PR3DCluster* main_cluster = it2->first;
+  	std::vector<std::pair<WireCell::PR3DCluster*,double>>& additional_clusters = it2->second;
+  	FlashTPCBundle *bundle = new FlashTPCBundle(flash, main_cluster, flash_index_id, cluster_index_id);
+  	bool flag_good_bundle = false;
+	
+  	std::vector<double>& pred_pmt_light = bundle->get_pred_pmt_light();
+  	PR3DClusterSelection& other_clusters = bundle->get_other_clusters();
+  	PR3DClusterSelection& more_clusters = bundle->get_more_clusters();
+
+	//Call to calculate predicted pe for a given bundle
+        calculate_pred_pe(run_no, time_offset, nrebin, time_slice_width, pl, bundle, &pred_pmt_light, &additional_clusters, &other_clusters, &more_clusters, flag_good_bundle, flag_data);
 
   	if (flag_good_bundle){
   	  all_bundles.insert(bundle);
