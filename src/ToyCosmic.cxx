@@ -1,9 +1,9 @@
-#include "WireCell2dToy/ToyCosmic.h"
+#include "WCP2dToy/ToyCosmic.h"
 #include "TVector3.h"
 
-using namespace WireCell;
+using namespace WCP;
 
-WireCell2dToy::ToyCosmic::ToyCosmic(WireCell2dToy::ToyTrackingSelection& trackings, float abc, float abc1)
+WCP2dToy::ToyCosmic::ToyCosmic(WCP2dToy::ToyTrackingSelection& trackings, float abc, float abc1)
   : trackings(trackings)
 {
 
@@ -228,7 +228,7 @@ WireCell2dToy::ToyCosmic::ToyCosmic(WireCell2dToy::ToyTrackingSelection& trackin
   // }
 }
 
-bool WireCell2dToy::ToyCosmic::IsConnected(ToyTracking *tracking1, ToyTracking *tracking2){
+bool WCP2dToy::ToyCosmic::IsConnected(ToyTracking *tracking1, ToyTracking *tracking2){
   //return false;
   WCTrackSelection& tracking1_tracks = tracking1->get_good_tracks();
   WCTrackSelection& tracking2_tracks = tracking2->get_good_tracks();
@@ -347,7 +347,7 @@ bool WireCell2dToy::ToyCosmic::IsConnected(ToyTracking *tracking1, ToyTracking *
   return false;
 }
 
-bool WireCell2dToy::ToyCosmic::IsConnected(MergeSpaceCell *mcell1, MergeSpaceCell *mcell2, float dis_cut){
+bool WCP2dToy::ToyCosmic::IsConnected(MergeSpaceCell *mcell1, MergeSpaceCell *mcell2, float dis_cut){
   float dy1 = mcell1->get_dy();
   float dz1 = mcell1->get_dz();
   Point p1 = mcell1->Get_Center();
@@ -396,6 +396,6 @@ bool WireCell2dToy::ToyCosmic::IsConnected(MergeSpaceCell *mcell1, MergeSpaceCel
 }
 
 
-WireCell2dToy::ToyCosmic::~ToyCosmic(){
+WCP2dToy::ToyCosmic::~ToyCosmic(){
   
 }

@@ -1,11 +1,11 @@
-#include "WireCell2dToy/MemUsage.h"
+#include "WCP2dToy/MemUsage.h"
 
 #include <unistd.h>
 #include <iostream>		// debugging
 #include <sstream>
 
 using namespace std;
-using namespace WireCell;
+using namespace WCP;
 
 static double memusage_linux_resident() {
     int tSize = 0, resident = 0, share = 0;
@@ -41,21 +41,21 @@ static double memusage_linux_size() {
 }
 
 
-double WireCell::memusage_resident() {
+double WCP::memusage_resident() {
 #ifdef __linux__
     return memusage_linux_resident();
 #endif
     return -1;
 }
 
-double WireCell::memusage_shared()
+double WCP::memusage_shared()
 {
 #ifdef __linux__
     return memusage_linux_shared();
 #endif
     return -1;
 }
-double WireCell::memusage_size()
+double WCP::memusage_size()
 {
 #ifdef __linux__
     return memusage_linux_size();

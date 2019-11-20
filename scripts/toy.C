@@ -7,11 +7,11 @@
 
 
 
-#include "WireCell2dToy/FrameDataSource.h"
-#include "WireCell2dToy/ToyEventDisplay.h"
-#include "WireCellNav/SliceDataSource.h"
-#include "WireCellSst/GeomDataSource.h"
-#include "WireCell2dToy/ToyTiling.h"
+#include "WCP2dToy/FrameDataSource.h"
+#include "WCP2dToy/ToyEventDisplay.h"
+#include "WCPNav/SliceDataSource.h"
+#include "WCPSst/GeomDataSource.h"
+#include "WCP2dToy/ToyTiling.h"
 
 #include "TPad.h"
 
@@ -21,17 +21,17 @@ using namespace std;
 class WC2DToy
 {
 public:
-    WireCellSst::GeomDataSource* gds;
-    WireCell2dToy::FrameDataSource* fds;
-    WireCell::SliceDataSource* sds;
-    WireCell2dToy::ToyEventDisplay* display;
+    WCPSst::GeomDataSource* gds;
+    WCP2dToy::FrameDataSource* fds;
+    WCP::SliceDataSource* sds;
+    WCP2dToy::ToyEventDisplay* display;
 
     WC2DToy(TPad& _pad, const char* sstgeometryfile, const char* sstrootfile=0) 
 	{
-	    gds = new WireCellSst::GeomDataSource(sstgeometryfile);
-	    fds = new WireCell2dToy::FrameDataSource(10, *gds);
-	    sds = new WireCell::SliceDataSource(*fds);
-	    display = new WireCell2dToy::ToyEventDisplay(_pad, *gds);
+	    gds = new WCPSst::GeomDataSource(sstgeometryfile);
+	    fds = new WCP2dToy::FrameDataSource(10, *gds);
+	    sds = new WCP::SliceDataSource(*fds);
+	    display = new WCP2dToy::ToyEventDisplay(_pad, *gds);
 
 	    fds->jump(0);
 	}
@@ -51,7 +51,7 @@ public:
 
     void update() {
 
-	const WireCell::PointValueVector& mctruth = fds->cell_charges();
+	const WCP::PointValueVector& mctruth = fds->cell_charges();
 	cerr << "#true cells: " << mctruth.size() << endl;
 
 	display->init();
@@ -59,12 +59,12 @@ public:
 	display->draw_mc(1,mctruth,"");
 	display->draw_mc(2,mctruth,"TEXTsame");
 
-	const WireCell::Slice& slice = sds->get();
+	const WCP::Slice& slice = sds->get();
 	cerr << "Slice: tbin=" << slice.tbin() << " with " << slice.group().size() << " charges" << endl;
 
 	display->draw_slice(slice, "same");
 
-	WireCell2dToy::ToyTiling tt(slice, *gds);
+	WCP2dToy::ToyTiling tt(slice, *gds);
 
 	display->draw_cells(tt.get_allcell(),"*same");
 	display->draw_mc(3,mctruth,"*same");

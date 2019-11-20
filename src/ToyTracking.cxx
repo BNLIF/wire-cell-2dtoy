@@ -1,15 +1,15 @@
-#include "WireCell2dToy/ToyTracking.h"
-#include "WireCell2dToy/ToyWalking.h"
-#include "WireCellData/Singleton.h"
-#include "WireCellData/TPCParams.h"
+#include "WCP2dToy/ToyTracking.h"
+#include "WCP2dToy/ToyWalking.h"
+#include "WCPData/Singleton.h"
+#include "WCPData/TPCParams.h"
 
 #include "TVector3.h"
-#include "WireCellData/Line.h"
+#include "WCPData/Line.h"
 
 
-using namespace WireCell;
+using namespace WCP;
 
-void WireCell2dToy::ToyTracking::create_new_tracks_from_leftover(WireCell2dToy::ToyCrawler& toycrawler){
+void WCP2dToy::ToyTracking::create_new_tracks_from_leftover(WCP2dToy::ToyCrawler& toycrawler){
   // find out the mcells not in the current tracks ...
 
   MergeSpaceCellSelection all_track_mscs;
@@ -143,7 +143,7 @@ void WireCell2dToy::ToyTracking::create_new_tracks_from_leftover(WireCell2dToy::
 }
 
 
-void WireCell2dToy::ToyTracking::IterateMergeTracks(WireCell::MergeSpaceCellMap& mcells_map){
+void WCP2dToy::ToyTracking::IterateMergeTracks(WCP::MergeSpaceCellMap& mcells_map){
   
 
   int flag = 1;
@@ -193,7 +193,7 @@ void WireCell2dToy::ToyTracking::IterateMergeTracks(WireCell::MergeSpaceCellMap&
   
 }
 
-void WireCell2dToy::ToyTracking::MergeTracks_no_shared_vertex(WireCell::MergeSpaceCellMap& mcells_map, int type){
+void WCP2dToy::ToyTracking::MergeTracks_no_shared_vertex(WCP::MergeSpaceCellMap& mcells_map, int type){
   std::cout << "Merge Tracks shared no vertex " << type << std::endl;
   
   WCTrackSelection all_tracks;
@@ -639,7 +639,7 @@ void WireCell2dToy::ToyTracking::MergeTracks_no_shared_vertex(WireCell::MergeSpa
     Point start_point = good_vertices1.at(track_no.at(0))->Center();
     MergeSpaceCell* end_cell = good_vertices1.at(track_no.at(1))->get_msc();
     Point end_point = good_vertices1.at(track_no.at(1))->Center();
-    WireCell2dToy::ToyWalking walking(start_cell,start_point,end_cell,end_point,mcells_map,5000);
+    WCP2dToy::ToyWalking walking(start_cell,start_point,end_cell,end_point,mcells_map,5000);
     mcells = walking.get_cells();
     // std::cout << start_point.x/units::cm << " " << start_point.y/units::cm << " " << start_point.z/units::cm << " " << std::endl;
     // std::cout << end_point.x/units::cm << " " << end_point.y/units::cm << " " << end_point.z/units::cm << " " << std::endl;
@@ -789,7 +789,7 @@ void WireCell2dToy::ToyTracking::MergeTracks_no_shared_vertex(WireCell::MergeSpa
 }
 
 
-void WireCell2dToy::ToyTracking::MergeTracks(WireCell::MergeSpaceCellMap& mcells_map){
+void WCP2dToy::ToyTracking::MergeTracks(WCP::MergeSpaceCellMap& mcells_map){
   std::cout << "Merge Tracks! " << std::endl;
 
   WCTrackSelection all_tracks;
@@ -1183,7 +1183,7 @@ void WireCell2dToy::ToyTracking::MergeTracks(WireCell::MergeSpaceCellMap& mcells
     Point start_point = good_vertices1.at(track_no.at(0))->Center();
     MergeSpaceCell* end_cell = good_vertices1.at(track_no.at(1))->get_msc();
     Point end_point = good_vertices1.at(track_no.at(1))->Center();
-    WireCell2dToy::ToyWalking walking(start_cell,start_point,end_cell,end_point,mcells_map,5000);
+    WCP2dToy::ToyWalking walking(start_cell,start_point,end_cell,end_point,mcells_map,5000);
     mcells = walking.get_cells();
     // std::cout << "xin: " << mcells.size() << std::endl;
   
@@ -1319,7 +1319,7 @@ void WireCell2dToy::ToyTracking::MergeTracks(WireCell::MergeSpaceCellMap& mcells
 
 }
 
-void WireCell2dToy::ToyTracking::fill_maps(){
+void WCP2dToy::ToyTracking::fill_maps(){
   if (tracks_angle_map.size()==0){
     for (int i = 0;i!=good_tracks.size();i++){
       WCTrack *track = good_tracks.at(i);
@@ -1329,7 +1329,7 @@ void WireCell2dToy::ToyTracking::fill_maps(){
   }
 }
 
-bool WireCell2dToy::ToyTracking::IsContained(){
+bool WCP2dToy::ToyTracking::IsContained(){
   MergeSpaceCellSelection all_cells;
   for (int i=0;i!=tracks.size();i++){
     for (int j=0;j!=tracks.at(i)->get_all_cells().size();j++){
@@ -1347,7 +1347,7 @@ bool WireCell2dToy::ToyTracking::IsContained(){
   return false;
 }
 
-WireCell2dToy::ToyTracking::ToyTracking(WireCell2dToy::ToyCrawler& toycrawler, int tracking_type){
+WCP2dToy::ToyTracking::ToyTracking(WCP2dToy::ToyCrawler& toycrawler, int tracking_type){
 
   
   CreateVertices(toycrawler);
@@ -1634,7 +1634,7 @@ WireCell2dToy::ToyTracking::ToyTracking(WireCell2dToy::ToyCrawler& toycrawler, i
 
 }
 
-void WireCell2dToy::ToyTracking::cosmic_finder_part(WireCell2dToy::ToyCrawler& toycrawler){
+void WCP2dToy::ToyTracking::cosmic_finder_part(WCP2dToy::ToyCrawler& toycrawler){
   MergeSpaceCellMap& mcells_map = toycrawler.Get_mcells_map();
   MergeSpaceCellSelection all_cells;  
   
@@ -1780,7 +1780,7 @@ void WireCell2dToy::ToyTracking::cosmic_finder_part(WireCell2dToy::ToyCrawler& t
     
     
     MergeSpaceCellSelection track_mcells;
-    WireCell2dToy::ToyWalking walking(max_cell,max_point,min_cell,min_point,mcells_map);
+    WCP2dToy::ToyWalking walking(max_cell,max_point,min_cell,min_point,mcells_map);
     track_mcells = walking.get_cells();
     
     //std::cout << track_mcells.size() << " " << walking.get_counter() << " " << walking.get_global_counter() << std::endl;
@@ -1829,7 +1829,7 @@ void WireCell2dToy::ToyTracking::cosmic_finder_part(WireCell2dToy::ToyCrawler& t
 }
 
 
-void WireCell2dToy::ToyTracking::cosmic_finder_all(WireCell2dToy::ToyCrawler& toycrawler){
+void WCP2dToy::ToyTracking::cosmic_finder_all(WCP2dToy::ToyCrawler& toycrawler){
   MergeSpaceCellMap& mcells_map = toycrawler.Get_mcells_map();
   MergeSpaceCellSelection all_cells;  
   Point p(0,0,0);
@@ -1915,7 +1915,7 @@ void WireCell2dToy::ToyTracking::cosmic_finder_all(WireCell2dToy::ToyCrawler& to
     
     
     MergeSpaceCellSelection track_mcells;
-    WireCell2dToy::ToyWalking walking(max_cell,max_point,min_cell,min_point,mcells_map);
+    WCP2dToy::ToyWalking walking(max_cell,max_point,min_cell,min_point,mcells_map);
     track_mcells = walking.get_cells();
     
     //std::cout << track_mcells.size() << " " << walking.get_counter() << " " << walking.get_global_counter() << std::endl;
@@ -1963,7 +1963,7 @@ void WireCell2dToy::ToyTracking::cosmic_finder_all(WireCell2dToy::ToyCrawler& to
   }
 }
 
-void WireCell2dToy::ToyTracking::RemoveSameTrack(){
+void WCP2dToy::ToyTracking::RemoveSameTrack(){
   WCTrackSelection to_be_removed;
   //WCTrackSelection parent_track;
   for (int i=0;i!=vertices.size();i++){
@@ -2028,7 +2028,7 @@ void WireCell2dToy::ToyTracking::RemoveSameTrack(){
 
 
 
-void WireCell2dToy::ToyTracking::single_shower_reco(WireCell2dToy::ToyCrawler& toycrawler){
+void WCP2dToy::ToyTracking::single_shower_reco(WCP2dToy::ToyCrawler& toycrawler){
   // MergeSpaceCellSelection all_cells;  
   
   // for (auto it =toycrawler.Get_mcells_map().begin();it!=toycrawler.Get_mcells_map().end();it++){
@@ -2110,7 +2110,7 @@ void WireCell2dToy::ToyTracking::single_shower_reco(WireCell2dToy::ToyCrawler& t
 
 
 
-void WireCell2dToy::ToyTracking::Cleanup_showers(){
+void WCP2dToy::ToyTracking::Cleanup_showers(){
   WCVertexSelection not_remove_vertex;
   WCTrackSelection not_remove_track;
   for (int i = 0;i!=showers.size();i++){
@@ -2208,7 +2208,7 @@ void WireCell2dToy::ToyTracking::Cleanup_showers(){
 
 
 
-bool  WireCell2dToy::ToyTracking::track_shower_reco(WireCell2dToy::ToyCrawler& toycrawler){
+bool  WCP2dToy::ToyTracking::track_shower_reco(WCP2dToy::ToyCrawler& toycrawler){
   bool result = false;
 
   // find vertex with distance cut
@@ -2693,7 +2693,7 @@ bool  WireCell2dToy::ToyTracking::track_shower_reco(WireCell2dToy::ToyCrawler& t
 }
 
 
-void WireCell2dToy::ToyTracking::form_parallel_tiny_tracks_wovertex(WireCell2dToy::ToyCrawler& toycrawler){
+void WCP2dToy::ToyTracking::form_parallel_tiny_tracks_wovertex(WCP2dToy::ToyCrawler& toycrawler){
   //form all the cells
   MergeSpaceCellMap& mcells_map = toycrawler.Get_mcells_map();
   MergeSpaceCellSelection mcells;
@@ -2854,7 +2854,7 @@ void WireCell2dToy::ToyTracking::form_parallel_tiny_tracks_wovertex(WireCell2dTo
 }
 
 
-void WireCell2dToy::ToyTracking::form_parallel_tiny_tracks(WireCell2dToy::ToyCrawler& toycrawler){
+void WCP2dToy::ToyTracking::form_parallel_tiny_tracks(WCP2dToy::ToyCrawler& toycrawler){
   
   //form all the cells
   MergeSpaceCellMap& mcells_map = toycrawler.Get_mcells_map();
@@ -3080,13 +3080,13 @@ void WireCell2dToy::ToyTracking::form_parallel_tiny_tracks(WireCell2dToy::ToyCra
 
 }
 
-void WireCell2dToy::ToyTracking::parallel_tracking(WCVertex *vertex, MergeSpaceCellSelection &mcells, WireCell2dToy::ToyCrawler& toycrawler){
+void WCP2dToy::ToyTracking::parallel_tracking(WCVertex *vertex, MergeSpaceCellSelection &mcells, WCP2dToy::ToyCrawler& toycrawler){
  
   // re-organize mcells to do a merge, merge anything that are close ... 
   MergeSpaceCellMap& mcells_map_old = toycrawler.Get_mcells_map();  
   
   MergeSpaceCellMap mcells_map; // new map ... 
-  WireCell::MergeSpaceCellMap1 new_mcells_map1; 
+  WCP::MergeSpaceCellMap1 new_mcells_map1; 
 
   WCTrack *track_1st=0;
   WCTrack *track_2nd=0;
@@ -3272,11 +3272,11 @@ void WireCell2dToy::ToyTracking::parallel_tracking(WCVertex *vertex, MergeSpaceC
   
   if (flag_qx == 0){
     // max_cell --> vertex_cell, find the shortest path 
-    WireCell2dToy::ToyWalking walking(max_mcell,max_point,vertex_cell,vertex->Center(),mcells_map);
+    WCP2dToy::ToyWalking walking(max_mcell,max_point,vertex_cell,vertex->Center(),mcells_map);
     track_mcells = walking.get_cells();
     dist = walking.get_dist();
   }else{ // map over the new cells ... 
-    WireCell2dToy::ToyWalking walking(new_mcells_map1[max_mcell],max_point,new_mcells_map1[vertex_cell],vertex->Center(),mcells_map);
+    WCP2dToy::ToyWalking walking(new_mcells_map1[max_mcell],max_point,new_mcells_map1[vertex_cell],vertex->Center(),mcells_map);
     dist = walking.get_dist();
     // How to deal with these??? 
     track_mcells = walking.get_cells();
@@ -3507,7 +3507,7 @@ void WireCell2dToy::ToyTracking::parallel_tracking(WCVertex *vertex, MergeSpaceC
       
       
       // max_cell --> vertex_cell, find the shortest path 
-      WireCell2dToy::ToyWalking walking1(max_mcell,max_point,vertex_cell,vertex->Center(),mcells_map);
+      WCP2dToy::ToyWalking walking1(max_mcell,max_point,vertex_cell,vertex->Center(),mcells_map);
       track_mcells = walking1.get_cells();
       dist = walking1.get_dist();
       
@@ -3736,7 +3736,7 @@ void WireCell2dToy::ToyTracking::parallel_tracking(WCVertex *vertex, MergeSpaceC
 }
 
 
-bool WireCell2dToy::ToyTracking::grow_track_fill_gap(WireCell2dToy::ToyCrawler& toycrawler){
+bool WCP2dToy::ToyTracking::grow_track_fill_gap(WCP2dToy::ToyCrawler& toycrawler){
   bool result = false;
   MergeSpaceCellMap& mcells_map = toycrawler.Get_mcells_map();
   
@@ -3956,7 +3956,7 @@ bool WireCell2dToy::ToyTracking::grow_track_fill_gap(WireCell2dToy::ToyCrawler& 
 }
 
 
-void WireCell2dToy::ToyTracking::deal_wiggle_tracks(){
+void WCP2dToy::ToyTracking::deal_wiggle_tracks(){
   
   //wiggle_vertices.clear();
   
@@ -4052,7 +4052,7 @@ void WireCell2dToy::ToyTracking::deal_wiggle_tracks(){
   
 }
 
-bool WireCell2dToy::ToyTracking::IsThisShower(WireCell2dToy::ToyCrawler& toycrawler){
+bool WCP2dToy::ToyTracking::IsThisShower(WCP2dToy::ToyCrawler& toycrawler){
   // find out how many separated tracks are there? 
   // 1. # of tracks
   int ntracks = 0;
@@ -4466,7 +4466,7 @@ bool WireCell2dToy::ToyTracking::IsThisShower(WireCell2dToy::ToyCrawler& toycraw
 }
 
 
-void WireCell2dToy::ToyTracking::cleanup_bad_tracks(){
+void WCP2dToy::ToyTracking::cleanup_bad_tracks(){
   WCVertexSelection to_be_removed;
 
   for (int i=0;i!=good_tracks.size();i++){
@@ -4518,7 +4518,7 @@ void WireCell2dToy::ToyTracking::cleanup_bad_tracks(){
 
 }
 
-void WireCell2dToy::ToyTracking::update_maps1(){
+void WCP2dToy::ToyTracking::update_maps1(){
   // update maps with good tracks ... 
   wct_wcv_map.clear();
   wcv_wct_map.clear();
@@ -4577,7 +4577,7 @@ void WireCell2dToy::ToyTracking::update_maps1(){
 }
 
 
-void WireCell2dToy::ToyTracking::update_maps(int flag){
+void WCP2dToy::ToyTracking::update_maps(int flag){
   wct_wcv_map.clear();
   wcv_wct_map.clear();
 
@@ -4703,7 +4703,7 @@ void WireCell2dToy::ToyTracking::update_maps(int flag){
 
 }
 
-void WireCell2dToy::ToyTracking::fine_tracking(int flag){
+void WCP2dToy::ToyTracking::fine_tracking(int flag){
   for (int i=0;i!=tracks.size();i++){
     //std::cout << i << " " << tracks.size() << std::endl;
     WCTrack *track = tracks.at(i);
@@ -4757,7 +4757,7 @@ void WireCell2dToy::ToyTracking::fine_tracking(int flag){
   }
 }
 
-bool WireCell2dToy::ToyTracking::ExamineVertex(WCVertex* vertex, WireCell2dToy::ToyCrawler& toycrawler){
+bool WCP2dToy::ToyTracking::ExamineVertex(WCVertex* vertex, WCP2dToy::ToyCrawler& toycrawler){
   Point vertex_location = vertex->Center();
   
   if (fabs(vertex_location.x - vertex->get_msc()->Get_Center().x) < Singleton<TPCParams>::Instance().get_ts_width() * 5 ){
@@ -4887,7 +4887,7 @@ bool WireCell2dToy::ToyTracking::ExamineVertex(WCVertex* vertex, WireCell2dToy::
 
 
 
-void WireCell2dToy::ToyTracking::CheckVertices(WireCell2dToy::ToyCrawler& toycrawler){
+void WCP2dToy::ToyTracking::CheckVertices(WCP2dToy::ToyCrawler& toycrawler){
   
   MergeSpaceCellMap& mcells_map = toycrawler.Get_mcells_map();
   
@@ -5042,7 +5042,7 @@ void WireCell2dToy::ToyTracking::CheckVertices(WireCell2dToy::ToyCrawler& toycra
 }
 
 
-void WireCell2dToy::ToyTracking::CleanUpVertex(){
+void WCP2dToy::ToyTracking::CleanUpVertex(){
   WCVertexSelection temp;
   for (int i=0;i!=vertices.size();i++){
     WCVertex *vertex = vertices.at(i);
@@ -5067,7 +5067,7 @@ void WireCell2dToy::ToyTracking::CleanUpVertex(){
 }
 
 
-void WireCell2dToy::ToyTracking::OrganizeTracks(int flag){
+void WCP2dToy::ToyTracking::OrganizeTracks(int flag){
   MergeSpaceCellSelection saved_cells;
   for (int i=0;i!=vertices.size();i++){
     saved_cells.push_back(vertices.at(i)->get_msc());
@@ -5081,7 +5081,7 @@ void WireCell2dToy::ToyTracking::OrganizeTracks(int flag){
 }
 
 
-void WireCell2dToy::ToyTracking::Crawl(){
+void WCP2dToy::ToyTracking::Crawl(){
   // first shift the vertex locations
   for (int i=0;i!=vertices.size();i++){
     WCVertex *vertex = vertices.at(i);
@@ -5097,7 +5097,7 @@ void WireCell2dToy::ToyTracking::Crawl(){
   }
 }
 
-void WireCell2dToy::ToyTracking::BreakTracks(){
+void WCP2dToy::ToyTracking::BreakTracks(){
   // Now need to break the track?
   //std::cout << "abc" << std::endl;
 
@@ -5171,7 +5171,7 @@ void WireCell2dToy::ToyTracking::BreakTracks(){
 }
 
 
-void WireCell2dToy::ToyTracking::MergeVertices(int flag){
+void WCP2dToy::ToyTracking::MergeVertices(int flag){
   WCVertexSelection to_be_removed;
   //prepare to merge vertices 
   for (int i=0;i!=vertices.size();i++){
@@ -5220,7 +5220,7 @@ void WireCell2dToy::ToyTracking::MergeVertices(int flag){
 }
 
 
-void WireCell2dToy::ToyTracking::RemoveSame(){
+void WCP2dToy::ToyTracking::RemoveSame(){
   // remove the contained one ... 
   WCVertexSelection to_be_removed;
   for (int i=0;i!=vertices.size();i++){
@@ -5254,7 +5254,7 @@ void WireCell2dToy::ToyTracking::RemoveSame(){
 
 
 
-void WireCell2dToy::ToyTracking::CreateVertices(ToyCrawler& toycrawler){
+void WCP2dToy::ToyTracking::CreateVertices(ToyCrawler& toycrawler){
   std::map<MergeSpaceCell*,WCTrackSelection> msc_wct_map;
 
   //  std::cout << toycrawler.Get_allMCT().size() << std::endl;
@@ -5377,7 +5377,7 @@ void WireCell2dToy::ToyTracking::CreateVertices(ToyCrawler& toycrawler){
 
 }
 
-void WireCell2dToy::ToyTracking::Associate(){
+void WCP2dToy::ToyTracking::Associate(){
   WCTrackSelection saved_tracks;
   for (int i=0;i!=vertices.size();i++){
     for (int j=0;j!=vertices.at(i)->get_tracks().size();j++){
@@ -5408,7 +5408,7 @@ void WireCell2dToy::ToyTracking::Associate(){
 }
 
 
-WireCell2dToy::ToyTracking::~ToyTracking(){
+WCP2dToy::ToyTracking::~ToyTracking(){
   for (int i=0;i!=tracks.size();i++){
     delete tracks.at(i);
   }

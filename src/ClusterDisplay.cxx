@@ -1,21 +1,21 @@
-#include "WireCell2dToy/ClusterDisplay.h"
+#include "WCP2dToy/ClusterDisplay.h"
 #include "TGraph2D.h"
 #include "TVector3.h"
 #include "TPolyLine3D.h"
 #include "TRandom.h"
 
-using namespace WireCell;
+using namespace WCP;
 
-WireCell2dToy::ClusterDisplay::ClusterDisplay(TPad& pad)
+WCP2dToy::ClusterDisplay::ClusterDisplay(TPad& pad)
   :pad(pad)
 {
 }
 
-WireCell2dToy::ClusterDisplay::~ClusterDisplay(){
+WCP2dToy::ClusterDisplay::~ClusterDisplay(){
 }
 
 
-void WireCell2dToy::ClusterDisplay::DrawShower(WireCell::WCShower* shower, TString option, int color){
+void WCP2dToy::ClusterDisplay::DrawShower(WCP::WCShower* shower, TString option, int color){
   TGraph2D *g1 = new TGraph2D();
   int n = 0;
   double x,y,z;
@@ -35,7 +35,7 @@ void WireCell2dToy::ClusterDisplay::DrawShower(WireCell::WCShower* shower, TStri
   g1->SetMarkerColor(color);
 }
 
-void WireCell2dToy::ClusterDisplay::DrawVertex(WCVertexSelection& vertices, TString option){
+void WCP2dToy::ClusterDisplay::DrawVertex(WCVertexSelection& vertices, TString option){
   TGraph2D *g1 = new TGraph2D();
   int n = 0;
   double x,y,z;
@@ -136,7 +136,7 @@ void WireCell2dToy::ClusterDisplay::DrawVertex(WCVertexSelection& vertices, TStr
 }
 
 
-void WireCell2dToy::ClusterDisplay::DrawTracks(WireCell::WCTrackSelection& tracks, TString option, int color ){
+void WCP2dToy::ClusterDisplay::DrawTracks(WCP::WCTrackSelection& tracks, TString option, int color ){
   double x1[2500],y1[2500],z1[2500];
   
   for (int i =0; i!=tracks.size();i++){
@@ -186,7 +186,7 @@ void WireCell2dToy::ClusterDisplay::DrawTracks(WireCell::WCTrackSelection& track
 }
 
 
-void WireCell2dToy::ClusterDisplay::DrawHough(SpaceCellSelection& cells, Point& p, double dis_near, double dis_far){
+void WCP2dToy::ClusterDisplay::DrawHough(SpaceCellSelection& cells, Point& p, double dis_near, double dis_far){
   TH2F *h1 = new TH2F("h1","h1",180,0,3.1415926,360,-3.1415926,3.1415926);
   Double_t x,y,z;
   Double_t x0 = p.x;
@@ -209,7 +209,7 @@ void WireCell2dToy::ClusterDisplay::DrawHough(SpaceCellSelection& cells, Point& 
   h1->Draw("COLZ");
 }
 
-void WireCell2dToy::ClusterDisplay::DrawCrawler(WireCell2dToy::ToyCrawler& toycrawler, TString option, int flag){
+void WCP2dToy::ClusterDisplay::DrawCrawler(WCP2dToy::ToyCrawler& toycrawler, TString option, int flag){
   
   std::cout << "Draw Crawler " << " " << toycrawler.Get_allCT().size() << " " << toycrawler.Get_allMCT().size()<< std::endl;
 
@@ -299,7 +299,7 @@ void WireCell2dToy::ClusterDisplay::DrawCrawler(WireCell2dToy::ToyCrawler& toycr
 }
 					     
 
-void WireCell2dToy::ClusterDisplay::DrawCluster(SpaceCellSelection& mcells, TString option){
+void WCP2dToy::ClusterDisplay::DrawCluster(SpaceCellSelection& mcells, TString option){
   Double_t x, y, z;
   TGraph2D *g1 = new TGraph2D();
   
@@ -322,7 +322,7 @@ void WireCell2dToy::ClusterDisplay::DrawCluster(SpaceCellSelection& mcells, TStr
 
 
 
-void WireCell2dToy::ClusterDisplay::DrawCluster(MergeSpaceCellSelection& mcells,TString option){
+void WCP2dToy::ClusterDisplay::DrawCluster(MergeSpaceCellSelection& mcells,TString option){
   Double_t x, y, z;
   TGraph2D *g1 = new TGraph2D();
   
@@ -374,7 +374,7 @@ void WireCell2dToy::ClusterDisplay::DrawCluster(MergeSpaceCellSelection& mcells,
 
 
 
-void WireCell2dToy::ClusterDisplay::DrawCluster(MergeSpaceCellSelection& mcells,WireCell2dToy::ToyTracking& toytracking){
+void WCP2dToy::ClusterDisplay::DrawCluster(MergeSpaceCellSelection& mcells,WCP2dToy::ToyTracking& toytracking){
   Double_t x, y, z;
   TGraph2D *g1 = new TGraph2D();
   

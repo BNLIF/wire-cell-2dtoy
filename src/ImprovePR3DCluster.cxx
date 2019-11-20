@@ -1,10 +1,10 @@
-#include "WireCell2dToy/ImprovePR3DCluster.h"
-#include "WireCell2dToy/LowmemTiling.h"
+#include "WCP2dToy/ImprovePR3DCluster.h"
+#include "WCP2dToy/LowmemTiling.h"
 
 
-using namespace WireCell;
+using namespace WCP;
 
-WireCell::PR3DCluster* WireCell2dToy::Improve_PR3DCluster(WireCell::PR3DCluster* cluster, ToyCTPointCloud& ct_point_cloud,WireCellSst::GeomDataSource& gds){
+WCP::PR3DCluster* WCP2dToy::Improve_PR3DCluster(WCP::PR3DCluster* cluster, ToyCTPointCloud& ct_point_cloud,WCPSst::GeomDataSource& gds){
 
   std::map<int,std::set<int>> u_time_chs; // time chs
   std::map<int,std::set<int>> v_time_chs; // time chs
@@ -197,10 +197,10 @@ WireCell::PR3DCluster* WireCell2dToy::Improve_PR3DCluster(WireCell::PR3DCluster*
   }
 
   
-  WireCell2dToy::WireCellHolder *WCholder = new WireCellHolder();
+  WCP2dToy::WCPHolder *WCholder = new WCPHolder();
   for (auto it = u_time_chs.begin(); it!= u_time_chs.end(); it++){
     int time_slice = it->first;
-    WireCell2dToy::LowmemTiling tiling(time_slice,gds,*WCholder);
+    WCP2dToy::LowmemTiling tiling(time_slice,gds,*WCholder);
     // recreate the merged wires
     // recreate the merge cells
     tiling.init_good_cells(u_time_chs, v_time_chs, w_time_chs);  

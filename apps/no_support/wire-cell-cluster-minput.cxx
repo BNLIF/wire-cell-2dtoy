@@ -1,18 +1,18 @@
-#include "WireCellSst/GeomDataSource.h"
-#include "WireCellData/PR3DCluster.h"
-#include "WireCellData/SlimMergeGeomCell.h"
-#include "WireCellData/TPCParams.h"
-#include "WireCellData/Singleton.h"
-#include "WireCell2dToy/ExecMon.h"
-#include "WireCell2dToy/CalcPoints.h"
-#include "WireCell2dToy/ToyClustering.h"
+#include "WCPSst/GeomDataSource.h"
+#include "WCPData/PR3DCluster.h"
+#include "WCPData/SlimMergeGeomCell.h"
+#include "WCPData/TPCParams.h"
+#include "WCPData/Singleton.h"
+#include "WCP2dToy/ExecMon.h"
+#include "WCP2dToy/CalcPoints.h"
+#include "WCP2dToy/ToyClustering.h"
 
 
 #include "TFile.h"
 #include "TTree.h"
 #include "TString.h"
 
-using namespace WireCell;
+using namespace WCP;
 using namespace std;
 
 int main(int argc, char* argv[])
@@ -25,7 +25,7 @@ int main(int argc, char* argv[])
   ExecMon em("starting");
   //cerr << em("load geometry") << endl;
 
-  WireCellSst::GeomDataSource gds(argv[1]);
+  WCPSst::GeomDataSource gds(argv[1]);
   std::vector<double> ex = gds.extent();
   cerr << "Extent: "
        << " x:" << ex[0]/units::mm << " mm"
@@ -382,11 +382,11 @@ int main(int argc, char* argv[])
    // Start to add X, Y, Z points
    // form boundaries for the bad cells ... 
    for (size_t j = 0; j!= dead_clusters.size(); j++){
-     WireCell2dToy::calc_boundary_points_dead(gds,dead_clusters.at(j));
+     WCP2dToy::calc_boundary_points_dead(gds,dead_clusters.at(j));
    }
    // form sampling points for the normal cells ...
    for (size_t i=0; i!=live_clusters.size();i++){
-     WireCell2dToy::calc_sampling_points(gds,live_clusters.at(i),nrebin, frame_length, unit_dis);
+     WCP2dToy::calc_sampling_points(gds,live_clusters.at(i),nrebin, frame_length, unit_dis);
      // live_clusters.at(i)->Calc_PCA();
    }
    //cerr << em("Add X, Y, Z points") << std::endl;
@@ -404,7 +404,7 @@ int main(int argc, char* argv[])
    cerr << em("Build local point clouds") << std::endl;
    
 
-   WireCell2dToy::Clustering_jump_gap_cosmics(live_clusters, dead_clusters, dead_u_index, dead_v_index, dead_w_index, global_point_cloud);
+   WCP2dToy::Clustering_jump_gap_cosmics(live_clusters, dead_clusters, dead_u_index, dead_v_index, dead_w_index, global_point_cloud);
    cerr << em("Clustering to jump gap in cosmics") << std::endl;
 
 

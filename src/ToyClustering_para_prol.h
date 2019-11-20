@@ -1,4 +1,4 @@
-void WireCell2dToy::Clustering_parallel_prolong(WireCell::PR3DClusterSelection& live_clusters, std::map<PR3DCluster*,double>& cluster_length_map, std::set<WireCell::PR3DCluster*>& cluster_connected_dead, double length_cut){
+void WCP2dToy::Clustering_parallel_prolong(WCP::PR3DClusterSelection& live_clusters, std::map<PR3DCluster*,double>& cluster_length_map, std::set<WCP::PR3DCluster*>& cluster_connected_dead, double length_cut){
   // calculate the length ...
   TPCParams& mp = Singleton<TPCParams>::Instance();
   double pitch_u = mp.get_pitch_u();
@@ -23,7 +23,7 @@ void WireCell2dToy::Clustering_parallel_prolong(WireCell::PR3DClusterSelection& 
     PR3DCluster* cluster_1 = live_clusters.at(i);
     for (size_t j=i+1;j<live_clusters.size();j++){
       PR3DCluster* cluster_2 = live_clusters.at(j);
-      if (WireCell2dToy::Clustering_2nd_round(cluster_1,cluster_2, cluster_length_map[cluster_1], cluster_length_map[cluster_2], length_cut))
+      if (WCP2dToy::Clustering_2nd_round(cluster_1,cluster_2, cluster_length_map[cluster_1], cluster_length_map[cluster_2], length_cut))
 	to_be_merged_pairs.insert(std::make_pair(cluster_1,cluster_2));
     }
   }
@@ -104,7 +104,7 @@ void WireCell2dToy::Clustering_parallel_prolong(WireCell::PR3DClusterSelection& 
 }
 
 
-bool WireCell2dToy::Clustering_2nd_round(WireCell::PR3DCluster *cluster1, WireCell::PR3DCluster *cluster2, double length_1, double length_2, double length_cut){
+bool WCP2dToy::Clustering_2nd_round(WCP::PR3DCluster *cluster1, WCP::PR3DCluster *cluster2, double length_1, double length_2, double length_cut){
 
   if (length_1 < 10*units::cm && length_2 < 10*units::cm) return false;
   
@@ -190,7 +190,7 @@ bool WireCell2dToy::Clustering_2nd_round(WireCell::PR3DCluster *cluster1, WireCe
 	    }else if (fabs(angle2-3.1415926/2.)<2.5/180.*3.1415926 && fabs(angle5-3.1415926/2.)<5/180.*3.1415926 && fabs(angle6-3.1415926/2.)<5/180.*3.141592 ){
 	      // parallel case, but exclude both very long tracks
 	      if (length_1 < 60*units::cm || length_2 < 60*units::cm){
-		if (WireCell2dToy::is_angle_consistent(dir1,tempV1,false,15,angle_u,angle_v,angle_w) && WireCell2dToy::is_angle_consistent(dir2,tempV1,true,15,angle_u,angle_v,angle_w)) 
+		if (WCP2dToy::is_angle_consistent(dir1,tempV1,false,15,angle_u,angle_v,angle_w) && WCP2dToy::is_angle_consistent(dir2,tempV1,true,15,angle_u,angle_v,angle_w)) 
 		  return true;
 	      }else if (dis <5*units::cm){
 		return true;
@@ -200,7 +200,7 @@ bool WireCell2dToy::Clustering_2nd_round(WireCell::PR3DCluster *cluster1, WireCe
 	      	double angle9 = dir2.Angle(tempV1)/3.1415926*180.; // dir2 = -p2
 	      	if (angle7 < 30 && angle8 < 30 && angle9 < 30)
 	      	  return true;
-		if (WireCell2dToy::is_angle_consistent(dir1,tempV1,false,10,angle_u,angle_v,angle_w) && WireCell2dToy::is_angle_consistent(dir2,tempV1,true,10,angle_u,angle_v,angle_w)) 
+		if (WCP2dToy::is_angle_consistent(dir1,tempV1,false,10,angle_u,angle_v,angle_w) && WCP2dToy::is_angle_consistent(dir2,tempV1,true,10,angle_u,angle_v,angle_w)) 
 		  return true; 
 	      }
 	      
@@ -213,7 +213,7 @@ bool WireCell2dToy::Clustering_2nd_round(WireCell::PR3DCluster *cluster1, WireCe
 		  fabs(angle5-3.1415926/2.)<5/180.*3.1415926 && fabs(angle6-3.1415926/2.)<5/180.*3.141592 &&
 		   angle7 < 45 && angle8 < 45 && angle9 < 45) && dis < 20*units::cm)
 		return true;
-	      if (WireCell2dToy::is_angle_consistent(dir1,tempV1,false,10,angle_u,angle_v,angle_w) && WireCell2dToy::is_angle_consistent(dir2,tempV1,true,10,angle_u,angle_v,angle_w)) 
+	      if (WCP2dToy::is_angle_consistent(dir1,tempV1,false,10,angle_u,angle_v,angle_w) && WCP2dToy::is_angle_consistent(dir2,tempV1,true,10,angle_u,angle_v,angle_w)) 
 		return true; 
 	    }
 	  }
@@ -230,7 +230,7 @@ bool WireCell2dToy::Clustering_2nd_round(WireCell::PR3DCluster *cluster1, WireCe
 	    }else if (dis < 15*units::cm && fabs(angle3-3.1415926/2.)<2.5/180.*3.1415926 && (length_1 < 60*units::cm || length_2 < 60*units::cm) ){
 	      return true;
 	    }else if (fabs(angle3-3.1415926/2.)<2.5/180.*3.1415926 && fabs(angle5-3.1415926/2.)<5/180.*3.1415926 && fabs(angle6-3.1415926/2.)<5/180.*3.141592){
-	      if (WireCell2dToy::is_angle_consistent(dir1,tempV1,false,15,angle_u,angle_v,angle_w) && WireCell2dToy::is_angle_consistent(dir2,tempV1,true,15,angle_u,angle_v,angle_w)) 
+	      if (WCP2dToy::is_angle_consistent(dir1,tempV1,false,15,angle_u,angle_v,angle_w) && WCP2dToy::is_angle_consistent(dir2,tempV1,true,15,angle_u,angle_v,angle_w)) 
 		return true;
 	    }else{
 	      double angle7 = (3.1415926-dir1.Angle(dir2))/3.1415926*180.;
@@ -240,7 +240,7 @@ bool WireCell2dToy::Clustering_2nd_round(WireCell::PR3DCluster *cluster1, WireCe
 		  fabs(angle5-3.1415926/2.)<5/180.*3.1415926 && fabs(angle6-3.1415926/2.)<5/180.*3.141592 &&
 		  angle7 < 60 && angle8 < 60 && angle9 < 60)
 		return true;
-	      if (WireCell2dToy::is_angle_consistent(dir1,tempV1,false,10,angle_u,angle_v,angle_w) && WireCell2dToy::is_angle_consistent(dir2,tempV1,true,10,angle_u,angle_v,angle_w))
+	      if (WCP2dToy::is_angle_consistent(dir1,tempV1,false,10,angle_u,angle_v,angle_w) && WCP2dToy::is_angle_consistent(dir2,tempV1,true,10,angle_u,angle_v,angle_w))
 	      	  return true;
 	    }
 	  }

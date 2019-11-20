@@ -1,8 +1,8 @@
-#include "WireCell2dToy/BlobMetric.h"
+#include "WCP2dToy/BlobMetric.h"
 
-using namespace WireCell;
+using namespace WCP;
 
-WireCell2dToy::BlobMetric::BlobMetric(){
+WCP2dToy::BlobMetric::BlobMetric(){
   rm_cell_true = 0;
   rm_cell_false = 0;
   el_cell_true = 0;
@@ -15,7 +15,7 @@ WireCell2dToy::BlobMetric::BlobMetric(){
 }
 
 
-void WireCell2dToy::BlobMetric::Print(){
+void WCP2dToy::BlobMetric::Print(){
   std::cout << "Summary of Simple DeBlob " << std::endl;
   std::cout << "Remaining Cells Containing Truth     : " << rm_cell_true << "  charge:" << charge_rm_cell_true << " true charge:" << Tcharge_rm_cell_true << std::endl;
   std::cout << "Remaining Cells Not Containing Truth : " << rm_cell_false << "  charge:" << charge_rm_cell_false << std::endl;
@@ -25,11 +25,11 @@ void WireCell2dToy::BlobMetric::Print(){
   
 }
 
-WireCell2dToy::BlobMetric::~BlobMetric(){
+WCP2dToy::BlobMetric::~BlobMetric(){
 }
 
 
-void WireCell2dToy::BlobMetric::Add(WireCell2dToy::SimpleBlobToyTiling &blobtiling, WireCell::CellChargeMap& ccmap){
+void WCP2dToy::BlobMetric::Add(WCP2dToy::SimpleBlobToyTiling &blobtiling, WCP::CellChargeMap& ccmap){
   GeomCellSelection sbcells = blobtiling.Get_SB_Cells();
   GeomCellSelection cells = blobtiling.Get_Cells();
 

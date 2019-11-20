@@ -1,23 +1,23 @@
-#include "WireCell2dToy/ToyMatching.h"
+#include "WCP2dToy/ToyMatching.h"
 
-#include "WireCellRess/LassoModel.h"
-#include "WireCellRess/ElasticNetModel.h"
+#include "WCPRess/LassoModel.h"
+#include "WCPRess/ElasticNetModel.h"
 #include <Eigen/Dense>
 
 #include "TChain.h"
 #include "TGraph.h"
 #include "TVector3.h"
 
-#include "WireCellData/TPCParams.h"
-#include "WireCellData/Singleton.h"
-#include "WireCellData/FlashTPCBundle.h"
+#include "WCPData/TPCParams.h"
+#include "WCPData/Singleton.h"
+#include "WCPData/FlashTPCBundle.h"
 
 #include <fstream>
 
 using namespace Eigen;
-using namespace WireCell;
+using namespace WCP;
 
-int WireCell2dToy::convert_xyz_voxel_id(WireCell::Point &p){
+int WCP2dToy::convert_xyz_voxel_id(WCP::Point &p){
   // int voxel_x_id = std::round((p.x/units::cm+64.825-5.14667/2.)/5.14667);
   // int voxel_y_id = std::round((p.y/units::cm+193-5.14667/2.)/5.14667);
   // int voxel_z_id = std::round((p.z/units::cm+128.243-3.23122/2.)/3.23122);
@@ -41,7 +41,7 @@ int WireCell2dToy::convert_xyz_voxel_id(WireCell::Point &p){
 } 
 
 /*
-WireCell2dToy::Photon_Library::Photon_Library(Int_t run_no, bool flag_data, bool flag_add_light_yield_err){
+WCP2dToy::Photon_Library::Photon_Library(Int_t run_no, bool flag_data, bool flag_add_light_yield_err){
   rel_light_yield_err = 0;
   scaling_light_mag = 0.01 * 1.5;
   Double_t yield_run_no[37]={5590, 5934, 6207, 6427, 6617, 6854, 7059, 7305, 7648, 8199, 8518, 8871, 9209, 9468, 9652, 10478, 10701, 10924, 11197, 11605, 11816, 12021, 12344, 12505, 13521, 13725, 14034, 14256, 14527, 14773, 15013, 15426, 15922, 16218, 16643, 16977, 17417};
@@ -142,8 +142,8 @@ WireCell2dToy::Photon_Library::Photon_Library(Int_t run_no, bool flag_data, bool
 
 */
 
-void WireCell2dToy::calculate_pred_pe(int run_no, int time_offset, int nrebin, double time_slice_width, WireCell::Photon_Library *pl, FlashTPCBundle* bundle, std::vector<double>* pred_pmt_light,
-				      std::vector<std::pair<WireCell::PR3DCluster*,double>>* additional_clusters, PR3DClusterSelection* other_clusters, PR3DClusterSelection* more_clusters, bool &flag_good_bundle, bool flag_data){
+void WCP2dToy::calculate_pred_pe(int run_no, int time_offset, int nrebin, double time_slice_width, WCP::Photon_Library *pl, FlashTPCBundle* bundle, std::vector<double>* pred_pmt_light,
+				      std::vector<std::pair<WCP::PR3DCluster*,double>>* additional_clusters, PR3DClusterSelection* other_clusters, PR3DClusterSelection* more_clusters, bool &flag_good_bundle, bool flag_data){
 
 	double rel_light_yield_err = pl->rel_light_yield_err;
 	double scaling_light_mag = pl->scaling_light_mag;
@@ -309,7 +309,7 @@ void WireCell2dToy::calculate_pred_pe(int run_no, int time_offset, int nrebin, d
   		  p.y = pts.at(i).y;
   		  p.z = pts.at(i).z;
 		  
-		  int voxel_id = WireCell2dToy::convert_xyz_voxel_id(p);
+		  int voxel_id = WCP2dToy::convert_xyz_voxel_id(p);
 		  std::list<std::pair<int,float>>& pmt_list = photon_library->at(voxel_id);
 		  
 		  for (auto it5 = pmt_list.begin(); it5!=pmt_list.end(); it5++){
@@ -349,7 +349,7 @@ void WireCell2dToy::calculate_pred_pe(int run_no, int time_offset, int nrebin, d
   	}
 }
 
-FlashTPCBundleSelection WireCell2dToy::tpc_light_match(int time_offset, int nrebin, WireCell::Photon_Library *pl, std::map<WireCell::PR3DCluster*,std::vector<std::pair<WireCell::PR3DCluster*,double>>>& group_clusters, WireCell::OpflashSelection& flashes, Int_t run_no, bool flag_data, bool flag_add_light_yield_err){
+FlashTPCBundleSelection WCP2dToy::tpc_light_match(int time_offset, int nrebin, WCP::Photon_Library *pl, std::map<WCP::PR3DCluster*,std::vector<std::pair<WCP::PR3DCluster*,double>>>& group_clusters, WCP::OpflashSelection& flashes, Int_t run_no, bool flag_data, bool flag_add_light_yield_err){
 
   double rel_light_yield_err = pl->rel_light_yield_err;
   double scaling_light_mag = pl->scaling_light_mag;
@@ -408,7 +408,7 @@ FlashTPCBundleSelection WireCell2dToy::tpc_light_match(int time_offset, int nreb
       int cluster_index_id = 0;
       for (auto it2 = group_clusters.begin(); it2!=group_clusters.end(); it2++){
   	PR3DCluster* main_cluster = it2->first;
-  	std::vector<std::pair<WireCell::PR3DCluster*,double>>& additional_clusters = it2->second;
+  	std::vector<std::pair<WCP::PR3DCluster*,double>>& additional_clusters = it2->second;
   	FlashTPCBundle *bundle = new FlashTPCBundle(flash, main_cluster, flash_index_id, cluster_index_id);
   	bool flag_good_bundle = false;
 	
@@ -1473,7 +1473,7 @@ FlashTPCBundleSelection WireCell2dToy::tpc_light_match(int time_offset, int nreb
       // }
       
       
-      WireCell::LassoModel m2(lambda, 100000, 0.01);
+      WCP::LassoModel m2(lambda, 100000, 0.01);
       m2.SetData(G, W);
 
       std::vector<double> init_values;
@@ -1615,7 +1615,7 @@ FlashTPCBundleSelection WireCell2dToy::tpc_light_match(int time_offset, int nreb
     VectorXd W = RT * M + RFT * MF;
     MatrixXd G = RT * R + RFT * RF;
     
-    WireCell::LassoModel m2(lambda, 100000, 0.01);
+    WCP::LassoModel m2(lambda, 100000, 0.01);
     m2.SetData(G, W);
     for (size_t i=0; i!=total_weights.size(); i++){
       m2.SetLambdaWeight(i,total_weights.at(i));
@@ -1725,7 +1725,7 @@ FlashTPCBundleSelection WireCell2dToy::tpc_light_match(int time_offset, int nreb
 }
 
 
-void WireCell2dToy::organize_matched_bundles(WireCell::FlashTPCBundleSelection& results_bundles,  Double_t *cos_pe_low, Double_t *cos_pe_mid, std::map<std::pair<Opflash*,PR3DCluster*>,FlashTPCBundle*>& fc_bundles_map){
+void WCP2dToy::organize_matched_bundles(WCP::FlashTPCBundleSelection& results_bundles,  Double_t *cos_pe_low, Double_t *cos_pe_mid, std::map<std::pair<Opflash*,PR3DCluster*>,FlashTPCBundle*>& fc_bundles_map){
   std::map<Opflash*, FlashTPCBundleSelection> flash_bundles_map;
 
   // get all the flashes and associated bundles for more than one bundle ... 
@@ -1948,7 +1948,7 @@ void WireCell2dToy::organize_matched_bundles(WireCell::FlashTPCBundleSelection& 
 
 /*
 
-FlashTPCBundleSelection WireCell2dToy::tpc_light_match_ana(int time_offset, int nrebin, std::map<WireCell::PR3DCluster*,std::vector<std::pair<WireCell::PR3DCluster*,double>>>& group_clusters, WireCell::OpflashSelection& flashes){
+FlashTPCBundleSelection WCP2dToy::tpc_light_match_ana(int time_offset, int nrebin, std::map<WCP::PR3DCluster*,std::vector<std::pair<WCP::PR3DCluster*,double>>>& group_clusters, WCP::OpflashSelection& flashes){
 
   std::map<int, std::vector<double> > pmt_pos_map;
   {
@@ -2092,7 +2092,7 @@ FlashTPCBundleSelection WireCell2dToy::tpc_light_match_ana(int time_offset, int 
       int cluster_index_id = 0;
       for (auto it2 = group_clusters.begin(); it2!=group_clusters.end(); it2++){
   	PR3DCluster* main_cluster = it2->first;
-  	std::vector<std::pair<WireCell::PR3DCluster*,double>>& additional_clusters = it2->second;
+  	std::vector<std::pair<WCP::PR3DCluster*,double>>& additional_clusters = it2->second;
   	FlashTPCBundle *bundle = new FlashTPCBundle(flash, main_cluster, flash_index_id, cluster_index_id);
   	bool flag_good_bundle = false;
 	
@@ -2247,7 +2247,7 @@ FlashTPCBundleSelection WireCell2dToy::tpc_light_match_ana(int time_offset, int 
   		  p.y = pts.at(i).y;
   		  p.z = pts.at(i).z;
 		  
-		  int voxel_id = WireCell2dToy::convert_xyz_voxel_id(p);
+		  int voxel_id = WCP2dToy::convert_xyz_voxel_id(p);
 
 		  std::list<std::pair<int,float>> pmt_list;
 		  for (int jj=0;jj!=32;jj++){
@@ -3340,7 +3340,7 @@ FlashTPCBundleSelection WireCell2dToy::tpc_light_match_ana(int time_offset, int 
       // }
       
       
-      WireCell::LassoModel m2(lambda, 100000, 0.01);
+      WCP::LassoModel m2(lambda, 100000, 0.01);
       m2.SetData(G, W);
 
       std::vector<double> init_values;
@@ -3482,7 +3482,7 @@ FlashTPCBundleSelection WireCell2dToy::tpc_light_match_ana(int time_offset, int 
     VectorXd W = RT * M + RFT * MF;
     MatrixXd G = RT * R + RFT * RF;
     
-    WireCell::LassoModel m2(lambda, 100000, 0.01);
+    WCP::LassoModel m2(lambda, 100000, 0.01);
     m2.SetData(G, W);
     for (size_t i=0; i!=total_weights.size(); i++){
       m2.SetLambdaWeight(i,total_weights.at(i));

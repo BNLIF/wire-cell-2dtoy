@@ -1,11 +1,11 @@
-#include "WireCell2dToy/BlobToyTiling.h"
+#include "WCP2dToy/BlobToyTiling.h"
 
 
 #include <cmath>
 
-using namespace WireCell;
+using namespace WCP;
 
-WireCell2dToy::BlobToyTiling::BlobToyTiling(WireCell2dToy::ToyTiling& toytiling, WireCell2dToy::MergeToyTiling& mergetiling, WireCell2dToy::ToyMatrix& toymatrix, int time_slice, int num_merge_wire){
+WCP2dToy::BlobToyTiling::BlobToyTiling(WCP2dToy::ToyTiling& toytiling, WCP2dToy::MergeToyTiling& mergetiling, WCP2dToy::ToyMatrix& toymatrix, int time_slice, int num_merge_wire){
   num_wire = num_merge_wire;
   tiling = &toytiling;
   //all the single wires
@@ -43,7 +43,7 @@ WireCell2dToy::BlobToyTiling::BlobToyTiling(WireCell2dToy::ToyTiling& toytiling,
 
   GeomCellSelection cellall = mergetiling.get_allcell();
   for (int i=0;i!=cellall.size();i++){
-    MergeGeomCell *mcell = (WireCell::MergeGeomCell*)cellall[i];
+    MergeGeomCell *mcell = (WCP::MergeGeomCell*)cellall[i];
     if (toymatrix.Get_Cell_Charge(mcell)+toymatrix.Get_Cell_Charge(mcell,2)>0){
       GeomCellSelection acell = mcell->get_allcell();
       //put all the single cells in here
@@ -189,7 +189,7 @@ WireCell2dToy::BlobToyTiling::BlobToyTiling(WireCell2dToy::ToyTiling& toytiling,
 }
 
 
-MergeGeomCell* WireCell2dToy::BlobToyTiling::FormMergeCell(MergeGeomWire* mwireu, MergeGeomWire* mwirev, MergeGeomWire* mwirew,int ident_cell,int time_slice) {
+MergeGeomCell* WCP2dToy::BlobToyTiling::FormMergeCell(MergeGeomWire* mwireu, MergeGeomWire* mwirev, MergeGeomWire* mwirew,int ident_cell,int time_slice) {
   MergeGeomCell *mcell = 0;
 
   for (int i =0; i!= mwireu->get_allwire().size();i++){
@@ -223,13 +223,13 @@ MergeGeomCell* WireCell2dToy::BlobToyTiling::FormMergeCell(MergeGeomWire* mwireu
 }
 
 
-const WireCell::GeomCell* WireCell2dToy::BlobToyTiling::cell(const WireCell::GeomWireSelection& wires) const
+const WCP::GeomCell* WCP2dToy::BlobToyTiling::cell(const WCP::GeomWireSelection& wires) const
 {
   return 0;
 }
 
 
-WireCell2dToy::BlobToyTiling::~BlobToyTiling(){
+WCP2dToy::BlobToyTiling::~BlobToyTiling(){
   for (int i=0;i!=cell_all.size();i++){
     delete cell_all[i];
   }
@@ -256,4 +256,4 @@ WireCell2dToy::BlobToyTiling::~BlobToyTiling(){
 
 }
 
-ClassImp(WireCell2dToy::BlobToyTiling);
+ClassImp(WCP2dToy::BlobToyTiling);

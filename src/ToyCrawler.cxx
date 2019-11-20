@@ -1,10 +1,10 @@
-#include "WireCell2dToy/ToyCrawler.h"
+#include "WCP2dToy/ToyCrawler.h"
 #include "TVector3.h"
-#include "WireCell2dToy/ToyWalking.h"
+#include "WCP2dToy/ToyWalking.h"
 
-using namespace WireCell;
+using namespace WCP;
 
-WireCell2dToy::ToyCrawler::ToyCrawler(MergeSpaceCellSelection& mcells, int flag, int flag1){
+WCP2dToy::ToyCrawler::ToyCrawler(MergeSpaceCellSelection& mcells, int flag, int flag1){
 
   CreateClusterTrack(mcells);
   FormGraph(); 
@@ -54,7 +54,7 @@ WireCell2dToy::ToyCrawler::ToyCrawler(MergeSpaceCellSelection& mcells, int flag,
   //  }
 }
 
-void WireCell2dToy::ToyCrawler::PrepareTracking(){
+void WCP2dToy::ToyCrawler::PrepareTracking(){
   MergeClusterTrackSelection to_be_removed;
   MergeClusterTrackSelection to_be_added;
   for (int i=0;i!=all_mergeclustertrack.size();i++){
@@ -260,10 +260,10 @@ void WireCell2dToy::ToyCrawler::PrepareTracking(){
 }
 
 
-MergeSpaceCell* WireCell2dToy::ToyCrawler::GetClosestMSC(Point p, WireCell::MergeSpaceCellSelection& cells2){
+MergeSpaceCell* WCP2dToy::ToyCrawler::GetClosestMSC(Point p, WCP::MergeSpaceCellSelection& cells2){
   // loop all mergeclustertrack
   // find the right time slice and search for mergespace cell (or the closest)
-  int time = WireCell2dToy::MergeToyTiling::Dis2Time(p.x);
+  int time = WCP2dToy::MergeToyTiling::Dis2Time(p.x);
   // std::cout << p.x/units::cm << " " << time << std::endl;
   MergeSpaceCell *cell = 0;
 
@@ -310,7 +310,7 @@ MergeSpaceCell* WireCell2dToy::ToyCrawler::GetClosestMSC(Point p, WireCell::Merg
 }
 
 
-void WireCell2dToy::ToyCrawler::CleanUpCTTrack(int flag){
+void WCP2dToy::ToyCrawler::CleanUpCTTrack(int flag){
   //Sort the track first
   MergeClusterTrackSet MCT_set;
   for (int i =0;i!=all_mergeclustertrack.size();i++){
@@ -402,7 +402,7 @@ void WireCell2dToy::ToyCrawler::CleanUpCTTrack(int flag){
 
 }
 
-void WireCell2dToy::ToyCrawler::UpdateMap(){
+void WCP2dToy::ToyCrawler::UpdateMap(){
   // Update map again ... 
   mcells_mct_map.clear();
   for (int i=0;i!=all_mergeclustertrack.size();i++){
@@ -422,7 +422,7 @@ void WireCell2dToy::ToyCrawler::UpdateMap(){
 }
 
 
-void WireCell2dToy::ToyCrawler::PurgeMergeCTrack(){
+void WCP2dToy::ToyCrawler::PurgeMergeCTrack(){
   
   //remove merged cluster in which all the merge space cell are accounted for ... s
   MergeClusterTrackSelection temp1;
@@ -472,7 +472,7 @@ void WireCell2dToy::ToyCrawler::PurgeMergeCTrack(){
 
 
 
-void WireCell2dToy::ToyCrawler::FurtherExtendCTrack(int flag_qx){
+void WCP2dToy::ToyCrawler::FurtherExtendCTrack(int flag_qx){
   
   
   MergeClusterTrackSelection temp1;
@@ -737,8 +737,8 @@ void WireCell2dToy::ToyCrawler::FurtherExtendCTrack(int flag_qx){
 }
 
 
-void WireCell2dToy::ToyCrawler::MergeCTrack(int flag1){
-  WireCell::ClusterTrackSelection used_clustertrack; // hold the used tracks
+void WCP2dToy::ToyCrawler::MergeCTrack(int flag1){
+  WCP::ClusterTrackSelection used_clustertrack; // hold the used tracks
 
   for (int i = 0;i!=all_clustertrack.size();i++){
     
@@ -951,7 +951,7 @@ void WireCell2dToy::ToyCrawler::MergeCTrack(int flag1){
 }
 
 
-void WireCell2dToy::ToyCrawler::CreateClusterTrack(MergeSpaceCellSelection& mcells){
+void WCP2dToy::ToyCrawler::CreateClusterTrack(MergeSpaceCellSelection& mcells){
 
   for (int i = 0; i!=mcells.size();i++){
     MergeSpaceCell *mcell1 = mcells.at(i);
@@ -1246,7 +1246,7 @@ void WireCell2dToy::ToyCrawler::CreateClusterTrack(MergeSpaceCellSelection& mcel
   } // while loop
 }
 
-void WireCell2dToy::ToyCrawler::FormGraph(){
+void WCP2dToy::ToyCrawler::FormGraph(){
   ct_ms_map.clear();
   ms_ct_map.clear();
 
@@ -1283,7 +1283,7 @@ void WireCell2dToy::ToyCrawler::FormGraph(){
 }
 
 
-WireCell2dToy::ToyCrawler::~ToyCrawler(){
+WCP2dToy::ToyCrawler::~ToyCrawler(){
   for (int i=0;i!=all_clustertrack.size();i++){
     delete all_clustertrack.at(i);
   }

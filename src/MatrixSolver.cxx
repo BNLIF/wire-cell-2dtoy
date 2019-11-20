@@ -1,15 +1,15 @@
-#include "WireCell2dToy/MatrixSolver.h"
+#include "WCP2dToy/MatrixSolver.h"
 #include "TDecompChol.h"
 
-#include "WireCellRess/LassoModel.h"
-#include "WireCellRess/ElasticNetModel.h"
+#include "WCPRess/LassoModel.h"
+#include "WCPRess/ElasticNetModel.h"
 
 
 using namespace Eigen;
 
-using namespace WireCell;
+using namespace WCP;
 
-WireCell2dToy::MatrixSolver::MatrixSolver(GeomCellSelection& allmcell, GeomWireSelection& mwires, WireCell::GeomCellMap& cell_wire_map, WireCell::GeomWireMap& wire_cell_map, WireCell::WireChargeMap& wire_charge_map, WireCell::WireChargeMap& wire_charge_error_map)
+WCP2dToy::MatrixSolver::MatrixSolver(GeomCellSelection& allmcell, GeomWireSelection& mwires, WCP::GeomCellMap& cell_wire_map, WCP::GeomWireMap& wire_cell_map, WCP::WireChargeMap& wire_charge_map, WCP::WireChargeMap& wire_charge_error_map)
 {
   //
   solve_flag = -1;
@@ -221,7 +221,7 @@ WireCell2dToy::MatrixSolver::MatrixSolver(GeomCellSelection& allmcell, GeomWireS
   }
   
 }
-void WireCell2dToy::MatrixSolver::L1_Solve(std::map<const GeomCell*, double>& cell_weight_map){
+void WCP2dToy::MatrixSolver::L1_Solve(std::map<const GeomCell*, double>& cell_weight_map){
     
 
   // MA->Print();
@@ -229,7 +229,7 @@ void WireCell2dToy::MatrixSolver::L1_Solve(std::map<const GeomCell*, double>& ce
   
   
 
-  WireCell::LassoModel m2(lambda, 100000, TOL, true);
+  WCP::LassoModel m2(lambda, 100000, TOL, true);
   m2.SetData(G, W);
   // set weights
   for (auto it = mcimap.begin(); it!=mcimap.end(); it++){
@@ -268,7 +268,7 @@ void WireCell2dToy::MatrixSolver::L1_Solve(std::map<const GeomCell*, double>& ce
   solve_flag = 2;
 }
 
-GeomCellSelection WireCell2dToy::MatrixSolver::get_all_cells(){
+GeomCellSelection WCP2dToy::MatrixSolver::get_all_cells(){
   GeomCellSelection cells;
   for (auto it = mcimap.begin(); it!=mcimap.end();it++){
     cells.push_back(it->first);
@@ -277,7 +277,7 @@ GeomCellSelection WireCell2dToy::MatrixSolver::get_all_cells(){
 }
 
 
-double WireCell2dToy::MatrixSolver::get_mcell_charge(MergeGeomCell *mcell){
+double WCP2dToy::MatrixSolver::get_mcell_charge(MergeGeomCell *mcell){
   double charge = 0;
 
   if (mcimap.find(mcell) != mcimap.end()){
@@ -288,7 +288,7 @@ double WireCell2dToy::MatrixSolver::get_mcell_charge(MergeGeomCell *mcell){
 }
 
 
-// void WireCell2dToy::MatrixSolver::Direct_Solve(){
+// void WCP2dToy::MatrixSolver::Direct_Solve(){
 //   *MC_inv = *MC;
 //   MC_inv->Invert();
 //   *Cx = (*MC_inv) * (*MAT) * (*VBy_inv) * (*MB) * (*Wy);
@@ -322,7 +322,7 @@ double WireCell2dToy::MatrixSolver::get_mcell_charge(MergeGeomCell *mcell){
 // }
 
 
-WireCell2dToy::MatrixSolver::~MatrixSolver(){
+WCP2dToy::MatrixSolver::~MatrixSolver(){
   
     
 

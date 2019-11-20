@@ -1,11 +1,11 @@
-#include "WireCellSst/GeomDataSource.h"
-#include "WireCell2dToy/uBooNE_light_reco.h"
+#include "WCPSst/GeomDataSource.h"
+#include "WCP2dToy/uBooNE_light_reco.h"
 #include "TH1F.h"
 #include "TH2F.h"
 
 #include <iostream>
 
-using namespace WireCell;
+using namespace WCP;
 using namespace std;
 
 int main(int argc, char* argv[])
@@ -16,7 +16,7 @@ int main(int argc, char* argv[])
   }
   TH1::AddDirectory(kFALSE);
 
-  WireCellSst::GeomDataSource gds(argv[1]);
+  WCPSst::GeomDataSource gds(argv[1]);
   std::vector<double> ex = gds.extent();
   cerr << "Extent: "
        << " x:" << ex[0]/units::mm << " mm"
@@ -36,7 +36,7 @@ int main(int argc, char* argv[])
   const char* root_file = argv[2];
   int eve_num = atoi(argv[3]);
 
-  WireCell2dToy::uBooNE_light_reco uboone_flash(root_file);
+  WCP2dToy::uBooNE_light_reco uboone_flash(root_file);
   //uboone_flash.load_event(eve_num);
   uboone_flash.load_event_raw(eve_num);
     
@@ -176,7 +176,7 @@ int main(int argc, char* argv[])
   T_flash->Branch("l1_fired_time",&l1_fired_time);
   T_flash->Branch("l1_fired_pe",&l1_fired_pe);
 
-  WireCell::OpflashSelection& flashes = uboone_flash.get_flashes();
+  WCP::OpflashSelection& flashes = uboone_flash.get_flashes();
   for (auto it = flashes.begin(); it!=flashes.end(); it++){
     fired_channels.clear();
     

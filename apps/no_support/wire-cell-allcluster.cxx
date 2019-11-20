@@ -1,15 +1,15 @@
-#include "WireCell2dToy/ToyTiling.h"
-#include "WireCell2dToy/ClusterDisplay.h"
-#include "WireCell2dToy/ToyCrawler.h"
-#include "WireCell2dToy/ToyTracking.h"
-#include "WireCellData/TPCParams.h"
-#include "WireCellData/Singleton.h"
+#include "WCP2dToy/ToyTiling.h"
+#include "WCP2dToy/ClusterDisplay.h"
+#include "WCP2dToy/ToyCrawler.h"
+#include "WCP2dToy/ToyTracking.h"
+#include "WCPData/TPCParams.h"
+#include "WCPData/Singleton.h"
 
 
-#include "WireCellData/MergeGeomCell.h"
-#include "WireCellData/MergeGeomWire.h"
-#include "WireCellData/SpaceCell.h"
-#include "WireCellData/MergeSpaceCell.h"
+#include "WCPData/MergeGeomCell.h"
+#include "WCPData/MergeGeomWire.h"
+#include "WCPData/SpaceCell.h"
+#include "WCPData/MergeSpaceCell.h"
 
 
 
@@ -26,7 +26,7 @@
 #include "TMatrixD.h"
 #include <iostream>
 
-using namespace WireCell;
+using namespace WCP;
 using namespace std;
 
 int main(int argc, char* argv[])
@@ -36,7 +36,7 @@ int main(int argc, char* argv[])
     return 1;
   }
    
-     WireCellSst::GeomDataSource gds(argv[1]);
+     WCPSst::GeomDataSource gds(argv[1]);
   std::vector<double> ex = gds.extent();
   cerr << "Extent: "
        << " x:" << ex[0]/units::mm << " mm"
@@ -87,12 +87,12 @@ int main(int argc, char* argv[])
 
   //cout << T->GetEntries() << " " << TC->GetEntries() << endl;
   const int ntime = total_time_bin/nrebin;
-  WireCell2dToy::ToyTiling **toytiling = new WireCell2dToy::ToyTiling*[ntime];
+  WCP2dToy::ToyTiling **toytiling = new WCP2dToy::ToyTiling*[ntime];
   for (int i=0;i!=ntime;i++){
-    toytiling[i] = new WireCell2dToy::ToyTiling();
+    toytiling[i] = new WCP2dToy::ToyTiling();
   }
   int time_slice;
-  //  WireCell2dToy::ToyTiling* tt = 0;
+  //  WCP2dToy::ToyTiling* tt = 0;
   
   // T->SetBranchAddress("time_slice",&time_slice);
   // T->SetBranchAddress("toytiling",&tt);
@@ -141,8 +141,8 @@ int main(int argc, char* argv[])
 
 
   //save all the crawlers ... 
-  std::vector<WireCell2dToy::ToyCrawler*> crawlers;
-  std::vector<WireCell2dToy::ToyTracking*> trackings;
+  std::vector<WCP2dToy::ToyCrawler*> crawlers;
+  std::vector<WCP2dToy::ToyTracking*> trackings;
 
   int prev_mcell_id = -1;
   int prev_cluster_num = -1;
@@ -159,7 +159,7 @@ int main(int argc, char* argv[])
       if (prev_cluster_num!=-1){
 	if (mcell->Get_all_spacecell().size()>0)
 	  mcells.push_back(mcell);  
-	WireCell2dToy::ToyCrawler* toycrawler = new WireCell2dToy::ToyCrawler(mcells,1,2); // cosmic tune
+	WCP2dToy::ToyCrawler* toycrawler = new WCP2dToy::ToyCrawler(mcells,1,2); // cosmic tune
 	//toycrawler->FormGraph();
 
 	// if (cluster_num==3){
@@ -167,7 +167,7 @@ int main(int argc, char* argv[])
 	//   theApp.SetReturnFromRun(true);	  
 	//   TCanvas c1("ToyMC","ToyMC",800,600);
 	//   c1.Draw();
-	//   WireCell2dToy::ClusterDisplay display(c1);
+	//   WCP2dToy::ClusterDisplay display(c1);
 	//   display.DrawCluster(cells);
 	//   display.DrawCluster(mcells);
 	  
@@ -231,7 +231,7 @@ int main(int argc, char* argv[])
     if (mcell->Get_all_spacecell().size()>0)
       mcells.push_back(mcell);  
   }
-  WireCell2dToy::ToyCrawler* toycrawler = new WireCell2dToy::ToyCrawler(mcells);
+  WCP2dToy::ToyCrawler* toycrawler = new WCP2dToy::ToyCrawler(mcells);
   toycrawler->FormGraph();
   crawlers.push_back(toycrawler);
 
@@ -244,7 +244,7 @@ int main(int argc, char* argv[])
   int sum = 0 ;
   
   for (int i=0;i!=crawlers.size();i++){
-    WireCell2dToy::ToyTracking* toytracking = new WireCell2dToy::ToyTracking(*crawlers.at(i),1); // cosmic tune
+    WCP2dToy::ToyTracking* toytracking = new WCP2dToy::ToyTracking(*crawlers.at(i),1); // cosmic tune
     trackings.push_back(toytracking);
 
     std::cout << i << std::endl;
@@ -568,7 +568,7 @@ int main(int argc, char* argv[])
   
   
   // for (int i=0;i!=crawlers.size();i++){
-  //   WireCell2dToy::ToyCrawler *toycrawler = crawlers.at(i);
+  //   WCP2dToy::ToyCrawler *toycrawler = crawlers.at(i);
   //   for (int j=0;j!=toycrawler->Get_allMCT().size();j++){
   //     MergeClusterTrack *mct = toycrawler->Get_allMCT().at(j);
   //     int ntime = mct->Get_TimeLength();
@@ -603,7 +603,7 @@ int main(int argc, char* argv[])
   // TCanvas c1("ToyMC","ToyMC",800,600);
   // c1.Draw();
   
-  // WireCell2dToy::ClusterDisplay display(c1);
+  // WCP2dToy::ClusterDisplay display(c1);
   // display.DrawCluster(ms_cells);
 
   // theApp.Run();

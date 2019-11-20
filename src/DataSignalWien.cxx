@@ -1,14 +1,14 @@
-#include "WireCell2dToy/DataSignalWien.h"
+#include "WCP2dToy/DataSignalWien.h"
 
-#include "WireCellData/GeomWire.h"
+#include "WCPData/GeomWire.h"
 #include "TFile.h"
 #include "TVirtualFFT.h"
 #include "TRandom.h"
 #include "TF1.h"
 
-using namespace WireCell;
+using namespace WCP;
 
-WireCell2dToy::DataSignalWienFDS::DataSignalWienFDS(WireCell::FrameDataSource& fds, const WireCell::GeomDataSource& gds,WireCell::ChirpMap& umap, WireCell::ChirpMap& vmap, WireCell::ChirpMap& wmap, int bins_per_frame1, int nframes_total, float time_offset_uv, float time_offset_uw, float overall_time_offset)
+WCP2dToy::DataSignalWienFDS::DataSignalWienFDS(WCP::FrameDataSource& fds, const WCP::GeomDataSource& gds,WCP::ChirpMap& umap, WCP::ChirpMap& vmap, WCP::ChirpMap& wmap, int bins_per_frame1, int nframes_total, float time_offset_uv, float time_offset_uw, float overall_time_offset)
   : fds(fds)
   , gds(gds)
   , max_frames(nframes_total)
@@ -122,11 +122,11 @@ WireCell2dToy::DataSignalWienFDS::DataSignalWienFDS(WireCell::FrameDataSource& f
   
 }
 
-int WireCell2dToy::DataSignalWienFDS::size() const{
+int WCP2dToy::DataSignalWienFDS::size() const{
   return max_frames;
 }
 
-void WireCell2dToy::DataSignalWienFDS::Save(){
+void WCP2dToy::DataSignalWienFDS::Save(){
   TFile *file = new TFile("temp_wien.root","RECREATE");
   // for (int i=0;i!=nwire_u;i++){
   //   TH1F *huu = (TH1F*)hu[i]->Clone(Form("U1_%d",i));
@@ -141,7 +141,7 @@ void WireCell2dToy::DataSignalWienFDS::Save(){
   file->Close();
 }
 
-int WireCell2dToy::DataSignalWienFDS::jump(int frame_number){
+int WCP2dToy::DataSignalWienFDS::jump(int frame_number){
   // fill the frame data ... 
   if (frame.index == frame_number) {
     return frame_number;
@@ -436,7 +436,7 @@ int WireCell2dToy::DataSignalWienFDS::jump(int frame_number){
   return frame.index;
 }
 
-WireCell2dToy::DataSignalWienFDS::~DataSignalWienFDS(){
+WCP2dToy::DataSignalWienFDS::~DataSignalWienFDS(){
   // for (int i=0;i!=nwire_u;i++){
   //   delete hu[i] ;
   // }

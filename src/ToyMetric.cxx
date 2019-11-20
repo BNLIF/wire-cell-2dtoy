@@ -1,8 +1,8 @@
-#include "WireCell2dToy/ToyMetric.h"
+#include "WCP2dToy/ToyMetric.h"
 
-using namespace WireCell;
+using namespace WCP;
 
-WireCell2dToy::ToyMetric::ToyMetric(){
+WCP2dToy::ToyMetric::ToyMetric(){
   rm_cell_true = 0;
   rm_cell_false = 0;
   el_cell_true = 0;
@@ -20,7 +20,7 @@ WireCell2dToy::ToyMetric::ToyMetric(){
   threshold = 2000;
 }
 
-void WireCell2dToy::ToyMetric::AddSolve(int cond){
+void WCP2dToy::ToyMetric::AddSolve(int cond){
   if (cond ==0 ){
     solve_condition[0] ++;
   }else if (cond==1){
@@ -30,10 +30,10 @@ void WireCell2dToy::ToyMetric::AddSolve(int cond){
   }
 }
 
-WireCell2dToy::ToyMetric::~ToyMetric(){
+WCP2dToy::ToyMetric::~ToyMetric(){
 }
 
-void WireCell2dToy::ToyMetric::Add(GeomCellSelection &allmcell,WireCell2dToy::ToyMatrix& toymatrix, CellChargeMap& ccmap){
+void WCP2dToy::ToyMetric::Add(GeomCellSelection &allmcell,WCP2dToy::ToyMatrix& toymatrix, CellChargeMap& ccmap){
   for (int j=0;j!=allmcell.size();j++){
     MergeGeomCell *mcell = (MergeGeomCell*)allmcell[j];
     double charge = toymatrix.Get_Cell_Charge(mcell,1);
@@ -63,7 +63,7 @@ void WireCell2dToy::ToyMetric::Add(GeomCellSelection &allmcell,WireCell2dToy::To
   
 }
 
-void WireCell2dToy::ToyMetric::Print(){
+void WCP2dToy::ToyMetric::Print(){
   // std::cout << "Remaining Cells Containing Truth     : " << rm_cell_true << " " << charge_rm_cell_true << std::endl;
   // std::cout << "Remaining Cells Not Containing Truth : " << rm_cell_false << " " << charge_rm_cell_false << std::endl;
   // std::cout << "Eliminated Cells Containing Truth    : " << el_cell_true << " " << charge_el_cell_true << std::endl;

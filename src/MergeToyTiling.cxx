@@ -1,20 +1,20 @@
-#include "WireCell2dToy/MergeToyTiling.h"
-#include "WireCellData/GeomCell.h"
-#include "WireCellData/GeomWire.h"
-#include "WireCellData/MergeGeomCell.h"
-#include "WireCellData/MergeGeomWire.h"
-#include "WireCellData/Singleton.h"
-#include "WireCellData/TPCParams.h"
+#include "WCP2dToy/MergeToyTiling.h"
+#include "WCPData/GeomCell.h"
+#include "WCPData/GeomWire.h"
+#include "WCPData/MergeGeomCell.h"
+#include "WCPData/MergeGeomWire.h"
+#include "WCPData/Singleton.h"
+#include "WCPData/TPCParams.h"
 
 #include <cmath>
 
-using namespace WireCell;
+using namespace WCP;
 
-double WireCell2dToy::MergeToyTiling::time_convert = 0.32;
-double WireCell2dToy::MergeToyTiling::dis_offset = -256;
+double WCP2dToy::MergeToyTiling::time_convert = 0.32;
+double WCP2dToy::MergeToyTiling::dis_offset = -256;
 
 
-WireCell2dToy::MergeToyTiling::MergeToyTiling(WireCell2dToy::ToyTiling& tiling, int time_slice, int merge_strategy, int flag_remerge)
+WCP2dToy::MergeToyTiling::MergeToyTiling(WCP2dToy::ToyTiling& tiling, int time_slice, int merge_strategy, int flag_remerge)
 {
   IsRemerged = false;
 
@@ -457,7 +457,7 @@ WireCell2dToy::MergeToyTiling::MergeToyTiling(WireCell2dToy::ToyTiling& tiling, 
 }
 
 
-WireCell2dToy::MergeToyTiling::MergeToyTiling(const DetectorGDS& gds, WireCell2dToy::ToyTiling& tiling, int time_slice){
+WCP2dToy::MergeToyTiling::MergeToyTiling(const DetectorGDS& gds, WCP2dToy::ToyTiling& tiling, int time_slice){
   
   //check cells
   // for (int i = 0; i!=tiling.get_allcell().size(); i++){
@@ -686,7 +686,7 @@ WireCell2dToy::MergeToyTiling::MergeToyTiling(const DetectorGDS& gds, WireCell2d
 }
 
 
-void WireCell2dToy::MergeToyTiling::form_wiremap(const DetectorGDS& gds, WireCell2dToy::ToyTiling& tiling, int time_slice){
+void WCP2dToy::MergeToyTiling::form_wiremap(const DetectorGDS& gds, WCP2dToy::ToyTiling& tiling, int time_slice){
   int ident_wire = 50000;
 
   for (int i=0;i!=cell_all.size();i++){    
@@ -863,7 +863,7 @@ void WireCell2dToy::MergeToyTiling::form_wiremap(const DetectorGDS& gds, WireCel
 
 
 
-void WireCell2dToy::MergeToyTiling::deghost(GeomCellSelection &good_mcells){
+void WCP2dToy::MergeToyTiling::deghost(GeomCellSelection &good_mcells){
   
   // fill the three-wires cells and two-wires cells 
   two_wires_cells.clear();
@@ -1106,7 +1106,7 @@ void WireCell2dToy::MergeToyTiling::deghost(GeomCellSelection &good_mcells){
 }
 
 
-void WireCell2dToy::MergeToyTiling::form_wiremap(WireCell2dToy::ToyTiling& tiling, int time_slice){
+void WCP2dToy::MergeToyTiling::form_wiremap(WCP2dToy::ToyTiling& tiling, int time_slice){
   int ident_wire = 50000;
   
 
@@ -1261,7 +1261,7 @@ void WireCell2dToy::MergeToyTiling::form_wiremap(WireCell2dToy::ToyTiling& tilin
 
 
 
-WireCell2dToy::MergeToyTiling::~MergeToyTiling(){
+WCP2dToy::MergeToyTiling::~MergeToyTiling(){
   for (int i=0;i!=cell_all.size();i++){
     delete cell_all[i];
   }
@@ -1288,9 +1288,9 @@ WireCell2dToy::MergeToyTiling::~MergeToyTiling(){
 }
 
 
-int WireCell2dToy::MergeToyTiling::further_mergewire(WireCell::GeomWireSelection &allwire, int nwire, int time_slice){
+int WCP2dToy::MergeToyTiling::further_mergewire(WCP::GeomWireSelection &allwire, int nwire, int time_slice){
 
-  WireCell::GeomWireSelection tempwire = allwire;
+  WCP::GeomWireSelection tempwire = allwire;
   allwire.clear();
 
   for (int i=0;i!=tempwire.size();i++){
@@ -1336,8 +1336,8 @@ int WireCell2dToy::MergeToyTiling::further_mergewire(WireCell::GeomWireSelection
 
 
 
-int WireCell2dToy::MergeToyTiling::further_merge(WireCell::GeomCellSelection &allcell, int ncell,int time_slice, double dis){
-  WireCell::GeomCellSelection tempcell = allcell;
+int WCP2dToy::MergeToyTiling::further_merge(WCP::GeomCellSelection &allcell, int ncell,int time_slice, double dis){
+  WCP::GeomCellSelection tempcell = allcell;
   allcell.clear();
 
   
@@ -1377,9 +1377,9 @@ int WireCell2dToy::MergeToyTiling::further_merge(WireCell::GeomCellSelection &al
 }
 
 
-const WireCell::GeomCell* WireCell2dToy::MergeToyTiling::cell(const WireCell::GeomWireSelection& wires) const
+const WCP::GeomCell* WCP2dToy::MergeToyTiling::cell(const WCP::GeomWireSelection& wires) const
 {
   return 0;
 }
 
-ClassImp(WireCell2dToy::MergeToyTiling);
+ClassImp(WCP2dToy::MergeToyTiling);

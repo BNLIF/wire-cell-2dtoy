@@ -1,4 +1,4 @@
-void WireCell2dToy::Clustering_close(WireCell::PR3DClusterSelection& live_clusters, std::map<PR3DCluster*,double>& cluster_length_map, std::set<WireCell::PR3DCluster*>& cluster_connected_dead, double length_cut){
+void WCP2dToy::Clustering_close(WCP::PR3DClusterSelection& live_clusters, std::map<PR3DCluster*,double>& cluster_length_map, std::set<WCP::PR3DCluster*>& cluster_connected_dead, double length_cut){
   // calculate the length ...
   TPCParams& mp = Singleton<TPCParams>::Instance();
   double pitch_u = mp.get_pitch_u();
@@ -30,7 +30,7 @@ void WireCell2dToy::Clustering_close(WireCell::PR3DClusterSelection& live_cluste
       PR3DCluster* cluster_2 = live_clusters.at(j);
       if (used_clusters.find(cluster_2)!=used_clusters.end()) continue;
       if (cluster_length_map[cluster_2] < 1.5*units::cm) continue;
-      if (WireCell2dToy::Clustering_3rd_round(cluster_1,cluster_2, cluster_length_map[cluster_1], cluster_length_map[cluster_2], length_cut)){
+      if (WCP2dToy::Clustering_3rd_round(cluster_1,cluster_2, cluster_length_map[cluster_1], cluster_length_map[cluster_2], length_cut)){
 	to_be_merged_pairs.insert(std::make_pair(cluster_1,cluster_2));
 	if (cluster_length_map[cluster_1] < 5*units::cm){
 	  used_clusters.insert(cluster_1);
@@ -120,7 +120,7 @@ void WireCell2dToy::Clustering_close(WireCell::PR3DClusterSelection& live_cluste
 }
 
 
-bool WireCell2dToy::Clustering_3rd_round(WireCell::PR3DCluster *cluster1, WireCell::PR3DCluster *cluster2, double length_1, double length_2, double length_cut){
+bool WCP2dToy::Clustering_3rd_round(WCP::PR3DCluster *cluster1, WCP::PR3DCluster *cluster2, double length_1, double length_2, double length_cut){
   cluster1->Create_point_cloud();
   cluster2->Create_point_cloud();
 

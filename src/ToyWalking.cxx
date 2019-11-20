@@ -1,8 +1,8 @@
-#include "WireCell2dToy/ToyWalking.h"
+#include "WCP2dToy/ToyWalking.h"
 
-using namespace WireCell;
+using namespace WCP;
 
-WireCell2dToy::ToyNWalking::ToyNWalking(WireCell::MergeSpaceCell *start_cell, WireCell::MergeSpaceCellMap& mcells_map, WireCell::MergeSpaceCellSelection& used_cell, WireCell::MergeSpaceCellSelection& must_cell)
+WCP2dToy::ToyNWalking::ToyNWalking(WCP::MergeSpaceCell *start_cell, WCP::MergeSpaceCellMap& mcells_map, WCP::MergeSpaceCellSelection& used_cell, WCP::MergeSpaceCellSelection& must_cell)
   : start_cell(start_cell)
   , mcells_map(mcells_map)
   , used_cell(used_cell)
@@ -11,7 +11,7 @@ WireCell2dToy::ToyNWalking::ToyNWalking(WireCell::MergeSpaceCell *start_cell, Wi
   Iterate(start_cell);
 }
 
-void WireCell2dToy::ToyNWalking::Iterate(MergeSpaceCell *curr_cell){
+void WCP2dToy::ToyNWalking::Iterate(MergeSpaceCell *curr_cell){
   cells.push_back(curr_cell);
   
   for (int i=0;i!=mcells_map[curr_cell].size();i++){
@@ -28,11 +28,11 @@ void WireCell2dToy::ToyNWalking::Iterate(MergeSpaceCell *curr_cell){
   }
 }
 
-WireCell2dToy::ToyNWalking::~ToyNWalking(){
+WCP2dToy::ToyNWalking::~ToyNWalking(){
 }
 
 
-WireCell2dToy::ToyWalking::ToyWalking(WireCell::MergeSpaceCell *start_cell, Point start_point, WireCell::MergeSpaceCell *target_cell, Point target_point, WireCell::MergeSpaceCellMap& mcells_map, int counter_limit)
+WCP2dToy::ToyWalking::ToyWalking(WCP::MergeSpaceCell *start_cell, Point start_point, WCP::MergeSpaceCell *target_cell, Point target_point, WCP::MergeSpaceCellMap& mcells_map, int counter_limit)
   : start_cell(start_cell)
   , target_cell(target_cell)
   , mcells_map(mcells_map)
@@ -50,7 +50,7 @@ WireCell2dToy::ToyWalking::ToyWalking(WireCell::MergeSpaceCell *start_cell, Poin
 }
 
 
-WireCell2dToy::ToyWalking::ToyWalking(WireCell::MergeSpaceCell *start_cell, Point start_point, WireCell::MergeSpaceCell *target_cell, Point target_point, WireCell::MergeSpaceCellMap& mcells_map, WireCell::MergeSpaceCellSelection must_cells, int counter_limit)
+WCP2dToy::ToyWalking::ToyWalking(WCP::MergeSpaceCell *start_cell, Point start_point, WCP::MergeSpaceCell *target_cell, Point target_point, WCP::MergeSpaceCellMap& mcells_map, WCP::MergeSpaceCellSelection must_cells, int counter_limit)
   : start_cell(start_cell)
   , target_cell(target_cell)
   , mcells_map(mcells_map)
@@ -68,7 +68,7 @@ WireCell2dToy::ToyWalking::ToyWalking(WireCell::MergeSpaceCell *start_cell, Poin
 }
 
 
-void WireCell2dToy::ToyWalking::Iterate(MergeSpaceCell *curr_cell, MergeSpaceCellSelection &curr_cells, double dis){
+void WCP2dToy::ToyWalking::Iterate(MergeSpaceCell *curr_cell, MergeSpaceCellSelection &curr_cells, double dis){
   curr_cells.push_back(curr_cell);
   global_counter ++;
   
@@ -162,5 +162,5 @@ void WireCell2dToy::ToyWalking::Iterate(MergeSpaceCell *curr_cell, MergeSpaceCel
 }
 
 
-WireCell2dToy::ToyWalking::~ToyWalking(){
+WCP2dToy::ToyWalking::~ToyWalking(){
 }

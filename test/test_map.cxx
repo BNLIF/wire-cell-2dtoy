@@ -1,14 +1,14 @@
-#include "WireCellSst/GeomDataSource.h"
-#include "WireCell2dToy/FrameDataSource.h"
-#include "WireCell2dToy/ToyEventDisplay.h"
-#include "WireCell2dToy/ToyTiling.h"
+#include "WCPSst/GeomDataSource.h"
+#include "WCP2dToy/FrameDataSource.h"
+#include "WCP2dToy/ToyEventDisplay.h"
+#include "WCP2dToy/ToyTiling.h"
 
-#include "WireCellNav/SliceDataSource.h"
+#include "WCPNav/SliceDataSource.h"
 #include "TApplication.h"
 #include "TStyle.h"
 #include "TH1F.h"
 #include <iostream>
-using namespace WireCell;
+using namespace WCP;
 using namespace std;
 
 

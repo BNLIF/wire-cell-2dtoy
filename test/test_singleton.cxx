@@ -1,5 +1,5 @@
-#include "WireCellData/Singleton.h"
-//#include "WireCellUtil/Testing.h"
+#include "WCPData/Singleton.h"
+//#include "WCPUtil/Testing.h"
 
 #include <boost/assert.hpp>
 
@@ -16,7 +16,7 @@ public:
     virtual void chirp() { cout << "Foo::chirp() at " << (void*)this << endl; }
 };
 
-typedef WireCell::Singleton<Foo> OnlyFoo;
+typedef WCP::Singleton<Foo> OnlyFoo;
 
 int main()
 {
@@ -30,7 +30,7 @@ int main()
     cout << "Second time:" << endl;
     OnlyFoo::Instance().chirp();
 
-    Foo* foo3 = &WireCell::Singleton<Foo>::Instance();
+    Foo* foo3 = &WCP::Singleton<Foo>::Instance();
     Assert(foo3 == foo1);
 
 }

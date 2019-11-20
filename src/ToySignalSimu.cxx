@@ -1,14 +1,14 @@
-#include "WireCell2dToy/ToySignalSimu.h"
+#include "WCP2dToy/ToySignalSimu.h"
 
-#include "WireCellData/GeomWire.h"
+#include "WCPData/GeomWire.h"
 #include "TFile.h"
 #include "TVirtualFFT.h"
 #include "TRandom.h"
 #include "TF1.h"
 
-using namespace WireCell;
+using namespace WCP;
 
-WireCell2dToy::ToySignalSimuFDS::ToySignalSimuFDS(WireCell::FrameDataSource& fds, const WireCell::GeomDataSource& gds,int bins_per_frame1, int nframes_total, float time_offset_uv, float time_offset_uw, int flag_random, float overall_time_offset, int overall_time_shift)
+WCP2dToy::ToySignalSimuFDS::ToySignalSimuFDS(WCP::FrameDataSource& fds, const WCP::GeomDataSource& gds,int bins_per_frame1, int nframes_total, float time_offset_uv, float time_offset_uw, int flag_random, float overall_time_offset, int overall_time_shift)
   : fds(fds)
   , gds(&gds)
   , dgds(0)
@@ -89,7 +89,7 @@ WireCell2dToy::ToySignalSimuFDS::ToySignalSimuFDS(WireCell::FrameDataSource& fds
   */
 }
  
-WireCell2dToy::ToySignalSimuFDS::ToySignalSimuFDS(WireCell::FrameDataSource& fds, const WireCell::DetectorGDS& gds,int bins_per_frame1, int nframes_total, float time_offset_uv, float time_offset_uw, int flag_random, float overall_time_offset, int overall_time_shift)
+WCP2dToy::ToySignalSimuFDS::ToySignalSimuFDS(WCP::FrameDataSource& fds, const WCP::DetectorGDS& gds,int bins_per_frame1, int nframes_total, float time_offset_uv, float time_offset_uw, int flag_random, float overall_time_offset, int overall_time_shift)
   : fds(fds)
   , gds(0)
   , dgds(&gds)
@@ -165,7 +165,7 @@ WireCell2dToy::ToySignalSimuFDS::ToySignalSimuFDS(WireCell::FrameDataSource& fds
   */
 }
 
-WireCell2dToy::ToySignalSimuFDS::ToySignalSimuFDS(WireCell::FrameDataSource& fds, const WireCell::DetectorGDS& gds, WireCellSignal::ElectronicsConfig& conf, int nframes_total, float time_offset_uv, float time_offset_uw, int flag_random, float overall_time_offset, int overall_time_shift)
+WCP2dToy::ToySignalSimuFDS::ToySignalSimuFDS(WCP::FrameDataSource& fds, const WCP::DetectorGDS& gds, WCPSignal::ElectronicsConfig& conf, int nframes_total, float time_offset_uv, float time_offset_uw, int flag_random, float overall_time_offset, int overall_time_shift)
   : fds(fds)
   , gds(0)
   , dgds(&gds)
@@ -181,13 +181,13 @@ WireCell2dToy::ToySignalSimuFDS::ToySignalSimuFDS(WireCell::FrameDataSource& fds
   std::cout<<"here?"<<std::endl;
   bins_per_frame = config->NTDC();
   std::cout<<"bins per frame: "<<bins_per_frame<<std::endl;;    
-  noise = new WireCellSignal::GenNoise(*config);
+  noise = new WCPSignal::GenNoise(*config);
   std::cout<<"noise"<<std::endl;
-  //fRsp = new WireCellSignal::ConvolutedResponse(config, "/home/xiaoyueli/BNLIF/wire-cell/signal/dune.root", overall_time_offset, time_offset_uv, time_offset_uw);
+  //fRsp = new WCPSignal::ConvolutedResponse(config, "/home/xiaoyueli/BNLIF/wire-cell/signal/dune.root", overall_time_offset, time_offset_uv, time_offset_uw);
   //fds.SetResponseFunctions(fRsp);
 }
 
-WireCell2dToy::ToySignalSimuFDS::ToySignalSimuFDS(WireCell::FrameDataSource& fds, const WireCell::GeomDataSource& gds, WireCellSignal::ElectronicsConfig& conf, int nframes_total, float time_offset_uv, float time_offset_uw, int flag_random, float overall_time_offset, int overall_time_shift)
+WCP2dToy::ToySignalSimuFDS::ToySignalSimuFDS(WCP::FrameDataSource& fds, const WCP::GeomDataSource& gds, WCPSignal::ElectronicsConfig& conf, int nframes_total, float time_offset_uv, float time_offset_uw, int flag_random, float overall_time_offset, int overall_time_shift)
   : fds(fds)
   , gds(&gds)
   , dgds(0)
@@ -201,16 +201,16 @@ WireCell2dToy::ToySignalSimuFDS::ToySignalSimuFDS(WireCell::FrameDataSource& fds
   , simulation_type(2)  
 {  
   bins_per_frame = config->NTDC();
-  noise = new WireCellSignal::GenNoise(*config);
-  //fRsp = new WireCellSignal::ConvolutedResponse(config, "/home/xiaoyueli/BNLIF/wire-cell/signal/dune.root", overall_time_offset, time_offset_uv, time_offset_uw);
+  noise = new WCPSignal::GenNoise(*config);
+  //fRsp = new WCPSignal::ConvolutedResponse(config, "/home/xiaoyueli/BNLIF/wire-cell/signal/dune.root", overall_time_offset, time_offset_uv, time_offset_uw);
   //fds.SetResponseFunctions(fRsp);
 }
 
-int WireCell2dToy::ToySignalSimuFDS::size() const{
+int WCP2dToy::ToySignalSimuFDS::size() const{
   return max_frames;
 }
 
-void WireCell2dToy::ToySignalSimuFDS::Save(){
+void WCP2dToy::ToySignalSimuFDS::Save(){
   /*
   std::cout<<"save"<<std::endl;
   TFile *file = new TFile("temp_simu.root","RECREATE");
@@ -241,7 +241,7 @@ void WireCell2dToy::ToySignalSimuFDS::Save(){
   */
 }
 
-int WireCell2dToy::ToySignalSimuFDS::jump(int frame_number){
+int WCP2dToy::ToySignalSimuFDS::jump(int frame_number){
   // do simulation
   
   //test save
@@ -588,7 +588,7 @@ int WireCell2dToy::ToySignalSimuFDS::jump(int frame_number){
   return frame.index;
 }
 
-WireCell2dToy::ToySignalSimuFDS::~ToySignalSimuFDS(){
+WCP2dToy::ToySignalSimuFDS::~ToySignalSimuFDS(){
   //test save
   // for (int i=0;i!=nwire_u;i++){
   //   delete hu1[i] ;

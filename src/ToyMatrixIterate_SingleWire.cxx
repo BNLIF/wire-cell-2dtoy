@@ -1,8 +1,8 @@
-#include "WireCell2dToy/ToyMatrixIterate_SingleWire.h"
+#include "WCP2dToy/ToyMatrixIterate_SingleWire.h"
 
-using namespace WireCell;
+using namespace WCP;
 
-WireCell2dToy::ToyMatrixIterate_SingleWire::ToyMatrixIterate_SingleWire(WireCell2dToy::ToyMatrix *toybefore, WireCell2dToy::ToyMatrix *toycur, WireCell2dToy::ToyMatrix *toyafter, WireCell2dToy::MergeToyTiling *mergebefore, WireCell2dToy::MergeToyTiling *mergecur, WireCell2dToy::MergeToyTiling *mergeafter, int recon_t, float limit, double penalty, double penalty_ncpt)
+WCP2dToy::ToyMatrixIterate_SingleWire::ToyMatrixIterate_SingleWire(WCP2dToy::ToyMatrix *toybefore, WCP2dToy::ToyMatrix *toycur, WCP2dToy::ToyMatrix *toyafter, WCP2dToy::MergeToyTiling *mergebefore, WCP2dToy::MergeToyTiling *mergecur, WCP2dToy::MergeToyTiling *mergeafter, int recon_t, float limit, double penalty, double penalty_ncpt)
   : toymatrix(*toycur)
   , mergetiling(mergecur)
   , limit(limit)
@@ -81,8 +81,8 @@ WireCell2dToy::ToyMatrixIterate_SingleWire::ToyMatrixIterate_SingleWire(WireCell
 
 
    // figure out single-wire cell, and no need to remove these
-  WireCell::GeomCellSelection all_cells = mergetiling->get_allcell();
-  WireCell::GeomCellSelection single_wire_cells = mergetiling->get_single_wire_cells();
+  WCP::GeomCellSelection all_cells = mergetiling->get_allcell();
+  WCP::GeomCellSelection single_wire_cells = mergetiling->get_single_wire_cells();
   
   wirechargemap = mergetiling->wcmap();
 
@@ -139,7 +139,7 @@ WireCell2dToy::ToyMatrixIterate_SingleWire::ToyMatrixIterate_SingleWire(WireCell
       // }
     }
     
-    WireCell2dToy::ToyMatrixKalman toykalman(already_removed, no_need_remove, toymatrix,0,0,chi2_p);
+    WCP2dToy::ToyMatrixKalman toykalman(already_removed, no_need_remove, toymatrix,0,0,chi2_p);
     //std::cout << "Test: " << cellmap.size() << " " << wiremap.size() << " " << toykalman.Get_numz() << " " << ncount << std::endl;
   }
 
@@ -148,7 +148,7 @@ WireCell2dToy::ToyMatrixIterate_SingleWire::ToyMatrixIterate_SingleWire(WireCell
 }
 
 
-WireCell2dToy::ToyMatrixIterate_SingleWire::ToyMatrixIterate_SingleWire(WireCell2dToy::ToyMatrix &toymatrix, WireCell2dToy::MergeToyTiling* mergetiling)
+WCP2dToy::ToyMatrixIterate_SingleWire::ToyMatrixIterate_SingleWire(WCP2dToy::ToyMatrix &toymatrix, WCP2dToy::MergeToyTiling* mergetiling)
   : toymatrix(toymatrix)
   , mergetiling(mergetiling)
   , penalty_ncpt(0)
@@ -159,8 +159,8 @@ WireCell2dToy::ToyMatrixIterate_SingleWire::ToyMatrixIterate_SingleWire(WireCell
   limit = 1e5;
 
   // figure out single-wire cell, and no need to remove these
-  WireCell::GeomCellSelection all_cells = mergetiling->get_allcell();
-  WireCell::GeomCellSelection single_wire_cells = mergetiling->get_single_wire_cells();
+  WCP::GeomCellSelection all_cells = mergetiling->get_allcell();
+  WCP::GeomCellSelection single_wire_cells = mergetiling->get_single_wire_cells();
   
   wirechargemap = mergetiling->wcmap();
 
@@ -189,7 +189,7 @@ WireCell2dToy::ToyMatrixIterate_SingleWire::ToyMatrixIterate_SingleWire(WireCell
       no_need_remove.push_back(index);
     }
 	
-    WireCell2dToy::ToyMatrixKalman toykalman(already_removed, no_need_remove, toymatrix,0,0);
+    WCP2dToy::ToyMatrixKalman toykalman(already_removed, no_need_remove, toymatrix,0,0);
     //std::cout << "Test: " << cellmap.size() << " " << wiremap.size() << " " << toykalman.Get_numz() << " " << ncount << std::endl;
   }
 
@@ -197,7 +197,7 @@ WireCell2dToy::ToyMatrixIterate_SingleWire::ToyMatrixIterate_SingleWire(WireCell
   
 }
 
-void WireCell2dToy::ToyMatrixIterate_SingleWire::Iterate(WireCell::GeomCellSelection cells, WireCell::GeomCellSelection single_cells, WireCell::GeomCellSelection tried_cell, WireCell::GeomCellMap cellmap, WireCell::GeomWireMap wiremap){
+void WCP2dToy::ToyMatrixIterate_SingleWire::Iterate(WCP::GeomCellSelection cells, WCP::GeomCellSelection single_cells, WCP::GeomCellSelection tried_cell, WCP::GeomCellMap cellmap, WCP::GeomWireMap wiremap){
   if (ncount > limit) return;
 
   
@@ -361,7 +361,7 @@ void WireCell2dToy::ToyMatrixIterate_SingleWire::Iterate(WireCell::GeomCellSelec
 	}
 	
 	
-	WireCell2dToy::ToyMatrixKalman toykalman(already_removed, no_need_remove, toymatrix,0,0,chi2_p);
+	WCP2dToy::ToyMatrixKalman toykalman(already_removed, no_need_remove, toymatrix,0,0,chi2_p);
 	if (ncount > limit) return;
 	ncount ++;
 
@@ -375,5 +375,5 @@ void WireCell2dToy::ToyMatrixIterate_SingleWire::Iterate(WireCell::GeomCellSelec
 }
 
 
-WireCell2dToy::ToyMatrixIterate_SingleWire::~ToyMatrixIterate_SingleWire(){
+WCP2dToy::ToyMatrixIterate_SingleWire::~ToyMatrixIterate_SingleWire(){
 }

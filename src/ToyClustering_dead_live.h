@@ -1,6 +1,6 @@
 
 
-void WireCell2dToy::Clustering_live_dead(WireCell::PR3DClusterSelection& live_clusters, WireCell::PR3DClusterSelection& dead_clusters, std::map<WireCell::PR3DCluster*,double>& cluster_length_map, std::set<WireCell::PR3DCluster*>& cluster_connected_dead){
+void WCP2dToy::Clustering_live_dead(WCP::PR3DClusterSelection& live_clusters, WCP::PR3DClusterSelection& dead_clusters, std::map<WCP::PR3DCluster*,double>& cluster_length_map, std::set<WCP::PR3DCluster*>& cluster_connected_dead){
 
   TPCParams& mp = Singleton<TPCParams>::Instance();
   double pitch_u = mp.get_pitch_u();
@@ -159,19 +159,19 @@ void WireCell2dToy::Clustering_live_dead(WireCell::PR3DClusterSelection& live_cl
 		     fabs(angle3-3.1415926/2.)<7.5/180.*3.1415926) &&
 		    fabs(angle1-3.1415926/2.)+fabs(angle2-3.1415926/2.)+fabs(angle3-3.1415926/2.) < 25/180.*3.1415926){
 		  flag_para = true;
-		  if (WireCell2dToy::is_angle_consistent(dir1,dir2,false,15,angle_u,angle_v,angle_w,3) && WireCell2dToy::is_angle_consistent(dir3,dir2,true,15,angle_u,angle_v,angle_w,3))
+		  if (WCP2dToy::is_angle_consistent(dir1,dir2,false,15,angle_u,angle_v,angle_w,3) && WCP2dToy::is_angle_consistent(dir3,dir2,true,15,angle_u,angle_v,angle_w,3))
 		    flag_merge = true;
 		}else{
-		  bool flag_const1 = WireCell2dToy::is_angle_consistent(dir1,dir2,false,10,angle_u,angle_v,angle_w);
-		  bool flag_const2 = WireCell2dToy::is_angle_consistent(dir3,dir2,true,10,angle_u,angle_v,angle_w);
+		  bool flag_const1 = WCP2dToy::is_angle_consistent(dir1,dir2,false,10,angle_u,angle_v,angle_w);
+		  bool flag_const2 = WCP2dToy::is_angle_consistent(dir3,dir2,true,10,angle_u,angle_v,angle_w);
 
 		  if (flag_const1 && flag_const2){
 		    flag_merge = true;
 		  }else if (flag_const1 && length_2 < 6*units::cm && length_1 > 15*units::cm){
-		    if (WireCell2dToy::is_angle_consistent(dir1,dir2,false,5,angle_u,angle_v,angle_w,3))
+		    if (WCP2dToy::is_angle_consistent(dir1,dir2,false,5,angle_u,angle_v,angle_w,3))
 		      flag_merge = true;
 		  }else if (flag_const2 && length_1 < 6*units::cm && length_2 > 15*units::cm){
-		    if (WireCell2dToy::is_angle_consistent(dir3,dir2,true,5,angle_u,angle_v,angle_w,3))
+		    if (WCP2dToy::is_angle_consistent(dir3,dir2,true,5,angle_u,angle_v,angle_w,3))
 		       flag_merge = true;
 		  }
 		  
@@ -359,7 +359,7 @@ void WireCell2dToy::Clustering_live_dead(WireCell::PR3DClusterSelection& live_cl
 }
 
 
-// bool WireCell2dToy::IsCrossing(WireCell::Point& p, double theta, double phi, WireCell::SlimMergeGeomCell *mcell, WireCellSst::GeomDataSource& gds){
+// bool WCP2dToy::IsCrossing(WCP::Point& p, double theta, double phi, WCP::SlimMergeGeomCell *mcell, WCPSst::GeomDataSource& gds){
 //   // dx = sintheta*cosphi*dl
 //   // dy = sintheta*sinphi*dl
 //   // dz = costheta*dl

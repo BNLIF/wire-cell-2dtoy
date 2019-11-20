@@ -1,12 +1,12 @@
-#include "WireCell2dToy/ToyMatrixIterate_Only.h"
+#include "WCP2dToy/ToyMatrixIterate_Only.h"
 
-using namespace WireCell;
+using namespace WCP;
 
-WireCell2dToy::ToyMatrixIterate_Only::~ToyMatrixIterate_Only(){
+WCP2dToy::ToyMatrixIterate_Only::~ToyMatrixIterate_Only(){
 
 }
 
-WireCell2dToy::ToyMatrixIterate_Only::ToyMatrixIterate_Only(WireCell2dToy::ToyMatrix &toymatrix, WireCell2dToy::MergeToyTiling* mergetiling)
+WCP2dToy::ToyMatrixIterate_Only::ToyMatrixIterate_Only(WCP2dToy::ToyMatrix &toymatrix, WCP2dToy::MergeToyTiling* mergetiling)
   : toymatrix(toymatrix)
   , mergetiling(mergetiling)
 {
@@ -19,10 +19,10 @@ WireCell2dToy::ToyMatrixIterate_Only::ToyMatrixIterate_Only(WireCell2dToy::ToyMa
   ncount = 0;
   nlevel = 0;
 
-  WireCell::GeomCellSelection good_cells;
-  WireCell::GeomWireSelection used_wires;
-  WireCell::GeomCellSelection bad_cells;
-  WireCell::GeomCellSelection tried_cells;
+  WCP::GeomCellSelection good_cells;
+  WCP::GeomWireSelection used_wires;
+  WCP::GeomCellSelection bad_cells;
+  WCP::GeomCellSelection tried_cells;
 
   std::cout << "Test: " << all_cells.size() << std::endl;
 
@@ -30,7 +30,7 @@ WireCell2dToy::ToyMatrixIterate_Only::ToyMatrixIterate_Only(WireCell2dToy::ToyMa
  
 }
 
-void WireCell2dToy::ToyMatrixIterate_Only::Iterate(GeomCellSelection remaining_cells, GeomCellSelection good_cells, GeomWireSelection used_wires, GeomCellSelection bad_cells, GeomCellSelection& tried_cells){
+void WCP2dToy::ToyMatrixIterate_Only::Iterate(GeomCellSelection remaining_cells, GeomCellSelection good_cells, GeomWireSelection used_wires, GeomCellSelection bad_cells, GeomCellSelection& tried_cells){
   nlevel ++;
 
   for (int i=0;i!=remaining_cells.size();i++){
@@ -99,7 +99,7 @@ void WireCell2dToy::ToyMatrixIterate_Only::Iterate(GeomCellSelection remaining_c
 	  int index = toymatrix.Get_mcindex(bad_cells_1.at(j));
 	  already_removed.push_back(index);
 	}
-	 WireCell2dToy::ToyMatrixKalman toykalman(already_removed, no_need_remove, toymatrix,0,0);
+	 WCP2dToy::ToyMatrixKalman toykalman(already_removed, no_need_remove, toymatrix,0,0);
 	 ncount ++;
 	 
 	 std::cout << "Test: " << all_cells.size() << " " << bad_cells_1.size() + good_cells_1.size() << " " << toykalman.Get_numz() << " " << nlevel << " " << ncount << std::endl;

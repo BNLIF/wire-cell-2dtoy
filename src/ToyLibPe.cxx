@@ -1,19 +1,19 @@
-#include "WireCell2dToy/ToyLibPe.h"
+#include "WCP2dToy/ToyLibPe.h"
 
-#include "WireCellRess/LassoModel.h"
-#include "WireCellRess/ElasticNetModel.h"
+#include "WCPRess/LassoModel.h"
+#include "WCPRess/ElasticNetModel.h"
 #include <Eigen/Dense>
 #include "TChain.h"
 
-#include "WireCellData/TPCParams.h"
-#include "WireCellData/Singleton.h"
-#include "WireCellData/Units.h"
+#include "WCPData/TPCParams.h"
+#include "WCPData/Singleton.h"
+#include "WCPData/Units.h"
 
 using namespace std;
 using namespace Eigen;
-using namespace WireCell;
+using namespace WCP;
 
-WireCell2dToy::ToyLibPe::ToyLibPe(const char* root_file){
+WCP2dToy::ToyLibPe::ToyLibPe(const char* root_file){
   file = new TFile(root_file);
   T = (TTree*)file->Get("tout");
 
@@ -25,7 +25,7 @@ WireCell2dToy::ToyLibPe::ToyLibPe(const char* root_file){
   z = new std::vector<float>;
 }
 
-WireCell2dToy::ToyLibPe::~ToyLibPe(){
+WCP2dToy::ToyLibPe::~ToyLibPe(){
   delete trackId;
   delete energy;
   delete numElectrons;
@@ -36,7 +36,7 @@ WireCell2dToy::ToyLibPe::~ToyLibPe(){
   delete file;
 }
 
-int WireCell2dToy::ToyLibPe::convert_to_voxel_id(WireCell::Point &p){
+int WCP2dToy::ToyLibPe::convert_to_voxel_id(WCP::Point &p){
   int voxel_x_id = round((p.x/units::cm+63.435-5.1096/2.)/5.1096);
   int voxel_y_id = round((p.y/units::cm+191.61-5.1096/2.)/5.1096);
   int voxel_z_id = round((p.z/units::cm+92.375-3.05437/2.)/3.05437);
@@ -50,7 +50,7 @@ int WireCell2dToy::ToyLibPe::convert_to_voxel_id(WireCell::Point &p){
   return voxel_id;
 }
 
-std::map<int,int> WireCell2dToy::ToyLibPe::getMapLibPmt(){
+std::map<int,int> WCP2dToy::ToyLibPe::getMapLibPmt(){
   map<int,int> map_lib_pmt;
   map_lib_pmt[1]=2;
   map_lib_pmt[0]=4;
@@ -92,7 +92,7 @@ std::map<int,int> WireCell2dToy::ToyLibPe::getMapLibPmt(){
   return map_lib_pmt;
 }
 
-std::map<int,int> WireCell2dToy::ToyLibPe::getMapPmtLib(){
+std::map<int,int> WCP2dToy::ToyLibPe::getMapPmtLib(){
   map<int,int> map_pmt_lib;
   map_pmt_lib[2]=1;
   map_pmt_lib[4]=0;
@@ -134,7 +134,7 @@ std::map<int,int> WireCell2dToy::ToyLibPe::getMapPmtLib(){
   return map_pmt_lib;
 }
 
-std::vector<std::vector<std::pair<int,float> > > WireCell2dToy::ToyLibPe::getPhotonLibrary(){
+std::vector<std::vector<std::pair<int,float> > > WCP2dToy::ToyLibPe::getPhotonLibrary(){
   TChain *Tlib = new TChain("/pmtresponse/PhotonLibraryData","/pmtresponse/PhotonLibraryData");
   Tlib->AddFile("./uboone_photon_library.root");
   Int_t Voxel;
@@ -154,7 +154,7 @@ std::vector<std::vector<std::pair<int,float> > > WireCell2dToy::ToyLibPe::getPho
   return photon_library;
 }
 
-std::vector<double> WireCell2dToy::ToyLibPe::getXYZQ(std::vector<float> *x, std::vector<float> *y, std::vector<float> *z, std::vector<float> *e){
+std::vector<double> WCP2dToy::ToyLibPe::getXYZQ(std::vector<float> *x, std::vector<float> *y, std::vector<float> *z, std::vector<float> *e){
   double sumX = 0, sumY = 0, sumZ = 0, sumE = 0;
 
   int nDeps = (int)x->size();
@@ -168,7 +168,7 @@ std::vector<double> WireCell2dToy::ToyLibPe::getXYZQ(std::vector<float> *x, std:
   return xyzq;
 }
 
-std::vector<double> WireCell2dToy::ToyLibPe::getShiftedXYZQ(std::vector<float> *x, std::vector<float> *y, std::vector<float> *z, std::vector<float> *e, float xOffset, float yOffset, float zOffset){
+std::vector<double> WCP2dToy::ToyLibPe::getShiftedXYZQ(std::vector<float> *x, std::vector<float> *y, std::vector<float> *z, std::vector<float> *e, float xOffset, float yOffset, float zOffset){
   double sumX = 0, sumY = 0, sumZ = 0, sumE = 0;
 
   int nDeps = (int)x->size();
@@ -182,7 +182,7 @@ std::vector<double> WireCell2dToy::ToyLibPe::getShiftedXYZQ(std::vector<float> *
   return xyzq;
 }
 
-std::pair<float,float> WireCell2dToy::ToyLibPe::getXminXmax(std::vector<float> *x){
+std::pair<float,float> WCP2dToy::ToyLibPe::getXminXmax(std::vector<float> *x){
   std::pair<float,float> result;
   float min = *std::min_element(x->begin(), x->end());
   float max = *std::max_element(x->begin(), x->end());
@@ -190,7 +190,7 @@ std::pair<float,float> WireCell2dToy::ToyLibPe::getXminXmax(std::vector<float> *
   return result;
 }
 
-std::pair<float,float> WireCell2dToy::ToyLibPe::getShiftedXminXmax(std::vector<float> *x, float xOffset){
+std::pair<float,float> WCP2dToy::ToyLibPe::getShiftedXminXmax(std::vector<float> *x, float xOffset){
   std::pair<float,float> result;
 
   float min = *std::min_element(x->begin(), x->end())-xOffset;
@@ -199,7 +199,7 @@ std::pair<float,float> WireCell2dToy::ToyLibPe::getShiftedXminXmax(std::vector<f
   return result;
 }
 
-bool WireCell2dToy::ToyLibPe::xInFidVol(std::pair<float,float> &x){
+bool WCP2dToy::ToyLibPe::xInFidVol(std::pair<float,float> &x){
   bool flag = false;
   double high_x_cut = 256 * units::cm;
   double high_x_cut_ext1 = + 1*units::cm;
@@ -216,7 +216,7 @@ bool WireCell2dToy::ToyLibPe::xInFidVol(std::pair<float,float> &x){
   return flag;
 }
 
-bool WireCell2dToy::ToyLibPe::xAtBoundary(std::pair<float,float> &x){
+bool WCP2dToy::ToyLibPe::xAtBoundary(std::pair<float,float> &x){
   bool flag = false;
   double high_x_cut = 256 * units::cm;
   double high_x_cut_ext1 = + 1*units::cm;
@@ -233,7 +233,7 @@ bool WireCell2dToy::ToyLibPe::xAtBoundary(std::pair<float,float> &x){
   return flag;
 }
 
-std::vector<double> WireCell2dToy::ToyLibPe::fromClusterFindPeDist(std::vector<float> *x, std::vector<float> *y, std::vector<float> *z, std::vector<float> *e, float xOffset, float yOffset, float zOffset){
+std::vector<double> WCP2dToy::ToyLibPe::fromClusterFindPeDist(std::vector<float> *x, std::vector<float> *y, std::vector<float> *z, std::vector<float> *e, float xOffset, float yOffset, float zOffset){
   std::vector<double> pred_pmt_light;
   pred_pmt_light.resize(32,0);
 

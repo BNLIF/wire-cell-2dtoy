@@ -1,7 +1,7 @@
-#include "WireCellData/Slim3DCluster.h"
-#include "WireCellSst/GeomDataSource.h"
+#include "WCPData/Slim3DCluster.h"
+#include "WCPSst/GeomDataSource.h"
 
-using namespace WireCell;
+using namespace WCP;
 using namespace std;
 
 int main(int argc, char* argv[])
@@ -10,7 +10,7 @@ int main(int argc, char* argv[])
     cerr << "usage: wire-cell-uboone /path/to/ChannelWireGeometry.txt" << std::endl;
     return 1;
   }
-  WireCellSst::GeomDataSource gds(argv[1]);
+  WCPSst::GeomDataSource gds(argv[1]);
   std::vector<double> ex = gds.extent();
   cerr << "Extent: "
        << " x:" << ex[0]/units::mm << " mm"

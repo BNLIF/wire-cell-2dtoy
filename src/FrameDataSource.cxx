@@ -1,24 +1,24 @@
-#include "WireCell2dToy/FrameDataSource.h"
-#include "WireCellData/Point.h"
+#include "WCP2dToy/FrameDataSource.h"
+#include "WCPData/Point.h"
 #include "TRandom.h"
 
-WireCell2dToy::FrameDataSource::FrameDataSource(int nevents,
-						const WireCell::GeomDataSource& gds)
-    : WireCell::FrameDataSource()
+WCP2dToy::FrameDataSource::FrameDataSource(int nevents,
+						const WCP::GeomDataSource& gds)
+    : WCP::FrameDataSource()
     , Nevent(nevents)
     , gds(gds)
 {
 }
-WireCell2dToy::FrameDataSource::~FrameDataSource()
+WCP2dToy::FrameDataSource::~FrameDataSource()
 {
 }
 
-int WireCell2dToy::FrameDataSource::size() const
+int WCP2dToy::FrameDataSource::size() const
 {
   return Nevent;
 }
 
-int WireCell2dToy::FrameDataSource::jump(int frame_number)
+int WCP2dToy::FrameDataSource::jump(int frame_number)
 {
   if (frame_number >= Nevent) frame_number = Nevent;
 
@@ -29,7 +29,7 @@ int WireCell2dToy::FrameDataSource::jump(int frame_number)
   
   //main code to construct a frame
   // first create many traces and initialize the channel number
-  std::vector <WireCell::Trace> traces(8400);
+  std::vector <WCP::Trace> traces(8400);
   for (int i=0;i!=8400;i++){	// fixme: use the gds?
     traces[i].chid = i;
     traces[i].tbin = 0;
@@ -46,11 +46,11 @@ int WireCell2dToy::FrameDataSource::jump(int frame_number)
   Double_t z_low = 5 * units::m, z_high = 6 * units::m;
 
 
-  const WireCell::GeomWire * wire_closest;
-  WireCell::WirePlaneType_t plane;
+  const WCP::GeomWire * wire_closest;
+  WCP::WirePlaneType_t plane;
 
   for (int i=0;i!=npoint;i++){
-    WireCell::Point p;
+    WCP::Point p;
     p.x = -1;
     // p.y = -0.672 * units::m;//gRandom->Uniform(y_low, y_high);
     // p.z = 5.718 * units::m;//gRandom->Uniform(z_low, z_high);
@@ -59,11 +59,11 @@ int WireCell2dToy::FrameDataSource::jump(int frame_number)
     p.z = gRandom->Uniform(z_low, z_high);
     
     charge = gRandom->Uniform(5,30);
-    mctruth.push_back(WireCell::PointValue(p,charge));
+    mctruth.push_back(WCP::PointValue(p,charge));
     
 
     for (int j=0;j!=3;j++){
-      plane = static_cast<WireCell::WirePlaneType_t>(j);
+      plane = static_cast<WCP::WirePlaneType_t>(j);
       wire_closest = gds.closest(p,plane);
       traces[wire_closest->channel()].charge[0] += charge;
     }

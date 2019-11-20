@@ -1,11 +1,11 @@
-#include "WireCell2dToy/uBooNE_Data_After_ROI.h"
+#include "WCP2dToy/uBooNE_Data_After_ROI.h"
 #include "TSpectrum.h"
 
 
-using namespace WireCell;
+using namespace WCP;
 
 
-WireCell2dToy::uBooNEDataAfterROI::uBooNEDataAfterROI(WireCell::FrameDataSource& fds, const WireCell::GeomDataSource& gds, WireCell2dToy::uBooNEDataROI& rois, int rebin)
+WCP2dToy::uBooNEDataAfterROI::uBooNEDataAfterROI(WCP::FrameDataSource& fds, const WCP::GeomDataSource& gds, WCP2dToy::uBooNEDataROI& rois, int rebin)
   : fds(fds)
   , gds(gds)
   , rois(rois)
@@ -58,15 +58,15 @@ WireCell2dToy::uBooNEDataAfterROI::uBooNEDataAfterROI(WireCell::FrameDataSource&
 }
 
 
-WireCell2dToy::uBooNEDataAfterROI::~uBooNEDataAfterROI(){
+WCP2dToy::uBooNEDataAfterROI::~uBooNEDataAfterROI(){
   Clear();
 }
 
-int WireCell2dToy::uBooNEDataAfterROI::size() const{
+int WCP2dToy::uBooNEDataAfterROI::size() const{
   return 1;
 }
 
-void WireCell2dToy::uBooNEDataAfterROI::Clear(){
+void WCP2dToy::uBooNEDataAfterROI::Clear(){
   for (int i=0;i!=nwire_u;i++){
     for (auto it = rois_u_tight.at(i).begin(); it!=rois_u_tight.at(i).end();it++){
       delete *it;
@@ -108,7 +108,7 @@ void WireCell2dToy::uBooNEDataAfterROI::Clear(){
 
 }
 
-void WireCell2dToy::uBooNEDataAfterROI::CleanUpROIs(){
+void WCP2dToy::uBooNEDataAfterROI::CleanUpROIs(){
   // clean up ROIs
   std::map<SignalROI*, int> ROIsaved_map;
   //int counter = 0;
@@ -279,7 +279,7 @@ void WireCell2dToy::uBooNEDataAfterROI::CleanUpROIs(){
 
 }
 
-void WireCell2dToy::uBooNEDataAfterROI::CleanUpInductionROIs(){
+void WCP2dToy::uBooNEDataAfterROI::CleanUpInductionROIs(){
   // deal with loose ROIs
   // focus on the isolated ones first
   float mean_threshold = 500;
@@ -510,7 +510,7 @@ void WireCell2dToy::uBooNEDataAfterROI::CleanUpInductionROIs(){
 }
 
 
-void WireCell2dToy::uBooNEDataAfterROI::CleanUpCollectionROIs(){
+void WCP2dToy::uBooNEDataAfterROI::CleanUpCollectionROIs(){
   // deal with tight ROIs, 
   // scan with all the tight ROIs to look for peaks above certain threshold, put in a temporary set
   float mean_threshold = 500; //electrons
@@ -595,7 +595,7 @@ void WireCell2dToy::uBooNEDataAfterROI::CleanUpCollectionROIs(){
 }
 
 
-void WireCell2dToy::uBooNEDataAfterROI::BreakROI1(SignalROI* roi){
+void WCP2dToy::uBooNEDataAfterROI::BreakROI1(SignalROI* roi){
   int start_bin = roi->get_start_bin();
   int end_bin = roi->get_end_bin();
   
@@ -713,7 +713,7 @@ void WireCell2dToy::uBooNEDataAfterROI::BreakROI1(SignalROI* roi){
 
 }
 
-void WireCell2dToy::uBooNEDataAfterROI::BreakROI(SignalROI* roi, float rms){
+void WCP2dToy::uBooNEDataAfterROI::BreakROI(SignalROI* roi, float rms){
   // main algorithm 
   int start_bin = roi->get_start_bin();
   int end_bin = roi->get_end_bin();
@@ -1041,7 +1041,7 @@ void WireCell2dToy::uBooNEDataAfterROI::BreakROI(SignalROI* roi, float rms){
 
 }
 
-void WireCell2dToy::uBooNEDataAfterROI::unlink(SignalROI* prev_roi, SignalROI* next_roi){
+void WCP2dToy::uBooNEDataAfterROI::unlink(SignalROI* prev_roi, SignalROI* next_roi){
   if (front_rois.find(prev_roi)!=front_rois.end()){
     SignalROISelection& temp_rois = front_rois[prev_roi];
     auto it = find(temp_rois.begin(),temp_rois.end(),next_roi);
@@ -1056,7 +1056,7 @@ void WireCell2dToy::uBooNEDataAfterROI::unlink(SignalROI* prev_roi, SignalROI* n
   }
 }
 
-void WireCell2dToy::uBooNEDataAfterROI::link(SignalROI* prev_roi, SignalROI* next_roi){
+void WCP2dToy::uBooNEDataAfterROI::link(SignalROI* prev_roi, SignalROI* next_roi){
   if (front_rois.find(prev_roi)!=front_rois.end()){
     SignalROISelection& temp_rois = front_rois[prev_roi];
     auto it = find(temp_rois.begin(),temp_rois.end(),next_roi);
@@ -1081,7 +1081,7 @@ void WireCell2dToy::uBooNEDataAfterROI::link(SignalROI* prev_roi, SignalROI* nex
 }
 
 
-void WireCell2dToy::uBooNEDataAfterROI::BreakROIs(){
+void WCP2dToy::uBooNEDataAfterROI::BreakROIs(){
   // get RMS value, and put in 
   std::vector<float>& rms_u = rois.get_uplane_rms();
   std::vector<float>& rms_v = rois.get_vplane_rms();
@@ -1136,7 +1136,7 @@ void WireCell2dToy::uBooNEDataAfterROI::BreakROIs(){
   // std::cout << num_tight[0] << " " << num_tight[1] << " " << num_tight[2] << " " << num_loose[0] << " " << num_loose[1] << " " << num_loose[2] << " " << front_rois.size() << " " << back_rois.size() << " " << contained_rois.size() << std::endl;
 }
 
-void WireCell2dToy::uBooNEDataAfterROI::ShrinkROI(SignalROI *roi){
+void WCP2dToy::uBooNEDataAfterROI::ShrinkROI(SignalROI *roi){
   
   // get tight ROI as a inner boundary
   // get the nearby ROIs with threshold as some sort of boundary 
@@ -1367,7 +1367,7 @@ void WireCell2dToy::uBooNEDataAfterROI::ShrinkROI(SignalROI *roi){
   
 }
 
-void WireCell2dToy::uBooNEDataAfterROI::ShrinkROIs(){
+void WCP2dToy::uBooNEDataAfterROI::ShrinkROIs(){
   // collect all ROIs
   SignalROISelection all_rois;
   for (int i=0;i!=rois_u_loose.size();i++){
@@ -1385,7 +1385,7 @@ void WireCell2dToy::uBooNEDataAfterROI::ShrinkROIs(){
   }
 }
 
-void WireCell2dToy::uBooNEDataAfterROI::generate_merge_ROIs(){
+void WCP2dToy::uBooNEDataAfterROI::generate_merge_ROIs(){
   // find tight ROIs not contained by the loose ROIs
   for (int i = 0;i!=nwire_u;i++){
     std::map<SignalROI*,int> covered_tight_rois;
@@ -1563,7 +1563,7 @@ void WireCell2dToy::uBooNEDataAfterROI::generate_merge_ROIs(){
 }
 
 
-int WireCell2dToy::uBooNEDataAfterROI::jump(int frame_number){
+int WCP2dToy::uBooNEDataAfterROI::jump(int frame_number){
   Clear();
   if (frame.index == frame_number) {
     return frame_number;
@@ -2051,7 +2051,7 @@ int WireCell2dToy::uBooNEDataAfterROI::jump(int frame_number){
   
   // load results back into the data ... 
 
-  WireCell2dToy::uBooNEData2DDeconvolutionFDS* temp_fds =(WireCell2dToy::uBooNEData2DDeconvolutionFDS*)&fds;
+  WCP2dToy::uBooNEData2DDeconvolutionFDS* temp_fds =(WCP2dToy::uBooNEData2DDeconvolutionFDS*)&fds;
     
   TH2I *hu_data = temp_fds->get_u_wiener();
   TH2I *hv_data = temp_fds->get_v_wiener();  
@@ -2143,7 +2143,7 @@ int WireCell2dToy::uBooNEDataAfterROI::jump(int frame_number){
     
     
     // save into frames ... 
-    WireCell::Trace trace1;
+    WCP::Trace trace1;
     trace1.chid = chid;
     trace1.tbin = 0;
     trace1.charge.resize(bins_per_frame, 0.0);
@@ -2165,7 +2165,7 @@ int WireCell2dToy::uBooNEDataAfterROI::jump(int frame_number){
 
 }
 
-void WireCell2dToy::uBooNEDataAfterROI::ExtendROIs(){
+void WCP2dToy::uBooNEDataAfterROI::ExtendROIs(){
 
   bool flag = true;
   // initialize all ROIs
@@ -2374,7 +2374,7 @@ void WireCell2dToy::uBooNEDataAfterROI::ExtendROIs(){
 
 
 
-void WireCell2dToy::uBooNEDataAfterROI::CheckROIs(){
+void WCP2dToy::uBooNEDataAfterROI::CheckROIs(){
   std::vector<float>& rms_u = rois.get_uplane_rms();
   std::vector<float>& rms_v = rois.get_vplane_rms();
   
@@ -2495,7 +2495,7 @@ void WireCell2dToy::uBooNEDataAfterROI::CheckROIs(){
 
 
 
-void WireCell2dToy::uBooNEDataAfterROI::TestROIs(){
+void WCP2dToy::uBooNEDataAfterROI::TestROIs(){
 
   for (int chid = 0; chid != nwire_u; chid ++){
     for (auto it = rois_u_loose.at(chid).begin(); it!= rois_u_loose.at(chid).end();it++){

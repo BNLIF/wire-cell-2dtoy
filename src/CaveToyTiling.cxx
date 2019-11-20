@@ -1,10 +1,10 @@
-#include "WireCell2dToy/CaveToyTiling.h"
+#include "WCP2dToy/CaveToyTiling.h"
 
 #include <cmath>
 
-using namespace WireCell;
+using namespace WCP;
 
-WireCell2dToy::CaveToyTiling::CaveToyTiling(WireCell2dToy::ToyTiling *toytiling1, WireCell2dToy::MergeToyTiling& mergetiling, WireCell2dToy::ToyMatrix& toymatrix){
+WCP2dToy::CaveToyTiling::CaveToyTiling(WCP2dToy::ToyTiling *toytiling1, WCP2dToy::MergeToyTiling& mergetiling, WCP2dToy::ToyMatrix& toymatrix){
   toytiling = toytiling1;
   // create cell_all_save, 
   GeomCellCellMap tmp_ccmap;
@@ -128,7 +128,7 @@ WireCell2dToy::CaveToyTiling::CaveToyTiling(WireCell2dToy::ToyTiling *toytiling1
   //move current_cell to somewhere ... 
 }
 
-WireCell2dToy::CaveToyTiling::~CaveToyTiling(){
+WCP2dToy::CaveToyTiling::~CaveToyTiling(){
   for (int i=0;i!=cell_all.size();i++){
     delete cell_all[i];
   }
@@ -146,8 +146,8 @@ WireCell2dToy::CaveToyTiling::~CaveToyTiling(){
   }
 }
 
-const WireCell::GeomCell* WireCell2dToy::CaveToyTiling::cell(const WireCell::GeomWireSelection& wires) const
+const WCP::GeomCell* WCP2dToy::CaveToyTiling::cell(const WCP::GeomWireSelection& wires) const
 {
   return 0;
 }
-ClassImp(WireCell2dToy::CaveToyTiling);
+ClassImp(WCP2dToy::CaveToyTiling);

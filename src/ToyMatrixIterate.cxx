@@ -1,10 +1,10 @@
-#include "WireCell2dToy/ToyMatrixIterate.h"
+#include "WCP2dToy/ToyMatrixIterate.h"
 
-using namespace WireCell;
+using namespace WCP;
 
 #include "TMath.h"
 
-WireCell2dToy::ToyMatrixIterate::ToyMatrixIterate(WireCell2dToy::ToyMatrix &toymatrix, std::vector<int>& already_removed, int recon_t, int limit)
+WCP2dToy::ToyMatrixIterate::ToyMatrixIterate(WCP2dToy::ToyMatrix &toymatrix, std::vector<int>& already_removed, int recon_t, int limit)
   : penalty_ncpt(0)
 {
   prev_ncount = -1;
@@ -21,7 +21,7 @@ WireCell2dToy::ToyMatrixIterate::ToyMatrixIterate(WireCell2dToy::ToyMatrix &toym
   
   //std::cout << "Number of zeros: " << toymatrixkalman->Get_numz() << std::endl;
   //int numz = toymatrix.Get_mcindex() - toymatrix.Get_mwindex();
-  toymatrixkalman = new WireCell2dToy::ToyMatrixKalman(already_removed, no_need_remove, toymatrix, 0,0);  
+  toymatrixkalman = new WCP2dToy::ToyMatrixKalman(already_removed, no_need_remove, toymatrix, 0,0);  
   
   //estimated_loop = TMath::Factorial(toymatrix.Get_mcindex())/TMath::Factorial(toymatrix.Get_mcindex()-numz)/TMath::Factorial(numz)/25.;
   //std::cout << estimated_loop << std::endl;
@@ -29,7 +29,7 @@ WireCell2dToy::ToyMatrixIterate::ToyMatrixIterate(WireCell2dToy::ToyMatrix &toym
   
   // if(toymatrixkalman->Get_numz()==toymatrix.Get_mcindex()){
   //   delete toymatrixkalman;
-  //   toymatrixkalman = new WireCell2dToy::ToyMatrixKalman(already_removed, no_need_remove, toymatrix, 0,1); 
+  //   toymatrixkalman = new WCP2dToy::ToyMatrixKalman(already_removed, no_need_remove, toymatrix, 0,1); 
   // }
   
   std::cout << estimated_loop << " " << toymatrix.Get_mcindex() << " " << toymatrixkalman->Get_numz() << std::endl;
@@ -37,7 +37,7 @@ WireCell2dToy::ToyMatrixIterate::ToyMatrixIterate(WireCell2dToy::ToyMatrix &toym
   if (estimated_loop < limit && toymatrixkalman->Get_numz()!=toymatrix.Get_mcindex() && toymatrix.Get_mcindex() - toymatrixkalman->Get_numz() > toymatrixkalman->Get_numz()){
     time_flag = 0;
     delete toymatrixkalman;
-    toymatrixkalman = new WireCell2dToy::ToyMatrixKalman(already_removed, no_need_remove, toymatrix, 0,1); 
+    toymatrixkalman = new WCP2dToy::ToyMatrixKalman(already_removed, no_need_remove, toymatrix, 0,1); 
     
     
     Iterate(*toymatrixkalman,toymatrix);
@@ -46,7 +46,7 @@ WireCell2dToy::ToyMatrixIterate::ToyMatrixIterate(WireCell2dToy::ToyMatrix &toym
 
 }
 
-WireCell2dToy::ToyMatrixIterate::ToyMatrixIterate(WireCell2dToy::ToyMatrix &toymatrix, int recon_t, float limit)
+WCP2dToy::ToyMatrixIterate::ToyMatrixIterate(WCP2dToy::ToyMatrix &toymatrix, int recon_t, float limit)
   : penalty_ncpt(0)
 {
   prev_ncount = -1;
@@ -60,7 +60,7 @@ WireCell2dToy::ToyMatrixIterate::ToyMatrixIterate(WireCell2dToy::ToyMatrix &toym
   
   //std::cout << "Number of zeros: " << toymatrixkalman->Get_numz() << std::endl;
   //int numz = toymatrix.Get_mcindex() - toymatrix.Get_mwindex();
-  toymatrixkalman = new WireCell2dToy::ToyMatrixKalman(toymatrix,0);  
+  toymatrixkalman = new WCP2dToy::ToyMatrixKalman(toymatrix,0);  
   // estimated_loop = TMath::Factorial(toymatrix.Get_mcindex())/TMath::Factorial(toymatrix.Get_mcindex()-numz)/TMath::Factorial(numz)/25.;
   // std::cout << estimated_loop << std::endl;
   estimated_loop = TMath::Binomial(toymatrix.Get_mcindex(),toymatrixkalman->Get_numz())/25.;//TMath::Factorial(toymatrix.Get_mcindex())/TMath::Factorial(toymatrix.Get_mcindex()-toymatrixkalman->Get_numz())/TMath::Factorial(toymatrixkalman->Get_numz())/25.;
@@ -70,20 +70,20 @@ WireCell2dToy::ToyMatrixIterate::ToyMatrixIterate(WireCell2dToy::ToyMatrix &toym
   
   // if(toymatrixkalman->Get_numz()==toymatrix.Get_mcindex()){
   //   delete toymatrixkalman;
-  //   toymatrixkalman = new WireCell2dToy::ToyMatrixKalman(toymatrix,1); 
+  //   toymatrixkalman = new WCP2dToy::ToyMatrixKalman(toymatrix,1); 
   // }
   
   if (estimated_loop < limit && toymatrixkalman->Get_numz()!=toymatrix.Get_mcindex() && toymatrix.Get_mcindex() - toymatrixkalman->Get_numz() > toymatrixkalman->Get_numz()){
     time_flag = 0;
     delete toymatrixkalman;
-    toymatrixkalman = new WireCell2dToy::ToyMatrixKalman(toymatrix,1);  
+    toymatrixkalman = new WCP2dToy::ToyMatrixKalman(toymatrix,1);  
     //  std::cout << toymatrixkalman->Get_numz() << std::endl;
     Iterate(*toymatrixkalman,toymatrix);
   }
   //if not use time information ... 
 }
 
-WireCell2dToy::ToyMatrixIterate::ToyMatrixIterate(WireCell2dToy::ToyMatrix *toybefore, WireCell2dToy::ToyMatrix *toycur, WireCell2dToy::ToyMatrix *toyafter, WireCell2dToy::MergeToyTiling *mergebefore, WireCell2dToy::MergeToyTiling *mergecur, WireCell2dToy::MergeToyTiling *mergeafter, int recon_t, float limit, double penalty, double penalty_ncpt)
+WCP2dToy::ToyMatrixIterate::ToyMatrixIterate(WCP2dToy::ToyMatrix *toybefore, WCP2dToy::ToyMatrix *toycur, WCP2dToy::ToyMatrix *toyafter, WCP2dToy::MergeToyTiling *mergebefore, WCP2dToy::MergeToyTiling *mergecur, WCP2dToy::MergeToyTiling *mergeafter, int recon_t, float limit, double penalty, double penalty_ncpt)
   : penalty_ncpt(penalty_ncpt)
 {
   // find the penalties for the current set ... 
@@ -164,7 +164,7 @@ WireCell2dToy::ToyMatrixIterate::ToyMatrixIterate(WireCell2dToy::ToyMatrix *toyb
   
   //std::cout << "Number of zeros: " << toymatrixkalman->Get_numz() << std::endl;
   //int numz = toymatrix.Get_mcindex() - toymatrix.Get_mwindex();
-  toymatrixkalman = new WireCell2dToy::ToyMatrixKalman(*toycur,0);  
+  toymatrixkalman = new WCP2dToy::ToyMatrixKalman(*toycur,0);  
   // estimated_loop = TMath::Factorial(toymatrix.Get_mcindex())/TMath::Factorial(toymatrix.Get_mcindex()-numz)/TMath::Factorial(numz)/25.;
   // std::cout << estimated_loop << std::endl;
   estimated_loop = TMath::Binomial(toycur->Get_mcindex(),toymatrixkalman->Get_numz())/25.;//TMath::Factorial(toymatrix.Get_mcindex())/TMath::Factorial(toymatrix.Get_mcindex()-toymatrixkalman->Get_numz())/TMath::Factorial(toymatrixkalman->Get_numz())/25.;
@@ -173,13 +173,13 @@ WireCell2dToy::ToyMatrixIterate::ToyMatrixIterate(WireCell2dToy::ToyMatrix *toyb
   
   // if(toymatrixkalman->Get_numz()==toymatrix.Get_mcindex()){
   //   delete toymatrixkalman;
-  //   toymatrixkalman = new WireCell2dToy::ToyMatrixKalman(toymatrix,1); 
+  //   toymatrixkalman = new WCP2dToy::ToyMatrixKalman(toymatrix,1); 
   // }
   
   if (estimated_loop < limit && toymatrixkalman->Get_numz()!=toycur->Get_mcindex() && toycur->Get_mcindex() - toymatrixkalman->Get_numz() > toymatrixkalman->Get_numz()){
     time_flag = 0;
     delete toymatrixkalman;
-    toymatrixkalman = new WireCell2dToy::ToyMatrixKalman(*toycur,1);  
+    toymatrixkalman = new WCP2dToy::ToyMatrixKalman(*toycur,1);  
     //  std::cout << toymatrixkalman->Get_numz() << std::endl;
     Iterate(*toymatrixkalman,*toycur);
   }
@@ -191,7 +191,7 @@ WireCell2dToy::ToyMatrixIterate::ToyMatrixIterate(WireCell2dToy::ToyMatrix *toyb
 
 
 
-WireCell2dToy::ToyMatrixIterate::ToyMatrixIterate(WireCell2dToy::ToyMatrix &toycur, WireCell2dToy::MergeToyTiling &mergecur, WireCell::GeomCellSelection &cells, int recon_t )
+WCP2dToy::ToyMatrixIterate::ToyMatrixIterate(WCP2dToy::ToyMatrix &toycur, WCP2dToy::MergeToyTiling &mergecur, WCP::GeomCellSelection &cells, int recon_t )
   : penalty_ncpt(0)
 {
   std::vector<int> already_removed; //dummy
@@ -218,7 +218,7 @@ WireCell2dToy::ToyMatrixIterate::ToyMatrixIterate(WireCell2dToy::ToyMatrix &toyc
   no_need_remove.clear();
     
   
-  toymatrixkalman = new WireCell2dToy::ToyMatrixKalman(already_removed, no_need_remove, toycur,1);
+  toymatrixkalman = new WCP2dToy::ToyMatrixKalman(already_removed, no_need_remove, toycur,1);
   std::cout << "With Time: " << toymatrixkalman->Get_numz() << " " << allmcell_c.size() << " " <<  already_removed.size() << std::endl;
   // Find a sub-set that is not degenerated
   // put things into no_need_remove
@@ -229,7 +229,7 @@ WireCell2dToy::ToyMatrixIterate::ToyMatrixIterate(WireCell2dToy::ToyMatrix &toyc
   nlevel = 0;
   // recalculate
   delete toymatrixkalman;
-  toymatrixkalman = new WireCell2dToy::ToyMatrixKalman(already_removed, no_need_remove, toycur,1);
+  toymatrixkalman = new WCP2dToy::ToyMatrixKalman(already_removed, no_need_remove, toycur,1);
   toycur.Set_Solve_Flag(0);
   toycur.Set_chi2(-1);
 
@@ -242,7 +242,7 @@ WireCell2dToy::ToyMatrixIterate::ToyMatrixIterate(WireCell2dToy::ToyMatrix &toyc
   if (estimated_loop < 2e5 && toymatrixkalman->Get_numz()!=toycur.Get_mcindex() && toycur.Get_mcindex()-no_need_remove.size() - toymatrixkalman->Get_numz() > toymatrixkalman->Get_numz()){
     time_flag = 1;
     delete toymatrixkalman;
-    toymatrixkalman = new WireCell2dToy::ToyMatrixKalman(already_removed, no_need_remove, toycur, 0,1); 
+    toymatrixkalman = new WCP2dToy::ToyMatrixKalman(already_removed, no_need_remove, toycur, 0,1); 
     
     Iterate(*toymatrixkalman,toycur);
   }
@@ -254,14 +254,14 @@ WireCell2dToy::ToyMatrixIterate::ToyMatrixIterate(WireCell2dToy::ToyMatrix &toyc
     already_removed.clear();
     
     
-    toymatrixkalman = new WireCell2dToy::ToyMatrixKalman(already_removed, no_need_remove, toycur, 0,0);  
+    toymatrixkalman = new WCP2dToy::ToyMatrixKalman(already_removed, no_need_remove, toycur, 0,0);  
     estimated_loop = TMath::Binomial(toycur.Get_mcindex(),toymatrixkalman->Get_numz())/25.;//TMath::Factorial(toycur.Get_mcindex())/TMath::Factorial(toycur.Get_mcindex()-toymatrixkalman->Get_numz())/TMath::Factorial(toymatrixkalman->Get_numz())/25.;
     std::cout << "Try again: " << estimated_loop << " " << toycur.Get_mcindex() << " " << toymatrixkalman->Get_numz() << std::endl;
     
     if (estimated_loop < 5e5 && toymatrixkalman->Get_numz()!=toycur.Get_mcindex() && toycur.Get_mcindex()- toymatrixkalman->Get_numz() > toymatrixkalman->Get_numz()){
       time_flag = 0;
       delete toymatrixkalman;
-      toymatrixkalman = new WireCell2dToy::ToyMatrixKalman(already_removed, no_need_remove, toycur, 0,1); 
+      toymatrixkalman = new WCP2dToy::ToyMatrixKalman(already_removed, no_need_remove, toycur, 0,1); 
       Iterate(*toymatrixkalman,toycur);
     }else{
       toycur.Set_Solve_Flag(0);
@@ -274,7 +274,7 @@ WireCell2dToy::ToyMatrixIterate::ToyMatrixIterate(WireCell2dToy::ToyMatrix &toyc
 
 
 
-void WireCell2dToy::ToyMatrixIterate::UseTime(WireCell2dToy::ToyMatrix &toybefore, WireCell2dToy::ToyMatrix &toycur, WireCell2dToy::ToyMatrix &toyafter, WireCell2dToy::MergeToyTiling &mergebefore, WireCell2dToy::MergeToyTiling &mergecur, WireCell2dToy::MergeToyTiling &mergeafter){
+void WCP2dToy::ToyMatrixIterate::UseTime(WCP2dToy::ToyMatrix &toybefore, WCP2dToy::ToyMatrix &toycur, WCP2dToy::ToyMatrix &toyafter, WCP2dToy::MergeToyTiling &mergebefore, WCP2dToy::MergeToyTiling &mergecur, WCP2dToy::MergeToyTiling &mergeafter){
   
   GeomCellSelection allmcell_p = mergebefore.get_allcell();
   GeomCellSelection allmcell_c = mergecur.get_allcell();
@@ -327,7 +327,7 @@ void WireCell2dToy::ToyMatrixIterate::UseTime(WireCell2dToy::ToyMatrix &toybefor
 
   
   delete toymatrixkalman;
-  toymatrixkalman = new WireCell2dToy::ToyMatrixKalman(already_removed, no_need_remove, toycur,1);
+  toymatrixkalman = new WCP2dToy::ToyMatrixKalman(already_removed, no_need_remove, toycur,1);
   std::cout << "With Time: " << toymatrixkalman->Get_numz() << " " << allmcell_c.size() << " " <<  already_removed.size() << std::endl;
   // Find a sub-set that is not degenerated
   // put things into no_need_remove
@@ -338,7 +338,7 @@ void WireCell2dToy::ToyMatrixIterate::UseTime(WireCell2dToy::ToyMatrix &toybefor
   nlevel = 0;
   // recalculate
   delete toymatrixkalman;
-  toymatrixkalman = new WireCell2dToy::ToyMatrixKalman(already_removed, no_need_remove, toycur,1);
+  toymatrixkalman = new WCP2dToy::ToyMatrixKalman(already_removed, no_need_remove, toycur,1);
   toycur.Set_Solve_Flag(0);
   toycur.Set_chi2(-1);
 
@@ -366,7 +366,7 @@ void WireCell2dToy::ToyMatrixIterate::UseTime(WireCell2dToy::ToyMatrix &toybefor
     no_need_remove.clear();
     already_removed.clear();
     delete toymatrixkalman;
-    toymatrixkalman = new WireCell2dToy::ToyMatrixKalman(already_removed, no_need_remove, toycur,0);
+    toymatrixkalman = new WCP2dToy::ToyMatrixKalman(already_removed, no_need_remove, toycur,0);
     Iterate_simple1(*toymatrixkalman,toycur);
   }
   
@@ -374,7 +374,7 @@ void WireCell2dToy::ToyMatrixIterate::UseTime(WireCell2dToy::ToyMatrix &toybefor
 }
 
 
-WireCell2dToy::ToyMatrixIterate::~ToyMatrixIterate(){
+WCP2dToy::ToyMatrixIterate::~ToyMatrixIterate(){
   if (estimated_loop < 1e6){
     delete toymatrixkalman;
   }
@@ -382,7 +382,7 @@ WireCell2dToy::ToyMatrixIterate::~ToyMatrixIterate(){
 
 
 
-void WireCell2dToy::ToyMatrixIterate::Iterate(WireCell2dToy::ToyMatrixKalman &toymatrix,WireCell2dToy::ToyMatrix &toymatrix1){
+void WCP2dToy::ToyMatrixIterate::Iterate(WCP2dToy::ToyMatrixKalman &toymatrix,WCP2dToy::ToyMatrix &toymatrix1){
   nlevel ++;
   if (toymatrix.Get_numz()!=0 && toymatrix.Cal_numz(toymatrix1)==0){
     for (int i=0;i!=toymatrix.Get_mcindex();i++){
@@ -421,7 +421,7 @@ void WireCell2dToy::ToyMatrixIterate::Iterate(WireCell2dToy::ToyMatrixKalman &to
 	}
 	
 
-	WireCell2dToy::ToyMatrixKalman kalman(already_removed,toymatrix.Get_no_need_remove(),toymatrix1,0,1,chi2_p);
+	WCP2dToy::ToyMatrixKalman kalman(already_removed,toymatrix.Get_no_need_remove(),toymatrix1,0,1,chi2_p);
 
 	
 
@@ -461,7 +461,7 @@ void WireCell2dToy::ToyMatrixIterate::Iterate(WireCell2dToy::ToyMatrixKalman &to
 
 
 
-void WireCell2dToy::ToyMatrixIterate::find_subset(WireCell2dToy::ToyMatrixKalman &toymatrix,WireCell2dToy::ToyMatrix &toymatrix1, std::vector<int>& vec){
+void WCP2dToy::ToyMatrixIterate::find_subset(WCP2dToy::ToyMatrixKalman &toymatrix,WCP2dToy::ToyMatrix &toymatrix1, std::vector<int>& vec){
   //std::cout << toymatrix.Get_already_removed().size() << " " << toymatrix.Get_no_need_remove().size() << " " << vec.size() << std::endl;
 
   if (toymatrix.Get_numz()!=0){
@@ -471,7 +471,7 @@ void WireCell2dToy::ToyMatrixIterate::find_subset(WireCell2dToy::ToyMatrixKalman
       if (it1 == toymatrix.Get_already_removed().end() && it2 == toymatrix.Get_no_need_remove().end()){
 	std::vector<int> already_removed = toymatrix.Get_already_removed();
 	already_removed.push_back(i);
-	WireCell2dToy::ToyMatrixKalman kalman(already_removed,toymatrix.Get_no_need_remove(),toymatrix1,0);
+	WCP2dToy::ToyMatrixKalman kalman(already_removed,toymatrix.Get_no_need_remove(),toymatrix1,0);
 	
 	if (kalman.Get_numz()==toymatrix.Get_numz()){
 	}else{
@@ -496,7 +496,7 @@ void WireCell2dToy::ToyMatrixIterate::find_subset(WireCell2dToy::ToyMatrixKalman
 
 
 
-void WireCell2dToy::ToyMatrixIterate::Iterate_simple(WireCell2dToy::ToyMatrixKalman &toymatrix,WireCell2dToy::ToyMatrix &toymatrix1){
+void WCP2dToy::ToyMatrixIterate::Iterate_simple(WCP2dToy::ToyMatrixKalman &toymatrix,WCP2dToy::ToyMatrix &toymatrix1){
   nlevel ++;
   
   int ncount_cut = 50000;
@@ -509,7 +509,7 @@ void WireCell2dToy::ToyMatrixIterate::Iterate_simple(WireCell2dToy::ToyMatrixKal
       if (it1 == toymatrix.Get_already_removed().end() && it2 == toymatrix.Get_no_need_remove().end()){
 	std::vector<int> already_removed = toymatrix.Get_already_removed();
 	already_removed.push_back(i);
-	WireCell2dToy::ToyMatrixKalman kalman(already_removed,toymatrix.Get_no_need_remove(),toymatrix1,1);
+	WCP2dToy::ToyMatrixKalman kalman(already_removed,toymatrix.Get_no_need_remove(),toymatrix1,1);
 
 	Iterate_simple(kalman,toymatrix1);
 	toymatrix.Get_no_need_remove().push_back(i);
@@ -541,7 +541,7 @@ void WireCell2dToy::ToyMatrixIterate::Iterate_simple(WireCell2dToy::ToyMatrixKal
   }
 }
 
-void WireCell2dToy::ToyMatrixIterate::Iterate_simple1(WireCell2dToy::ToyMatrixKalman &toymatrix,WireCell2dToy::ToyMatrix &toymatrix1){
+void WCP2dToy::ToyMatrixIterate::Iterate_simple1(WCP2dToy::ToyMatrixKalman &toymatrix,WCP2dToy::ToyMatrix &toymatrix1){
   nlevel ++;
   int ncount_cut = 100000;
   //std::cout << "Simple1 " << nlevel << " " << ncount << std::endl;
@@ -552,7 +552,7 @@ void WireCell2dToy::ToyMatrixIterate::Iterate_simple1(WireCell2dToy::ToyMatrixKa
       if (it1 == toymatrix.Get_already_removed().end() && it2 == toymatrix.Get_no_need_remove().end()){
 	std::vector<int> already_removed = toymatrix.Get_already_removed();
 	already_removed.push_back(i);
-	WireCell2dToy::ToyMatrixKalman kalman(already_removed,toymatrix.Get_no_need_remove(),toymatrix1,0);
+	WCP2dToy::ToyMatrixKalman kalman(already_removed,toymatrix.Get_no_need_remove(),toymatrix1,0);
 
 	Iterate_simple1(kalman,toymatrix1);
 	toymatrix.Get_no_need_remove().push_back(i);

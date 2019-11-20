@@ -1,7 +1,7 @@
-#include "WireCell2dToy/ExecMon.h"
+#include "WCP2dToy/ExecMon.h"
 #include <sstream>
 
-using namespace WireCell;
+using namespace WCP;
 
 ExecMon::ExecMon(const std::string& msg, TimeKeeper::ptime starting_time)
     : tk(msg, starting_time)

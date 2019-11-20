@@ -1,10 +1,10 @@
-#include "WireCell2dToy/WCCosmic.h"
-#include "WireCellData/Line.h"
+#include "WCP2dToy/WCCosmic.h"
+#include "WCPData/Line.h"
 #include "TVector3.h"
 
-using namespace WireCell;
+using namespace WCP;
 
-bool WireCell2dToy::WCCosmic::IsNearBy(ToyTracking *toytracking){
+bool WCP2dToy::WCCosmic::IsNearBy(ToyTracking *toytracking){
   //collect all the mcells inside the good tracks.
   MergeSpaceCellSelection mcells;
   for (int i=0;i!=toytracking->get_good_tracks().size();i++){
@@ -38,7 +38,7 @@ bool WireCell2dToy::WCCosmic::IsNearBy(ToyTracking *toytracking){
   return false;
 }
 
-WireCell2dToy::WCCosmic::WCCosmic(WireCell2dToy::ToyTrackingSelection& toytrackings)
+WCP2dToy::WCCosmic::WCCosmic(WCP2dToy::ToyTrackingSelection& toytrackings)
   : toytrackings(toytrackings)
 {
   center.x = 0;
@@ -94,7 +94,7 @@ WireCell2dToy::WCCosmic::WCCosmic(WireCell2dToy::ToyTrackingSelection& toytracki
   }
 }
 
-void WireCell2dToy::WCCosmic::judge_cosmic(){
+void WCP2dToy::WCCosmic::judge_cosmic(){
   cosmic_flag = false;
   
   // if anythng is outside x
@@ -157,7 +157,7 @@ void WireCell2dToy::WCCosmic::judge_cosmic(){
 	// count how many good tracks were in ... 
 	int ntrack = 0;
 	for (int i=0;i!=toytrackings.size();i++){
-	  WireCell2dToy::ToyTracking *toytracking = toytrackings.at(i);
+	  WCP2dToy::ToyTracking *toytracking = toytrackings.at(i);
 	  for (int j=0;j!=toytracking->get_vertices().size();j++){
 	    WCVertex *vertex = toytracking->get_vertices().at(j);
 	    if (vertex->get_ntracks() >=2){
@@ -292,7 +292,7 @@ void WireCell2dToy::WCCosmic::judge_cosmic(){
 }
 
 
-void WireCell2dToy::WCCosmic::Add(WCCosmic *cosmic){
+void WCP2dToy::WCCosmic::Add(WCCosmic *cosmic){
   toytrackings.insert(toytrackings.end(), cosmic->get_trackings().begin(),
 		      cosmic->get_trackings().end());
   mcells.insert(mcells.end(),cosmic->get_mcells().begin(),cosmic->get_mcells().end());
@@ -334,7 +334,7 @@ void WireCell2dToy::WCCosmic::Add(WCCosmic *cosmic){
 }
 
 
-void WireCell2dToy::WCCosmic::fill_points(){
+void WCP2dToy::WCCosmic::fill_points(){
   points.clear();
   
   //find the smallest point and largest point
@@ -424,14 +424,14 @@ void WireCell2dToy::WCCosmic::fill_points(){
   // 	    << max_dis << " " << max_point.x/units::cm << " " << max_point.y/units::cm << " " << max_point.z/units::cm << std::endl;
 }
 
-void WireCell2dToy::WCCosmic::Sort(){
+void WCP2dToy::WCCosmic::Sort(){
   //Sorting 
-  std::vector<WireCell2dToy::MSC_Struct> msc_vector;
+  std::vector<WCP2dToy::MSC_Struct> msc_vector;
   for (int i=0;i!=mcells.size();i++){
-    msc_vector.push_back(WireCell2dToy::MSC_Struct(cal_pos(mcells.at(i)),mcells.at(i)));
+    msc_vector.push_back(WCP2dToy::MSC_Struct(cal_pos(mcells.at(i)),mcells.at(i)));
   }
   
-  std::sort(msc_vector.begin(),msc_vector.end(),WireCell2dToy::less_than_key());
+  std::sort(msc_vector.begin(),msc_vector.end(),WCP2dToy::less_than_key());
   
   mcells.clear();
   for (int i=0;i!=msc_vector.size();i++){
@@ -439,7 +439,7 @@ void WireCell2dToy::WCCosmic::Sort(){
   }
 }
 
-float WireCell2dToy::WCCosmic::cal_pos(SpaceCell *cell){
+float WCP2dToy::WCCosmic::cal_pos(SpaceCell *cell){
   TVector3 dir(sin(theta)*cos(phi),sin(theta)*sin(phi),cos(theta));
   TVector3 dir1(cell->x() - center.x,
 		cell->y() - center.y,
@@ -448,7 +448,7 @@ float WireCell2dToy::WCCosmic::cal_pos(SpaceCell *cell){
   return dis1;
 }
 
-float WireCell2dToy::WCCosmic::cal_pos(MergeSpaceCell *mcell1){
+float WCP2dToy::WCCosmic::cal_pos(MergeSpaceCell *mcell1){
   TVector3 dir(sin(theta)*cos(phi),sin(theta)*sin(phi),cos(theta));
   TVector3 dir1(mcell1->Get_Center().x - center.x,
 		mcell1->Get_Center().y - center.y,
@@ -458,7 +458,7 @@ float WireCell2dToy::WCCosmic::cal_pos(MergeSpaceCell *mcell1){
 }
 
 
-float WireCell2dToy::WCCosmic::cal_dist(WireCell2dToy::WCCosmic *cosmic){
+float WCP2dToy::WCCosmic::cal_dist(WCP2dToy::WCCosmic *cosmic){
   TVector3 dir1(sin(theta)*cos(phi),sin(theta)*sin(phi),cos(theta));
   TVector3 dir2(sin(cosmic->get_theta())*cos(cosmic->get_phi()),
 		sin(cosmic->get_theta())*sin(cosmic->get_phi()),
@@ -481,7 +481,7 @@ float WireCell2dToy::WCCosmic::cal_dist(WireCell2dToy::WCCosmic *cosmic){
   return dis;
 }
 
-float WireCell2dToy::WCCosmic::cal_costh(WireCell2dToy::WCCosmic *cosmic){
+float WCP2dToy::WCCosmic::cal_costh(WCP2dToy::WCCosmic *cosmic){
   TVector3 dir1(sin(theta)*cos(phi),sin(theta)*sin(phi),cos(theta));
   TVector3 dir2(sin(cosmic->get_theta())*cos(cosmic->get_phi()),
 		sin(cosmic->get_theta())*sin(cosmic->get_phi()),
@@ -490,7 +490,7 @@ float WireCell2dToy::WCCosmic::cal_costh(WireCell2dToy::WCCosmic *cosmic){
 }
 
 
-WireCell2dToy::WCCosmic::~WCCosmic(){
+WCP2dToy::WCCosmic::~WCCosmic(){
   if (ct != 0)
     delete ct;
 }

@@ -1,5 +1,5 @@
-#include "WireCell2dToy/ToyMatrixExclusive.h"
-using namespace WireCell;
+#include "WCP2dToy/ToyMatrixExclusive.h"
+using namespace WCP;
 
 #include "TMath.h"
 
@@ -15,7 +15,7 @@ struct EigenCompare {
 typedef std::set<EigenPair, EigenCompare> EigenSet;
 
 
-WireCell2dToy::ToyMatrixExclusive::ToyMatrixExclusive(WireCell2dToy::ToyMatrix &toymatrix){
+WCP2dToy::ToyMatrixExclusive::ToyMatrixExclusive(WCP2dToy::ToyMatrix &toymatrix){
   Eigen = new TMatrixDEigen(*(toymatrix.Get_MC()));
   EigenValue = new TVectorD(Eigen->GetEigenValuesRe());
   trans = new TMatrixD(Eigen->GetEigenVectors());
@@ -123,7 +123,7 @@ WireCell2dToy::ToyMatrixExclusive::ToyMatrixExclusive(WireCell2dToy::ToyMatrix &
 
 
 
-WireCell2dToy::ToyMatrixExclusive::~ToyMatrixExclusive(){
+WCP2dToy::ToyMatrixExclusive::~ToyMatrixExclusive(){
   delete Eigen;
   delete EigenValue;
   delete MA;
@@ -140,7 +140,7 @@ WireCell2dToy::ToyMatrixExclusive::~ToyMatrixExclusive(){
 }
 
 
-int WireCell2dToy::ToyMatrixExclusive::Solve(std::vector<int>& flag, WireCell2dToy::ToyMatrix &toymatrix){
+int WCP2dToy::ToyMatrixExclusive::Solve(std::vector<int>& flag, WCP2dToy::ToyMatrix &toymatrix){
   const TMatrixD *MA_big = toymatrix.Get_MA();
   const TMatrixD *VBy = toymatrix.Get_VBy();
   const TMatrixD *VBy_inv = toymatrix.Get_VBy_inv();
@@ -226,7 +226,7 @@ int WireCell2dToy::ToyMatrixExclusive::Solve(std::vector<int>& flag, WireCell2dT
 
 }
 
-void WireCell2dToy::ToyMatrixExclusive::move(std::vector<int>& flag, int index, int max){
+void WCP2dToy::ToyMatrixExclusive::move(std::vector<int>& flag, int index, int max){
   int temp = flag.at(index);
   auto it = find(flag.begin(),flag.end(),temp);
   while(it!=flag.end()){

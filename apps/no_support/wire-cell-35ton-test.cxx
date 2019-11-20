@@ -1,30 +1,30 @@
-#include "WireCellNav/DetectorGDS.h"
-#include "WireCellNav/DetGenerativeFDS.h"
-#include "WireCellNav/FrameDataSource.h"
-#include "WireCell2dToy/ToyDepositor.h"
-#include "WireCellSst/Util.h"
-#include "WireCell2dToy/ToySignalSimu.h"
-#include "WireCell2dToy/ToySignalSimuTrue.h"
-#include "WireCell2dToy/ToySignalGaus.h"
-#include "WireCell2dToy/ToySignalWien.h"
-#include "WireCellSst/ToyuBooNESliceDataSource.h"
-#include "WireCell2dToy/ToyTiling.h"
-#include "WireCell2dToy/MergeToyTiling.h"
-#include "WireCell2dToy/TruthToyTiling.h"
-#include "WireCellData/MergeGeomCell.h"
+#include "WCPNav/DetectorGDS.h"
+#include "WCPNav/DetGenerativeFDS.h"
+#include "WCPNav/FrameDataSource.h"
+#include "WCP2dToy/ToyDepositor.h"
+#include "WCPSst/Util.h"
+#include "WCP2dToy/ToySignalSimu.h"
+#include "WCP2dToy/ToySignalSimuTrue.h"
+#include "WCP2dToy/ToySignalGaus.h"
+#include "WCP2dToy/ToySignalWien.h"
+#include "WCPSst/ToyuBooNESliceDataSource.h"
+#include "WCP2dToy/ToyTiling.h"
+#include "WCP2dToy/MergeToyTiling.h"
+#include "WCP2dToy/TruthToyTiling.h"
+#include "WCPData/MergeGeomCell.h"
 
-#include "WireCell2dToy/ToyEventDisplay.h"
+#include "WCP2dToy/ToyEventDisplay.h"
 
-#include "WireCell2dToy/ToyMatrix.h"
-#include "WireCell2dToy/ToyMatrixExclusive.h"
-#include "WireCell2dToy/ToyMatrixKalman.h"
-#include "WireCell2dToy/ToyMatrixIterate.h"
-#include "WireCell2dToy/ToyMatrixMarkov.h"
-#include "WireCell2dToy/ToyMetric.h"
-#include "WireCellData/TPCParams.h"
-#include "WireCellData/Singleton.h"
+#include "WCP2dToy/ToyMatrix.h"
+#include "WCP2dToy/ToyMatrixExclusive.h"
+#include "WCP2dToy/ToyMatrixKalman.h"
+#include "WCP2dToy/ToyMatrixIterate.h"
+#include "WCP2dToy/ToyMatrixMarkov.h"
+#include "WCP2dToy/ToyMetric.h"
+#include "WCPData/TPCParams.h"
+#include "WCPData/Singleton.h"
 
-#include "WireCellData/GeomCluster.h"
+#include "WCPData/GeomCluster.h"
 
 #include "TApplication.h"
 #include "TCanvas.h"
@@ -43,7 +43,7 @@
 #include <vector>
 
 
-using namespace WireCell;
+using namespace WCP;
 using namespace std;
 
 int main(int argc, char* argv[])
@@ -127,8 +127,8 @@ int main(int argc, char* argv[])
 
   cout << "Run No: " << run_no << " " << subrun_no << " " << eve_num << endl;
   
-  WireCell::FrameDataSource* fds = 0;
-  fds = WireCellSst::make_fds(*tfile);
+  WCP::FrameDataSource* fds = 0;
+  fds = WCPSst::make_fds(*tfile);
   if (!fds) {
     cerr << "ERROR: failed to get FDS from " << root_file << endl;
     return 1;
@@ -136,7 +136,7 @@ int main(int argc, char* argv[])
   
   TH1::AddDirectory(kFALSE);
   
-  WireCell::ToyDepositor toydep(fds,0,unit_dis,frame_length);
+  WCP::ToyDepositor toydep(fds,0,unit_dis,frame_length);
   const PointValueVector& pvv = toydep.depositions(eve_num);
 
   std::cout << "Points deposited: " << pvv.size() << std::endl;
@@ -148,26 +148,26 @@ int main(int argc, char* argv[])
   tfile->Close("R");
   delete tfile;
 
-  //WireCellSst::ToyuBooNESliceDataSource sds(gfds,1500); //set threshold at 2000 electrons
+  //WCPSst::ToyuBooNESliceDataSource sds(gfds,1500); //set threshold at 2000 electrons
 
   
   
   cout << "Put in Truth " << endl; 
-  WireCell2dToy::ToySignalSimuTrueFDS st_fds(gfds,gds,total_time_bin/nrebin,max_events,0); //truth
+  WCP2dToy::ToySignalSimuTrueFDS st_fds(gfds,gds,total_time_bin/nrebin,max_events,0); //truth
   st_fds.jump(eve_num);
   
   cout << "Simulate Raw WaveForm " << endl; 
-  WireCell2dToy::ToySignalSimuFDS simu_fds(gfds,gds,total_time_bin,max_events,toffset_1,toffset_2,1); // time offset among different planes for the time electrons travel among different planes
+  WCP2dToy::ToySignalSimuFDS simu_fds(gfds,gds,total_time_bin,max_events,toffset_1,toffset_2,1); // time offset among different planes for the time electrons travel among different planes
   simu_fds.jump(eve_num);
   //simu_fds.Save();
   
   cout << "Deconvolution with Gaussian filter" << endl;
-  WireCell2dToy::ToySignalGausFDS gaus_fds(simu_fds,gds,total_time_bin/nrebin,max_events,toffset_1,toffset_2); // gaussian smearing for charge estimation
+  WCP2dToy::ToySignalGausFDS gaus_fds(simu_fds,gds,total_time_bin/nrebin,max_events,toffset_1,toffset_2); // gaussian smearing for charge estimation
   gaus_fds.jump(eve_num);
   //gaus_fds.Save();
 
   cout << "Deconvolution with Wiener filter" << endl;
-  WireCell2dToy::ToySignalWienFDS wien_fds(simu_fds,gds,total_time_bin/nrebin,max_events,toffset_1,toffset_2); // weiner smearing for hit identification
+  WCP2dToy::ToySignalWienFDS wien_fds(simu_fds,gds,total_time_bin/nrebin,max_events,toffset_1,toffset_2); // weiner smearing for hit identification
   wien_fds.jump(eve_num);
   //wien_fds.Save();
   
@@ -182,14 +182,14 @@ int main(int argc, char* argv[])
   
   // cin >> abc;
 
-  WireCellSst::ToyuBooNESliceDataSource sds(gds,wien_fds,gaus_fds,threshold_u, 
+  WCPSst::ToyuBooNESliceDataSource sds(gds,wien_fds,gaus_fds,threshold_u, 
   					    threshold_v, threshold_w, 
   					    threshold_ug, 
   					    threshold_vg, threshold_wg, 
   					    nwire_u, 
   					    nwire_v, nwire_w); 
 
-  WireCellSst::ToyuBooNESliceDataSource sds_th(gds,st_fds,st_fds,500, 
+  WCPSst::ToyuBooNESliceDataSource sds_th(gds,st_fds,st_fds,500, 
   					    500, 500, 
   					    threshold_ug, 
   					    threshold_vg, threshold_wg, 
@@ -204,16 +204,16 @@ int main(int argc, char* argv[])
   int ncount_t = 0;
 
 
-   WireCell2dToy::ToyTiling **toytiling = new WireCell2dToy::ToyTiling*[2400];
-   WireCell2dToy::MergeToyTiling **mergetiling = new WireCell2dToy::MergeToyTiling*[2400];
-   WireCell2dToy::TruthToyTiling **truthtiling = new WireCell2dToy::TruthToyTiling*[2400];
-   WireCell2dToy::ToyMatrix **toymatrix = new WireCell2dToy::ToyMatrix*[2400];
+   WCP2dToy::ToyTiling **toytiling = new WCP2dToy::ToyTiling*[2400];
+   WCP2dToy::MergeToyTiling **mergetiling = new WCP2dToy::MergeToyTiling*[2400];
+   WCP2dToy::TruthToyTiling **truthtiling = new WCP2dToy::TruthToyTiling*[2400];
+   WCP2dToy::ToyMatrix **toymatrix = new WCP2dToy::ToyMatrix*[2400];
    
     //save truth ...
-   WireCell2dToy::ToyTiling **toytiling_th = new WireCell2dToy::ToyTiling*[2400];
-   WireCell2dToy::TruthToyTiling **truthtiling_th = new WireCell2dToy::TruthToyTiling*[2400];
+   WCP2dToy::ToyTiling **toytiling_th = new WCP2dToy::ToyTiling*[2400];
+   WCP2dToy::TruthToyTiling **truthtiling_th = new WCP2dToy::TruthToyTiling*[2400];
 
-   WireCell2dToy::ToyMetric toymetric;
+   WCP2dToy::ToyMetric toymetric;
    
 
    //add in cluster
@@ -233,38 +233,38 @@ int main(int argc, char* argv[])
      sds.jump(i);
      sds_th.jump(i);
      
-     WireCell::Slice slice = sds.get();
-     WireCell::Slice slice_th = sds_th.get();
+     WCP::Slice slice = sds.get();
+     WCP::Slice slice_th = sds_th.get();
      cout << i << " " << slice.group().size() << " " << slice_th.group().size() << endl;
 
      // if ( slice.group().size() >0){
      // cout << i << " " << slice.group().size() << endl;
-     toytiling[i] = new WireCell2dToy::ToyTiling(slice,gds,0,0,0,threshold_ug,threshold_vg, threshold_wg);
+     toytiling[i] = new WCP2dToy::ToyTiling(slice,gds,0,0,0,threshold_ug,threshold_vg, threshold_wg);
      //allcell = toytiling[i]->get_allcell();
      GeomCellSelection allcell = toytiling[i]->get_allcell();
      GeomWireSelection allwire = toytiling[i]->get_allwire();
      cout << "Single Cell: " << i << " "  << allcell.size() << " " << allwire.size() << endl;
 
-     mergetiling[i] = new WireCell2dToy::MergeToyTiling(gds,*toytiling[i],i); 
+     mergetiling[i] = new WCP2dToy::MergeToyTiling(gds,*toytiling[i],i); 
      GeomCellSelection allmcell = mergetiling[i]->get_allcell();
      GeomWireSelection allmwire = mergetiling[i]->get_allwire();
      
      cout <<"Blob: " << i << " " << allmcell.size() << " " << allmwire.size() << endl;
      
      
-     truthtiling[i] = new WireCell2dToy::TruthToyTiling(*toytiling[i],pvv,i,gds,frame_length/nrebin,unit_dis);
+     truthtiling[i] = new WCP2dToy::TruthToyTiling(*toytiling[i],pvv,i,gds,frame_length/nrebin,unit_dis);
      
      
-     toymatrix[i] = new WireCell2dToy::ToyMatrix(gds,*toytiling[i],*mergetiling[i]);
+     toymatrix[i] = new WCP2dToy::ToyMatrix(gds,*toytiling[i],*mergetiling[i]);
      if (toymatrix[i]->Get_Solve_Flag()==0){
-       WireCell2dToy::ToyMatrixIterate toymatrix_it(*toymatrix[i],2000,1e5);
+       WCP2dToy::ToyMatrixIterate toymatrix_it(*toymatrix[i],2000,1e5);
      }
      
      cout << i << " chi2: " << toymatrix[i]->Get_Chi2() <<
        " NDF: " << toymatrix[i]->Get_ndf() << endl;
      
-     toytiling_th[i] = new WireCell2dToy::ToyTiling(slice_th,gds,0,0,0,threshold_ug,threshold_vg, threshold_wg);
-    truthtiling_th[i] = new WireCell2dToy::TruthToyTiling(*toytiling_th[i],pvv,i,gds,frame_length/nrebin,unit_dis);
+     toytiling_th[i] = new WCP2dToy::ToyTiling(slice_th,gds,0,0,0,threshold_ug,threshold_vg, threshold_wg);
+    truthtiling_th[i] = new WCP2dToy::TruthToyTiling(*toytiling_th[i],pvv,i,gds,frame_length/nrebin,unit_dis);
     
      CellChargeMap ccmap = truthtiling[i]->ccmap();
      if (toymatrix[i]->Get_Solve_Flag()!=0)
@@ -286,7 +286,7 @@ int main(int argc, char* argv[])
     // float charge_max = 1e5;
 
 
-    // WireCell2dToy::ToyEventDisplay display(c1, gds);
+    // WCP2dToy::ToyEventDisplay display(c1, gds);
     // display.charge_min = charge_min;
     // display.charge_max = charge_max;
 
@@ -306,7 +306,7 @@ int main(int argc, char* argv[])
     // gStyle->SetPalette(NCont,MyPalette);
     
     // display.init(-0.03,1.568,-0.845,1.151);
-    // display.draw_mc(1,WireCell::PointValueVector(),"colz");
+    // display.draw_mc(1,WCP::PointValueVector(),"colz");
     // display.draw_slice(slice,"");
     // display.draw_cells(toytiling[i]->get_allcell(),"*same");
 
@@ -334,8 +334,8 @@ int main(int argc, char* argv[])
    // for (int i=start_num;i!=end_num+1;i++){
    //   if (toymatrix[i]->Get_Solve_Flag()==0){
    //     GeomCellSelection allmcell = mergetiling[i]->get_allcell();
-   //     WireCell2dToy::ToyMatrixMarkov toymatrix_markov(*toymatrix[i],*mergetiling[i],&allmcell,Good_MCells.at(i-start_num));
-   //     //WireCell2dToy::ToyMatrixMarkov toymatrix_markov(toymatrix[i],&allmcell);
+   //     WCP2dToy::ToyMatrixMarkov toymatrix_markov(*toymatrix[i],*mergetiling[i],&allmcell,Good_MCells.at(i-start_num));
+   //     //WCP2dToy::ToyMatrixMarkov toymatrix_markov(toymatrix[i],&allmcell);
    //     CellChargeMap ccmap = truthtiling[i]->ccmap();
    //     if (toymatrix[i]->Get_Solve_Flag()!=0)
    // 	toymetric.Add(allmcell,*toymatrix[i],ccmap);
@@ -359,7 +359,7 @@ int main(int argc, char* argv[])
        for (int i=start_num;i!=end_num+1;i++){
 	 if (toymatrix[i]->Get_Solve_Flag()==0){
 	   GeomCellSelection allmcell = mergetiling[i]->get_allcell();
-	   WireCell2dToy::ToyMatrixMarkov toymatrix_markov(toymatrix[i],&allmcell);
+	   WCP2dToy::ToyMatrixMarkov toymatrix_markov(toymatrix[i],&allmcell);
 	   CellChargeMap ccmap = truthtiling[i]->ccmap();
 	   if (toymatrix[i]->Get_Solve_Flag()!=0)
 	     toymetric.Add(allmcell,*toymatrix[i],ccmap);
@@ -372,7 +372,7 @@ int main(int argc, char* argv[])
        for (int i=first_solve+1;i<=end_num-1;i++){
 	 if (toymatrix[i]->Get_Solve_Flag()==0){
 	   GeomCellSelection allmcell = mergetiling[i]->get_allcell();
-	   WireCell2dToy::ToyMatrixMarkov toymatrix_markov(toymatrix[i-1],toymatrix[i],toymatrix[i+1],mergetiling[i-1],mergetiling[i],mergetiling[i+1],&allmcell);
+	   WCP2dToy::ToyMatrixMarkov toymatrix_markov(toymatrix[i-1],toymatrix[i],toymatrix[i+1],mergetiling[i-1],mergetiling[i],mergetiling[i+1],&allmcell);
 	   CellChargeMap ccmap = truthtiling[i]->ccmap();
 	   if (toymatrix[i]->Get_Solve_Flag()!=0)
 	     toymetric.Add(allmcell,*toymatrix[i],ccmap);
@@ -387,7 +387,7 @@ int main(int argc, char* argv[])
        
        if (toymatrix[end_num]->Get_Solve_Flag()==0){
 	 GeomCellSelection allmcell = mergetiling[end_num]->get_allcell();
-	 WireCell2dToy::ToyMatrixMarkov toymatrix_markov(toymatrix[end_num-1],toymatrix[end_num],0,mergetiling[end_num-1],mergetiling[end_num],0,&allmcell);
+	 WCP2dToy::ToyMatrixMarkov toymatrix_markov(toymatrix[end_num-1],toymatrix[end_num],0,mergetiling[end_num-1],mergetiling[end_num],0,&allmcell);
 	 
 	 
 	 CellChargeMap ccmap = truthtiling[end_num]->ccmap();
@@ -403,7 +403,7 @@ int main(int argc, char* argv[])
       for (int i=first_solve-1;i>=start_num+1;i--){
   	if (toymatrix[i]->Get_Solve_Flag()==0){
   	  GeomCellSelection allmcell = mergetiling[i]->get_allcell();
-  	  WireCell2dToy::ToyMatrixMarkov toymatrix_markov(toymatrix[i-1],toymatrix[i],toymatrix[i+1],mergetiling[i-1],mergetiling[i],mergetiling[i+1],&allmcell);
+  	  WCP2dToy::ToyMatrixMarkov toymatrix_markov(toymatrix[i-1],toymatrix[i],toymatrix[i+1],mergetiling[i-1],mergetiling[i],mergetiling[i+1],&allmcell);
 	  
   	  CellChargeMap ccmap = truthtiling[i]->ccmap();
   	  if (toymatrix[i]->Get_Solve_Flag()!=0)
@@ -417,7 +417,7 @@ int main(int argc, char* argv[])
       
       if (toymatrix[start_num]->Get_Solve_Flag()==0){
   	GeomCellSelection allmcell = mergetiling[start_num]->get_allcell();
-  	WireCell2dToy::ToyMatrixMarkov toymatrix_markov(0,toymatrix[start_num],toymatrix[start_num+1],0,mergetiling[start_num],mergetiling[start_num+1],&allmcell);
+  	WCP2dToy::ToyMatrixMarkov toymatrix_markov(0,toymatrix[start_num],toymatrix[start_num+1],0,mergetiling[start_num],mergetiling[start_num+1],&allmcell);
 	
 	
   	CellChargeMap ccmap = truthtiling[start_num]->ccmap();

@@ -1,7 +1,7 @@
-#include "WireCell2dToy/uBooNE_L1SP.h"
+#include "WCP2dToy/uBooNE_L1SP.h"
 
-#include "WireCellRess/LassoModel.h"
-#include "WireCellRess/ElasticNetModel.h"
+#include "WCPRess/LassoModel.h"
+#include "WCPRess/ElasticNetModel.h"
 #include <Eigen/Dense>
 
 #include "TVirtualFFT.h"
@@ -9,9 +9,9 @@
 #include <fstream>
 
 using namespace Eigen;
-using namespace WireCell;
+using namespace WCP;
 
-WireCell2dToy::uBooNE_L1SP::uBooNE_L1SP(TH2F *hv_raw, TH2F *hv_decon, TH2F *hv_decon_g, int nrebin, double time_offset)
+WCP2dToy::uBooNE_L1SP::uBooNE_L1SP(TH2F *hv_raw, TH2F *hv_decon, TH2F *hv_decon_g, int nrebin, double time_offset)
   : hv_raw(hv_raw)
   , hv_decon(hv_decon)
   , hv_decon_g(hv_decon_g)
@@ -212,13 +212,13 @@ WireCell2dToy::uBooNE_L1SP::uBooNE_L1SP(TH2F *hv_raw, TH2F *hv_decon, TH2F *hv_d
   
 }
 
-WireCell2dToy::uBooNE_L1SP::~uBooNE_L1SP(){
+WCP2dToy::uBooNE_L1SP::~uBooNE_L1SP(){
   delete gv;
   delete gw;
   delete filter_g;
 }
 
-void WireCell2dToy::uBooNE_L1SP::AddWireTime_Raw(){
+void WCP2dToy::uBooNE_L1SP::AddWireTime_Raw(){
   TH1F *h1 = new TH1F("h1","h1",200,-50,50);
   for (int wire_index= 1166; wire_index<=1905;wire_index++){
     h1->Reset();
@@ -272,7 +272,7 @@ void WireCell2dToy::uBooNE_L1SP::AddWireTime_Raw(){
   delete h1;
 }
 
-void WireCell2dToy::uBooNE_L1SP::AddWires(int time_slice, GeomWireSelection& wires){
+void WCP2dToy::uBooNE_L1SP::AddWires(int time_slice, GeomWireSelection& wires){
   if (wires.size() >0){
     
     // save +- 2 time slices ... 
@@ -296,7 +296,7 @@ void WireCell2dToy::uBooNE_L1SP::AddWires(int time_slice, GeomWireSelection& wir
   }
 }
 
-void WireCell2dToy::uBooNE_L1SP::Form_rois(int pad){
+void WCP2dToy::uBooNE_L1SP::Form_rois(int pad){
   
   for (auto it = init_map.begin(); it!=init_map.end(); it++){
     int wire_index = it->first;
@@ -374,7 +374,7 @@ void WireCell2dToy::uBooNE_L1SP::Form_rois(int pad){
 }
 
 
-void WireCell2dToy::uBooNE_L1SP::L1_fit(int wire_index, int start_tick, int end_tick){
+void WCP2dToy::uBooNE_L1SP::L1_fit(int wire_index, int start_tick, int end_tick){
   const int nbin_fit = end_tick-start_tick;
   // std::cout << start_tick << " " << end_tick << std::endl;
   
@@ -439,7 +439,7 @@ void WireCell2dToy::uBooNE_L1SP::L1_fit(int wire_index, int start_tick, int end_
       }
       
       double lambda = 5;//1/2.;
-      WireCell::LassoModel m2(lambda, 100000, 0.05);
+      WCP::LassoModel m2(lambda, 100000, 0.05);
       m2.SetData(G, W);
       m2.Fit();
       VectorXd beta = m2.Getbeta();

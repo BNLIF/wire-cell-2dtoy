@@ -1,10 +1,10 @@
-#include "WireCell2dToy/ToyMatrix.h"
+#include "WCP2dToy/ToyMatrix.h"
 
 #include "TDecompSVD.h"
 
-using namespace WireCell;
+using namespace WCP;
 
-void WireCell2dToy::ToyMatrix::JudgeSimpleBlob(WireCell2dToy::ToyTiling& toytiling, WireCell2dToy::MergeToyTiling& mergetiling){
+void WCP2dToy::ToyMatrix::JudgeSimpleBlob(WCP2dToy::ToyTiling& toytiling, WCP2dToy::MergeToyTiling& mergetiling){
    GeomCellSelection allmcell = mergetiling.get_allcell();
    num_blob = 0;
    for (int j=0;j!=allmcell.size();j++){
@@ -87,7 +87,7 @@ void WireCell2dToy::ToyMatrix::JudgeSimpleBlob(WireCell2dToy::ToyTiling& toytili
 
 }
 
-WireCell2dToy::ToyMatrix::ToyMatrix(){
+WCP2dToy::ToyMatrix::ToyMatrix(){
   solve_flag = -1;
   chi2 = -1;
   svd_flag = 0;
@@ -124,7 +124,7 @@ WireCell2dToy::ToyMatrix::ToyMatrix(){
 }
 
 
-WireCell2dToy::ToyMatrix::ToyMatrix(WireCell2dToy::ToyTiling& toytiling, WireCell2dToy::MergeToyTiling& mergetiling, int svd_flag1, int recon_t){
+WCP2dToy::ToyMatrix::ToyMatrix(WCP2dToy::ToyTiling& toytiling, WCP2dToy::MergeToyTiling& mergetiling, int svd_flag1, int recon_t){
   solve_flag = -1;
   chi2 = -1;
   svd_flag = svd_flag1;
@@ -254,7 +254,7 @@ WireCell2dToy::ToyMatrix::ToyMatrix(WireCell2dToy::ToyTiling& toytiling, WireCel
   
 }
 
-void WireCell2dToy::ToyMatrix::Buildup_index(const WireCell::DetectorGDS& gds, WireCell2dToy::MergeToyTiling& mergetiling){
+void WCP2dToy::ToyMatrix::Buildup_index(const WCP::DetectorGDS& gds, WCP2dToy::MergeToyTiling& mergetiling){
   mcindex = 0; // merged cell
   mwindex = 0; // merged wire
   swindex = 0; // single channel
@@ -293,7 +293,7 @@ void WireCell2dToy::ToyMatrix::Buildup_index(const WireCell::DetectorGDS& gds, W
   }
 }
 
-WireCell2dToy::ToyMatrix::ToyMatrix(const DetectorGDS& gds,WireCell2dToy::ToyTiling& toytiling, WireCell2dToy::MergeToyTiling& mergetiling, int recon_t){
+WCP2dToy::ToyMatrix::ToyMatrix(const DetectorGDS& gds,WCP2dToy::ToyTiling& toytiling, WCP2dToy::MergeToyTiling& mergetiling, int recon_t){
   solve_flag = -1;
   chi2 = -1;
   svd_flag = 0;
@@ -387,7 +387,7 @@ WireCell2dToy::ToyMatrix::ToyMatrix(const DetectorGDS& gds,WireCell2dToy::ToyTil
   }
 }
 
-WireCell2dToy::ToyMatrix::ToyMatrix(WireCell2dToy::ToyTiling& toytiling, WireCell2dToy::MergeToyTiling& mergetiling, int recon_t){
+WCP2dToy::ToyMatrix::ToyMatrix(WCP2dToy::ToyTiling& toytiling, WCP2dToy::MergeToyTiling& mergetiling, int recon_t){
   solve_flag = -1;
   chi2 = -1;
   svd_flag = 0;
@@ -512,12 +512,12 @@ WireCell2dToy::ToyMatrix::ToyMatrix(WireCell2dToy::ToyTiling& toytiling, WireCel
 
 
 
-void WireCell2dToy::ToyMatrix::Update_pred(){
+void WCP2dToy::ToyMatrix::Update_pred(){
   *MWy = (*MB) * (*Wy);
   *MWy_pred = (*MA) * (*Cx);
 }
 
-void WireCell2dToy::ToyMatrix::Print(){
+void WCP2dToy::ToyMatrix::Print(){
 
   MA->Print();
   std::cout << std::endl;
@@ -528,7 +528,7 @@ void WireCell2dToy::ToyMatrix::Print(){
   }
 }
 
-double WireCell2dToy::ToyMatrix::Get_residual(const WireCell::GeomCell *cell){
+double WCP2dToy::ToyMatrix::Get_residual(const WCP::GeomCell *cell){
   double res=0;
   int index = mcimap[cell];
 
@@ -539,7 +539,7 @@ double WireCell2dToy::ToyMatrix::Get_residual(const WireCell::GeomCell *cell){
   return res;
 }
 
-WireCell2dToy::ToyMatrix::~ToyMatrix(){
+WCP2dToy::ToyMatrix::~ToyMatrix(){
   
   
   delete MA;
@@ -560,7 +560,7 @@ WireCell2dToy::ToyMatrix::~ToyMatrix(){
   delete MWy;
 }
 
-int WireCell2dToy::ToyMatrix::Solve(){
+int WCP2dToy::ToyMatrix::Solve(){
   
   // double det = MC->Determinant();
 
@@ -596,7 +596,7 @@ int WireCell2dToy::ToyMatrix::Solve(){
   return solve_flag;
 }
 
-int WireCell2dToy::ToyMatrix::Solve_SVD(){
+int WCP2dToy::ToyMatrix::Solve_SVD(){
   
   // if (svd_removed.size()!=0){
   //   //update *MC
@@ -684,7 +684,7 @@ int WireCell2dToy::ToyMatrix::Solve_SVD(){
 
 
 
-double WireCell2dToy::ToyMatrix::Get_Cell_Charge( const WireCell::GeomCell *cell, int flag )  {
+double WCP2dToy::ToyMatrix::Get_Cell_Charge( const WCP::GeomCell *cell, int flag )  {
   // flag == 1 charge
   // flag == 2 uncertainty
   int index = mcimap[cell];
@@ -696,7 +696,7 @@ double WireCell2dToy::ToyMatrix::Get_Cell_Charge( const WireCell::GeomCell *cell
 }
 
 
-void WireCell2dToy::ToyMatrix::Buildup_index(WireCell2dToy::MergeToyTiling& mergetiling){
+void WCP2dToy::ToyMatrix::Buildup_index(WCP2dToy::MergeToyTiling& mergetiling){
 
   mcindex = 0;
   mwindex = 0;

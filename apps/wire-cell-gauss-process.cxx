@@ -5,13 +5,13 @@
 #include "TAxis.h"
 #include "TLegend.h"
 
-#include "WireCellRess/GaussProcess.h"
+#include "WCPRess/GaussProcess.h"
 
 
 
 #include <iostream>
 using namespace std;
-using namespace WireCell;
+using namespace WCP;
 
 int main(int argc, char* argv[])
 {

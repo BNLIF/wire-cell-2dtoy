@@ -1,14 +1,14 @@
-#include "WireCell2dToy/TotalTiling.h"
+#include "WCP2dToy/TotalTiling.h"
 
-using namespace WireCell;
+using namespace WCP;
 
-WireCell2dToy::TotalTiling::TotalTiling(){
+WCP2dToy::TotalTiling::TotalTiling(){
 }
 
-WireCell2dToy::TotalTiling::~TotalTiling(){
+WCP2dToy::TotalTiling::~TotalTiling(){
 }
 
-void WireCell2dToy::TotalTiling::AddCellWire(const GeomCell *cell, const GeomWire *uwire, const GeomWire *vwire, const GeomWire *wwire){
+void WCP2dToy::TotalTiling::AddCellWire(const GeomCell *cell, const GeomWire *uwire, const GeomWire *vwire, const GeomWire *wwire){
   cell_all.push_back(cell);
   
   GeomWireSelection wires;
@@ -54,7 +54,7 @@ void WireCell2dToy::TotalTiling::AddCellWire(const GeomCell *cell, const GeomWir
 }
 
 
-void WireCell2dToy::TotalTiling::Clear(){
+void WCP2dToy::TotalTiling::Clear(){
   wire_u.clear();
   wire_v.clear();
   wire_w.clear();
@@ -65,7 +65,7 @@ void WireCell2dToy::TotalTiling::Clear(){
 }
 
 
-GeomWireSelection WireCell2dToy::TotalTiling::wires(const GeomCell& cell) const
+GeomWireSelection WCP2dToy::TotalTiling::wires(const GeomCell& cell) const
 {
   if (cellmap.find(&cell) == cellmap.end()){
     //not found 
@@ -77,7 +77,7 @@ GeomWireSelection WireCell2dToy::TotalTiling::wires(const GeomCell& cell) const
     
 }
 	
-GeomCellSelection WireCell2dToy::TotalTiling::cells(const GeomWire& wire) const
+GeomCellSelection WCP2dToy::TotalTiling::cells(const GeomWire& wire) const
 {
   if (wiremap.find(&wire) == wiremap.end()){
     return GeomCellSelection();
@@ -87,7 +87,7 @@ GeomCellSelection WireCell2dToy::TotalTiling::cells(const GeomWire& wire) const
 }
 
 
-const GeomCell* WireCell2dToy::TotalTiling::cell(const GeomWireSelection& wires)
+const GeomCell* WCP2dToy::TotalTiling::cell(const GeomWireSelection& wires)
 {
   if (wires.size()!=3) return 0;
   const GeomWire *wire1 = wires[0];

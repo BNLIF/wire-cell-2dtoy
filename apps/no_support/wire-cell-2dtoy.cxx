@@ -1,15 +1,15 @@
-#include "WireCellSst/GeomDataSource.h"
-#include "WireCell2dToy/FrameDataSource.h"
-#include "WireCell2dToy/ToyEventDisplay.h"
-#include "WireCell2dToy/ToyTiling.h"
+#include "WCPSst/GeomDataSource.h"
+#include "WCP2dToy/FrameDataSource.h"
+#include "WCP2dToy/ToyEventDisplay.h"
+#include "WCP2dToy/ToyTiling.h"
 
-#include "WireCellNav/SliceDataSource.h"
+#include "WCPNav/SliceDataSource.h"
 #include "TApplication.h"
 #include "TCanvas.h"
 #include "TStyle.h"
 #include "TH1F.h"
 #include <iostream>
-using namespace WireCell;
+using namespace WCP;
 using namespace std;
 
 
@@ -22,8 +22,8 @@ int main(int argc, char* argv[])
       return 1;
   }
 
-  WireCellSst::GeomDataSource gds(argv[1]);
-  WireCell2dToy::FrameDataSource fds(10, gds);
+  WCPSst::GeomDataSource gds(argv[1]);
+  WCP2dToy::FrameDataSource fds(10, gds);
 
   std::vector<double> ex = gds.extent();
   cerr << "Extent: "
@@ -35,16 +35,16 @@ int main(int argc, char* argv[])
   cout << fds.size() << endl;
   
   fds.jump(1);
-  WireCell::Frame frame = fds.get();
+  WCP::Frame frame = fds.get();
   cout << frame.traces.size() << endl;
-  const WireCell::PointValueVector& mctruth = fds.cell_charges();
+  const WCP::PointValueVector& mctruth = fds.cell_charges();
   cout << mctruth.size() << endl;
 
-  WireCell::SliceDataSource sds(fds);
+  WCP::SliceDataSource sds(fds);
   sds.jump(0);
-  WireCell::Slice slice = sds.get();
+  WCP::Slice slice = sds.get();
 
-  WireCell2dToy::ToyTiling toytiling(slice,gds);
+  WCP2dToy::ToyTiling toytiling(slice,gds);
 
   GeomCellSelection allcell = toytiling.get_allcell();
   GeomWireSelection allwire = toytiling.get_allwire();
@@ -59,7 +59,7 @@ int main(int argc, char* argv[])
   TCanvas c1("ToyMC","ToyMC",800,600);
   c1.Draw();
 
-  WireCell2dToy::ToyEventDisplay display(c1, gds);
+  WCP2dToy::ToyEventDisplay display(c1, gds);
   
   gStyle->SetOptStat(0);
 

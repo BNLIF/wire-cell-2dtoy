@@ -1,9 +1,9 @@
-#include "WireCell2dToy/ToyMatrixKalman.h"
-using namespace WireCell;
+#include "WCP2dToy/ToyMatrixKalman.h"
+using namespace WCP;
 
 #include "TMath.h"
 
-int WireCell2dToy::ToyMatrixKalman::Cal_numz(WireCell2dToy::ToyMatrix &toymatrix){
+int WCP2dToy::ToyMatrixKalman::Cal_numz(WCP2dToy::ToyMatrix &toymatrix){
   
   //std::cout << no_need_remove.size() << std::endl;
   if (no_need_remove.size()!=0){
@@ -42,7 +42,7 @@ int WireCell2dToy::ToyMatrixKalman::Cal_numz(WireCell2dToy::ToyMatrix &toymatrix
   }
 }
 
-void WireCell2dToy::ToyMatrixKalman::init(WireCell2dToy::ToyMatrix& toymatrix){
+void WCP2dToy::ToyMatrixKalman::init(WCP2dToy::ToyMatrix& toymatrix){
   ncount = 0;
   numz = 0;
   
@@ -244,7 +244,7 @@ void WireCell2dToy::ToyMatrixKalman::init(WireCell2dToy::ToyMatrix& toymatrix){
   
 }
 
-WireCell2dToy::ToyMatrixKalman::ToyMatrixKalman(WireCell2dToy::ToyMatrix& toymatrix, int flag_no_need, double chi2_penalty)
+WCP2dToy::ToyMatrixKalman::ToyMatrixKalman(WCP2dToy::ToyMatrix& toymatrix, int flag_no_need, double chi2_penalty)
   : flag_no_need(flag_no_need)
   , chi2_penalty(chi2_penalty)
 {
@@ -256,7 +256,7 @@ WireCell2dToy::ToyMatrixKalman::ToyMatrixKalman(WireCell2dToy::ToyMatrix& toymat
 }
 
 
-WireCell2dToy::ToyMatrixKalman::ToyMatrixKalman(std::vector<int>& already_removed1, std::vector<int>& no_need_remove1, WireCell2dToy::ToyMatrix& toymatrix, int check, int flag_no_need, double chi2_penalty)
+WCP2dToy::ToyMatrixKalman::ToyMatrixKalman(std::vector<int>& already_removed1, std::vector<int>& no_need_remove1, WCP2dToy::ToyMatrix& toymatrix, int check, int flag_no_need, double chi2_penalty)
   : flag_no_need(flag_no_need)
   , chi2_penalty(chi2_penalty)
 {
@@ -271,7 +271,7 @@ WireCell2dToy::ToyMatrixKalman::ToyMatrixKalman(std::vector<int>& already_remove
 
 
 
-WireCell2dToy::ToyMatrixKalman::~ToyMatrixKalman(){
+WCP2dToy::ToyMatrixKalman::~ToyMatrixKalman(){
   // already_removed.clear();
   // no_need_remove.clear();
   

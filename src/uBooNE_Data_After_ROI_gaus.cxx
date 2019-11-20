@@ -1,8 +1,8 @@
-#include "WireCell2dToy/uBooNE_Data_After_ROI_gaus.h"
+#include "WCP2dToy/uBooNE_Data_After_ROI_gaus.h"
 
-using namespace WireCell;
+using namespace WCP;
 
-WireCell2dToy::uBooNEDataAfterROI_Gaus::uBooNEDataAfterROI_Gaus(WireCell2dToy::uBooNEData2DDeconvolutionFDS* frame_data, WireCell2dToy::uBooNEDataAfterROI* frame_rois, const WireCell::GeomDataSource& gds)
+WCP2dToy::uBooNEDataAfterROI_Gaus::uBooNEDataAfterROI_Gaus(WCP2dToy::uBooNEData2DDeconvolutionFDS* frame_data, WCP2dToy::uBooNEDataAfterROI* frame_rois, const WCP::GeomDataSource& gds)
   : frame_data(frame_data)
   , frame_rois(frame_rois)
 {
@@ -15,19 +15,19 @@ WireCell2dToy::uBooNEDataAfterROI_Gaus::uBooNEDataAfterROI_Gaus(WireCell2dToy::u
   nwire_w = wires_w.size();
 }
 
-WireCell2dToy::uBooNEDataAfterROI_Gaus::~uBooNEDataAfterROI_Gaus(){
+WCP2dToy::uBooNEDataAfterROI_Gaus::~uBooNEDataAfterROI_Gaus(){
   
 }
 
-void WireCell2dToy::uBooNEDataAfterROI_Gaus::Clear(){
+void WCP2dToy::uBooNEDataAfterROI_Gaus::Clear(){
 
 }
 
-int WireCell2dToy::uBooNEDataAfterROI_Gaus::size() const{
+int WCP2dToy::uBooNEDataAfterROI_Gaus::size() const{
   return 1;
 }
 
-int WireCell2dToy::uBooNEDataAfterROI_Gaus::jump(int frame_number){
+int WCP2dToy::uBooNEDataAfterROI_Gaus::jump(int frame_number){
   Clear();
   if (frame.index == frame_number) {
     return frame_number;
@@ -52,9 +52,9 @@ int WireCell2dToy::uBooNEDataAfterROI_Gaus::jump(int frame_number){
   TH2I *hw_data = frame_data->get_w_gaus();
 
   // get ROIs  
-  WireCell::SignalROIChList& rois_u = frame_rois->get_u_rois();
-  WireCell::SignalROIChList& rois_v = frame_rois->get_v_rois();
-  WireCell::SignalROIChList& rois_w = frame_rois->get_w_rois();
+  WCP::SignalROIChList& rois_u = frame_rois->get_u_rois();
+  WCP::SignalROIChList& rois_v = frame_rois->get_v_rois();
+  WCP::SignalROIChList& rois_w = frame_rois->get_w_rois();
 
   
   // load results back into data
@@ -113,7 +113,7 @@ int WireCell2dToy::uBooNEDataAfterROI_Gaus::jump(int frame_number){
 
 
     // save into frames ... 
-    WireCell::Trace trace1;
+    WCP::Trace trace1;
     trace1.chid = chid;
     trace1.tbin = 0;
     trace1.charge.resize(bins_per_frame, 0.0);

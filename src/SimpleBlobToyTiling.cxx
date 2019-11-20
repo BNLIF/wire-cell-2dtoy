@@ -1,4 +1,4 @@
-#include "WireCell2dToy/SimpleBlobToyTiling.h"
+#include "WCP2dToy/SimpleBlobToyTiling.h"
 #include "TRandom.h"
 #include "TDecompSVD.h"
 
@@ -11,9 +11,9 @@
 //#include <sstream>
 
 
-using namespace WireCell;
+using namespace WCP;
 
-double WireCell2dToy::SimpleBlobToyTiling::Get_Cell_Charge( const WireCell::GeomCell *cell, int flag )  {
+double WCP2dToy::SimpleBlobToyTiling::Get_Cell_Charge( const WCP::GeomCell *cell, int flag )  {
   // flag == 1 charge
   // flag == 2 uncertainty
   int index = scimap_save[cell];
@@ -25,9 +25,9 @@ double WireCell2dToy::SimpleBlobToyTiling::Get_Cell_Charge( const WireCell::Geom
 }
 
 
-WireCell2dToy::SimpleBlobToyTiling::SimpleBlobToyTiling(WireCell2dToy::ToyTiling& toytiling1, WireCell2dToy::MergeToyTiling& mergetiling1, WireCell2dToy::ToyMatrix& toymatrix1,
-							WireCell2dToy::MergeToyTiling& prev_mergetiling, WireCell2dToy::ToyMatrix& prev_toymatrix,
-							WireCell2dToy::MergeToyTiling& next_mergetiling, WireCell2dToy::ToyMatrix& next_toymatrix, int recon_t){
+WCP2dToy::SimpleBlobToyTiling::SimpleBlobToyTiling(WCP2dToy::ToyTiling& toytiling1, WCP2dToy::MergeToyTiling& mergetiling1, WCP2dToy::ToyMatrix& toymatrix1,
+							WCP2dToy::MergeToyTiling& prev_mergetiling, WCP2dToy::ToyMatrix& prev_toymatrix,
+							WCP2dToy::MergeToyTiling& next_mergetiling, WCP2dToy::ToyMatrix& next_toymatrix, int recon_t){
   toytiling = &toytiling1;
   mergetiling = &mergetiling1;
   toymatrix = &toymatrix1;
@@ -239,7 +239,7 @@ WireCell2dToy::SimpleBlobToyTiling::SimpleBlobToyTiling(WireCell2dToy::ToyTiling
   }
 }
 
-double WireCell2dToy::SimpleBlobToyTiling::CalChi2(){
+double WCP2dToy::SimpleBlobToyTiling::CalChi2(){
   //using namespace boost::numeric::ublas;
 
   double chi2=1e9;
@@ -389,7 +389,7 @@ double WireCell2dToy::SimpleBlobToyTiling::CalChi2(){
   return chi2;
 }
   
-void WireCell2dToy::SimpleBlobToyTiling::Buildup_index(){
+void WCP2dToy::SimpleBlobToyTiling::Buildup_index(){
   scindex = 0;
   swindex = 0;
   
@@ -429,7 +429,7 @@ void WireCell2dToy::SimpleBlobToyTiling::Buildup_index(){
 }
 
 
-void WireCell2dToy::SimpleBlobToyTiling::SaveResult(){
+void WCP2dToy::SimpleBlobToyTiling::SaveResult(){
   chi2_save = cur_chi2;
   //  std::cout << "abc1 " <<std::endl;
   // if (hypo_save.size() !=0){
@@ -485,7 +485,7 @@ void WireCell2dToy::SimpleBlobToyTiling::SaveResult(){
 }
 
 
-void WireCell2dToy::SimpleBlobToyTiling::DoTiling(){
+void WCP2dToy::SimpleBlobToyTiling::DoTiling(){
   
   GeomWireSelection mwires; //save all the merged wires
   GeomCellSelection mcells; // save other cells, and any associated cells
@@ -564,12 +564,12 @@ void WireCell2dToy::SimpleBlobToyTiling::DoTiling(){
   //save all the cells;
   cell_all.clear();
   for (int i = 0; i!=sbcells.size();i++){
-    WireCell2dToy::HypoSelection hypos = cur_hypo.at(i);
+    WCP2dToy::HypoSelection hypos = cur_hypo.at(i);
     MergeGeomCell* mcell = (MergeGeomCell*) sbcells.at(i);
     for (int j=0;j!=mcell->get_allcell().size();j++){
       const GeomCell* cell = mcell->get_allcell().at(j);
       for (int k=0;k!=hypos.size();k++){
-	WireCell2dToy::ToyHypothesis *hypo = (WireCell2dToy::ToyHypothesis*) hypos.at(k);
+	WCP2dToy::ToyHypothesis *hypo = (WCP2dToy::ToyHypothesis*) hypos.at(k);
 
 	//std::cout << i << " " << j << " " << k << " " << hypo->IsInside(*cell) << std::endl;
 
@@ -639,7 +639,7 @@ void WireCell2dToy::SimpleBlobToyTiling::DoTiling(){
 }
 
 
-void WireCell2dToy::SimpleBlobToyTiling::FormHypo(){
+void WCP2dToy::SimpleBlobToyTiling::FormHypo(){
   // std::cout << ncount << std::endl;
    ClearHypo();
 
@@ -647,19 +647,19 @@ void WireCell2dToy::SimpleBlobToyTiling::FormHypo(){
   
   if (ncount == 0){
     for (int i=0;i!=nsimple_blob;i++){
-      WireCell2dToy::HypoSelection hypos;
+      WCP2dToy::HypoSelection hypos;
       if (flag_cell.at(i) == 1){
 	// only one hypothsis to connect highest and second highest
 	MergeGeomCell *mcell1 = (MergeGeomCell*) first_cell.at(i).at(0);
 	MergeGeomCell *mcell2 = (MergeGeomCell*) second_cell.at(i).at(0);
-	WireCell2dToy::ToyHypothesis *hypo = new WireCell2dToy::ToyHypothesis(*mcell1,*mcell2);
+	WCP2dToy::ToyHypothesis *hypo = new WCP2dToy::ToyHypothesis(*mcell1,*mcell2);
 	hypos.push_back(hypo);
       }else if (flag_cell.at(i) == 2){
 	// two hypothesis, highest and second highest, and then highest to the third
 	MergeGeomCell *mcell1 = (MergeGeomCell*) first_cell.at(i).at(0);
 	MergeGeomCell *mcell2 = (MergeGeomCell*) second_cell.at(i).at(0);
 	MergeGeomCell *mcell3 = (MergeGeomCell*) other_cell.at(i).at(0);
-	WireCell2dToy::ToyHypothesis *hypo = new WireCell2dToy::ToyHypothesis(*mcell1,*mcell2);
+	WCP2dToy::ToyHypothesis *hypo = new WCP2dToy::ToyHypothesis(*mcell1,*mcell2);
 	hypos.push_back(hypo);
 	
 	//do the smallest distance
@@ -667,9 +667,9 @@ void WireCell2dToy::SimpleBlobToyTiling::FormHypo(){
 	double dis2 = pow(mcell2->center().y-mcell3->center().y,2) + pow(mcell2->center().z-mcell3->center().z,2);
 	
 	if (dis1 < dis2){
-	  hypo = new WireCell2dToy::ToyHypothesis(*mcell1,*mcell3);
+	  hypo = new WCP2dToy::ToyHypothesis(*mcell1,*mcell3);
 	}else{
-	  hypo = new WireCell2dToy::ToyHypothesis(*mcell2,*mcell3);
+	  hypo = new WCP2dToy::ToyHypothesis(*mcell2,*mcell3);
 	}
 	hypos.push_back(hypo);
       }else if (flag_cell.at(i) == 3){
@@ -707,9 +707,9 @@ void WireCell2dToy::SimpleBlobToyTiling::FormHypo(){
 	  }
 	  if (flag==1) break;
 	}
-	WireCell2dToy::ToyHypothesis *hypo = new WireCell2dToy::ToyHypothesis(*mcell1,*mcell3);
+	WCP2dToy::ToyHypothesis *hypo = new WCP2dToy::ToyHypothesis(*mcell1,*mcell3);
 	hypos.push_back(hypo);
-	hypo = new WireCell2dToy::ToyHypothesis(*mcell2,*mcell4);
+	hypo = new WCP2dToy::ToyHypothesis(*mcell2,*mcell4);
 	hypos.push_back(hypo);
       }
       cur_hypo.push_back(hypos);
@@ -717,7 +717,7 @@ void WireCell2dToy::SimpleBlobToyTiling::FormHypo(){
   }else{
     //start to randomize ... 
     for (int i=0;i!=nsimple_blob;i++){
-      WireCell2dToy::HypoSelection hypos;
+      WCP2dToy::HypoSelection hypos;
       if (flag_cell.at(i) == 1){
 	// single track (change to two tracks)
 	int n = gRandom->Uniform(0,first_cell.at(i).size());
@@ -728,18 +728,18 @@ void WireCell2dToy::SimpleBlobToyTiling::FormHypo(){
 	if (other_cell.at(i).size()!=0){
 	  n = gRandom->Uniform(0,other_cell.at(i).size());
 	  MergeGeomCell *mcell3 = (MergeGeomCell*) other_cell.at(i).at(n);	
-	  WireCell2dToy::ToyHypothesis *hypo = new WireCell2dToy::ToyHypothesis(*mcell1,*mcell2);
+	  WCP2dToy::ToyHypothesis *hypo = new WCP2dToy::ToyHypothesis(*mcell1,*mcell2);
 	  hypos.push_back(hypo);
 	  n = gRandom->Uniform(0.1,1.9);
 	  if (n==0){
-	    hypo = new WireCell2dToy::ToyHypothesis(*mcell1,*mcell3);
+	    hypo = new WCP2dToy::ToyHypothesis(*mcell1,*mcell3);
 	    hypos.push_back(hypo);
 	  }else{
-	    hypo = new WireCell2dToy::ToyHypothesis(*mcell2,*mcell3);
+	    hypo = new WCP2dToy::ToyHypothesis(*mcell2,*mcell3);
 	    hypos.push_back(hypo);
 	  }
 	}else{
-	  WireCell2dToy::ToyHypothesis *hypo = new WireCell2dToy::ToyHypothesis(*mcell1,*mcell2);
+	  WCP2dToy::ToyHypothesis *hypo = new WCP2dToy::ToyHypothesis(*mcell1,*mcell2);
 	  hypos.push_back(hypo);
 	}
       }else if (flag_cell.at(i) == 2){
@@ -761,18 +761,18 @@ void WireCell2dToy::SimpleBlobToyTiling::FormHypo(){
 	    nnn ++;
 	  }
 	  
-	  WireCell2dToy::ToyHypothesis *hypo = new WireCell2dToy::ToyHypothesis(*mcell1,*mcell2);
+	  WCP2dToy::ToyHypothesis *hypo = new WCP2dToy::ToyHypothesis(*mcell1,*mcell2);
 	  hypos.push_back(hypo);
 	  n = gRandom->Uniform(0.1,1.9);
 	  if (n==0){
-	    hypo = new WireCell2dToy::ToyHypothesis(*mcell1,*mcell3);
+	    hypo = new WCP2dToy::ToyHypothesis(*mcell1,*mcell3);
 	    hypos.push_back(hypo);
 	  }else{
-	    hypo = new WireCell2dToy::ToyHypothesis(*mcell2,*mcell3);
+	    hypo = new WCP2dToy::ToyHypothesis(*mcell2,*mcell3);
 	    hypos.push_back(hypo);
 	  }
 	}else{
-	  WireCell2dToy::ToyHypothesis *hypo = new WireCell2dToy::ToyHypothesis(*mcell1,*mcell2);
+	  WCP2dToy::ToyHypothesis *hypo = new WCP2dToy::ToyHypothesis(*mcell1,*mcell2);
 	  hypos.push_back(hypo);
 	}
       }else if (flag_cell.at(i) == 3){
@@ -829,23 +829,23 @@ void WireCell2dToy::SimpleBlobToyTiling::FormHypo(){
 	  
 	  n = gRandom->Uniform(0.1,2.9);
 	  if (n==0){
-	    WireCell2dToy::ToyHypothesis *hypo = new WireCell2dToy::ToyHypothesis(*mcell1,*mcell2);
+	    WCP2dToy::ToyHypothesis *hypo = new WCP2dToy::ToyHypothesis(*mcell1,*mcell2);
 	    hypos.push_back(hypo);
-	    hypo = new WireCell2dToy::ToyHypothesis(*mcell3,*mcell4);
+	    hypo = new WCP2dToy::ToyHypothesis(*mcell3,*mcell4);
 	    hypos.push_back(hypo);
 	  }else if (n==1){
-	    WireCell2dToy::ToyHypothesis *hypo = new WireCell2dToy::ToyHypothesis(*mcell1,*mcell3);
+	    WCP2dToy::ToyHypothesis *hypo = new WCP2dToy::ToyHypothesis(*mcell1,*mcell3);
 	    hypos.push_back(hypo);
-	    hypo = new WireCell2dToy::ToyHypothesis(*mcell2,*mcell4);
+	    hypo = new WCP2dToy::ToyHypothesis(*mcell2,*mcell4);
 	    hypos.push_back(hypo);
 	  }else if (n==2){
-	    WireCell2dToy::ToyHypothesis *hypo = new WireCell2dToy::ToyHypothesis(*mcell1,*mcell4);
+	    WCP2dToy::ToyHypothesis *hypo = new WCP2dToy::ToyHypothesis(*mcell1,*mcell4);
 	    hypos.push_back(hypo);
-	    hypo = new WireCell2dToy::ToyHypothesis(*mcell2,*mcell3);
+	    hypo = new WCP2dToy::ToyHypothesis(*mcell2,*mcell3);
 	    hypos.push_back(hypo);
 	  }
 	}else{
-	  WireCell2dToy::ToyHypothesis *hypo = new WireCell2dToy::ToyHypothesis(*mcell1,*mcell2);
+	  WCP2dToy::ToyHypothesis *hypo = new WCP2dToy::ToyHypothesis(*mcell1,*mcell2);
 	  hypos.push_back(hypo);
 	}
 	
@@ -856,7 +856,7 @@ void WireCell2dToy::SimpleBlobToyTiling::FormHypo(){
   ncount ++;
 }
 
-void WireCell2dToy::SimpleBlobToyTiling::ClearHypo(){
+void WCP2dToy::SimpleBlobToyTiling::ClearHypo(){
   if (cur_hypo.size() !=0){
     for (int i = 0;i!=cur_hypo.size();i++){
       for (int j=0;j!=cur_hypo.at(i).size();j++){
@@ -869,7 +869,7 @@ void WireCell2dToy::SimpleBlobToyTiling::ClearHypo(){
 }
 
 
-void WireCell2dToy::SimpleBlobToyTiling::Organize(int nsimple_blob){
+void WCP2dToy::SimpleBlobToyTiling::Organize(int nsimple_blob){
   //fill the first rank, second rank and third rank and flag ... 
   // loop through the smcells and find the highest rank, fill in first rank, 
   int max = 0 ;
@@ -1206,7 +1206,7 @@ void WireCell2dToy::SimpleBlobToyTiling::Organize(int nsimple_blob){
 }
 
 
-WireCell2dToy::SimpleBlobToyTiling::~SimpleBlobToyTiling(){
+WCP2dToy::SimpleBlobToyTiling::~SimpleBlobToyTiling(){
   for (int i=0;i!=nsimple_blob;i++){
     for (int j=0;j!=corner_mcells[i].size();j++){
       delete corner_mcells[i].at(j);
@@ -1225,4 +1225,4 @@ WireCell2dToy::SimpleBlobToyTiling::~SimpleBlobToyTiling(){
   // }
 }
 
-ClassImp(WireCell2dToy::SimpleBlobToyTiling);
+ClassImp(WCP2dToy::SimpleBlobToyTiling);

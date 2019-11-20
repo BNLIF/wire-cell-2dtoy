@@ -1,8 +1,8 @@
-#include "WireCellData/Line.h"
+#include "WCPData/Line.h"
 
-using namespace WireCell;
+using namespace WCP;
 
-void WireCell2dToy::Clustering_connect1(WireCell::PR3DClusterSelection& live_clusters, std::map<WireCell::PR3DCluster*,double>& cluster_length_map, WireCell::DynamicToyPointCloud& global_point_cloud, std::map<int,std::pair<double,double>>& dead_u_index, std::map<int,std::pair<double,double>>& dead_v_index, std::map<int,std::pair<double,double>>& dead_w_index){
+void WCP2dToy::Clustering_connect1(WCP::PR3DClusterSelection& live_clusters, std::map<WCP::PR3DCluster*,double>& cluster_length_map, WCP::DynamicToyPointCloud& global_point_cloud, std::map<int,std::pair<double,double>>& dead_u_index, std::map<int,std::pair<double,double>>& dead_v_index, std::map<int,std::pair<double,double>>& dead_w_index){
   
   // sort the clusters length ...
   {
@@ -34,7 +34,7 @@ void WireCell2dToy::Clustering_connect1(WireCell::PR3DClusterSelection& live_clu
   
   std::set<std::pair<PR3DCluster*, PR3DCluster*>> to_be_merged_pairs;
 
-  WireCell::WCPointCloud<double>& global_cloud = global_skeleton_cloud.get_cloud();
+  WCP::WCPointCloud<double>& global_cloud = global_skeleton_cloud.get_cloud();
 
   std::map<PR3DCluster*, TVector3 > map_cluster_dir1;
   std::map<PR3DCluster*, TVector3 > map_cluster_dir2;
@@ -222,7 +222,7 @@ void WireCell2dToy::Clustering_connect1(WireCell::PR3DClusterSelection& live_clu
 
       if (cluster_length_map[cluster] < 100*units::cm  ||
 	  fabs(dir2.Angle(drift_dir) - 3.1415926/2.) < 5*3.1415926/180. && fabs(dir1.Angle(drift_dir) - 3.1415926/2.) < 5*3.1415926/180.  && cluster_length_map[cluster] < 200*units::cm){
-	WireCell::WCPointCloud<double>& cloud = cluster->get_point_cloud()->get_cloud();
+	WCP::WCPointCloud<double>& cloud = cluster->get_point_cloud()->get_cloud();
 	int num_total_points = cloud.pts.size(); // total number of points
 	int num_unique[3]={0,0,0}; // points that are unique (not agree with any other clusters)
 	std::map<PR3DCluster*, int> map_cluster_num[3];
@@ -715,7 +715,7 @@ void WireCell2dToy::Clustering_connect1(WireCell::PR3DClusterSelection& live_clu
 
 
 
-  WireCell::PR3DClusterSelection new_clusters;
+  WCP::PR3DClusterSelection new_clusters;
   
   // merge clusters into new clusters, delete old clusters 
   for (auto it = merge_clusters.begin(); it!=merge_clusters.end();it++){

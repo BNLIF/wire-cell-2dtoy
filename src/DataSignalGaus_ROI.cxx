@@ -1,21 +1,21 @@
-#include "WireCell2dToy/DataSignalGaus_ROI.h"
+#include "WCP2dToy/DataSignalGaus_ROI.h"
 
-using namespace WireCell;
+using namespace WCP;
 
-WireCell2dToy::DataSignalGausROIFDS::DataSignalGausROIFDS(WireCell2dToy::DataSignalWienROIFDS& fds, int nframes_total)
+WCP2dToy::DataSignalGausROIFDS::DataSignalGausROIFDS(WCP2dToy::DataSignalWienROIFDS& fds, int nframes_total)
   : fds(fds)
   , max_frames(nframes_total)
 {
 }
 
-WireCell2dToy::DataSignalGausROIFDS::~DataSignalGausROIFDS(){
+WCP2dToy::DataSignalGausROIFDS::~DataSignalGausROIFDS(){
 }
 
-int WireCell2dToy::DataSignalGausROIFDS::size() const{
+int WCP2dToy::DataSignalGausROIFDS::size() const{
   return max_frames;
 }
 
-int WireCell2dToy::DataSignalGausROIFDS::jump(int frame_number){
+int WCP2dToy::DataSignalGausROIFDS::jump(int frame_number){
   // fill the frame data ... 
   if (frame.index == frame_number) {
     return frame_number;

@@ -1,6 +1,6 @@
-#include "WireCell2dToy/uBooNE_light_reco.h"
-#include "WireCellRess/LassoModel.h"
-#include "WireCellRess/ElasticNetModel.h"
+#include "WCP2dToy/uBooNE_light_reco.h"
+#include "WCPRess/LassoModel.h"
+#include "WCPRess/ElasticNetModel.h"
 #include <Eigen/Dense>
 
 #include "TH1S.h"
@@ -8,11 +8,11 @@
 #include "TVirtualFFT.h"
 #include <iostream>
 
-using namespace WireCell;
+using namespace WCP;
 using namespace Eigen;
 
 
-WireCell2dToy::uBooNE_light_reco::uBooNE_light_reco(const char* root_file){
+WCP2dToy::uBooNE_light_reco::uBooNE_light_reco(const char* root_file){
   file = new TFile(root_file);
   T = (TTree*)file->Get("/Event/Sim");
   //  T->AddFile(root_file);
@@ -46,7 +46,7 @@ WireCell2dToy::uBooNE_light_reco::uBooNE_light_reco(const char* root_file){
   ctr = 0;
 }
 
-WireCell2dToy::uBooNE_light_reco::~uBooNE_light_reco(){
+WCP2dToy::uBooNE_light_reco::~uBooNE_light_reco(){
   for (int i=0;i!=32;i++){
     delete hraw[i];
     delete hdecon[i];
@@ -77,7 +77,7 @@ WireCell2dToy::uBooNE_light_reco::~uBooNE_light_reco(){
   delete file;
 }
 
-void WireCell2dToy::uBooNE_light_reco::load_event_raw(int eve_num){
+void WCP2dToy::uBooNE_light_reco::load_event_raw(int eve_num){
 
   TClonesArray* cosmic_hg_wf = new TClonesArray;
   TClonesArray* cosmic_lg_wf = new TClonesArray;
@@ -195,7 +195,7 @@ void WireCell2dToy::uBooNE_light_reco::load_event_raw(int eve_num){
   sort_flashes();
 }
 
-void WireCell2dToy::uBooNE_light_reco::load_event(int eve_num){
+void WCP2dToy::uBooNE_light_reco::load_event(int eve_num){
   TClonesArray* op_wf = new TClonesArray;
   //std::vector<int> *op_femch = new std::vector<int>;
   std::vector<short> *op_femch = new std::vector<short>;
@@ -313,7 +313,7 @@ void WireCell2dToy::uBooNE_light_reco::load_event(int eve_num){
   // sort the flashes ... 
   sort_flashes();
 }
-void WireCell2dToy::uBooNE_light_reco::sort_flashes(){
+void WCP2dToy::uBooNE_light_reco::sort_flashes(){
   OpFlashSet cosmic_set;
   for (auto it= cosmic_flashes.begin(); it!= cosmic_flashes.end(); it++){
     cosmic_set.insert(*it);
@@ -338,7 +338,7 @@ void WireCell2dToy::uBooNE_light_reco::sort_flashes(){
   // std::cout << flashes.size() << std::endl;
 }
 
-void WireCell2dToy::uBooNE_light_reco::Process_beam_wfs(){
+void WCP2dToy::uBooNE_light_reco::Process_beam_wfs(){
   // correct the baseline ...
   TH1F h1("h1","h1",200,-100,100);
   for (int i=0;i!=32;i++){
@@ -525,7 +525,7 @@ void WireCell2dToy::uBooNE_light_reco::Process_beam_wfs(){
     }
     
     double lambda = 5;//1/2.;
-    WireCell::LassoModel m2(lambda, 100000, 0.05);
+    WCP::LassoModel m2(lambda, 100000, 0.05);
     m2.SetData(G, W);
     m2.Fit();
     VectorXd beta = m2.Getbeta();
@@ -658,7 +658,7 @@ void WireCell2dToy::uBooNE_light_reco::Process_beam_wfs(){
   delete hspe;
 }
 
-std::pair<double,double> WireCell2dToy::uBooNE_light_reco::cal_mean_rms(TH1 *hist, int nbin){
+std::pair<double,double> WCP2dToy::uBooNE_light_reco::cal_mean_rms(TH1 *hist, int nbin){
   TH1F *h4 = new TH1F("h4","h4",2000,-10,10);
   double mean, rms;
   for (int i=0;i!=nbin;i++){
@@ -682,7 +682,7 @@ std::pair<double,double> WireCell2dToy::uBooNE_light_reco::cal_mean_rms(TH1 *his
   return std::make_pair(mean,rms);
 }
 
-void WireCell2dToy::uBooNE_light_reco::mergeRawBeam(TClonesArray *hg_wf, std::vector<short> *hg_chan, std::vector<double> *hg_timestamp,
+void WCP2dToy::uBooNE_light_reco::mergeRawBeam(TClonesArray *hg_wf, std::vector<short> *hg_chan, std::vector<double> *hg_timestamp,
 						    TClonesArray *lg_wf, std::vector<short> *lg_chan, std::vector<double> *lg_timestamp,
 						    bool beamDisc, std::vector<int> *OpChanToOpDet, int ctr){
   int discriminatorSizeCompare = 1000;
@@ -732,7 +732,7 @@ void WireCell2dToy::uBooNE_light_reco::mergeRawBeam(TClonesArray *hg_wf, std::ve
   }
 }
 
-void WireCell2dToy::uBooNE_light_reco::mergeRawCosmic(TClonesArray *hg_wf, std::vector<short> *hg_chan, std::vector<double> *hg_timestamp,
+void WCP2dToy::uBooNE_light_reco::mergeRawCosmic(TClonesArray *hg_wf, std::vector<short> *hg_chan, std::vector<double> *hg_timestamp,
 						    TClonesArray *lg_wf, std::vector<short> *lg_chan, std::vector<double> *lg_timestamp,
 						    bool beamDisc, std::vector<int> *OpChanToOpDet, int ctr){
   int discriminatorSizeCompare = 1000;
@@ -784,7 +784,7 @@ void WireCell2dToy::uBooNE_light_reco::mergeRawCosmic(TClonesArray *hg_wf, std::
   }
 }
 
-void WireCell2dToy::uBooNE_light_reco::reorderMerged(TClonesArray *beam_wf, std::vector<short> *beam_femch, std::vector<double> *beam_timestamp,
+void WCP2dToy::uBooNE_light_reco::reorderMerged(TClonesArray *beam_wf, std::vector<short> *beam_femch, std::vector<double> *beam_timestamp,
 						     TClonesArray *cosmic_wf, std::vector<short> *cosmic_femch, std::vector<double> *cosmic_timestamp){
 
   int c = 0;
@@ -818,7 +818,7 @@ void WireCell2dToy::uBooNE_light_reco::reorderMerged(TClonesArray *beam_wf, std:
   }
 }
 
-float WireCell2dToy::uBooNE_light_reco::findScaling(int opdet){
+float WCP2dToy::uBooNE_light_reco::findScaling(int opdet){
   if(opdet == 0){ return 10.13; }
   if(opdet == 1){ return 10.20; }
   if(opdet == 2){ return 10.13; }

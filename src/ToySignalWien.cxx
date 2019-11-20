@@ -1,14 +1,14 @@
-#include "WireCell2dToy/ToySignalWien.h"
+#include "WCP2dToy/ToySignalWien.h"
 
-#include "WireCellData/GeomWire.h"
+#include "WCPData/GeomWire.h"
 #include "TFile.h"
 #include "TVirtualFFT.h"
 #include "TRandom.h"
 #include "TF1.h"
 
-using namespace WireCell;
+using namespace WCP;
 
-WireCell2dToy::ToySignalWienFDS::ToySignalWienFDS(WireCell::FrameDataSource& fds, const WireCell::GeomDataSource& gds, int bins_per_frame1, int nframes_total, float time_offset_uv, float time_offset_uw, float overall_time_offset)
+WCP2dToy::ToySignalWienFDS::ToySignalWienFDS(WCP::FrameDataSource& fds, const WCP::GeomDataSource& gds, int bins_per_frame1, int nframes_total, float time_offset_uv, float time_offset_uw, float overall_time_offset)
   : fds(fds)
   , gds_flag(0)
   , gds(&gds)
@@ -78,7 +78,7 @@ WireCell2dToy::ToySignalWienFDS::ToySignalWienFDS(WireCell::FrameDataSource& fds
   
 }
 
-WireCell2dToy::ToySignalWienFDS::ToySignalWienFDS(WireCell::FrameDataSource& fds, const WireCell::DetectorGDS& gds, int bins_per_frame1, int nframes_total, float time_offset_uv, float time_offset_uw, float overall_time_offset)
+WCP2dToy::ToySignalWienFDS::ToySignalWienFDS(WCP::FrameDataSource& fds, const WCP::DetectorGDS& gds, int bins_per_frame1, int nframes_total, float time_offset_uv, float time_offset_uw, float overall_time_offset)
   : fds(fds)
   , gds_flag(1)
   , gds(0)
@@ -148,11 +148,11 @@ WireCell2dToy::ToySignalWienFDS::ToySignalWienFDS(WireCell::FrameDataSource& fds
 
 
 
-int WireCell2dToy::ToySignalWienFDS::size() const{
+int WCP2dToy::ToySignalWienFDS::size() const{
   return max_frames;
 }
 
-void WireCell2dToy::ToySignalWienFDS::Save(){
+void WCP2dToy::ToySignalWienFDS::Save(){
   TFile *file = new TFile("temp_wien.root","RECREATE");
   // for (int i=0;i!=nwire_u;i++){
   //   TH1F *huu = (TH1F*)hu[i]->Clone(Form("U1_%d",i));
@@ -167,7 +167,7 @@ void WireCell2dToy::ToySignalWienFDS::Save(){
   file->Close();
 }
 
-int WireCell2dToy::ToySignalWienFDS::jump(int frame_number){
+int WCP2dToy::ToySignalWienFDS::jump(int frame_number){
   // fill the frame data ... 
   if (frame.index == frame_number) {
     return frame_number;
@@ -426,7 +426,7 @@ int WireCell2dToy::ToySignalWienFDS::jump(int frame_number){
   return frame.index;
 }
 
-WireCell2dToy::ToySignalWienFDS::~ToySignalWienFDS(){
+WCP2dToy::ToySignalWienFDS::~ToySignalWienFDS(){
   // for (int i=0;i!=nwire_u;i++){
   //   delete hu[i] ;
   // }

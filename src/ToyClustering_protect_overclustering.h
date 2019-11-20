@@ -2,7 +2,7 @@
 #include <boost/graph/connected_components.hpp>
 #include <boost/graph/prim_minimum_spanning_tree.hpp>
 
-void WireCell2dToy::Clustering_protect_overclustering(WireCell::PR3DClusterSelection& live_clusters,std::map<WireCell::PR3DCluster*,double>& cluster_length_map, WireCell::ToyCTPointCloud& ct_point_cloud){
+void WCP2dToy::Clustering_protect_overclustering(WCP::PR3DClusterSelection& live_clusters,std::map<WCP::PR3DCluster*,double>& cluster_length_map, WCP::ToyCTPointCloud& ct_point_cloud){
   
   // can follow ToyClustering_separate to add clusters ...
 
@@ -45,7 +45,7 @@ void WireCell2dToy::Clustering_protect_overclustering(WireCell::PR3DClusterSelec
 }
 
 
-PR3DClusterSelection WireCell2dToy::Examine_overclustering(PR3DCluster *cluster,  WireCell::ToyCTPointCloud& ct_point_cloud){
+PR3DClusterSelection WCP2dToy::Examine_overclustering(PR3DCluster *cluster,  WCP::ToyCTPointCloud& ct_point_cloud){
   //copy the create_graph from the PR3D Cluster ... 
 
   PR3DClusterSelection new_clusters;
@@ -58,10 +58,10 @@ PR3DClusterSelection WireCell2dToy::Examine_overclustering(PR3DCluster *cluster,
   SMGCSelection& mcells = cluster->get_mcells();
   std::map<int,SMGCSet>& time_cells_set_map = cluster->get_time_cells_set_map();
 
-  WireCell::WCPointCloud<double>& cloud = point_cloud->get_cloud();
-  WireCell::WC2DPointCloud<double>& cloud_u = point_cloud->get_cloud_u();
-  WireCell::WC2DPointCloud<double>& cloud_v = point_cloud->get_cloud_v();
-  WireCell::WC2DPointCloud<double>& cloud_w = point_cloud->get_cloud_w();
+  WCP::WCPointCloud<double>& cloud = point_cloud->get_cloud();
+  WCP::WC2DPointCloud<double>& cloud_u = point_cloud->get_cloud_u();
+  WCP::WC2DPointCloud<double>& cloud_v = point_cloud->get_cloud_v();
+  WCP::WC2DPointCloud<double>& cloud_w = point_cloud->get_cloud_w();
   
   std::map<SlimMergeGeomCell*, std::map<int, std::set<int>>> map_mcell_uindex_wcps;
   std::map<SlimMergeGeomCell*, std::map<int, std::set<int>>> map_mcell_vindex_wcps;

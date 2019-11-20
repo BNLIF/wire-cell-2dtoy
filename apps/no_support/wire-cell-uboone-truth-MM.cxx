@@ -1,18 +1,18 @@
-#include "WireCellSst/GeomDataSource.h"
-#include "WireCellSst/ToyuBooNESliceDataSource.h"
-#include "WireCell2dToy/ToyEventDisplay.h"
-#include "WireCell2dToy/ToyTiling.h"
-#include "WireCell2dToy/MergeToyTiling.h"
-#include "WireCell2dToy/TruthToyTiling.h"
-#include "WireCellData/MergeGeomCell.h"
+#include "WCPSst/GeomDataSource.h"
+#include "WCPSst/ToyuBooNESliceDataSource.h"
+#include "WCP2dToy/ToyEventDisplay.h"
+#include "WCP2dToy/ToyTiling.h"
+#include "WCP2dToy/MergeToyTiling.h"
+#include "WCP2dToy/TruthToyTiling.h"
+#include "WCPData/MergeGeomCell.h"
 
-#include "WireCellNav/FrameDataSource.h"
-#include "WireCellNav/SimDataSource.h"
-#include "WireCellNav/SliceDataSource.h"
-#include "WireCellSst/Util.h"
-#include "WireCellData/SimTruth.h"
-#include "WireCell2dToy/ToyDepositor.h"
-#include "WireCellNav/GenerativeFDS.h"
+#include "WCPNav/FrameDataSource.h"
+#include "WCPNav/SimDataSource.h"
+#include "WCPNav/SliceDataSource.h"
+#include "WCPSst/Util.h"
+#include "WCPData/SimTruth.h"
+#include "WCP2dToy/ToyDepositor.h"
+#include "WCPNav/GenerativeFDS.h"
 
 #include "TApplication.h"
 #include "TCanvas.h"
@@ -27,7 +27,7 @@
 #include "TMatrixDEigen.h"
 #include <iostream>
 
-using namespace WireCell;
+using namespace WCP;
 using namespace std;
 
 int main(int argc, char* argv[])
@@ -87,26 +87,26 @@ int main(int argc, char* argv[])
   gStyle->SetPalette(NCont,MyPalette);
   
   // Get GDS from geometry text file
-  WireCellSst::GeomDataSource gds(argv[1]);
+  WCPSst::GeomDataSource gds(argv[1]);
   
   // Get FDS from ROOT file (Chao's data format for now)
   const char* root_file = argv[2];
   const char* tpath = "/Event/Sim";
-  WireCell::FrameDataSource* fds = 0;
-  fds = WireCellSst::make_fds(root_file);
+  WCP::FrameDataSource* fds = 0;
+  fds = WCPSst::make_fds(root_file);
   if (!fds) {
     cerr << "ERROR: failed to get FDS from " << root_file << endl;
     return 1;
   }
   
   // Make GenerativeFDS to represent reco info using SimChannels for now (eventually replace with actual CalWire output)
-  WireCell::ToyDepositor toydep(fds);
+  WCP::ToyDepositor toydep(fds);
   const PointValueVector pvv = toydep.depositions(1);
-  WireCell::GenerativeFDS gfds(toydep,gds,binsPerFrame,totalFrames,2.0*1.6*units::millimeter);
+  WCP::GenerativeFDS gfds(toydep,gds,binsPerFrame,totalFrames,2.0*1.6*units::millimeter);
   gfds.jump(1); // NB: look at first frame only for now
 
   // Create MicroBooNE SDS using GenerativeFDS (used for per-slice tiling)
-  WireCellSst::ToyuBooNESliceDataSource sds(gfds,elecThreshold);
+  WCPSst::ToyuBooNESliceDataSource sds(gfds,elecThreshold);
 
   // Start interactive application used for plotting during program execution
   TApplication theApp("theApp",0,0); 
@@ -114,7 +114,7 @@ int main(int argc, char* argv[])
 
   // Create toy display for plotting
   TCanvas c1("ToyMC","ToyMC",1200,600);
-  WireCell2dToy::ToyEventDisplay display(c1,gds);
+  WCP2dToy::ToyEventDisplay display(c1,gds);
 
   // Main loop over slices
   const int N = 100000;
@@ -128,16 +128,16 @@ int main(int argc, char* argv[])
   for (int i = 0; i != sds.size(); i++){
     // Get next slice
     sds.jump(i);
-    WireCell::Slice slice = sds.get();
+    WCP::Slice slice = sds.get();
 
     // Look at slice if there is above-threshold activity
     if (slice.group().size() > 0){
       // Do tiling for all possible hits (fake and real hits)
-      WireCell2dToy::ToyTiling toytiling(slice,gds);
+      WCP2dToy::ToyTiling toytiling(slice,gds);
       // Do merged tiling (Xin's blob idea) for all possible hits (fake and real hits)
-      WireCell2dToy::MergeToyTiling mergetiling(toytiling);
+      WCP2dToy::MergeToyTiling mergetiling(toytiling);
       // Do tiling using truth info (real hits only) - associates 2D points to closest {U,V,Y} wires
-      WireCell2dToy::TruthToyTiling truthtiling(toytiling,pvv,i,gds);
+      WCP2dToy::TruthToyTiling truthtiling(toytiling,pvv,i,gds);
      
       // Collect cell and wire information
       GeomCellSelection allcell = toytiling.get_allcell();
@@ -331,7 +331,7 @@ int main(int argc, char* argv[])
 
         // Draw cells and wires
         c1.Draw();
-	display.draw_mc(1,WireCell::PointValueVector(),"colz");           
+	display.draw_mc(1,WCP::PointValueVector(),"colz");           
         display.draw_slice(slice,"");
         display.draw_cells(toytiling.get_allcell(),"*same");
         display.draw_mergecells(mergetiling.get_allcell(),"*same");

@@ -1,9 +1,9 @@
-#include "WireCell2dToy/uBooNE_Data_Error.h"
+#include "WCP2dToy/uBooNE_Data_Error.h"
 #include "TGraph.h"
 
-using namespace WireCell;
+using namespace WCP;
 
-WireCell2dToy::uBooNEDataError::uBooNEDataError(const WireCell::GeomDataSource& gds, TH2I *hu_decon, TH2I *hv_decon, TH2I *hw_decon, int eve_num, int nrebin)
+WCP2dToy::uBooNEDataError::uBooNEDataError(const WCP::GeomDataSource& gds, TH2I *hu_decon, TH2I *hv_decon, TH2I *hw_decon, int eve_num, int nrebin)
   : gds(gds)
   , nrebin(nrebin)
 {
@@ -65,7 +65,7 @@ WireCell2dToy::uBooNEDataError::uBooNEDataError(const WireCell::GeomDataSource& 
 
     
     
-    WireCell::Trace trace;
+    WCP::Trace trace;
     trace.chid = ind;
     trace.tbin = 0;		// full readout, if zero suppress this would be non-zero
     trace.charge.resize(bins_per_frame, 0.0);
@@ -131,7 +131,7 @@ WireCell2dToy::uBooNEDataError::uBooNEDataError(const WireCell::GeomDataSource& 
 
 
 
-    WireCell::Trace trace;
+    WCP::Trace trace;
     trace.chid = ind + nwire_u;
     trace.tbin = 0;		// full readout, if zero suppress this would be non-zero
     trace.charge.resize(bins_per_frame, 0.0);
@@ -192,7 +192,7 @@ WireCell2dToy::uBooNEDataError::uBooNEDataError(const WireCell::GeomDataSource& 
       }
     }
 
-    WireCell::Trace trace;
+    WCP::Trace trace;
     trace.chid = ind + nwire_u + nwire_v;
     trace.tbin = 0;		// full readout, if zero suppress this would be non-zero
     trace.charge.resize(bins_per_frame, 0.0);
@@ -232,7 +232,7 @@ WireCell2dToy::uBooNEDataError::uBooNEDataError(const WireCell::GeomDataSource& 
   //std::cout << frame.traces.size() << " " << bins_per_frame << std::endl;
 }
 
-void WireCell2dToy::uBooNEDataError::refresh(TH2F *hu_decon, TH2F *hv_decon, TH2F *hw_decon, int eve_num){
+void WCP2dToy::uBooNEDataError::refresh(TH2F *hu_decon, TH2F *hv_decon, TH2F *hw_decon, int eve_num){
    GeomWireSelection wires_u = gds.wires_in_plane(WirePlaneType_t(0));
   GeomWireSelection wires_v = gds.wires_in_plane(WirePlaneType_t(1));
   GeomWireSelection wires_w = gds.wires_in_plane(WirePlaneType_t(2));
@@ -291,7 +291,7 @@ void WireCell2dToy::uBooNEDataError::refresh(TH2F *hu_decon, TH2F *hv_decon, TH2
 
     
     
-    WireCell::Trace trace;
+    WCP::Trace trace;
     trace.chid = ind;
     trace.tbin = 0;		// full readout, if zero suppress this would be non-zero
     trace.charge.resize(bins_per_frame, 0.0);
@@ -357,7 +357,7 @@ void WireCell2dToy::uBooNEDataError::refresh(TH2F *hu_decon, TH2F *hv_decon, TH2
 
 
 
-    WireCell::Trace trace;
+    WCP::Trace trace;
     trace.chid = ind + nwire_u;
     trace.tbin = 0;		// full readout, if zero suppress this would be non-zero
     trace.charge.resize(bins_per_frame, 0.0);
@@ -418,7 +418,7 @@ void WireCell2dToy::uBooNEDataError::refresh(TH2F *hu_decon, TH2F *hv_decon, TH2
       }
     }
 
-    WireCell::Trace trace;
+    WCP::Trace trace;
     trace.chid = ind + nwire_u + nwire_v;
     trace.tbin = 0;		// full readout, if zero suppress this would be non-zero
     trace.charge.resize(bins_per_frame, 0.0);
@@ -457,7 +457,7 @@ void WireCell2dToy::uBooNEDataError::refresh(TH2F *hu_decon, TH2F *hv_decon, TH2
 
 }
 
-WireCell2dToy::uBooNEDataError::uBooNEDataError(const WireCell::GeomDataSource& gds, TH2F *hu_decon, TH2F *hv_decon, TH2F *hw_decon, int eve_num, int nrebin)
+WCP2dToy::uBooNEDataError::uBooNEDataError(const WCP::GeomDataSource& gds, TH2F *hu_decon, TH2F *hv_decon, TH2F *hw_decon, int eve_num, int nrebin)
   : gds(gds)
   , nrebin(nrebin)
 {
@@ -519,7 +519,7 @@ WireCell2dToy::uBooNEDataError::uBooNEDataError(const WireCell::GeomDataSource& 
 
     
     
-    WireCell::Trace trace;
+    WCP::Trace trace;
     trace.chid = ind;
     trace.tbin = 0;		// full readout, if zero suppress this would be non-zero
     trace.charge.resize(bins_per_frame, 0.0);
@@ -585,7 +585,7 @@ WireCell2dToy::uBooNEDataError::uBooNEDataError(const WireCell::GeomDataSource& 
 
 
 
-    WireCell::Trace trace;
+    WCP::Trace trace;
     trace.chid = ind + nwire_u;
     trace.tbin = 0;		// full readout, if zero suppress this would be non-zero
     trace.charge.resize(bins_per_frame, 0.0);
@@ -646,7 +646,7 @@ WireCell2dToy::uBooNEDataError::uBooNEDataError(const WireCell::GeomDataSource& 
       }
     }
 
-    WireCell::Trace trace;
+    WCP::Trace trace;
     trace.chid = ind + nwire_u + nwire_v;
     trace.tbin = 0;		// full readout, if zero suppress this would be non-zero
     trace.charge.resize(bins_per_frame, 0.0);
@@ -686,14 +686,14 @@ WireCell2dToy::uBooNEDataError::uBooNEDataError(const WireCell::GeomDataSource& 
   //std::cout << frame.traces.size() << " " << bins_per_frame << std::endl;
 }
 
-WireCell2dToy::uBooNEDataError::~uBooNEDataError(){
+WCP2dToy::uBooNEDataError::~uBooNEDataError(){
 }
 
-int WireCell2dToy::uBooNEDataError::jump(int frame_number){
+int WCP2dToy::uBooNEDataError::jump(int frame_number){
   return frame.index;
 }
 
-int WireCell2dToy::uBooNEDataError::size() const{
+int WCP2dToy::uBooNEDataError::size() const{
   return 1;
 }
 

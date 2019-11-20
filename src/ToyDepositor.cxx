@@ -1,10 +1,10 @@
-#include "WireCell2dToy/ToyDepositor.h"
-#include "WireCellData/Units.h"
+#include "WCP2dToy/ToyDepositor.h"
+#include "WCPData/Units.h"
 #include "TMath.h"
 
-using namespace::WireCell;
+using namespace::WCP;
 
-ToyDepositor::ToyDepositor(WireCell::FrameDataSource* fds1, int flag, float unit_dis, int toffset, float x_center, float y_center, float z_center, float rotate_angle)
+ToyDepositor::ToyDepositor(WCP::FrameDataSource* fds1, int flag, float unit_dis, int toffset, float x_center, float y_center, float z_center, float rotate_angle)
   : fds(fds1)
   , flag(flag)
   , unit_dis(unit_dis)
@@ -26,14 +26,14 @@ const PointValueVector& ToyDepositor::depositions(int frame_number) const{
     }
   }
 
-  WireCell::SimDataSource* sim = dynamic_cast<WireCell::SimDataSource*>(fds);
-  WireCell::SimTruthSelection sts = sim->truth();
+  WCP::SimDataSource* sim = dynamic_cast<WCP::SimDataSource*>(fds);
+  WCP::SimTruthSelection sts = sim->truth();
   
   std::cout<<"("<<x_center<<","<<y_center<<","<<z_center<<"), angle = "<<rotate_angle*180/TMath::Pi()<<std::endl;
   mchits.clear();
   time_offset.clear();
   for (size_t itruth = 0; itruth < sts.size(); ++itruth) {
-    const WireCell::SimTruth* st = sts[itruth];
+    const WCP::SimTruth* st = sts[itruth];
     PointValue p;
     p.first.x = (st->x() * units::cm - x_center*units::cm)*cos(rotate_angle) - (st->z() * units::cm - z_center*units::cm)*sin(rotate_angle) + x_center*units::cm + x_shift*units::cm;
     p.first.y = st->y() * units::cm + y_shift*units::cm;

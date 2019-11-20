@@ -1,8 +1,8 @@
-#include "WireCell2dToy/ExamineBundles.h"
+#include "WCP2dToy/ExamineBundles.h"
 
-using namespace WireCell;
+using namespace WCP;
 
-FlashTPCBundleSelection WireCell2dToy::ExamineBundles(WireCell::FlashTPCBundleSelection bundles, WireCell::ToyCTPointCloud& ct_point_cloud){
+FlashTPCBundleSelection WCP2dToy::ExamineBundles(WCP::FlashTPCBundleSelection bundles, WCP::ToyCTPointCloud& ct_point_cloud){
 
   std::set<int> used_cluster_ids;
   FlashTPCBundleSelection new_bundles;
@@ -32,7 +32,7 @@ FlashTPCBundleSelection WireCell2dToy::ExamineBundles(WireCell::FlashTPCBundleSe
   
 }
 
-WireCell::FlashTPCBundle* WireCell2dToy::ExamineBundle(WireCell::FlashTPCBundle* bundle, std::set<int>& used_cluster_ids, WireCell::ToyCTPointCloud& ct_point_cloud){
+WCP::FlashTPCBundle* WCP2dToy::ExamineBundle(WCP::FlashTPCBundle* bundle, std::set<int>& used_cluster_ids, WCP::ToyCTPointCloud& ct_point_cloud){
   
   int cluster_id;
   if (used_cluster_ids.size()==0){

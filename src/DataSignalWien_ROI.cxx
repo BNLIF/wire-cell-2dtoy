@@ -1,6 +1,6 @@
-#include "WireCell2dToy/DataSignalWien_ROI.h"
+#include "WCP2dToy/DataSignalWien_ROI.h"
 
-#include "WireCellData/GeomWire.h"
+#include "WCPData/GeomWire.h"
 #include "TFile.h"
 #include "TVirtualFFT.h"
 #include "TRandom.h"
@@ -11,9 +11,9 @@
 #include <algorithm>
 #include <fstream>
 
-using namespace WireCell;
+using namespace WCP;
 
-WireCell2dToy::DataSignalWienROIFDS::DataSignalWienROIFDS(WireCell::FrameDataSource& fds, const WireCell::GeomDataSource& gds,WireCell::ChirpMap& umap, WireCell::ChirpMap& vmap, WireCell::ChirpMap& wmap, int bins_per_frame1, int nframes_total, float time_offset_uv, float time_offset_uw, float overall_time_offset)
+WCP2dToy::DataSignalWienROIFDS::DataSignalWienROIFDS(WCP::FrameDataSource& fds, const WCP::GeomDataSource& gds,WCP::ChirpMap& umap, WCP::ChirpMap& vmap, WCP::ChirpMap& wmap, int bins_per_frame1, int nframes_total, float time_offset_uv, float time_offset_uw, float overall_time_offset)
   : fds(fds)
   , gds(gds)
   , max_frames(nframes_total)
@@ -219,7 +219,7 @@ WireCell2dToy::DataSignalWienROIFDS::DataSignalWienROIFDS(WireCell::FrameDataSou
   scale_v_2d = 1.0;
 }
 
-WireCell2dToy::DataSignalWienROIFDS::~DataSignalWienROIFDS(){
+WCP2dToy::DataSignalWienROIFDS::~DataSignalWienROIFDS(){
   delete hu_1D_c;
   delete hu_1D_c_gaus;
 
@@ -255,15 +255,15 @@ WireCell2dToy::DataSignalWienROIFDS::~DataSignalWienROIFDS(){
 
 
 
-int WireCell2dToy::DataSignalWienROIFDS::size() const{
+int WCP2dToy::DataSignalWienROIFDS::size() const{
   return max_frames;
 }
 
-void WireCell2dToy::DataSignalWienROIFDS::Save(){
+void WCP2dToy::DataSignalWienROIFDS::Save(){
 }
 
 
-void  WireCell2dToy::DataSignalWienROIFDS::Deconvolute_V_2D_g(){
+void  WCP2dToy::DataSignalWienROIFDS::Deconvolute_V_2D_g(){
   const Frame& frame1 = fds.get();
   size_t ntraces = frame1.traces.size();
 
@@ -618,7 +618,7 @@ void  WireCell2dToy::DataSignalWienROIFDS::Deconvolute_V_2D_g(){
 }
 
 
-void WireCell2dToy::DataSignalWienROIFDS::Deconvolute_U_2D_g(){
+void WCP2dToy::DataSignalWienROIFDS::Deconvolute_U_2D_g(){
   const Frame& frame1 = fds.get();
   size_t ntraces = frame1.traces.size();
 
@@ -974,7 +974,7 @@ void WireCell2dToy::DataSignalWienROIFDS::Deconvolute_U_2D_g(){
 }
 
 
-void WireCell2dToy::DataSignalWienROIFDS::ROI_cal(TH1F *h1_1, TH1F *h2_1, TH1F *h3_1, TH1F *h4_1, TH1F *h5_1, Double_t threshold0,Double_t threshold2, TH1F *hresult, TH1F *hresult1, int flag_u = 0){
+void WCP2dToy::DataSignalWienROIFDS::ROI_cal(TH1F *h1_1, TH1F *h2_1, TH1F *h3_1, TH1F *h4_1, TH1F *h5_1, Double_t threshold0,Double_t threshold2, TH1F *hresult, TH1F *hresult1, int flag_u = 0){
   
     Double_t th = threshold2*2.0; // do 2 sigma
     Double_t th1 = threshold0*3.6; // do 3.6 sigma
@@ -1873,7 +1873,7 @@ void WireCell2dToy::DataSignalWienROIFDS::ROI_cal(TH1F *h1_1, TH1F *h2_1, TH1F *
 
 
 
-Int_t WireCell2dToy::DataSignalWienROIFDS::find_ROI_end(TH1F *h1, Int_t bin, Double_t th=0){
+Int_t WCP2dToy::DataSignalWienROIFDS::find_ROI_end(TH1F *h1, Int_t bin, Double_t th=0){
   Int_t end = bin;
   Double_t content = h1->GetBinContent(end+1);
   while(content>th){
@@ -1892,7 +1892,7 @@ Int_t WireCell2dToy::DataSignalWienROIFDS::find_ROI_end(TH1F *h1, Int_t bin, Dou
   return end;
 }
 
-Int_t WireCell2dToy::DataSignalWienROIFDS::find_ROI_begin(TH1F *h1, Int_t bin, Double_t th=0){
+Int_t WCP2dToy::DataSignalWienROIFDS::find_ROI_begin(TH1F *h1, Int_t bin, Double_t th=0){
   // find the first one before bin and is below threshold ... 
   Int_t begin = bin;
   Double_t content = h1->GetBinContent(begin+1);
@@ -1919,7 +1919,7 @@ Int_t WireCell2dToy::DataSignalWienROIFDS::find_ROI_begin(TH1F *h1, Int_t bin, D
   return begin;
 }
 
-Double_t WireCell2dToy::DataSignalWienROIFDS::local_ave(TH1F *h1, Int_t bin, Int_t width){
+Double_t WCP2dToy::DataSignalWienROIFDS::local_ave(TH1F *h1, Int_t bin, Int_t width){
   Double_t sum1 = 0;
   Double_t sum2 = 0;
   
@@ -1943,7 +1943,7 @@ Double_t WireCell2dToy::DataSignalWienROIFDS::local_ave(TH1F *h1, Int_t bin, Int
 }
 
 
-void WireCell2dToy::DataSignalWienROIFDS::Deconvolute_V_1D_g(){
+void WCP2dToy::DataSignalWienROIFDS::Deconvolute_V_1D_g(){
   const Frame& frame1 = fds.get();
   size_t ntraces = frame1.traces.size();
 
@@ -2159,7 +2159,7 @@ void WireCell2dToy::DataSignalWienROIFDS::Deconvolute_V_1D_g(){
 
 }
 
-void WireCell2dToy::DataSignalWienROIFDS::Deconvolute_W_1D_g(){
+void WCP2dToy::DataSignalWienROIFDS::Deconvolute_W_1D_g(){
   const Frame& frame1 = fds.get();
   size_t ntraces = frame1.traces.size();
 
@@ -2331,7 +2331,7 @@ void WireCell2dToy::DataSignalWienROIFDS::Deconvolute_W_1D_g(){
 }
 
 
-void WireCell2dToy::DataSignalWienROIFDS::Deconvolute_V_1D_c(){
+void WCP2dToy::DataSignalWienROIFDS::Deconvolute_V_1D_c(){
   const Frame& frame1 = fds.get();
   size_t ntraces = frame1.traces.size();
 
@@ -2504,7 +2504,7 @@ void WireCell2dToy::DataSignalWienROIFDS::Deconvolute_V_1D_c(){
 }
 
 
-void WireCell2dToy::DataSignalWienROIFDS::Deconvolute_U_1D_c(){
+void WCP2dToy::DataSignalWienROIFDS::Deconvolute_U_1D_c(){
   
   const Frame& frame1 = fds.get();
   size_t ntraces = frame1.traces.size();
@@ -2673,7 +2673,7 @@ void WireCell2dToy::DataSignalWienROIFDS::Deconvolute_U_1D_c(){
   delete filter_u;
 }
 
-double WireCell2dToy::DataSignalWienROIFDS::cal_rms(TH1F *htemp, int chid){
+double WCP2dToy::DataSignalWienROIFDS::cal_rms(TH1F *htemp, int chid){
   //calculate rms, this is to be used for threshold purpose
   float rms = 0, rms1 = 0,rms2 = 0;
   int start=-1, end=-1;
@@ -2744,7 +2744,7 @@ double WireCell2dToy::DataSignalWienROIFDS::cal_rms(TH1F *htemp, int chid){
 }
 
 
-void WireCell2dToy::DataSignalWienROIFDS::restore_baseline(TH1F *htemp){
+void WCP2dToy::DataSignalWienROIFDS::restore_baseline(TH1F *htemp){
   //correct baseline 
   double max = htemp->GetMaximum();
   double min = htemp->GetMinimum();
@@ -2774,7 +2774,7 @@ void WireCell2dToy::DataSignalWienROIFDS::restore_baseline(TH1F *htemp){
 }
 
 
-int WireCell2dToy::DataSignalWienROIFDS::jump(int frame_number){
+int WCP2dToy::DataSignalWienROIFDS::jump(int frame_number){
   // fill the frame data ... 
   if (frame.index == frame_number) {
     return frame_number;

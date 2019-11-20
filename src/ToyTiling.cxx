@@ -1,20 +1,20 @@
-#include "WireCell2dToy/ToyTiling.h"
-#include "WireCell2dToy/TotalTiling.h"
-#include "WireCellData/GeomCell.h"
-#include "WireCellData/GeomWire.h"
-#include "WireCellData/Singleton.h"
+#include "WCP2dToy/ToyTiling.h"
+#include "WCP2dToy/TotalTiling.h"
+#include "WCPData/GeomCell.h"
+#include "WCPData/GeomWire.h"
+#include "WCPData/Singleton.h"
 #include <cmath>
 
-using namespace WireCell;
+using namespace WCP;
 
-WireCell2dToy::ToyTiling::ToyTiling()
+WCP2dToy::ToyTiling::ToyTiling()
   : ave_charge(0)
   , ncell(0)
 {
 }
 
 
-void WireCell2dToy::ToyTiling::AddCell(WireCell::DetectorGDS& gds, int cryo, int apa, GeomCell *cell, int u_index, int v_index, int w_index, 
+void WCP2dToy::ToyTiling::AddCell(WCP::DetectorGDS& gds, int cryo, int apa, GeomCell *cell, int u_index, int v_index, int w_index, 
 				       float u_charge, float v_charge, float w_charge,
 				       float u_charge_err, float v_charge_err, float w_charge_err){
   
@@ -99,7 +99,7 @@ void WireCell2dToy::ToyTiling::AddCell(WireCell::DetectorGDS& gds, int cryo, int
 
 
 
-void WireCell2dToy::ToyTiling::AddCell(WireCell::GeomDataSource& gds, GeomCell *cell, int u_index, int v_index, int w_index, 
+void WCP2dToy::ToyTiling::AddCell(WCP::GeomDataSource& gds, GeomCell *cell, int u_index, int v_index, int w_index, 
 				       float u_charge, float v_charge, float w_charge,
 				       float u_charge_err, float v_charge_err, float w_charge_err){
   
@@ -182,8 +182,8 @@ void WireCell2dToy::ToyTiling::AddCell(WireCell::GeomDataSource& gds, GeomCell *
 
 }
 
-WireCell2dToy::ToyTiling::ToyTiling(const WireCell::Slice& slice,WireCell::DetectorGDS& gds, float rel_u , float rel_v, float rel_w, float noise_u, float noise_v, float noise_w, std::vector<float>* uplane_rms, std::vector<float>* vplane_rms, std::vector<float>* wplane_rms){
-  WireCell::Channel::Group group = slice.group();
+WCP2dToy::ToyTiling::ToyTiling(const WCP::Slice& slice,WCP::DetectorGDS& gds, float rel_u , float rel_v, float rel_w, float noise_u, float noise_v, float noise_w, std::vector<float>* uplane_rms, std::vector<float>* vplane_rms, std::vector<float>* wplane_rms){
+  WCP::Channel::Group group = slice.group();
   float tolerance = 0.1 * units::mm;
   //save all the wires
 
@@ -310,17 +310,17 @@ WireCell2dToy::ToyTiling::ToyTiling(const WireCell::Slice& slice,WireCell::Detec
 
 
 
-WireCell2dToy::ToyTiling::ToyTiling(const WireCell::Slice& slice,WireCell::GeomDataSource& gds, float rel_u , float rel_v, float rel_w, float noise_u, float noise_v, float noise_w, std::vector<float>* uplane_rms, std::vector<float>* vplane_rms, std::vector<float>* wplane_rms)
+WCP2dToy::ToyTiling::ToyTiling(const WCP::Slice& slice,WCP::GeomDataSource& gds, float rel_u , float rel_v, float rel_w, float noise_u, float noise_v, float noise_w, std::vector<float>* uplane_rms, std::vector<float>* vplane_rms, std::vector<float>* wplane_rms)
   : ave_charge(0)
   , ncell(0)
 {
-  WireCell::Channel::Group group = slice.group();
+  WCP::Channel::Group group = slice.group();
 
   float tolerance = 0.1 * units::mm;
 
   //double sum = 0;
   for (int i=0;i!=group.size();i++){
-    const WireCell::GeomWire *wire = gds.by_channel_segment(group.at(i).first,0);
+    const WCP::GeomWire *wire = gds.by_channel_segment(group.at(i).first,0);
     
     float charge = group.at(i).second;
     if (charge < 11) charge = 11;
@@ -633,7 +633,7 @@ WireCell2dToy::ToyTiling::ToyTiling(const WireCell::Slice& slice,WireCell::GeomD
 	    cell = cell_t;
 
 	    // // new method
-	    // WireCell2dToy::TotalTiling& totaltiling = Singleton<WireCell2dToy::TotalTiling>::Instance();
+	    // WCP2dToy::TotalTiling& totaltiling = Singleton<WCP2dToy::TotalTiling>::Instance();
 	    // GeomWireSelection temp_wires;
 	    // temp_wires.push_back(wire_u.at(i));
 	    // temp_wires.push_back(wire_v.at(j));
@@ -772,7 +772,7 @@ WireCell2dToy::ToyTiling::ToyTiling(const WireCell::Slice& slice,WireCell::GeomD
 
 
 
-void WireCell2dToy::ToyTiling::twoplane_tiling(int time, int nrebin, WireCell::GeomDataSource& gds, std::vector<float>& uplane_rms, std::vector<float>& vplane_rms, std::vector<float>& wplane_rms, WireCell::ChirpMap& uplane_map, WireCell::ChirpMap& vplane_map, WireCell::ChirpMap& wplane_map){
+void WCP2dToy::ToyTiling::twoplane_tiling(int time, int nrebin, WCP::GeomDataSource& gds, std::vector<float>& uplane_rms, std::vector<float>& vplane_rms, std::vector<float>& wplane_rms, WCP::ChirpMap& uplane_map, WCP::ChirpMap& vplane_map, WCP::ChirpMap& wplane_map){
   float tolerance = 0.1 * units::mm;
   int ncell = 10000;
   
@@ -965,7 +965,7 @@ void WireCell2dToy::ToyTiling::twoplane_tiling(int time, int nrebin, WireCell::G
 		cell = cell_t;
 		
 		// // new method
-		// WireCell2dToy::TotalTiling& totaltiling = Singleton<WireCell2dToy::TotalTiling>::Instance();
+		// WCP2dToy::TotalTiling& totaltiling = Singleton<WCP2dToy::TotalTiling>::Instance();
 		// GeomWireSelection temp_wires;
 		// temp_wires.push_back(wire_u.at(i));
 		// temp_wires.push_back(wire_v.at(j));
@@ -1183,7 +1183,7 @@ void WireCell2dToy::ToyTiling::twoplane_tiling(int time, int nrebin, WireCell::G
 		cell = cell_t;
 		
 		// // new method
-		// WireCell2dToy::TotalTiling& totaltiling = Singleton<WireCell2dToy::TotalTiling>::Instance();
+		// WCP2dToy::TotalTiling& totaltiling = Singleton<WCP2dToy::TotalTiling>::Instance();
 		// GeomWireSelection temp_wires;
 		// temp_wires.push_back(wire_u.at(i));
 		// temp_wires.push_back(n_wire);
@@ -1408,7 +1408,7 @@ void WireCell2dToy::ToyTiling::twoplane_tiling(int time, int nrebin, WireCell::G
 		cell = cell_t;
 		
 		// // new method
-		// WireCell2dToy::TotalTiling& totaltiling = Singleton<WireCell2dToy::TotalTiling>::Instance();
+		// WCP2dToy::TotalTiling& totaltiling = Singleton<WCP2dToy::TotalTiling>::Instance();
 		// GeomWireSelection temp_wires;
 		// temp_wires.push_back(n_wire);
 		// temp_wires.push_back(wire_v.at(j));
@@ -1519,7 +1519,7 @@ void WireCell2dToy::ToyTiling::twoplane_tiling(int time, int nrebin, WireCell::G
 
 
 
-WireCell2dToy::ToyTiling::~ToyTiling()
+WCP2dToy::ToyTiling::~ToyTiling()
 {
   //delete all the cells
   for (int i=0;i!=cell_all.size();i++){
@@ -1537,7 +1537,7 @@ WireCell2dToy::ToyTiling::~ToyTiling()
   
 }
 
-GeomWireSelection WireCell2dToy::ToyTiling::wires(const GeomCell& cell) const
+GeomWireSelection WCP2dToy::ToyTiling::wires(const GeomCell& cell) const
 {
   if (cellmap.find(&cell) == cellmap.end()){
     //not found 
@@ -1549,7 +1549,7 @@ GeomWireSelection WireCell2dToy::ToyTiling::wires(const GeomCell& cell) const
     
 }
 	
-GeomCellSelection WireCell2dToy::ToyTiling::cells(const GeomWire& wire) const
+GeomCellSelection WCP2dToy::ToyTiling::cells(const GeomWire& wire) const
 {
   if (wiremap.find(&wire) == wiremap.end()){
     return GeomCellSelection();
@@ -1559,7 +1559,7 @@ GeomCellSelection WireCell2dToy::ToyTiling::cells(const GeomWire& wire) const
 }
 
 
-const GeomCell* WireCell2dToy::ToyTiling::cell(const GeomWireSelection& wires) const
+const GeomCell* WCP2dToy::ToyTiling::cell(const GeomWireSelection& wires) const
 {
   if (wires.size()!=3) return 0;
   const GeomWire *wire1 = wires[0];
@@ -1630,7 +1630,7 @@ const GeomCell* WireCell2dToy::ToyTiling::cell(const GeomWireSelection& wires) c
 
 
 
-void WireCell2dToy::ToyTiling::CreateCell(float tolerance, const GeomDataSource& gds, int face, int n_tpc, GeomWireSelection& temp_wire_u, 
+void WCP2dToy::ToyTiling::CreateCell(float tolerance, const GeomDataSource& gds, int face, int n_tpc, GeomWireSelection& temp_wire_u, 
 					  GeomWireSelection& temp_wire_v, GeomWireSelection& temp_wire_w){
   float dis_u[3]={0.0},dis_v[3]={0.0},dis_w[3]={0.0},
 					dis_puv[5]={0.0},dis_puw[5]={0.0},dis_pwv[5]={0.0};
@@ -1812,7 +1812,7 @@ void WireCell2dToy::ToyTiling::CreateCell(float tolerance, const GeomDataSource&
 	    cell = cell_t;
 
 	    //  // new method
-	    // WireCell2dToy::TotalTiling& totaltiling = Singleton<WireCell2dToy::TotalTiling>::Instance();
+	    // WCP2dToy::TotalTiling& totaltiling = Singleton<WCP2dToy::TotalTiling>::Instance();
 	    // GeomWireSelection temp_wires;
 	    // temp_wires.push_back(temp_wire_u.at(i));
 	    // temp_wires.push_back(temp_wire_v.at(j));
@@ -1886,4 +1886,4 @@ void WireCell2dToy::ToyTiling::CreateCell(float tolerance, const GeomDataSource&
 
 
 
-ClassImp(WireCell2dToy::ToyTiling);
+ClassImp(WCP2dToy::ToyTiling);

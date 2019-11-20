@@ -1,6 +1,6 @@
-#include "WireCell2dToy/uBooNE_Data_2D_Deconvolution.h"
+#include "WCP2dToy/uBooNE_Data_2D_Deconvolution.h"
 
-#include "WireCellData/GeomWire.h"
+#include "WCPData/GeomWire.h"
 #include "TFile.h"
 #include "TVirtualFFT.h"
 #include "TRandom.h"
@@ -11,9 +11,9 @@
 #include <algorithm>
 #include <fstream>
 
-using namespace WireCell;
+using namespace WCP;
 
-WireCell2dToy::uBooNEData2DDeconvolutionFDS::uBooNEData2DDeconvolutionFDS(TH2I *hu_decon, TH2I *hv_decon, TH2I *hw_decon, TTree *T_bad, const WireCell::GeomDataSource& gds)
+WCP2dToy::uBooNEData2DDeconvolutionFDS::uBooNEData2DDeconvolutionFDS(TH2I *hu_decon, TH2I *hv_decon, TH2I *hw_decon, TTree *T_bad, const WCP::GeomDataSource& gds)
   : fds (0)
   , gds (gds)
   , max_frames(0)
@@ -72,7 +72,7 @@ WireCell2dToy::uBooNEData2DDeconvolutionFDS::uBooNEData2DDeconvolutionFDS(TH2I *
 
   // U plane
   for (size_t ind=0; ind < hu_decon->GetNbinsX(); ++ind) {
-    WireCell::Trace trace;
+    WCP::Trace trace;
     trace.chid = ind;
     trace.tbin = 0;		// full readout, if zero suppress this would be non-zero
     trace.charge.resize(bins_per_frame, 0.0);
@@ -85,7 +85,7 @@ WireCell2dToy::uBooNEData2DDeconvolutionFDS::uBooNEData2DDeconvolutionFDS(TH2I *
   
   // V plane
   for (size_t ind=0; ind < hv_decon->GetNbinsX(); ++ind) {
-    WireCell::Trace trace;
+    WCP::Trace trace;
     trace.chid = ind + nwire_u;
     trace.tbin = 0;		// full readout, if zero suppress this would be non-zero
     trace.charge.resize(bins_per_frame, 0.0);
@@ -98,7 +98,7 @@ WireCell2dToy::uBooNEData2DDeconvolutionFDS::uBooNEData2DDeconvolutionFDS(TH2I *
 
   // W plane
   for (size_t ind=0; ind < hw_decon->GetNbinsX(); ++ind) {
-    WireCell::Trace trace;
+    WCP::Trace trace;
     trace.chid = ind + nwire_u + nwire_v;
     trace.tbin = 0;		// full readout, if zero suppress this would be non-zero
     trace.charge.resize(bins_per_frame, 0.0);
@@ -144,7 +144,7 @@ WireCell2dToy::uBooNEData2DDeconvolutionFDS::uBooNEData2DDeconvolutionFDS(TH2I *
 }
 
 
-WireCell2dToy::uBooNEData2DDeconvolutionFDS::uBooNEData2DDeconvolutionFDS(WireCell::FrameDataSource& fds1, const WireCell::GeomDataSource& gds,WireCell::ChirpMap& umap, WireCell::ChirpMap& vmap, WireCell::ChirpMap& wmap, int nframes_total, float time_offset_uv, float time_offset_uw, float overall_time_offset, int flag_sim)
+WCP2dToy::uBooNEData2DDeconvolutionFDS::uBooNEData2DDeconvolutionFDS(WCP::FrameDataSource& fds1, const WCP::GeomDataSource& gds,WCP::ChirpMap& umap, WCP::ChirpMap& vmap, WCP::ChirpMap& wmap, int nframes_total, float time_offset_uv, float time_offset_uw, float overall_time_offset, int flag_sim)
   : fds(&fds1)
   , gds(gds)
   , max_frames(nframes_total)
@@ -390,7 +390,7 @@ WireCell2dToy::uBooNEData2DDeconvolutionFDS::uBooNEData2DDeconvolutionFDS(WireCe
   // }
 }
 
-WireCell2dToy::uBooNEData2DDeconvolutionFDS::~uBooNEData2DDeconvolutionFDS()
+WCP2dToy::uBooNEData2DDeconvolutionFDS::~uBooNEData2DDeconvolutionFDS()
 {
 
   if (!load_results_from_file){
@@ -414,7 +414,7 @@ WireCell2dToy::uBooNEData2DDeconvolutionFDS::~uBooNEData2DDeconvolutionFDS()
   }
 }
 
-int WireCell2dToy::uBooNEData2DDeconvolutionFDS::jump(int frame_number){
+int WCP2dToy::uBooNEData2DDeconvolutionFDS::jump(int frame_number){
   
   if (load_results_from_file) return frame_number;
 
@@ -499,11 +499,11 @@ int WireCell2dToy::uBooNEData2DDeconvolutionFDS::jump(int frame_number){
   return frame.index;
 }
 
-int WireCell2dToy::uBooNEData2DDeconvolutionFDS::size() const{
+int WCP2dToy::uBooNEData2DDeconvolutionFDS::size() const{
   return max_frames;
 }
 
-void WireCell2dToy::uBooNEData2DDeconvolutionFDS::Deconvolute_2D(int plane){
+void WCP2dToy::uBooNEData2DDeconvolutionFDS::Deconvolute_2D(int plane){
   const Frame& frame1 = fds->get();
   size_t ntraces = frame1.traces.size();
   
@@ -1000,7 +1000,7 @@ void WireCell2dToy::uBooNEData2DDeconvolutionFDS::Deconvolute_2D(int plane){
   
 }
 
-void WireCell2dToy::uBooNEData2DDeconvolutionFDS::Clear(){
+void WCP2dToy::uBooNEData2DDeconvolutionFDS::Clear(){
   hu_2D_g->Reset();
   hv_2D_g->Reset();
   hw_2D_g->Reset();
@@ -1013,7 +1013,7 @@ void WireCell2dToy::uBooNEData2DDeconvolutionFDS::Clear(){
 }
 
 
-void WireCell2dToy::uBooNEData2DDeconvolutionFDS::restore_baseline(TH1F *htemp){
+void WCP2dToy::uBooNEData2DDeconvolutionFDS::restore_baseline(TH1F *htemp){
   //correct baseline 
   double max = htemp->GetMaximum();
   double min = htemp->GetMinimum();

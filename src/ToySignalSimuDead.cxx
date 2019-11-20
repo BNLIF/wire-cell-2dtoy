@@ -1,14 +1,14 @@
-#include "WireCell2dToy/ToySignalSimuDead.h"
+#include "WCP2dToy/ToySignalSimuDead.h"
 
-#include "WireCellData/GeomWire.h"
+#include "WCPData/GeomWire.h"
 #include "TFile.h"
 #include "TVirtualFFT.h"
 #include "TRandom.h"
 #include "TF1.h"
 
-using namespace WireCell;
+using namespace WCP;
 
-WireCell2dToy::ToySignalSimuDeadFDS::ToySignalSimuDeadFDS(WireCell::FrameDataSource& fds, const WireCell::GeomDataSource& gds,int bins_per_frame1, int nframes_total, float time_offset_uv, float time_offset_uw, int flag_random, float overall_time_offset, int overall_time_shift)
+WCP2dToy::ToySignalSimuDeadFDS::ToySignalSimuDeadFDS(WCP::FrameDataSource& fds, const WCP::GeomDataSource& gds,int bins_per_frame1, int nframes_total, float time_offset_uv, float time_offset_uw, int flag_random, float overall_time_offset, int overall_time_shift)
   : fds(fds)
   , gds(&gds)
   , dgds(0)
@@ -72,7 +72,7 @@ WireCell2dToy::ToySignalSimuDeadFDS::ToySignalSimuDeadFDS(WireCell::FrameDataSou
   
 }
 
-WireCell2dToy::ToySignalSimuDeadFDS::ToySignalSimuDeadFDS(WireCell::FrameDataSource& fds, const WireCell::DetectorGDS& gds,int bins_per_frame1, int nframes_total, float time_offset_uv, float time_offset_uw, int flag_random, float overall_time_offset, int overall_time_shift)
+WCP2dToy::ToySignalSimuDeadFDS::ToySignalSimuDeadFDS(WCP::FrameDataSource& fds, const WCP::DetectorGDS& gds,int bins_per_frame1, int nframes_total, float time_offset_uv, float time_offset_uw, int flag_random, float overall_time_offset, int overall_time_shift)
   : fds(fds)
   , gds(0)
   , dgds(&gds)
@@ -133,11 +133,11 @@ WireCell2dToy::ToySignalSimuDeadFDS::ToySignalSimuDeadFDS(WireCell::FrameDataSou
 }
 
 
-int WireCell2dToy::ToySignalSimuDeadFDS::size() const{
+int WCP2dToy::ToySignalSimuDeadFDS::size() const{
   return max_frames;
 }
 
-void WireCell2dToy::ToySignalSimuDeadFDS::Save(){
+void WCP2dToy::ToySignalSimuDeadFDS::Save(){
   TFile *file = new TFile("temp_simu.root","RECREATE");
   //test save
   // for (int i=0;i!=nwire_u;i++){
@@ -154,7 +154,7 @@ void WireCell2dToy::ToySignalSimuDeadFDS::Save(){
   file->Close();
 }
 
-int WireCell2dToy::ToySignalSimuDeadFDS::jump(int frame_number){
+int WCP2dToy::ToySignalSimuDeadFDS::jump(int frame_number){
   // do simulation
   
   //test save
@@ -441,7 +441,7 @@ int WireCell2dToy::ToySignalSimuDeadFDS::jump(int frame_number){
   return frame.index;
 }
 
-WireCell2dToy::ToySignalSimuDeadFDS::~ToySignalSimuDeadFDS(){
+WCP2dToy::ToySignalSimuDeadFDS::~ToySignalSimuDeadFDS(){
   //test save
   // for (int i=0;i!=nwire_u;i++){
   //   delete hu1[i] ;

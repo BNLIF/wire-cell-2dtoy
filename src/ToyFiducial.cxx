@@ -1,8 +1,8 @@
-#include "WireCell2dToy/ToyFiducial.h"
-#include "WireCellData/TPCParams.h"
-#include "WireCellData/Singleton.h"
+#include "WCP2dToy/ToyFiducial.h"
+#include "WCPData/TPCParams.h"
+#include "WCPData/Singleton.h"
 
-using namespace WireCell;
+using namespace WCP;
 
 int pnpoly(std::vector<double>& vertx, std::vector<double>& verty, double testx, double testy)
 {
@@ -19,7 +19,7 @@ int pnpoly(std::vector<double>& vertx, std::vector<double>& verty, double testx,
 //Helper function that returns the number of boundary contacts for a set of extreme points, drift offset, and tolerances
 //checks whether a given cluster's extreme points are touching any detector boundaries for a given flash time / drift offest_x
 //-2 means short track, -1 means outside boundary, 0 means inside boudnary, 1 means STM, 2 meanst TGM
-int WireCell2dToy::ToyFiducial::check_boundary(std::vector<std::vector<WireCell::WCPointCloud<double>::WCPoint>> extreme_points, double offset_x, std::vector<double>* tol_vec){
+int WCP2dToy::ToyFiducial::check_boundary(std::vector<std::vector<WCP::WCPointCloud<double>::WCPoint>> extreme_points, double offset_x, std::vector<double>* tol_vec){
 
 	//Check whether the extreme points are contained within the boundary planes (allowing for tolerance), and if they are near a boundary.
 	bool front_flag = false;
@@ -42,8 +42,8 @@ int WireCell2dToy::ToyFiducial::check_boundary(std::vector<std::vector<WireCell:
 }
 
 //Main cosmic tagger function
-void WireCell2dToy::ToyFiducial::cosmic_tagger(WireCell::OpflashSelection& flashes, FlashTPCBundleSelection *matched_bundles, FlashTPCBundle* main_bundle, WireCell::Photon_Library *pl, int time_offset, int nrebin, float unit_dis, WireCell::ToyCTPointCloud& ct_point_cloud,
-						std::map<WireCell::PR3DCluster*, WireCell::PR3DCluster*>& old_new_cluster_map, int run_no, int subrun_no, int event_no, bool flag_data, bool debug_tagger){
+void WCP2dToy::ToyFiducial::cosmic_tagger(WCP::OpflashSelection& flashes, FlashTPCBundleSelection *matched_bundles, FlashTPCBundle* main_bundle, WCP::Photon_Library *pl, int time_offset, int nrebin, float unit_dis, WCP::ToyCTPointCloud& ct_point_cloud,
+						std::map<WCP::PR3DCluster*, WCP::PR3DCluster*>& old_new_cluster_map, int run_no, int subrun_no, int event_no, bool flag_data, bool debug_tagger){
 
 	//std::cout << "starting cosmic tagger ===================================================" << std::endl;
 
@@ -136,13 +136,13 @@ void WireCell2dToy::ToyFiducial::cosmic_tagger(WireCell::OpflashSelection& flash
 			}
 
 			//Flash PE Prediction
-			std::vector<std::pair<WireCell::PR3DCluster*,double>> additional_clusters;
+			std::vector<std::pair<WCP::PR3DCluster*,double>> additional_clusters;
 			PR3DClusterSelection other_clusters;
 			PR3DClusterSelection more_clusters;
 			bool flag_good_bundle;
 			FlashTPCBundle *new_bundle =  new FlashTPCBundle(flash, main_cluster,flash->get_flash_id(),main_cluster->get_cluster_id());
 			std::vector<double>& pred_pmt_light = new_bundle->get_pred_pmt_light();
-			WireCell2dToy::calculate_pred_pe(run_no, time_offset, nrebin, time_slice_width, pl, new_bundle, &pred_pmt_light, &additional_clusters, &other_clusters, &more_clusters, flag_good_bundle, flag_data);
+			WCP2dToy::calculate_pred_pe(run_no, time_offset, nrebin, time_slice_width, pl, new_bundle, &pred_pmt_light, &additional_clusters, &other_clusters, &more_clusters, flag_good_bundle, flag_data);
 			//std::vector<double>& pred_pmt_light = main_bundle->get_pred_pmt_light();
 
 			//Compute the PE centroids for the flash PE and predicted PE
@@ -288,7 +288,7 @@ void WireCell2dToy::ToyFiducial::cosmic_tagger(WireCell::OpflashSelection& flash
    
 
 /*
-WireCell2dToy::ToyFiducial::ToyFiducial(int dead_region_ch_ext, double offset_t, double offset_u, double offset_v, double offset_w, double slope_t, double slope_u, double slope_v, double slope_w, double angle_u, double angle_v, double angle_w, double boundary_dis_cut, double top, double bottom, double upstream, double downstream, double anode, double cathode, int flag_data)
+WCP2dToy::ToyFiducial::ToyFiducial(int dead_region_ch_ext, double offset_t, double offset_u, double offset_v, double offset_w, double slope_t, double slope_u, double slope_v, double slope_w, double angle_u, double angle_v, double angle_w, double boundary_dis_cut, double top, double bottom, double upstream, double downstream, double anode, double cathode, int flag_data)
   : dead_region_ch_ext(dead_region_ch_ext)
   , offset_t(offset_t)
   , offset_u(offset_u)
@@ -393,7 +393,7 @@ WireCell2dToy::ToyFiducial::ToyFiducial(int dead_region_ch_ext, double offset_t,
 }
 */
 
-WireCell2dToy::ToyFiducial::ToyFiducial(int dead_region_ch_ext, double offset_t, double offset_u, double offset_v, double offset_w, double slope_t, double slope_u, double slope_v, double slope_w, double angle_u, double angle_v, double angle_w, double boundary_dis_cut, double top, double bottom, double upstream, double downstream, double anode, double cathode, int flag_data)
+WCP2dToy::ToyFiducial::ToyFiducial(int dead_region_ch_ext, double offset_t, double offset_u, double offset_v, double offset_w, double slope_t, double slope_u, double slope_v, double slope_w, double angle_u, double angle_v, double angle_w, double boundary_dis_cut, double top, double bottom, double upstream, double downstream, double anode, double cathode, int flag_data)
   : dead_region_ch_ext(dead_region_ch_ext)
   , offset_t(offset_t)
   , offset_u(offset_u)
@@ -595,7 +595,7 @@ WireCell2dToy::ToyFiducial::ToyFiducial(int dead_region_ch_ext, double offset_t,
   }  
 }
 
-int WireCell2dToy::ToyFiducial::check_LM(WireCell::FlashTPCBundle *bundle, double& cluster_length){
+int WCP2dToy::ToyFiducial::check_LM(WCP::FlashTPCBundle *bundle, double& cluster_length){
 
   PR3DCluster *main_cluster = bundle->get_main_cluster();
   Opflash *flash = bundle->get_flash();
@@ -658,7 +658,7 @@ int WireCell2dToy::ToyFiducial::check_LM(WireCell::FlashTPCBundle *bundle, doubl
   return 0;
 }
 
-int WireCell2dToy::ToyFiducial::check_LM_cuts(WireCell::FlashTPCBundle *bundle, double& cluster_length){
+int WCP2dToy::ToyFiducial::check_LM_cuts(WCP::FlashTPCBundle *bundle, double& cluster_length){
 
   Opflash *flash = bundle->get_flash();
   /* comment out for now... to make direct comparison to Xin's*/
@@ -722,7 +722,7 @@ int WireCell2dToy::ToyFiducial::check_LM_cuts(WireCell::FlashTPCBundle *bundle, 
   return 0;
 }
 
-int WireCell2dToy::ToyFiducial::check_LM_bdt(WireCell::FlashTPCBundle *bundle, double& cluster_length){
+int WCP2dToy::ToyFiducial::check_LM_bdt(WCP::FlashTPCBundle *bundle, double& cluster_length){
 
   Opflash *flash = bundle->get_flash();
   /* comment out for now... to make direct comparison to Xin's*/
@@ -801,7 +801,7 @@ int WireCell2dToy::ToyFiducial::check_LM_bdt(WireCell::FlashTPCBundle *bundle, d
   }
   
   int temp = -100;
-  WireCell::LMBDT lm(total_pred_pe,total_meas_pe,max_meas_pe, ks_dis,
+  WCP::LMBDT lm(total_pred_pe,total_meas_pe,max_meas_pe, ks_dis,
 		     chi2,ndf,cl,temp,flag_anode,flag_boundary); 
   
   //  if( !lm.isSignal(lm.get_BDT_score_max_significance(sig,bgd)) ){
@@ -813,7 +813,7 @@ int WireCell2dToy::ToyFiducial::check_LM_bdt(WireCell::FlashTPCBundle *bundle, d
   return 0;
 }
 
-bool WireCell2dToy::ToyFiducial::check_fully_contained(WireCell::FlashTPCBundle *bundle, double offset_x, WireCell::ToyCTPointCloud& ct_point_cloud,std::map<PR3DCluster*, PR3DCluster*>& old_new_cluster_map, unsigned int* fail_mode, int flag){
+bool WCP2dToy::ToyFiducial::check_fully_contained(WCP::FlashTPCBundle *bundle, double offset_x, WCP::ToyCTPointCloud& ct_point_cloud,std::map<PR3DCluster*, PR3DCluster*>& old_new_cluster_map, unsigned int* fail_mode, int flag){
   PR3DCluster *main_cluster; 
   PR3DCluster *main_cluster1; 
   if (flag==1){ // check the current
@@ -902,7 +902,7 @@ bool WireCell2dToy::ToyFiducial::check_fully_contained(WireCell::FlashTPCBundle 
   return true;
 }
 
-bool WireCell2dToy::ToyFiducial::check_tgm(WireCell::FlashTPCBundle *bundle, double offset_x, WireCell::ToyCTPointCloud& ct_point_cloud,std::map<PR3DCluster*, PR3DCluster*>& old_new_cluster_map, int flag){
+bool WCP2dToy::ToyFiducial::check_tgm(WCP::FlashTPCBundle *bundle, double offset_x, WCP::ToyCTPointCloud& ct_point_cloud,std::map<PR3DCluster*, PR3DCluster*>& old_new_cluster_map, int flag){
 
   PR3DCluster *main_cluster; 
   PR3DCluster *main_cluster1; 
@@ -1279,7 +1279,7 @@ bool WireCell2dToy::ToyFiducial::check_tgm(WireCell::FlashTPCBundle *bundle, dou
   return false;
 }
 
-bool WireCell2dToy::ToyFiducial::check_neutrino_candidate(WireCell::PR3DCluster *main_cluster,WCPointCloud<double>::WCPoint& wcp1 ,WCPointCloud<double>::WCPoint& wcp2, double offset_x, WireCell::ToyCTPointCloud& ct_point_cloud,bool flag_2view_check){
+bool WCP2dToy::ToyFiducial::check_neutrino_candidate(WCP::PR3DCluster *main_cluster,WCPointCloud<double>::WCPoint& wcp1 ,WCPointCloud<double>::WCPoint& wcp2, double offset_x, WCP::ToyCTPointCloud& ct_point_cloud,bool flag_2view_check){
   main_cluster->Create_graph(ct_point_cloud);
   
   main_cluster->dijkstra_shortest_paths(wcp1);
@@ -1370,9 +1370,9 @@ bool WireCell2dToy::ToyFiducial::check_neutrino_candidate(WireCell::PR3DCluster 
     int num_bad = 0;
     
     for (int i=0;i!=path_wcps_vec1.size();i++){
-      WireCell::CTPointCloud<double> cloud_u = ct_point_cloud.get_closest_points(path_wcps_vec1.at(i),low_dis_limit*2,0);
-      WireCell::CTPointCloud<double> cloud_v = ct_point_cloud.get_closest_points(path_wcps_vec1.at(i),low_dis_limit*2,1);
-      WireCell::CTPointCloud<double> cloud_w = ct_point_cloud.get_closest_points(path_wcps_vec1.at(i),low_dis_limit*2,2);
+      WCP::CTPointCloud<double> cloud_u = ct_point_cloud.get_closest_points(path_wcps_vec1.at(i),low_dis_limit*2,0);
+      WCP::CTPointCloud<double> cloud_v = ct_point_cloud.get_closest_points(path_wcps_vec1.at(i),low_dis_limit*2,1);
+      WCP::CTPointCloud<double> cloud_w = ct_point_cloud.get_closest_points(path_wcps_vec1.at(i),low_dis_limit*2,2);
 
       bool flag_reset = false;
 
@@ -1588,10 +1588,10 @@ bool WireCell2dToy::ToyFiducial::check_neutrino_candidate(WireCell::PR3DCluster 
 }
 
 
-WireCell2dToy::ToyFiducial::~ToyFiducial(){
+WCP2dToy::ToyFiducial::~ToyFiducial(){
 }
 
-bool WireCell2dToy::ToyFiducial::check_signal_processing(WireCell::Point& p, TVector3& dir, WireCell::ToyCTPointCloud& ct_point_cloud, double step, double offset_x){
+bool WCP2dToy::ToyFiducial::check_signal_processing(WCP::Point& p, TVector3& dir, WCP::ToyCTPointCloud& ct_point_cloud, double step, double offset_x){
 
   if (dir.Mag()==0){
     return true;
@@ -1611,9 +1611,9 @@ bool WireCell2dToy::ToyFiducial::check_signal_processing(WireCell::Point& p, TVe
 
       //      std::cerr << temp_p.x/units::cm << " " << temp_p.y/units::cm << " " << temp_p.z/units::cm << " ";
       
-      WireCell::CTPointCloud<double> cloud_u = ct_point_cloud.get_closest_points(temp_p,1.2*units::cm,0);
-      WireCell::CTPointCloud<double> cloud_v = ct_point_cloud.get_closest_points(temp_p,1.2*units::cm,1);
-      WireCell::CTPointCloud<double> cloud_w = ct_point_cloud.get_closest_points(temp_p,1.2*units::cm,2);
+      WCP::CTPointCloud<double> cloud_u = ct_point_cloud.get_closest_points(temp_p,1.2*units::cm,0);
+      WCP::CTPointCloud<double> cloud_v = ct_point_cloud.get_closest_points(temp_p,1.2*units::cm,1);
+      WCP::CTPointCloud<double> cloud_w = ct_point_cloud.get_closest_points(temp_p,1.2*units::cm,2);
       
       //      std::cerr << cloud_u.pts.size() << " " << cloud_v.pts.size() << " " << cloud_w.pts.size() << std::endl;
 
@@ -1639,7 +1639,7 @@ bool WireCell2dToy::ToyFiducial::check_signal_processing(WireCell::Point& p, TVe
   return true;
 }
 
-bool WireCell2dToy::ToyFiducial::check_dead_volume(WireCell::Point& p, TVector3& dir, double step, double offset_x){
+bool WCP2dToy::ToyFiducial::check_dead_volume(WCP::Point& p, TVector3& dir, double step, double offset_x){
   if (!inside_fiducial_volume(p,offset_x)){
     return false;
   }else{
@@ -1678,7 +1678,7 @@ bool WireCell2dToy::ToyFiducial::check_dead_volume(WireCell::Point& p, TVector3&
 }
 
 /*
-bool WireCell2dToy::ToyFiducial::inside_fiducial_volume(WireCell::Point& p, double offset_x){
+bool WCP2dToy::ToyFiducial::inside_fiducial_volume(WCP::Point& p, double offset_x){
 
   int c1 = pnpoly(boundary_xy_x, boundary_xy_y, p.x-offset_x, p.y);
   int c2 = pnpoly(boundary_xz_x, boundary_xz_z, p.x-offset_x, p.z);
@@ -1693,7 +1693,7 @@ bool WireCell2dToy::ToyFiducial::inside_fiducial_volume(WireCell::Point& p, doub
   }
 }
 */
-bool WireCell2dToy::ToyFiducial::inside_fiducial_volume(WireCell::Point& p, double offset_x, std::vector<double>* tolerance_vec){
+bool WCP2dToy::ToyFiducial::inside_fiducial_volume(WCP::Point& p, double offset_x, std::vector<double>* tolerance_vec){
 
 	int c1=0;
 	int c2=0;
@@ -1756,7 +1756,7 @@ bool WireCell2dToy::ToyFiducial::inside_fiducial_volume(WireCell::Point& p, doub
   }
 }
 
-bool WireCell2dToy::ToyFiducial::inside_dead_region(WireCell::Point& p){
+bool WCP2dToy::ToyFiducial::inside_dead_region(WCP::Point& p){
   // convert the position into U, V, W, and T number ...
   int time_slice = p.x * slope_t + offset_t;
   double pos_u = cos(angle_u) * p.z - sin(angle_u) *p.y;
@@ -1818,7 +1818,7 @@ bool WireCell2dToy::ToyFiducial::inside_dead_region(WireCell::Point& p){
 }
 
 
-void WireCell2dToy::ToyFiducial::AddDeadRegion(WireCell::SlimMergeGeomCell* mcell, std::vector<int>& time_slices){
+void WCP2dToy::ToyFiducial::AddDeadRegion(WCP::SlimMergeGeomCell* mcell, std::vector<int>& time_slices){
 
   mcells.push_back(mcell);
   int start_time = time_slices.front() - dead_region_ch_ext ;

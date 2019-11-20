@@ -1,10 +1,10 @@
-#include "WireCell2dToy/TimeKeeper.h"
+#include "WCP2dToy/TimeKeeper.h"
 
 #include <sstream>
 #include <iostream>		// debugging
 
 using namespace std;
-using namespace WireCell;
+using namespace WCP;
 
 TimeKeeper::TimeKeeper(const std::string& msg, ptime starting_time)
 {

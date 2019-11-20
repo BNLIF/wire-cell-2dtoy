@@ -1,6 +1,6 @@
-#include "WireCell2dToy/ToyHypothesis.h"
-using namespace WireCell;
-WireCell2dToy::ToyHypothesis::ToyHypothesis(){
+#include "WCP2dToy/ToyHypothesis.h"
+using namespace WCP;
+WCP2dToy::ToyHypothesis::ToyHypothesis(){
   pc[0] = Point();
   pc[1] = Point();
   p1[0] = Point();
@@ -10,7 +10,7 @@ WireCell2dToy::ToyHypothesis::ToyHypothesis(){
   
 }
 
-WireCell2dToy::ToyHypothesis::ToyHypothesis(MergeGeomCell& mcell1, MergeGeomCell& mcell2){
+WCP2dToy::ToyHypothesis::ToyHypothesis(MergeGeomCell& mcell1, MergeGeomCell& mcell2){
   pc[0] = mcell1.center();
   pc[1] = mcell2.center();
   
@@ -99,10 +99,10 @@ WireCell2dToy::ToyHypothesis::ToyHypothesis(MergeGeomCell& mcell1, MergeGeomCell
  
 }
 
-WireCell2dToy::ToyHypothesis::~ToyHypothesis(){
+WCP2dToy::ToyHypothesis::~ToyHypothesis(){
 }
 
-double WireCell2dToy::ToyHypothesis::CalValue(Point p, Point p1, Point p2){
+double WCP2dToy::ToyHypothesis::CalValue(Point p, Point p1, Point p2){
   double val;
 
   double  y = p.y, z = p.z;
@@ -118,7 +118,7 @@ double WireCell2dToy::ToyHypothesis::CalValue(Point p, Point p1, Point p2){
   return val;
 }
 
-bool WireCell2dToy::ToyHypothesis::IsInside(Point p){
+bool WCP2dToy::ToyHypothesis::IsInside(Point p){
   bool val = false;
   
   double dis1 = CalValue(p,p1[0],p1[1]);
@@ -128,7 +128,7 @@ bool WireCell2dToy::ToyHypothesis::IsInside(Point p){
   return val;
 }
 
-bool WireCell2dToy::ToyHypothesis::IsInside(const GeomCell& cell){
+bool WCP2dToy::ToyHypothesis::IsInside(const GeomCell& cell){
   bool val = false;
   PointVector pv = cell.boundary();
   for (int i=0;i!=pv.size();i++){

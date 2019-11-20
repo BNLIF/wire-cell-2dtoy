@@ -1,4 +1,4 @@
-void WireCell2dToy::Clustering_examine_x_boundary(WireCell::PR3DClusterSelection& live_clusters,std::map<WireCell::PR3DCluster*,double>& cluster_length_map){
+void WCP2dToy::Clustering_examine_x_boundary(WCP::PR3DClusterSelection& live_clusters,std::map<WCP::PR3DCluster*,double>& cluster_length_map){
   TPCParams& mp = Singleton<TPCParams>::Instance();
   double pitch_u = mp.get_pitch_u();
   double pitch_v = mp.get_pitch_v();
@@ -43,7 +43,7 @@ void WireCell2dToy::Clustering_examine_x_boundary(WireCell::PR3DClusterSelection
 }
 
 
-void WireCell2dToy::Clustering_neutrino(WireCell::PR3DClusterSelection& live_clusters,std::map<WireCell::PR3DCluster*,double>& cluster_length_map, int num_try){
+void WCP2dToy::Clustering_neutrino(WCP::PR3DClusterSelection& live_clusters,std::map<WCP::PR3DCluster*,double>& cluster_length_map, int num_try){
   TPCParams& mp = Singleton<TPCParams>::Instance();
   double pitch_u = mp.get_pitch_u();
   double pitch_v = mp.get_pitch_v();
@@ -70,8 +70,8 @@ void WireCell2dToy::Clustering_neutrino(WireCell::PR3DClusterSelection& live_clu
   }
   
   // find all the clusters that are inside the box ...
-  WireCell::PR3DClusterSelection contained_clusters;
-  WireCell::PR3DClusterSelection candidate_clusters;
+  WCP::PR3DClusterSelection contained_clusters;
+  WCP::PR3DClusterSelection candidate_clusters;
   
   for (size_t i=0;i!=live_clusters.size();i++){
     PR3DCluster *cluster = live_clusters.at(i);
@@ -270,7 +270,7 @@ void WireCell2dToy::Clustering_neutrino(WireCell::PR3DClusterSelection& live_clu
 	
 	ToyPointCloud* cloud1_ext = new ToyPointCloud(angle_u, angle_v, angle_w);
 	cluster_cloud_map[cluster1] = cloud1_ext;
-	WireCell::PointVector pts;
+	WCP::PointVector pts;
 	std::pair<Point,Point> extreme_pts = cluster1->get_two_extreme_points();
 
 	if (cluster_length_map[cluster1] >25*units::cm){
@@ -476,7 +476,7 @@ void WireCell2dToy::Clustering_neutrino(WireCell::PR3DClusterSelection& live_clu
 	
 	ToyPointCloud* cloud2_ext = new ToyPointCloud(angle_u, angle_v, angle_w);
 	cluster_cloud_map[cluster2] = cloud2_ext;
-	WireCell::PointVector pts;
+	WCP::PointVector pts;
 	std::pair<Point,Point> extreme_pts = cluster2->get_two_extreme_points();
 
 	if (cluster_length_map[cluster2] >25*units::cm){
@@ -997,7 +997,7 @@ void WireCell2dToy::Clustering_neutrino(WireCell::PR3DClusterSelection& live_clu
 }
 
 
-void WireCell2dToy::Clustering_dis(WireCell::PR3DClusterSelection& live_clusters,std::map<WireCell::PR3DCluster*,double>& cluster_length_map){
+void WCP2dToy::Clustering_dis(WCP::PR3DClusterSelection& live_clusters,std::map<WCP::PR3DCluster*,double>& cluster_length_map){
   TPCParams& mp = Singleton<TPCParams>::Instance();
   double pitch_u = mp.get_pitch_u();
   double pitch_v = mp.get_pitch_v();
@@ -1171,7 +1171,7 @@ void WireCell2dToy::Clustering_dis(WireCell::PR3DClusterSelection& live_clusters
 	int num_outside_points = 0;
 	/* int num_close_points = 0; */
 	const int N = cloud2->get_num_points();
-	WireCell::WCPointCloud<double>& cloud = cloud2->get_cloud();
+	WCP::WCPointCloud<double>& cloud = cloud2->get_cloud();
 	for (int k=0;k!=N;k++){
 	  Point test_p1(cloud.pts[k].x,cloud.pts[k].y,cloud.pts[k].z);
 	  double close_dis = cloud1->get_closest_dis(test_p1);

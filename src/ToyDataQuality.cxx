@@ -1,6 +1,6 @@
-#include "WireCell2dToy/ToyDataQuality.h"
+#include "WCP2dToy/ToyDataQuality.h"
 
-void WireCell2dToy::Organize_Dead_Channels(WireCell::ChirpMap& uplane_map, WireCell::ChirpMap& vplane_map, WireCell::ChirpMap& wplane_map, int nbins, int nrebin, int n_div){
+void WCP2dToy::Organize_Dead_Channels(WCP::ChirpMap& uplane_map, WCP::ChirpMap& vplane_map, WCP::ChirpMap& wplane_map, int nbins, int nrebin, int n_div){
   std::vector<std::pair<int,int>> boundaries;
   
   for (int i=0;i!=n_div;i++){
@@ -61,7 +61,7 @@ void WireCell2dToy::Organize_Dead_Channels(WireCell::ChirpMap& uplane_map, WireC
   
 }
 
-int WireCell2dToy::Noisy_Event_ID(TH2F *hu_decon, TH2F *hv_decon, TH2F *hw_decon, std::vector<float>& uplane_rms, std::vector<float>& vplane_rms, std::vector<float>& wplane_rms, WireCell::ChirpMap& uplane_map, WireCell::ChirpMap& vplane_map, WireCell::ChirpMap& wplane_map, TH2F *hu_decon_g, TH2F *hv_decon_g, TH2F *hw_decon_g, int nrebin, TH2F *hv_raw, bool flag_corr){
+int WCP2dToy::Noisy_Event_ID(TH2F *hu_decon, TH2F *hv_decon, TH2F *hw_decon, std::vector<float>& uplane_rms, std::vector<float>& vplane_rms, std::vector<float>& wplane_rms, WCP::ChirpMap& uplane_map, WCP::ChirpMap& vplane_map, WCP::ChirpMap& wplane_map, TH2F *hu_decon_g, TH2F *hv_decon_g, TH2F *hw_decon_g, int nrebin, TH2F *hv_raw, bool flag_corr){
 
   int nwire_u = hu_decon->GetNbinsX();
   int nwire_v = hv_decon->GetNbinsX();

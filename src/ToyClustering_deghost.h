@@ -1,9 +1,9 @@
 
 
-using namespace WireCell;
+using namespace WCP;
 
 
-void WireCell2dToy::Clustering_deghost(WireCell::PR3DClusterSelection& live_clusters, std::map<WireCell::PR3DCluster*,double>& cluster_length_map, std::map<int,std::pair<double,double>>& dead_u_index, std::map<int,std::pair<double,double>>& dead_v_index, std::map<int,std::pair<double,double>>& dead_w_index, double length_cut){
+void WCP2dToy::Clustering_deghost(WCP::PR3DClusterSelection& live_clusters, std::map<WCP::PR3DCluster*,double>& cluster_length_map, std::map<int,std::pair<double,double>>& dead_u_index, std::map<int,std::pair<double,double>>& dead_v_index, std::map<int,std::pair<double,double>>& dead_w_index, double length_cut){
 
   
   // sort the clusters length ...
@@ -55,7 +55,7 @@ void WireCell2dToy::Clustering_deghost(WireCell::PR3DClusterSelection& live_clus
       
       if (length_cut == 0 || cluster_length_map[live_clusters.at(i)] < length_cut)  {
 	cluster->Create_point_cloud();
-	WireCell::WCPointCloud<double>& cloud = cluster->get_point_cloud()->get_cloud();
+	WCP::WCPointCloud<double>& cloud = cluster->get_point_cloud()->get_cloud();
 	int num_total_points = cloud.pts.size(); // total number of points
 	int num_dead[3]={0,0,0}; // dead wires in each view 
 	int num_unique[3]={0,0,0}; // points that are unique (not agree with any other clusters)
@@ -535,7 +535,7 @@ void WireCell2dToy::Clustering_deghost(WireCell::PR3DClusterSelection& live_clus
 }
 
 
-void WireCell2dToy::Clustering_deghost(WireCell::ToyCTPointCloud& ct_point_cloud, WireCell::PR3DClusterSelection& live_clusters, std::map<WireCell::PR3DCluster*,double>& cluster_length_map, std::map<int,std::pair<double,double>>& dead_u_index, std::map<int,std::pair<double,double>>& dead_v_index, std::map<int,std::pair<double,double>>& dead_w_index, double length_cut){
+void WCP2dToy::Clustering_deghost(WCP::ToyCTPointCloud& ct_point_cloud, WCP::PR3DClusterSelection& live_clusters, std::map<WCP::PR3DCluster*,double>& cluster_length_map, std::map<int,std::pair<double,double>>& dead_u_index, std::map<int,std::pair<double,double>>& dead_v_index, std::map<int,std::pair<double,double>>& dead_w_index, double length_cut){
 
   
   // sort the clusters length ...
@@ -587,7 +587,7 @@ void WireCell2dToy::Clustering_deghost(WireCell::ToyCTPointCloud& ct_point_cloud
       
       if (length_cut == 0 || cluster_length_map[live_clusters.at(i)] < length_cut)  {
 	cluster->Create_point_cloud();
-	WireCell::WCPointCloud<double>& cloud = cluster->get_point_cloud()->get_cloud();
+	WCP::WCPointCloud<double>& cloud = cluster->get_point_cloud()->get_cloud();
 	int num_total_points = cloud.pts.size(); // total number of points
 	int num_dead[3]={0,0,0}; // dead wires in each view 
 	int num_unique[3]={0,0,0}; // points that are unique (not agree with any other clusters)

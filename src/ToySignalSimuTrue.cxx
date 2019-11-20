@@ -1,14 +1,14 @@
-#include "WireCell2dToy/ToySignalSimuTrue.h"
+#include "WCP2dToy/ToySignalSimuTrue.h"
 
-#include "WireCellData/GeomWire.h"
+#include "WCPData/GeomWire.h"
 #include "TFile.h"
 #include "TVirtualFFT.h"
 #include "TRandom.h"
 #include "TF1.h"
 
-using namespace WireCell;
+using namespace WCP;
 
-WireCell2dToy::ToySignalSimuTrueFDS::ToySignalSimuTrueFDS(WireCell::FrameDataSource& fds1, const WireCell::GeomDataSource& gds,
+WCP2dToy::ToySignalSimuTrueFDS::ToySignalSimuTrueFDS(WCP::FrameDataSource& fds1, const WCP::GeomDataSource& gds,
 							  int bins_per_frame1, int nframes_total, int flag_smear)
   : fds(&fds1)
   , max_frames(nframes_total)
@@ -64,7 +64,7 @@ WireCell2dToy::ToySignalSimuTrueFDS::ToySignalSimuTrueFDS(WireCell::FrameDataSou
 }
 
 
-WireCell2dToy::ToySignalSimuTrueFDS::ToySignalSimuTrueFDS(WireCell::FrameDataSource& fds1, const WireCell::DetectorGDS& gds,
+WCP2dToy::ToySignalSimuTrueFDS::ToySignalSimuTrueFDS(WCP::FrameDataSource& fds1, const WCP::DetectorGDS& gds,
 							  int bins_per_frame1, int nframes_total, int flag_smear)
   : fds(&fds1)
   , max_frames(nframes_total)
@@ -122,11 +122,11 @@ WireCell2dToy::ToySignalSimuTrueFDS::ToySignalSimuTrueFDS(WireCell::FrameDataSou
 
 
 
-int WireCell2dToy::ToySignalSimuTrueFDS::size() const{
+int WCP2dToy::ToySignalSimuTrueFDS::size() const{
   return max_frames;
 }
 
-void WireCell2dToy::ToySignalSimuTrueFDS::Save(){
+void WCP2dToy::ToySignalSimuTrueFDS::Save(){
   TFile *file = new TFile("temp_true.root","RECREATE");
   // for (int i=0;i!=nwire_u;i++){
   //   TH1F *huu = (TH1F*)hu[i]->Clone(Form("U1_%d",i));
@@ -143,7 +143,7 @@ void WireCell2dToy::ToySignalSimuTrueFDS::Save(){
   file->Close();
 }
 
-int WireCell2dToy::ToySignalSimuTrueFDS::jump(int frame_number){
+int WCP2dToy::ToySignalSimuTrueFDS::jump(int frame_number){
   // do simulation
   // for (int i=0;i!=nwire_u;i++){
   //   hu[i]->Reset();
@@ -383,7 +383,7 @@ int WireCell2dToy::ToySignalSimuTrueFDS::jump(int frame_number){
   return frame.index;
 }
 
-WireCell2dToy::ToySignalSimuTrueFDS::~ToySignalSimuTrueFDS(){
+WCP2dToy::ToySignalSimuTrueFDS::~ToySignalSimuTrueFDS(){
   
   fds = 0;
   

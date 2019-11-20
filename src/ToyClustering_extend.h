@@ -1,4 +1,4 @@
-void WireCell2dToy::Clustering_extend(WireCell::PR3DClusterSelection& live_clusters, std::map<PR3DCluster*,double>& cluster_length_map, std::set<WireCell::PR3DCluster*>& cluster_connected_dead, int flag,  double length_cut, int num_try, double length_2_cut, int num_dead_try){
+void WCP2dToy::Clustering_extend(WCP::PR3DClusterSelection& live_clusters, std::map<PR3DCluster*,double>& cluster_length_map, std::set<WCP::PR3DCluster*>& cluster_connected_dead, int flag,  double length_cut, int num_try, double length_2_cut, int num_dead_try){
   
    // calculate the length ...
   TPCParams& mp = Singleton<TPCParams>::Instance();
@@ -335,7 +335,7 @@ void WireCell2dToy::Clustering_extend(WireCell::PR3DClusterSelection& live_clust
 }
 
 
-bool WireCell2dToy::Clustering_4th_dead(WireCell::PR3DCluster *cluster_1, WireCell::PR3DCluster *cluster_2, double length_1, double length_2, double length_cut, int num_dead_try){
+bool WCP2dToy::Clustering_4th_dead(WCP::PR3DCluster *cluster_1, WCP::PR3DCluster *cluster_2, double length_1, double length_2, double length_cut, int num_dead_try){
   cluster_1->Create_point_cloud();
   cluster_2->Create_point_cloud();
 
@@ -461,17 +461,17 @@ bool WireCell2dToy::Clustering_4th_dead(WireCell::PR3DCluster *cluster_1, WireCe
 
       
       /* if (length_1 > 100*units::cm && i==0 && length_2 > 30*units::cm) */
-      /* 	std::cout << cluster_1->get_cluster_id() << " " << cluster_2->get_cluster_id() << " " << length_1/units::cm << " " << length_2/units::cm << " " <<  " c " << WireCell2dToy::is_angle_consistent(dir1,dir2,false,15,angle_u,angle_v,angle_w) << " " << WireCell2dToy::is_angle_consistent(dir3,dir2,true,15,angle_u,angle_v,angle_w) << " " << fabs(ave_dir.Angle(drift_dir)-3.1415926/2.)/3.1415926*180. << std::endl; */
+      /* 	std::cout << cluster_1->get_cluster_id() << " " << cluster_2->get_cluster_id() << " " << length_1/units::cm << " " << length_2/units::cm << " " <<  " c " << WCP2dToy::is_angle_consistent(dir1,dir2,false,15,angle_u,angle_v,angle_w) << " " << WCP2dToy::is_angle_consistent(dir3,dir2,true,15,angle_u,angle_v,angle_w) << " " << fabs(ave_dir.Angle(drift_dir)-3.1415926/2.)/3.1415926*180. << std::endl; */
       
       // use projection to deal with stuff ...
       if (fabs(ave_dir.Angle(drift_dir)-3.1415926/2.)/3.1415926*180.>7.5){
       	// non-parallel case ...
-      	if (WireCell2dToy::is_angle_consistent(dir1,dir2,false,10,angle_u,angle_v,angle_w)){
-      	  if (length_2 < 8*units::cm&& WireCell2dToy::is_angle_consistent(dir1,dir2,false,5,angle_u,angle_v,angle_w))
+      	if (WCP2dToy::is_angle_consistent(dir1,dir2,false,10,angle_u,angle_v,angle_w)){
+      	  if (length_2 < 8*units::cm&& WCP2dToy::is_angle_consistent(dir1,dir2,false,5,angle_u,angle_v,angle_w))
       	    return true;
-      	  if (length_2 < 15*units::cm && WireCell2dToy::is_angle_consistent(dir1,dir2,false,7.5,angle_u,angle_v,angle_w))
+      	  if (length_2 < 15*units::cm && WCP2dToy::is_angle_consistent(dir1,dir2,false,7.5,angle_u,angle_v,angle_w))
       	    return true;
-      	  if (WireCell2dToy::is_angle_consistent(dir3,dir2,true,10,angle_u,angle_v,angle_w)){
+      	  if (WCP2dToy::is_angle_consistent(dir3,dir2,true,10,angle_u,angle_v,angle_w)){
       	    return true;
       	  }
       	}
@@ -484,7 +484,7 @@ bool WireCell2dToy::Clustering_4th_dead(WireCell::PR3DCluster *cluster_1, WireCe
 
 
       /* if ( length_2 > 100*units::cm && length_1>100*units::cm) */
-      /* 	  std::cout << cluster_1->get_cluster_id() << " " << cluster_2->get_cluster_id() << " " << length_1/units::cm << " " << length_2/units::cm << " " <<  angle1 << " " << angle2 << " " << angle3 << " "  << WireCell2dToy::is_angle_consistent(dir1,dir2,false,10,angle_u,angle_v,angle_w) << " " << WireCell2dToy::is_angle_consistent(dir3,dir2,true,10,angle_u,angle_v,angle_w) << std::endl; */
+      /* 	  std::cout << cluster_1->get_cluster_id() << " " << cluster_2->get_cluster_id() << " " << length_1/units::cm << " " << length_2/units::cm << " " <<  angle1 << " " << angle2 << " " << angle3 << " "  << WCP2dToy::is_angle_consistent(dir1,dir2,false,10,angle_u,angle_v,angle_w) << " " << WCP2dToy::is_angle_consistent(dir3,dir2,true,10,angle_u,angle_v,angle_w) << std::endl; */
 
       /* if (dis > 25*units::cm && length_2 < 10*units::cm) */
       /* 	std::cout << cluster_1->get_cluster_id() << " " << cluster_2->get_cluster_id() << " " << dis/units::cm << " " << length_1/units::cm << " " << length_2/units::cm << */
@@ -564,7 +564,7 @@ bool WireCell2dToy::Clustering_4th_dead(WireCell::PR3DCluster *cluster_1, WireCe
 
 
 
-bool WireCell2dToy::Clustering_4th_reg(WireCell::PR3DCluster *cluster_1, WireCell::PR3DCluster *cluster_2, double length_1, double length_2, WireCell::Point p1, double length_cut){
+bool WCP2dToy::Clustering_4th_reg(WCP::PR3DCluster *cluster_1, WCP::PR3DCluster *cluster_2, double length_1, double length_2, WCP::Point p1, double length_cut){
   cluster_2->Create_point_cloud();
   
   std::pair<SlimMergeGeomCell*,Point> temp_results = cluster_2->get_closest_point_mcell(p1);
@@ -625,8 +625,8 @@ bool WireCell2dToy::Clustering_4th_reg(WireCell::PR3DCluster *cluster_1, WireCel
     
     /* if (fabs(dir2.Angle(drift_dir)-3.1415926/2.)/3.1415926*180.>7.5){ */
     /*   // non-parallel case ... */
-    /*   if (WireCell2dToy::is_angle_consistent(dir1,dir2,false,7.5,angle_u,angle_v,angle_w)){ */
-    /* 	if (WireCell2dToy::is_angle_consistent(dir3,dir2,true,7.5,angle_u,angle_v,angle_w)){ */
+    /*   if (WCP2dToy::is_angle_consistent(dir1,dir2,false,7.5,angle_u,angle_v,angle_w)){ */
+    /* 	if (WCP2dToy::is_angle_consistent(dir3,dir2,true,7.5,angle_u,angle_v,angle_w)){ */
     /* 	  return true; */
     /* 	} */
     /*   } */
@@ -770,10 +770,10 @@ bool WireCell2dToy::Clustering_4th_reg(WireCell::PR3DCluster *cluster_1, WireCel
 
       if (fabs(dir2.Angle(drift_dir)-3.1415926/2.)/3.1415926*180.>7.5){
 	// non-parallel case ... 
-	if (WireCell2dToy::is_angle_consistent(dir1,dir2,false,10,angle_u,angle_v,angle_w)){
-	  if (length_2 < 8*units::cm && WireCell2dToy::is_angle_consistent(dir1,dir2,false,5,angle_u,angle_v,angle_w)) 
+	if (WCP2dToy::is_angle_consistent(dir1,dir2,false,10,angle_u,angle_v,angle_w)){
+	  if (length_2 < 8*units::cm && WCP2dToy::is_angle_consistent(dir1,dir2,false,5,angle_u,angle_v,angle_w)) 
 	    return true; 
-	  if (WireCell2dToy::is_angle_consistent(dir3,dir2,true,10,angle_u,angle_v,angle_w)){
+	  if (WCP2dToy::is_angle_consistent(dir3,dir2,true,10,angle_u,angle_v,angle_w)){
 	    return true;
 	  }
 	}
@@ -859,7 +859,7 @@ bool WireCell2dToy::Clustering_4th_reg(WireCell::PR3DCluster *cluster_1, WireCel
 
 
 
-bool WireCell2dToy::Clustering_4th_para(WireCell::PR3DCluster *cluster_1, WireCell::PR3DCluster *cluster_2, double length_1, double length_2, WireCell::Point& earliest_p, TVector3& dir_earlp, double length_cut){
+bool WCP2dToy::Clustering_4th_para(WCP::PR3DCluster *cluster_1, WCP::PR3DCluster *cluster_2, double length_1, double length_2, WCP::Point& earliest_p, TVector3& dir_earlp, double length_cut){
   cluster_2->Create_point_cloud();
  
   std::pair<SlimMergeGeomCell*,Point> temp_results = cluster_2->get_closest_point_mcell(earliest_p);
@@ -906,7 +906,7 @@ bool WireCell2dToy::Clustering_4th_para(WireCell::PR3DCluster *cluster_1, WireCe
 
 
 
-bool WireCell2dToy::Clustering_4th_prol(WireCell::PR3DCluster *cluster_1, PR3DCluster *cluster_2, double length_2, Point& earliest_p, TVector3& dir_earlp, double length_cut){
+bool WCP2dToy::Clustering_4th_prol(WCP::PR3DCluster *cluster_1, PR3DCluster *cluster_2, double length_2, Point& earliest_p, TVector3& dir_earlp, double length_cut){
   cluster_2->Create_point_cloud();
  
   std::pair<SlimMergeGeomCell*,Point> temp_results = cluster_2->get_closest_point_mcell(earliest_p);
@@ -937,7 +937,7 @@ bool WireCell2dToy::Clustering_4th_prol(WireCell::PR3DCluster *cluster_1, PR3DCl
 
 
 
-/* bool WireCell2dToy::Clustering_4th_round(WireCell::PR3DCluster *cluster1, WireCell::PR3DCluster *cluster2, double length_1, double length_2, double length_cut){ */
+/* bool WCP2dToy::Clustering_4th_round(WCP::PR3DCluster *cluster1, WCP::PR3DCluster *cluster2, double length_1, double length_2, double length_cut){ */
 
 /*   cluster1->Create_point_cloud(); */
 /*   cluster2->Create_point_cloud(); */

@@ -1,24 +1,24 @@
-#include "WireCell2dToy/CalcPoints.h"
+#include "WCP2dToy/CalcPoints.h"
 
 //#include <tuple>
 
-using namespace WireCell;
+using namespace WCP;
 
-void WireCell2dToy::calc_boundary_points_dead(WireCell::GeomDataSource& gds, WireCell::PR3DCluster* cluster){
+void WCP2dToy::calc_boundary_points_dead(WCP::GeomDataSource& gds, WCP::PR3DCluster* cluster){
   SMGCSelection mcells = cluster->get_mcells();
   for (auto it = mcells.begin(); it!=mcells.end(); it++){
     calc_boundary_points_dead(gds,*it);
   }
 }
 
-void WireCell2dToy::calc_sampling_points(WireCell::GeomDataSource& gds, WireCell::PR3DCluster* cluster, int nrebin, int frame_length, double unit_dis){
+void WCP2dToy::calc_sampling_points(WCP::GeomDataSource& gds, WCP::PR3DCluster* cluster, int nrebin, int frame_length, double unit_dis){
   SMGCSelection mcells = cluster->get_mcells();
   for (auto it = mcells.begin(); it!=mcells.end(); it++){
     calc_sampling_points(gds,*it, nrebin, frame_length, unit_dis);
   }
 }
 
-void WireCell2dToy::calc_boundary_points_dead(WireCell::GeomDataSource& gds, WireCell::SlimMergeGeomCell* mcell){
+void WCP2dToy::calc_boundary_points_dead(WCP::GeomDataSource& gds, WCP::SlimMergeGeomCell* mcell){
   GeomWireSelection bad_wire_u = mcell->get_uwires();
   GeomWireSelection bad_wire_v = mcell->get_vwires();
   GeomWireSelection bad_wire_w = mcell->get_wwires();
@@ -610,7 +610,7 @@ void WireCell2dToy::calc_boundary_points_dead(WireCell::GeomDataSource& gds, Wir
   
 }
 
-void WireCell2dToy::calc_sampling_points(WireCell::GeomDataSource& gds, WireCell::SlimMergeGeomCell* mcell, int nrebin, int frame_length, double unit_dis){
+void WCP2dToy::calc_sampling_points(WCP::GeomDataSource& gds, WCP::SlimMergeGeomCell* mcell, int nrebin, int frame_length, double unit_dis){
   GeomWireSelection wires_u = mcell->get_uwires();
   GeomWireSelection wires_v = mcell->get_vwires();
   GeomWireSelection wires_w = mcell->get_wwires();

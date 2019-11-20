@@ -1,6 +1,6 @@
-#include "WireCellSst/GeomDataSource.h"
-#include "WireCellRess/LassoModel.h"
-#include "WireCellRess/ElasticNetModel.h"
+#include "WCPSst/GeomDataSource.h"
+#include "WCPRess/LassoModel.h"
+#include "WCPRess/ElasticNetModel.h"
 
 #include "TFile.h"
 #include "TH2F.h"
@@ -12,7 +12,7 @@
 #include <Eigen/Dense>
 using namespace Eigen;
 
-using namespace WireCell;
+using namespace WCP;
 using namespace std;
 
 
@@ -25,7 +25,7 @@ int main(int argc, char* argv[])
     return 0;
   }
   
-  WireCellSst::GeomDataSource gds(argv[1]);
+  WCPSst::GeomDataSource gds(argv[1]);
   std::vector<double> ex = gds.extent();
   cerr << "Extent: "
        << " x:" << ex[0]/units::mm << " mm"
@@ -211,7 +211,7 @@ int main(int argc, char* argv[])
   }
   // solve ... 
   double lambda = 5;//nbin_fit *4 / 50./2.;
-  WireCell::LassoModel m2(lambda, 100000, 0.05);
+  WCP::LassoModel m2(lambda, 100000, 0.05);
   m2.SetData(G, W);
   //m2.SetLambdaWeight(2*nbin_fit,0);
   m2.Fit();

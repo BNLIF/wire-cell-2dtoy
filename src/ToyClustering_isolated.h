@@ -1,5 +1,5 @@
 
-std::map<PR3DCluster*,std::vector<std::pair<PR3DCluster*,double>>> WireCell2dToy::Clustering_isolated(WireCell::PR3DClusterSelection& live_clusters, std::map<WireCell::PR3DCluster*,double>& cluster_length_map){
+std::map<PR3DCluster*,std::vector<std::pair<PR3DCluster*,double>>> WCP2dToy::Clustering_isolated(WCP::PR3DClusterSelection& live_clusters, std::map<WCP::PR3DCluster*,double>& cluster_length_map){
   
   TPCParams& mp = Singleton<TPCParams>::Instance();
   double pitch_u = mp.get_pitch_u();
@@ -174,7 +174,7 @@ std::map<PR3DCluster*,std::vector<std::pair<PR3DCluster*,double>>> WireCell2dToy
 	int num_outside_points = 0;
 	/* int num_close_points = 0; */
 	const int N = cloud2->get_num_points();
-	WireCell::WCPointCloud<double>& cloud = cloud2->get_cloud();
+	WCP::WCPointCloud<double>& cloud = cloud2->get_cloud();
 	for (int k=0;k!=N;k++){
 	  Point test_p1(cloud.pts[k].x,cloud.pts[k].y,cloud.pts[k].z);
 	  double close_dis = cloud1->get_closest_dis(test_p1);

@@ -1,40 +1,40 @@
-#include "WireCellSst/GeomDataSource.h"
-#include "WireCellSst/ToyuBooNEFrameDataSource.h"
-#include "WireCellSst/ToyuBooNESliceDataSource.h"
-#include "WireCell2dToy/ToyEventDisplay.h"
-#include "WireCell2dToy/ToyTiling.h"
-#include "WireCell2dToy/MergeToyTiling.h"
-#include "WireCell2dToy/TruthToyTiling.h"
-#include "WireCell2dToy/SimpleBlobToyTiling.h"
+#include "WCPSst/GeomDataSource.h"
+#include "WCPSst/ToyuBooNEFrameDataSource.h"
+#include "WCPSst/ToyuBooNESliceDataSource.h"
+#include "WCP2dToy/ToyEventDisplay.h"
+#include "WCP2dToy/ToyTiling.h"
+#include "WCP2dToy/MergeToyTiling.h"
+#include "WCP2dToy/TruthToyTiling.h"
+#include "WCP2dToy/SimpleBlobToyTiling.h"
 
-#include "WireCell2dToy/ToyMatrix.h"
-#include "WireCell2dToy/ToyMatrixExclusive.h"
-#include "WireCell2dToy/ToyMatrixKalman.h"
-#include "WireCell2dToy/ToyMatrixIterate.h"
-#include "WireCell2dToy/ToyMatrixMarkov.h"
-#include "WireCell2dToy/ToyMetric.h"
-#include "WireCell2dToy/BlobMetric.h"
+#include "WCP2dToy/ToyMatrix.h"
+#include "WCP2dToy/ToyMatrixExclusive.h"
+#include "WCP2dToy/ToyMatrixKalman.h"
+#include "WCP2dToy/ToyMatrixIterate.h"
+#include "WCP2dToy/ToyMatrixMarkov.h"
+#include "WCP2dToy/ToyMetric.h"
+#include "WCP2dToy/BlobMetric.h"
 
-#include "WireCellData/MergeGeomCell.h"
-#include "WireCellData/MergeGeomWire.h"
+#include "WCPData/MergeGeomCell.h"
+#include "WCPData/MergeGeomWire.h"
 
-#include "WireCellData/GeomCluster.h"
-//#include "WireCellNav/SliceDataSource.h"
+#include "WCPData/GeomCluster.h"
+//#include "WCPNav/SliceDataSource.h"
 
 
-#include "WireCellNav/FrameDataSource.h"
-#include "WireCellNav/SimDataSource.h"
-#include "WireCellNav/SliceDataSource.h"
-#include "WireCellSst/Util.h"
-#include "WireCellData/SimTruth.h"
-#include "WireCell2dToy/ToyDepositor.h"
-#include "WireCellNav/GenerativeFDS.h"
-#include "WireCell2dToy/ToySignalSimu.h"
-#include "WireCell2dToy/ToySignalSimuTrue.h"
-#include "WireCell2dToy/ToySignalGaus.h"
-#include "WireCell2dToy/ToySignalWien.h"
-#include "WireCellData/TPCParams.h"
-#include "WireCellData/Singleton.h"
+#include "WCPNav/FrameDataSource.h"
+#include "WCPNav/SimDataSource.h"
+#include "WCPNav/SliceDataSource.h"
+#include "WCPSst/Util.h"
+#include "WCPData/SimTruth.h"
+#include "WCP2dToy/ToyDepositor.h"
+#include "WCPNav/GenerativeFDS.h"
+#include "WCP2dToy/ToySignalSimu.h"
+#include "WCP2dToy/ToySignalSimuTrue.h"
+#include "WCP2dToy/ToySignalGaus.h"
+#include "WCP2dToy/ToySignalWien.h"
+#include "WCPData/TPCParams.h"
+#include "WCPData/Singleton.h"
 
 #include "TApplication.h"
 #include "TCanvas.h"
@@ -47,7 +47,7 @@
 #include "TMatrixD.h"
 #include <iostream>
 
-using namespace WireCell;
+using namespace WCP;
 using namespace std;
 
 //#define MAX_TRACKS 30000
@@ -61,7 +61,7 @@ int main(int argc, char* argv[])
   }
   
   
-  WireCellSst::GeomDataSource gds(argv[1]);
+  WCPSst::GeomDataSource gds(argv[1]);
   std::vector<double> ex = gds.extent();
   cerr << "Extent: "
        << " x:" << ex[0]/units::mm << " mm"
@@ -166,8 +166,8 @@ int main(int argc, char* argv[])
   cout << "Run No: " << run_no << " " << subrun_no << " " << eve_num << endl;
 
 
-  WireCell::FrameDataSource* fds = 0;
-  fds = WireCellSst::make_fds(*tfile);
+  WCP::FrameDataSource* fds = 0;
+  fds = WCPSst::make_fds(*tfile);
   if (!fds) {
     cerr << "ERROR: failed to get FDS from " << root_file << endl;
     return 1;
@@ -178,42 +178,42 @@ int main(int argc, char* argv[])
   ChirpMap wplane_map;
 
 
-  // WireCell::ToyDepositor toydep(fds);
+  // WCP::ToyDepositor toydep(fds);
   // const PointValueVector pvv = toydep.depositions(eve_num);
   
-  // WireCell::GenerativeFDS gfds(toydep,gds,2400,max_events,2.0*unit_dis*units::millimeter);
+  // WCP::GenerativeFDS gfds(toydep,gds,2400,max_events,2.0*unit_dis*units::millimeter);
   // gfds.jump(eve_num);
 
 
   
  
 
-  WireCell::ToyDepositor toydep(fds,0,unit_dis,frame_length);
+  WCP::ToyDepositor toydep(fds,0,unit_dis,frame_length);
   const PointValueVector& pvv = toydep.depositions(eve_num);
   
   //cout << pvv.size() << endl;
 
-  //WireCell::GenerativeFDS gfds(toydep,gds,total_time_bin,max_events,0.5*1.605723*units::millimeter); // 87 K at 0.5 kV/cm
-  WireCell::GenerativeFDS gfds(toydep,gds,total_time_bin,max_events,0.5*unit_dis*units::millimeter); // 87 K at 0.5 kV/cm
+  //WCP::GenerativeFDS gfds(toydep,gds,total_time_bin,max_events,0.5*1.605723*units::millimeter); // 87 K at 0.5 kV/cm
+  WCP::GenerativeFDS gfds(toydep,gds,total_time_bin,max_events,0.5*unit_dis*units::millimeter); // 87 K at 0.5 kV/cm
   
   cout << "Put in Truth " << endl; 
-  WireCell2dToy::ToySignalSimuTrueFDS st_fds(gfds,gds,total_time_bin/nrebin,max_events,0); //truth
-  //WireCell::GenerativeFDS st_fds(toydep,gds,total_time_bin/nrebin,max_events,2.0*unit_dis*units::millimeter); // 87 K at 0.5 kV/cm
+  WCP2dToy::ToySignalSimuTrueFDS st_fds(gfds,gds,total_time_bin/nrebin,max_events,0); //truth
+  //WCP::GenerativeFDS st_fds(toydep,gds,total_time_bin/nrebin,max_events,2.0*unit_dis*units::millimeter); // 87 K at 0.5 kV/cm
   st_fds.jump(eve_num);
   // st_fds.Save();
   
   cout << "Simulate Raw WaveForm " << endl; 
-  WireCell2dToy::ToySignalSimuFDS simu_fds(gfds,gds,total_time_bin,max_events,toffset_1,toffset_2,1); // time offset among different planes for the time electrons travel among different planes
+  WCP2dToy::ToySignalSimuFDS simu_fds(gfds,gds,total_time_bin,max_events,toffset_1,toffset_2,1); // time offset among different planes for the time electrons travel among different planes
   simu_fds.jump(eve_num);
   //simu_fds.Save();
 
   cout << "Deconvolution with Gaussian filter" << endl;
-  WireCell2dToy::ToySignalGausFDS gaus_fds(simu_fds,gds,total_time_bin/nrebin,max_events,toffset_1,toffset_2); // gaussian smearing for charge estimation
+  WCP2dToy::ToySignalGausFDS gaus_fds(simu_fds,gds,total_time_bin/nrebin,max_events,toffset_1,toffset_2); // gaussian smearing for charge estimation
   gaus_fds.jump(eve_num);
   //gaus_fds.Save();
 
   cout << "Deconvolution with Wiener filter" << endl;
-   WireCell2dToy::ToySignalWienFDS wien_fds(simu_fds,gds,total_time_bin/nrebin,max_events,toffset_1,toffset_2); // weiner smearing for hit identification
+   WCP2dToy::ToySignalWienFDS wien_fds(simu_fds,gds,total_time_bin/nrebin,max_events,toffset_1,toffset_2); // weiner smearing for hit identification
   wien_fds.jump(eve_num);
   //wien_fds.Save();
   

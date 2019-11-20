@@ -1,9 +1,9 @@
-#include "WireCell2dToy/BadTiling.h"
+#include "WCP2dToy/BadTiling.h"
 
-using namespace WireCell;
+using namespace WCP;
 
-WireCell2dToy::BadTiling::BadTiling(int time, int scale, WireCell::ChirpMap& uplane_map, 
-				    WireCell::ChirpMap& vplane_map, WireCell::ChirpMap& wplane_map, WireCell::GeomDataSource& gds, int flag_1plane, int flag_all){
+WCP2dToy::BadTiling::BadTiling(int time, int scale, WCP::ChirpMap& uplane_map, 
+				    WCP::ChirpMap& vplane_map, WCP::ChirpMap& wplane_map, WCP::GeomDataSource& gds, int flag_1plane, int flag_all){
   if (flag_1plane==0){
     BadTiling1(time,scale,uplane_map,vplane_map,wplane_map,gds,flag_all);
   }else{
@@ -27,7 +27,7 @@ WireCell2dToy::BadTiling::BadTiling(int time, int scale, WireCell::ChirpMap& upl
       }
       
       if (flag_temp == 1){
-	const GeomWire* wire = gds.by_planeindex(WireCell::WirePlaneType_t(0),i);
+	const GeomWire* wire = gds.by_planeindex(WCP::WirePlaneType_t(0),i);
 	if (mwire == 0){
 	  mwire = new MergeGeomWire(num, *wire);
 	  wire_u.push_back(mwire);
@@ -66,7 +66,7 @@ WireCell2dToy::BadTiling::BadTiling(int time, int scale, WireCell::ChirpMap& upl
       }
       
       if (flag_temp == 1){
-	const GeomWire* wire = gds.by_planeindex(WireCell::WirePlaneType_t(1),i);
+	const GeomWire* wire = gds.by_planeindex(WCP::WirePlaneType_t(1),i);
 	if (mwire == 0){
 	  mwire = new MergeGeomWire(num, *wire);
 	  wire_v.push_back(mwire);
@@ -112,7 +112,7 @@ WireCell2dToy::BadTiling::BadTiling(int time, int scale, WireCell::ChirpMap& upl
       
       if (flag_temp==1){
 	//std::cout << i << " " << wplane_map.size() << " " << gds.wires_in_plane(WirePlaneType_t(2)).size() << std::endl;
-	const GeomWire* wire = gds.by_planeindex(WireCell::WirePlaneType_t(2),i);
+	const GeomWire* wire = gds.by_planeindex(WCP::WirePlaneType_t(2),i);
 	if (mwire == 0){
 	  mwire = new MergeGeomWire(num, *wire);
 	  wire_w.push_back(mwire);
@@ -201,7 +201,7 @@ WireCell2dToy::BadTiling::BadTiling(int time, int scale, WireCell::ChirpMap& upl
 
 }
 
-void WireCell2dToy::BadTiling::BadTiling1(int time, int scale, WireCell::ChirpMap& uplane_map, WireCell::ChirpMap& vplane_map, WireCell::ChirpMap& wplane_map, WireCell::GeomDataSource& gds, int flag_all){
+void WCP2dToy::BadTiling::BadTiling1(int time, int scale, WCP::ChirpMap& uplane_map, WCP::ChirpMap& vplane_map, WCP::ChirpMap& wplane_map, WCP::GeomDataSource& gds, int flag_all){
   MergeGeomWire *mwire = 0;
   int prev_wire = -1;
   int num = 0;
@@ -220,7 +220,7 @@ void WireCell2dToy::BadTiling::BadTiling1(int time, int scale, WireCell::ChirpMa
     }
     
     if (flag_temp == 1){
-      const GeomWire* wire = gds.by_planeindex(WireCell::WirePlaneType_t(0),i);
+      const GeomWire* wire = gds.by_planeindex(WCP::WirePlaneType_t(0),i);
       if (mwire == 0){
 	mwire = new MergeGeomWire(num, *wire);
 	wire_u.push_back(mwire);
@@ -259,7 +259,7 @@ void WireCell2dToy::BadTiling::BadTiling1(int time, int scale, WireCell::ChirpMa
     }
     
     if (flag_temp == 1){
-      const GeomWire* wire = gds.by_planeindex(WireCell::WirePlaneType_t(1),i);
+      const GeomWire* wire = gds.by_planeindex(WCP::WirePlaneType_t(1),i);
       if (mwire == 0){
 	mwire = new MergeGeomWire(num, *wire);
 	wire_v.push_back(mwire);
@@ -305,7 +305,7 @@ void WireCell2dToy::BadTiling::BadTiling1(int time, int scale, WireCell::ChirpMa
 
     if (flag_temp==1){
       //std::cout << i << " " << wplane_map.size() << " " << gds.wires_in_plane(WirePlaneType_t(2)).size() << std::endl;
-      const GeomWire* wire = gds.by_planeindex(WireCell::WirePlaneType_t(2),i);
+      const GeomWire* wire = gds.by_planeindex(WCP::WirePlaneType_t(2),i);
       if (mwire == 0){
 	mwire = new MergeGeomWire(num, *wire);
 	wire_w.push_back(mwire);
@@ -942,5 +942,5 @@ void WireCell2dToy::BadTiling::BadTiling1(int time, int scale, WireCell::ChirpMa
 
 
 
-WireCell2dToy::BadTiling::~BadTiling(){
+WCP2dToy::BadTiling::~BadTiling(){
 }

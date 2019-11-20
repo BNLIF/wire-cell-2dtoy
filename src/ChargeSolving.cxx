@@ -1,9 +1,9 @@
-#include "WireCell2dToy/ChargeSolving.h"
+#include "WCP2dToy/ChargeSolving.h"
 
 
-using namespace WireCell;
+using namespace WCP;
 
-WireCell2dToy::ChargeSolving::ChargeSolving(const WireCell::GeomDataSource& gds, LowmemTiling& tiling)
+WCP2dToy::ChargeSolving::ChargeSolving(const WCP::GeomDataSource& gds, LowmemTiling& tiling)
   : gds(gds)
   , tiling(tiling)
 {
@@ -18,10 +18,10 @@ WireCell2dToy::ChargeSolving::ChargeSolving(const WireCell::GeomDataSource& gds,
 
 }
 
-WireCell2dToy::ChargeSolving::~ChargeSolving(){
+WCP2dToy::ChargeSolving::~ChargeSolving(){
 }
 
-void WireCell2dToy::ChargeSolving::L1_resolve(float weight, float reduce_weight_factor){
+void WCP2dToy::ChargeSolving::L1_resolve(float weight, float reduce_weight_factor){
   update_cell_weight_map(weight, reduce_weight_factor);
   
   // loop existing matrices and resolve ...
@@ -40,7 +40,7 @@ void WireCell2dToy::ChargeSolving::L1_resolve(float weight, float reduce_weight_
   }
 }
 
-void WireCell2dToy::ChargeSolving::update_cell_weight_map(float weight, float reduce_weight_factor){
+void WCP2dToy::ChargeSolving::update_cell_weight_map(float weight, float reduce_weight_factor){
   for (auto it= cell_weight_map.begin(); it!=cell_weight_map.end(); it++){
     const GeomCell *mcell = it->first;
     float temp_weight = weight;
@@ -53,7 +53,7 @@ void WireCell2dToy::ChargeSolving::update_cell_weight_map(float weight, float re
   }
 }
 
-void WireCell2dToy::ChargeSolving::init_cell_weight_map(float weight){
+void WCP2dToy::ChargeSolving::init_cell_weight_map(float weight){
   GeomCellSelection& one_wire_cells = tiling.get_one_good_wire_cells();
   GeomCellSelection& two_wire_cells = tiling.get_two_good_wire_cells();
   GeomCellSelection& three_wire_cells = tiling.get_three_good_wire_cells();
@@ -80,7 +80,7 @@ void WireCell2dToy::ChargeSolving::init_cell_weight_map(float weight){
 
 
 
-void WireCell2dToy::ChargeSolving::divide_groups(){
+void WCP2dToy::ChargeSolving::divide_groups(){
 
   GeomCellSelection& one_wire_cells = tiling.get_one_good_wire_cells();
   GeomCellSelection& two_wire_cells = tiling.get_two_good_wire_cells();
@@ -200,11 +200,11 @@ void WireCell2dToy::ChargeSolving::divide_groups(){
 
 }
 
-double WireCell2dToy::ChargeSolving::get_chi2(){
+double WCP2dToy::ChargeSolving::get_chi2(){
   return chi2;
 }
 
-void WireCell2dToy::ChargeSolving::Update_ndf_chi2(){
+void WCP2dToy::ChargeSolving::Update_ndf_chi2(){
   ndf = 0;
   L1_ndf.clear();
   direct_ndf.clear();
@@ -244,7 +244,7 @@ void WireCell2dToy::ChargeSolving::Update_ndf_chi2(){
   
 }
 
-int WireCell2dToy::ChargeSolving::get_ndf(){
+int WCP2dToy::ChargeSolving::get_ndf(){
   
   
   return ndf;

@@ -1,8 +1,8 @@
-#include "WireCell2dToy/TruthToyTiling.h"
+#include "WCP2dToy/TruthToyTiling.h"
 
-using namespace WireCell;
+using namespace WCP;
 
-WireCell2dToy::TruthToyTiling::TruthToyTiling(WireCell2dToy::ToyTiling& tiling, const WireCell::PointValueVector &pvv, int tbin, const GeomDataSource& gds, int offset1, float unit_dis){
+WCP2dToy::TruthToyTiling::TruthToyTiling(WCP2dToy::ToyTiling& tiling, const WCP::PointValueVector &pvv, int tbin, const GeomDataSource& gds, int offset1, float unit_dis){
   offset = offset1;
 
   if (tiling.get_allcell().size()>0){
@@ -63,7 +63,7 @@ WireCell2dToy::TruthToyTiling::TruthToyTiling(WireCell2dToy::ToyTiling& tiling, 
 }
 
 
-WireCell2dToy::TruthToyTiling::TruthToyTiling(WireCell2dToy::ToyTiling& tiling, const WireCell::PointValueVector &pvv, const std::vector<int> &time_offset, int tbin, const GeomDataSource& gds, float unit_dis){
+WCP2dToy::TruthToyTiling::TruthToyTiling(WCP2dToy::ToyTiling& tiling, const WCP::PointValueVector &pvv, const std::vector<int> &time_offset, int tbin, const GeomDataSource& gds, float unit_dis){
   if (tiling.get_allcell().size()>0){
     float sum = 0;
     for (int itruth = 0; itruth < pvv.size(); ++itruth){
@@ -109,7 +109,7 @@ WireCell2dToy::TruthToyTiling::TruthToyTiling(WireCell2dToy::ToyTiling& tiling, 
 
 
 
-WireCell2dToy::TruthToyTiling::TruthToyTiling(WireCell2dToy::ToyTiling& tiling, const WireCell::PointValueVector &pvv, int tbin, const DetectorGDS& gds, int offset1, float unit_dis){
+WCP2dToy::TruthToyTiling::TruthToyTiling(WCP2dToy::ToyTiling& tiling, const WCP::PointValueVector &pvv, int tbin, const DetectorGDS& gds, int offset1, float unit_dis){
   if (tiling.get_allcell().size()>0){
     offset = offset1;
     
@@ -193,7 +193,7 @@ WireCell2dToy::TruthToyTiling::TruthToyTiling(WireCell2dToy::ToyTiling& tiling, 
 }
 
 
-WireCell2dToy::TruthToyTiling::TruthToyTiling(WireCell2dToy::ToyTiling& tiling, const WireCell::PointValueVector &pvv, const std::vector<int> &time_offset, int tbin, const DetectorGDS& gds, float unit_dis){
+WCP2dToy::TruthToyTiling::TruthToyTiling(WCP2dToy::ToyTiling& tiling, const WCP::PointValueVector &pvv, const std::vector<int> &time_offset, int tbin, const DetectorGDS& gds, float unit_dis){
   if (tiling.get_allcell().size()>0){
     float sum = 0;
     for (int itruth = 0; itruth < pvv.size(); ++itruth){
@@ -273,5 +273,5 @@ WireCell2dToy::TruthToyTiling::TruthToyTiling(WireCell2dToy::ToyTiling& tiling, 
 
 
 
-ClassImp(WireCell2dToy::TruthToyTiling);
+ClassImp(WCP2dToy::TruthToyTiling);
 

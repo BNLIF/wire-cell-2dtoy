@@ -1,15 +1,15 @@
-#include "WireCell2dToy/ToyEventDisplay.h"
-#include "WireCellData/Units.h"
-#include "WireCellData/Point.h"
-#include "WireCellData/MergeGeomWire.h"
-//#include "WireCellData/MergeGeomCell.h"
+#include "WCP2dToy/ToyEventDisplay.h"
+#include "WCPData/Units.h"
+#include "WCPData/Point.h"
+#include "WCPData/MergeGeomWire.h"
+//#include "WCPData/MergeGeomCell.h"
 #include "TGraph.h"
 #include "TLine.h"
 #include <iostream>
 
-using namespace WireCell2dToy;
+using namespace WCP2dToy;
 
-ToyEventDisplay::ToyEventDisplay(TPad& pad, const WireCell::GeomDataSource& gds)
+ToyEventDisplay::ToyEventDisplay(TPad& pad, const WCP::GeomDataSource& gds)
     : pad(pad)
     , gds_flag(0)
     , gds(&gds)
@@ -23,7 +23,7 @@ ToyEventDisplay::ToyEventDisplay(TPad& pad, const WireCell::GeomDataSource& gds)
   truth_threshold = 2000;
 }
 
-ToyEventDisplay::ToyEventDisplay(TPad& pad, const WireCell::DetectorGDS& gds)
+ToyEventDisplay::ToyEventDisplay(TPad& pad, const WCP::DetectorGDS& gds)
     : pad(pad)
     , gds_flag(1)
     , gds(0)
@@ -88,7 +88,7 @@ int ToyEventDisplay::init(float x_min, float x_max, float y_min, float y_max)
   return 0;
 }
 
-int ToyEventDisplay::draw_mc(int flag, const WireCell::PointValueVector& mctruth, TString option)
+int ToyEventDisplay::draw_mc(int flag, const WCP::PointValueVector& mctruth, TString option)
 {
   if (gds_flag == 0 ){
     pad.cd();
@@ -125,7 +125,7 @@ int ToyEventDisplay::draw_mc(int flag, const WireCell::PointValueVector& mctruth
 }
 
 
-void ToyEventDisplay::draw_bad_cell(WireCell::GeomCellSelection& cells){
+void ToyEventDisplay::draw_bad_cell(WCP::GeomCellSelection& cells){
   pad.cd();
   for (int i=0;i!=cells.size();i++){
     double x[100];
@@ -150,7 +150,7 @@ void ToyEventDisplay::draw_bad_cell(WireCell::GeomCellSelection& cells){
   }
 }
 
-void ToyEventDisplay::draw_bad_region(WireCell::ChirpMap& chirpmap, int time, int scale, int plane, TString option){
+void ToyEventDisplay::draw_bad_region(WCP::ChirpMap& chirpmap, int time, int scale, int plane, TString option){
   pad.cd();
 
   // int nwire_u = gds->wires_in_plane(WirePlaneType_t(0)).size();
@@ -161,7 +161,7 @@ void ToyEventDisplay::draw_bad_region(WireCell::ChirpMap& chirpmap, int time, in
 
   for (auto it = chirpmap.begin(); it!=chirpmap.end(); it++){
     if (time >= it->second.first/scale && time <= it->second.second/scale){
-      const WireCell::GeomWire *wire = gds->by_planeindex(WireCell::WirePlaneType_t(plane),it->first);
+      const WCP::GeomWire *wire = gds->by_planeindex(WCP::WirePlaneType_t(plane),it->first);
       float pitch = gds->pitch(wire->plane());
       float angle = gds->angle(wire->plane());
       TLine *l3 = new TLine(wire->point1().z/units::m  ,wire->point1().y/units::m,
@@ -174,12 +174,12 @@ void ToyEventDisplay::draw_bad_region(WireCell::ChirpMap& chirpmap, int time, in
 }
 
 
-int ToyEventDisplay::draw_merged_wires(WireCell::GeomWireSelection wires, TString option, int color){
+int ToyEventDisplay::draw_merged_wires(WCP::GeomWireSelection wires, TString option, int color){
    for (int j=0;j!=wires.size();j++){
       
-     WireCell::MergeGeomWire *wire = (WireCell::MergeGeomWire*)wires.at(j);
-     const WireCell::GeomWire *wire1 = wire->get_allwire().front();
-     const WireCell::GeomWire *wire2 = wire->get_allwire().back();
+     WCP::MergeGeomWire *wire = (WCP::MergeGeomWire*)wires.at(j);
+     const WCP::GeomWire *wire1 = wire->get_allwire().front();
+     const WCP::GeomWire *wire2 = wire->get_allwire().back();
           
       TLine *l3 = new TLine(wire1->point1().z/units::m  ,wire1->point1().y/units::m,
       			    wire1->point2().z/units::m  ,wire1->point2().y/units::m);
@@ -203,12 +203,12 @@ int ToyEventDisplay::draw_merged_wires(WireCell::GeomWireSelection wires, TStrin
   return 0;
 }
 
-int ToyEventDisplay::draw_wires(WireCell::GeomWireSelection& wires, TString option){
+int ToyEventDisplay::draw_wires(WCP::GeomWireSelection& wires, TString option){
   
  
     for (int j=0;j!=wires.size();j++){
       
-      const WireCell::GeomWire *wire = wires.at(j);
+      const WCP::GeomWire *wire = wires.at(j);
       
       
       
@@ -242,21 +242,21 @@ int ToyEventDisplay::draw_wires(WireCell::GeomWireSelection& wires, TString opti
   return 0;
 }
 
-int ToyEventDisplay::draw_slice(const WireCell::Slice& slice, TString option)
+int ToyEventDisplay::draw_slice(const WCP::Slice& slice, TString option)
 {
   
 
-  WireCell::Channel::Group group = slice.group();
+  WCP::Channel::Group group = slice.group();
   //std::cout << group.size() << std::endl;
   
   for (int i=0;i!=group.size();i++){
 
     if (gds_flag == 1 ){
-      const WireCell::GeomWireSelection& wires = dgds->by_channel(group.at(i).first);
+      const WCP::GeomWireSelection& wires = dgds->by_channel(group.at(i).first);
       //std::cout << wires.at(0)->plane() << " " << group.at(i).first << std::endl;
        for (int j=0;j!=wires.size();j++){
 	 
-	 const WireCell::GeomWire *wire = wires.at(j);
+	 const WCP::GeomWire *wire = wires.at(j);
 	 
 	 // std::cout << wire->point1().z/units::m  << " " << wire->point1().y/units::m << " " << 
 	 //   wire->point2().z/units::m  << " " << wire->point2().y/units::m << std::endl;
@@ -296,7 +296,7 @@ int ToyEventDisplay::draw_slice(const WireCell::Slice& slice, TString option)
     }else if (gds_flag == 0 ){
       pad.cd();
       //std::cout << group.at(i).first << std::endl;
-      const WireCell::GeomWire *wire = gds->by_channel_segment(group.at(i).first,0);
+      const WCP::GeomWire *wire = gds->by_channel_segment(group.at(i).first,0);
       // std::cout << wire->channel() << std::endl;
       // if ( wire->channel() ==1429 || wire->channel() ==4461){
       
@@ -327,7 +327,7 @@ int ToyEventDisplay::draw_slice(const WireCell::Slice& slice, TString option)
   return 0;
 }
 
-int ToyEventDisplay::draw_points(WireCell::PointVector pcells, TString option, int color){
+int ToyEventDisplay::draw_points(WCP::PointVector pcells, TString option, int color){
   TGraph *g1 = new TGraph();
   for (int i=0; i!=pcells.size(); i++){
     g1->SetPoint(i,pcells.at(i).z/units::m, pcells.at(i).y/units::m);
@@ -339,7 +339,7 @@ int ToyEventDisplay::draw_points(WireCell::PointVector pcells, TString option, i
 }
 
 
-int ToyEventDisplay::draw_cells(const WireCell::GeomCellSelection& cellall, TString option, int color)
+int ToyEventDisplay::draw_cells(const WCP::GeomCellSelection& cellall, TString option, int color)
 {
   if (gds_flag == 1){
     g2 = new TGraph();
@@ -384,7 +384,7 @@ int ToyEventDisplay::draw_cells(const WireCell::GeomCellSelection& cellall, TStr
 }
 
 
-int ToyEventDisplay::draw_mergecells(const WireCell::GeomCellSelection& cellall, TString option, int flag)
+int ToyEventDisplay::draw_mergecells(const WCP::GeomCellSelection& cellall, TString option, int flag)
 {
  
   
@@ -394,7 +394,7 @@ int ToyEventDisplay::draw_mergecells(const WireCell::GeomCellSelection& cellall,
   g2b = new TGraph();
   
   for (int i=0;i!=cellall.size();i++){
-    const WireCell::MergeGeomCell* mcell = (const WireCell::MergeGeomCell*)cellall.at(i);
+    const WCP::MergeGeomCell* mcell = (const WCP::MergeGeomCell*)cellall.at(i);
     int face = mcell->get_allcell().at(0)->get_face();
 
     if (flag==0){
@@ -409,7 +409,7 @@ int ToyEventDisplay::draw_mergecells(const WireCell::GeomCellSelection& cellall,
 	npb++;
       }
     }else if (flag==1){
-      WireCell::MergeGeomCell *mcell = (WireCell::MergeGeomCell*)cellall[i];
+      WCP::MergeGeomCell *mcell = (WCP::MergeGeomCell*)cellall[i];
       if (mcell->GetContainTruthCell()){
 	if (face == 1){
 	  g2->SetPoint(np,cellall[i]->center().z/units::m,cellall[i]->center().y/units::m);
@@ -442,7 +442,7 @@ int ToyEventDisplay::draw_mergecells(const WireCell::GeomCellSelection& cellall,
 
 
 
-int ToyEventDisplay::draw_truthcells(const WireCell::CellChargeMap& ccmap, TString option)
+int ToyEventDisplay::draw_truthcells(const WCP::CellChargeMap& ccmap, TString option)
 {
   if (gds_flag==1){
     g2 = new TGraph();
@@ -452,7 +452,7 @@ int ToyEventDisplay::draw_truthcells(const WireCell::CellChargeMap& ccmap, TStri
     
     int i=0;
     for (auto it = ccmap.begin();it!=ccmap.end(); it++){
-      WireCell::Point p = it->first->center();
+      WCP::Point p = it->first->center();
       if (it->first->get_face()==1){
 	if (it->second > truth_threshold){
 	  g2->SetPoint(nf,p.z/units::m,p.y/units::m);
@@ -487,7 +487,7 @@ int ToyEventDisplay::draw_truthcells(const WireCell::CellChargeMap& ccmap, TStri
     g2 = new TGraph();
     int i=0;
     for (auto it = ccmap.begin();it!=ccmap.end(); it++){
-      WireCell::Point p = it->first->center();
+      WCP::Point p = it->first->center();
       if (it->second > truth_threshold){
 	g2->SetPoint(i,p.z/units::m,p.y/units::m);
 	i++;
@@ -503,7 +503,7 @@ int ToyEventDisplay::draw_truthcells(const WireCell::CellChargeMap& ccmap, TStri
   return 0;
 }
 
-int ToyEventDisplay::draw_truthcells_charge(const WireCell::CellChargeMap& ccmap, TString option, int FI)
+int ToyEventDisplay::draw_truthcells_charge(const WCP::CellChargeMap& ccmap, TString option, int FI)
 {
   pad.cd();
 
@@ -513,9 +513,9 @@ int ToyEventDisplay::draw_truthcells_charge(const WireCell::CellChargeMap& ccmap
   Double_t x[100],y[100];
 
   for (auto it = ccmap.begin();it!=ccmap.end(); it++){
-    //WireCell::Point p = it->first->center();
+    //WCP::Point p = it->first->center();
     
-    WireCell::PointVector boundary = it->first->boundary();
+    WCP::PointVector boundary = it->first->boundary();
     int n = 0;
     for (int i=0;i!=boundary.size();i++){
       x[n] = boundary[i].z/units::m;
@@ -547,14 +547,14 @@ int ToyEventDisplay::draw_truthcells_charge(const WireCell::CellChargeMap& ccmap
 }
 
 
-int ToyEventDisplay::draw_wires_charge(const WireCell::WireChargeMap& wcmap, TString option, int FI)
+int ToyEventDisplay::draw_wires_charge(const WCP::WireChargeMap& wcmap, TString option, int FI)
 {
   pad.cd();
   Double_t x[100],y[100];
 
   for (auto it = wcmap.begin();it!=wcmap.end(); it++){
 
-    const WireCell::GeomWire *wire = it->first;
+    const WCP::GeomWire *wire = it->first;
     float charge = it->second;
     
     float pitch = gds->pitch(wire->plane());
@@ -588,7 +588,7 @@ int ToyEventDisplay::draw_wires_charge(const WireCell::WireChargeMap& wcmap, TSt
 
 
 
-int ToyEventDisplay::draw_cells_charge(const WireCell::GeomCellSelection& cellall, TString option)
+int ToyEventDisplay::draw_cells_charge(const WCP::GeomCellSelection& cellall, TString option)
 {
   pad.cd();
 
@@ -596,7 +596,7 @@ int ToyEventDisplay::draw_cells_charge(const WireCell::GeomCellSelection& cellal
   Double_t x[100],y[100];
   for (int i=0;i!=cellall.size();i++){
     
-    WireCell::PointVector boundary = cellall[i]->boundary();
+    WCP::PointVector boundary = cellall[i]->boundary();
     int n = 0;
     for (int i=0;i!=boundary.size();i++){
       x[n] = boundary[i].z/units::m;
@@ -615,15 +615,15 @@ int ToyEventDisplay::draw_cells_charge(const WireCell::GeomCellSelection& cellal
   return 0;
 }
 
-int ToyEventDisplay::draw_reconcells(const WireCell::GeomCellSelection& cellall, WireCell2dToy::ToyMatrix *toymatrix ,TString option, int color){
+int ToyEventDisplay::draw_reconcells(const WCP::GeomCellSelection& cellall, WCP2dToy::ToyMatrix *toymatrix ,TString option, int color){
   
   pad.cd();
   g2 = new TGraph();
   int ncount = 0;
   for (int i=0;i!=cellall.size();i++){
-    WireCell::MergeGeomCell *mcell = (WireCell::MergeGeomCell*)cellall[i];
+    WCP::MergeGeomCell *mcell = (WCP::MergeGeomCell*)cellall[i];
     if (toymatrix->Get_Cell_Charge(mcell)>recon_threshold){
-      WireCell::GeomCellSelection acell = mcell->get_allcell();
+      WCP::GeomCellSelection acell = mcell->get_allcell();
       for (int j=0;j!=acell.size();j++){
 	g2->SetPoint(ncount,acell[j]->center().z/units::m,acell[j]->center().y/units::m);
 	ncount ++;

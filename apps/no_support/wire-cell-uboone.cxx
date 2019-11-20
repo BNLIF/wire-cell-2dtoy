@@ -1,19 +1,19 @@
-#include "WireCellSst/GeomDataSource.h"
-#include "WireCellSst/ToyuBooNEFrameDataSource.h"
-#include "WireCellSst/ToyuBooNESliceDataSource.h"
-#include "WireCell2dToy/ToyEventDisplay.h"
-#include "WireCell2dToy/ToyTiling.h"
-#include "WireCell2dToy/MergeToyTiling.h"
+#include "WCPSst/GeomDataSource.h"
+#include "WCPSst/ToyuBooNEFrameDataSource.h"
+#include "WCPSst/ToyuBooNESliceDataSource.h"
+#include "WCP2dToy/ToyEventDisplay.h"
+#include "WCP2dToy/ToyTiling.h"
+#include "WCP2dToy/MergeToyTiling.h"
 
-#include "WireCellData/MergeGeomCell.h"
-//#include "WireCellNav/SliceDataSource.h"
+#include "WCPData/MergeGeomCell.h"
+//#include "WCPNav/SliceDataSource.h"
 #include "TApplication.h"
 #include "TCanvas.h"
 #include "TStyle.h"
 #include "TH1F.h"
 #include "TFile.h"
 #include <iostream>
-using namespace WireCell;
+using namespace WCP;
 using namespace std;
 
 
@@ -27,7 +27,7 @@ int main(int argc, char* argv[])
   }
 
 
-  WireCellSst::GeomDataSource gds(argv[1]);
+  WCPSst::GeomDataSource gds(argv[1]);
   std::vector<double> ex = gds.extent();
   cerr << "Extent: "
        << " x:" << ex[0]/units::mm << " mm"
@@ -41,43 +41,43 @@ int main(int argc, char* argv[])
   
   TFile tfile(root_file,"read");
   TTree* sst = dynamic_cast<TTree*>(tfile.Get(tpath));
-  WireCellSst::ToyuBooNEFrameDataSource fds(*sst,gds);
+  WCPSst::ToyuBooNEFrameDataSource fds(*sst,gds);
   std::cerr << "Got " << fds.size() 
 	    << " frames from " << tpath 
 	    << " in " << root_file << std::endl;
   
   fds.jump(1);
-  WireCell::Frame frame = fds.get();
+  WCP::Frame frame = fds.get();
   
-  WireCellSst::ToyuBooNESliceDataSource sds(fds,1);
+  WCPSst::ToyuBooNESliceDataSource sds(fds,1);
   
   // int i=1129;{
   int i=331;{
   //for (int i=0;i!=sds.size();i++){
   //for (int i=1143;i!=1145;i++){
   sds.jump(i);
-  WireCell::Slice slice = sds.get();
+  WCP::Slice slice = sds.get();
   if ( slice.group().size() >0){
-    WireCell2dToy::ToyTiling toytiling(slice,gds);
+    WCP2dToy::ToyTiling toytiling(slice,gds);
     GeomCellSelection allcell = toytiling.get_allcell();
 
    
     
 
-    WireCell2dToy::MergeToyTiling mergetiling(toytiling);    
+    WCP2dToy::MergeToyTiling mergetiling(toytiling);    
     GeomCellSelection allmcell = mergetiling.get_allcell();
     GeomWireSelection allwire = mergetiling.get_allwire();
     //cout << i << endl;
     // int sum = 0;
     // for (int j=0;j!=allmcell.size();j++){
-    //   GeomCellSelection cells = ((WireCell::MergeGeomCell*)allmcell[j])->get_allcell();
+    //   GeomCellSelection cells = ((WCP::MergeGeomCell*)allmcell[j])->get_allcell();
     //   for (int k=0;k!=cells.size();k++){
     // 	GeomWireSelection wires = toytiling.wires(*cells[k]);
     // 	if( wires[0]->ident()==0 || wires[1]->ident()==0 || wires[2]->ident()==0){
     // 	  cout << i << " Wrong!!" << endl;
     // 	}
     //   }
-    //   //   sum += ((WireCell::MergeGeomCell*)allmcell[j])->get_allcell().size() ;
+    //   //   sum += ((WCP::MergeGeomCell*)allmcell[j])->get_allcell().size() ;
     // }
 
     //  //debug the toytiling itself. 
@@ -124,7 +124,7 @@ int main(int argc, char* argv[])
     TCanvas c1("ToyMC","ToyMC",800,600);
     c1.Draw();
     
-    WireCell2dToy::ToyEventDisplay display(c1, gds);
+    WCP2dToy::ToyEventDisplay display(c1, gds);
     
     gStyle->SetOptStat(0);
     
@@ -132,7 +132,7 @@ int main(int argc, char* argv[])
     //display.init(0.6,1.0,0.0,0.3);
     //display.init(0.6,0.7,0.07,0.12);
     //display.init();
-    display.draw_mc(1,WireCell::PointValueVector(),"");
+    display.draw_mc(1,WCP::PointValueVector(),"");
     //display.draw_mc(1,fds.mctruth,"");
     //display.draw_mc(2,fds.mctruth,"TEXT");
     

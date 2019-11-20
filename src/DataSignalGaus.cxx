@@ -1,5 +1,5 @@
-#include "WireCell2dToy/DataSignalGaus.h"
-#include "WireCellData/GeomWire.h"
+#include "WCP2dToy/DataSignalGaus.h"
+#include "WCPData/GeomWire.h"
 #include "TFile.h"
 #include "TVirtualFFT.h"
 #include "TF1.h"
@@ -7,9 +7,9 @@
 #include "TMatrixD.h"
 #include "TVectorD.h"
 
-using namespace WireCell;
+using namespace WCP;
 
-WireCell2dToy::DataSignalGausFDS::DataSignalGausFDS(WireCell::FrameDataSource& fds, const WireCell::GeomDataSource& gds, int bins_per_frame1, int nframes_total, float time_offset_uv, float time_offset_uw, float overall_time_offset)
+WCP2dToy::DataSignalGausFDS::DataSignalGausFDS(WCP::FrameDataSource& fds, const WCP::GeomDataSource& gds, int bins_per_frame1, int nframes_total, float time_offset_uv, float time_offset_uw, float overall_time_offset)
   : fds(fds)
   , gds(gds)
   , max_frames(nframes_total)
@@ -132,11 +132,11 @@ WireCell2dToy::DataSignalGausFDS::DataSignalGausFDS(WireCell::FrameDataSource& f
 }
 
 
-int WireCell2dToy::DataSignalGausFDS::size() const{
+int WCP2dToy::DataSignalGausFDS::size() const{
   return max_frames;
 }
 
-void WireCell2dToy::DataSignalGausFDS::Save(){
+void WCP2dToy::DataSignalGausFDS::Save(){
   TFile *file = new TFile("temp_gaus.root","RECREATE");
   // for (int i=0;i!=nwire_u;i++){
   //   TH1F *huu = (TH1F*)hu[i]->Clone(Form("U1_%d",i));
@@ -158,7 +158,7 @@ void WireCell2dToy::DataSignalGausFDS::Save(){
 }
 
 
-int WireCell2dToy::DataSignalGausFDS::jump(int frame_number){
+int WCP2dToy::DataSignalGausFDS::jump(int frame_number){
   // fill the frame data ... 
   if (frame.index == frame_number) {
     return frame_number;
@@ -305,7 +305,7 @@ int WireCell2dToy::DataSignalGausFDS::jump(int frame_number){
 }
 
 
-WireCell2dToy::DataSignalGausFDS::~DataSignalGausFDS(){
+WCP2dToy::DataSignalGausFDS::~DataSignalGausFDS(){
   // for (int i=0;i!=nwire_u;i++){
   //   delete hu[i] ;
   // }

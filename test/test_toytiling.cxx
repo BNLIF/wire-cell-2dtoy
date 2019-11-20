@@ -1,18 +1,18 @@
-#include "WireCellNav/ExampleGDS.h"
-#include "WireCellNav/GenerativeFDS.h"
-#include "WireCellNav/PepperDepositor.h"
-#include "WireCellNav/SliceDataSource.h"
+#include "WCPNav/ExampleGDS.h"
+#include "WCPNav/GenerativeFDS.h"
+#include "WCPNav/PepperDepositor.h"
+#include "WCPNav/SliceDataSource.h"
 
-#include "WireCell2dToy/ToyTiling.h"
+#include "WCP2dToy/ToyTiling.h"
 
-#include "WireCellData/Units.h"
-#include "WireCellData/Slice.h"
+#include "WCPData/Units.h"
+#include "WCPData/Slice.h"
 
 #include <iostream>
 #include <string>
 
 using namespace std;
-using namespace WireCell;
+using namespace WCP;
 
 
 template<typename OK>
@@ -42,7 +42,7 @@ int main () {
 
     const Slice& slice = sds.get();
     
-    WireCell2dToy::ToyTiling *toytiling = new WireCell2dToy::ToyTiling(slice,*gds);
+    WCP2dToy::ToyTiling *toytiling = new WCP2dToy::ToyTiling(slice,*gds);
     
     GeomCellSelection allcell = toytiling->get_allcell();
     

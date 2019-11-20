@@ -1,21 +1,21 @@
-#include "WireCellSst/GeomDataSource.h"
-//#include "WireCellSst/ToyuBooNEFrameDataSource.h"
-#include "WireCellSst/ToyuBooNESliceDataSource.h"
-#include "WireCell2dToy/ToyEventDisplay.h"
-#include "WireCell2dToy/ToyTiling.h"
-#include "WireCell2dToy/MergeToyTiling.h"
-#include "WireCell2dToy/TruthToyTiling.h"
-#include "WireCellData/MergeGeomCell.h"
-#include "WireCellData/GeomCluster.h"
-//#include "WireCellNav/SliceDataSource.h"
+#include "WCPSst/GeomDataSource.h"
+//#include "WCPSst/ToyuBooNEFrameDataSource.h"
+#include "WCPSst/ToyuBooNESliceDataSource.h"
+#include "WCP2dToy/ToyEventDisplay.h"
+#include "WCP2dToy/ToyTiling.h"
+#include "WCP2dToy/MergeToyTiling.h"
+#include "WCP2dToy/TruthToyTiling.h"
+#include "WCPData/MergeGeomCell.h"
+#include "WCPData/GeomCluster.h"
+//#include "WCPNav/SliceDataSource.h"
 
-#include "WireCellNav/FrameDataSource.h"
-#include "WireCellNav/SimDataSource.h"
-#include "WireCellNav/SliceDataSource.h"
-#include "WireCellSst/Util.h"
-#include "WireCellData/SimTruth.h"
-#include "WireCell2dToy/ToyDepositor.h"
-#include "WireCellNav/GenerativeFDS.h"
+#include "WCPNav/FrameDataSource.h"
+#include "WCPNav/SimDataSource.h"
+#include "WCPNav/SliceDataSource.h"
+#include "WCPSst/Util.h"
+#include "WCPData/SimTruth.h"
+#include "WCP2dToy/ToyDepositor.h"
+#include "WCPNav/GenerativeFDS.h"
 
 #include "TApplication.h"
 #include "TCanvas.h"
@@ -26,7 +26,7 @@
 #include "TColor.h"
 #include <iostream>
 
-using namespace WireCell;
+using namespace WCP;
 using namespace std;
 
 
@@ -40,7 +40,7 @@ int main(int argc, char* argv[])
   }
   
   
-  WireCellSst::GeomDataSource gds(argv[1]);
+  WCPSst::GeomDataSource gds(argv[1]);
   std::vector<double> ex = gds.extent();
   cerr << "Extent: "
        << " x:" << ex[0]/units::mm << " mm"
@@ -52,8 +52,8 @@ int main(int argc, char* argv[])
   const char* root_file = argv[2];
   const char* tpath = "/Event/Sim";
   
-  WireCell::FrameDataSource* fds = 0;
-  fds = WireCellSst::make_fds(root_file);
+  WCP::FrameDataSource* fds = 0;
+  fds = WCPSst::make_fds(root_file);
   if (!fds) {
     cerr << "ERROR: failed to get FDS from " << root_file << endl;
     return 1;
@@ -63,14 +63,14 @@ int main(int argc, char* argv[])
   int eve_num = 4;
 
   
-  WireCell::ToyDepositor toydep(fds);
+  WCP::ToyDepositor toydep(fds);
   const PointValueVector pvv = toydep.depositions(eve_num);
   
 
-  WireCell::GenerativeFDS gfds(toydep,gds,2400,max_events,2.0*1.6*units::millimeter);
+  WCP::GenerativeFDS gfds(toydep,gds,2400,max_events,2.0*1.6*units::millimeter);
   gfds.jump(eve_num);
 
-  WireCellSst::ToyuBooNESliceDataSource sds(gfds,1500); //set threshold at 2000 electrons
+  WCPSst::ToyuBooNESliceDataSource sds(gfds,1500); //set threshold at 2000 electrons
 
   
 
@@ -81,9 +81,9 @@ int main(int argc, char* argv[])
   int ncount_t = 0;
   
 
-  WireCell2dToy::ToyTiling **toytiling = new WireCell2dToy::ToyTiling*[2400];
-  WireCell2dToy::MergeToyTiling **mergetiling = new WireCell2dToy::MergeToyTiling*[2400];
-  WireCell2dToy::TruthToyTiling **truthtiling = new WireCell2dToy::TruthToyTiling*[2400];
+  WCP2dToy::ToyTiling **toytiling = new WCP2dToy::ToyTiling*[2400];
+  WCP2dToy::MergeToyTiling **mergetiling = new WCP2dToy::MergeToyTiling*[2400];
+  WCP2dToy::TruthToyTiling **truthtiling = new WCP2dToy::TruthToyTiling*[2400];
   
   //add in cluster
   GeomClusterSet cluster_set, cluster_delset;
@@ -98,17 +98,17 @@ int main(int argc, char* argv[])
     //for (int i=365;i!=378;i++){
  
     sds.jump(i);
-    WireCell::Slice slice = sds.get();
+    WCP::Slice slice = sds.get();
     if ( slice.group().size() >0){
       cout << i << " " << slice.group().size() << endl;
 
-      toytiling[i] = new WireCell2dToy::ToyTiling(slice,gds);
+      toytiling[i] = new WCP2dToy::ToyTiling(slice,gds);
       GeomCellSelection allcell = toytiling[i]->get_allcell();
 
       cout << allcell.size() << endl;
       
-      mergetiling[i] = new WireCell2dToy::MergeToyTiling(*toytiling[i],i,3,1);
-      truthtiling[i] = new WireCell2dToy::TruthToyTiling(*toytiling[i],pvv,i,gds);
+      mergetiling[i] = new WCP2dToy::MergeToyTiling(*toytiling[i],i,3,1);
+      truthtiling[i] = new WCP2dToy::TruthToyTiling(*toytiling[i],pvv,i,gds);
       
       
 
@@ -247,7 +247,7 @@ int main(int argc, char* argv[])
       // }
     // int sum = 0;
     // for (int j=0;j!=allmcell.size();j++){
-    //   sum += ((WireCell::MergeGeomCell*)allmcell[j])->get_allcell().size() ;
+    //   sum += ((WCP::MergeGeomCell*)allmcell[j])->get_allcell().size() ;
     // }
     // cout << allcell.size() << " " << allmcell.size() << " "  << sum << endl;
 
@@ -281,7 +281,7 @@ int main(int argc, char* argv[])
     TCanvas c1("ToyMC","ToyMC",800,600);
     c1.Draw();
     
-    WireCell2dToy::ToyEventDisplay display(c1, gds);
+    WCP2dToy::ToyEventDisplay display(c1, gds);
     display.charge_min = charge_min;
     display.charge_max = charge_max;
 
@@ -305,7 +305,7 @@ int main(int argc, char* argv[])
     display.init(0,10.3698,-2.33/2.,2.33/2.);
     //display.init(1.1,1.8,0.7,1.0);
     
-    display.draw_mc(1,WireCell::PointValueVector(),"colz");
+    display.draw_mc(1,WCP::PointValueVector(),"colz");
     
     
 

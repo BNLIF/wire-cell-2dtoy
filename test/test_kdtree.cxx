@@ -1,9 +1,9 @@
-#include "WireCellNanoflann/nanoflann.h" 
-#include "WireCellData/WCPointCloud.h"
+#include "WCPNanoflann/nanoflann.h" 
+#include "WCPData/WCPointCloud.h"
 
 #include "TRandom.h"
 
-using namespace WireCell;
+using namespace WCP;
 
 int main()
 {

@@ -1,10 +1,10 @@
-#include "WireCell2dToy/ToyMatrixMarkov.h"
+#include "WCP2dToy/ToyMatrixMarkov.h"
 
-using namespace WireCell;
+using namespace WCP;
 #include "TMath.h"
 #include "TRandom.h"
 
-void WireCell2dToy::ToyMatrixMarkov::find_subset(WireCell2dToy::ToyMatrixKalman &toymatrix,WireCell2dToy::ToyMatrix &toymatrix1, std::vector<int>& vec){
+void WCP2dToy::ToyMatrixMarkov::find_subset(WCP2dToy::ToyMatrixKalman &toymatrix,WCP2dToy::ToyMatrix &toymatrix1, std::vector<int>& vec){
   //std::cout << toymatrix.Get_already_removed().size() << " " << toymatrix.Get_no_need_remove().size() << " " << vec.size() << std::endl;
 
   if (toymatrix.Get_numz()!=0){
@@ -14,7 +14,7 @@ void WireCell2dToy::ToyMatrixMarkov::find_subset(WireCell2dToy::ToyMatrixKalman 
       if (it1 == toymatrix.Get_already_removed().end() && it2 == toymatrix.Get_no_need_remove().end()){
 	std::vector<int> already_removed = toymatrix.Get_already_removed();
 	already_removed.push_back(i);
-	WireCell2dToy::ToyMatrixKalman kalman(already_removed,toymatrix.Get_no_need_remove(),toymatrix1,0,0);
+	WCP2dToy::ToyMatrixKalman kalman(already_removed,toymatrix.Get_no_need_remove(),toymatrix1,0,0);
 
 	//	std::cout << "abc: " << i << " " <<kalman.Get_numz() << " " << toymatrix.Get_numz() << std::endl;
 	if (kalman.Get_numz()==toymatrix.Get_numz()){
@@ -40,7 +40,7 @@ void WireCell2dToy::ToyMatrixMarkov::find_subset(WireCell2dToy::ToyMatrixKalman 
 	      std::vector<int> already_removed = toymatrix.Get_already_removed();
 	      already_removed.push_back(i);
 	      already_removed.push_back(j);
-	      WireCell2dToy::ToyMatrixKalman kalman(already_removed,toymatrix.Get_no_need_remove(),toymatrix1,0,0);
+	      WCP2dToy::ToyMatrixKalman kalman(already_removed,toymatrix.Get_no_need_remove(),toymatrix1,0,0);
 	      
 	      // std::cout << "abc: " << i << " " << j << " " << kalman.Get_numz() << " " << toymatrix.Get_numz() << std::endl;
 
@@ -70,7 +70,7 @@ void WireCell2dToy::ToyMatrixMarkov::find_subset(WireCell2dToy::ToyMatrixKalman 
   }
 }
 
-WireCell2dToy::ToyMatrixMarkov::ToyMatrixMarkov(WireCell2dToy::ToyMatrix &toycur,WireCell2dToy::MergeToyTiling &mergecur, WireCell::GeomCellSelection *allmcell1, WireCell::GeomCellSelection &cells, int recon_t1, int recon_t2)
+WCP2dToy::ToyMatrixMarkov::ToyMatrixMarkov(WCP2dToy::ToyMatrix &toycur,WCP2dToy::MergeToyTiling &mergecur, WCP::GeomCellSelection *allmcell1, WCP::GeomCellSelection &cells, int recon_t1, int recon_t2)
   : penalty_ncpt(0)
 {
   ncount = 0;
@@ -108,9 +108,9 @@ WireCell2dToy::ToyMatrixMarkov::ToyMatrixMarkov(WireCell2dToy::ToyMatrix &toycur
   use_time.clear();
   
   //initialize
-  //toymatrixkalman = new WireCell2dToy::ToyMatrixKalman(*toymatrix);  // hold the current results 
+  //toymatrixkalman = new WCP2dToy::ToyMatrixKalman(*toymatrix);  // hold the current results 
 
-  toymatrixkalman = new WireCell2dToy::ToyMatrixKalman(already_removed, use_time, *toymatrix,1,0);
+  toymatrixkalman = new WCP2dToy::ToyMatrixKalman(already_removed, use_time, *toymatrix,1,0);
   std::cout << "With Time: " << toymatrixkalman->Get_numz() << " " << allmcell_c.size() << " " <<  already_removed.size() << std::endl;
   // Find a sub-set that is not degenerated
   // put things into use_time
@@ -120,7 +120,7 @@ WireCell2dToy::ToyMatrixMarkov::ToyMatrixMarkov(WireCell2dToy::ToyMatrix &toycur
   std::cout << use_time.size() << std::endl;
   // recalculate
   delete toymatrixkalman;
-  toymatrixkalman = new WireCell2dToy::ToyMatrixKalman(already_removed, use_time, toycur,1,0);
+  toymatrixkalman = new WCP2dToy::ToyMatrixKalman(already_removed, use_time, toycur,1,0);
   toymatrix->Set_Solve_Flag(0);
   toymatrix->Set_chi2(-1);
 
@@ -215,14 +215,14 @@ WireCell2dToy::ToyMatrixMarkov::ToyMatrixMarkov(WireCell2dToy::ToyMatrix &toycur
   }
 }
 
-WireCell2dToy::ToyMatrixMarkov::ToyMatrixMarkov(WireCell2dToy::ToyMatrix &toybefore, WireCell2dToy::ToyMatrix &toycur, WireCell2dToy::ToyMatrix &toyafter, WireCell2dToy::MergeToyTiling &mergebefore, WireCell2dToy::MergeToyTiling &mergecur, WireCell2dToy::MergeToyTiling &mergeafter, WireCell::GeomCellSelection *allmcell1,int recon_t1, int recon_t2, double penalty, double penalty_ncpt)
+WCP2dToy::ToyMatrixMarkov::ToyMatrixMarkov(WCP2dToy::ToyMatrix &toybefore, WCP2dToy::ToyMatrix &toycur, WCP2dToy::ToyMatrix &toyafter, WCP2dToy::MergeToyTiling &mergebefore, WCP2dToy::MergeToyTiling &mergecur, WCP2dToy::MergeToyTiling &mergeafter, WCP::GeomCellSelection *allmcell1,int recon_t1, int recon_t2, double penalty, double penalty_ncpt)
   : penalty_ncpt(penalty_ncpt)
 {
   ToyMatrixMarkov(&toybefore, &toycur, &toyafter, &mergebefore, &mergecur, &mergeafter, allmcell, recon_t1, recon_t2, penalty, penalty_ncpt);
 }
 
 
-WireCell2dToy::ToyMatrixMarkov::ToyMatrixMarkov(WireCell2dToy::ToyMatrix *toybefore, WireCell2dToy::ToyMatrix *toycur, WireCell2dToy::ToyMatrix *toyafter, WireCell2dToy::MergeToyTiling *mergebefore, WireCell2dToy::MergeToyTiling *mergecur, WireCell2dToy::MergeToyTiling *mergeafter, WireCell::GeomCellSelection *allmcell1,int recon_t1, int recon_t2, double penalty, double penalty_ncpt)
+WCP2dToy::ToyMatrixMarkov::ToyMatrixMarkov(WCP2dToy::ToyMatrix *toybefore, WCP2dToy::ToyMatrix *toycur, WCP2dToy::ToyMatrix *toyafter, WCP2dToy::MergeToyTiling *mergebefore, WCP2dToy::MergeToyTiling *mergecur, WCP2dToy::MergeToyTiling *mergeafter, WCP::GeomCellSelection *allmcell1,int recon_t1, int recon_t2, double penalty, double penalty_ncpt)
   : penalty_ncpt(penalty_ncpt)
 {
   ncount = 0;
@@ -322,9 +322,9 @@ WireCell2dToy::ToyMatrixMarkov::ToyMatrixMarkov(WireCell2dToy::ToyMatrix *toybef
   use_time.clear();
   
   //initialize
-  //toymatrixkalman = new WireCell2dToy::ToyMatrixKalman(*toymatrix);  // hold the current results 
+  //toymatrixkalman = new WCP2dToy::ToyMatrixKalman(*toymatrix);  // hold the current results 
   
-  toymatrixkalman = new WireCell2dToy::ToyMatrixKalman(already_removed, use_time, *toymatrix,1,0);
+  toymatrixkalman = new WCP2dToy::ToyMatrixKalman(already_removed, use_time, *toymatrix,1,0);
   std::cout << "With Time: " << toymatrixkalman->Get_numz() << " " << allmcell_c.size() << " " <<  already_removed.size() << std::endl;
   // Find a sub-set that is not degenerated
   // put things into use_time
@@ -334,7 +334,7 @@ WireCell2dToy::ToyMatrixMarkov::ToyMatrixMarkov(WireCell2dToy::ToyMatrix *toybef
   //std::cout << use_time.size() << std::endl;
   // recalculate
   delete toymatrixkalman;
-  toymatrixkalman = new WireCell2dToy::ToyMatrixKalman(already_removed, use_time, *toycur,1,0);
+  toymatrixkalman = new WCP2dToy::ToyMatrixKalman(already_removed, use_time, *toycur,1,0);
   toymatrix->Set_Solve_Flag(0);
   toymatrix->Set_chi2(-1);
 
@@ -431,7 +431,7 @@ WireCell2dToy::ToyMatrixMarkov::ToyMatrixMarkov(WireCell2dToy::ToyMatrix *toybef
 
 
 
-WireCell2dToy::ToyMatrixMarkov::ToyMatrixMarkov(WireCell2dToy::ToyMatrix *toymatrix1,WireCell::GeomCellSelection *allmcell1, int recon_t1, int recon_t2)
+WCP2dToy::ToyMatrixMarkov::ToyMatrixMarkov(WCP2dToy::ToyMatrix *toymatrix1,WCP::GeomCellSelection *allmcell1, int recon_t1, int recon_t2)
   : penalty_ncpt(0)
 {
   ncount = 0;
@@ -448,7 +448,7 @@ WireCell2dToy::ToyMatrixMarkov::ToyMatrixMarkov(WireCell2dToy::ToyMatrix *toymat
   }
 
 
-  toymatrixkalman = new WireCell2dToy::ToyMatrixKalman(*toymatrix,0);  // hold the current results 
+  toymatrixkalman = new WCP2dToy::ToyMatrixKalman(*toymatrix,0);  // hold the current results 
   
   if (allmcell->size() < 50){
     while (ncount < 1e4 
@@ -512,11 +512,11 @@ WireCell2dToy::ToyMatrixMarkov::ToyMatrixMarkov(WireCell2dToy::ToyMatrix *toymat
   
 }
 
-WireCell2dToy::ToyMatrixMarkov::~ToyMatrixMarkov(){
+WCP2dToy::ToyMatrixMarkov::~ToyMatrixMarkov(){
   delete toymatrixkalman;
 }
 
-void WireCell2dToy::ToyMatrixMarkov::make_guess(){
+void WCP2dToy::ToyMatrixMarkov::make_guess(){
   
   ncount ++; 
   
@@ -725,7 +725,7 @@ void WireCell2dToy::ToyMatrixMarkov::make_guess(){
   //std::cout << toymatrixkalman->Get_already_removed().size() << std::endl;
 }
 
-void WireCell2dToy::ToyMatrixMarkov::Iterate(WireCell2dToy::ToyMatrixKalman &toykalman){
+void WCP2dToy::ToyMatrixMarkov::Iterate(WCP2dToy::ToyMatrixKalman &toykalman){
   nlevel++;
   if (toykalman.Get_numz()!=0&&toymatrix->Get_Chi2()<0){
     for (int i=0;i!=toykalman.Get_mcindex();i++){
@@ -747,9 +747,9 @@ void WireCell2dToy::ToyMatrixMarkov::Iterate(WireCell2dToy::ToyMatrixKalman &toy
 	  // use_time.clear();
 	  
 	  // //initialize
-	  // //toymatrixkalman = new WireCell2dToy::ToyMatrixKalman(*toymatrix);  // hold the current results 
+	  // //toymatrixkalman = new WCP2dToy::ToyMatrixKalman(*toymatrix);  // hold the current results 
 	  
-	  // toymatrixkalman = new WireCell2dToy::ToyMatrixKalman(already_removed, use_time, *toymatrix,1,0);
+	  // toymatrixkalman = new WCP2dToy::ToyMatrixKalman(already_removed, use_time, *toymatrix,1,0);
 	  // std::cout << "With Time: " << toymatrixkalman->Get_numz() << " " << allmcell_c.size() << " " <<  already_removed.size() << std::endl;
 	  // // Find a sub-set that is not degenerated
 	  // // put things into use_time
@@ -766,7 +766,7 @@ void WireCell2dToy::ToyMatrixMarkov::Iterate(WireCell2dToy::ToyMatrixKalman &toy
 
 	  //temp_no_need_remove.clear();
 	  //initialize
-	  WireCell2dToy::ToyMatrixKalman temp_tk(temp_already_removed, temp_no_need_remove, *toymatrix,0,0);
+	  WCP2dToy::ToyMatrixKalman temp_tk(temp_already_removed, temp_no_need_remove, *toymatrix,0,0);
 	  //	  std::cout << temp_tk.Get_numz() << " " << temp_already_removed.size() << " " << temp_no_need_remove.size() << std::endl;
 	  // Find a sub-set that is not degenerated
 	  find_subset(temp_tk,*toymatrix,temp_no_need_remove);
@@ -815,7 +815,7 @@ void WireCell2dToy::ToyMatrixMarkov::Iterate(WireCell2dToy::ToyMatrixKalman &toy
 
 	//std::cout << nlevel << " " << already_removed.size() << " " << toykalman.Get_no_need_remove().size() << " " << toykalman.Get_numz() << std::endl;
 
-	WireCell2dToy::ToyMatrixKalman kalman(already_removed,toykalman.Get_no_need_remove(),*toymatrix,0,1,chi2_p);
+	WCP2dToy::ToyMatrixKalman kalman(already_removed,toykalman.Get_no_need_remove(),*toymatrix,0,1,chi2_p);
 	//std::cout << kalman.Get_numz() << std::endl;
 	// this part seems to be able to improve
 	// to get the first solution, one should not take too much time ...

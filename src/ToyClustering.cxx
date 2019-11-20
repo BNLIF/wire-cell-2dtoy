@@ -1,10 +1,10 @@
-#include "WireCell2dToy/ToyClustering.h"
+#include "WCP2dToy/ToyClustering.h"
 
-#include "WireCellData/TPCParams.h"
-#include "WireCellData/Singleton.h"
-#include "WireCellData/Line.h"
+#include "WCPData/TPCParams.h"
+#include "WCPData/Singleton.h"
+#include "WCPData/Line.h"
 
-using namespace WireCell;
+using namespace WCP;
 using namespace std;
 
 #include "ToyClustering_dead_live.h"
@@ -21,9 +21,9 @@ using namespace std;
 #include "ToyClustering_neutrino.h"
 #include "ToyClustering_isolated.h"
 
-#include "WireCell2dToy/ExecMon.h"
+#include "WCP2dToy/ExecMon.h"
 
-double WireCell2dToy::cal_proj_angle_diff(TVector3& dir1, TVector3& dir2, double plane_angle){
+double WCP2dToy::cal_proj_angle_diff(TVector3& dir1, TVector3& dir2, double plane_angle){
   TVector3 temp_dir1;
   TVector3 temp_dir2;
 
@@ -33,10 +33,10 @@ double WireCell2dToy::cal_proj_angle_diff(TVector3& dir1, TVector3& dir2, double
   return temp_dir1.Angle(temp_dir2);
 }
 
-bool WireCell2dToy::is_angle_consistent(TVector3& dir1, TVector3& dir2, bool same_direction, double angle_cut, double uplane_angle, double vplane_angle, double wplane_angle, int num_cut){
-  double angle_u = WireCell2dToy::cal_proj_angle_diff(dir1,dir2,uplane_angle);
-  double angle_v = WireCell2dToy::cal_proj_angle_diff(dir1,dir2,vplane_angle);
-  double angle_w = WireCell2dToy::cal_proj_angle_diff(dir1,dir2,wplane_angle);
+bool WCP2dToy::is_angle_consistent(TVector3& dir1, TVector3& dir2, bool same_direction, double angle_cut, double uplane_angle, double vplane_angle, double wplane_angle, int num_cut){
+  double angle_u = WCP2dToy::cal_proj_angle_diff(dir1,dir2,uplane_angle);
+  double angle_v = WCP2dToy::cal_proj_angle_diff(dir1,dir2,vplane_angle);
+  double angle_w = WCP2dToy::cal_proj_angle_diff(dir1,dir2,wplane_angle);
   int num = 0;
   //input is degrees ...
   angle_cut *= 3.1415926/180.;
@@ -56,7 +56,7 @@ bool WireCell2dToy::is_angle_consistent(TVector3& dir1, TVector3& dir2, bool sam
 }
 
 
-double WireCell2dToy::Find_Closeset_Points(WireCell::PR3DCluster *cluster1, WireCell::PR3DCluster *cluster2,double length_1, double length_2, double length_cut, SlimMergeGeomCell *mcell1_save, SlimMergeGeomCell *mcell2_save, Point& p1_save, Point &p2_save){
+double WCP2dToy::Find_Closeset_Points(WCP::PR3DCluster *cluster1, WCP::PR3DCluster *cluster2,double length_1, double length_2, double length_cut, SlimMergeGeomCell *mcell1_save, SlimMergeGeomCell *mcell2_save, Point& p1_save, Point &p2_save){
   double dis_save = 1e9;
 
   // pick the first point from the small one
@@ -190,7 +190,7 @@ double WireCell2dToy::Find_Closeset_Points(WireCell::PR3DCluster *cluster1, Wire
 }
 
 
-std::map<PR3DCluster*,std::vector<std::pair<PR3DCluster*,double>>> WireCell2dToy::Clustering_jump_gap_cosmics(WireCell::PR3DClusterSelection& live_clusters, WireCell::PR3DClusterSelection& dead_clusters, std::map<int,std::pair<double,double>>& dead_u_index, std::map<int,std::pair<double,double>>& dead_v_index, std::map<int,std::pair<double,double>>& dead_w_index, WireCell::DynamicToyPointCloud& global_point_cloud, WireCell::ToyCTPointCloud& ct_point_cloud, bool flag_neutrino){
+std::map<PR3DCluster*,std::vector<std::pair<PR3DCluster*,double>>> WCP2dToy::Clustering_jump_gap_cosmics(WCP::PR3DClusterSelection& live_clusters, WCP::PR3DClusterSelection& dead_clusters, std::map<int,std::pair<double,double>>& dead_u_index, std::map<int,std::pair<double,double>>& dead_v_index, std::map<int,std::pair<double,double>>& dead_w_index, WCP::DynamicToyPointCloud& global_point_cloud, WCP::ToyCTPointCloud& ct_point_cloud, bool flag_neutrino){
 
   
   ExecMon em("starting");
@@ -366,7 +366,7 @@ std::map<PR3DCluster*,std::vector<std::pair<PR3DCluster*,double>>> WireCell2dToy
   
 
   // need to further cluster things ... for the small and isolated pieces ... 
-  std::map<PR3DCluster*,std::vector<std::pair<PR3DCluster*,double>>> group_clusters =  WireCell2dToy::Clustering_isolated(live_clusters, cluster_length_map);
+  std::map<PR3DCluster*,std::vector<std::pair<PR3DCluster*,double>>> group_clusters =  WCP2dToy::Clustering_isolated(live_clusters, cluster_length_map);
   // cerr << em("Clustering isolated") << std::endl;
  
 
@@ -376,7 +376,7 @@ std::map<PR3DCluster*,std::vector<std::pair<PR3DCluster*,double>>> WireCell2dToy
 
 
 // old version of code to not break the old code ... 
-std::map<PR3DCluster*,std::vector<std::pair<PR3DCluster*,double>>> WireCell2dToy::Clustering_jump_gap_cosmics(WireCell::PR3DClusterSelection& live_clusters, WireCell::PR3DClusterSelection& dead_clusters, std::map<int,std::pair<double,double>>& dead_u_index, std::map<int,std::pair<double,double>>& dead_v_index, std::map<int,std::pair<double,double>>& dead_w_index, WireCell::DynamicToyPointCloud& global_point_cloud, bool flag_neutrino){
+std::map<PR3DCluster*,std::vector<std::pair<PR3DCluster*,double>>> WCP2dToy::Clustering_jump_gap_cosmics(WCP::PR3DClusterSelection& live_clusters, WCP::PR3DClusterSelection& dead_clusters, std::map<int,std::pair<double,double>>& dead_u_index, std::map<int,std::pair<double,double>>& dead_v_index, std::map<int,std::pair<double,double>>& dead_w_index, WCP::DynamicToyPointCloud& global_point_cloud, bool flag_neutrino){
 
   
   ExecMon em("starting");
@@ -551,7 +551,7 @@ std::map<PR3DCluster*,std::vector<std::pair<PR3DCluster*,double>>> WireCell2dToy
   
 
   // need to further cluster things ... for the small and isolated pieces ... 
-  std::map<PR3DCluster*,std::vector<std::pair<PR3DCluster*,double>>> group_clusters =  WireCell2dToy::Clustering_isolated(live_clusters, cluster_length_map);
+  std::map<PR3DCluster*,std::vector<std::pair<PR3DCluster*,double>>> group_clusters =  WCP2dToy::Clustering_isolated(live_clusters, cluster_length_map);
   // cerr << em("Clustering isolated") << std::endl;
  
 

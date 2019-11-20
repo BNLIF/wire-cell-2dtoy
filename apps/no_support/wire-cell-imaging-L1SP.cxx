@@ -1,59 +1,59 @@
-#include "WireCellSst/GeomDataSource.h"
-#include "WireCellSst/DatauBooNEFrameDataSource.h"
-#include "WireCellSst/ToyuBooNESliceDataSource.h"
-#include "WireCellSst/uBooNESliceDataSource.h"
+#include "WCPSst/GeomDataSource.h"
+#include "WCPSst/DatauBooNEFrameDataSource.h"
+#include "WCPSst/ToyuBooNESliceDataSource.h"
+#include "WCPSst/uBooNESliceDataSource.h"
 
-#include "WireCell2dToy/ToyEventDisplay.h"
-#include "WireCell2dToy/ToyTiling.h"
-#include "WireCell2dToy/BadTiling.h"
-#include "WireCell2dToy/LowmemTiling.h"
-#include "WireCell2dToy/uBooNE_L1SP.h"
-#include "WireCell2dToy/WireCellHolder.h"
+#include "WCP2dToy/ToyEventDisplay.h"
+#include "WCP2dToy/ToyTiling.h"
+#include "WCP2dToy/BadTiling.h"
+#include "WCP2dToy/LowmemTiling.h"
+#include "WCP2dToy/uBooNE_L1SP.h"
+#include "WCP2dToy/WCPHolder.h"
 
-#include "WireCell2dToy/MergeToyTiling.h"
-#include "WireCell2dToy/TruthToyTiling.h"
-#include "WireCell2dToy/SimpleBlobToyTiling.h"
+#include "WCP2dToy/MergeToyTiling.h"
+#include "WCP2dToy/TruthToyTiling.h"
+#include "WCP2dToy/SimpleBlobToyTiling.h"
 
-#include "WireCell2dToy/ChargeSolving.h"
-#include "WireCell2dToy/ToyMatrix.h"
-#include "WireCell2dToy/ToyMatrixExclusive.h"
-#include "WireCell2dToy/ToyMatrixKalman.h"
-#include "WireCell2dToy/ToyMatrixIterate.h"
-#include "WireCell2dToy/ToyMatrixIterate_SingleWire.h"
-#include "WireCell2dToy/ToyMatrixIterate_Only.h"
+#include "WCP2dToy/ChargeSolving.h"
+#include "WCP2dToy/ToyMatrix.h"
+#include "WCP2dToy/ToyMatrixExclusive.h"
+#include "WCP2dToy/ToyMatrixKalman.h"
+#include "WCP2dToy/ToyMatrixIterate.h"
+#include "WCP2dToy/ToyMatrixIterate_SingleWire.h"
+#include "WCP2dToy/ToyMatrixIterate_Only.h"
 
-#include "WireCell2dToy/ToyMatrixMarkov.h"
-#include "WireCell2dToy/ToyMetric.h"
-#include "WireCell2dToy/BlobMetric.h"
-#include "WireCellData/TPCParams.h"
-#include "WireCellData/Singleton.h"
+#include "WCP2dToy/ToyMatrixMarkov.h"
+#include "WCP2dToy/ToyMetric.h"
+#include "WCP2dToy/BlobMetric.h"
+#include "WCPData/TPCParams.h"
+#include "WCPData/Singleton.h"
 
-#include "WireCellData/MergeGeomCell.h"
-#include "WireCellData/MergeGeomWire.h"
+#include "WCPData/MergeGeomCell.h"
+#include "WCPData/MergeGeomWire.h"
 
-#include "WireCellData/Slim3DCluster.h"
-//#include "WireCellNav/SliceDataSource.h"
+#include "WCPData/Slim3DCluster.h"
+//#include "WCPNav/SliceDataSource.h"
 
 
-#include "WireCellNav/FrameDataSource.h"
-#include "WireCellNav/SimDataSource.h"
-#include "WireCellNav/SliceDataSource.h"
-#include "WireCellSst/Util.h"
-#include "WireCellData/SimTruth.h"
-#include "WireCell2dToy/ToyDepositor.h"
-#include "WireCellNav/GenerativeFDS.h"
-#include "WireCell2dToy/ToySignalSimu.h"
-#include "WireCell2dToy/ToySignalSimuTrue.h"
-#include "WireCell2dToy/DataSignalGaus_ROI.h"
-#include "WireCell2dToy/DataSignalWien_ROI.h"
+#include "WCPNav/FrameDataSource.h"
+#include "WCPNav/SimDataSource.h"
+#include "WCPNav/SliceDataSource.h"
+#include "WCPSst/Util.h"
+#include "WCPData/SimTruth.h"
+#include "WCP2dToy/ToyDepositor.h"
+#include "WCPNav/GenerativeFDS.h"
+#include "WCP2dToy/ToySignalSimu.h"
+#include "WCP2dToy/ToySignalSimuTrue.h"
+#include "WCP2dToy/DataSignalGaus_ROI.h"
+#include "WCP2dToy/DataSignalWien_ROI.h"
 
-#include "WireCell2dToy/uBooNE_Data_2D_Deconvolution.h"
-#include "WireCell2dToy/uBooNE_Data_ROI.h"
-#include "WireCell2dToy/uBooNE_Data_After_ROI.h"
-#include "WireCell2dToy/uBooNE_Data_After_ROI_gaus.h"
-#include "WireCell2dToy/pd_Data_FDS.h"
-#include "WireCell2dToy/uBooNE_Data_Error.h"
-#include "WireCell2dToy/ExecMon.h"
+#include "WCP2dToy/uBooNE_Data_2D_Deconvolution.h"
+#include "WCP2dToy/uBooNE_Data_ROI.h"
+#include "WCP2dToy/uBooNE_Data_After_ROI.h"
+#include "WCP2dToy/uBooNE_Data_After_ROI_gaus.h"
+#include "WCP2dToy/pd_Data_FDS.h"
+#include "WCP2dToy/uBooNE_Data_Error.h"
+#include "WCP2dToy/ExecMon.h"
 
 #include "TApplication.h"
 #include "TCanvas.h"
@@ -66,7 +66,7 @@
 #include "TMatrixD.h"
 #include <iostream>
 
-using namespace WireCell;
+using namespace WCP;
 using namespace std;
 
 bool GeomWireSelectionCompare(GeomWireSelection a, GeomWireSelection b) {
@@ -128,7 +128,7 @@ int main(int argc, char* argv[])
   ExecMon em("starting");
   cerr << em("load geometry") << endl;
 
-  WireCellSst::GeomDataSource gds(argv[1]);
+  WCPSst::GeomDataSource gds(argv[1]);
   std::vector<double> ex = gds.extent();
   cerr << "Extent: "
        << " x:" << ex[0]/units::mm << " mm"
@@ -285,7 +285,7 @@ int main(int argc, char* argv[])
   TH2F *hv_raw = (TH2F*)file1->Get("hv_raw");
   TH2F *hw_raw = (TH2F*)file1->Get("hw_raw");
   
-  WireCell2dToy::pdDataFDS roi_fds(gds,hu_decon,hv_decon,hw_decon,eve_num);
+  WCP2dToy::pdDataFDS roi_fds(gds,hu_decon,hv_decon,hw_decon,eve_num);
   roi_fds.jump(eve_num);
 
   TH2F *hu_decon_g = (TH2F*)file1->Get("hu_decon");
@@ -297,19 +297,19 @@ int main(int argc, char* argv[])
   // if it is -2.8, it will shift L1SP decon result to early time by 2.8 us
   // This is to take into account potential time difference between
   // WCT standard SP and WCP L1SP (based on WCP standard SP) ...
-  WireCell2dToy::uBooNE_L1SP l1sp(hv_raw,hv_decon,hv_decon_g,nrebin,0);
-  //  WireCell2dToy::uBooNE_L1SP l1sp(hv_raw,hv_decon,hv_decon_g,nrebin,-2.8);
+  WCP2dToy::uBooNE_L1SP l1sp(hv_raw,hv_decon,hv_decon_g,nrebin,0);
+  //  WCP2dToy::uBooNE_L1SP l1sp(hv_raw,hv_decon,hv_decon_g,nrebin,-2.8);
   
-  WireCell2dToy::pdDataFDS roi_gaus_fds(gds,hu_decon_g,hv_decon_g,hw_decon_g,eve_num);
+  WCP2dToy::pdDataFDS roi_gaus_fds(gds,hu_decon_g,hv_decon_g,hw_decon_g,eve_num);
   roi_gaus_fds.jump(eve_num);
 
-  WireCell2dToy::uBooNEDataError error_fds(gds,hu_decon_g, hv_decon_g, hw_decon_g, eve_num, nrebin);
+  WCP2dToy::uBooNEDataError error_fds(gds,hu_decon_g, hv_decon_g, hw_decon_g, eve_num, nrebin);
   error_fds.jump(eve_num);
   
   
 
 
-  WireCellSst::uBooNESliceDataSource sds(roi_fds,roi_gaus_fds,error_fds,
+  WCPSst::uBooNESliceDataSource sds(roi_fds,roi_gaus_fds,error_fds,
 					 threshold_u, threshold_v, threshold_w,
 					 nwire_u, nwire_v, nwire_w,
 					 &uplane_rms, &vplane_rms, &wplane_rms); 
@@ -327,10 +327,10 @@ int main(int argc, char* argv[])
   
 
  
-  WireCell2dToy::LowmemTiling **lowmemtiling = new WireCell2dToy::LowmemTiling*[2400];
-  WireCell2dToy::ChargeSolving **chargesolver = new WireCell2dToy::ChargeSolving*[2400];
+  WCP2dToy::LowmemTiling **lowmemtiling = new WCP2dToy::LowmemTiling*[2400];
+  WCP2dToy::ChargeSolving **chargesolver = new WCP2dToy::ChargeSolving*[2400];
   
-  WireCell2dToy::WireCellHolder WCholder;
+  WCP2dToy::WCPHolder WCholder;
 
   //add in cluster
   Slim3DClusterSet cluster_set, cluster_delset;
@@ -399,17 +399,17 @@ int main(int argc, char* argv[])
       std::cout << "Tiling: " << i << std::endl;
 
     sds.jump(i);
-    WireCell::Slice slice = sds.get();
-    WireCell::Slice slice_err = sds.get_error();
+    WCP::Slice slice = sds.get();
+    WCP::Slice slice_err = sds.get_error();
 
-    // WireCell::Channel::Group group = slice.group();
-    // WireCell::Channel::Group group_err = slice_err.group();
+    // WCP::Channel::Group group = slice.group();
+    // WCP::Channel::Group group_err = slice_err.group();
     //double sum = 0;
     // for (int i=0;i!=group.size();i++){
     //   std::cout << group.at(i).first << " " << group.at(i).second << " " << group_err.at(i).first << " " << group_err.at(i).second << std::endl;
     // }
     
-    lowmemtiling[i] = new WireCell2dToy::LowmemTiling(i,nrebin,gds,WCholder);
+    lowmemtiling[i] = new WCP2dToy::LowmemTiling(i,nrebin,gds,WCholder);
     if (i==start_num){
       lowmemtiling[i]->init_bad_cells(uplane_map,vplane_map,wplane_map);
     }else{
@@ -455,12 +455,12 @@ int main(int argc, char* argv[])
 
       
       sds.jump(time_slice);
-      WireCell::Slice slice = sds.get();
-      WireCell::Slice slice_err = sds.get_error();
+      WCP::Slice slice = sds.get();
+      WCP::Slice slice_err = sds.get_error();
 
       std::cout << time_slice << " " << slice.group().size() << " " << slice_err.group().size() << std::endl;
       // if (time_slice == 2070){
-      // 	WireCell::Channel::Group group = slice.group();
+      // 	WCP::Channel::Group group = slice.group();
       // 	for (int k=0;k!=group.size();k++){
       // 	  std::cout << k << " " << group.at(k).first << " " << group.at(k).second << std::endl;
       // 	}
@@ -483,8 +483,8 @@ int main(int argc, char* argv[])
   }
   // for (int i=start_num;i!=end_num+1;i++){
   //    sds.jump(i);
-  //    WireCell::Slice slice = sds.get();
-  //    WireCell::Slice slice_err = sds.get_error();
+  //    WCP::Slice slice = sds.get();
+  //    WCP::Slice slice_err = sds.get_error();
      
   //    lowmemtiling[i]->init_good_cells(slice,slice_err,uplane_rms,vplane_rms,wplane_rms);
   // }

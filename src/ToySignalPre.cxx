@@ -1,6 +1,6 @@
-#include "WireCell2dToy/ToySignalPre.h"
-#include "WireCell2dToy/ToySignalSimu.h"
-#include "WireCellData/GeomWire.h"
+#include "WCP2dToy/ToySignalPre.h"
+#include "WCP2dToy/ToySignalSimu.h"
+#include "WCPData/GeomWire.h"
 #include "TFile.h"
 #include "TVirtualFFT.h"
 #include "TF1.h"
@@ -8,9 +8,9 @@
 #include "TMatrixD.h"
 #include "TVectorD.h"
 
-using namespace WireCell;
+using namespace WCP;
 
-WireCell2dToy::ToySignalPreFDS::ToySignalPreFDS(WireCell::FrameDataSource& fds, const WireCell::GeomDataSource& gds, int bins_per_frame1, int nframes_total)
+WCP2dToy::ToySignalPreFDS::ToySignalPreFDS(WCP::FrameDataSource& fds, const WCP::GeomDataSource& gds, int bins_per_frame1, int nframes_total)
   : fds(fds)
   , gds(gds)
   , max_frames(nframes_total)
@@ -160,11 +160,11 @@ WireCell2dToy::ToySignalPreFDS::ToySignalPreFDS(WireCell::FrameDataSource& fds, 
 }
 
 
-int WireCell2dToy::ToySignalPreFDS::size() const{
+int WCP2dToy::ToySignalPreFDS::size() const{
   return max_frames;
 }
 
-void WireCell2dToy::ToySignalPreFDS::Save(){
+void WCP2dToy::ToySignalPreFDS::Save(){
   TFile *file = new TFile("temp_pre.root","RECREATE");
   for (int i=0;i!=nwire_u;i++){
     TH1F *huu = (TH1F*)hu[i]->Clone(Form("U1_%d",i));
@@ -189,7 +189,7 @@ void WireCell2dToy::ToySignalPreFDS::Save(){
 }
 
 
-int WireCell2dToy::ToySignalPreFDS::jump(int frame_number){
+int WCP2dToy::ToySignalPreFDS::jump(int frame_number){
   // fill the frame data ... 
   if (frame.index == frame_number) {
     return frame_number;
@@ -353,7 +353,7 @@ int WireCell2dToy::ToySignalPreFDS::jump(int frame_number){
 }
 
 
-WireCell2dToy::ToySignalPreFDS::~ToySignalPreFDS(){
+WCP2dToy::ToySignalPreFDS::~ToySignalPreFDS(){
   for (int i=0;i!=nwire_u;i++){
     delete hu[i] ;
   }

@@ -1,6 +1,6 @@
-#include "WireCell2dToy/ToyLightReco.h"
-#include "WireCellRess/LassoModel.h"
-#include "WireCellRess/ElasticNetModel.h"
+#include "WCP2dToy/ToyLightReco.h"
+#include "WCPRess/LassoModel.h"
+#include "WCPRess/ElasticNetModel.h"
 #include <Eigen/Dense>
 
 #include "TH1S.h"
@@ -9,11 +9,11 @@
 #include <iostream>
 #include <array>
 
-using namespace WireCell;
+using namespace WCP;
 using namespace Eigen;
 
 
-WireCell2dToy::ToyLightReco::ToyLightReco(const char* root_file, bool imagingoutput, int datatier){
+WCP2dToy::ToyLightReco::ToyLightReco(const char* root_file, bool imagingoutput, int datatier){
   //file = new TFile(root_file);
   file = TFile::Open(root_file);
   if(imagingoutput){
@@ -104,7 +104,7 @@ WireCell2dToy::ToyLightReco::ToyLightReco(const char* root_file, bool imagingout
   //delete_status = true;
 }
 
-WireCell2dToy::ToyLightReco::~ToyLightReco(){
+WCP2dToy::ToyLightReco::~ToyLightReco(){
   //  if(delete_status){
 
   clear_flashes();
@@ -192,7 +192,7 @@ WireCell2dToy::ToyLightReco::~ToyLightReco(){
 }
 
 
-void WireCell2dToy::ToyLightReco::clear_flashes(){
+void WCP2dToy::ToyLightReco::clear_flashes(){
 
   // clear flashes and actually delete them ... 
   for (auto it = beam_flashes.begin(); it!=beam_flashes.end(); it++){
@@ -236,7 +236,7 @@ void WireCell2dToy::ToyLightReco::clear_flashes(){
   
 }
 
-void WireCell2dToy::ToyLightReco::load_event_raw(int eve_num, double tMin, double tMax){
+void WCP2dToy::ToyLightReco::load_event_raw(int eve_num, double tMin, double tMax){
   
   T->GetEntry(eve_num);
 
@@ -253,27 +253,27 @@ void WireCell2dToy::ToyLightReco::load_event_raw(int eve_num, double tMin, doubl
     }
   }
   
-  WireCell2dToy::pmtMapSet beamHG = makePmtContainer(true, true, beam_hg_wf, beam_hg_opch, beam_hg_timestamp);
+  WCP2dToy::pmtMapSet beamHG = makePmtContainer(true, true, beam_hg_wf, beam_hg_opch, beam_hg_timestamp);
 
   // std::cout << "1 " << std::endl;
   
-  WireCell2dToy::pmtMapSet beamLG = makePmtContainer(false, true, beam_lg_wf, beam_lg_opch, beam_lg_timestamp);
+  WCP2dToy::pmtMapSet beamLG = makePmtContainer(false, true, beam_lg_wf, beam_lg_opch, beam_lg_timestamp);
 
   // std::cout << "1 " << std::endl;
-  WireCell2dToy::pmtMapSet cosmicHG = makePmtContainer(true, false, cosmic_hg_wf, cosmic_hg_opch, cosmic_hg_timestamp);
+  WCP2dToy::pmtMapSet cosmicHG = makePmtContainer(true, false, cosmic_hg_wf, cosmic_hg_opch, cosmic_hg_timestamp);
 
   //  std::cout << "1 " << std::endl;
-  WireCell2dToy::pmtMapSet cosmicLG = makePmtContainer(false, false, cosmic_lg_wf, cosmic_lg_opch, cosmic_lg_timestamp);
+  WCP2dToy::pmtMapSet cosmicLG = makePmtContainer(false, false, cosmic_lg_wf, cosmic_lg_opch, cosmic_lg_timestamp);
 
   // std::cout << "1 " << std::endl;
   
-  WireCell2dToy::pmtMapPair beamPair = makeBeamPairs(beamHG, beamLG);
-  WireCell2dToy::pmtMapSetPair cosmicPair = makeCosmicPairs(cosmicHG, cosmicLG);
+  WCP2dToy::pmtMapPair beamPair = makeBeamPairs(beamHG, beamLG);
+  WCP2dToy::pmtMapSetPair cosmicPair = makeCosmicPairs(cosmicHG, cosmicLG);
 
   // std::cout << "1 " << std::endl;
   
-  WireCell2dToy::pmtMap beamMerge = mergeBeam(beamPair);
-  WireCell2dToy::pmtMapSet cosmicMerge = mergeCosmic(cosmicPair);
+  WCP2dToy::pmtMap beamMerge = mergeBeam(beamPair);
+  WCP2dToy::pmtMapSet cosmicMerge = mergeCosmic(cosmicPair);
 
   // std::cout << "1 " << std::endl;
   
@@ -389,7 +389,7 @@ void WireCell2dToy::ToyLightReco::load_event_raw(int eve_num, double tMin, doubl
   
 }
 
-void WireCell2dToy::ToyLightReco::update_pmt_map(){
+void WCP2dToy::ToyLightReco::update_pmt_map(){
   // std::cout << "Update map!" << std::endl;
   for (auto it=flashes.begin(); it!=flashes.end(); it++){
     Opflash *flash = *it;
@@ -399,7 +399,7 @@ void WireCell2dToy::ToyLightReco::update_pmt_map(){
 
 
     
-void WireCell2dToy::ToyLightReco::sort_flashes(){
+void WCP2dToy::ToyLightReco::sort_flashes(){
   OpFlashSet cosmic_set;
   for (auto it= cosmic_flashes.begin(); it!= cosmic_flashes.end(); it++){
     cosmic_set.insert(*it);
@@ -424,7 +424,7 @@ void WireCell2dToy::ToyLightReco::sort_flashes(){
   // std::cout << flashes.size() << std::endl;
 }
 
-void WireCell2dToy::ToyLightReco::Process_beam_wfs(double tMin, double tMax){
+void WCP2dToy::ToyLightReco::Process_beam_wfs(double tMin, double tMax){
   // correct the baseline ...
   TH1F h1("h1","h1",200,-100,100);
   for (int i=0;i!=32;i++){
@@ -634,7 +634,7 @@ void WireCell2dToy::ToyLightReco::Process_beam_wfs(double tMin, double tMax){
     }
     
     double lambda = 5;//1/2.;
-    WireCell::LassoModel m2(lambda, 100000, 0.05);
+    WCP::LassoModel m2(lambda, 100000, 0.05);
     m2.SetData(G, W);
     m2.Fit();
     VectorXd beta = m2.Getbeta();
@@ -713,7 +713,7 @@ void WireCell2dToy::ToyLightReco::Process_beam_wfs(double tMin, double tMax){
   // MatrixXd Gp = GT_tot * G_tot + FT_tot * F_tot;
 
   // double lambda = 0.1;//1/2.;
-  // WireCell::LassoModel m3(lambda, 100000, 0.05);
+  // WCP::LassoModel m3(lambda, 100000, 0.05);
   // m3.SetData(Gp, Wp);
   // for (size_t i=0;i!=global_vals_x.size();i++){
   //   m3.SetLambdaWeight(i,0.0);
@@ -980,16 +980,16 @@ void WireCell2dToy::ToyLightReco::Process_beam_wfs(double tMin, double tMax){
   delete hspe;
 }
 
-WireCell2dToy::pmtMapSet WireCell2dToy::ToyLightReco::makePmtContainer(bool high, bool beam, TClonesArray *wf, std::vector<short> *chan, std::vector<double> *timestamp){
+WCP2dToy::pmtMapSet WCP2dToy::ToyLightReco::makePmtContainer(bool high, bool beam, TClonesArray *wf, std::vector<short> *chan, std::vector<double> *timestamp){
   short discSize=1500, baseline=2050, saturationThreshold=4080, refSize=1000;
-  WireCell2dToy::pmtMapSet result;
+  WCP2dToy::pmtMapSet result;
   int num = wf->GetEntriesFast();
   if(beam == false){ discSize = 40; }
   std::array<float,32> scalePMT; scalePMT.fill(10.0);
 
   if(high == true){
     for(int i=0; i<num; i++){
-      WireCell2dToy::pmtDisc disc;
+      WCP2dToy::pmtDisc disc;
       if(beam == true){
 	if(chan->at(i)>=32) continue;
 	disc.channel = chan->at(i);
@@ -1017,7 +1017,7 @@ WireCell2dToy::pmtMapSet WireCell2dToy::ToyLightReco::makePmtContainer(bool high
   }
   else if(high == false){
     for(int i=0; i<num; i++){
-      WireCell2dToy::pmtDisc disc;
+      WCP2dToy::pmtDisc disc;
       if(chan->at(i)>=132) continue;
       TH1S *h = (TH1S*)wf->At(i);
       if( (beam == true && h->GetNbinsX()<refSize) ||
@@ -1053,11 +1053,11 @@ WireCell2dToy::pmtMapSet WireCell2dToy::ToyLightReco::makePmtContainer(bool high
   return result;
 }
 
-WireCell2dToy::pmtMapPair WireCell2dToy::ToyLightReco::makeBeamPairs(WireCell2dToy::pmtMapSet &high, WireCell2dToy::pmtMapSet &low){
-  WireCell2dToy::pmtMapPair result;
+WCP2dToy::pmtMapPair WCP2dToy::ToyLightReco::makeBeamPairs(WCP2dToy::pmtMapSet &high, WCP2dToy::pmtMapSet &low){
+  WCP2dToy::pmtMapPair result;
 
   for(auto h=high.begin(); h!=high.end(); h++){
-    WireCell2dToy::pmtPair tempPair;
+    WCP2dToy::pmtPair tempPair;
     tempPair.first = *h->second.begin();
     tempPair.second = *low[h->first].begin();
     result[h->first] = tempPair;
@@ -1065,17 +1065,17 @@ WireCell2dToy::pmtMapPair WireCell2dToy::ToyLightReco::makeBeamPairs(WireCell2dT
   return result;
 }
 
-WireCell2dToy::pmtMapSetPair WireCell2dToy::ToyLightReco::makeCosmicPairs(WireCell2dToy::pmtMapSet &high, WireCell2dToy::pmtMapSet &low){
-  WireCell2dToy::pmtMapSetPair result;
+WCP2dToy::pmtMapSetPair WCP2dToy::ToyLightReco::makeCosmicPairs(WCP2dToy::pmtMapSet &high, WCP2dToy::pmtMapSet &low){
+  WCP2dToy::pmtMapSetPair result;
   int countIsoLg = 0, tickWindow=20;
   float tick = 0.015625;
 
   // can use the 1D kd tree to search??? 
   for(auto h=high.begin(); h!=high.end(); h++){
-    WireCell2dToy::pmtSetPair tempSetPair;
+    WCP2dToy::pmtSetPair tempSetPair;
 
     for(auto hs : h->second){
-      WireCell2dToy::pmtPair tempPair;
+      WCP2dToy::pmtPair tempPair;
       bool found = false;
 
       for(auto ls : low[h->first]){
@@ -1096,7 +1096,7 @@ WireCell2dToy::pmtMapSetPair WireCell2dToy::ToyLightReco::makeCosmicPairs(WireCe
     }
 
     for(auto ls : low[h->first]){
-      WireCell2dToy::pmtPair tempPair;
+      WCP2dToy::pmtPair tempPair;
       if(ls.isolated == false) continue;
       tempPair.first = ls;
       tempPair.second = ls;
@@ -1107,12 +1107,12 @@ WireCell2dToy::pmtMapSetPair WireCell2dToy::ToyLightReco::makeCosmicPairs(WireCe
   return result;
 }
 
-WireCell2dToy::pmtMap WireCell2dToy::ToyLightReco::mergeBeam(WireCell2dToy::pmtMapPair &beam){
-  WireCell2dToy::pmtMap result;
+WCP2dToy::pmtMap WCP2dToy::ToyLightReco::mergeBeam(WCP2dToy::pmtMapPair &beam){
+  WCP2dToy::pmtMap result;
   for(auto b=beam.begin(); b!=beam.end(); b++){
     if(b->second.first.saturated == true){
       //  std::cout << "Xin: " << b->second.first.channel <<  " " << b->second.first.wfm.at(0) << " " << b->second.second.wfm.at(0) << std::endl;
-      WireCell2dToy::saturationTick tickVec = findSaturationTick(b->second.first.wfm);
+      WCP2dToy::saturationTick tickVec = findSaturationTick(b->second.first.wfm);
       b->second.first.wfm = replaceSaturatedBin(b->second.first.wfm,b->second.second.wfm,tickVec);
       //b->second.first.wfm = b->second.second.wfm;
     }
@@ -1121,8 +1121,8 @@ WireCell2dToy::pmtMap WireCell2dToy::ToyLightReco::mergeBeam(WireCell2dToy::pmtM
   return result;
 }
 
-WireCell2dToy::pmtMapSet WireCell2dToy::ToyLightReco::mergeCosmic(WireCell2dToy::pmtMapSetPair &cosmic){
-  WireCell2dToy::pmtMapSet result;
+WCP2dToy::pmtMapSet WCP2dToy::ToyLightReco::mergeCosmic(WCP2dToy::pmtMapSetPair &cosmic){
+  WCP2dToy::pmtMapSet result;
   for(auto c=cosmic.begin(); c!=cosmic.end(); c++){
     for(auto p : c->second){
 
@@ -1138,7 +1138,7 @@ WireCell2dToy::pmtMapSet WireCell2dToy::ToyLightReco::mergeCosmic(WireCell2dToy:
       }
       else{ // paired cos. disc.
 	if(p.first.saturated == true){ // saturated HG
-	  //WireCell2dToy::saturationTick tickVec = findSaturationTick(p.first.wfm);
+	  //WCP2dToy::saturationTick tickVec = findSaturationTick(p.first.wfm);
 	  //p.first.wfm = replaceSaturatedBin(p.first.wfm,p.second.wfm,tickVec);
 	  p.first.wfm = p.second.wfm;
 	  result[c->first].insert(p.first);
@@ -1152,8 +1152,8 @@ WireCell2dToy::pmtMapSet WireCell2dToy::ToyLightReco::mergeCosmic(WireCell2dToy:
   return result;
 }
 
-WireCell2dToy::saturationTick WireCell2dToy::ToyLightReco::findSaturationTick(std::vector<short> &wfm){
-  WireCell2dToy::saturationTick result;
+WCP2dToy::saturationTick WCP2dToy::ToyLightReco::findSaturationTick(std::vector<short> &wfm){
+  WCP2dToy::saturationTick result;
   bool saturatedStatus = false;
   std::pair<short,short> tempPair;
   short saturationThreshold=4080;
@@ -1172,7 +1172,7 @@ WireCell2dToy::saturationTick WireCell2dToy::ToyLightReco::findSaturationTick(st
   return result;
 }
 
-std::vector<short> WireCell2dToy::ToyLightReco::replaceSaturatedBin(std::vector<short> &high, std::vector<short> &low, saturationTick &st){
+std::vector<short> WCP2dToy::ToyLightReco::replaceSaturatedBin(std::vector<short> &high, std::vector<short> &low, saturationTick &st){
 
   for(int i=0; i<(int)st.size(); i++){
     for(short j=st.at(i).first; j<st.at(i).second; j++){
@@ -1182,7 +1182,7 @@ std::vector<short> WireCell2dToy::ToyLightReco::replaceSaturatedBin(std::vector<
   return high;
 }
 
-void WireCell2dToy::ToyLightReco::dumpPmtVec(WireCell2dToy::pmtMap &beam, WireCell2dToy::pmtMapSet &cosmic){
+void WCP2dToy::ToyLightReco::dumpPmtVec(WCP2dToy::pmtMap &beam, WCP2dToy::pmtMapSet &cosmic){
   int z=0;
   for(auto b=beam.begin(); b!=beam.end(); b++){
     fop_femch->push_back( b->second.channel );
@@ -1209,7 +1209,7 @@ void WireCell2dToy::ToyLightReco::dumpPmtVec(WireCell2dToy::pmtMap &beam, WireCe
   return;
 }
 
-double WireCell2dToy::ToyLightReco::findBaselineLg(TH1 *hist, int nbin){
+double WCP2dToy::ToyLightReco::findBaselineLg(TH1 *hist, int nbin){
   TH1F *h = new TH1F("h","",1000,1500-0.5,2500-0.5);
   double baseline=0;
   for(int i=0; i!=20; i++){
@@ -1223,7 +1223,7 @@ double WireCell2dToy::ToyLightReco::findBaselineLg(TH1 *hist, int nbin){
   return baseline;
 }
 
-std::pair<double,double> WireCell2dToy::ToyLightReco::cal_mean_rms(TH1 *hist, int nbin){
+std::pair<double,double> WCP2dToy::ToyLightReco::cal_mean_rms(TH1 *hist, int nbin){
   TH1F *h4 = new TH1F("h4","h4",2000,-10,10);
   double mean, rms;
   for (int i=0;i!=nbin;i++){
@@ -1247,7 +1247,7 @@ std::pair<double,double> WireCell2dToy::ToyLightReco::cal_mean_rms(TH1 *hist, in
   return std::make_pair(mean,rms);
 }
 
-float WireCell2dToy::ToyLightReco::findScaling(int opdet){
+float WCP2dToy::ToyLightReco::findScaling(int opdet){
   if(opdet == 0){ return 10.13; }
   if(opdet == 1){ return 10.20; }
   if(opdet == 2){ return 10.13; }

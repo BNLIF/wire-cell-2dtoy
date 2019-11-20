@@ -2,14 +2,14 @@
 #define WIRECELL_UBOONE_LIGHT_RECO_H
 
 
-#include "WireCellData/Opflash.h"
+#include "WCPData/Opflash.h"
 
 #include "TFile.h"
 #include "TTree.h"
 #include "TClonesArray.h"
 #include <vector>
 
-namespace WireCell2dToy{
+namespace WCP2dToy{
   class uBooNE_light_reco{
   public:
     uBooNE_light_reco(const char* root_file);
@@ -29,9 +29,9 @@ namespace WireCell2dToy{
     TH1F* get_l1_mult(){return h_l1_mult;};
     TH1F* get_l1_totPE(){return h_l1_totPE;};
     
-    WireCell::OpflashSelection& get_flashes(){return flashes;};
-    WireCell::OpflashSelection& get_cosmic_flashes(){return cosmic_flashes;};
-    WireCell::OpflashSelection& get_beam_flashes(){return beam_flashes;};
+    WCP::OpflashSelection& get_flashes(){return flashes;};
+    WCP::OpflashSelection& get_cosmic_flashes(){return cosmic_flashes;};
+    WCP::OpflashSelection& get_beam_flashes(){return beam_flashes;};
     
   protected:
     void Process_beam_wfs();
@@ -49,10 +49,10 @@ namespace WireCell2dToy{
     
     TFile *file;
     TTree *T;
-    WireCell::OpflashSelection cosmic_flashes;
-    WireCell::OpflashSelection beam_flashes;
-    WireCell::OpflashSelection flashes;
-    // WireCell::COphitSelection op_hits;
+    WCP::OpflashSelection cosmic_flashes;
+    WCP::OpflashSelection beam_flashes;
+    WCP::OpflashSelection flashes;
+    // WCP::COphitSelection op_hits;
 
     double gain[32];
     double beam_dt[32];

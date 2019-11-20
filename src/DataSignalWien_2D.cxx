@@ -1,14 +1,14 @@
-#include "WireCell2dToy/DataSignalWien_2D.h"
+#include "WCP2dToy/DataSignalWien_2D.h"
 
-#include "WireCellData/GeomWire.h"
+#include "WCPData/GeomWire.h"
 #include "TFile.h"
 #include "TVirtualFFT.h"
 #include "TRandom.h"
 #include "TF1.h"
 
-using namespace WireCell;
+using namespace WCP;
 
-WireCell2dToy::DataSignalWien2DFDS::DataSignalWien2DFDS(WireCell::FrameDataSource& fds, const WireCell::GeomDataSource& gds,WireCell::ChirpMap& umap, WireCell::ChirpMap& vmap, WireCell::ChirpMap& wmap, int bins_per_frame1, int nframes_total, float time_offset_uv, float time_offset_uw, float overall_time_offset)
+WCP2dToy::DataSignalWien2DFDS::DataSignalWien2DFDS(WCP::FrameDataSource& fds, const WCP::GeomDataSource& gds,WCP::ChirpMap& umap, WCP::ChirpMap& vmap, WCP::ChirpMap& wmap, int bins_per_frame1, int nframes_total, float time_offset_uv, float time_offset_uw, float overall_time_offset)
   : fds(fds)
   , gds(gds)
   , max_frames(nframes_total)
@@ -52,17 +52,17 @@ WireCell2dToy::DataSignalWien2DFDS::DataSignalWien2DFDS(WireCell::FrameDataSourc
   gw = new TGraph(5000,xw,yw);
 }
 
-int WireCell2dToy::DataSignalWien2DFDS::size() const{
+int WCP2dToy::DataSignalWien2DFDS::size() const{
   return max_frames;
 }
 
-void WireCell2dToy::DataSignalWien2DFDS::Save(){
+void WCP2dToy::DataSignalWien2DFDS::Save(){
   // TFile *file = new TFile("temp_wien.root","RECREATE");
   // file->Write();
   // file->Close();
 }
 
-int WireCell2dToy::DataSignalWien2DFDS::jump(int frame_number){
+int WCP2dToy::DataSignalWien2DFDS::jump(int frame_number){
   // fill the frame data ... 
   if (frame.index == frame_number) {
     return frame_number;
@@ -620,7 +620,7 @@ int WireCell2dToy::DataSignalWien2DFDS::jump(int frame_number){
   return frame.index;
 }
 
-WireCell2dToy::DataSignalWien2DFDS::~DataSignalWien2DFDS(){
+WCP2dToy::DataSignalWien2DFDS::~DataSignalWien2DFDS(){
   // for (int i=0;i!=nwire_u;i++){
   //   delete hu[i] ;
   // }

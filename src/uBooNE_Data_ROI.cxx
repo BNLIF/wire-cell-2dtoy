@@ -1,12 +1,12 @@
-#include "WireCell2dToy/uBooNE_Data_ROI.h"
+#include "WCP2dToy/uBooNE_Data_ROI.h"
 
-#include "WireCellData/GeomWire.h"
+#include "WCPData/GeomWire.h"
 #include "TVirtualFFT.h"
 #include "TF1.h"
 
-using namespace WireCell;
+using namespace WCP;
 
-Double_t WireCell2dToy::uBooNEDataROI::local_ave(TH1F *h1, Int_t bin, Int_t width){
+Double_t WCP2dToy::uBooNEDataROI::local_ave(TH1F *h1, Int_t bin, Int_t width){
   Double_t sum1 = 0;
   Double_t sum2 = 0;
   
@@ -30,7 +30,7 @@ Double_t WireCell2dToy::uBooNEDataROI::local_ave(TH1F *h1, Int_t bin, Int_t widt
 }
 
 
-void WireCell2dToy::uBooNEDataROI::Clear(){
+void WCP2dToy::uBooNEDataROI::Clear(){
   self_rois_u.clear();
   self_rois_v.clear();
   self_rois_w.clear();
@@ -45,7 +45,7 @@ void WireCell2dToy::uBooNEDataROI::Clear(){
 }
 
 
-Int_t WireCell2dToy::uBooNEDataROI::find_ROI_end(TH1F *h1, Int_t bin, Double_t th){
+Int_t WCP2dToy::uBooNEDataROI::find_ROI_end(TH1F *h1, Int_t bin, Double_t th){
   Int_t end = bin;
   Double_t content = h1->GetBinContent(end+1);
   while(content>th){
@@ -73,7 +73,7 @@ Int_t WireCell2dToy::uBooNEDataROI::find_ROI_end(TH1F *h1, Int_t bin, Double_t t
   return end;
 }
 
-Int_t WireCell2dToy::uBooNEDataROI::find_ROI_begin(TH1F *h1, Int_t bin, Double_t th){
+Int_t WCP2dToy::uBooNEDataROI::find_ROI_begin(TH1F *h1, Int_t bin, Double_t th){
   // find the first one before bin and is below threshold ... 
   Int_t begin = bin;
   Double_t content = h1->GetBinContent(begin+1);
@@ -106,7 +106,7 @@ Int_t WireCell2dToy::uBooNEDataROI::find_ROI_begin(TH1F *h1, Int_t bin, Double_t
 
 
 
-WireCell2dToy::uBooNEDataROI::uBooNEDataROI(WireCell::FrameDataSource& raw_fds,WireCell::FrameDataSource& fds, const WireCell::GeomDataSource& gds, WireCell::ChirpMap& umap, WireCell::ChirpMap& vmap, WireCell::ChirpMap& wmap, std::set<int>& lf_noisy_channels)
+WCP2dToy::uBooNEDataROI::uBooNEDataROI(WCP::FrameDataSource& raw_fds,WCP::FrameDataSource& fds, const WCP::GeomDataSource& gds, WCP::ChirpMap& umap, WCP::ChirpMap& vmap, WCP::ChirpMap& wmap, std::set<int>& lf_noisy_channels)
   : fds(fds)
   , raw_fds(raw_fds)
   , gds(gds)
@@ -180,7 +180,7 @@ WireCell2dToy::uBooNEDataROI::uBooNEDataROI(WireCell::FrameDataSource& raw_fds,W
   //merge_ROIs();
 }
 
-void WireCell2dToy::uBooNEDataROI::extend_ROI_loose(){
+void WCP2dToy::uBooNEDataROI::extend_ROI_loose(){
   // compare the loose one with tight one 
   for(int i=0;i!=nwire_u;i++){
     std::vector<std::pair<int,int>> temp_rois;
@@ -242,7 +242,7 @@ void WireCell2dToy::uBooNEDataROI::extend_ROI_loose(){
 
 }
 
-void WireCell2dToy::uBooNEDataROI::create_ROI_connect_info(float asy){
+void WCP2dToy::uBooNEDataROI::create_ROI_connect_info(float asy){
   
   // u 
   for (int i=0;i!=nwire_u-2;i++){
@@ -352,7 +352,7 @@ void WireCell2dToy::uBooNEDataROI::create_ROI_connect_info(float asy){
 
 }
 
-// void WireCell2dToy::uBooNEDataROI::extend_ROI_others(int pad){
+// void WCP2dToy::uBooNEDataROI::extend_ROI_others(int pad){
 //   const int nbins = raw_fds.Get_Bins_Per_Frame();
 
 //   for (int i=0;i!=others_rois_u.size();i++){
@@ -408,7 +408,7 @@ void WireCell2dToy::uBooNEDataROI::create_ROI_connect_info(float asy){
 // }
 
 
-void WireCell2dToy::uBooNEDataROI::find_ROI_loose(int rebin){
+void WCP2dToy::uBooNEDataROI::find_ROI_loose(int rebin){
   
   // some example thresholds
   Double_t factor = 3.5; // regular threshold
@@ -716,7 +716,7 @@ void WireCell2dToy::uBooNEDataROI::find_ROI_loose(int rebin){
 }
 
 
-void WireCell2dToy::uBooNEDataROI::extend_ROI_self(int pad){
+void WCP2dToy::uBooNEDataROI::extend_ROI_self(int pad){
   const int nbins = raw_fds.Get_Bins_Per_Frame();
 
   for (int i=0;i!=self_rois_u.size();i++){
@@ -795,12 +795,12 @@ void WireCell2dToy::uBooNEDataROI::extend_ROI_self(int pad){
 }
 
 
-WireCell2dToy::uBooNEDataROI::~uBooNEDataROI()
+WCP2dToy::uBooNEDataROI::~uBooNEDataROI()
 {
   
 }
 
-// void WireCell2dToy::uBooNEDataROI::merge_ROIs(){
+// void WCP2dToy::uBooNEDataROI::merge_ROIs(){
 
 //   std::vector<std::vector<std::pair<int,int>>> others_rois_u1;
 //   std::vector<std::vector<std::pair<int,int>>> others_rois_v1;
@@ -853,7 +853,7 @@ WireCell2dToy::uBooNEDataROI::~uBooNEDataROI()
 // }
 
 
-// void WireCell2dToy::uBooNEDataROI::find_ROI_by_others(){
+// void WCP2dToy::uBooNEDataROI::find_ROI_by_others(){
 //   double u_pitch, v_pitch, w_pitch;
 //   u_pitch = gds.pitch(kUwire);
 //   v_pitch = gds.pitch(kVwire);
@@ -1429,7 +1429,7 @@ WireCell2dToy::uBooNEDataROI::~uBooNEDataROI()
 // }
 
 
-// void WireCell2dToy::uBooNEDataROI::find_ROI_by_raw_itself(int th_factor , int pad ){
+// void WCP2dToy::uBooNEDataROI::find_ROI_by_raw_itself(int th_factor , int pad ){
 //   const int nbins = raw_fds.Get_Bins_Per_Frame();
 //   TH1F *hresult = new TH1F("hresult","hresult",nbins,0,nbins);
     
@@ -1573,7 +1573,7 @@ WireCell2dToy::uBooNEDataROI::~uBooNEDataROI()
 // }
 
 
-void WireCell2dToy::uBooNEDataROI::find_ROI_by_decon_itself(int th_factor_ind, int th_factor_col , int pad ){
+void WCP2dToy::uBooNEDataROI::find_ROI_by_decon_itself(int th_factor_ind, int th_factor_col , int pad ){
   
   const int nbins = fds.Get_Bins_Per_Frame();
 
@@ -1840,7 +1840,7 @@ void WireCell2dToy::uBooNEDataROI::find_ROI_by_decon_itself(int th_factor_ind, i
 
 
 
-void WireCell2dToy::uBooNEDataROI::restore_baseline(TH1F *htemp){
+void WCP2dToy::uBooNEDataROI::restore_baseline(TH1F *htemp){
   //correct baseline 
   double max = htemp->GetMaximum();
   double min = htemp->GetMinimum();
@@ -1873,7 +1873,7 @@ void WireCell2dToy::uBooNEDataROI::restore_baseline(TH1F *htemp){
 
 
 
-double WireCell2dToy::uBooNEDataROI::cal_rms(TH1F *htemp, int chid){
+double WCP2dToy::uBooNEDataROI::cal_rms(TH1F *htemp, int chid){
   //calculate rms, this is to be used for threshold purpose
   float rms = 0, rms1 = 0,rms2 = 0;
   int start=-1, end=-1;

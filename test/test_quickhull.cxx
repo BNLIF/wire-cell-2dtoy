@@ -1,5 +1,5 @@
-#include "WireCellQuickhull/QuickHull.h"
-#include "WireCellQuickhull/MathUtils.h"
+#include "WCPQuickhull/QuickHull.h"
+#include "WCPQuickhull/MathUtils.h"
 
 #include <vector>
 #include <set>
