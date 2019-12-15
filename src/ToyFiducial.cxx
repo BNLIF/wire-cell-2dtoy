@@ -1019,10 +1019,11 @@ bool WCP2dToy::ToyFiducial::check_tgm(WCP::FlashTPCBundle *bundle, double offset
 	
 	// if (main_cluster->get_cluster_id()==10)
 	//   std::cout << flag_check << " " << out_vec_wcps.size() << std::endl;
-	
+
+	// middle points are inside fiducial volume
 	if (flag_check){
 	  if (flash->get_type()==2){
-
+	    
 	    double temp_length = sqrt(pow(out_vec_wcps.at(i).at(p1_index).x-out_vec_wcps.at(k).at(p2_index).x,2)+
 				      pow(out_vec_wcps.at(i).at(p1_index).y-out_vec_wcps.at(k).at(p2_index).y,2)+
 				      pow(out_vec_wcps.at(i).at(p1_index).z-out_vec_wcps.at(k).at(p2_index).z,2));
@@ -1042,6 +1043,7 @@ bool WCP2dToy::ToyFiducial::check_tgm(WCP::FlashTPCBundle *bundle, double offset
 	  }else{
 	    return true; // through going muon ...
 	  }
+	  // no middle points are inside the fiducial volume
 	}else{
 	  
 	  if (out_vec_wcps.size()==2){
@@ -1072,7 +1074,7 @@ bool WCP2dToy::ToyFiducial::check_tgm(WCP::FlashTPCBundle *bundle, double offset
 	      double temp_length = sqrt(pow(out_vec_wcps.at(i).at(p1_index).x-out_vec_wcps.at(k).at(p2_index).x,2)+
 					pow(out_vec_wcps.at(i).at(p1_index).y-out_vec_wcps.at(k).at(p2_index).y,2)+
 					pow(out_vec_wcps.at(i).at(p1_index).z-out_vec_wcps.at(k).at(p2_index).z,2));
-	      
+	      // check neutrino candidates ...
 	      if (i==0&&k==1){
 		if ( (!check_neutrino_candidate(main_cluster1,out_vec_wcps.at(i).at(p1_index),out_vec_wcps.at(k).at(p2_index),offset_x,ct_point_cloud,true)) && temp_length > 0.45*length_limit)
 		  return true;
