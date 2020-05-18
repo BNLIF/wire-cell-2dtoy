@@ -6,6 +6,7 @@ using namespace WCP;
 void WCP2dToy::Clustering_deghost(WCP::PR3DClusterSelection& live_clusters, std::map<WCP::PR3DCluster*,double>& cluster_length_map, std::map<int,std::pair<double,double>>& dead_u_index, std::map<int,std::pair<double,double>>& dead_v_index, std::map<int,std::pair<double,double>>& dead_w_index, double length_cut){
 
   
+  
   // sort the clusters length ...
   {
     std::vector<std::pair<PR3DCluster*,double>> temp_pair_vec;
@@ -538,6 +539,7 @@ void WCP2dToy::Clustering_deghost(WCP::PR3DClusterSelection& live_clusters, std:
 void WCP2dToy::Clustering_deghost(WCP::ToyCTPointCloud& ct_point_cloud, WCP::PR3DClusterSelection& live_clusters, std::map<WCP::PR3DCluster*,double>& cluster_length_map, std::map<int,std::pair<double,double>>& dead_u_index, std::map<int,std::pair<double,double>>& dead_v_index, std::map<int,std::pair<double,double>>& dead_w_index, double length_cut){
 
   
+  
   // sort the clusters length ...
   {
     std::vector<std::pair<PR3DCluster*,double>> temp_pair_vec;
@@ -573,13 +575,16 @@ void WCP2dToy::Clustering_deghost(WCP::ToyCTPointCloud& ct_point_cloud, WCP::PR3
   std::set<std::pair<PR3DCluster*, PR3DCluster*>> to_be_merged_pairs;
   
   for (size_t i=0;i!=live_clusters.size();i++){
+    
     if (i==0){
       // fill anyway ...
       live_clusters.at(i)->Create_point_cloud();
       global_point_cloud.AddPoints(live_clusters.at(i),0);
-      if (cluster_length_map[live_clusters.at(i)]>30*units::cm){
+      if (cluster_length_map[live_clusters.at(i)]>30*units::cm){ // should be the default for most of them ...
 	live_clusters.at(i)->Construct_skeleton(ct_point_cloud);
 	global_skeleton_cloud.AddPoints(live_clusters.at(i),1);
+      }else{
+	global_skeleton_cloud.AddPoints(live_clusters.at(i),0);
       }
     }else{ 
       // start the process to add things in and perform deghosting ... 
@@ -595,7 +600,7 @@ void WCP2dToy::Clustering_deghost(WCP::ToyCTPointCloud& ct_point_cloud, WCP::PR3
 	
 	double dis_cut = 1.2*units::cm;
 	
-	
+
 	
 	for (size_t j=0;j!=num_total_points;j++){
 	  Point test_point(cloud.pts.at(j).x,cloud.pts.at(j).y,cloud.pts.at(j).z);
@@ -608,9 +613,10 @@ void WCP2dToy::Clustering_deghost(WCP::ToyCTPointCloud& ct_point_cloud, WCP::PR3
 	      flag_dead = true;
 	    }
 	  }
-	  
+	 
 	  if (!flag_dead){
 	    std::tuple<double, PR3DCluster*, size_t> results = global_point_cloud.get_closest_2d_point_info(test_point, 0);
+	    
 	    if (std::get<0>(results)<=dis_cut/3.){
 	      if (map_cluster_num[0].find(std::get<1>(results))==map_cluster_num[0].end()){
 		map_cluster_num[0][std::get<1>(results)] = 1;
@@ -632,6 +638,7 @@ void WCP2dToy::Clustering_deghost(WCP::ToyCTPointCloud& ct_point_cloud, WCP::PR3
 	  }else{
 	    num_dead[0]++;
 	  }
+
 	  
 	  
 	  flag_dead = false;
@@ -965,6 +972,7 @@ void WCP2dToy::Clustering_deghost(WCP::ToyCTPointCloud& ct_point_cloud, WCP::PR3
 
 
 
+  
   //merge clusters
   std::vector<std::set<PR3DCluster*>> merge_clusters;
   for (auto it = to_be_merged_pairs.begin(); it!=to_be_merged_pairs.end(); it++){

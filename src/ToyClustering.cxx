@@ -304,7 +304,7 @@ std::map<PR3DCluster*,std::vector<std::pair<PR3DCluster*,double>>> WCP2dToy::Clu
     PR3DCluster *cluster = live_clusters.at(i);
     cluster->set_cluster_id(i+1);
   }
-  
+
  
   // prepare for deghosting and clustering along track
   Clustering_deghost(ct_point_cloud, live_clusters,cluster_length_map, dead_u_index, dead_v_index, dead_w_index);
