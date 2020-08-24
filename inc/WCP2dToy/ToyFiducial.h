@@ -71,9 +71,9 @@ namespace WCP2dToy{
       return boundary_SCB_xz_z_array[index_y];
     }
     int check_boundary(std::vector<std::vector<WCP::WCPointCloud<double>::WCPoint>> extreme_points, double offset_x, std::vector<double>* tol_vec);
-    void cosmic_tagger(WCP::OpflashSelection& flashes,WCP::FlashTPCBundleSelection *matched_bundles, WCP::FlashTPCBundle* main_bundle, WCP::Photon_Library *pl,
+    void cosmic_tagger(double eventTime, WCP::OpflashSelection& flashes,WCP::FlashTPCBundleSelection *matched_bundles, WCP::FlashTPCBundle* main_bundle, WCP::Photon_Library *pl,
       int time_offset, int nrebin, float unit_dis, WCP::ToyCTPointCloud& ct_point_cloud,
-      std::map<WCP::PR3DCluster*, WCP::PR3DCluster*>& old_new_cluster_map, int run_no, int subrun_no, int event_no, bool flag_data, bool debug_tagger=false);
+		       std::map<WCP::PR3DCluster*, WCP::PR3DCluster*>& old_new_cluster_map, int run_no, int subrun_no, int event_no,  bool flag_data, bool debug_tagger=false, bool flag_timestamp = false);
     
   protected:
     // boundary

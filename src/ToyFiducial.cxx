@@ -42,8 +42,8 @@ int WCP2dToy::ToyFiducial::check_boundary(std::vector<std::vector<WCP::WCPointCl
 }
 
 //Main cosmic tagger function
-void WCP2dToy::ToyFiducial::cosmic_tagger(WCP::OpflashSelection& flashes, FlashTPCBundleSelection *matched_bundles, FlashTPCBundle* main_bundle, WCP::Photon_Library *pl, int time_offset, int nrebin, float unit_dis, WCP::ToyCTPointCloud& ct_point_cloud,
-						std::map<WCP::PR3DCluster*, WCP::PR3DCluster*>& old_new_cluster_map, int run_no, int subrun_no, int event_no, bool flag_data, bool debug_tagger){
+void WCP2dToy::ToyFiducial::cosmic_tagger(double eventTime, WCP::OpflashSelection& flashes, FlashTPCBundleSelection *matched_bundles, FlashTPCBundle* main_bundle, WCP::Photon_Library *pl, int time_offset, int nrebin, float unit_dis, WCP::ToyCTPointCloud& ct_point_cloud,
+					  std::map<WCP::PR3DCluster*, WCP::PR3DCluster*>& old_new_cluster_map, int run_no, int subrun_no, int event_no,  bool flag_data, bool debug_tagger, bool flag_timestamp){
 
 	//std::cout << "starting cosmic tagger ===================================================" << std::endl;
 
@@ -142,7 +142,7 @@ void WCP2dToy::ToyFiducial::cosmic_tagger(WCP::OpflashSelection& flashes, FlashT
 			bool flag_good_bundle;
 			FlashTPCBundle *new_bundle =  new FlashTPCBundle(flash, main_cluster,flash->get_flash_id(),main_cluster->get_cluster_id());
 			std::vector<double>& pred_pmt_light = new_bundle->get_pred_pmt_light();
-			WCP2dToy::calculate_pred_pe(run_no, time_offset, nrebin, time_slice_width, pl, new_bundle, &pred_pmt_light, &additional_clusters, &other_clusters, &more_clusters, flag_good_bundle, flag_data);
+			WCP2dToy::calculate_pred_pe(run_no, eventTime, time_offset, nrebin, time_slice_width, pl, new_bundle, &pred_pmt_light, &additional_clusters, &other_clusters, &more_clusters, flag_good_bundle, flag_data, flag_timestamp);
 			//std::vector<double>& pred_pmt_light = main_bundle->get_pred_pmt_light();
 
 			//Compute the PE centroids for the flash PE and predicted PE
