@@ -145,7 +145,7 @@ WCP2dToy::Photon_Library::Photon_Library(Int_t run_no, bool flag_data, bool flag
 void WCP2dToy::calculate_pred_pe(int run_no, double eventTime, int time_offset, int nrebin, double time_slice_width, WCP::Photon_Library *pl, FlashTPCBundle* bundle, std::vector<double>* pred_pmt_light,
 				 std::vector<std::pair<WCP::PR3DCluster*,double>>* additional_clusters, PR3DClusterSelection* other_clusters, PR3DClusterSelection* more_clusters, bool &flag_good_bundle, bool flag_data, bool flag_timestamp){
 
-  std::cout << "ZXin_4: " << eventTime << " " << flag_timestamp << std::endl;
+  //  std::cout << "ZXin_4: " << eventTime << " " << flag_timestamp << std::endl;
   
 	double rel_light_yield_err = pl->rel_light_yield_err;
 	double scaling_light_mag = pl->scaling_light_mag;
@@ -331,9 +331,11 @@ void WCP2dToy::calculate_pred_pe(int run_no, double eventTime, int time_offset, 
 	    norm_factor[i] = 1;
 	  }
 	  if (flag_data){
-	    if (run_no >= 12809)
+	    if ((run_no >= 12809 && (!flag_timestamp)) || (flag_timestamp && eventTime >= 1505170407))
 	      norm_factor[17] = 0;
 	  }
+
+	  //	  std::cout << "kaka1 " << run_no << " " << eventTime << " " << flag_timestamp << " " << eventTime - 1505170407 << " " << norm_factor[17] << std::endl;
 	  
   	  double sum1 = 0, sum2 = 0, max_pe = 0;
   	  for (size_t i=0;i!=32;i++){
