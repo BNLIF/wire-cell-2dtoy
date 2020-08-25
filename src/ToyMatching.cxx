@@ -335,7 +335,7 @@ void WCP2dToy::calculate_pred_pe(int run_no, double eventTime, int time_offset, 
 	      norm_factor[17] = 0;
 	  }
 
-	  //	  std::cout << "kaka1 " << run_no << " " << eventTime << " " << flag_timestamp << " " << eventTime - 1505170407 << " " << norm_factor[17] << std::endl;
+	  //std::cout << "kaka1 " << run_no << " " << eventTime << " " << flag_timestamp << " " << eventTime - 1505170407 << " " << norm_factor[17] << std::endl;
 	  
   	  double sum1 = 0, sum2 = 0, max_pe = 0;
   	  for (size_t i=0;i!=32;i++){
