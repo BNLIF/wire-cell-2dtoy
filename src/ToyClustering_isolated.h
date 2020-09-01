@@ -1,5 +1,6 @@
 
-std::map<PR3DCluster*,std::vector<std::pair<PR3DCluster*,double>>> WCP2dToy::Clustering_isolated(WCP::PR3DClusterSelection& live_clusters, std::map<WCP::PR3DCluster*,double>& cluster_length_map){
+
+  map_cluster_cluster_vec  WCP2dToy::Clustering_isolated(WCP::PR3DClusterSelection& live_clusters, WCP::map_pr3dcluster_double& cluster_length_map){
   
   TPCParams& mp = Singleton<TPCParams>::Instance();
   double pitch_u = mp.get_pitch_u();
@@ -266,7 +267,7 @@ std::map<PR3DCluster*,std::vector<std::pair<PR3DCluster*,double>>> WCP2dToy::Clu
   }
   
   // new stuff ... 
-  std::map<PR3DCluster*,std::vector<std::pair<PR3DCluster*,double>>> results;
+    map_cluster_cluster_vec results;
   for (auto it = merge_clusters.begin(); it!=merge_clusters.end(); it++){
     std::set<PR3DCluster*>& cluster_set = (*it);
     double max_length = 0;

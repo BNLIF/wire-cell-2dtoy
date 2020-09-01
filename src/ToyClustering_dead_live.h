@@ -1,6 +1,6 @@
 
 
-void WCP2dToy::Clustering_live_dead(WCP::PR3DClusterSelection& live_clusters, WCP::PR3DClusterSelection& dead_clusters, std::map<WCP::PR3DCluster*,double>& cluster_length_map, std::set<WCP::PR3DCluster*>& cluster_connected_dead){
+void WCP2dToy::Clustering_live_dead(WCP::PR3DClusterSelection& live_clusters, WCP::PR3DClusterSelection& dead_clusters, WCP::map_pr3dcluster_double& cluster_length_map, WCP::PR3DClusterSet& cluster_connected_dead){
 
   TPCParams& mp = Singleton<TPCParams>::Instance();
   double pitch_u = mp.get_pitch_u();

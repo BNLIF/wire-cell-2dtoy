@@ -1,4 +1,4 @@
-void WCP2dToy::Clustering_examine_x_boundary(WCP::PR3DClusterSelection& live_clusters,std::map<WCP::PR3DCluster*,double>& cluster_length_map){
+void WCP2dToy::Clustering_examine_x_boundary(WCP::PR3DClusterSelection& live_clusters,WCP::map_pr3dcluster_double& cluster_length_map){
   TPCParams& mp = Singleton<TPCParams>::Instance();
   double pitch_u = mp.get_pitch_u();
   double pitch_v = mp.get_pitch_v();
@@ -43,7 +43,7 @@ void WCP2dToy::Clustering_examine_x_boundary(WCP::PR3DClusterSelection& live_clu
 }
 
 
-void WCP2dToy::Clustering_neutrino(WCP::PR3DClusterSelection& live_clusters,std::map<WCP::PR3DCluster*,double>& cluster_length_map, int num_try){
+void WCP2dToy::Clustering_neutrino(WCP::PR3DClusterSelection& live_clusters,WCP::map_pr3dcluster_double& cluster_length_map, int num_try){
   TPCParams& mp = Singleton<TPCParams>::Instance();
   double pitch_u = mp.get_pitch_u();
   double pitch_v = mp.get_pitch_v();
@@ -997,7 +997,7 @@ void WCP2dToy::Clustering_neutrino(WCP::PR3DClusterSelection& live_clusters,std:
 }
 
 
-void WCP2dToy::Clustering_dis(WCP::PR3DClusterSelection& live_clusters,std::map<WCP::PR3DCluster*,double>& cluster_length_map){
+void WCP2dToy::Clustering_dis(WCP::PR3DClusterSelection& live_clusters,WCP::map_pr3dcluster_double& cluster_length_map){
   TPCParams& mp = Singleton<TPCParams>::Instance();
   double pitch_u = mp.get_pitch_u();
   double pitch_v = mp.get_pitch_v();

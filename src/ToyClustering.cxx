@@ -189,17 +189,16 @@ double WCP2dToy::Find_Closeset_Points(WCP::PR3DCluster *cluster1, WCP::PR3DClust
   return dis_save;
 }
 
-
-std::map<PR3DCluster*,std::vector<std::pair<PR3DCluster*,double>>> WCP2dToy::Clustering_jump_gap_cosmics(WCP::PR3DClusterSelection& live_clusters, WCP::PR3DClusterSelection& dead_clusters, std::map<int,std::pair<double,double>>& dead_u_index, std::map<int,std::pair<double,double>>& dead_v_index, std::map<int,std::pair<double,double>>& dead_w_index, WCP::DynamicToyPointCloud& global_point_cloud, WCP::ToyCTPointCloud& ct_point_cloud, bool flag_neutrino){
+map_cluster_cluster_vec WCP2dToy::Clustering_jump_gap_cosmics(WCP::PR3DClusterSelection& live_clusters, WCP::PR3DClusterSelection& dead_clusters, std::map<int,std::pair<double,double>>& dead_u_index, std::map<int,std::pair<double,double>>& dead_v_index, std::map<int,std::pair<double,double>>& dead_w_index, WCP::DynamicToyPointCloud& global_point_cloud, WCP::ToyCTPointCloud& ct_point_cloud, bool flag_neutrino){
 
   
   ExecMon em("starting");
 
 
   // include some parallel or prolonged, no need to do track fitting
-  std::map<PR3DCluster*,double> cluster_length_map;
+  map_pr3dcluster_double cluster_length_map;
 
-  std::set<PR3DCluster*> cluster_connected_dead;
+  PR3DClusterSet cluster_connected_dead;
   
   // calculate the length ...
   TPCParams& mp = Singleton<TPCParams>::Instance();
@@ -366,7 +365,7 @@ std::map<PR3DCluster*,std::vector<std::pair<PR3DCluster*,double>>> WCP2dToy::Clu
   
 
   // need to further cluster things ... for the small and isolated pieces ... 
-  std::map<PR3DCluster*,std::vector<std::pair<PR3DCluster*,double>>> group_clusters =  WCP2dToy::Clustering_isolated(live_clusters, cluster_length_map);
+  map_cluster_cluster_vec group_clusters =  WCP2dToy::Clustering_isolated(live_clusters, cluster_length_map);
   // cerr << em("Clustering isolated") << std::endl;
  
 
@@ -376,16 +375,16 @@ std::map<PR3DCluster*,std::vector<std::pair<PR3DCluster*,double>>> WCP2dToy::Clu
 
 
 // old version of code to not break the old code ... 
-std::map<PR3DCluster*,std::vector<std::pair<PR3DCluster*,double>>> WCP2dToy::Clustering_jump_gap_cosmics(WCP::PR3DClusterSelection& live_clusters, WCP::PR3DClusterSelection& dead_clusters, std::map<int,std::pair<double,double>>& dead_u_index, std::map<int,std::pair<double,double>>& dead_v_index, std::map<int,std::pair<double,double>>& dead_w_index, WCP::DynamicToyPointCloud& global_point_cloud, bool flag_neutrino){
+map_cluster_cluster_vec WCP2dToy::Clustering_jump_gap_cosmics(WCP::PR3DClusterSelection& live_clusters, WCP::PR3DClusterSelection& dead_clusters, std::map<int,std::pair<double,double>>& dead_u_index, std::map<int,std::pair<double,double>>& dead_v_index, std::map<int,std::pair<double,double>>& dead_w_index, WCP::DynamicToyPointCloud& global_point_cloud, bool flag_neutrino){
 
   
   ExecMon em("starting");
 
 
   // include some parallel or prolonged, no need to do track fitting
-  std::map<PR3DCluster*,double> cluster_length_map;
+  map_pr3dcluster_double cluster_length_map;
 
-  std::set<PR3DCluster*> cluster_connected_dead;
+  PR3DClusterSet cluster_connected_dead;
   
   // calculate the length ...
   TPCParams& mp = Singleton<TPCParams>::Instance();
@@ -551,7 +550,7 @@ std::map<PR3DCluster*,std::vector<std::pair<PR3DCluster*,double>>> WCP2dToy::Clu
   
 
   // need to further cluster things ... for the small and isolated pieces ... 
-  std::map<PR3DCluster*,std::vector<std::pair<PR3DCluster*,double>>> group_clusters =  WCP2dToy::Clustering_isolated(live_clusters, cluster_length_map);
+  map_cluster_cluster_vec group_clusters =  WCP2dToy::Clustering_isolated(live_clusters, cluster_length_map);
   // cerr << em("Clustering isolated") << std::endl;
  
 

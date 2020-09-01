@@ -1,4 +1,4 @@
-void WCP2dToy::Clustering_extend(WCP::PR3DClusterSelection& live_clusters, std::map<PR3DCluster*,double>& cluster_length_map, std::set<WCP::PR3DCluster*>& cluster_connected_dead, int flag,  double length_cut, int num_try, double length_2_cut, int num_dead_try){
+void WCP2dToy::Clustering_extend(WCP::PR3DClusterSelection& live_clusters, WCP::map_pr3dcluster_double& cluster_length_map, WCP::PR3DClusterSet& cluster_connected_dead, int flag,  double length_cut, int num_try, double length_2_cut, int num_dead_try){
   
    // calculate the length ...
   TPCParams& mp = Singleton<TPCParams>::Instance();

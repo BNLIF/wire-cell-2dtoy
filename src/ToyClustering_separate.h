@@ -1803,7 +1803,7 @@ std::vector<WCP::PR3DCluster*> WCP2dToy::Separate_1(WCP::ToyCTPointCloud& ct_poi
 }
   
 
-void WCP2dToy::Clustering_separate(WCP::PR3DClusterSelection& live_clusters, std::map<WCP::PR3DCluster*,double>& cluster_length_map, std::map<int,std::pair<double,double>>& dead_u_index, std::map<int,std::pair<double,double>>& dead_v_index, std::map<int,std::pair<double,double>>& dead_w_index){
+void WCP2dToy::Clustering_separate(WCP::PR3DClusterSelection& live_clusters, WCP::map_pr3dcluster_double& cluster_length_map, std::map<int,std::pair<double,double>>& dead_u_index, std::map<int,std::pair<double,double>>& dead_v_index, std::map<int,std::pair<double,double>>& dead_w_index){
   TVector3 drift_dir(1,0,0);
   TVector3 beam_dir(0,0,1);
   TVector3 vertical_dir(0,1,0);
@@ -2334,7 +2334,7 @@ std::vector<WCP::PR3DCluster*> WCP2dToy::Separate_2(WCP::PR3DCluster* cluster, d
 }
 
 
-void WCP2dToy::Clustering_separate(WCP::PR3DClusterSelection& live_clusters, std::map<WCP::PR3DCluster*,double>& cluster_length_map, std::map<int,std::pair<double,double>>& dead_u_index, std::map<int,std::pair<double,double>>& dead_v_index, std::map<int,std::pair<double,double>>& dead_w_index, WCP::ToyCTPointCloud& ct_point_cloud){
+void WCP2dToy::Clustering_separate(WCP::PR3DClusterSelection& live_clusters, WCP::map_pr3dcluster_double& cluster_length_map, std::map<int,std::pair<double,double>>& dead_u_index, std::map<int,std::pair<double,double>>& dead_v_index, std::map<int,std::pair<double,double>>& dead_w_index, WCP::ToyCTPointCloud& ct_point_cloud){
   TVector3 drift_dir(1,0,0);
   TVector3 beam_dir(0,0,1);
   TVector3 vertical_dir(0,1,0);

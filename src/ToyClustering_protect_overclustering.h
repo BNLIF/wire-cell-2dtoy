@@ -2,7 +2,7 @@
 #include <boost/graph/connected_components.hpp>
 #include <boost/graph/prim_minimum_spanning_tree.hpp>
 
-void WCP2dToy::Clustering_protect_overclustering(WCP::PR3DClusterSelection& live_clusters,std::map<WCP::PR3DCluster*,double>& cluster_length_map, WCP::ToyCTPointCloud& ct_point_cloud){
+void WCP2dToy::Clustering_protect_overclustering(WCP::PR3DClusterSelection& live_clusters,WCP::map_pr3dcluster_double& cluster_length_map, WCP::ToyCTPointCloud& ct_point_cloud){
   
   // can follow ToyClustering_separate to add clusters ...
 
