@@ -3,7 +3,8 @@
 using namespace WCP;
 
 WCP2dToy::LowmemTiling::LowmemTiling(int time_slice,  WCP::GeomDataSource& gds,WCP2dToy::WCPHolder& holder)
-  : gds(gds)
+  : ident_wire(0)
+  , gds(gds)
   , nrebin(0)
   , time_slice(time_slice)
   , holder(holder)
@@ -19,7 +20,8 @@ WCP2dToy::LowmemTiling::LowmemTiling(int time_slice,  WCP::GeomDataSource& gds,W
 }
 
 WCP2dToy::LowmemTiling::LowmemTiling(int time_slice, int nrebin, WCP::GeomDataSource& gds,WCP2dToy::WCPHolder& holder)
-  : gds(gds)
+  : ident_wire(0)
+  , gds(gds)
   , nrebin(nrebin)
   , time_slice(time_slice)
   , holder(holder)
@@ -207,7 +209,7 @@ void WCP2dToy::LowmemTiling::DivideWires(int wire_limit, int min_wire){
 	       //std::cout << j << std::endl;
 	       nwires.push_back(gds.by_planeindex(old_wire->get_allwire().front()->plane(),j));
 	     }
-	     MergeGeomWire *new_wire = new MergeGeomWire(0,nwires);
+	     MergeGeomWire *new_wire = new MergeGeomWire(ident_wire,nwires);ident_wire++;
 	     new_wires.push_back(new_wire);
 	   }
 	  if (old_wire->get_allwire().back()->index() > saved_results.at(i).second){
@@ -215,7 +217,7 @@ void WCP2dToy::LowmemTiling::DivideWires(int wire_limit, int min_wire){
 	    for (int j=saved_results.at(i).second+1; j!= old_wire->get_allwire().back()->index() + 1; j++){
 	      nwires.push_back(gds.by_planeindex(old_wire->get_allwire().front()->plane(),j));
 	    }
-	    MergeGeomWire *new_wire = new MergeGeomWire(0,nwires);
+	    MergeGeomWire *new_wire = new MergeGeomWire(ident_wire,nwires); ident_wire++;
 	    new_wires.push_back(new_wire);
 	  }
 	  {
@@ -223,7 +225,7 @@ void WCP2dToy::LowmemTiling::DivideWires(int wire_limit, int min_wire){
 	    for (int j=saved_results.at(i).first; j!= saved_results.at(i).second+1; j++){
 	      nwires.push_back(gds.by_planeindex(old_wire->get_allwire().front()->plane(),j));
 	    }
-	    MergeGeomWire *new_wire = new MergeGeomWire(0,nwires);
+	    MergeGeomWire *new_wire = new MergeGeomWire(ident_wire,nwires); ident_wire++;
 	    new_wires.push_back(new_wire);
 	  }
 	  
@@ -279,9 +281,9 @@ void WCP2dToy::LowmemTiling::DivideWires(int wire_limit, int min_wire){
 	      GeomWireSelection& uwires = new_cell->get_uwires();
 	      GeomWireSelection& vwires = new_cell->get_vwires();
 	      GeomWireSelection& wwires = new_cell->get_wwires();
-	      MergeGeomWire *mwire_u = new MergeGeomWire(0,uwires);
-	      MergeGeomWire *mwire_v = new MergeGeomWire(0,vwires);
-	      MergeGeomWire *mwire_w = new MergeGeomWire(0,wwires);
+	      MergeGeomWire *mwire_u = new MergeGeomWire(ident_wire,uwires); ident_wire++;
+	      MergeGeomWire *mwire_v = new MergeGeomWire(ident_wire,vwires); ident_wire++;
+	      MergeGeomWire *mwire_w = new MergeGeomWire(ident_wire,wwires); ident_wire++;
 	    
 	      // create the map  
 	      // cell to wires
@@ -1610,9 +1612,9 @@ void WCP2dToy::LowmemTiling::re_establish_maps(){
     GeomWireSelection& uwires = mcell->get_uwires();
     GeomWireSelection& vwires = mcell->get_vwires();
     GeomWireSelection& wwires = mcell->get_wwires();
-    MergeGeomWire *mwire_u = new MergeGeomWire(0,uwires);
-    MergeGeomWire *mwire_v = new MergeGeomWire(0,vwires);
-    MergeGeomWire *mwire_w = new MergeGeomWire(0,wwires);
+    MergeGeomWire *mwire_u = new MergeGeomWire(ident_wire,uwires); ident_wire++;
+    MergeGeomWire *mwire_v = new MergeGeomWire(ident_wire,vwires); ident_wire++;
+    MergeGeomWire *mwire_w = new MergeGeomWire(ident_wire,wwires); ident_wire++;
 
     // create the map  
     // cell to wires
@@ -1676,7 +1678,7 @@ void WCP2dToy::LowmemTiling::re_establish_maps(){
   }
 }
 
-void WCP2dToy::LowmemTiling::local_deghosting1(std::set<WCP::SlimMergeGeomCell*>& good_mcells, std::map<WCP::SlimMergeGeomCell*, double>& map_mcell_charge){
+void WCP2dToy::LowmemTiling::local_deghosting1(std::set<WCP::SlimMergeGeomCell*, WCP::GeomCellComparep>& good_mcells, std::map<WCP::SlimMergeGeomCell*, double, WCP::GeomCellComparep>& map_mcell_charge){
    
   std::map<const GeomWire*, float> wire_score_map;
   for (auto it = three_good_wire_cells.begin(); it!= three_good_wire_cells.end(); it++){
@@ -1973,7 +1975,7 @@ void WCP2dToy::LowmemTiling::local_deghosting1(std::set<WCP::SlimMergeGeomCell*>
 
 
 
-GeomCellSelection WCP2dToy::LowmemTiling::local_deghosting(std::set<SlimMergeGeomCell*>& potential_good_mcells, std::set<WCP::SlimMergeGeomCell*>& good_mcells, bool flag_del){
+GeomCellSelection WCP2dToy::LowmemTiling::local_deghosting(std::set<SlimMergeGeomCell*, WCP::GeomCellComparep>& potential_good_mcells, std::set<WCP::SlimMergeGeomCell*, WCP::GeomCellComparep>& good_mcells, bool flag_del){
   
   // do the local deghosting
   std::set<const GeomWire*> used_uwires;
@@ -2625,9 +2627,9 @@ void WCP2dToy::LowmemTiling::init_good_cells(const WCP::Slice& slice, const WCP:
 	  GeomWireSelection uwires = mcell->get_uwires();
 	  GeomWireSelection vwires = mcell->get_vwires();
 	  GeomWireSelection wwires = mcell->get_wwires();
-	  MergeGeomWire *mwire_u = new MergeGeomWire(0,uwires);
-	  MergeGeomWire *mwire_v = new MergeGeomWire(0,vwires);
-	  MergeGeomWire *mwire_w = new MergeGeomWire(0,wwires);
+	  MergeGeomWire *mwire_u = new MergeGeomWire(ident_wire,uwires); ident_wire++;
+	  MergeGeomWire *mwire_v = new MergeGeomWire(ident_wire,vwires); ident_wire++;
+	  MergeGeomWire *mwire_w = new MergeGeomWire(ident_wire,wwires); ident_wire++;
 
 	  // create the map  
 	  // cell to wires
@@ -2707,9 +2709,9 @@ void WCP2dToy::LowmemTiling::init_good_cells(const WCP::Slice& slice, const WCP:
 	    GeomWireSelection& uwires = mcell->get_uwires();
 	    GeomWireSelection& vwires = mcell->get_vwires();
 	    GeomWireSelection& wwires = mcell->get_wwires();
-	    MergeGeomWire *mwire_u = new MergeGeomWire(0,uwires);
-	    MergeGeomWire *mwire_v = new MergeGeomWire(0,vwires);
-	    MergeGeomWire *mwire_w = new MergeGeomWire(0,wwires);
+	    MergeGeomWire *mwire_u = new MergeGeomWire(ident_wire,uwires); ident_wire++;
+	    MergeGeomWire *mwire_v = new MergeGeomWire(ident_wire,vwires); ident_wire++;
+	    MergeGeomWire *mwire_w = new MergeGeomWire(ident_wire,wwires); ident_wire++;
 	    
 	    // create the map  
 	    // cell to wires
@@ -2785,9 +2787,9 @@ void WCP2dToy::LowmemTiling::init_good_cells(const WCP::Slice& slice, const WCP:
 	    GeomWireSelection& uwires = mcell->get_uwires();
 	    GeomWireSelection& vwires = mcell->get_vwires();
 	    GeomWireSelection& wwires = mcell->get_wwires();
-	    MergeGeomWire *mwire_u = new MergeGeomWire(0,uwires);
-	    MergeGeomWire *mwire_v = new MergeGeomWire(0,vwires);
-	    MergeGeomWire *mwire_w = new MergeGeomWire(0,wwires);
+	    MergeGeomWire *mwire_u = new MergeGeomWire(ident_wire,uwires); ident_wire++;
+	    MergeGeomWire *mwire_v = new MergeGeomWire(ident_wire,vwires); ident_wire++;
+	    MergeGeomWire *mwire_w = new MergeGeomWire(ident_wire,wwires); ident_wire++;
 	    
 	    // create the map  
 	    // cell to wires
@@ -2863,9 +2865,9 @@ void WCP2dToy::LowmemTiling::init_good_cells(const WCP::Slice& slice, const WCP:
 	    GeomWireSelection& uwires = mcell->get_uwires();
 	    GeomWireSelection& vwires = mcell->get_vwires();
 	    GeomWireSelection& wwires = mcell->get_wwires();
-	    MergeGeomWire *mwire_u = new MergeGeomWire(0,uwires);
-	    MergeGeomWire *mwire_v = new MergeGeomWire(0,vwires);
-	    MergeGeomWire *mwire_w = new MergeGeomWire(0,wwires);
+	    MergeGeomWire *mwire_u = new MergeGeomWire(ident_wire,uwires); ident_wire++;
+	    MergeGeomWire *mwire_v = new MergeGeomWire(ident_wire,vwires); ident_wire++;
+	    MergeGeomWire *mwire_w = new MergeGeomWire(ident_wire,wwires); ident_wire++;
 	    
 	    // create the map  
 	    // cell to wires
@@ -3077,27 +3079,27 @@ void WCP2dToy::LowmemTiling::create_one_good_wire_cells(){
   GeomWireSelection remaining_fired_wire_u, remaining_fired_wire_v, remaining_fired_wire_w;
   // do U
   MergeGeomWire *mwire = 0;
-  int ident = 0;
+  //  int ident = 0;
   int last_wire = -1;
   for (int i = 0; i!= nwire_u; i++){
     const GeomWire *wire = gds.by_planeindex((WirePlaneType_t)0,i);
     if (leftover_wires.find(wire)!=leftover_wires.end()){
       if (mwire == 0){
-   	mwire = new MergeGeomWire(ident,*wire);
+   	mwire = new MergeGeomWire(ident_wire,*wire);
 	wire_type_map[mwire] = true;
 	temp_wire_map[mwire] = temp_wire_map[wire];
 	remaining_fired_wire_u.push_back(mwire);
-   	ident ++;
+   	ident_wire ++;
       }else{
    	if (i==last_wire+1){
    	  mwire->AddWire(*wire);
    	}else{
    	  // create a new wire
-   	  mwire = new MergeGeomWire(ident,*wire);
+   	  mwire = new MergeGeomWire(ident_wire,*wire);
     	  wire_type_map[mwire] = true;
 	  temp_wire_map[mwire] = temp_wire_map[wire];
 	  remaining_fired_wire_u.push_back(mwire);
-   	  ident ++;
+   	  ident_wire ++;
    	}
       }
       last_wire = i;
@@ -3111,23 +3113,23 @@ void WCP2dToy::LowmemTiling::create_one_good_wire_cells(){
     const GeomWire *wire = gds.by_planeindex((WirePlaneType_t)1,i);
     if (leftover_wires.find(wire)!=leftover_wires.end()){
       if (mwire == 0){
-  	mwire = new MergeGeomWire(ident,*wire);
+  	mwire = new MergeGeomWire(ident_wire,*wire);
   	//mwire->SetTimeSlice(time_slice);
 	wire_type_map[mwire] = true;
 	temp_wire_map[mwire] = temp_wire_map[wire];
   	remaining_fired_wire_v.push_back(mwire);
-  	ident ++;
+  	ident_wire ++;
       }else{
   	if (i==last_wire+1){
   	  mwire->AddWire(*wire);
   	}else{
   	  // create a new wire
-  	  mwire = new MergeGeomWire(ident,*wire);
+  	  mwire = new MergeGeomWire(ident_wire,*wire);
   	  //mwire->SetTimeSlice(time_slice);
 	  wire_type_map[mwire] = true;
 	  temp_wire_map[mwire] = temp_wire_map[wire];
   	  remaining_fired_wire_v.push_back(mwire);
-  	  ident ++;
+  	  ident_wire ++;
   	}
       }
       last_wire = i;
@@ -3141,23 +3143,23 @@ void WCP2dToy::LowmemTiling::create_one_good_wire_cells(){
     const GeomWire *wire = gds.by_planeindex((WirePlaneType_t)2,i);
     if (leftover_wires.find(wire)!=leftover_wires.end()){
       if (mwire == 0){
-  	mwire = new MergeGeomWire(ident,*wire);
+  	mwire = new MergeGeomWire(ident_wire,*wire);
   	//mwire->SetTimeSlice(time_slice);
 	wire_type_map[mwire] = true;
 	temp_wire_map[mwire] = temp_wire_map[wire];
   	remaining_fired_wire_w.push_back(mwire);
-  	ident ++;
+  	ident_wire ++;
       }else{
   	if (i==last_wire+1){
   	  mwire->AddWire(*wire);
   	}else{
   	  // create a new wire
-  	  mwire = new MergeGeomWire(ident,*wire);
+  	  mwire = new MergeGeomWire(ident_wire,*wire);
   	  //mwire->SetTimeSlice(time_slice);
 	  wire_type_map[mwire] = true;
 	  temp_wire_map[mwire] = temp_wire_map[wire];
   	  remaining_fired_wire_w.push_back(mwire);
-  	  ident ++;
+  	  ident_wire ++;
   	}
       }
       last_wire = i;
@@ -3197,9 +3199,9 @@ void WCP2dToy::LowmemTiling::create_one_good_wire_cells(){
 	  GeomWireSelection& uwires = mcell->get_uwires();
 	  GeomWireSelection& vwires = mcell->get_vwires();
 	  GeomWireSelection& wwires = mcell->get_wwires();
-	  MergeGeomWire *mwire_u = new MergeGeomWire(0,uwires);
-	  MergeGeomWire *mwire_v = new MergeGeomWire(0,vwires);
-	  MergeGeomWire *mwire_w = new MergeGeomWire(0,wwires);
+	  MergeGeomWire *mwire_u = new MergeGeomWire(ident_wire,uwires); ident_wire++;
+	  MergeGeomWire *mwire_v = new MergeGeomWire(ident_wire,vwires); ident_wire++;
+	  MergeGeomWire *mwire_w = new MergeGeomWire(ident_wire,wwires); ident_wire++;
 
 	  // create the map  
 	  // cell to wires
@@ -3276,9 +3278,9 @@ void WCP2dToy::LowmemTiling::create_one_good_wire_cells(){
 	  GeomWireSelection& uwires = mcell->get_uwires();
 	  GeomWireSelection& vwires = mcell->get_vwires();
 	  GeomWireSelection& wwires = mcell->get_wwires();
-	  MergeGeomWire *mwire_u = new MergeGeomWire(0,uwires);
-	  MergeGeomWire *mwire_v = new MergeGeomWire(0,vwires);
-	  MergeGeomWire *mwire_w = new MergeGeomWire(0,wwires);
+	  MergeGeomWire *mwire_u = new MergeGeomWire(ident_wire,uwires); ident_wire++;
+	  MergeGeomWire *mwire_v = new MergeGeomWire(ident_wire,vwires); ident_wire++;
+	  MergeGeomWire *mwire_w = new MergeGeomWire(ident_wire,wwires); ident_wire++;
 
 	  // create the map  
 	  // cell to wires
@@ -3353,9 +3355,9 @@ void WCP2dToy::LowmemTiling::create_one_good_wire_cells(){
 	  GeomWireSelection& uwires = mcell->get_uwires();
 	  GeomWireSelection& vwires = mcell->get_vwires();
 	  GeomWireSelection& wwires = mcell->get_wwires();
-	  MergeGeomWire *mwire_u = new MergeGeomWire(0,uwires);
-	  MergeGeomWire *mwire_v = new MergeGeomWire(0,vwires);
-	  MergeGeomWire *mwire_w = new MergeGeomWire(0,wwires);
+	  MergeGeomWire *mwire_u = new MergeGeomWire(ident_wire, uwires); ident_wire++;
+	  MergeGeomWire *mwire_v = new MergeGeomWire(ident_wire, vwires); ident_wire++;
+	  MergeGeomWire *mwire_w = new MergeGeomWire(ident_wire, wwires); ident_wire++;
 
 	  // create the map  
 	  // cell to wires
@@ -4705,7 +4707,7 @@ void WCP2dToy::LowmemTiling::form_fired_merge_wires_with_charge(std::map<int,std
   
   // do U
   MergeGeomWire *mwire = 0;
-  int ident = 0;
+  //  int ident = 0;
   int last_wire = -1;
   for (int i = 0; i!= nwire_u; i++){
     const GeomWire *wire = gds.by_planeindex((WirePlaneType_t)0,i);
@@ -4717,21 +4719,21 @@ void WCP2dToy::LowmemTiling::form_fired_merge_wires_with_charge(std::map<int,std
 	std::cout << "Mismatch maps in charges!";
       }
       if (mwire == 0){
-	mwire = new MergeGeomWire(ident,*wire);
+	mwire = new MergeGeomWire(ident_wire,*wire);
 	//mwire->SetTimeSlice(time_slice);
 	wire_type_map[mwire] = true;
 	fired_wire_u.push_back(mwire);
-	ident ++;
+	ident_wire ++;
       }else{
 	if (i==last_wire+1){
 	  mwire->AddWire(*wire);
 	}else{
 	  // create a new wire
-	  mwire = new MergeGeomWire(ident,*wire);
+	  mwire = new MergeGeomWire(ident_wire,*wire);
 	  // mwire->SetTimeSlice(time_slice);
 	  wire_type_map[mwire] = true;
 	  fired_wire_u.push_back(mwire);
-	  ident ++;
+	  ident_wire ++;
 	}
       }
       last_wire = i;
@@ -4752,21 +4754,21 @@ void WCP2dToy::LowmemTiling::form_fired_merge_wires_with_charge(std::map<int,std
       }
       
       if (mwire == 0){
-	mwire = new MergeGeomWire(ident,*wire);
+	mwire = new MergeGeomWire(ident_wire,*wire);
 	//mwire->SetTimeSlice(time_slice);
 	wire_type_map[mwire] = true;
 	fired_wire_v.push_back(mwire);
-	ident ++;
+	ident_wire ++;
       }else{
 	if (i==last_wire+1){
 	  mwire->AddWire(*wire);
 	}else{
 	  // create a new wire
-	  mwire = new MergeGeomWire(ident,*wire);
+	  mwire = new MergeGeomWire(ident_wire,*wire);
 	  //mwire->SetTimeSlice(time_slice);
 	  wire_type_map[mwire] = true;
 	  fired_wire_v.push_back(mwire);
-	  ident ++;
+	  ident_wire ++;
 	}
       }
       last_wire = i;
@@ -4787,21 +4789,21 @@ void WCP2dToy::LowmemTiling::form_fired_merge_wires_with_charge(std::map<int,std
       }
       
       if (mwire == 0){
-	mwire = new MergeGeomWire(ident,*wire);
+	mwire = new MergeGeomWire(ident_wire,*wire);
 	//mwire->SetTimeSlice(time_slice);
 	wire_type_map[mwire] = true;
 	fired_wire_w.push_back(mwire);
-	ident ++;
+	ident_wire ++;
       }else{
 	if (i==last_wire+1){
 	  mwire->AddWire(*wire);
 	}else{
 	  // create a new wire
-	  mwire = new MergeGeomWire(ident,*wire);
+	  mwire = new MergeGeomWire(ident_wire,*wire);
 	  //mwire->SetTimeSlice(time_slice);
 	  wire_type_map[mwire] = true;
 	  fired_wire_w.push_back(mwire);
-	  ident ++;
+	  ident_wire ++;
 	}
       }
       last_wire = i;
@@ -4820,27 +4822,27 @@ void WCP2dToy::LowmemTiling::form_fired_merge_wires(std::map<int,std::set<int>>&
   
   // do U
   MergeGeomWire *mwire = 0;
-  int ident = 0;
+  //  int ident = 0;
   int last_wire = -1;
   for (int i = 0; i!= nwire_u; i++){
     const GeomWire *wire = gds.by_planeindex((WirePlaneType_t)0,i);
     if (u_chs.find(wire->channel())!=u_chs.end()){
       if (mwire == 0){
-	mwire = new MergeGeomWire(ident,*wire);
+	mwire = new MergeGeomWire(ident_wire,*wire);
 	//mwire->SetTimeSlice(time_slice);
 	wire_type_map[mwire] = true;
 	fired_wire_u.push_back(mwire);
-	ident ++;
+	ident_wire ++;
       }else{
 	if (i==last_wire+1){
 	  mwire->AddWire(*wire);
 	}else{
 	  // create a new wire
-	  mwire = new MergeGeomWire(ident,*wire);
+	  mwire = new MergeGeomWire(ident_wire,*wire);
 	  // mwire->SetTimeSlice(time_slice);
 	  wire_type_map[mwire] = true;
 	  fired_wire_u.push_back(mwire);
-	  ident ++;
+	  ident_wire ++;
 	}
       }
       last_wire = i;
@@ -4854,21 +4856,21 @@ void WCP2dToy::LowmemTiling::form_fired_merge_wires(std::map<int,std::set<int>>&
     const GeomWire *wire = gds.by_planeindex((WirePlaneType_t)1,i);
     if (v_chs.find(wire->channel())!=v_chs.end()){
       if (mwire == 0){
-	mwire = new MergeGeomWire(ident,*wire);
+	mwire = new MergeGeomWire(ident_wire,*wire);
 	//mwire->SetTimeSlice(time_slice);
 	wire_type_map[mwire] = true;
 	fired_wire_v.push_back(mwire);
-	ident ++;
+	ident_wire ++;
       }else{
 	if (i==last_wire+1){
 	  mwire->AddWire(*wire);
 	}else{
 	  // create a new wire
-	  mwire = new MergeGeomWire(ident,*wire);
+	  mwire = new MergeGeomWire(ident_wire,*wire);
 	  //mwire->SetTimeSlice(time_slice);
 	  wire_type_map[mwire] = true;
 	  fired_wire_v.push_back(mwire);
-	  ident ++;
+	  ident_wire ++;
 	}
       }
       last_wire = i;
@@ -4882,21 +4884,21 @@ void WCP2dToy::LowmemTiling::form_fired_merge_wires(std::map<int,std::set<int>>&
     const GeomWire *wire = gds.by_planeindex((WirePlaneType_t)2,i);
     if (w_chs.find(wire->channel())!=w_chs.end()){
       if (mwire == 0){
-	mwire = new MergeGeomWire(ident,*wire);
+	mwire = new MergeGeomWire(ident_wire,*wire);
 	//mwire->SetTimeSlice(time_slice);
 	wire_type_map[mwire] = true;
 	fired_wire_w.push_back(mwire);
-	ident ++;
+	ident_wire ++;
       }else{
 	if (i==last_wire+1){
 	  mwire->AddWire(*wire);
 	}else{
 	  // create a new wire
-	  mwire = new MergeGeomWire(ident,*wire);
+	  mwire = new MergeGeomWire(ident_wire,*wire);
 	  //mwire->SetTimeSlice(time_slice);
 	  wire_type_map[mwire] = true;
 	  fired_wire_w.push_back(mwire);
-	  ident ++;
+	  ident_wire ++;
 	}
       }
       last_wire = i;
@@ -4933,27 +4935,27 @@ void WCP2dToy::LowmemTiling::form_fired_merge_wires(const WCP::Slice& slice, con
   
   // do U
   MergeGeomWire *mwire = 0;
-  int ident = 0;
+  //  int ident = 0;
   int last_wire = -1;
   for (int i = 0; i!= nwire_u; i++){
     const GeomWire *wire = gds.by_planeindex((WirePlaneType_t)0,i);
     if (wirechargemap.find(wire)!=wirechargemap.end()){
       if (mwire == 0){
-	mwire = new MergeGeomWire(ident,*wire);
+	mwire = new MergeGeomWire(ident_wire,*wire);
 	//mwire->SetTimeSlice(time_slice);
 	wire_type_map[mwire] = true;
 	fired_wire_u.push_back(mwire);
-	ident ++;
+	ident_wire ++;
       }else{
 	if (i==last_wire+1){
 	  mwire->AddWire(*wire);
 	}else{
 	  // create a new wire
-	  mwire = new MergeGeomWire(ident,*wire);
+	  mwire = new MergeGeomWire(ident_wire,*wire);
 	  // mwire->SetTimeSlice(time_slice);
 	  wire_type_map[mwire] = true;
 	  fired_wire_u.push_back(mwire);
-	  ident ++;
+	  ident_wire ++;
 	}
       }
       last_wire = i;
@@ -4967,21 +4969,21 @@ void WCP2dToy::LowmemTiling::form_fired_merge_wires(const WCP::Slice& slice, con
     const GeomWire *wire = gds.by_planeindex((WirePlaneType_t)1,i);
     if (wirechargemap.find(wire)!=wirechargemap.end()){
       if (mwire == 0){
-	mwire = new MergeGeomWire(ident,*wire);
+	mwire = new MergeGeomWire(ident_wire,*wire);
 	//mwire->SetTimeSlice(time_slice);
 	wire_type_map[mwire] = true;
 	fired_wire_v.push_back(mwire);
-	ident ++;
+	ident_wire ++;
       }else{
 	if (i==last_wire+1){
 	  mwire->AddWire(*wire);
 	}else{
 	  // create a new wire
-	  mwire = new MergeGeomWire(ident,*wire);
+	  mwire = new MergeGeomWire(ident_wire,*wire);
 	  //mwire->SetTimeSlice(time_slice);
 	  wire_type_map[mwire] = true;
 	  fired_wire_v.push_back(mwire);
-	  ident ++;
+	  ident_wire ++;
 	}
       }
       last_wire = i;
@@ -4995,21 +4997,21 @@ void WCP2dToy::LowmemTiling::form_fired_merge_wires(const WCP::Slice& slice, con
     const GeomWire *wire = gds.by_planeindex((WirePlaneType_t)2,i);
     if (wirechargemap.find(wire)!=wirechargemap.end()){
       if (mwire == 0){
-	mwire = new MergeGeomWire(ident,*wire);
+	mwire = new MergeGeomWire(ident_wire,*wire);
 	//mwire->SetTimeSlice(time_slice);
 	wire_type_map[mwire] = true;
 	fired_wire_w.push_back(mwire);
-	ident ++;
+	ident_wire ++;
       }else{
 	if (i==last_wire+1){
 	  mwire->AddWire(*wire);
 	}else{
 	  // create a new wire
-	  mwire = new MergeGeomWire(ident,*wire);
+	  mwire = new MergeGeomWire(ident_wire,*wire);
 	  //mwire->SetTimeSlice(time_slice);
 	  wire_type_map[mwire] = true;
 	  fired_wire_w.push_back(mwire);
-	  ident ++;
+	  ident_wire ++;
 	}
       }
       last_wire = i;

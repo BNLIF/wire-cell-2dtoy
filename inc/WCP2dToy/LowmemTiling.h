@@ -90,13 +90,13 @@ namespace WCP2dToy{
     void Erase_Cell(WCP::SlimMergeGeomCell *cell);
 
     void Print_maps();
-    WCP::GeomCellSelection local_deghosting(std::set<WCP::SlimMergeGeomCell*>& potential_good_mcells, std::set<WCP::SlimMergeGeomCell*>& good_mcells, bool flag_del = false);
+    WCP::GeomCellSelection local_deghosting(std::set<WCP::SlimMergeGeomCell*, WCP::GeomCellComparep>& potential_good_mcells, std::set<WCP::SlimMergeGeomCell*, WCP::GeomCellComparep>& good_mcells, bool flag_del = false);
 
-    void local_deghosting1(std::set<WCP::SlimMergeGeomCell*>& good_mcells, std::map<WCP::SlimMergeGeomCell*, double>& map_mcell_charge);
+    void local_deghosting1(std::set<WCP::SlimMergeGeomCell*, WCP::GeomCellComparep>& good_mcells, std::map<WCP::SlimMergeGeomCell*, double, WCP::GeomCellComparep>& map_mcell_charge);
 
     WCP::GeomWireSelection find_L1SP_wires();
 
-    std::map<const WCP::GeomWire*,bool> get_wire_type_map(){return wire_type_map;};
+    std::map<const WCP::GeomWire*,bool, WCP::GeomWireComparep> get_wire_type_map(){return wire_type_map;};
 
     WCP::GeomWireWireMap get_wire_pwire_map(){ return wire_pwire_map;};
     //map parent wire to wire
@@ -105,6 +105,7 @@ namespace WCP2dToy{
     bool get_regen_two_bad_wire_cells(){return regen_two_bad_wire_cells;};
     
   protected:
+    int ident_wire;
     WCP::GeomDataSource& gds;
     WCP2dToy::WCPHolder& holder;
 
@@ -143,7 +144,7 @@ namespace WCP2dToy{
     
     
     //map wire --> bad or good
-    std::map<const WCP::GeomWire*,bool> wire_type_map;
+    std::map<const WCP::GeomWire*,bool, WCP::GeomWireComparep> wire_type_map;
     //map cell to wire
     WCP::GeomCellMap cell_wires_map;
     //map wire to cell
