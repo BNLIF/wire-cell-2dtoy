@@ -73,7 +73,7 @@ int main(int argc, char* argv[])
   }
  
   
-  Slim3DCluster *cluster = new Slim3DCluster(*mcell1);
+  Slim3DCluster *cluster = new Slim3DCluster(0,*mcell1);
   cluster->AddCell(*mcell2);
   cluster->AddCell(*mcell3);
   cluster->AddCell(*mcell4);
@@ -81,7 +81,7 @@ int main(int argc, char* argv[])
   cluster->Calc_Projection();
 
   
-  Slim3DCluster *cluster1 = new Slim3DCluster(*mcell1);
+  Slim3DCluster *cluster1 = new Slim3DCluster(1,*mcell1);
   cluster1->AddCell(*mcell2);
   // cluster1->AddCell(*mcell3);
   cluster1->AddCell(*mcell4p);
