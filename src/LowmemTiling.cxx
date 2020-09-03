@@ -403,8 +403,12 @@ void WCP2dToy::LowmemTiling::MergeWires(){
     }
   }
 
+  
+  
   calculate_merged_wire_charge();
 
+  
+  
   for (auto it=cell_wires_map.begin(); it!= cell_wires_map.end(); it++){
     SlimMergeGeomCell *mcell = (SlimMergeGeomCell*)it->first;
     mcell->OrderWires();
@@ -420,9 +424,15 @@ void WCP2dToy::LowmemTiling::calculate_merged_wire_charge(){
   // set relative uncertainties to zero
   float relative_err_ind = 0.0; // 15% relative uncertainties for induction plane 
   float relative_err_col = 0.0; // 5% relative uncertainties for collection plane
+
+  
   
   for (auto it = wire_cells_map.begin(); it!= wire_cells_map.end(); it++){
+    
     MergeGeomWire *mwire = (MergeGeomWire*)it->first;
+
+    
+	
     if (wire_type_map[mwire]){
       // calculate merged good wire charge
       wirechargemap[mwire] = 0;
@@ -430,6 +440,8 @@ void WCP2dToy::LowmemTiling::calculate_merged_wire_charge(){
       GeomWireSelection wires = mwire->get_allwire();
       for (size_t i=0; i!=wires.size();i++){
 	const GeomWire* swire = wires.at(i);
+
+		
 	// if (wirechargemap.find(swire)==wirechargemap.end() ||
 	//     wirecharge_errmap.find(swire)==wirecharge_errmap.end()){
 	//   std::cout << "Wrong! " << std::endl;
@@ -555,6 +567,13 @@ bool WCP2dToy::LowmemTiling::remove_wire_clear(MergeGeomWire *wire){
       wires.erase(it);
     wire_pwire_map.erase(wire);
   }
+
+  if (wirechargemap.find(wire)!=wirechargemap.end()){
+    wirechargemap.erase(wire);
+  }
+  if (wirecharge_errmap.find(wire)!=wirecharge_errmap.end()){
+    wirecharge_errmap.erase(wire);
+  }
   
   //do wire type map 
   if (wire_type_map.find(wire) != wire_type_map.end()){
@@ -589,7 +608,13 @@ bool WCP2dToy::LowmemTiling::remove_wire(MergeGeomWire *wire){
     wire_pwire_map.erase(wire);
   }
   
-
+  if (wirechargemap.find(wire)!=wirechargemap.end()){
+    wirechargemap.erase(wire);
+  }
+  if (wirecharge_errmap.find(wire)!=wirecharge_errmap.end()){
+    wirecharge_errmap.erase(wire);
+  }
+  
   //do wire type map 
   if (wire_type_map.find(wire) != wire_type_map.end()){
     wire_type_map.erase(wire);
@@ -1494,7 +1519,8 @@ WCP::SlimMergeGeomCell* WCP2dToy::LowmemTiling::create_slim_merge_cell(WCP::Merg
    
    
     if (flag==1){
-      SlimMergeGeomCell *mcell = new SlimMergeGeomCell(ident);
+      ident = holder.get_cell_no();
+      SlimMergeGeomCell *mcell = new SlimMergeGeomCell(ident);ident++;
       mcell->SetTimeSlice(time_slice);
       holder.AddCell_No();
       // // Creat the Merge Wires
@@ -2207,6 +2233,8 @@ GeomCellSelection WCP2dToy::LowmemTiling::local_deghosting(std::set<SlimMergeGeo
     to_be_removed.clear();
   }
   
+
+
   
   return to_be_removed;
   
@@ -4021,7 +4049,7 @@ void WCP2dToy::LowmemTiling::form_two_bad_cells(){
 	//std::cout << u_max << " " << u_min << " " << v_max << " " << v_min << " " << w_max << " " << w_min << std::endl;
 	//Create a cell
 	int ident = holder.get_cell_no();
-	SlimMergeGeomCell *mcell = new SlimMergeGeomCell(ident);
+	SlimMergeGeomCell *mcell = new SlimMergeGeomCell(ident);ident++;
 	mcell->SetTimeSlice(time_slice);
 	mcell->AddBoundary(pcell);
 	mcell->add_bad_planes(WirePlaneType_t(0));
@@ -4330,7 +4358,7 @@ void WCP2dToy::LowmemTiling::form_two_bad_cells(){
 	//std::cout << u_max << " " << u_min << " " << v_max << " " << v_min << " " << w_max << " " << w_min << std::endl;
 	//Create a cell
 	int ident = holder.get_cell_no();
-	SlimMergeGeomCell *mcell = new SlimMergeGeomCell(ident);
+	SlimMergeGeomCell *mcell = new SlimMergeGeomCell(ident);ident++;
 	mcell->SetTimeSlice(time_slice);
 	mcell->AddBoundary(pcell);
 	mcell->add_bad_planes(WirePlaneType_t(0));
@@ -4616,7 +4644,7 @@ void WCP2dToy::LowmemTiling::form_two_bad_cells(){
 	//std::cout << u_max << " " << u_min << " " << v_max << " " << v_min << " " << w_max << " " << w_min << std::endl;
 	//Create a cell
 	int ident = holder.get_cell_no();
-	SlimMergeGeomCell *mcell = new SlimMergeGeomCell(ident);
+	SlimMergeGeomCell *mcell = new SlimMergeGeomCell(ident);ident++;
 	mcell->SetTimeSlice(time_slice);
 	mcell->AddBoundary(pcell);
 	mcell->add_bad_planes(WirePlaneType_t(1));

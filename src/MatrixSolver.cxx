@@ -221,7 +221,7 @@ WCP2dToy::MatrixSolver::MatrixSolver(GeomCellSelection& allmcell, GeomWireSelect
   }
   
 }
-void WCP2dToy::MatrixSolver::L1_Solve(std::map<const GeomCell*, double>& cell_weight_map){
+void WCP2dToy::MatrixSolver::L1_Solve(std::map<const GeomCell*, double, WCP::GeomCellComparep>& cell_weight_map){
     
 
   // MA->Print();

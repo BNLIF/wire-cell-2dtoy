@@ -64,11 +64,11 @@ namespace WCP2dToy{
     const WCP::GeomDataSource& gds;
     LowmemTiling& tiling;
 
-    std::map<const WCP::GeomCell*, double> cell_weight_map;
+    std::map<const WCP::GeomCell*, double, WCP::GeomCellComparep > cell_weight_map;
 
     
-    std::set<const WCP::GeomCell*> front_connectivity;
-    std::set<const WCP::GeomCell*> back_connectivity;
+    std::set<const WCP::GeomCell*, WCP::GeomCellComparep > front_connectivity;
+    std::set<const WCP::GeomCell*, WCP::GeomCellComparep > back_connectivity;
     
   };
 

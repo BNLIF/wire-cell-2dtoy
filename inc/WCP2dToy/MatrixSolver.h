@@ -30,7 +30,7 @@ namespace WCP2dToy{
     
     int get_solve_flag(){return solve_flag;};
 
-    void L1_Solve(std::map<const WCP::GeomCell*, double>& cell_weight_map);
+    void L1_Solve(std::map<const WCP::GeomCell*, double, WCP::GeomCellComparep >& cell_weight_map);
 
     WCP::GeomCellSelection get_all_cells();
     
