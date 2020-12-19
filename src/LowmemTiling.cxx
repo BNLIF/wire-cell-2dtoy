@@ -653,23 +653,30 @@ void WCP2dToy::LowmemTiling::Erase_Cell(SlimMergeGeomCell *cell){
   if (cell_wires_map.find(cell) != cell_wires_map.end()){
     // find all the wires connect to the cells
     GeomWireSelection& wires = cell_wires_map[cell];
+
+    // std::cout << wires.size() << std::endl;
+    
+    
     for (int i = 0; i!=wires.size();i++){
+      //std::cout << " a " << i << " " << wires.size() << std::endl;
       MergeGeomWire *wire = (MergeGeomWire*)wires.at(i);
       // remove the cell from the wire map
       GeomCellSelection& cells = wire_cells_map[wire];
       auto it = find(cells.begin(),cells.end(),cell);
       if (it!=cells.end())
 	cells.erase(it);
-
+      //std::cout << cells.size() << std::endl;
       // if the wire does not connect anything, remove it ... 
       if(cells.size()==0){
 	remove_wire(wire); 
       }
-
+      // std::cout << wires.size() << std::endl;
       
-      // remove the cell 
-      cell_wires_map.erase(cell);
+      
     }
+    // remove the cell 
+    cell_wires_map.erase(cell);
+    //std::cout << wires.size() << " a " << std::endl;
   }
    
   // remove it from holder (no need ...)
