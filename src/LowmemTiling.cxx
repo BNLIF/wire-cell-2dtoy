@@ -699,10 +699,9 @@ bool WCP2dToy::LowmemTiling::remove_cell(SlimMergeGeomCell *cell){
       if(cells.size()==0){
 	remove_wire(wire); 
       }
-
-      // remove the cell 
-      cell_wires_map.erase(cell);
     }
+    // remove the cell 
+    cell_wires_map.erase(cell);
     delete cell;
   }
   
