@@ -155,6 +155,7 @@ void WCP2dToy::calculate_pred_pe(int run_no, double eventTime, int time_offset, 
 
 	double high_x_cut = 256 * units::cm;
 	double high_x_cut_ext1 = + 1.2*units::cm;
+	//double high_x_cut_ext1 = + 2.0*units::cm;
 	double high_x_cut_ext2 = - 2.0*units::cm;
 	double low_x_cut = 0*units::cm;
 	double low_x_cut_ext1 = - 2*units::cm;
@@ -212,9 +213,9 @@ void WCP2dToy::calculate_pred_pe(int run_no, double eventTime, int time_offset, 
 	  if (num_mcells_def_outside < 0.0015 * main_cluster->get_num_mcells()&&num_mcells_def_outside>0)
 	    first_pos_x = offset_x;
 	  
-	  //  if (flash->get_flash_id()==61&&main_cluster->get_cluster_id()==1)
-	  // std::cout << num_mcells_outside << " " << main_cluster->get_num_mcells() << "  A " << (first_pos_x - offset_x)/units::cm << " " <<
-	  //  (prev_pos_x-offset_x)/units::cm << " " << (current_pos_x-offset_x)/units::cm << " " << num_mcells_def_outside << std::endl;
+	  // if (flash->get_flash_id()==26&&main_cluster->get_cluster_id()==22)
+	  //   std::cout << num_mcells_outside << " " << main_cluster->get_num_mcells() << "  A " << (first_pos_x - offset_x)/units::cm << " " <<
+	  //     (prev_pos_x-offset_x)/units::cm << " " << (current_pos_x-offset_x)/units::cm << " " << num_mcells_def_outside << std::endl;
 	  
 	}
 	if (last_pos_x - offset_x >= high_x_cut + high_x_cut_ext1 &&
@@ -234,6 +235,9 @@ void WCP2dToy::calculate_pred_pe(int run_no, double eventTime, int time_offset, 
 
 
 	    if (current_pos_x -offset_x>high_x_cut + high_x_cut_ext1) num_mcells_def_outside +=it3->second.size();
+
+	    //	    if (flash->get_flash_id()==26&&main_cluster->get_cluster_id()==22)
+	    //  std::cout << current_pos_x/units::cm << " " << it3->second.size() << std::endl;
 	    
 	    num_time_slices_outside += 1;
 	    num_mcells_outside += it3->second.size();
@@ -252,21 +256,23 @@ void WCP2dToy::calculate_pred_pe(int run_no, double eventTime, int time_offset, 
 	  if (num_mcells_def_outside < 0.0015 * main_cluster->get_num_mcells()&&num_mcells_def_outside>0)
 	    last_pos_x = offset_x+high_x_cut;
 
-	  // if (flash->get_flash_id()==19&&main_cluster->get_cluster_id()==19)
-	  //   std::cout << flash->get_flash_id() << " "<< main_cluster->get_cluster_id() << " " << (first_pos_x-offset_x)/units::cm << " " << (last_pos_x-offset_x)/units::cm << " " << num_time_slices_outside << " " << num_mcells_outside << " " << main_cluster->get_num_mcells() << " " << fabs(current_pos_x - prev_pos_x)/units::cm << std::endl;
+	  //	  if (flash->get_flash_id()==26&&main_cluster->get_cluster_id()==22)
+	  //  std::cout << flash->get_flash_id() << " "<< main_cluster->get_cluster_id() << " " << (first_pos_x-offset_x)/units::cm << " " << (last_pos_x-offset_x)/units::cm << " " << num_time_slices_outside << " " << num_mcells_outside << " " << main_cluster->get_num_mcells() << " " << fabs(current_pos_x - prev_pos_x)/units::cm << std::endl;
 	  
 	}
 	
 	// if (flash->get_flash_id()==16 && main_cluster->get_cluster_id()==13 )
 	//   std::cout << flash->get_flash_id() << " "<< main_cluster->get_cluster_id() << " " << (first_pos_x-offset_x)/units::cm << " " << (last_pos_x-offset_x)/units::cm << std::endl;
 
-	// if (flash->get_flash_id()==39)
-	//   std::cout << flash->get_flash_id() << " " << main_cluster->get_cluster_id() << " " << offset_x/units::cm << " " << (first_pos_x-offset_x)/units::cm << " " << (last_pos_x-offset_x)/units::cm << " " << std::endl;
+	//	if (flash->get_flash_id()==26)
+	//  std::cout << flash->get_flash_id() << " " << main_cluster->get_cluster_id() << " " << offset_x/units::cm << " " << (first_pos_x-offset_x)/units::cm << " " << (last_pos_x-offset_x)/units::cm << " " << std::endl;
 	
   	if (first_pos_x-offset_x > low_x_cut + low_x_cut_ext1 -1.0*units::cm &&
   	    last_pos_x-offset_x > low_x_cut &&
   	    last_pos_x-offset_x < high_x_cut + high_x_cut_ext1 &&
   	    first_pos_x-offset_x < high_x_cut){
+
+	  
 	  
 	  bundle->set_spec_end_flag(flag_spec_end);
 	  
