@@ -236,8 +236,8 @@ void WCP2dToy::calculate_pred_pe(int run_no, double eventTime, int time_offset, 
 
 	    if (current_pos_x -offset_x>high_x_cut + high_x_cut_ext1) num_mcells_def_outside +=it3->second.size();
 
-	    //	    if (flash->get_flash_id()==26&&main_cluster->get_cluster_id()==22)
-	    //  std::cout << current_pos_x/units::cm << " " << it3->second.size() << std::endl;
+	    // if (flash->get_flash_id()==18&&main_cluster->get_cluster_id()==23)
+	    //   std::cout << current_pos_x/units::cm << " " << it3->second.size() << std::endl;
 	    
 	    num_time_slices_outside += 1;
 	    num_mcells_outside += it3->second.size();
@@ -256,7 +256,7 @@ void WCP2dToy::calculate_pred_pe(int run_no, double eventTime, int time_offset, 
 	  if (num_mcells_def_outside < 0.0015 * main_cluster->get_num_mcells()&&num_mcells_def_outside>0)
 	    last_pos_x = offset_x+high_x_cut;
 
-	  //	  if (flash->get_flash_id()==26&&main_cluster->get_cluster_id()==22)
+	  //if (flash->get_flash_id()==26&&main_cluster->get_cluster_id()==22)
 	  //  std::cout << flash->get_flash_id() << " "<< main_cluster->get_cluster_id() << " " << (first_pos_x-offset_x)/units::cm << " " << (last_pos_x-offset_x)/units::cm << " " << num_time_slices_outside << " " << num_mcells_outside << " " << main_cluster->get_num_mcells() << " " << fabs(current_pos_x - prev_pos_x)/units::cm << std::endl;
 	  
 	}
