@@ -364,6 +364,7 @@ void WCP2dToy::ToyLightReco::load_event_raw(int eve_num, double tMin, double tMa
     }
     gain[i] = op_gain->at(i);
     beam_dt[i] = fop_timestamp->at(i) - triggerTime;
+    //    std::cout << i << " " << beam_dt[i] << std::endl;
   }
 
   
@@ -901,13 +902,16 @@ void WCP2dToy::ToyLightReco::Process_beam_wfs(double tMin, double tMax){
 	priorFlashBin = std::max(1,int((priorFlashTime-beam_dt[0])/tBinWidth-0.5));	//bin 1 corresponds to [0,94] ns
 	bin = std::max(bMin,1+priorFlashBin);						//Stat 1 bin after the flash
 
-	while(bin<bMax && !finished){
+	while(bin<bMax && !finished 
+	      && bin < hdeconProjYList.size()){
 		//Trigger on large KS values to find when the prior flash is over
 		priorFlashProfile->Reset();
 		for(int i=0;i<32;i++){
 			double avPE = ( hdecon2->GetBinContent(priorFlashBin,i) + hdecon2->GetBinContent(priorFlashBin+1,i) )/2;
 			priorFlashProfile->SetBinContent(i,avPE);
 		}
+		//	std::cout << priorFlashProfile->GetNbinsX() << " " << tMin << " " << tMax << " " << beam_dt[0] << " " << bin << " " << bMin << " " << priorFlashBin << " " << bMax << " " << hdeconProjYList.size() << " " << hdeconProjYList[bin-1].GetNbinsX() << std::endl;
+		
 		double ksPriorNew = priorFlashProfile->KolmogorovTest(&hdeconProjYList[bin-1],"M");
 		double avPriorPE = (totalPE[bin-2]+totalPE[bin-3])/2;
 		double avPriorPEWeight = (10-(10-1)*(ksPriorNew-.15)/(.5-.15));
