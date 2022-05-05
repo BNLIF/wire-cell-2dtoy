@@ -77,6 +77,7 @@ int WCP2dToy::Noisy_Event_ID(TH2F *hu_decon, TH2F *hv_decon, TH2F *hw_decon, std
   std::vector<std::tuple<int,int,float>> summary_v;
   std::vector<std::tuple<int,int,float>> summary_w;
 
+  //std::cout << "test: " << n_time_slice << std::endl;
   
   // ID the events
   for (int i=0;i<n_time_slice/n_rebin;i++){
@@ -93,6 +94,12 @@ int WCP2dToy::Noisy_Event_ID(TH2F *hu_decon, TH2F *hv_decon, TH2F *hw_decon, std
 	content += hu_decon->GetBinContent(j+1,i*n_rebin+1+k);
       }
       float rms = uplane_rms.at(j);
+      
+      // debug ...
+      //      if (content> 0 )
+      // 	std::cout << i << " " << j << " " << content << " " << rms << std::endl;
+      
+
       if (!flag_roi){
 	if (content > rms){
 	  start = j;
@@ -152,6 +159,11 @@ int WCP2dToy::Noisy_Event_ID(TH2F *hu_decon, TH2F *hv_decon, TH2F *hw_decon, std
 	}
       }
     }
+
+    // debug
+    //    std::cout << i << " " << ROI_u.size() << " " << ROI_v.size() << " " << ROI_w.size() << std::endl;
+
+    
     float nfired_u = 0;
     float nfired_v = 0;
     float nfired_w = 0;
@@ -197,6 +209,9 @@ int WCP2dToy::Noisy_Event_ID(TH2F *hu_decon, TH2F *hv_decon, TH2F *hw_decon, std
     // 		<< " " << nfired_v * ncover_v << " " << ncover_v
     //		<< " " << nfired_w * ncover_w << " " << ncover_w << std::endl;
   }
+  
+  //debug
+  //std::cout << summary_u.size() << " " << summary_v.size() << " " << summary_w.size() << std::endl;
 
   bool flag_u = false;
   int prev_time = -1;
@@ -217,6 +232,9 @@ int WCP2dToy::Noisy_Event_ID(TH2F *hu_decon, TH2F *hv_decon, TH2F *hw_decon, std
     int time = std::get<0>(summary_u.at(i));
     int ncover = std::get<1>(summary_u.at(i));
     float percentage = std::get<2>(summary_u.at(i));
+
+    // debug
+    //std::cout << time << " " << ncover << " " << percentage << std::endl;
     
     if (time > prev_time+time_cut){
       //std::cout << n_cover << " " << n_fire << " " << acc_fire*1./acc_cover << " " << acc_fire * 1./acc_total << " " << std::endl;
@@ -363,6 +381,10 @@ int WCP2dToy::Noisy_Event_ID(TH2F *hu_decon, TH2F *hv_decon, TH2F *hw_decon, std
   
   std::cout << "Xin: " << " " << flag_u << " " << flag_v << " " << flag_w << std::endl;
 
+  // test
+  //  noisy_u.push_back(std::make_pair(100,200));
+  //noisy_v.push_back(std::make_pair(100,200));
+  //noisy_w.push_back(std::make_pair(100,200));
 
   //extend the window size ...
   for (auto it=noisy_u.begin(); it!=noisy_u.end();it++){
@@ -394,7 +416,9 @@ int WCP2dToy::Noisy_Event_ID(TH2F *hu_decon, TH2F *hv_decon, TH2F *hw_decon, std
 
     it->first = min_start_time;
     it->second = max_end_time;
-    //    std::cout << start_time << " " << end_time << " " << min_start_time << " " << max_end_time << std::endl;
+
+    // debug
+    //std::cout << start_time << " " << end_time << " " << min_start_time << " " << max_end_time << std::endl;
   }
   for (auto it=noisy_v.begin(); it!=noisy_v.end();it++){
     int start_time = it->first; 
@@ -425,7 +449,8 @@ int WCP2dToy::Noisy_Event_ID(TH2F *hu_decon, TH2F *hv_decon, TH2F *hw_decon, std
 
     it->first = min_start_time;
     it->second = max_end_time;
-    //    std::cout << start_time << " " << end_time << " " << min_start_time << " " << max_end_time << std::endl;
+    // debug
+    //std::cout << start_time << " " << end_time << " " << min_start_time << " " << max_end_time << std::endl;
   }
   for (auto it=noisy_w.begin(); it!=noisy_w.end();it++){
     int start_time = it->first; 
@@ -456,7 +481,8 @@ int WCP2dToy::Noisy_Event_ID(TH2F *hu_decon, TH2F *hv_decon, TH2F *hw_decon, std
 
     it->first = min_start_time;
     it->second = max_end_time;
-    //    std::cout << start_time << " " << end_time << " " << min_start_time << " " << max_end_time << std::endl;
+    // debug
+    //std::cout << start_time << " " << end_time << " " << min_start_time << " " << max_end_time << std::endl;
   }
   
   // finish it ... 
@@ -659,6 +685,10 @@ int WCP2dToy::Noisy_Event_ID(TH2F *hu_decon, TH2F *hv_decon, TH2F *hw_decon, std
 	sum_total_w++;
       }
     }
+
+    // debug
+    // std::cout << sum_fired_u<< " " << sum_total_u << " " <<  sum_fired_v << " " << sum_total_v << " " << sum_fired_w<< " " << sum_total_w << std::endl;
+    
     if (sum_fired_u/sum_total_u + sum_fired_v/sum_total_v + sum_fired_w/sum_total_w > 0.048){
       std::cout << "Too busy: " << sum_fired_u/sum_total_u << " " << sum_fired_v/sum_total_v << " " << sum_fired_w/sum_total_w << std::endl;
       // zero all the files ...

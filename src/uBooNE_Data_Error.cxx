@@ -29,6 +29,8 @@ WCP2dToy::uBooNEDataError::uBooNEDataError(const WCP::GeomDataSource& gds, TH2I 
 
   int nbin = bins_per_frame;
 
+  //  std::cout << "check: " << nbin << std::endl;
+  
   double fudge_factor = 1.1;//
   double fudge_factor_ind = 2.1;
   // U plane
@@ -483,6 +485,8 @@ WCP2dToy::uBooNEDataError::uBooNEDataError(const WCP::GeomDataSource& gds, TH2F 
 
   int nbin = bins_per_frame;
 
+  //  std::cout << "check: " << nbin << std::endl;
+  
   double fudge_factor = 1.1;//
   double fudge_factor_ind = 2.1;
   // U plane
