@@ -991,6 +991,8 @@ WCP2dToy::pmtMapSet WCP2dToy::ToyLightReco::makePmtContainer(bool high, bool bea
   if(beam == false){ discSize = 40; }
   std::array<float,32> scalePMT; scalePMT.fill(10.0);
 
+  //  std::cout << high << " " << beam << " " << num << std::endl;
+  
   if(high == true){
     for(int i=0; i<num; i++){
       WCP2dToy::pmtDisc disc;
@@ -1015,12 +1017,29 @@ WCP2dToy::pmtMapSet WCP2dToy::ToyLightReco::makePmtContainer(bool high, bool bea
       disc.timestamp = timestamp->at(i);
       disc.isolated = true;
       disc.highGain = true;
-      result[disc.channel].insert(disc);
+
+      if (beam == true){
+	if (result[disc.channel].size()==0)
+	  result[disc.channel].insert(disc);
+	else{
+	  if (disc.timestamp < result[disc.channel].begin()->timestamp){
+	    result[disc.channel].clear();
+	    result[disc.channel].insert(disc);
+	  }
+	  //	  std::cout << disc.timestamp << " " << result[disc.channel].begin()->timestamp << std::endl;
+	}
+      }else{
+	result[disc.channel].insert(disc);
+      }
       // h->Delete();
     }
   }
   else if(high == false){
     for(int i=0; i<num; i++){
+
+      //if (beam == true)
+      //	std::cout << high << " " << chan->at(i) << " " << ((TH1S*)wf->At(i))->GetNbinsX() << " " << timestamp->at(i) << std::endl;
+      
       WCP2dToy::pmtDisc disc;
       if(chan->at(i)>=132) continue;
       TH1S *h = (TH1S*)wf->At(i);
@@ -1050,10 +1069,27 @@ WCP2dToy::pmtMapSet WCP2dToy::ToyLightReco::makePmtContainer(bool high, bool bea
 	disc.wfm.at(j) = (h->GetBinContent(j+1)-baseline)*findScaling(disc.channel)+baseline;
       }
       //      std::cout <<  disc.channel << " A " << disc.wfm.at(0) << std::endl;
-      result[disc.channel].insert(disc);
+
+
+      if (beam == true){
+	if (result[disc.channel].size()==0)
+	  result[disc.channel].insert(disc);
+	else{
+	  if (disc.timestamp < result[disc.channel].begin()->timestamp){
+	    result[disc.channel].clear();
+	    result[disc.channel].insert(disc);
+	  }
+	  //	  std::cout << disc.timestamp << " " << result[disc.channel].begin()->timestamp << std::endl;
+	}
+      }else{
+	result[disc.channel].insert(disc);
+      }
       // h->Delete();
     }
   }
+
+  //  std::cout << result.size() << " " << result.begin()->second.size() << std::endl;
+  
   return result;
 }
 
