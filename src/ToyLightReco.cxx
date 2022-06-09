@@ -292,7 +292,7 @@ void WCP2dToy::ToyLightReco::load_event_raw(int eve_num, double tMin, double tMa
     COphit *op_hit = new COphit(fop_femch->at(i), (TH1S*)fop_wf->At(i), fop_timestamp->at(i) - triggerTime, op_gain->at(fop_femch->at(i)), op_gainerror->at(fop_femch->at(i)));
     op_hits.push_back(op_hit);
 
-    //std::cout << i << " " << fop_timestamp->at(i) << " " <<  triggerTime << std::endl;
+    //    std::cout << i << " " << fop_timestamp->at(i) -  triggerTime << std::endl;
      
     if (op_hit->get_type()){ // what type  good baseline ???
       bool flag_used = false;
@@ -346,13 +346,13 @@ void WCP2dToy::ToyLightReco::load_event_raw(int eve_num, double tMin, double tMa
     }else{
       delete flash;
     }
-    //    std::cout << ophits_group.at(j).size() << " " << flash->get_time() << std::endl;
+    //std::cout << ophits_group.at(j).size() << " " << flash->get_time() << std::endl;
   }
 
   // std::cout << cosmic_flashes.size() << std::endl;
 
-  // for (auto flash : cosmic_flashes){
-  //   std::cout << flash->get_time() << std::endl;
+  //  for (auto flash : cosmic_flashes){
+  //  std::cout << "Xin: " << flash->get_time() << std::endl;
   // }
 
   
@@ -374,8 +374,8 @@ void WCP2dToy::ToyLightReco::load_event_raw(int eve_num, double tMin, double tMa
 
   // std::cout << beam_flashes.size() << std::endl;
 
-  // for (auto flash : beam_flashes){
-  //   std::cout << flash->get_time() << std::endl;
+  //  for (auto flash : beam_flashes){
+  //  std::cout << flash->get_time() << std::endl;
   // }
   
   
@@ -995,6 +995,9 @@ WCP2dToy::pmtMapSet WCP2dToy::ToyLightReco::makePmtContainer(bool high, bool bea
   
   if(high == true){
     for(int i=0; i<num; i++){
+
+      //std::cout << high << " " << chan->at(i) << " " << ((TH1S*)wf->At(i))->GetNbinsX() << " " << timestamp->at(i) << std::endl;
+      
       WCP2dToy::pmtDisc disc;
       if(beam == true){
 	if(chan->at(i)>=32) continue;
@@ -1018,6 +1021,11 @@ WCP2dToy::pmtMapSet WCP2dToy::ToyLightReco::makePmtContainer(bool high, bool bea
       disc.isolated = true;
       disc.highGain = true;
 
+
+      //      if (discSize < 100 && !beam){
+      //	std::cout << disc.channel << " " << disc.timestamp- 4.36978e+06  << " " << disc.wfm.at(3)-disc.wfm.at(0) << std::endl;
+      //}
+      
       if (beam == true){
 	if (result[disc.channel].size()==0)
 	  result[disc.channel].insert(disc);
@@ -1038,51 +1046,94 @@ WCP2dToy::pmtMapSet WCP2dToy::ToyLightReco::makePmtContainer(bool high, bool bea
     for(int i=0; i<num; i++){
 
       //if (beam == true)
-      //	std::cout << high << " " << chan->at(i) << " " << ((TH1S*)wf->At(i))->GetNbinsX() << " " << timestamp->at(i) << std::endl;
+      //      std::cout << high << " " << chan->at(i) << " " << ((TH1S*)wf->At(i))->GetNbinsX() << " " << timestamp->at(i) << std::endl;
       
       WCP2dToy::pmtDisc disc;
       if(chan->at(i)>=132) continue;
       TH1S *h = (TH1S*)wf->At(i);
-      if( (beam == true && h->GetNbinsX()<refSize) ||
-	  (beam == false && h->GetNbinsX()>refSize) ){
-	//	h->Delete();
+      if( (beam == true && h->GetNbinsX()<refSize)){
 	continue;
-      }
-      disc.channel = chan->at(i)-100;
-      disc.saturated = false;
-      disc.timestamp = timestamp->at(i);
-      disc.isolated = true;
-      disc.highGain = false;
-      disc.wfm.resize(discSize);
-      if(beam == true){
+      }else if ((beam == false && h->GetNbinsX()>refSize) ){
+	//	h->Delete();
+
+	//continue; // more work to work this out ...
+	
+	// do we use this code ???
 	baseline = 2050;
 	double temp_baseline = findBaselineLg(h);
-	//std::cout << temp_baseline << " " << baseline << std::endl;
 	if (fabs(temp_baseline-baseline)<=8)
 	  baseline = temp_baseline;
-      }
-      if(beam == false){ baseline = h->GetBinContent(1); }
-      for(int j=0; j<discSize; j++){
-	// is 2050 a good approximation??? 
-	//disc.wfm.at(j) = (h->GetBinContent(j+1)-baseline)*scalePMT[disc.channel]+baseline;
-	//if (j==0) std::cout << baseline << std::endl;
-	disc.wfm.at(j) = (h->GetBinContent(j+1)-baseline)*findScaling(disc.channel)+baseline;
-      }
-      //      std::cout <<  disc.channel << " A " << disc.wfm.at(0) << std::endl;
 
-
-      if (beam == true){
-	if (result[disc.channel].size()==0)
-	  result[disc.channel].insert(disc);
-	else{
-	  if (disc.timestamp < result[disc.channel].begin()->timestamp){
-	    result[disc.channel].clear();
-	    result[disc.channel].insert(disc);
+	std::vector<int> recorded_bins;
+	for (int j=0;j<h->GetNbinsX();j++){
+	  double content =  h->GetBinContent(j+1) - baseline;
+	  if (content > 30){
+	    int bin = j-3;
+	    if (bin <0) bin = 0;
+	    recorded_bins.push_back(bin);
+	    j = bin + discSize;
 	  }
-	  //	  std::cout << disc.timestamp << " " << result[disc.channel].begin()->timestamp << std::endl;
+	  //	  std::cout << h->GetBinContent(j+1) - baseline << std::endl;
 	}
+	//std::cout << chan->at(i) << " " << recorded_bins.size() << std::endl;
+
+	for (size_t j=0; j!=recorded_bins.size();j++){
+	  disc.channel = chan->at(i)-100;
+	  disc.saturated = false;
+	  disc.timestamp = timestamp->at(i) + recorded_bins.at(j) * 0.015625 ;
+	  disc.isolated = true;
+	  disc.highGain = false;
+	  disc.wfm.resize(discSize);
+	  for (int k= 0; k< discSize; k++){
+	    if (recorded_bins.at(j)+k+1 < h->GetNbinsX())
+	      disc.wfm.at(k) = (h->GetBinContent(recorded_bins.at(j)+k+1)- h->GetBinContent(recorded_bins.at(j)+1))*findScaling(disc.channel) + h->GetBinContent(recorded_bins.at(j)+1);
+	    else
+	      disc.wfm.at(k) = h->GetBinContent(recorded_bins.at(j)+1);
+	  }
+	  //	  std::cout << "Xin: " << disc.channel << " " << discSize << " " << refSize << " " << disc.timestamp - 4.36978e+06 << " " << disc.wfm.at(2) - disc.wfm.at(0) << std::endl;
+	  result[disc.channel].insert(disc);
+	}
+	
+	
+	//	continue; 
       }else{
-	result[disc.channel].insert(disc);
+	disc.channel = chan->at(i)-100;
+	disc.saturated = false;
+	disc.timestamp = timestamp->at(i);
+	disc.isolated = true;
+	disc.highGain = false;
+	disc.wfm.resize(discSize);
+	if(beam == true){
+	  baseline = 2050;
+	  double temp_baseline = findBaselineLg(h);
+	  //std::cout << temp_baseline << " " << baseline << std::endl;
+	  if (fabs(temp_baseline-baseline)<=8)
+	    baseline = temp_baseline;
+	}
+	if(beam == false){ baseline = h->GetBinContent(1); }
+	for(int j=0; j<discSize; j++){
+	  // is 2050 a good approximation??? 
+	  //disc.wfm.at(j) = (h->GetBinContent(j+1)-baseline)*scalePMT[disc.channel]+baseline;
+	  //if (j==0) std::cout << baseline << std::endl;
+	  //if (discSize < 100 && j==3) std::cout << j << " " << h->GetBinContent(j+1)-baseline << std::endl;
+	  disc.wfm.at(j) = (h->GetBinContent(j+1)-baseline)*findScaling(disc.channel)+baseline;
+	}
+	//      std::cout <<  disc.channel << " A " << disc.wfm.at(0) << std::endl;
+	
+	
+	if (beam == true){
+	  if (result[disc.channel].size()==0)
+	    result[disc.channel].insert(disc);
+	  else{
+	    if (disc.timestamp < result[disc.channel].begin()->timestamp){
+	      result[disc.channel].clear();
+	      result[disc.channel].insert(disc);
+	    }
+	    //	  std::cout << disc.timestamp << " " << result[disc.channel].begin()->timestamp << std::endl;
+	  }
+	}else{
+	  result[disc.channel].insert(disc);
+	}
       }
       // h->Delete();
     }
