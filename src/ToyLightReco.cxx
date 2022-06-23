@@ -1056,6 +1056,8 @@ WCP2dToy::pmtMapSet WCP2dToy::ToyLightReco::makePmtContainer(bool high, bool bea
       }else if ((beam == false && h->GetNbinsX()>refSize) ){
 	//	h->Delete();
 
+	//	std::cout << chan->at(i) << " " << h->GetNbinsX() << std::endl;
+	
 	//continue; // more work to work this out ...
 	
 	// do we use this code ???
@@ -1084,14 +1086,18 @@ WCP2dToy::pmtMapSet WCP2dToy::ToyLightReco::makePmtContainer(bool high, bool bea
 	  disc.isolated = true;
 	  disc.highGain = false;
 	  disc.wfm.resize(discSize);
+
+	  double sum = 0;
 	  for (int k= 0; k< discSize; k++){
 	    if (recorded_bins.at(j)+k+1 < h->GetNbinsX())
 	      disc.wfm.at(k) = (h->GetBinContent(recorded_bins.at(j)+k+1)- h->GetBinContent(recorded_bins.at(j)+1))*findScaling(disc.channel) + h->GetBinContent(recorded_bins.at(j)+1);
 	    else
 	      disc.wfm.at(k) = h->GetBinContent(recorded_bins.at(j)+1);
+	    sum += disc.wfm.at(k) - disc.wfm.at(0);
 	  }
-	  //	  std::cout << "Xin: " << disc.channel << " " << discSize << " " << refSize << " " << disc.timestamp - 4.36978e+06 << " " << disc.wfm.at(2) - disc.wfm.at(0) << std::endl;
-	  result[disc.channel].insert(disc);
+	  //std::cout << "Xin: " << disc.channel << " " << discSize << " " << refSize << " " << disc.timestamp  << " " << disc.wfm.at(2) - disc.wfm.at(0) << " " << sum << " " << recorded_bins.at(j) << std::endl;
+	  if (sum > 20*120.)
+	    result[disc.channel].insert(disc);
 	}
 	
 	
