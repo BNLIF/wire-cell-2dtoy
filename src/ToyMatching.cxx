@@ -146,6 +146,8 @@ void WCP2dToy::calculate_pred_pe(int run_no, double eventTime, int time_offset, 
 				 std::vector<std::pair<WCP::PR3DCluster*,double>>* additional_clusters, PR3DClusterSelection* other_clusters, PR3DClusterSelection* more_clusters, bool &flag_good_bundle, bool flag_data, bool flag_timestamp){
 
   //  std::cout << "ZXin_4: " << eventTime << " " << flag_timestamp << std::endl;
+
+  TPCParams& mp = Singleton<TPCParams>::Instance();
   
 	double rel_light_yield_err = pl->rel_light_yield_err;
 	double scaling_light_mag = pl->scaling_light_mag;
@@ -316,12 +318,16 @@ void WCP2dToy::calculate_pred_pe(int run_no, double eventTime, int time_offset, 
   		  p.x = pts.at(i).x - offset_x;
   		  p.y = pts.at(i).y;
   		  p.z = pts.at(i).z;
+
+		  //correct for finite electron lifetime
+		  float elifetime_ratio = mp.get_attenuation_ratio(p.x/time_slice_width * nrebin * 0.5*units::microsecond / units::millisecond);
+		  //std::cout << p.x << " " << time_slice_width << " " << p.x/time_slice_width * nrebin * 0.5*units::microsecond / units::millisecond << " " << elifetime_ratio << std::endl;
 		  
 		  int voxel_id = WCP2dToy::convert_xyz_voxel_id(p);
 		  std::list<std::pair<int,float>>& pmt_list = photon_library->at(voxel_id);
 		  
 		  for (auto it5 = pmt_list.begin(); it5!=pmt_list.end(); it5++){
-		    pred_pmt_light->at((*map_lib_pmt)[it5->first]) += charge * it5->second;
+		    pred_pmt_light->at((*map_lib_pmt)[it5->first]) += charge * it5->second / elifetime_ratio;
 		  }
 		}
   	      }
