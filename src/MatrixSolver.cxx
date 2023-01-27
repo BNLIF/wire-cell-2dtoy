@@ -322,6 +322,36 @@ double WCP2dToy::MatrixSolver::get_mcell_charge(MergeGeomCell *mcell){
 // }
 
 
+int WCP2dToy::MatrixSolver::get_mc_index(const WCP::GeomCell* cell){
+  auto it = mcimap.find(cell);
+  if (it != mcimap.end()){
+    return it->second;
+  }else{
+    return -1;
+  }
+}
+int WCP2dToy::MatrixSolver::get_mw_index(const WCP::GeomWire* wire){
+  auto it = mwimap.find(wire);
+  if (it!=mwimap.end()){
+    return it->second;
+  }else{
+    return -1;
+  }
+};
+double WCP2dToy::MatrixSolver::get_W_value(int index){
+  if (index < mwindex && index >=0)
+    return W(index);
+  else return 0;
+
+};
+double WCP2dToy::MatrixSolver::get_G_value(int index_mw, int index_mc){
+  if (index_mw < mwindex && index_mc < mcindex && index_mw >=0 && index_mc >=0)
+    return G(index_mw, index_mc);
+  else
+    return 0;
+};
+
+
 WCP2dToy::MatrixSolver::~MatrixSolver(){
   
     

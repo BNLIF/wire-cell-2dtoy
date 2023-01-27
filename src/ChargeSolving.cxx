@@ -21,6 +21,8 @@ WCP2dToy::ChargeSolving::ChargeSolving(const WCP::GeomDataSource& gds, LowmemTil
 WCP2dToy::ChargeSolving::~ChargeSolving(){
 }
 
+
+
 void WCP2dToy::ChargeSolving::L1_resolve(float weight, float reduce_weight_factor){
   update_cell_weight_map(weight, reduce_weight_factor);
   
@@ -78,6 +80,106 @@ void WCP2dToy::ChargeSolving::init_cell_weight_map(float weight){
   
 }
 
+float WCP2dToy::ChargeSolving::get_weight(WCP::GeomCell *cell){
+  auto it = cell_weight_map.find(cell);
+  if (it != cell_weight_map.end()){
+    return it->second;
+  }else{
+    return -1;
+  }
+}
+
+int WCP2dToy::ChargeSolving::get_matrix_id(WCP::GeomCell *cell){
+  auto it = map_mc_matrix_id.find(cell);
+  if (it != map_mc_matrix_id.end()){
+    return it->second;
+  }else{
+    return -1;
+  }
+}
+int WCP2dToy::ChargeSolving::get_mc_id(WCP::GeomCell *cell){
+  auto it = map_mc_index.find(cell);
+  if (it != map_mc_index.end()){
+    return it->second;
+  }else{
+    return -1;
+  }
+}
+double WCP2dToy::ChargeSolving::get_mc_lambda(WCP::GeomCell *cell){
+  auto it = map_mc_lambda.find(cell);
+  if (it != map_mc_lambda.end()){
+    return it->second;
+  }else{
+    return -1;
+  }
+}
+double WCP2dToy::ChargeSolving::get_mc_TOL(WCP::GeomCell *cell){
+  auto it = map_mc_TOL.find(cell);
+  if (it != map_mc_TOL.end()){
+    return it->second;
+  }else{
+    return -1;
+  }
+}
+
+int WCP2dToy::ChargeSolving::get_mw_id(WCP::GeomWire *mwire){
+  auto it = map_mw_index.find(mwire);
+  if (it!= map_mw_index.end()){
+    return it->second;
+  }else{
+    return -1;
+  }
+}
+double WCP2dToy::ChargeSolving::get_W(WCP::GeomWire *mwire){
+  auto it = map_W.find(mwire);
+  if (it != map_W.end()){
+    return it->second;
+  }else{
+    return 0;
+  }
+}
+double WCP2dToy::ChargeSolving::get_G(WCP::GeomCell *cell, WCP::GeomWire *mwire){
+  auto it = map_G.find(std::make_pair(cell, mwire));
+  if (it != map_G.end()){
+    return it->second;
+  }else{
+    return 0;
+  }
+}
+
+
+void WCP2dToy::ChargeSolving::update_information(){
+  GeomCellMap& cell_wire_map = tiling.get_cell_wires_map();
+  GeomWireMap& wire_cell_map = tiling.get_wire_cells_map();
+
+  int matrix_id = 1;
+  for (auto it = group_matrices.begin(); it!= group_matrices.end(); it++){
+    MatrixSolver *matrix = (*it);
+    matrix->set_id(matrix_id);
+    WCP::GeomCellSelection all_cells = matrix->get_all_cells();
+    for (auto it1 = all_cells.begin(); it1!=all_cells.end(); it1++){
+      map_mc_matrix_id[*it1] = matrix->get_id();
+      int c_index = matrix->get_mc_index(*it1);
+      map_mc_index[*it1] = c_index;
+      map_mc_TOL[*it1] = matrix->get_TOL();
+      map_mc_lambda[*it1] = matrix->get_lambda();
+
+      for (auto it2 = cell_wire_map[*it1].begin(); it2!= cell_wire_map[*it1].end(); it2++){
+	  const GeomWire *mwire = *it2;
+	  int w_index = matrix->get_mw_index(mwire);
+	  map_mw_index[mwire] = w_index;
+	  map_W[mwire] = matrix->get_W_value(w_index);
+	  map_G[std::make_pair(*it1, mwire)] = matrix->get_G_value(w_index, c_index);
+      }
+      
+      //std::cout << matrix->get_TOL() << " " << matrix->get_lambda() << std::endl;
+      //      if (cell_weight_map.find(*it1) == cell_weight_map.end())
+      //	std::cout << "something wrong" << std::endl;
+      //      std::cout << cell_weight_map[*it1] << std::endl;
+    }
+    matrix_id++;
+  }
+}
 
 
 void WCP2dToy::ChargeSolving::divide_groups(){

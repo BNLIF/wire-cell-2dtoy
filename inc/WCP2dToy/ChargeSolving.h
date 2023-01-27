@@ -37,6 +37,19 @@ namespace WCP2dToy{
     void clear_connectivity(){front_connectivity.clear(); back_connectivity.clear();};
     void add_front_connectivity(const WCP::GeomCell *cell){ front_connectivity.insert(cell);};
     void add_back_connectivity(const WCP::GeomCell *cell){back_connectivity.insert(cell); };
+
+    
+    // information
+    void update_information();
+    float get_weight(WCP::GeomCell *cell);
+    int get_matrix_id(WCP::GeomCell *cell);
+    int get_mc_id(WCP::GeomCell *cell);
+    double get_mc_lambda(WCP::GeomCell *cell);
+    double get_mc_TOL(WCP::GeomCell *cell);
+
+    int get_mw_id(WCP::GeomWire *mwire);
+    double get_W(WCP::GeomWire *mwire);
+    double get_G(WCP::GeomCell *cell, WCP::GeomWire *mwire);
     
   protected:
     int ndf;
@@ -54,6 +67,8 @@ namespace WCP2dToy{
     void divide_groups();
     void init_cell_weight_map(float weight=1);
     void update_cell_weight_map(float weight, float reduce_weight_factor);
+
+    
     
     std::vector<WCP::GeomCellSelection> final_cells_vec;
     std::vector<WCP::GeomWireSelection> final_wires_vec;
@@ -65,10 +80,19 @@ namespace WCP2dToy{
     LowmemTiling& tiling;
 
     std::map<const WCP::GeomCell*, double, WCP::GeomCellComparep > cell_weight_map;
-
     
     std::set<const WCP::GeomCell*, WCP::GeomCellComparep > front_connectivity;
     std::set<const WCP::GeomCell*, WCP::GeomCellComparep > back_connectivity;
+
+    //information ...
+    std::map<const WCP::GeomCell*, int> map_mc_matrix_id;
+    std::map<const WCP::GeomCell*, int> map_mc_index;
+    std::map<const WCP::GeomCell*, double> map_mc_TOL;
+    std::map<const WCP::GeomCell*, double> map_mc_lambda;
+    
+    std::map<const WCP::GeomWire*, int> map_mw_index;
+    std::map<const WCP::GeomWire*, double> map_W;
+    std::map<std::pair<const WCP::GeomCell*, const WCP::GeomWire*>, double> map_G;
     
   };
 

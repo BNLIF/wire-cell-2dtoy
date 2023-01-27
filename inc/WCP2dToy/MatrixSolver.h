@@ -33,9 +33,21 @@ namespace WCP2dToy{
     void L1_Solve(std::map<const WCP::GeomCell*, double, WCP::GeomCellComparep >& cell_weight_map);
 
     WCP::GeomCellSelection get_all_cells();
+
+    // added to expose more information out ...
+    double get_lambda(){return lambda;};
+    double get_TOL(){return TOL;};
+    int get_mc_index(const WCP::GeomCell* cell);
+    int get_mw_index(const WCP::GeomWire* wire);
+    double get_W_value(int index);
+    double get_G_value(int index_mw, int index_mc);
+
+    void set_id(int id1){id = id1;};
+    int get_id(){return id;};
     
   private:
     //    void Direct_Solve();
+    int id;
         
     int solve_flag;
     double direct_chi2;
