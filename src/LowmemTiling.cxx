@@ -1787,6 +1787,23 @@ void WCP2dToy::LowmemTiling::local_deghosting1(std::set<WCP::SlimMergeGeomCell*,
   }
   // finished filling fill in the wire score map ... 
 
+  std::set<SlimMergeGeomCell*> cannot_remove;
+  for (auto it = two_good_wire_cells.begin(); it!= two_good_wire_cells.end(); it++){
+    SlimMergeGeomCell *mcell = (SlimMergeGeomCell*)(*it);
+    int count = 0;
+    for (auto it1 = three_good_wire_cells.begin(); it1!= three_good_wire_cells.end(); it1++){
+      SlimMergeGeomCell *mcell1 = (SlimMergeGeomCell*)(*it1);
+      if (good_mcells.find(mcell1)!=good_mcells.end()){
+	if (mcell->Adjacent(mcell1))
+	  count ++;
+	if (count==2){
+	  cannot_remove.insert(mcell);
+	  break;
+	}
+      }
+    }
+  }
+  
   std::map<SlimMergeGeomCell*, float> mcell_high_score_map;
   
   for (auto it = two_good_wire_cells.begin(); it!= two_good_wire_cells.end(); it++){
@@ -1841,6 +1858,9 @@ void WCP2dToy::LowmemTiling::local_deghosting1(std::set<WCP::SlimMergeGeomCell*,
 
     mcell_high_score_map[mcell] = std::max(std::max(score_u,score_v),score_w);
 
+
+
+    
     // if (time_slice == 2387)
     //   std::cout << "ABC: " << time_slice << " " << uwires.front()->index() << " " << uwires.back()->index() << " " << vwires.front()->index()+2400 << " " << vwires.back()->index()+2400 << " " << wwires.front()->index()+4800 << " " << wwires.back()->index()+4800 << " " << mcell_high_score_map[mcell]  << std::endl;
   }
@@ -1898,26 +1918,13 @@ void WCP2dToy::LowmemTiling::local_deghosting1(std::set<WCP::SlimMergeGeomCell*,
     mcell_high_score_map[mcell] = std::max(std::max(score_u,score_v),score_w);
     if (good_mcells.find(mcell)!=good_mcells.end())
       mcell_high_score_map[mcell] = 1;
+
   }
 
   
-  std::set<SlimMergeGeomCell*> cannot_remove;
-  for (auto it = two_good_wire_cells.begin(); it!= two_good_wire_cells.end(); it++){
-    SlimMergeGeomCell *mcell = (SlimMergeGeomCell*)(*it);
-    int count = 0;
-    for (auto it1 = three_good_wire_cells.begin(); it1!= three_good_wire_cells.end(); it1++){
-      SlimMergeGeomCell *mcell1 = (SlimMergeGeomCell*)(*it1);
-      if (good_mcells.find(mcell1)!=good_mcells.end()){
-	if (mcell->Adjacent(mcell1))
-	  count ++;
-	if (count==2){
-	  cannot_remove.insert(mcell);
-	  break;
-	}
-      }
-    }
-  }
+  
 
+  
   
   GeomCellSelection to_be_removed;
 
@@ -1982,6 +1989,9 @@ void WCP2dToy::LowmemTiling::local_deghosting1(std::set<WCP::SlimMergeGeomCell*,
 	    }
 	    int min_wire = std::max(mcell_lwire,mcell1_lwire);
 	    int max_wire = std::min(mcell_hwire,mcell1_hwire);
+
+	    // std::cout << time_slice << " " << three_good_wire_cells.size() << " " << two_good_wire_cells.size() << " " << cannot_remove.size() << " " << map_mcell_charge[mcell] << " " << mwire->get_allwire().front()->plane()  << " " << map_mcell_charge[mcell1] << " " << min_wire << " " << max_wire << " " << (max_wire - min_wire + 1.0)/(mcell_hwire - mcell_lwire + 1.0)  << std::endl;
+	    
 	    // if (time_slice == 2387)
 	    //   std::cout << "b: " << (max_wire - min_wire + 1.0)/(mcell_hwire - mcell_lwire + 1.0) << std::endl;
 	    if ((max_wire - min_wire + 1.0)/(mcell_hwire - mcell_lwire + 1.0)>=0.75 && map_mcell_charge[mcell1] > map_mcell_charge[mcell]*0.75){
@@ -2034,6 +2044,7 @@ GeomCellSelection WCP2dToy::LowmemTiling::local_deghosting(std::set<SlimMergeGeo
   }
 
 
+
   std::set<SlimMergeGeomCell*> cannot_remove;
   for (auto it = two_good_wire_cells.begin(); it!= two_good_wire_cells.end(); it++){
     SlimMergeGeomCell *mcell = (SlimMergeGeomCell*)(*it);
@@ -2050,6 +2061,8 @@ GeomCellSelection WCP2dToy::LowmemTiling::local_deghosting(std::set<SlimMergeGeo
       }
     }
   }
+
+  
   
 
   GeomCellSelection to_be_removed;
@@ -2111,6 +2124,8 @@ GeomCellSelection WCP2dToy::LowmemTiling::local_deghosting(std::set<SlimMergeGeo
     }  
   }
 
+
+  
   // std::cout << two_good_wire_cells.size() << " " << to_be_removed.size() << std::endl;
   //delete absolutely that can be deleted ... 
   for (auto it=to_be_removed.begin(); it!=to_be_removed.end(); it++){
@@ -2118,6 +2133,7 @@ GeomCellSelection WCP2dToy::LowmemTiling::local_deghosting(std::set<SlimMergeGeo
       Erase_Cell((SlimMergeGeomCell*)(*it));
   }
   to_be_removed.clear();
+
 
   
   // std::cout << two_good_wire_cells.size() << std::endl;
@@ -2227,6 +2243,8 @@ GeomCellSelection WCP2dToy::LowmemTiling::local_deghosting(std::set<SlimMergeGeo
     if (score_u <=0.5 && score_v <= 0.5 && score_w <=0.5 &&
 	potential_good_mcells.find(mcell) == potential_good_mcells.end()){
       to_be_removed.push_back(mcell);
+
+      //  std::cout << "Check: " << time_slice << " " << three_good_wire_cells.size() << " " << two_good_wire_cells.size() << " " << used_uwires.size() << " " << used_vwires.size() << " " << used_wwires.size() << " " << cannot_remove.size() << " " << to_be_removed.size() << " " << score_u << " " << score_v << " " << score_w << std::endl;
     }
     //    std::cout << "Xin: " << score_u << " " << score_v << " " << score_w << std::endl;
   }

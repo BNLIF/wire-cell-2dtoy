@@ -79,6 +79,9 @@ WCP2dToy::uBooNEDataError::uBooNEDataError(const WCP::GeomDataSource& gds, TH2I 
 	std::cout << "too long time U " << ind << " " << time << std::endl;
 	time = 800;
       }
+
+      // std::cout << "Test: " << time << std::endl;
+      
       for (int j=0; j!=rois.at(i).size();j++){
        	trace.charge.at(rois.at(i).at(j)) = gu->Eval(time) * fudge_factor *fudge_factor_ind * nrebin / 4.;
 	// if (trace.charge.at(rois.at(i).at(j))<0)
@@ -535,6 +538,9 @@ WCP2dToy::uBooNEDataError::uBooNEDataError(const WCP::GeomDataSource& gds, TH2F 
 	std::cout << "too long time U " << ind << " " << time << std::endl;
 	time = 800;
       }
+
+      //std::cout << "Test: " << time << std::endl;
+      
       for (int j=0; j!=rois.at(i).size();j++){
        	trace.charge.at(rois.at(i).at(j)) = gu->Eval(time) * fudge_factor *fudge_factor_ind * nrebin / 4.;
 	// if (trace.charge.at(rois.at(i).at(j))<0)

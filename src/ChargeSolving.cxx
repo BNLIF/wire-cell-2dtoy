@@ -25,6 +25,7 @@ WCP2dToy::ChargeSolving::~ChargeSolving(){
 
 void WCP2dToy::ChargeSolving::L1_resolve(float weight, float reduce_weight_factor){
   update_cell_weight_map(weight, reduce_weight_factor);
+  ccmap.clear();
   
   // loop existing matrices and resolve ...
   for (auto it = group_matrices.begin(); it!= group_matrices.end(); it++){

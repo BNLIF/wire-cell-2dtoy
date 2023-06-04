@@ -174,8 +174,10 @@ WCP2dToy::MatrixSolver::MatrixSolver(GeomCellSelection& allmcell, GeomWireSelect
     G = MatrixXd::Zero(mwindex,mcindex);
     for (int i=0; i!=mwindex; i++){
       W(i) = (*UMWy)(i);
+      //      std::cout << "W: " << i << " " << W(i) << std::endl;
       for (int j=0;j!=mcindex;j++){
 	G(i,j) = (*UMA)(i,j);
+	//	std::cout << "G: " << i << " " << j << " " << G(i,j) << std::endl;
       }
     }
     
@@ -228,7 +230,8 @@ void WCP2dToy::MatrixSolver::L1_Solve(std::map<const GeomCell*, double, WCP::Geo
   // UMA.Print();
   
   
-
+  // std::cout << "params: " << lambda << " " << 100000 << " " << TOL << " " << true << std::endl;
+  
   WCP::LassoModel m2(lambda, 100000, TOL, true);
   m2.SetData(G, W);
   // set weights
@@ -236,7 +239,7 @@ void WCP2dToy::MatrixSolver::L1_Solve(std::map<const GeomCell*, double, WCP::Geo
     const GeomCell* mcell = it->first;
     int index = it->second;
     m2.SetLambdaWeight(index, cell_weight_map[mcell]);
-    //std::cout << index << " " << cell_weight_map[mcell] << std::endl;
+    //std::cout << "reg: " << index << " " << cell_weight_map[mcell] << std::endl;
   }
   
   m2.Fit();
@@ -246,7 +249,8 @@ void WCP2dToy::MatrixSolver::L1_Solve(std::map<const GeomCell*, double, WCP::Geo
   L1_ndf = mwindex;
   for (int i=0;i!=nbeta;i++){
     (*Cx)[i] = beta(i) * scale_factor;
-    //std::cout << (*Cx)[i] << std::endl;
+    // print hack ...
+    //std::cout << "solved charge " << i << " " << (*Cx)[i] << std::endl;
     (*dCx)[i] = 0;
     if (beta(i)!=0)
       L1_ndf --;

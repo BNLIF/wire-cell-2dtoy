@@ -23,7 +23,10 @@ namespace WCP2dToy{
     int get_ndirect_solved(){return ndirect_solved;};
     int get_nL1_solved(){return nL1_solved;};
 
-    double get_mcell_charge(const WCP::GeomCell *mcell){return ccmap[mcell];};
+    double get_mcell_charge(const WCP::GeomCell *mcell){
+      auto it = ccmap.find(mcell);
+      if (it != ccmap.end()) return it->second;
+      else return 0;};
     void Update_ndf_chi2();
     int get_ndf();
     double get_chi2();
@@ -50,6 +53,10 @@ namespace WCP2dToy{
     int get_mw_id(WCP::GeomWire *mwire);
     double get_W(WCP::GeomWire *mwire);
     double get_G(WCP::GeomCell *cell, WCP::GeomWire *mwire);
+
+    void divide_groups();
+    void init_cell_weight_map(float weight=1);
+    void update_cell_weight_map(float weight, float reduce_weight_factor);
     
   protected:
     int ndf;
@@ -64,9 +71,8 @@ namespace WCP2dToy{
     std::vector<int> direct_ndf;
     std::vector<double> direct_chi2;
     
-    void divide_groups();
-    void init_cell_weight_map(float weight=1);
-    void update_cell_weight_map(float weight, float reduce_weight_factor);
+
+
 
     
     
