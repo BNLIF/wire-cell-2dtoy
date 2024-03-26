@@ -2,6 +2,9 @@
 
 void WCP2dToy::Clustering_live_dead(WCP::PR3DClusterSelection& live_clusters, WCP::PR3DClusterSelection& dead_clusters, WCP::map_pr3dcluster_double& cluster_length_map, WCP::PR3DClusterSet& cluster_connected_dead){
 
+  bool flag_print = true;
+  ExecMon em("starting");
+  
   TPCParams& mp = Singleton<TPCParams>::Instance();
   double pitch_u = mp.get_pitch_u();
   double pitch_v = mp.get_pitch_v();
@@ -37,7 +40,10 @@ void WCP2dToy::Clustering_live_dead(WCP::PR3DClusterSelection& live_clusters, WC
        }
      }
    }
-  
+
+   if (flag_print) std::cout << em("construct the dead_live maps") << std::endl;
+   std::cout << dead_live_cluster_mapping.size() << " " << dead_clusters.size() << " " << live_clusters.size() << std::endl;
+   
   std::set<std::pair<PR3DCluster*, PR3DCluster*>> tested_pairs;
   std::set<std::pair<PR3DCluster*, PR3DCluster*>> to_be_merged_pairs;
 
@@ -116,7 +122,7 @@ void WCP2dToy::Clustering_live_dead(WCP::PR3DClusterSelection& live_clusters, WC
 	      Point mcell1_center, mcell2_center;
 	      TVector3 dir1, dir3;
 
-	       
+
 	     
 	      mcell1_center = cluster_1->calc_ave_pos(p1,5*units::cm);
 	      dir1 = cluster_1->VHoughTrans(mcell1_center,30*units::cm);
@@ -132,7 +138,13 @@ void WCP2dToy::Clustering_live_dead(WCP::PR3DClusterSelection& live_clusters, WC
 	      double angle_diff1 = (3.1415926-dir1.Angle(dir2))/3.1415926*180.; // 1 to 2
 	      double angle_diff2 = (3.1415926-dir3.Angle(dir4))/3.1415926*180.; // 2 to 1
 	      double angle_diff3 = (3.1415926-dir1.Angle(dir3))/3.1415926*180.; // 1 to 2
-	      
+
+	      //hack
+	      //	      if (sqrt(pow(p1.x-317.6*units::cm,2) + pow(p1.y - -98.9*units::cm,2) + pow(p1.z-927*units::cm,2))<20*units::cm){
+	      //if (length_1 > 100*units::cm && length_2 > 100*units::cm){
+	      //		std::cout << "xin4 " << length_1/units::cm << " " << length_2/units::cm << std::endl;
+	      //		std::cout << "xin5 " << p1 << " " << p2 << " " << mcell1_center << " " << mcell2_center << " (" << dir1.X() << ", " << dir1.Y() << ", " << dir1.Z()  << ") (" << dir3.X() << ", " << dir3.Y() << ", " << dir3.Z() << ") " << angle_diff1 << " " << angle_diff2 << " " << angle_diff3 << std::endl;
+	      //}
 	      
 	      bool flag_para =false;
 
@@ -222,6 +234,8 @@ void WCP2dToy::Clustering_live_dead(WCP::PR3DClusterSelection& live_clusters, WC
 		  
 		}
 	      }
+
+	      //	      std::cout << "xin2: " << length_1/units::cm << " " << length_2/units::cm << " " << flag_merge << std::endl;
 	      	    
 	      if (flag_merge){
 		to_be_merged_pairs.insert(std::make_pair(cluster_1,cluster_2));
@@ -279,6 +293,9 @@ void WCP2dToy::Clustering_live_dead(WCP::PR3DClusterSelection& live_clusters, WC
       //  std::cout << std::endl;
     }
   }
+
+
+  if (flag_print) std::cout << em("core alg.") << std::endl;
   
   //to_be_merged_pairs.clear();
   
@@ -354,6 +371,7 @@ void WCP2dToy::Clustering_live_dead(WCP::PR3DClusterSelection& live_clusters, WC
   //   std::cout << "Pair: " << (*it).first->get_cluster_id() << " " << (*it).second->get_cluster_id() << std::endl;
   // }
 
+  if (flag_print) std::cout << em("merge clusters") << std::endl;
 
   
 }

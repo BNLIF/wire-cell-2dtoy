@@ -17,6 +17,16 @@
   
   PR3DClusterSelection big_clusters;
   PR3DClusterSelection small_clusters;
+
+  // hack
+  map_cluster_cluster_vec ret;
+  std::vector<std::pair<PR3DCluster*,double>> ret1;
+  for (size_t i=0;i!=live_clusters.size();i++){
+    ret[live_clusters.at(i)] = ret1;
+  }
+  return ret;
+  //
+
   for (size_t i=0;i!=live_clusters.size();i++){
     std::vector<int> ranges = live_clusters.at(i)->get_uvwt_range();
     int max = 0;
@@ -61,7 +71,7 @@
       }
     }
   }
-
+  
 
   
   std::set<std::pair<PR3DCluster*, PR3DCluster*>> to_be_merged_pairs;

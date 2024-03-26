@@ -1,4 +1,8 @@
 void WCP2dToy::Clustering_close(WCP::PR3DClusterSelection& live_clusters, WCP::map_pr3dcluster_double& cluster_length_map, WCP::PR3DClusterSet& cluster_connected_dead, double length_cut){
+  bool flag_print = true;
+
+  ExecMon em("starting");
+
   // calculate the length ...
   TPCParams& mp = Singleton<TPCParams>::Instance();
   double pitch_u = mp.get_pitch_u();
@@ -43,6 +47,7 @@ void WCP2dToy::Clustering_close(WCP::PR3DClusterSelection& live_clusters, WCP::m
     }
   }
   
+  if (flag_print) std::cout << em("core alg.") << std::endl;
   
 
   std::vector<std::set<PR3DCluster*>> merge_clusters;
@@ -117,6 +122,9 @@ void WCP2dToy::Clustering_close(WCP::PR3DClusterSelection& live_clusters, WCP::m
     
     //std::cout << std::endl;
   }
+
+
+  if (flag_print) std::cout << em("merge clusters") << std::endl;
 }
 
 

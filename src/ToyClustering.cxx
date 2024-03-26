@@ -1,5 +1,5 @@
 #include "WCP2dToy/ToyClustering.h"
-
+#include "WCP2dToy/ExecMon.h"
 #include "WCPData/TPCParams.h"
 #include "WCPData/Singleton.h"
 #include "WCPData/Line.h"
@@ -21,7 +21,7 @@ using namespace std;
 #include "ToyClustering_neutrino.h"
 #include "ToyClustering_isolated.h"
 
-#include "WCP2dToy/ExecMon.h"
+
 
 double WCP2dToy::cal_proj_angle_diff(TVector3& dir1, TVector3& dir2, double plane_angle){
   TVector3 temp_dir1;
@@ -191,7 +191,7 @@ double WCP2dToy::Find_Closeset_Points(WCP::PR3DCluster *cluster1, WCP::PR3DClust
 
 map_cluster_cluster_vec WCP2dToy::Clustering_jump_gap_cosmics(WCP::PR3DClusterSelection& live_clusters, WCP::PR3DClusterSelection& dead_clusters, std::map<int,std::pair<double,double>>& dead_u_index, std::map<int,std::pair<double,double>>& dead_v_index, std::map<int,std::pair<double,double>>& dead_w_index, WCP::DynamicToyPointCloud& global_point_cloud, WCP::ToyCTPointCloud& ct_point_cloud, bool flag_neutrino){
 
-  
+  bool flag_print = false;
   ExecMon em("starting");
 
 
@@ -216,6 +216,11 @@ map_cluster_cluster_vec WCP2dToy::Clustering_jump_gap_cosmics(WCP::PR3DClusterSe
     PR3DCluster* cluster_1 = live_clusters.at(i);
     std::vector<int> range_v1 = cluster_1->get_uvwt_range();
     double length_1 = sqrt(2./3. * (pow(pitch_u*range_v1.at(0),2) + pow(pitch_v*range_v1.at(1),2) + pow(pitch_w*range_v1.at(2),2)) + pow(time_slice_width*range_v1.at(3),2));
+
+    //hack
+    //  if (length_1 > 100*units::cm)
+    //  std::cout << range_v1.at(0) << " " << range_v1.at(1) << " " << range_v1.at(2) << " " << range_v1.at(3) << " " << pitch_u << " " << pitch_v << " " << pitch_w << " " << time_slice_width << " " << length_1/units::cm << std::endl;
+    
     //cluster_length_vec.push_back(length_1);
     cluster_length_map[cluster_1] = length_1;
   }
@@ -223,25 +228,29 @@ map_cluster_cluster_vec WCP2dToy::Clustering_jump_gap_cosmics(WCP::PR3DClusterSe
   
   //cluster live dead ...
   Clustering_live_dead(live_clusters, dead_clusters, cluster_length_map, cluster_connected_dead);
+
+  if (flag_print) std::cout << em("test cluster live dead") << std::endl;
+  
   // try to do the large ones immediate ... 
   Clustering_extend(live_clusters, cluster_length_map,cluster_connected_dead,4,60*units::cm,0,15*units::cm,1);  
-  // cerr << em("live dead") << endl;
+  if (flag_print) cerr << em("first extend") << endl;
+
 
   
   // first round clustering
   Clustering_regular(live_clusters, cluster_length_map,cluster_connected_dead,60*units::cm,false);
-  //  cerr << em("1st regular") << endl;
+  if (flag_print) cerr << em("1st regular") << endl;
   Clustering_regular(live_clusters, cluster_length_map,cluster_connected_dead,30*units::cm,true); // do extension
-  // cerr << em("2nd regular") << endl;
+  if (flag_print)  cerr << em("2nd regular") << endl;
 
   
   //dedicated one dealing with parallel and prolonged track
   Clustering_parallel_prolong(live_clusters, cluster_length_map,cluster_connected_dead,35*units::cm);
-  //cerr << em("parallel prolong") << endl;
+  if (flag_print) cerr << em("parallel prolong") << endl;
   
   //clustering close distance ones ... 
   Clustering_close(live_clusters, cluster_length_map,cluster_connected_dead,1.2*units::cm);
-  // cerr << em("close") << endl;
+  if (flag_print)  cerr << em("close") << endl;
 
   // std::cout << cluster_connected_dead.size() << std::endl;
   // std::cout << "Num. of clusters: " << live_clusters.size() << std::endl;
@@ -253,36 +262,39 @@ map_cluster_cluster_vec WCP2dToy::Clustering_jump_gap_cosmics(WCP::PR3DClusterSe
     //extend the track ...
     // deal with prolong case
     Clustering_extend(live_clusters, cluster_length_map,cluster_connected_dead,1,150*units::cm,0);
-    //  cerr << em("extend prolong") << endl;
+    if (flag_print)   cerr << em("extend prolong") << endl;
     // deal with parallel case 
     Clustering_extend(live_clusters, cluster_length_map,cluster_connected_dead,2,30*units::cm,0);
-    // cerr << em("extend parallel") << endl;
+    if (flag_print)  cerr << em("extend parallel") << endl;
 
    
     // extension regular case
     Clustering_extend(live_clusters, cluster_length_map,cluster_connected_dead,3,15*units::cm,0);
     
-    //std::cout << i << std::endl;
+    std::cout << i << std::endl;
     
-    //  cerr << em("extend regular") << endl;
+    if (flag_print)   cerr << em("extend regular") << endl;
     // extension ones connected to dead region ...
     if (i==0){
       Clustering_extend(live_clusters, cluster_length_map,cluster_connected_dead,4,60*units::cm,i);
     }else{
       Clustering_extend(live_clusters, cluster_length_map,cluster_connected_dead,4,35*units::cm,i);
     }
-    //  cerr << em("extend dead") << endl;
+    if (flag_print)   cerr << em("extend dead") << endl;
   }
 
   
 
   
-  cerr << em("first round of clustering") << std::endl;
+  if (flag_print) cerr << em("first round of clustering") << std::endl;
 
   for (size_t i=0;i!=live_clusters.size();i++){
     PR3DCluster *cluster = live_clusters.at(i);
     cluster->set_cluster_id(i+1);
   }
+
+  // hack
+  if (0){
   
   // prepare for separating the connected pieces ... 
   Clustering_separate(live_clusters,cluster_length_map, dead_u_index, dead_v_index, dead_w_index, ct_point_cloud);
@@ -354,6 +366,9 @@ map_cluster_cluster_vec WCP2dToy::Clustering_jump_gap_cosmics(WCP::PR3DClusterSe
       live_clusters.push_back(it->first);
     }
   }
+
+  // hack
+  }
   
   for (size_t i=0;i!=live_clusters.size();i++){
     PR3DCluster *cluster = live_clusters.at(i);
@@ -378,7 +393,7 @@ map_cluster_cluster_vec WCP2dToy::Clustering_jump_gap_cosmics(WCP::PR3DClusterSe
 map_cluster_cluster_vec WCP2dToy::Clustering_jump_gap_cosmics(WCP::PR3DClusterSelection& live_clusters, WCP::PR3DClusterSelection& dead_clusters, std::map<int,std::pair<double,double>>& dead_u_index, std::map<int,std::pair<double,double>>& dead_v_index, std::map<int,std::pair<double,double>>& dead_w_index, WCP::DynamicToyPointCloud& global_point_cloud, bool flag_neutrino){
 
   
-  ExecMon em("starting");
+  ExecMon em("starting old");
 
 
   // include some parallel or prolonged, no need to do track fitting
