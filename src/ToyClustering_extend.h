@@ -250,6 +250,7 @@ void WCP2dToy::Clustering_extend(WCP::PR3DClusterSelection& live_clusters, WCP::
 	    }
 	  }
 	}
+	
       }
     }
   }

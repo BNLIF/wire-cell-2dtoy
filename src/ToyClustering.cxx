@@ -56,7 +56,8 @@ bool WCP2dToy::is_angle_consistent(TVector3& dir1, TVector3& dir2, bool same_dir
 }
 
 
-double WCP2dToy::Find_Closeset_Points(WCP::PR3DCluster *cluster1, WCP::PR3DCluster *cluster2,double length_1, double length_2, double length_cut, SlimMergeGeomCell *mcell1_save, SlimMergeGeomCell *mcell2_save, Point& p1_save, Point &p2_save){
+double WCP2dToy::Find_Closeset_Points(WCP::PR3DCluster *cluster1, WCP::PR3DCluster *cluster2,double length_1, double length_2, double length_cut, SlimMergeGeomCell *mcell1_save, SlimMergeGeomCell *mcell2_save, Point& p1_save, Point &p2_save,
+bool flag_print){
   double dis_save = 1e9;
 
   // pick the first point from the small one
@@ -72,6 +73,8 @@ double WCP2dToy::Find_Closeset_Points(WCP::PR3DCluster *cluster1, WCP::PR3DClust
     mcell1 = *(cluster1->get_time_cells_set_map().begin()->second.begin());
     p1 = mcell1->center();
 
+    if (flag_print) std::cout << "a: " << p1 << std::endl;
+
     while(mcell1!=prev_mcell1 || mcell2!=prev_mcell2){
       prev_mcell1 = mcell1;
       prev_mcell2 = mcell2;
@@ -84,6 +87,9 @@ double WCP2dToy::Find_Closeset_Points(WCP::PR3DCluster *cluster1, WCP::PR3DClust
       temp_results = cluster1->get_closest_point_mcell(p2);
       p1 = temp_results.second;
       mcell1 = temp_results.first;
+
+      if (flag_print) std::cout << "a: " << p1 << " " << p2 << std::endl;
+
     }
     dis = sqrt(pow(p1.x-p2.x,2)+pow(p1.y-p2.y,2)+pow(p1.z-p2.z,2));
 
@@ -101,6 +107,7 @@ double WCP2dToy::Find_Closeset_Points(WCP::PR3DCluster *cluster1, WCP::PR3DClust
     mcell1 = *(cluster1->get_time_cells_set_map().rbegin()->second.begin());
     p1 = mcell1->center();
 
+    if (flag_print) std::cout << "b: " << p1 << std::endl;
     while(mcell1!=prev_mcell1 || mcell2!=prev_mcell2){
       prev_mcell1 = mcell1;
       prev_mcell2 = mcell2;
@@ -113,6 +120,8 @@ double WCP2dToy::Find_Closeset_Points(WCP::PR3DCluster *cluster1, WCP::PR3DClust
       temp_results = cluster1->get_closest_point_mcell(p2);
       p1 = temp_results.second;
       mcell1 = temp_results.first;
+
+      if (flag_print) std::cout << "b: " << p1 << " " << p2 << std::endl;
     }
     dis = sqrt(pow(p1.x-p2.x,2)+pow(p1.y-p2.y,2)+pow(p1.z-p2.z,2));
 
@@ -129,6 +138,7 @@ double WCP2dToy::Find_Closeset_Points(WCP::PR3DCluster *cluster1, WCP::PR3DClust
     mcell2 = *(cluster2->get_time_cells_set_map().begin()->second.begin());
     p2 = mcell2->center();
 
+    if (flag_print) std::cout << "a: " << p2 << std::endl;
     while(mcell1!=prev_mcell1 || mcell2!=prev_mcell2){
       prev_mcell1 = mcell1;
       prev_mcell2 = mcell2;
@@ -141,6 +151,8 @@ double WCP2dToy::Find_Closeset_Points(WCP::PR3DCluster *cluster1, WCP::PR3DClust
       temp_results = cluster2->get_closest_point_mcell(p1);
       p2 = temp_results.second;
       mcell2 = temp_results.first;
+
+      if (flag_print) std::cout << "a: " << p2 << " " << p1 << std::endl;
     }
     dis = sqrt(pow(p1.x-p2.x,2)+pow(p1.y-p2.y,2)+pow(p1.z-p2.z,2));
 
@@ -160,6 +172,8 @@ double WCP2dToy::Find_Closeset_Points(WCP::PR3DCluster *cluster1, WCP::PR3DClust
     mcell2 = *(cluster2->get_time_cells_set_map().rbegin()->second.begin());
     p2 = mcell2->center();
 
+    if (flag_print) std::cout << "b: " << p2 << std::endl;
+
     while(mcell1!=prev_mcell1 || mcell2!=prev_mcell2){
       prev_mcell1 = mcell1;
       prev_mcell2 = mcell2;
@@ -172,6 +186,8 @@ double WCP2dToy::Find_Closeset_Points(WCP::PR3DCluster *cluster1, WCP::PR3DClust
       temp_results = cluster2->get_closest_point_mcell(p1);
       p2 = temp_results.second;
       mcell2 = temp_results.first;
+
+      if (flag_print) std::cout << "b: " << p2 << " " << p1 << std::endl;
     }
     dis = sqrt(pow(p1.x-p2.x,2)+pow(p1.y-p2.y,2)+pow(p1.z-p2.z,2));
 
@@ -225,31 +241,39 @@ map_cluster_cluster_vec WCP2dToy::Clustering_jump_gap_cosmics(WCP::PR3DClusterSe
     cluster_length_map[cluster_1] = length_1;
   }
   
-  
+  std::cout << "nclusters=" << live_clusters.size() << std::endl;
+
   //cluster live dead ...
   Clustering_live_dead(live_clusters, dead_clusters, cluster_length_map, cluster_connected_dead);
 
+  std::cout << "nclusters=" << live_clusters.size() << std::endl;
   if (flag_print) std::cout << em("test cluster live dead") << std::endl;
   
   // try to do the large ones immediate ... 
   Clustering_extend(live_clusters, cluster_length_map,cluster_connected_dead,4,60*units::cm,0,15*units::cm,1);  
+
+  std::cout << "nclusters=" << live_clusters.size() << std::endl;
   if (flag_print) cerr << em("first extend") << endl;
 
 
   
   // first round clustering
   Clustering_regular(live_clusters, cluster_length_map,cluster_connected_dead,60*units::cm,false);
+  std::cout << "nclusters=" << live_clusters.size() << std::endl; 
   if (flag_print) cerr << em("1st regular") << endl;
   Clustering_regular(live_clusters, cluster_length_map,cluster_connected_dead,30*units::cm,true); // do extension
+  std::cout << "nclusters=" << live_clusters.size() << std::endl;
   if (flag_print)  cerr << em("2nd regular") << endl;
 
   
   //dedicated one dealing with parallel and prolonged track
   Clustering_parallel_prolong(live_clusters, cluster_length_map,cluster_connected_dead,35*units::cm);
+  std::cout << "nclusters=" << live_clusters.size() << std::endl;
   if (flag_print) cerr << em("parallel prolong") << endl;
   
   //clustering close distance ones ... 
   Clustering_close(live_clusters, cluster_length_map,cluster_connected_dead,1.2*units::cm);
+  std::cout << "nclusters=" << live_clusters.size() << std::endl;
   if (flag_print)  cerr << em("close") << endl;
 
   // std::cout << cluster_connected_dead.size() << std::endl;
@@ -262,13 +286,16 @@ map_cluster_cluster_vec WCP2dToy::Clustering_jump_gap_cosmics(WCP::PR3DClusterSe
     //extend the track ...
     // deal with prolong case
     Clustering_extend(live_clusters, cluster_length_map,cluster_connected_dead,1,150*units::cm,0);
+    std::cout << "nclusters=" << live_clusters.size() << std::endl;
     if (flag_print)   cerr << em("extend prolong") << endl;
     // deal with parallel case 
     Clustering_extend(live_clusters, cluster_length_map,cluster_connected_dead,2,30*units::cm,0);
+    std::cout << "nclusters=" << live_clusters.size() << std::endl;
     if (flag_print)  cerr << em("extend parallel") << endl;
 
    
     // extension regular case
+    std::cout << "nclusters=" << live_clusters.size() << std::endl;
     Clustering_extend(live_clusters, cluster_length_map,cluster_connected_dead,3,15*units::cm,0);
     
     std::cout << i << std::endl;
@@ -280,6 +307,7 @@ map_cluster_cluster_vec WCP2dToy::Clustering_jump_gap_cosmics(WCP::PR3DClusterSe
     }else{
       Clustering_extend(live_clusters, cluster_length_map,cluster_connected_dead,4,35*units::cm,i);
     }
+    std::cout << "nclusters=" << live_clusters.size() << std::endl;
     if (flag_print)   cerr << em("extend dead") << endl;
   }
 
@@ -290,21 +318,33 @@ map_cluster_cluster_vec WCP2dToy::Clustering_jump_gap_cosmics(WCP::PR3DClusterSe
 
   for (size_t i=0;i!=live_clusters.size();i++){
     PR3DCluster *cluster = live_clusters.at(i);
+   
+    // hack
+    //cluster->Create_graph(ct_point_cloud);
+    //cerr << "cluster " << i+1 << " " << em("create_graph") << std::endl;
+    // end hack 
+
     cluster->set_cluster_id(i+1);
   }
 
-  // hack
-  if (0){
-  
+
+   // hack
+  //if (0){
+
+  //std::cout << "start count" << std::endl;
+
   // prepare for separating the connected pieces ... 
   Clustering_separate(live_clusters,cluster_length_map, dead_u_index, dead_v_index, dead_w_index, ct_point_cloud);
   cerr << em("separate clusters") << std::endl;
 
+  //std::cout <<  "end count " << std::endl;
 
+if (0){
   for (size_t i=0;i!=live_clusters.size();i++){
     PR3DCluster *cluster = live_clusters.at(i);
     cluster->set_cluster_id(i+1);
   }
+
 
 
   Clustering_connect1(live_clusters,cluster_length_map, global_point_cloud, dead_u_index, dead_v_index, dead_w_index);

@@ -7,7 +7,7 @@
 //#include "WCPSst/GeomDataSource.h"
 
 namespace WCP2dToy{
-  double Find_Closeset_Points(WCP::PR3DCluster *cluster1, WCP::PR3DCluster *cluster2,double length_1, double length_2, double length_cut, WCP::SlimMergeGeomCell *mcell1, WCP::SlimMergeGeomCell *mcell2, WCP::Point& p1, WCP::Point &p2);
+  double Find_Closeset_Points(WCP::PR3DCluster *cluster1, WCP::PR3DCluster *cluster2,double length_1, double length_2, double length_cut, WCP::SlimMergeGeomCell *mcell1, WCP::SlimMergeGeomCell *mcell2, WCP::Point& p1, WCP::Point &p2, bool flag_print = false);
 
   
   double cal_proj_angle_diff(TVector3& dir1, TVector3& dir2, double plane_angle);

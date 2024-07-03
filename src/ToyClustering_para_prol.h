@@ -24,7 +24,11 @@ void WCP2dToy::Clustering_parallel_prolong(WCP::PR3DClusterSelection& live_clust
     for (size_t j=i+1;j<live_clusters.size();j++){
       PR3DCluster* cluster_2 = live_clusters.at(j);
       if (WCP2dToy::Clustering_2nd_round(cluster_1,cluster_2, cluster_length_map[cluster_1], cluster_length_map[cluster_2], length_cut))
-	to_be_merged_pairs.insert(std::make_pair(cluster_1,cluster_2));
+	    
+      // // debug ...
+			// std::cout << cluster_length_map[cluster_1]/units::cm << " " << cluster_length_map[cluster_2]/units::cm << std::endl;
+
+      to_be_merged_pairs.insert(std::make_pair(cluster_1,cluster_2));
     }
   }
 
@@ -121,8 +125,32 @@ bool WCP2dToy::Clustering_2nd_round(WCP::PR3DCluster *cluster1, WCP::PR3DCluster
   SlimMergeGeomCell *mcell2=0;
   Point p2;
 
+  //  // debug ...
+  // bool flag_print = false;
+  // if (fabs(length_1 + length_2 - 1.42425*units::cm - 144.15 * units::cm) < 0.01*units::cm 
+  // && fabs(fabs(length_1-length_2) - fabs(1.42425 - 144.15)*units::cm) < 0.01*units::cm) flag_print =true;
+
   double dis = Find_Closeset_Points(cluster1, cluster2, length_1, length_2, length_cut, mcell1, mcell2, p1,p2);
   
+  // if (flag_print) {
+	// std::cout << length_1/units::cm << " " << length_2/units::cm << " " << cluster1->get_num_points() << " " 
+  // << cluster2->get_num_points() << " " << p1 << " " << p2 << " " << dis/units::cm << std::endl;
+	// SlimMergeGeomCell *blob =  *(cluster1->get_time_cells_set_map().begin()->second.begin());
+	// SlimMergeGeomCell *blob1 =  *(cluster1->get_time_cells_set_map().rbegin()->second.begin());
+	// std::map<SlimMergeGeomCell*, std::set<int>>& cell_times_set_map = cluster1->get_cell_times_set_map();
+	// std::cout << "U: " << blob->get_uwires().front()->index() << " " << blob->get_uwires().back()->index()
+	// 					  << " V: " <<  blob->get_vwires().front()->index() << " " << blob->get_vwires().back()->index()
+	// 					      << " W: " <<  blob->get_wwires().front()->index() << " " << blob->get_wwires().back()->index()
+	// 					      << " T: "  << *cell_times_set_map[blob].begin() << " " << *cell_times_set_map[blob].rbegin()
+	// 						  << std::endl;
+	// PointVector& points = blob->get_sampling_points();
+	// for (auto it1 = points.begin(); it1 != points.end(); it1++){
+	// 	std::cout << (*it1).x << " " << (*it1).y << " " << (*it1).z << std::endl;
+	// }
+	// std::cout << blob->center()  << " " << blob1->center() << " " << blob->get_sampling_points().size() << " " << blob1->get_sampling_points().size() << std::endl;
+  // }
+
+
   if ((dis < length_cut || (dis < 80*units::cm && length_1 +length_2 > 50*units::cm && length_1>15*units::cm && length_2 > 15*units::cm))){
     Point cluster1_ave_pos = cluster1->calc_ave_pos(p1,10*units::cm);
     Point cluster2_ave_pos = cluster2->calc_ave_pos(p2,10*units::cm);

@@ -4,7 +4,10 @@
 #include "WCP2dToy/TimeKeeper.h"
 #include "WCP2dToy/MemUsage.h"
 
+
 namespace WCP {
+
+
 
     /** A helper class combining a TimeKeeper and a MemUsage
      *
