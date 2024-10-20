@@ -22,6 +22,7 @@ double WCP2dToy::SimpleBlobToyTiling::Get_Cell_Charge( const WCP::GeomCell *cell
   }else if (flag==2){
     return dCx_save.at(index);
   }
+  return Cx_save.at(index);
 }
 
 

@@ -403,7 +403,8 @@ void WCP2dToy::LowmemTiling::MergeWires(){
     }
   }
 
-  
+
+
   
   calculate_merged_wire_charge();
 
@@ -477,9 +478,9 @@ int WCP2dToy::LowmemTiling::further_mergewire(GeomWireSelection& allwire){
     for (int k=0;k!=allwire.size();k++){
       if (((MergeGeomWire*)allwire[k])->AddWire(*wire)){
        	// now need to do something ... 
-	replace_wire(wire,(MergeGeomWire*)allwire[k]);
-	flag = 1;
-    	break;
+	      replace_wire(wire,(MergeGeomWire*)allwire[k]);
+	      flag = 1;
+    	  break;
       }
     }
       
@@ -488,6 +489,7 @@ int WCP2dToy::LowmemTiling::further_mergewire(GeomWireSelection& allwire){
     }
   }
   
+
   int diff = tempwire.size() - allwire.size();  
   return diff;
 }
@@ -529,27 +531,28 @@ bool WCP2dToy::LowmemTiling::replace_wire(WCP::MergeGeomWire *old_wire, WCP::Mer
       wire_cells_map[wire] = cells1;
     }
 
+    
     for (int i=0;i!=cells.size();i++){
       const GeomCell *cell = cells.at(i);
       // replace the old wire with the new wire ... 
       GeomWireSelection& wires = cell_wires_map[cell];
       auto it = find(wires.begin(),wires.end(),old_wire);
-      if (it!=wires.end())
-	wires.erase(it);
-      if (find(wires.begin(),wires.end(),wire)==wires.end())
-	wires.push_back(wire);
+      if (it!=wires.end()) 	    wires.erase(it);
+      if (find(wires.begin(),wires.end(),wire)==wires.end()) wires.push_back(wire);
 
       // add cells to this new wire cell ... 
       if (find(wire_cells_map[wire].begin(), wire_cells_map[wire].end(), cell) == wire_cells_map[wire].end()){
-      	wire_cells_map[wire].push_back(cell);
+        wire_cells_map[wire].push_back(cell);
       }
     }
+    
 
     wire_cells_map.erase(old_wire);
   }
   
   
   delete old_wire;
+  return true;
 }
 
 bool WCP2dToy::LowmemTiling::remove_wire_clear(MergeGeomWire *wire){
