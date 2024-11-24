@@ -58,12 +58,12 @@ bool WCP2dToy::JudgeSeparateDec_2(WCP::PR3DCluster* cluster, TVector3& drift_dir
     }else{
       Point test_p(boundary_points.at(j).x,boundary_points.at(j).y,boundary_points.at(j).z);
       if (cluster->get_num_points(test_p,15*units::cm) > 75){
-	if (boundary_points.at(j).y > hy_points.at(0).y) hy_points.at(0) = boundary_points.at(j);
-	if (boundary_points.at(j).y < ly_points.at(0).y) ly_points.at(0) = boundary_points.at(j);
-	if (boundary_points.at(j).x > hx_points.at(0).x) hx_points.at(0) = boundary_points.at(j);
-	if (boundary_points.at(j).x < lx_points.at(0).x) lx_points.at(0) = boundary_points.at(j);
-	if (boundary_points.at(j).z > hz_points.at(0).z) hz_points.at(0) = boundary_points.at(j);
-	if (boundary_points.at(j).z < lz_points.at(0).z) lz_points.at(0) = boundary_points.at(j);
+        if (boundary_points.at(j).y > hy_points.at(0).y) hy_points.at(0) = boundary_points.at(j);
+        if (boundary_points.at(j).y < ly_points.at(0).y) ly_points.at(0) = boundary_points.at(j);
+        if (boundary_points.at(j).x > hx_points.at(0).x) hx_points.at(0) = boundary_points.at(j);
+        if (boundary_points.at(j).x < lx_points.at(0).x) lx_points.at(0) = boundary_points.at(j);
+        if (boundary_points.at(j).z > hz_points.at(0).z) hz_points.at(0) = boundary_points.at(j);
+        if (boundary_points.at(j).z < lz_points.at(0).z) lz_points.at(0) = boundary_points.at(j);
       }
     }
   }
@@ -76,17 +76,19 @@ bool WCP2dToy::JudgeSeparateDec_2(WCP::PR3DCluster* cluster, TVector3& drift_dir
   if (hy_points.at(0).y > 101.5*units::cm){
     for (size_t j=0;j!=boundary_points.size();j++){
       if (boundary_points.at(j).y > 101.5*units::cm){
-	bool flag_save = true;
-	for (size_t k=0;k!=hy_points.size();k++){
-	  double dis = sqrt(pow(hy_points.at(k).x-boundary_points.at(j).x,2)+pow(hy_points.at(k).y-boundary_points.at(j).y,2)+pow(hy_points.at(k).z-boundary_points.at(j).z,2));
-	  if (dis <25*units::cm){
-	    if (boundary_points.at(j).y > hy_points.at(k).y)
-	      hy_points.at(k) = boundary_points.at(j);
-	    flag_save = false;
-	  }
-	}
-	if(flag_save)
-	  hy_points.push_back(boundary_points.at(j));
+	      bool flag_save = true;
+        for (size_t k=0;k!=hy_points.size();k++){
+          double dis = sqrt(pow(hy_points.at(k).x-boundary_points.at(j).x,2)
+                  +pow(hy_points.at(k).y-boundary_points.at(j).y,2)
+                  +pow(hy_points.at(k).z-boundary_points.at(j).z,2));
+          if (dis <25*units::cm){
+            if (boundary_points.at(j).y > hy_points.at(k).y)
+              hy_points.at(k) = boundary_points.at(j);
+            flag_save = false;
+          }
+        }
+        if(flag_save)
+          hy_points.push_back(boundary_points.at(j));
       }
     }
   }
@@ -94,51 +96,55 @@ bool WCP2dToy::JudgeSeparateDec_2(WCP::PR3DCluster* cluster, TVector3& drift_dir
   if (ly_points.at(0).y < -99.5*units::cm){
     for (size_t j=0;j!=boundary_points.size();j++){
       if (boundary_points.at(j).y < -99.5*units::cm){
-	bool flag_save = true;
-	for (size_t k=0;k!=ly_points.size();k++){
-	  double dis = sqrt(pow(ly_points.at(k).x-boundary_points.at(j).x,2)+pow(ly_points.at(k).y-boundary_points.at(j).y,2)+pow(ly_points.at(k).z-boundary_points.at(j).z,2));
-	  if (dis <25*units::cm){
-	    if (boundary_points.at(j).y < ly_points.at(k).y)
-	      ly_points.at(k) = boundary_points.at(j);
-	    flag_save = false;
-	  }
-	}
-	if(flag_save)
-	  ly_points.push_back(boundary_points.at(j));
+        bool flag_save = true;
+        for (size_t k=0;k!=ly_points.size();k++){
+          double dis = sqrt(pow(ly_points.at(k).x-boundary_points.at(j).x,2)
+              +pow(ly_points.at(k).y-boundary_points.at(j).y,2)
+              +pow(ly_points.at(k).z-boundary_points.at(j).z,2));
+          if (dis <25*units::cm){
+            if (boundary_points.at(j).y < ly_points.at(k).y)
+              ly_points.at(k) = boundary_points.at(j);
+            flag_save = false;
+          }
+        }
+        if(flag_save)
+          ly_points.push_back(boundary_points.at(j));
       }
     }
   }
   if (hz_points.at(0).z > 1022*units::cm){
     for (size_t j=0;j!=boundary_points.size();j++){
       if (boundary_points.at(j).z > 1022*units::cm){
-	bool flag_save = true;
-	for (size_t k=0;k!=hz_points.size();k++){
-	  double dis = sqrt(pow(hz_points.at(k).x-boundary_points.at(j).x,2)+pow(hz_points.at(k).y-boundary_points.at(j).y,2)+pow(hz_points.at(k).z-boundary_points.at(j).z,2));
-	  if (dis <25*units::cm){
-	    if (boundary_points.at(j).z > hz_points.at(k).z)
-	      hz_points.at(k) = boundary_points.at(j);
-	    flag_save = false;
-	  }
-	}
-	if(flag_save)
-	  hz_points.push_back(boundary_points.at(j));
+        bool flag_save = true;
+        for (size_t k=0;k!=hz_points.size();k++){
+          double dis = sqrt(pow(hz_points.at(k).x-boundary_points.at(j).x,2)
+              +pow(hz_points.at(k).y-boundary_points.at(j).y,2)
+              +pow(hz_points.at(k).z-boundary_points.at(j).z,2));
+          if (dis <25*units::cm){
+            if (boundary_points.at(j).z > hz_points.at(k).z)
+              hz_points.at(k) = boundary_points.at(j);
+            flag_save = false;
+          }
+        }
+        if(flag_save)
+          hz_points.push_back(boundary_points.at(j));
       }
     }
   }
   if (lz_points.at(0).z <15*units::cm){
     for (size_t j=0;j!=boundary_points.size();j++){
       if (boundary_points.at(j).z < 15*units::cm){
-	bool flag_save = true;
-	for (size_t k=0;k!=lz_points.size();k++){
-	  double dis = sqrt(pow(lz_points.at(k).x-boundary_points.at(j).x,2)+pow(lz_points.at(k).y-boundary_points.at(j).y,2)+pow(lz_points.at(k).z-boundary_points.at(j).z,2));
-	  if (dis <25*units::cm){
-	    if (boundary_points.at(j).z < lz_points.at(k).z)
-	      lz_points.at(k) = boundary_points.at(j);
-	    flag_save = false;
-	  }
-	}
-	if(flag_save)
-	  lz_points.push_back(boundary_points.at(j));
+        bool flag_save = true;
+        for (size_t k=0;k!=lz_points.size();k++){
+          double dis = sqrt(pow(lz_points.at(k).x-boundary_points.at(j).x,2)+pow(lz_points.at(k).y-boundary_points.at(j).y,2)+pow(lz_points.at(k).z-boundary_points.at(j).z,2));
+          if (dis <25*units::cm){
+            if (boundary_points.at(j).z < lz_points.at(k).z)
+              lz_points.at(k) = boundary_points.at(j);
+            flag_save = false;
+          }
+        }
+        if(flag_save)
+          lz_points.push_back(boundary_points.at(j));
       }
     }
   }
@@ -148,46 +154,46 @@ bool WCP2dToy::JudgeSeparateDec_2(WCP::PR3DCluster* cluster, TVector3& drift_dir
   
   for (size_t j=0;j!=hy_points.size();j++){
     if (hy_points.at(j).x >=1*units::cm && hy_points.at(j).x <=255*units::cm &&
-	hy_points.at(j).y >=-99.5*units::cm && hy_points.at(j).y <=101.5*units::cm &&
-	hy_points.at(j).z >= 15*units::cm && hy_points.at(j).z <= 1022*units::cm && (!flag_outx))
+      hy_points.at(j).y >=-99.5*units::cm && hy_points.at(j).y <=101.5*units::cm &&
+      hy_points.at(j).z >= 15*units::cm && hy_points.at(j).z <= 1022*units::cm && (!flag_outx))
       continue;
     
     bool flag_save = true;
     for (size_t k=0;k!=independent_points.size();k++){
       double dis = sqrt(pow(hy_points.at(j).x - independent_points.at(k).x,2)+pow(hy_points.at(j).y - independent_points.at(k).y,2)+pow(hy_points.at(j).z - independent_points.at(k).z,2));
       if (dis < 15*units::cm)
-	flag_save = false;
+	      flag_save = false;
     }
     if (flag_save){
       independent_points.push_back(hy_points.at(j));
       if (hy_points.at(j).y > 104*units::cm){
-	independent_surfaces.insert(0);
+	      independent_surfaces.insert(0);
       }else if (hy_points.at(j).y <-99.5*units::cm){
-	independent_surfaces.insert(1);
+	      independent_surfaces.insert(1);
       }else if (hy_points.at(j).z  > 1025*units::cm){
-	independent_surfaces.insert(2);
+	      independent_surfaces.insert(2);
       }else if (hy_points.at(j).z < 12*units::cm){
-	independent_surfaces.insert(3);
+	      independent_surfaces.insert(3);
       }else if (hy_points.at(j).x > 255*units::cm){
-	independent_surfaces.insert(4);
+	      independent_surfaces.insert(4);
       }else if (hy_points.at(j).x < 1*units::cm){
-	independent_surfaces.insert(5);
+	      independent_surfaces.insert(5);
       }
 
       
       if (hy_points.at(j).y > 104*units::cm || hy_points.at(j).y <-99.5*units::cm ||
-	  hy_points.at(j).z < 12*units::cm || hy_points.at(j).z > 1025*units::cm ||
-	  hy_points.at(j).x < 1*units::cm || hy_points.at(j).x > 255*units::cm )
-	num_outside_points ++;
+        hy_points.at(j).z < 12*units::cm || hy_points.at(j).z > 1025*units::cm ||
+        hy_points.at(j).x < 1*units::cm || hy_points.at(j).x > 255*units::cm )
+        num_outside_points ++;
       if (hy_points.at(j).x < -1*units::cm || hy_points.at(j).x > 257*units::cm )
-	num_outx_points++;
+	      num_outx_points++;
     }
     
   }
   for (size_t j=0;j!=ly_points.size();j++){
     if (ly_points.at(j).x >=1*units::cm && ly_points.at(j).x <=255*units::cm &&
-	ly_points.at(j).y >=-99.5*units::cm && ly_points.at(j).y <=101.5*units::cm &&
-	ly_points.at(j).z >= 15*units::cm && ly_points.at(j).z <= 1022*units::cm&& (!flag_outx))
+        ly_points.at(j).y >=-99.5*units::cm && ly_points.at(j).y <=101.5*units::cm &&
+        ly_points.at(j).z >= 15*units::cm && ly_points.at(j).z <= 1022*units::cm&& (!flag_outx))
       continue;
 
     
@@ -195,151 +201,150 @@ bool WCP2dToy::JudgeSeparateDec_2(WCP::PR3DCluster* cluster, TVector3& drift_dir
     for (size_t k=0;k!=independent_points.size();k++){
       double dis = sqrt(pow(ly_points.at(j).x - independent_points.at(k).x,2)+pow(ly_points.at(j).y - independent_points.at(k).y,2)+pow(ly_points.at(j).z - independent_points.at(k).z,2));
       if (dis < 15*units::cm)
-	flag_save = false;
+	      flag_save = false;
     }
     if (flag_save){
       independent_points.push_back(ly_points.at(j));
       
 
       if (ly_points.at(j).y <-99.5*units::cm){
-	independent_surfaces.insert(1);
+	      independent_surfaces.insert(1);
       }else if (ly_points.at(j).y > 104*units::cm){
-	independent_surfaces.insert(0);
+	      independent_surfaces.insert(0);
       }else if (ly_points.at(j).z  > 1025*units::cm){
-	independent_surfaces.insert(2);
+	      independent_surfaces.insert(2);
       }else if (ly_points.at(j).z < 12*units::cm){
-	independent_surfaces.insert(3);
+	      independent_surfaces.insert(3);
       }else if (ly_points.at(j).x > 255*units::cm){
-	independent_surfaces.insert(4);
+	      independent_surfaces.insert(4);
       }else if (ly_points.at(j).x < 1*units::cm){
-	independent_surfaces.insert(5);
+	      independent_surfaces.insert(5);
       }
 
       
       if (ly_points.at(j).y > 104*units::cm || ly_points.at(j).y <-99.5*units::cm ||
-	  ly_points.at(j).z < 12*units::cm || ly_points.at(j).z > 1025*units::cm ||
-	  ly_points.at(j).x < 1*units::cm || ly_points.at(j).x > 255*units::cm )
-	num_outside_points ++;
+        ly_points.at(j).z < 12*units::cm || ly_points.at(j).z > 1025*units::cm ||
+        ly_points.at(j).x < 1*units::cm || ly_points.at(j).x > 255*units::cm )
+      num_outside_points ++;
       if (ly_points.at(j).x < -1*units::cm || ly_points.at(j).x > 257*units::cm )
-	num_outx_points++;
+	      num_outx_points++;
     }
   }
   for (size_t j=0;j!=hz_points.size();j++){
 
     if (hz_points.at(j).x >=1*units::cm && hz_points.at(j).x <=255*units::cm &&
-	hz_points.at(j).y >=-99.5*units::cm && hz_points.at(j).y <=101.5*units::cm &&
-	hz_points.at(j).z >= 15*units::cm && hz_points.at(j).z <= 1022*units::cm&& (!flag_outx))
-      continue;
+      hz_points.at(j).y >=-99.5*units::cm && hz_points.at(j).y <=101.5*units::cm &&
+      hz_points.at(j).z >= 15*units::cm && hz_points.at(j).z <= 1022*units::cm&& (!flag_outx))
+          continue;
     
     bool flag_save = true;
     for (size_t k=0;k!=independent_points.size();k++){
       double dis = sqrt(pow(hz_points.at(j).x - independent_points.at(k).x,2)+pow(hz_points.at(j).y - independent_points.at(k).y,2)+pow(hz_points.at(j).z - independent_points.at(k).z,2));
       if (dis < 15*units::cm)
-	flag_save = false;
+      	flag_save = false;
     }
     if (flag_save){
       independent_points.push_back(hz_points.at(j));
             
       if (hz_points.at(j).z  > 1025*units::cm){
-	independent_surfaces.insert(2);
+	      independent_surfaces.insert(2);
       }else if (hz_points.at(j).z < 12*units::cm){
-	independent_surfaces.insert(3);
+	      independent_surfaces.insert(3);
       }else if (hz_points.at(j).y > 104*units::cm){
-	independent_surfaces.insert(0);
+	      independent_surfaces.insert(0);
       }else if (hz_points.at(j).y <-99.5*units::cm){
-	independent_surfaces.insert(1);
+	      independent_surfaces.insert(1);
       }else if (hz_points.at(j).x > 255*units::cm){
-	independent_surfaces.insert(4);
+	      independent_surfaces.insert(4);
       }else if (hz_points.at(j).x < 1*units::cm){
-	independent_surfaces.insert(5);
+	      independent_surfaces.insert(5);
       }
 
       
       if (hz_points.at(j).y > 104*units::cm || hz_points.at(j).y <-99.5*units::cm ||
-	  hz_points.at(j).z < 12*units::cm || hz_points.at(j).z > 1025*units::cm ||
-	  hz_points.at(j).x < 1*units::cm || hz_points.at(j).x > 255*units::cm )
-	num_outside_points ++;
+        hz_points.at(j).z < 12*units::cm || hz_points.at(j).z > 1025*units::cm ||
+        hz_points.at(j).x < 1*units::cm || hz_points.at(j).x > 255*units::cm )
+        num_outside_points ++;
       if (hz_points.at(j).x < -1*units::cm || hz_points.at(j).x > 257*units::cm )
-	num_outx_points ++;
+	      num_outx_points ++;
     }
   }
   for (size_t j=0;j!=lz_points.size();j++){
 
     if (lz_points.at(j).x >=1*units::cm && lz_points.at(j).x <=255*units::cm &&
-	lz_points.at(j).y >=-99.5*units::cm && lz_points.at(j).y <=101.5*units::cm &&
-	lz_points.at(j).z >= 15*units::cm && lz_points.at(j).z <= 1022*units::cm&& (!flag_outx))
-      continue;
+      lz_points.at(j).y >=-99.5*units::cm && lz_points.at(j).y <=101.5*units::cm &&
+      lz_points.at(j).z >= 15*units::cm && lz_points.at(j).z <= 1022*units::cm&& (!flag_outx))
+          continue;
     
     bool flag_save = true;
     for (size_t k=0;k!=independent_points.size();k++){
       double dis = sqrt(pow(lz_points.at(j).x - independent_points.at(k).x,2)+pow(lz_points.at(j).y - independent_points.at(k).y,2)+pow(lz_points.at(j).z - independent_points.at(k).z,2));
       if (dis < 15*units::cm)
-	flag_save = false;
+	      flag_save = false;
     }
     if (flag_save){
       independent_points.push_back(lz_points.at(j));
 
       if (lz_points.at(j).z < 12*units::cm){
-	independent_surfaces.insert(3);
+	      independent_surfaces.insert(3);
       }else if (lz_points.at(j).z  > 1025*units::cm){
-	independent_surfaces.insert(2);
+	      independent_surfaces.insert(2);
       }else if (lz_points.at(j).y > 104*units::cm){
-	independent_surfaces.insert(0);
+	      independent_surfaces.insert(0);
       }else if (lz_points.at(j).y <-99.5*units::cm){
-	independent_surfaces.insert(1);
+	      independent_surfaces.insert(1);
       }else if (lz_points.at(j).x > 255*units::cm){
-	independent_surfaces.insert(4);
+	      independent_surfaces.insert(4);
       }else if (lz_points.at(j).x < 1*units::cm){
-	independent_surfaces.insert(5);
+	      independent_surfaces.insert(5);
       }
 
 
       
       if (lz_points.at(j).y > 104*units::cm || lz_points.at(j).y <-99.5*units::cm ||
-	  lz_points.at(j).z < 12*units::cm || lz_points.at(j).z > 1025*units::cm ||
-	  lz_points.at(j).x < 1*units::cm || lz_points.at(j).x > 255*units::cm )
-	num_outside_points ++;
+          lz_points.at(j).z < 12*units::cm || lz_points.at(j).z > 1025*units::cm ||
+          lz_points.at(j).x < 1*units::cm || lz_points.at(j).x > 255*units::cm )
+        num_outside_points ++;
       if (lz_points.at(j).x < -1*units::cm || lz_points.at(j).x > 257*units::cm )
-	num_outx_points++;
+	      num_outx_points++;
     }
   }
   for (size_t j=0;j!=hx_points.size();j++){
 
     if (hx_points.at(j).x >=1*units::cm && hx_points.at(j).x <=255*units::cm &&
-	hx_points.at(j).y >=-99.5*units::cm && hx_points.at(j).y <=101.5*units::cm &&
-	hx_points.at(j).z >= 15*units::cm && hx_points.at(j).z <= 1022*units::cm&& (!flag_outx))
-      continue;
+      hx_points.at(j).y >=-99.5*units::cm && hx_points.at(j).y <=101.5*units::cm &&
+      hx_points.at(j).z >= 15*units::cm && hx_points.at(j).z <= 1022*units::cm&& (!flag_outx))
+          continue;
     
     bool flag_save = true;
     for (size_t k=0;k!=independent_points.size();k++){
       double dis = sqrt(pow(hx_points.at(j).x - independent_points.at(k).x,2)+pow(hx_points.at(j).y - independent_points.at(k).y,2)+pow(hx_points.at(j).z - independent_points.at(k).z,2));
       if (dis < 15*units::cm)
-	flag_save = false;
+	      flag_save = false;
     }
     if (flag_save){
       independent_points.push_back(hx_points.at(j));
       
       if (hx_points.at(j).y > 104*units::cm || hx_points.at(j).y <-99.5*units::cm ||
-	  hx_points.at(j).z < 12*units::cm || hx_points.at(j).z > 1025*units::cm ||
-	  hx_points.at(j).x < 1*units::cm || hx_points.at(j).x > 255*units::cm )
-	num_outside_points ++;
+          hx_points.at(j).z < 12*units::cm || hx_points.at(j).z > 1025*units::cm ||
+          hx_points.at(j).x < 1*units::cm || hx_points.at(j).x > 255*units::cm )
+        num_outside_points ++;
       if (hx_points.at(j).x < -1*units::cm || hx_points.at(j).x > 257*units::cm ){
-	
-	num_outx_points++;
+	      num_outx_points++;
       }
 
       if (lx_points.at(j).x > 255*units::cm){
-	independent_surfaces.insert(4);
+	      independent_surfaces.insert(4);
       }else if (lx_points.at(j).x < 1*units::cm){
-	independent_surfaces.insert(5);
+	      independent_surfaces.insert(5);
       }else if (lx_points.at(j).y > 104*units::cm){
-	independent_surfaces.insert(0);
+	      independent_surfaces.insert(0);
       }else if (lx_points.at(j).y <-99.5*units::cm){
-	independent_surfaces.insert(1);
+	      independent_surfaces.insert(1);
       }else if (lx_points.at(j).z  > 1025*units::cm){
-	independent_surfaces.insert(2);
+	      independent_surfaces.insert(2);
       }else if (lx_points.at(j).z < 12*units::cm){
-	independent_surfaces.insert(3);
+	      independent_surfaces.insert(3);
       }
       
     }
@@ -347,40 +352,39 @@ bool WCP2dToy::JudgeSeparateDec_2(WCP::PR3DCluster* cluster, TVector3& drift_dir
   for (size_t j=0;j!=lx_points.size();j++){
 
     if (lx_points.at(j).x >=1*units::cm && lx_points.at(j).x <=255*units::cm &&
-	lx_points.at(j).y >=-99.5*units::cm && lx_points.at(j).y <=101.5*units::cm &&
-	lx_points.at(j).z >= 15*units::cm && lx_points.at(j).z <= 1022*units::cm&& (!flag_outx))
-      continue;
+      lx_points.at(j).y >=-99.5*units::cm && lx_points.at(j).y <=101.5*units::cm &&
+      lx_points.at(j).z >= 15*units::cm && lx_points.at(j).z <= 1022*units::cm&& (!flag_outx))
+          continue;
     
     bool flag_save = true;
     for (size_t k=0;k!=independent_points.size();k++){
       double dis = sqrt(pow(lx_points.at(j).x - independent_points.at(k).x,2)+pow(lx_points.at(j).y - independent_points.at(k).y,2)+pow(lx_points.at(j).z - independent_points.at(k).z,2));
       if (dis < 15*units::cm)
-	flag_save = false;
+	      flag_save = false;
     }
     if (flag_save){
       independent_points.push_back(lx_points.at(j));
   
       if (lx_points.at(j).y > 104*units::cm || lx_points.at(j).y <-99.5*units::cm ||
-	  lx_points.at(j).z < 12*units::cm || lx_points.at(j).z > 1025*units::cm ||
-	  lx_points.at(j).x < 1*units::cm || lx_points.at(j).x > 255*units::cm )
-	num_outside_points ++;
+          lx_points.at(j).z < 12*units::cm || lx_points.at(j).z > 1025*units::cm ||
+          lx_points.at(j).x < 1*units::cm || lx_points.at(j).x > 255*units::cm )
+        num_outside_points ++;
       if (lx_points.at(j).x < -1*units::cm || lx_points.at(j).x > 257*units::cm ){
-	num_outx_points++;
-	
+      	num_outx_points++;
       }
 
       if (lx_points.at(j).x < 1*units::cm){
-	independent_surfaces.insert(5);
+	      independent_surfaces.insert(5);
       }else if (lx_points.at(j).x > 255*units::cm){
-	independent_surfaces.insert(4);
+	      independent_surfaces.insert(4);
       }else if (lx_points.at(j).y > 104*units::cm){
-	independent_surfaces.insert(0);
+	      independent_surfaces.insert(0);
       }else if (lx_points.at(j).y <-99.5*units::cm){
-	independent_surfaces.insert(1);
+	      independent_surfaces.insert(1);
       }else if (lx_points.at(j).z  > 1025*units::cm){
-	independent_surfaces.insert(2);
+	      independent_surfaces.insert(2);
       }else if (lx_points.at(j).z < 12*units::cm){
-	independent_surfaces.insert(3);
+	      independent_surfaces.insert(3);
       }
 
       
@@ -400,15 +404,15 @@ bool WCP2dToy::JudgeSeparateDec_2(WCP::PR3DCluster* cluster, TVector3& drift_dir
       double angle_3 = dir_3.Angle(drift_dir);
       //std::cout << dir_3.Mag()/units::cm << " " << fabs(angle_3-3.1415926/2.)/3.1415926*180. << " " << fabs(dir_3.X()/units::cm) << std::endl;
       if (fabs(angle_3-3.1415926/2.)/3.1415926*180.<7.5){
-	if (fabs(dir_3.X()/units::cm)>14*units::cm)
-	  num_far_points ++;
-	if (fabs(dir_1.Angle(drift_dir)-3.1415926/2.)/3.1415926*180. > 15){
-	  if (dir_3.Mag() > 20*units::cm)
-	    num_far_points ++;
-	}
+        if (fabs(dir_3.X()/units::cm)>14*units::cm)
+          num_far_points ++;
+        if (fabs(dir_1.Angle(drift_dir)-3.1415926/2.)/3.1415926*180. > 15){
+          if (dir_3.Mag() > 20*units::cm)
+            num_far_points ++;
+        }
       }else{
-	if (dir_3.Mag() > 20*units::cm)
-	  num_far_points ++;
+        if (dir_3.Mag() > 20*units::cm)
+          num_far_points ++;
       }
     }
 
@@ -482,7 +486,7 @@ bool WCP2dToy::JudgeSeparateDec_2(WCP::PR3DCluster* cluster, TVector3& drift_dir
     for (size_t k=0;k!=independent_points.size();k++){
       double dis = sqrt(pow(hy_points.at(j).x - independent_points.at(k).x,2)+pow(hy_points.at(j).y - independent_points.at(k).y,2)+pow(hy_points.at(j).z - independent_points.at(k).z,2));
       if (dis < 15*units::cm)
-	flag_save = false;
+	      flag_save = false;
     }
     if (flag_save)
       independent_points.push_back(hy_points.at(j));
@@ -493,7 +497,7 @@ bool WCP2dToy::JudgeSeparateDec_2(WCP::PR3DCluster* cluster, TVector3& drift_dir
     for (size_t k=0;k!=independent_points.size();k++){
       double dis = sqrt(pow(ly_points.at(j).x - independent_points.at(k).x,2)+pow(ly_points.at(j).y - independent_points.at(k).y,2)+pow(ly_points.at(j).z - independent_points.at(k).z,2));
       if (dis < 15*units::cm)
-	flag_save = false;
+	      flag_save = false;
     }
     if (flag_save)
       independent_points.push_back(ly_points.at(j));
@@ -504,7 +508,7 @@ bool WCP2dToy::JudgeSeparateDec_2(WCP::PR3DCluster* cluster, TVector3& drift_dir
     for (size_t k=0;k!=independent_points.size();k++){
       double dis = sqrt(pow(hx_points.at(j).x - independent_points.at(k).x,2)+pow(hx_points.at(j).y - independent_points.at(k).y,2)+pow(hx_points.at(j).z - independent_points.at(k).z,2));
       if (dis < 15*units::cm)
-	flag_save = false;
+	    flag_save = false;
     }
     if (flag_save)
       independent_points.push_back(hx_points.at(j));
@@ -515,7 +519,7 @@ bool WCP2dToy::JudgeSeparateDec_2(WCP::PR3DCluster* cluster, TVector3& drift_dir
     for (size_t k=0;k!=independent_points.size();k++){
       double dis = sqrt(pow(lx_points.at(j).x - independent_points.at(k).x,2)+pow(lx_points.at(j).y - independent_points.at(k).y,2)+pow(lx_points.at(j).z - independent_points.at(k).z,2));
       if (dis < 15*units::cm)
-	flag_save = false;
+      	flag_save = false;
     }
     if (flag_save)
       independent_points.push_back(lx_points.at(j));
@@ -526,7 +530,7 @@ bool WCP2dToy::JudgeSeparateDec_2(WCP::PR3DCluster* cluster, TVector3& drift_dir
     for (size_t k=0;k!=independent_points.size();k++){
       double dis = sqrt(pow(hz_points.at(j).x - independent_points.at(k).x,2)+pow(hz_points.at(j).y - independent_points.at(k).y,2)+pow(hz_points.at(j).z - independent_points.at(k).z,2));
       if (dis < 15*units::cm)
-	flag_save = false;
+	      flag_save = false;
     }
     if (flag_save)
       independent_points.push_back(hz_points.at(j));
@@ -537,7 +541,7 @@ bool WCP2dToy::JudgeSeparateDec_2(WCP::PR3DCluster* cluster, TVector3& drift_dir
     for (size_t k=0;k!=independent_points.size();k++){
       double dis = sqrt(pow(lz_points.at(j).x - independent_points.at(k).x,2)+pow(lz_points.at(j).y - independent_points.at(k).y,2)+pow(lz_points.at(j).z - independent_points.at(k).z,2));
       if (dis < 15*units::cm)
-	flag_save = false;
+	      flag_save = false;
     }
     if (flag_save)
       independent_points.push_back(lz_points.at(j));
@@ -1244,7 +1248,7 @@ std::vector<WCP::PR3DCluster*> WCP2dToy::Separate_1(WCP::ToyCTPointCloud& ct_poi
     }else if (num_points > 75){ 
       num_points = cluster->get_num_points(temp_p,30*units::cm);
       if (num_points > 160)
-	flag_connect = true;
+	      flag_connect = true;
     }
     
     // std::cout << dis / units::cm << " A " << cluster->get_num_points(temp_p,15*units::cm) << " " << cluster->get_num_points(temp_p,30*units::cm)  << std::endl;
@@ -1286,28 +1290,28 @@ std::vector<WCP::PR3DCluster*> WCP2dToy::Separate_1(WCP::ToyCTPointCloud& ct_poi
       bool flag_change = false;
       
       if (fabs(temp_dir1.Angle(main_dir)-3.1415926/2.) >  fabs(temp_dir2.Angle(main_dir)-3.1415926/2.)){
-	if (fabs(temp_dir2.Angle(main_dir)-3.1415926/2.) > 80/180.*3.1415926 && fabs(temp_dir1.Angle(main_dir)-3.1415926/2.) < fabs(temp_dir2.Angle(main_dir)-3.1415926/2.)+2.5/180.*3.1415926) {
-	}else{
-	  flag_change = true;
-	  start_wcpoint = independent_points.at(max_index);
-	  main_dir *= -1;
-	  max_index = min_index;
-	}
+        if (fabs(temp_dir2.Angle(main_dir)-3.1415926/2.) > 80/180.*3.1415926 && fabs(temp_dir1.Angle(main_dir)-3.1415926/2.) < fabs(temp_dir2.Angle(main_dir)-3.1415926/2.)+2.5/180.*3.1415926) {
+        }else{
+          flag_change = true;
+          start_wcpoint = independent_points.at(max_index);
+          main_dir *= -1;
+          max_index = min_index;
+        }
       }
 
       if ((!flag_change) && fabs(temp_dir1.Angle(drift_dir)-3.1415926/2.) > fabs(temp_dir2.Angle(drift_dir)-3.1415926/2.) &&
 	  fabs(temp_dir2.Angle(drift_dir)-3.1415926/2.)/3.1415926*180. < 10 && fabs(temp_dir2.Angle(main_dir)-3.1415926/2.)/3.1415926*180. < 80){
-	start_wcpoint = independent_points.at(max_index);
-	main_dir *= -1;
-	max_index = min_index;
+      start_wcpoint = independent_points.at(max_index);
+      main_dir *= -1;
+      max_index = min_index;
       }
 
       if ((!flag_change) && fabs(temp_dir2.Angle(drift_dir)-3.1415926/2.) < 1./180.*3.1415926 &&
 	  fabs(temp_dir1.Angle(drift_dir)-3.1415926/2.) > 3./180.*3.1415926 &&
 	  fabs(temp_dir1.Angle(main_dir)-3.1415926/2.)/3.1415926*180. >70){
-	start_wcpoint = independent_points.at(max_index);
-	main_dir *= -1;
-	max_index = min_index;
+      start_wcpoint = independent_points.at(max_index);
+      main_dir *= -1;
+      max_index = min_index;
       }
       
     }
@@ -1318,12 +1322,12 @@ std::vector<WCP::PR3DCluster*> WCP2dToy::Separate_1(WCP::ToyCTPointCloud& ct_poi
       dir  = cluster->VHoughTrans(start_point,100*units::cm);
       TVector3 dir1 = cluster->VHoughTrans(start_point,30*units::cm);
       if (dir.Angle(dir1) > 20*3.1415926/180.){
-	if (fabs(dir.Angle(drift_dir)-3.1415926/2.)<5*3.1415926/180. ||
-	    fabs(dir1.Angle(drift_dir)-3.1415926/2.)<5*3.1415926/180.){
-	  dir  = cluster->VHoughTrans(start_point,200*units::cm);
-	}else{
-	  dir = dir1;
-	}
+        if (fabs(dir.Angle(drift_dir)-3.1415926/2.)<5*3.1415926/180. ||
+            fabs(dir1.Angle(drift_dir)-3.1415926/2.)<5*3.1415926/180.){
+          dir  = cluster->VHoughTrans(start_point,200*units::cm);
+        }else{
+          dir = dir1;
+        }
       }
     }
     dir.SetMag(1);
@@ -1357,12 +1361,12 @@ std::vector<WCP::PR3DCluster*> WCP2dToy::Separate_1(WCP::ToyCTPointCloud& ct_poi
       dir  = cluster->VHoughTrans(start_point,100*units::cm);
       TVector3 dir1 = cluster->VHoughTrans(start_point,30*units::cm);
       if (dir.Angle(dir1) > 20*3.1415926/180.){
-	if (fabs(dir.Angle(drift_dir)-3.1415926/2.)<5*3.1415926/180. ||
-	    fabs(dir1.Angle(drift_dir)-3.1415926/2.)<5*3.1415926/180.){
-	  dir  = cluster->VHoughTrans(start_point,200*units::cm);
-	}else{
-	  dir = dir1;
-	}
+        if (fabs(dir.Angle(drift_dir)-3.1415926/2.)<5*3.1415926/180. ||
+            fabs(dir1.Angle(drift_dir)-3.1415926/2.)<5*3.1415926/180.){
+          dir  = cluster->VHoughTrans(start_point,200*units::cm);
+        }else{
+          dir = dir1;
+        }
       }
     }
     dir.SetMag(1);
@@ -1375,16 +1379,16 @@ std::vector<WCP::PR3DCluster*> WCP2dToy::Separate_1(WCP::ToyCTPointCloud& ct_poi
       start_wcpoint = end_wcpoint;
       Point start_point(start_wcpoint.x, start_wcpoint.y, start_wcpoint.z);
       {
-	dir  = cluster->VHoughTrans(start_point,100*units::cm);
-	TVector3 dir1 = cluster->VHoughTrans(start_point,30*units::cm);
-	if (dir.Angle(dir1) > 20*3.1415926/180.){
-	  if (fabs(dir.Angle(drift_dir)-3.1415926/2.)<5*3.1415926/180. ||
-	      fabs(dir1.Angle(drift_dir)-3.1415926/2.)<5*3.1415926/180.){
-	    dir  = cluster->VHoughTrans(start_point,200*units::cm);
-	  }else{
-	    dir = dir1;
-	  }
-	}
+        dir  = cluster->VHoughTrans(start_point,100*units::cm);
+        TVector3 dir1 = cluster->VHoughTrans(start_point,30*units::cm);
+        if (dir.Angle(dir1) > 20*3.1415926/180.){
+          if (fabs(dir.Angle(drift_dir)-3.1415926/2.)<5*3.1415926/180. ||
+              fabs(dir1.Angle(drift_dir)-3.1415926/2.)<5*3.1415926/180.){
+            dir  = cluster->VHoughTrans(start_point,200*units::cm);
+          }else{
+            dir = dir1;
+          }
+        }
       }
       dir.SetMag(1);
       TVector3 inv_dir = dir * (-1);
@@ -1445,10 +1449,10 @@ std::vector<WCP::PR3DCluster*> WCP2dToy::Separate_1(WCP::ToyCTPointCloud& ct_poi
       int num_points = int(dis/(1.0*units::cm))+1;
       double dis_seg = dis/num_points;
       for (int k=0;k!=num_points;k++){
-	Point current_pt(prev_wcp.x + (k+1.)/num_points*((*it).x - prev_wcp.x),
-			 prev_wcp.y + (k+1.)/num_points*((*it).y - prev_wcp.y),
-			 prev_wcp.z + (k+1.)/num_points*((*it).z - prev_wcp.z));
-	pts.push_back(current_pt);
+        Point current_pt(prev_wcp.x + (k+1.)/num_points*((*it).x - prev_wcp.x),
+            prev_wcp.y + (k+1.)/num_points*((*it).y - prev_wcp.y),
+            prev_wcp.z + (k+1.)/num_points*((*it).z - prev_wcp.z));
+        pts.push_back(current_pt);
 	//	std::cout << "b: " << current_pt.x/units::cm << " " << current_pt.y/units::cm << " " << current_pt.z/units::cm << std::endl;
       }
     }
@@ -1471,12 +1475,12 @@ std::vector<WCP::PR3DCluster*> WCP2dToy::Separate_1(WCP::ToyCTPointCloud& ct_poi
       flag1_u_pts.at(cloud->get_cloud().pts[j].index) = true;
     }else{
       if (dead_u_index.find(cloud->get_cloud().pts[j].index_u)!=dead_u_index.end()){
-	if (cloud->get_cloud().pts[j].x >= dead_u_index[cloud->get_cloud().pts[j].index_u].first &&
-	    cloud->get_cloud().pts[j].x <= dead_u_index[cloud->get_cloud().pts[j].index_u].second){
-	  if (dis < 10*units::cm)
-	    flag1_u_pts.at(cloud->get_cloud().pts[j].index) = true;
-	  flag2_u_pts.at(cloud->get_cloud().pts[j].index) = true;
-	}
+        if (cloud->get_cloud().pts[j].x >= dead_u_index[cloud->get_cloud().pts[j].index_u].first &&
+            cloud->get_cloud().pts[j].x <= dead_u_index[cloud->get_cloud().pts[j].index_u].second){
+          if (dis < 10*units::cm)
+            flag1_u_pts.at(cloud->get_cloud().pts[j].index) = true;
+          flag2_u_pts.at(cloud->get_cloud().pts[j].index) = true;
+        }
       }
     }
     temp_results = temp_cloud->get_closest_2d_dis(test_p,1);
@@ -1488,12 +1492,12 @@ std::vector<WCP::PR3DCluster*> WCP2dToy::Separate_1(WCP::ToyCTPointCloud& ct_poi
       flag1_v_pts.at(cloud->get_cloud().pts[j].index) = true;
     }else{
       if (dead_v_index.find(cloud->get_cloud().pts[j].index_v)!=dead_v_index.end()){
-	if (cloud->get_cloud().pts[j].x >= dead_v_index[cloud->get_cloud().pts[j].index_v].first  &&
-	    cloud->get_cloud().pts[j].x <= dead_v_index[cloud->get_cloud().pts[j].index_v].second ){
-	  if (dis < 10.0*units::cm)
-	    flag1_v_pts.at(cloud->get_cloud().pts[j].index) = true;
-	  flag2_v_pts.at(cloud->get_cloud().pts[j].index) = true;
-	}
+        if (cloud->get_cloud().pts[j].x >= dead_v_index[cloud->get_cloud().pts[j].index_v].first  &&
+            cloud->get_cloud().pts[j].x <= dead_v_index[cloud->get_cloud().pts[j].index_v].second ){
+          if (dis < 10.0*units::cm)
+            flag1_v_pts.at(cloud->get_cloud().pts[j].index) = true;
+          flag2_v_pts.at(cloud->get_cloud().pts[j].index) = true;
+        }
       }
     }
     temp_results = temp_cloud->get_closest_2d_dis(test_p,2);
@@ -1505,12 +1509,12 @@ std::vector<WCP::PR3DCluster*> WCP2dToy::Separate_1(WCP::ToyCTPointCloud& ct_poi
       flag1_w_pts.at(cloud->get_cloud().pts[j].index) = true;
     }else{
       if (dead_w_index.find(cloud->get_cloud().pts[j].index_w)!=dead_w_index.end()){
-	if (cloud->get_cloud().pts[j].x >= dead_w_index[cloud->get_cloud().pts[j].index_w].first &&
-	    cloud->get_cloud().pts[j].x <= dead_w_index[cloud->get_cloud().pts[j].index_w].second ){
-	  if (dis < 10*units::cm)
-	    flag1_w_pts.at(cloud->get_cloud().pts[j].index) = true;
-	  flag2_w_pts.at(cloud->get_cloud().pts[j].index) = true;
-	}
+        if (cloud->get_cloud().pts[j].x >= dead_w_index[cloud->get_cloud().pts[j].index_w].first &&
+            cloud->get_cloud().pts[j].x <= dead_w_index[cloud->get_cloud().pts[j].index_w].second ){
+          if (dis < 10*units::cm)
+            flag1_w_pts.at(cloud->get_cloud().pts[j].index) = true;
+          flag2_w_pts.at(cloud->get_cloud().pts[j].index) = true;
+        }
       }
     }
     /* if (fabs(test_p.y-76.7*units::cm)<2*units::cm && fabs(test_p.z-328.9*units::cm)<2*units::cm && fabs(test_p.x - 132.8*units::cm) < 2*units::cm){ */
@@ -2191,28 +2195,28 @@ std::vector<WCP::PR3DCluster*> WCP2dToy::Separate_2(WCP::PR3DCluster* cluster, d
     // create graph for points in mcell inside the same time slice
     if (mcells_set.size()>=2){
       for (auto it2 = mcells_set.begin(); it2!=mcells_set.end();it2++){
-    	SlimMergeGeomCell *mcell1 = *it2;
-    	auto it2p = it2;
-    	if (it2p!=mcells_set.end()){
-    	  it2p++;
-    	  for (auto it3 = it2p; it3!=mcells_set.end(); it3++){
-    	    SlimMergeGeomCell *mcell2 = *(it3);
-	    if (mcell1->Overlap_fast(mcell2,5))
-		connected_mcells.push_back(std::make_pair(mcell1,mcell2));
-    	  }
-    	}
+        SlimMergeGeomCell *mcell1 = *it2;
+        auto it2p = it2;
+        if (it2p!=mcells_set.end()){
+          it2p++;
+          for (auto it3 = it2p; it3!=mcells_set.end(); it3++){
+            SlimMergeGeomCell *mcell2 = *(it3);
+              if (mcell1->Overlap_fast(mcell2,5))
+                connected_mcells.push_back(std::make_pair(mcell1,mcell2));
+          }
+        }
       }
     }
     // create graph for points between connected mcells in adjacent time slices + 1, if not, + 2
     std::vector<SMGCSet> vec_mcells_set;
     if (i+1 < time_slices.size()){
       if (time_slices.at(i+1)-time_slices.at(i)==1){
-    	vec_mcells_set.push_back(time_cells_set_map[time_slices.at(i+1)]);
+    	  vec_mcells_set.push_back(time_cells_set_map[time_slices.at(i+1)]);
     	if (i+2 < time_slices.size())
     	  if (time_slices.at(i+2)-time_slices.at(i)==2)
     	    vec_mcells_set.push_back(time_cells_set_map[time_slices.at(i+2)]);
       }else if (time_slices.at(i+1) - time_slices.at(i)==2){
-    	vec_mcells_set.push_back(time_cells_set_map[time_slices.at(i+1)]);
+    	  vec_mcells_set.push_back(time_cells_set_map[time_slices.at(i+1)]);
       }
     }
     bool flag = false;
@@ -2220,14 +2224,14 @@ std::vector<WCP::PR3DCluster*> WCP2dToy::Separate_2(WCP::PR3DCluster* cluster, d
       if (flag) break;
       SMGCSet& next_mcells_set = vec_mcells_set.at(j);
       for (auto it1 = mcells_set.begin(); it1!= mcells_set.end(); it1++){
-    	SlimMergeGeomCell *mcell1 = (*it1);
-    	for (auto it2 = next_mcells_set.begin(); it2!=next_mcells_set.end(); it2++){
-    	  SlimMergeGeomCell *mcell2 = (*it2);
-    	  if (mcell1->Overlap_fast(mcell2,2)){
-    	    flag = true;
-    	    connected_mcells.push_back(std::make_pair(mcell1,mcell2));
-    	  }
-    	}
+        SlimMergeGeomCell *mcell1 = (*it1);
+        for (auto it2 = next_mcells_set.begin(); it2!=next_mcells_set.end(); it2++){
+          SlimMergeGeomCell *mcell2 = (*it2);
+          if (mcell1->Overlap_fast(mcell2,2)){
+            flag = true;
+            connected_mcells.push_back(std::make_pair(mcell1,mcell2));
+          }
+        }
       }
     }
   }
@@ -2263,36 +2267,36 @@ std::vector<WCP::PR3DCluster*> WCP2dToy::Separate_2(WCP::PR3DCluster* cluster, d
       std::vector<ToyPointCloud*> pt_clouds;
       std::vector<std::vector<int>> vec_vec(num);
       for (int j=0;j!=num;j++){
-	ToyPointCloud *pt_cloud = new ToyPointCloud();
-	pt_clouds.push_back(pt_cloud);
+        ToyPointCloud *pt_cloud = new ToyPointCloud();
+        pt_clouds.push_back(pt_cloud);
       }
       std::vector<int>::size_type i;
       for (i=0;i!=component.size(); ++i){
-	vec_vec.at(component[i]).push_back(i);
-	SlimMergeGeomCell *mcell = mcells.at(i);
-	pt_clouds.at(component[i])->AddPoints(mcell->get_sampling_points());
+        vec_vec.at(component[i]).push_back(i);
+        SlimMergeGeomCell *mcell = mcells.at(i);
+        pt_clouds.at(component[i])->AddPoints(mcell->get_sampling_points());
       }
       for (int j=0;j!=num;j++){
-	pt_clouds.at(j)->build_kdtree_index();
+	      pt_clouds.at(j)->build_kdtree_index();
       }
       
       for (int j=0;j!=num;j++){
-	for (int k=j+1;k!=num;k++){
-	  std::tuple<int,int,double> temp_results = pt_clouds.at(j)->get_closest_points(pt_clouds.at(k));
-	  if (std::get<2>(temp_results)<dis_cut){
-	    int index1 = vec_vec[j].front();
-	    int index2 = vec_vec[k].front();
-	    auto edge = add_edge(index1,index2,*graph);
-	    if (edge.second){
-	      (*graph)[edge.first].dist = 1;
-	    }
-	  }
-	}
+        for (int k=j+1;k!=num;k++){
+          std::tuple<int,int,double> temp_results = pt_clouds.at(j)->get_closest_points(pt_clouds.at(k));
+          if (std::get<2>(temp_results)<dis_cut){
+            int index1 = vec_vec[j].front();
+            int index2 = vec_vec[k].front();
+            auto edge = add_edge(index1,index2,*graph);
+            if (edge.second){
+              (*graph)[edge.first].dist = 1;
+            }
+          }
+        }
       }
       
       
       for (int j=0;j!=num;j++){
-	delete pt_clouds.at(j);
+	      delete pt_clouds.at(j);
       }
     }
 
