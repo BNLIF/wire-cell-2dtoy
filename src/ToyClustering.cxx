@@ -205,6 +205,7 @@ bool flag_print){
   return dis_save;
 }
 
+ // official running code ...
 map_cluster_cluster_vec WCP2dToy::Clustering_jump_gap_cosmics(WCP::PR3DClusterSelection& live_clusters, WCP::PR3DClusterSelection& dead_clusters, std::map<int,std::pair<double,double>>& dead_u_index, std::map<int,std::pair<double,double>>& dead_v_index, std::map<int,std::pair<double,double>>& dead_w_index, WCP::DynamicToyPointCloud& global_point_cloud, WCP::ToyCTPointCloud& ct_point_cloud, bool flag_neutrino){
 
   bool flag_print = false;
@@ -328,8 +329,7 @@ map_cluster_cluster_vec WCP2dToy::Clustering_jump_gap_cosmics(WCP::PR3DClusterSe
   }
 
 
-   // hack
-  //if (0){
+  
 
   //std::cout << "start count" << std::endl;
 
@@ -339,7 +339,8 @@ map_cluster_cluster_vec WCP2dToy::Clustering_jump_gap_cosmics(WCP::PR3DClusterSe
 
   //std::cout <<  "end count " << std::endl;
 
-if (0){
+  
+
   for (size_t i=0;i!=live_clusters.size();i++){
     PR3DCluster *cluster = live_clusters.at(i);
     cluster->set_cluster_id(i+1);
@@ -356,7 +357,9 @@ if (0){
     cluster->set_cluster_id(i+1);
   }
 
- 
+  // hack
+  if (0){
+    
   // prepare for deghosting and clustering along track
   Clustering_deghost(ct_point_cloud, live_clusters,cluster_length_map, dead_u_index, dead_v_index, dead_w_index);
   cerr << em("deghost clusters") << std::endl;
