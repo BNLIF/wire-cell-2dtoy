@@ -47,12 +47,14 @@ void WCP2dToy::Clustering_deghost(WCP::PR3DClusterSelection& live_clusters, WCP:
       live_clusters.at(i)->Create_point_cloud();
       global_point_cloud.AddPoints(live_clusters.at(i),0);
       if (cluster_length_map[live_clusters.at(i)]>30*units::cm){
-	live_clusters.at(i)->Construct_skeleton();
-	global_skeleton_cloud.AddPoints(live_clusters.at(i),1);
+		live_clusters.at(i)->Construct_skeleton();
+		global_skeleton_cloud.AddPoints(live_clusters.at(i),1);
       }
     }else{ 
       // start the process to add things in and perform deghosting ... 
       PR3DCluster* cluster = live_clusters.at(i);
+
+	 
       
       if (length_cut == 0 || cluster_length_map[live_clusters.at(i)] < length_cut)  {
 	cluster->Create_point_cloud();
@@ -590,6 +592,8 @@ void WCP2dToy::Clustering_deghost(WCP::ToyCTPointCloud& ct_point_cloud, WCP::PR3
       // start the process to add things in and perform deghosting ... 
       PR3DCluster* cluster = live_clusters.at(i);
       
+	//    if (cluster_length_map[cluster] > 100*units::cm) std::cout << "Check: " << cluster->get_num_mcells() << " " << cluster_length_map[cluster]/units::cm << std::endl;
+
       if (length_cut == 0 || cluster_length_map[live_clusters.at(i)] < length_cut)  {
 	cluster->Create_point_cloud();
 	WCP::WCPointCloud<double>& cloud = cluster->get_point_cloud()->get_cloud();
@@ -605,6 +609,7 @@ void WCP2dToy::Clustering_deghost(WCP::ToyCTPointCloud& ct_point_cloud, WCP::PR3
 	for (size_t j=0;j!=num_total_points;j++){
 	  Point test_point(cloud.pts.at(j).x,cloud.pts.at(j).y,cloud.pts.at(j).z);
 	  
+	  
 	  bool flag_dead = false;
 	  
 	  if (dead_u_index.find(cloud.pts.at(j).index_u)!=dead_u_index.end()){
@@ -614,8 +619,12 @@ void WCP2dToy::Clustering_deghost(WCP::ToyCTPointCloud& ct_point_cloud, WCP::PR3
 	    }
 	  }
 	 
+	  
+
 	  if (!flag_dead){
 	    std::tuple<double, PR3DCluster*, size_t> results = global_point_cloud.get_closest_2d_point_info(test_point, 0);
+
+		// if (cluster->get_num_mcells()==801 && j==0) std::cout << j << " " << test_point << " AU " << std::get<0>(results) << " " << cluster_length_map[std::get<1>(results)]/units::cm << std::endl;
 	    
 	    if (std::get<0>(results)<=dis_cut/3.){
 	      if (map_cluster_num[0].find(std::get<1>(results))==map_cluster_num[0].end()){
@@ -625,6 +634,9 @@ void WCP2dToy::Clustering_deghost(WCP::ToyCTPointCloud& ct_point_cloud, WCP::PR3
 	      }  
 	    }else{
 	      results = global_skeleton_cloud.get_closest_2d_point_info(test_point, 0);
+
+		//   if (cluster->get_num_mcells()==801 && j==0) std::cout << j << " " << test_point << " BU " << std::get<0>(results) << " " << cluster_length_map[std::get<1>(results)]/units::cm << std::endl;
+
 	      if (std::get<0>(results)<=dis_cut*2.0){
 		if (map_cluster_num[0].find(std::get<1>(results))==map_cluster_num[0].end()){
 		  map_cluster_num[0][std::get<1>(results)] = 1;
@@ -653,6 +665,9 @@ void WCP2dToy::Clustering_deghost(WCP::ToyCTPointCloud& ct_point_cloud, WCP::PR3
 	  
 	  if (!flag_dead){
 	    std::tuple<double, PR3DCluster*, size_t> results = global_point_cloud.get_closest_2d_point_info(test_point, 1);
+
+		// if (cluster->get_num_mcells()==801 && j==0) std::cout << j << " " << test_point << " AV " << std::get<0>(results) << " " << cluster_length_map[std::get<1>(results)]/units::cm << std::endl;
+
 	    if (std::get<0>(results)<=dis_cut/3.){
 	      if (map_cluster_num[1].find(std::get<1>(results))==map_cluster_num[1].end()){
 		map_cluster_num[1][std::get<1>(results)] = 1;
@@ -661,6 +676,9 @@ void WCP2dToy::Clustering_deghost(WCP::ToyCTPointCloud& ct_point_cloud, WCP::PR3
 	      }
 	    }else{
 	      results = global_skeleton_cloud.get_closest_2d_point_info(test_point, 1);
+
+		//   if (cluster->get_num_mcells()==801 && j==0) std::cout << j << " " << test_point << " BV " << std::get<0>(results) << " " << cluster_length_map[std::get<1>(results)]/units::cm << std::endl;
+
 	      if (std::get<0>(results)<=dis_cut*2.0){
 		if (map_cluster_num[1].find(std::get<1>(results))==map_cluster_num[1].end()){
 		  map_cluster_num[1][std::get<1>(results)] = 1;
@@ -687,6 +705,9 @@ void WCP2dToy::Clustering_deghost(WCP::ToyCTPointCloud& ct_point_cloud, WCP::PR3
 	  
 	  if (!flag_dead){
 	    std::tuple<double, PR3DCluster*, size_t> results = global_point_cloud.get_closest_2d_point_info(test_point, 2);
+
+		//  if (cluster->get_num_mcells()==801 && j==0) std::cout << j << " " << test_point << " AW " << std::get<0>(results) << " " << cluster_length_map[std::get<1>(results)]/units::cm << std::endl;
+
 	    if (std::get<0>(results)<=dis_cut/3.){
 	      if (map_cluster_num[2].find(std::get<1>(results))==map_cluster_num[2].end()){
 		map_cluster_num[2][std::get<1>(results)] = 1;
@@ -695,6 +716,9 @@ void WCP2dToy::Clustering_deghost(WCP::ToyCTPointCloud& ct_point_cloud, WCP::PR3
 	      }
 	    }else{
 	      results = global_skeleton_cloud.get_closest_2d_point_info(test_point, 2);
+
+		//   if (cluster->get_num_mcells()==801 && j==0) std::cout << j << " " << test_point << " BW " << std::get<0>(results) << " " << cluster_length_map[std::get<1>(results)]/units::cm << std::endl;
+
 	      if (std::get<0>(results)<=dis_cut*2.0){
 		if (map_cluster_num[2].find(std::get<1>(results))==map_cluster_num[2].end()){
 		  map_cluster_num[2][std::get<1>(results)] = 1;
@@ -709,7 +733,9 @@ void WCP2dToy::Clustering_deghost(WCP::ToyCTPointCloud& ct_point_cloud, WCP::PR3
 	    num_dead[2]++;
 	  }
 	  
-	  
+	//   if (cluster->get_num_mcells()==801 && j==0) std::cout << j << " " << test_point << " " << cloud.pts.at(j).x << " " << flag_dead << " " << num_unique[0] << " " << num_dead[0] << " " << num_unique[1] << " " << num_dead[1] << " " << num_unique[2] << " " << num_dead[2] << std::endl;
+
+
 	  if ( (num_unique[1]+num_unique[0]+num_unique[2]) >= 0.24 * num_total_points &&
 	       (num_unique[1]+num_unique[0]+num_unique[2]) > 25 )
 	    break;
@@ -717,6 +743,8 @@ void WCP2dToy::Clustering_deghost(WCP::ToyCTPointCloud& ct_point_cloud, WCP::PR3
 	
 	//std::cout << cluster->get_cluster_id() << " " << num_unique[0] << " " << num_unique[1] << " " << num_unique[2] << " " << num_dead[0] << " " << num_dead[1] << " " << num_dead[2] << " " << num_total_points << std::endl;
 	
+	// if (cluster->get_num_mcells()==801) std::cout << cluster_length_map[cluster]/units::cm << " " << num_total_points << " " << num_unique[0] << " " << num_dead[0] << " " << num_unique[1] << " " << num_dead[1] << " " << num_unique[2] << " " << num_dead[2] << " " << std::endl;
+
 	bool flag_save = false;
 	
 	if (((num_unique[0] <= 0.1 * (num_total_points - num_dead[0]) || num_unique[0] <= 0.1 * num_total_points && num_unique[0] <= 8) &&
@@ -1040,6 +1068,7 @@ void WCP2dToy::Clustering_deghost(WCP::ToyCTPointCloud& ct_point_cloud, WCP::PR3
   // delete clusters ... 
   for (auto it = to_be_removed_clusters.begin(); it!=to_be_removed_clusters.end(); it++){
     PR3DCluster *ocluster = *it;
+	// std::cout << "Remove cluster: " << ocluster->get_num_mcells() << " " << cluster_length_map[ocluster]/units::cm  << std::endl;
     live_clusters.erase(find(live_clusters.begin(), live_clusters.end(), ocluster));
     cluster_length_map.erase(ocluster);
     delete ocluster;

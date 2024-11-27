@@ -357,9 +357,7 @@ map_cluster_cluster_vec WCP2dToy::Clustering_jump_gap_cosmics(WCP::PR3DClusterSe
     cluster->set_cluster_id(i+1);
   }
 
-  // hack
-  if (0){
-    
+  
   // prepare for deghosting and clustering along track
   Clustering_deghost(ct_point_cloud, live_clusters,cluster_length_map, dead_u_index, dead_v_index, dead_w_index);
   cerr << em("deghost clusters") << std::endl;
@@ -369,6 +367,9 @@ map_cluster_cluster_vec WCP2dToy::Clustering_jump_gap_cosmics(WCP::PR3DClusterSe
     cluster->set_cluster_id(i+1);
   }
   
+  // hack
+  if (0){
+    
   Clustering_examine_x_boundary(live_clusters,cluster_length_map);
 
   // add a piece for separating over-clustered pieces ... 
