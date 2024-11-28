@@ -518,9 +518,9 @@ void WCP2dToy::Clustering_connect1(WCP::PR3DClusterSelection& live_clusters, WCP
 	  /* } */
 	  
 	//   if (max_cluster != 0)
-    //         if (fabs(cluster_length_map[cluster]/units::cm - 10) < 5 ){
+    //         if (fabs(cluster_length_map[cluster]/units::cm - 50) < 5 ){
 	// 			cluster->Calc_PCA(); max_cluster->Calc_PCA();
-    //                     std::cout << "Check: " << cluster_length_map[cluster]/units::cm << " " << cluster_length_map[max_cluster]/units::cm << " " << cluster->get_center() << " " << max_cluster->get_center() << std::endl;
+    //                     std::cout << "Check: " << cluster_length_map[cluster]/units::cm << " " << cluster_length_map[max_cluster]/units::cm << " " << cluster->get_center() << " " << max_cluster->get_center() << " " << max_value[0] << " " << max_value[1] << " " << max_value[2] << " " << num_total_points << " " << num_unique[0] << " " << num_unique[1] << " " << num_unique[2] << " " << std::endl;
     //                 }
 
 	  // if overlap a lot merge
@@ -536,7 +536,7 @@ void WCP2dToy::Clustering_connect1(WCP::PR3DClusterSelection& live_clusters, WCP
 	      flag_merge = true;
 	      to_be_merged_pairs.insert(std::make_pair(cluster,max_cluster)); 
 		  
-		//   cluster->Calc_PCA(); max_cluster->Calc_PCA(); std::cout << "Connect 1 1: " << cluster_length_map[cluster]/units::cm << " " << cluster_length_map[max_cluster]/units::cm << " " << cluster->get_center() << " " << max_cluster->get_center() << std::endl;
+		// cluster->Calc_PCA(); max_cluster->Calc_PCA(); std::cout << "Connect 1 1: " << cluster_length_map[cluster]/units::cm << " " << cluster_length_map[max_cluster]/units::cm << " " << cluster->get_center() << " " << max_cluster->get_center() << std::endl;
 	    //curr_cluster = max_cluster;
 	    }
 	    
@@ -580,6 +580,9 @@ void WCP2dToy::Clustering_connect1(WCP::PR3DClusterSelection& live_clusters, WCP
 	      double dis = l1.closest_dis(l2);
 	      double dis1 = sqrt(pow(p1_c.x - p2_c.x,2) + pow(p1_c.y - p2_c.y,2) + pow(p1_c.z - p2_c.z,2));
 	      
+		//   if (fabs(cluster_length_map[cluster]/units::cm - 50) < 5 ){
+		// 		std::cout << "Check 1: " << cluster_length_map[cluster]/units::cm << " " << cluster_length_map[max_cluster]/units::cm << " " << angle_diff << " " << dis/units::cm << " " << dis1/units::cm << " " << angle1_drift << " " << angle2_drift << std::endl;
+		// 	}
 	    
 	      if ( (angle_diff < 5 || angle_diff > 175 || fabs(angle1_drift-90) < 5 && fabs(angle2_drift-90) < 5 && fabs(angle1_drift-90)+fabs(angle2_drift-90) < 6 && (angle_diff < 30 || angle_diff > 150)) && dis < 1.5*units::cm ||
 		   (angle_diff < 10 || angle_diff > 170) && dis < 0.9*units::cm &&
@@ -696,7 +699,7 @@ void WCP2dToy::Clustering_connect1(WCP::PR3DClusterSelection& live_clusters, WCP
     PR3DCluster *cluster1 = (*it).first;
     PR3DCluster *cluster2 = (*it).second;
 
-    //std::cout << "Connect 1: " << cluster1 << " " << cluster2 << " " << cluster_length_map[cluster1]/units::cm << " " << cluster_length_map[cluster2]/units::cm << std::endl;
+    // std::cout << "Connect 1: " << cluster1 << " " << cluster2 << " " << cluster_length_map[cluster1]/units::cm << " " << cluster_length_map[cluster2]/units::cm << std::endl;
     
     bool flag_new = true;
     std::vector<std::set<PR3DCluster*>> temp_set;
@@ -802,6 +805,8 @@ void WCP2dToy::Clustering_connect1(WCP::PR3DClusterSelection& live_clusters, WCP
 	
 	bool flag_merge = false;
 	
+	// if (cluster_length_map[cluster_1] > 300*units::cm) std::cout << "Check 2: " << cluster_length_map[cluster_1]/units::cm << " " << cluster_length_map[cluster_2]/units::cm << " " << angle_diff << " " << dis/units::cm << " " << dis1/units::cm << " " << angle_diff1 << " " << angle_diff2 << std::endl;
+
 	if (((angle_diff >85) && (angle_diff1 > 90 - 1.5 * (90-angle_diff)) &&
 	     (angle_diff2 > 90 - 1.5 * (90-angle_diff)) && dis < 2.5*units::cm ||
 	     (angle_diff >80) && angle_diff1 > 80 && angle_diff2 > 80 && dis < 1.2*units::cm) &&
