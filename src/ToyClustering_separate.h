@@ -1418,8 +1418,14 @@ std::vector<WCP::PR3DCluster*> WCP2dToy::Separate_1(WCP::ToyCTPointCloud& ct_poi
   
   cluster->dijkstra_shortest_paths(start_wcpoint,ct_point_cloud);
   cluster->cal_shortest_path(end_wcpoint);
+
+  
   
   std::list<WCPointCloud<double>::WCPoint>& path_wcps = cluster->get_path_wcps();
+
+
+  // std::cout << cluster->get_num_mcells()  << " " << "path_wcps.size()" << path_wcps.size() << " " << start_wcpoint.x/units::cm << " " << start_wcpoint.y/units::cm << " " << start_wcpoint.z/units::cm << " to " << end_wcpoint.x/units::cm << " " << end_wcpoint.y/units::cm << " " << end_wcpoint.z/units::cm << std::endl;
+
   std::vector<bool> flag_u_pts, flag_v_pts, flag_w_pts;
   std::vector<bool> flag1_u_pts, flag1_v_pts, flag1_w_pts;
   std::vector<bool> flag2_u_pts, flag2_v_pts, flag2_w_pts;
@@ -1437,6 +1443,8 @@ std::vector<WCP::PR3DCluster*> WCP2dToy::Separate_1(WCP::ToyCTPointCloud& ct_poi
   
   PointVector pts;
   
+  // double acc_dis = 0;
+
   WCPointCloud<double>::WCPoint prev_wcp = path_wcps.front();
   for (auto it = path_wcps.begin(); it!=path_wcps.end();it++){
 
@@ -1444,6 +1452,10 @@ std::vector<WCP::PR3DCluster*> WCP2dToy::Separate_1(WCP::ToyCTPointCloud& ct_poi
     
     
     double dis = sqrt(pow((*it).x - prev_wcp.x,2) + pow((*it).y - prev_wcp.y,2) + pow((*it).z - prev_wcp.z,2));
+
+    // acc_dis += dis;
+    // if (cluster->get_num_mcells() == 3447) std::cout << (*it).x/units::cm << " " << (*it).y/units::cm << " " << (*it).z/units::cm << " " << dis/units::cm << " " << acc_dis/units::cm << std::endl;
+
     if (dis <=1.0*units::cm){
       Point current_pt((*it).x,(*it).y,(*it).z);
       pts.push_back(current_pt);
