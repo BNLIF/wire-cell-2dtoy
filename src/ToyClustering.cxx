@@ -377,15 +377,14 @@ map_cluster_cluster_vec WCP2dToy::Clustering_jump_gap_cosmics(WCP::PR3DClusterSe
   // use graph theory ... 
   Clustering_protect_overclustering(live_clusters, cluster_length_map, ct_point_cloud);
   
-  // hack
-  if (0){
 
-  if (flag_neutrino)
-    // Now clustering the isolated pieces ....
-    for (int i=0;i!=1;i++){
-      Clustering_neutrino(live_clusters,cluster_length_map,i);
-      // std::cout << std::endl << std::endl;
-    }
+
+  // if (flag_neutrino)
+  //   // Now clustering the isolated pieces ....
+  //   for (int i=0;i!=1;i++){
+  //     Clustering_neutrino(live_clusters,cluster_length_map,i);
+  //     // std::cout << std::endl << std::endl;
+  //   }
   
   // Clustering_dis(live_clusters,cluster_length_map);
   cerr << em("clustering isolated piece") << std::endl;
@@ -415,8 +414,7 @@ map_cluster_cluster_vec WCP2dToy::Clustering_jump_gap_cosmics(WCP::PR3DClusterSe
     }
   }
 
-  // hack
-  }
+  
   
   for (size_t i=0;i!=live_clusters.size();i++){
     PR3DCluster *cluster = live_clusters.at(i);

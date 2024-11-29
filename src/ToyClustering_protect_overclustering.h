@@ -852,6 +852,8 @@ PR3DClusterSelection WCP2dToy::Examine_overclustering(PR3DCluster *cluster,  WCP
       }
     }
     
+	// std::cout << "Check: "  << " " << cluster->get_num_mcells() << " " << num  << std::endl;
+
     
     // study the independent component again ... 
     {
@@ -859,7 +861,8 @@ PR3DClusterSelection WCP2dToy::Examine_overclustering(PR3DCluster *cluster,  WCP
       const int num1 = connected_components(*graph,&component1[0]);
       
       if (num1 >1){
-	//std::cout << cluster->get_cluster_id() << " " << num << " " << num1 << std::endl;
+
+	// std::cout << "Check1: " << cluster->get_num_mcells() << " " << num << " " << num1 << std::endl;
 	
 	// form new clusters ...
 	std::vector<SMGCSet> vec_mcells_set;
