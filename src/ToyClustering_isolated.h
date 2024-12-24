@@ -32,8 +32,11 @@
     int max = 0;
     for (int j=0;j!=4;j++){
       if (ranges.at(j)>max)
-	max =ranges.at(j);
+	        max =ranges.at(j);
     }
+
+    // std::cout << i << " " << cluster_length_map[live_clusters.at(i)]/units::cm << " " << live_clusters.at(i)->get_center() << " " << max << " " << range_cut << std::endl;
+
     if (max < range_cut&&cluster_length_map[live_clusters.at(i)] < length_cut){
       small_clusters.push_back(live_clusters.at(i));
     }else{
@@ -58,6 +61,8 @@
       	    delete sep_clusters.at(j);
       	  }
 	  
+          // std::cout << i << " " << cluster_length_map[live_clusters.at(i)]/units::cm << " " << live_clusters.at(i)->get_center() << " " << max << " " << range_cut << std::endl;
+
       	  if (max < range_cut && max_length < length_cut){
       	    small_clusters.push_back(live_clusters.at(i));
       	  }else{
@@ -97,6 +102,8 @@
       }
     }
     if (min_dis < small_big_dis_cut){
+      //  std::cout << "SB: " << cluster_length_map[curr_cluster]/units::cm << " " << cluster_length_map[min_dis_cluster]/units::cm << " " << curr_cluster->get_center() << " " << min_dis_cluster->get_center() << std::endl;
+
       to_be_merged_pairs.insert(std::make_pair(min_dis_cluster,curr_cluster));
       used_small_clusters.insert(curr_cluster);
     }
@@ -115,6 +122,8 @@
       if (dis < small_small_dis_cut){
 	if (used_small_clusters.find(cluster1)!=used_small_clusters.end() && used_small_clusters.find(cluster2)==used_small_clusters.end()||
 	    used_small_clusters.find(cluster2)!=used_small_clusters.end() && used_small_clusters.find(cluster1)==used_small_clusters.end()){
+        //  std::cout << "SD: " << cluster_length_map[cluster1]/units::cm << " " << cluster_length_map[cluster2]/units::cm << " " << cluster1->get_center() << " " << cluster2->get_center() << std::endl;
+
 	  to_be_merged_pairs.insert(std::make_pair(cluster1,cluster2));
 	  used_small_clusters.insert(cluster1);
 	  used_small_clusters.insert(cluster2);
@@ -143,6 +152,8 @@
       std::tuple<int,int,double> results =  cloud2->get_closest_points(cloud1);
       double dis = std::get<2>(results);
       if (dis < small_small_dis_cut){
+        //  std::cout << "SS: " << cluster_length_map[cluster1]/units::cm << " " << cluster_length_map[cluster2]/units::cm << " " << cluster1->get_center() << " " << cluster2->get_center() << std::endl;
+
 	to_be_merged_pairs.insert(std::make_pair(cluster1,cluster2));
       }
     }
@@ -209,7 +220,8 @@
 	
 	if (flag_merge) {
 	  
-	  
+    // std::cout << "BB: " << cluster_length_map[cluster1]/units::cm << " " << cluster_length_map[cluster2]/units::cm << " " << cluster1->get_center() << " " << cluster2->get_center() << std::endl;
+
 	  to_be_merged_pairs.insert(std::make_pair(cluster1,cluster2));
 	  if (cluster_length_map[cluster1] < cluster_length_map[cluster2]){
 	    used_big_clusters.insert(cluster1);

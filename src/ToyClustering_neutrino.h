@@ -689,7 +689,7 @@ void WCP2dToy::Clustering_neutrino(WCP::PR3DClusterSelection& live_clusters,WCP:
 	
 
 		
-	//	std::cout << cluster1->get_cluster_id() << " " << cluster2->get_cluster_id() << " " << dis1/units::cm << " " << dis2/units::cm << " " << dis/units::cm << " " << cluster_length_map[cluster1]/units::cm << " " << cluster_length_map[cluster2]/units::cm << " " << fabs(drift_dir.Angle(cluster_dir1_map[cluster1])-3.1415926/2.)/3.1415926*180. << " " << fabs(drift_dir.Angle(cluster_dir2_map[cluster1])-3.1415926/2.)/3.1415926*180. << std::endl;
+	// std::cout << cluster1->get_cluster_id() << " " << cluster2->get_cluster_id() << " " << dis1/units::cm << " " << dis2/units::cm << " " << dis/units::cm << " " << cluster_length_map[cluster1]/units::cm << " " << cluster_length_map[cluster2]/units::cm << " " << fabs(drift_dir.Angle(cluster_dir1_map[cluster1])-3.1415926/2.)/3.1415926*180. << " " << fabs(drift_dir.Angle(cluster_dir2_map[cluster1])-3.1415926/2.)/3.1415926*180. << std::endl;
 	
 	/* if (dis1 < std::max(3.5*units::cm,dis2*sin(15/180.*3.1415926)) && num_try == 0)  */
 	/*   flag_merge = true; */
@@ -821,9 +821,10 @@ void WCP2dToy::Clustering_neutrino(WCP::PR3DClusterSelection& live_clusters,WCP:
 	  }
 	}
 
-	/* if (flag_merge) */
-	/*    std::cout << dis1/units::cm << " " << dis2/units::cm << " " << dis/units::cm << " " << */
-	/*      cluster_length_map[cluster1]/units::cm << " " << cluster_length_map[cluster2]/units::cm << " " << cluster1->get_cluster_id() << " " << cluster2->get_cluster_id() << " " << flag_merge << " " << cluster1->get_PCA_value(0) << " " << cluster1->get_PCA_value(1) << " " << cluster2->get_PCA_value(0) << " " << cluster2->get_PCA_value(1) << " " << merge_type << " " << fabs(test_pt.x-test_pt1.x)/units::cm << std::endl; */
+	// if (flag_merge) 
+	//    std::cout << dis1/units::cm << " " << dis2/units::cm << " " << dis/units::cm << " " << 
+	//       cluster_length_map[cluster1]/units::cm << " " << cluster_length_map[cluster2]/units::cm << " " << flag_merge << " " << merge_type << " " << cluster1->get_center() << " " << cluster2->get_center() << std::endl;
+		  //cluster1->get_cluster_id() << " " << cluster2->get_cluster_id() << " " << flag_merge << " " << cluster1->get_PCA_value(0) << " " << cluster1->get_PCA_value(1) << " " << cluster2->get_PCA_value(0) << " " << cluster2->get_PCA_value(1) << " " << merge_type << " " << fabs(test_pt.x-test_pt1.x)/units::cm << std::endl; 
 	
 	/* /\*   // std::cout << cluster_length_map[cluster1]/units::cm << " " << cluster1->get_PCA_value(0) << " " << cluster1->get_PCA_value(1) << " " << cluster_length_map[cluster2]/units::cm << " " << cluster1->get_cluster_id() << " " << cluster2->get_cluster_id() << " " << cluster_close_cluster_map[cluster1].first->get_cluster_id() << " " << cluster_close_cluster_map[cluster1].second/units::cm << std::endl; *\/ */
 	/* /\* /\\*   /\\\* if (dis < 3*units::cm && dis1 < 3*units::cm) *\\\/ *\\/ *\/ */
@@ -914,8 +915,15 @@ void WCP2dToy::Clustering_neutrino(WCP::PR3DClusterSelection& live_clusters,WCP:
 	  
 	}
       }
-    }
+    
+	// if (flag_merge) 
+	//    std::cout << 
+	//       cluster_length_map[cluster1]/units::cm << " " << cluster_length_map[cluster2]/units::cm << " " << flag_merge << " " << merge_type << " " << cluster1->get_center() << " " << cluster2->get_center() << std::endl;
+
+	}
+	
   }
+  
   
   
   for (auto it = cluster_cloud_map.begin(); it!= cluster_cloud_map.end(); it++){
@@ -931,6 +939,7 @@ void WCP2dToy::Clustering_neutrino(WCP::PR3DClusterSelection& live_clusters,WCP:
     PR3DCluster *cluster1 = (*it).first;
     PR3DCluster *cluster2 = (*it).second;
 
+	// std::cout<< cluster_length_map[cluster1]/units::cm << " " << cluster_length_map[cluster2]/units::cm << " " << cluster1->get_center() << " " << cluster2->get_center() << std::endl;
     // std::cout << cluster1 << " " << cluster2 << " " << cluster1->get_cluster_id() << " " << cluster2->get_cluster_id() << std::endl;
     
     bool flag_new = true;

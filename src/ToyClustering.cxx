@@ -379,12 +379,12 @@ map_cluster_cluster_vec WCP2dToy::Clustering_jump_gap_cosmics(WCP::PR3DClusterSe
   
 
 
-  // if (flag_neutrino)
-  //   // Now clustering the isolated pieces ....
-  //   for (int i=0;i!=1;i++){
-  //     Clustering_neutrino(live_clusters,cluster_length_map,i);
-  //     // std::cout << std::endl << std::endl;
-  //   }
+  if (flag_neutrino)
+    // Now clustering the isolated pieces ....
+    for (int i=0;i!=1;i++){
+      Clustering_neutrino(live_clusters,cluster_length_map,i);
+      // std::cout << std::endl << std::endl;
+    }
   
   // Clustering_dis(live_clusters,cluster_length_map);
   cerr << em("clustering isolated piece") << std::endl;
