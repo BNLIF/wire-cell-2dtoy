@@ -28,9 +28,9 @@ bool WCP2dToy::ToyFiducial::check_tgm(
 ## Key Dependencies
 The function relies on several other functions and utilities:
 1. `inside_fiducial_volume()`: Checks if points are within detector boundaries. See detailed documentation [here](inside_fiducial_volume.md)
-2. `check_neutrino_candidate()`: Analyzes if track characteristics match neutrino interaction patterns
-3. `check_signal_processing()`: Validates signal processing aspects of track
-4. `check_dead_volume()`: Checks track interaction with detector dead regions
+2. `check_neutrino_candidate()`: Analyzes if track characteristics match neutrino interaction patterns. See detailed documentation [here](check_neutrino_candidates.md)
+3. `check_signal_processing()`: Validates signal processing aspects of track. See detailed documentation [here](check_signal_processing.md)
+4. `check_dead_volume()`: Checks track interaction with detector dead regions. See detailed documentation [here](check_dead_volume.md)
 5. `VHoughTrans()`: Performs Hough transform for direction analysis
 
 ## Algorithm Steps
