@@ -143,7 +143,8 @@ for (size_t i=0; i!=total_pairs.size(); i++){
 ```
 
 ### Output Bundle Creation
-Final bundles are created and organized:
+Final bundles are created and organized. For more details, refer to [ToyMatching_2.md](ToyMatching_2.md):
+
 
 ```cpp
 FlashTPCBundleSelection results_bundles;
