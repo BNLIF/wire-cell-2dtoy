@@ -1,4 +1,4 @@
-::: mermaid
+```mermaid
 flowchart TB
     Start([Start]) --> Init[Initialize Bundle Collections]
     Init --> CreateBundles[Create Initial Flash-TPC Bundles]
@@ -43,4 +43,3 @@ flowchart TB
     class CheckPos,CheckMetrics decision;
     class CalcPE,ExamineBundles,BuildMatrix,RunLasso,CreateMatches process;
     class BundleCreation,BundleEval,Optimization,FinalSelection groupbox;
-:::

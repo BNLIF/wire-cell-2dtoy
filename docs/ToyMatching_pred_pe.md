@@ -71,6 +71,8 @@ double low_x_cut_ext2 = + 4.0*units::cm;
 
 The complete algorithm flow is visualized in [ToyMatching_pred_pe_logic.md](ToyMatching_pred_pe_logic.md):
 
+![Algorithm Flow Diagram](ToyMatching_pred_pe_logic.png)
+
 ### 1. Position Validation
 First, the function checks if the cluster's position is within valid boundaries:
 

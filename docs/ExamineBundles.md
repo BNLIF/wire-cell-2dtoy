@@ -103,6 +103,7 @@ The process uses graph theory to:
 ### Flow Diagram
 
 The complete algorithm flow is visualized in [ExamineBundles_logic.md](ExamineBundles_logic.md):
+![ExamineBundles Logic Flow](ExamineBundles_logic.png)
 
 ### 1. Basic Usage Example
 ```cpp

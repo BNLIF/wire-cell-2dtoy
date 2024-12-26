@@ -1,4 +1,4 @@
-:::mermaid
+```mermaid
 flowchart TD
     subgraph ExamineBundles
         A[Start ExamineBundles] --> B[Initialize new_bundles]
@@ -35,4 +35,3 @@ flowchart TD
 
     C --> |Call| H
     L --> |Call| R
-:::

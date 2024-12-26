@@ -33,6 +33,8 @@ WCP::FlashTPCBundleSelection tpc_light_match(
 
 The complete algorithm flow is visualized in [ToyMatching_logic.md](ToyMatching_logic.md):
 
+![Algorithm Flow Diagram](ToyMatching_logic.png)
+
 The diagram shows the key stages:
 1. Bundle Creation and Initial Filtering
 2. Bundle Evaluation

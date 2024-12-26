@@ -1,4 +1,4 @@
-::: mermaid
+```mermaid
 flowchart TB
     Start([Start]) --> GetPos[Get Cluster Position]
     GetPos --> ValidatePos{Validate\nPosition}
@@ -41,5 +41,3 @@ flowchart TB
     class ValidatePos,CheckBoundary,ValidateResults decision;
     class ProcessClusters,CalcCharge,CalcLight process;
     class PosCheck,LightCalc,FinalProcess subgraphBox;
-
-:::
