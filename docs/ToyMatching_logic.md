@@ -34,10 +34,10 @@ flowchart TB
 
     OrganizeBundles --> Return([Return Bundle Selection])
 
-    classDef process fill:#a8d5ff,stroke:#333,stroke-width:2px;
-    classDef decision fill:#ffcccc,stroke:#333,stroke-width:2px;
-    classDef terminator fill:#d1e7dd,stroke:#333,stroke-width:2px;
-    classDef groupbox fill:#f5f5f5,stroke:#666,stroke-width:2px;
+    classDef process fill:#000000,stroke:#a8d5ff,stroke-width:2px;
+    classDef decision fill:#000000,stroke:#ffcccc,stroke-width:2px;
+    classDef terminator fill:#000000,stroke:#d1e7dd,stroke-width:2px;
+    classDef groupbox fill:#000000,stroke:#f5f5f5,stroke-width:2px;
 
     class Start,Return terminator;
     class CheckPos,CheckMetrics decision;
