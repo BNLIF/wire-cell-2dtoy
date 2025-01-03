@@ -1,7 +1,7 @@
 # Improve_PR3DCluster Function Documentation
 
 ## Overview
-The `Improve_PR3DCluster` function is designed to enhance a 3D cluster reconstruction in Wire-Cell Toolkit by filling in missing pieces and improving connectivity between cells. It takes an existing PR3DCluster and attempts to improve it by analyzing trajectory points and adding missing wire associations.
+The [`Improve_PR3DCluster`](https://github.com/BNLIF/wire-cell/blob/master/uboone_nusel_app/apps/prod-wire-cell-matching-nusel.cxx#L828) function is designed to enhance a 3D cluster reconstruction in Wire-Cell Toolkit by filling in missing pieces and improving connectivity between cells. It takes an existing PR3DCluster and attempts to improve it by analyzing trajectory points and adding missing wire associations.
 
 ## Function Signature
 ```cpp
