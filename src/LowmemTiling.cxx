@@ -494,6 +494,7 @@ int WCP2dToy::LowmemTiling::further_mergewire(GeomWireSelection& allwire){
 
 
 bool WCP2dToy::LowmemTiling::replace_wire(WCP::MergeGeomWire *old_wire, WCP::MergeGeomWire *wire){
+
   // replace the old_wire by the new wire
   // assume the new wire contains the old wire ... 
   // deal with the wire type map  // no point to do this if the wire is bad ... 
@@ -550,6 +551,7 @@ bool WCP2dToy::LowmemTiling::replace_wire(WCP::MergeGeomWire *old_wire, WCP::Mer
   
   
   delete old_wire;
+  return true;
 }
 
 bool WCP2dToy::LowmemTiling::remove_wire_clear(MergeGeomWire *wire){
