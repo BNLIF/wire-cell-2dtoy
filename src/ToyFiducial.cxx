@@ -613,16 +613,18 @@ int WCP2dToy::ToyFiducial::check_LM(WCP::FlashTPCBundle *bundle, double& cluster
   std::vector<int> range_v1 = main_cluster->get_uvwt_range();
   cluster_length = sqrt(2./3. * (pow(pitch_u*range_v1.at(0),2) + pow(pitch_v*range_v1.at(1),2) + pow(pitch_w*range_v1.at(2),2)) + pow(time_slice_width*range_v1.at(3),2))/units::cm;
 
+  //std::cout<<"Cluster Length "<<cluster_length<<std::endl;
+
   double total_pred_pe = 0;
   std::vector<double>& pred_pe = bundle->get_pred_pmt_light();
   for (size_t i=0;i!=pred_pe.size();i++){
     total_pred_pe += pred_pe.at(i);
   }
   double total_flash_pe = flash->get_total_PE();
-
+std::cout << "total_pred_pe "<<total_pred_pe << "  total_flash_pe "<< total_flash_pe << std::endl;
   //std::cout << main_cluster->get_cluster_id() << " " << cluster_length << std::endl;
-  
-  if (total_pred_pe < 25 || cluster_length < 10)
+  //if (total_pred_pe < 25 || cluster_length < 10) 
+  if (total_pred_pe < 25 || cluster_length < 1)
     return 1;
 
   bool flag_anode = bundle->get_flag_close_to_PMT();
@@ -638,7 +640,7 @@ int WCP2dToy::ToyFiducial::check_LM(WCP::FlashTPCBundle *bundle, double& cluster
     meas_pe[i] = flash->get_PE(i);
     if (max_meas_pe < meas_pe[i]) max_meas_pe = meas_pe[i];
   }
-
+std::cout << "  max_meas_pe "<<max_meas_pe<<std::endl;
   if (flash->get_type()==2){
     if (!flag_boundary){
       if (!( log10(total_pred_pe/total_flash_pe)>-0.55 &&
@@ -689,8 +691,9 @@ int WCP2dToy::ToyFiducial::check_LM_cuts(WCP::FlashTPCBundle *bundle, double& cl
     total_pred_pe += pred_pe.at(i);
   }
 
-  if(total_pred_pe < 25 || cluster_length < 10){
-    return 1; /* low energy event */
+  //if(total_pred_pe < 25 || cluster_length < 10){
+  if(total_pred_pe < 25 || cluster_length < 1){
+      	  return 1; /* low energy event */
   }
 
   /* temporary... to make direct comparison to Xin's*/
@@ -753,8 +756,9 @@ int WCP2dToy::ToyFiducial::check_LM_bdt(WCP::FlashTPCBundle *bundle, double& clu
     total_pred_pe += (float)pred_pe.at(i);
   }
 
-  if(total_pred_pe < 25 || cluster_length < 10){
-    return 1; /* low energy event */
+  //if(total_pred_pe < 25 || cluster_length < 10){
+  if(total_pred_pe < 25 || cluster_length < 1){
+      	  return 1; /* low energy event */
   }
 
   /* temporary... to make direct comparison to Xin's*/
