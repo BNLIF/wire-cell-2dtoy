@@ -81,6 +81,9 @@ namespace WCP2dToy{
   
 
   WCP::map_cluster_cluster_vec Clustering_isolated(WCP::PR3DClusterSelection& live_clusters,WCP::map_pr3dcluster_double& cluster_length_map);
+
+
+  void Clustering_CTPointCloud(WCP::ToyCTPointCloud& ct_point_cloud, WCP::PR3DClusterSelection& live_clusters, WCP::map_pr3dcluster_double& cluster_length_map, std::map<int,std::pair<double,double>>& dead_u_index, std::map<int,std::pair<double,double>>& dead_v_index, std::map<int,std::pair<double,double>>& dead_w_index);
 }
 
 #endif
