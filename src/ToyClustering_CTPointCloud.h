@@ -5,14 +5,19 @@ void WCP2dToy::Clustering_CTPointCloud(WCP::ToyCTPointCloud& ct_point_cloud, WCP
     // test a few different functions and then print out ...
 
     // is_good_point
-
     Point p(0*units::cm, 0*units::cm, 0*units::cm);
+    // for (size_t i=0; i!=live_clusters.size(); i++){
+    //     auto p1 = live_clusters[i]->get_point_cloud()->get_closest_point(p);
+    //     if (cluster_length_map[live_clusters.at(i)]/units::cm  > 200)
+    //     std::cout << cluster_length_map[live_clusters.at(i)]/units::cm << " " << p1.second << std::endl;
+    // }
     auto p1 = live_clusters[0]->get_point_cloud()->get_closest_point(p);
     p = p1.second;
     std::cout << p << std::endl;
 
     bool flag = ct_point_cloud.is_good_point(p, 0.6*units::cm, 1,1);
-    std::cout << "is_good_point: " << flag << std::endl;
+    bool flag_wc = ct_point_cloud.is_good_point_wc(p, 0.6*units::cm, 1,1);
+    std::cout << "is_good_point: " << flag << " " << flag_wc << std::endl;
 
     // get_closest_points
     auto closest_points_u= ct_point_cloud.get_closest_points(p, 0.6*units::cm, 0);
@@ -32,5 +37,28 @@ void WCP2dToy::Clustering_CTPointCloud(WCP::ToyCTPointCloud& ct_point_cloud, WCP
     auto time_ch = ct_point_cloud.convert_3Dpoint_time_ch(p);
     std::cout << "Convert_3Dpoint_time_ch: " << time_ch.at(0) << " " << time_ch.at(1) << " " << time_ch.at(2) << " " << time_ch.at(3) << std::endl;
 
+    std::cout << "Number of Points: " << ct_point_cloud.get_num_points(0)<< " " << ct_point_cloud.get_num_points(1) << " " << ct_point_cloud.get_num_points(2) << std::endl;
 
+    auto num_planes = ct_point_cloud.test_good_point(p, 0.6*units::cm, 1);
+    std::cout << "test_good_point: " << num_planes.at(0) << " " << num_planes.at(1) << " " << num_planes.at(2) << " " << num_planes.at(3) << " " << num_planes.at(4) << " " << num_planes.at(5) << std::endl;
+
+    std::cout << "test ave charge " << ct_point_cloud.get_ave_3d_charge(p, 1.0*units::cm) << " " << ct_point_cloud.get_ave_charge(p, 1.0*units::cm, 0) << " " << ct_point_cloud.get_ave_charge(p, 1.0*units::cm, 1) << " " << ct_point_cloud.get_ave_charge(p, 1.0*units::cm, 2) << std::endl;
+
+    auto point1 = ct_point_cloud.convert_time_ch_2Dpoint(10, 10, 0);
+    auto point2 = ct_point_cloud.convert_time_ch_2Dpoint(10, 10+2400, 1);
+    auto point3 = ct_point_cloud.convert_time_ch_2Dpoint(10, 10+4800, 2);
+
+    std::cout << "test 2D conversion " 
+              << point1.first << ", " << point1.second << " "
+              << point2.first << ", " << point2.second << " "
+              << point3.first << ", " << point3.second << std::endl;
+
+    auto dead_chs_u = ct_point_cloud.get_overlap_dead_chs(10, 1000, 0, 2400, 0);
+    auto dead_chs_v = ct_point_cloud.get_overlap_dead_chs(10, 1000, 2400, 4800, 1);
+    auto dead_chs_w = ct_point_cloud.get_overlap_dead_chs(10, 1000, 4800, 8256, 2);
+    std::cout << "test Overlap dead chs: " << dead_chs_u.size() << " " << dead_chs_v.size() << " " << dead_chs_w.size() << std::endl;
+
+    std::cout << "test all dead chs " << ct_point_cloud.get_all_dead_chs().size() << std::endl; 
+
+    std::cout << "test good chs " << ct_point_cloud.get_overlap_good_ch_charge(10,1000,0,2400,0).size() << " " << ct_point_cloud.get_overlap_good_ch_charge(10,1000,2400,4800,1).size() << " " << ct_point_cloud.get_overlap_good_ch_charge(10,1000,4800,8256,2).size() << " " << std::endl;
 }
