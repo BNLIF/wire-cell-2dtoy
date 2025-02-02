@@ -117,6 +117,8 @@ void WCP2dToy::Clustering_CTPointCloud(WCP::ToyCTPointCloud& ct_point_cloud, WCP
             std::cout << path_wcps_vec1.size() << " (" 
                       << path_wcps_vec1.front().x << ", " << path_wcps_vec1.front().y << ", " << path_wcps_vec1.front().z << ") ("
                       << path_wcps_vec1.back().x << ", " << path_wcps_vec1.back().y << ", " << path_wcps_vec1.back().z << ")" << std::endl;
+        
+            live_clusters[i]->Examine_graph(ct_point_cloud);
         }
     }
 }
