@@ -61,4 +61,62 @@ void WCP2dToy::Clustering_CTPointCloud(WCP::ToyCTPointCloud& ct_point_cloud, WCP
     std::cout << "test all dead chs " << ct_point_cloud.get_all_dead_chs().size() << std::endl; 
 
     std::cout << "test good chs " << ct_point_cloud.get_overlap_good_ch_charge(10,1000,0,2400,0).size() << " " << ct_point_cloud.get_overlap_good_ch_charge(10,1000,2400,4800,1).size() << " " << ct_point_cloud.get_overlap_good_ch_charge(10,1000,4800,8256,2).size() << " " << std::endl;
+
+    std::cout << "Test new functions in Cluster" << std::endl;
+    for (size_t i=0; i!=live_clusters.size(); i++){
+        auto p1 = live_clusters[i]->get_point_cloud()->get_closest_point(p);
+        if (cluster_length_map[live_clusters.at(i)]/units::cm  > 239){
+            std::cout << cluster_length_map[live_clusters.at(i)]/units::cm << " " << p1.second << std::endl;
+            auto points = live_clusters[i]->get_main_axis_wcps();
+            std::cout << "(" << points.first.x << ", "  << points.first.y << ", " << points.first.z << ") " 
+            << "(" << points.second.x << ", " << points.second.y << ", " << points.second.z << ")" << std::endl;
+
+            Point p1(points.first.x, points.first.y, points.first.z);
+            Point p2(points.second.x, points.second.y, points.second.z);
+            auto dir1 = live_clusters[i]->calc_dir(p1, p2, 10*units::cm);
+            std::cout << dir1.X() << " " << dir1.Y() << " "<< dir1.Z() << std::endl;
+
+            PointVector points1;
+            points1.push_back(p1);
+            points1.push_back(p2);
+            Point p3(-1204.49*units::mm, -57.85*units::mm, 5635*units::mm);
+            points1.push_back(p3);
+            live_clusters[i]->Calc_PCA(points1);
+            std::cout << live_clusters[i]->get_center() << " " << live_clusters[i]->get_PCA_axis(0) << " " << live_clusters[i]->get_PCA_axis(1) << " " << live_clusters[i]->get_PCA_axis(2) << std::endl;
+
+            Point p4(0,0,0);
+            auto dir2 = live_clusters[i]->calc_PCA_dir(p4, points1);
+            std::cout << dir2.X() << " " << dir2.Y() << " "<< dir2.Z() << std::endl;
+
+            auto p5 = live_clusters[i]->calc_ave_pos(p1, 10);
+            std::cout << p5 << std::endl;
+
+            // test shortest path ...
+            live_clusters[i]->dijkstra_shortest_paths(points.first, ct_point_cloud);
+            live_clusters[i]->cal_shortest_path(points.second);
+
+
+
+            auto path_wcps = live_clusters[i]->get_path_wcps();
+            std::cout << path_wcps.size() << " (" 
+                      << path_wcps.front().x << ", " << path_wcps.front().y << ", " << path_wcps.front().z << ") ("
+                      << path_wcps.back().x << ", " << path_wcps.back().y << ", " << path_wcps.back().z << ")" << std::endl;
+            
+            // for (auto it = path_wcps.begin(); it!=path_wcps.end(); it++){
+            //     std::cout << "{geo_point_t temp_p(" << it->x << ", " << it->y << ", " << it->z << "); points6.push_back(temp_p);}" << std::endl;
+            // }
+
+            std::vector<WCPointCloud<double>::WCPoint> path_wcps_vec;//(path_wcps.begin(), path_wcps.end());
+            live_clusters[i]->organize_wcps_path(path_wcps_vec, 0.6*units::cm);
+            std::cout << path_wcps_vec.size() << " (" 
+                      << path_wcps_vec.front().x << ", " << path_wcps_vec.front().y << ", " << path_wcps_vec.front().z << ") ("
+                      << path_wcps_vec.back().x << ", " << path_wcps_vec.back().y << ", " << path_wcps_vec.back().z << ")" << std::endl;
+
+            std::vector<WCPointCloud<double>::WCPoint> path_wcps_vec1(path_wcps.begin(), path_wcps.end());
+            live_clusters[i]->organize_wcps_vec_path(path_wcps_vec1, 0.6*units::cm);
+            std::cout << path_wcps_vec1.size() << " (" 
+                      << path_wcps_vec1.front().x << ", " << path_wcps_vec1.front().y << ", " << path_wcps_vec1.front().z << ") ("
+                      << path_wcps_vec1.back().x << ", " << path_wcps_vec1.back().y << ", " << path_wcps_vec1.back().z << ")" << std::endl;
+        }
+    }
 }
