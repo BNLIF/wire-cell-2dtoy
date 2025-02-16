@@ -75,6 +75,9 @@ WCP::FlashTPCBundle* WCP2dToy::ExamineBundle(WCP::FlashTPCBundle* bundle, std::s
   }
   //actual code to separate clusters ...
   std::vector<SMGCSelection> sep_mcells = new_cluster->Examine_graph(ct_point_cloud);
+
+  // std::cout << "Test: components: " << sep_mcells.size() << " " << new_cluster->get_mcells().size() << std::endl;
+
   delete new_cluster;
 
   PR3DCluster* main_cluster = 0;

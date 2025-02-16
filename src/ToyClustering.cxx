@@ -247,12 +247,12 @@ map_cluster_cluster_vec WCP2dToy::Clustering_jump_gap_cosmics(WCP::PR3DClusterSe
   std::cout << "nclusters=" << live_clusters.size() << std::endl;
 
 
-  // hack for tests ...
-  //map_cluster_cluster_vec group_clusters;
-  //Clustering_CTPointCloud(ct_point_cloud, live_clusters, cluster_length_map, dead_u_index, dead_v_index, dead_w_index);
+  // // hack for tests ...
+  // map_cluster_cluster_vec group_clusters;
+  // Clustering_CTPointCloud(ct_point_cloud, live_clusters, cluster_length_map, dead_u_index, dead_v_index, dead_w_index);
 
-  //hack
-  //if (1==0){
+  // //hack
+  // if (1==0){
 
   //cluster live dead ...
   Clustering_live_dead(live_clusters, dead_clusters, cluster_length_map, cluster_connected_dead);
@@ -438,7 +438,7 @@ map_cluster_cluster_vec WCP2dToy::Clustering_jump_gap_cosmics(WCP::PR3DClusterSe
   // need to further cluster things ... for the small and isolated pieces ... 
   map_cluster_cluster_vec group_clusters =  WCP2dToy::Clustering_isolated(live_clusters, cluster_length_map);
   // cerr << em("Clustering isolated") << std::endl;
-  //}
+  // }
 
   return group_clusters;
   

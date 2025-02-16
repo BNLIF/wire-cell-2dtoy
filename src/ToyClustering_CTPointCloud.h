@@ -4,6 +4,69 @@ void WCP2dToy::Clustering_CTPointCloud(WCP::ToyCTPointCloud& ct_point_cloud, WCP
 
     // test a few different functions and then print out ...
 
+
+    {
+        Point p1(158.544,969.257,3928), p2(151.938,972.721,3922);
+    double dis = sqrt(pow(p1.x - p2.x, 2) + pow(p1.y - p2.y, 2) + pow(p1.z - p2.z, 2));
+    double step_dis = 1.0 * units::cm;
+    int num_steps = dis/step_dis + 1;
+
+    // Track different types of "bad" points
+    int num_bad[4] = {0,0,0,0};   // more than one of three are bad
+    int num_bad1[4] = {0,0,0,0};  // at least one of three are bad
+    int num_bad2[3] = {0,0,0};    // number of dead channels
+
+    // Check points along path
+    for (int ii = 0; ii != num_steps; ii++) {
+        Point p;
+        p.x = p1.x + (p2.x-p1.x)/num_steps*(ii+1);
+        p.y = p1.y + (p2.y-p1.y)/num_steps*(ii+1);
+        p.z = p1.z + (p2.z-p1.z)/num_steps*(ii+1);
+
+        std::cout << "Test: " << p << std::endl;
+        bool flag = ct_point_cloud.is_good_point(p, 0.6*units::cm, 1, 1);
+        bool flag_wc = ct_point_cloud.is_good_point_wc(p, 0.6*units::cm, 1, 1);
+        std::cout << "Test is_good_point: " << flag << " " << flag_wc << std::endl;
+        
+        auto closest_points_u = ct_point_cloud.get_closest_points(p, 0.6*units::cm, 0);
+        auto closest_points_v = ct_point_cloud.get_closest_points(p, 0.6*units::cm, 1);
+        auto closest_points_w = ct_point_cloud.get_closest_points(p, 0.6*units::cm, 2);
+        std::cout << "Test get_closest_points: " << closest_points_u.pts.size() << " " << closest_points_v.pts.size() << " " << closest_points_w.pts.size() << std::endl;
+        
+        bool flag_dead_chs_u = ct_point_cloud.get_closest_dead_chs(p, 0, 1);
+        bool flag_dead_chs_v = ct_point_cloud.get_closest_dead_chs(p, 1, 1);
+        bool flag_dead_chs_w = ct_point_cloud.get_closest_dead_chs(p, 2, 1);
+        std::cout << "Test get_closest_dead_chs: " << flag_dead_chs_u << " " << flag_dead_chs_v << " " << flag_dead_chs_w << std::endl;
+
+        // Test point quality using grouping parameters
+        std::vector<int> scores;
+        scores = ct_point_cloud.test_good_point(p);
+        std::cout << "Test test_good_point: " << scores[0] << " " << scores[1] << " " << scores[2] << " " << scores[3] << " " << scores[4] << " " << scores[5] << std::endl;
+        // Check overall quality
+        if (scores[0] + scores[3] + scores[1] + scores[4] + (scores[2]+scores[5])*2 < 3) {
+            num_bad[0]++;
+        }
+        if (scores[0]+scores[3]==0) num_bad[1]++;
+        if (scores[1]+scores[4]==0) num_bad[2]++;
+        if (scores[2]+scores[5]==0) num_bad[3]++;
+
+        if (scores[3]!=0) num_bad2[0]++;
+        if (scores[4]!=0) num_bad2[1]++;
+        if (scores[5]!=0) num_bad2[2]++;
+        
+        if (scores[0] + scores[3] + scores[1] + scores[4] + (scores[2]+scores[5]) < 3) {
+            num_bad1[0]++;
+        }
+        if (scores[0]+scores[3]==0) num_bad1[1]++;
+        if (scores[1]+scores[4]==0) num_bad1[2]++;
+        if (scores[2]+scores[5]==0) num_bad1[3]++;
+    }
+    std::cout << "Test: Dis: " << p1 << " " << p2 << " " << dis << std::endl;
+    std::cout << "Test: num_bad1: " << num_bad1[0] << " " << num_bad1[1] << " " << num_bad1[2] << " " << num_bad1[3] << std::endl;
+    std::cout << "Test: num_bad2: " << num_bad2[0] << " " << num_bad2[1] << " " << num_bad2[2] << std::endl;
+    std::cout << "Test: num_bad: " << num_bad[0] << " " << num_bad[1] << " " << num_bad[2] << " " << num_bad[3] << std::endl;
+}
+
     // is_good_point
     Point p(0*units::cm, 0*units::cm, 0*units::cm);
     // for (size_t i=0; i!=live_clusters.size(); i++){
@@ -13,25 +76,25 @@ void WCP2dToy::Clustering_CTPointCloud(WCP::ToyCTPointCloud& ct_point_cloud, WCP
     // }
     auto p1 = live_clusters[0]->get_point_cloud()->get_closest_point(p);
     p = p1.second;
-    std::cout << p << std::endl;
+    // std::cout << p << std::endl;
 
-    bool flag = ct_point_cloud.is_good_point(p, 0.6*units::cm, 1,1);
-    bool flag_wc = ct_point_cloud.is_good_point_wc(p, 0.6*units::cm, 1,1);
-    std::cout << "is_good_point: " << flag << " " << flag_wc << std::endl;
+    // bool flag = ct_point_cloud.is_good_point(p, 0.6*units::cm, 1,1);
+    // bool flag_wc = ct_point_cloud.is_good_point_wc(p, 0.6*units::cm, 1,1);
+    // std::cout << "is_good_point: " << flag << " " << flag_wc << std::endl;
 
-    // get_closest_points
-    auto closest_points_u= ct_point_cloud.get_closest_points(p, 0.6*units::cm, 0);
-    auto closest_points_v= ct_point_cloud.get_closest_points(p, 0.6*units::cm, 1);
-    auto closest_points_w= ct_point_cloud.get_closest_points(p, 0.6*units::cm, 2);
+    // // get_closest_points
+    // auto closest_points_u= ct_point_cloud.get_closest_points(p, 0.6*units::cm, 0);
+    // auto closest_points_v= ct_point_cloud.get_closest_points(p, 0.6*units::cm, 1);
+    // auto closest_points_w= ct_point_cloud.get_closest_points(p, 0.6*units::cm, 2);
 
 
-    std::cout << "get_closest_points: " << closest_points_u.pts.size() << " " << closest_points_v.pts.size() << " " << closest_points_w.pts.size() << std::endl;
+    // std::cout << "get_closest_points: " << closest_points_u.pts.size() << " " << closest_points_v.pts.size() << " " << closest_points_w.pts.size() << std::endl;
 
-    // get_closest_dead_chs
-    bool flag_dead_chs_u = ct_point_cloud.get_closest_dead_chs(p, 0, 1);
-    bool flag_dead_chs_v = ct_point_cloud.get_closest_dead_chs(p, 1, 1);
-    bool flag_dead_chs_w = ct_point_cloud.get_closest_dead_chs(p, 2, 1);
-    std::cout << "get_closest_dead_chs: " << flag_dead_chs_u << " " << flag_dead_chs_v << " " << flag_dead_chs_w << std::endl;
+    // // get_closest_dead_chs
+    // bool flag_dead_chs_u = ct_point_cloud.get_closest_dead_chs(p, 0, 1);
+    // bool flag_dead_chs_v = ct_point_cloud.get_closest_dead_chs(p, 1, 1);
+    // bool flag_dead_chs_w = ct_point_cloud.get_closest_dead_chs(p, 2, 1);
+    // std::cout << "get_closest_dead_chs: " << flag_dead_chs_u << " " << flag_dead_chs_v << " " << flag_dead_chs_w << std::endl;
 
     // Convert_3Dpoint_time_ch
     auto time_ch = ct_point_cloud.convert_3Dpoint_time_ch(p);
