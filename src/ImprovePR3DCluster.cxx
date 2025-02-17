@@ -62,6 +62,8 @@ WCP::PR3DCluster* WCP2dToy::Improve_PR3DCluster(WCP::PR3DCluster* cluster, ToyCT
     }
   }
 
+  // std::cout << "Test: Org: "<< u_time_chs.size() << " " << cluster->get_mcells().size() << " "  << cluster << std::endl; 
+
   // for (auto it = time_ch_charge_map.begin(); it!= time_ch_charge_map.end(); it++){
   //   std::cout << it->first.first << " " << it->first.second << std::endl;
   // }
@@ -69,6 +71,8 @@ WCP::PR3DCluster* WCP2dToy::Improve_PR3DCluster(WCP::PR3DCluster* cluster, ToyCT
   
   //  std::cout << u_time_chs.size() << " Xin1: " << v_time_chs.size() << " " << w_time_chs.size() << " " << time_ch_charge_map.size() << std::endl;
 
+  // hack ...
+ 
   {
     // add in missing pieces based on trajectory points
     std::list<WCPointCloud<double>::WCPoint>& wcps = cluster->get_path_wcps();
@@ -128,7 +132,7 @@ WCP::PR3DCluster* WCP2dToy::Improve_PR3DCluster(WCP::PR3DCluster* cluster, ToyCT
 	path_pts_flag.push_back(false);
       }
       
-      //  std::cout << "Path: " << (*it).x/units::cm << " " << (*it).y/units::cm << " " << (*it).z/units::cm << " " << path_pts_flag.back() << std::endl;
+      // std::cout << "Path: (" << (*it).x/units::cm << ", " << (*it).y/units::cm << ", " << (*it).z/units::cm << ") " << nu << " " << nv << " " << nw << " " << path_pts_flag.back() << " " << results.at(0) << " " << results.at(1) << " " << results.at(2)-2400 << " " << results.at(3)-4800 << std::endl;
     }
 
     // std::cout << path_pts.size() << " " << path_pts_flag.size() << " " << cluster->get_cluster_id() << std::endl;
@@ -195,6 +199,9 @@ WCP::PR3DCluster* WCP2dToy::Improve_PR3DCluster(WCP::PR3DCluster* cluster, ToyCT
     //std::cout << path_pts.size() << std::endl;
     //   std::cout << u_time_chs.size() << " Xin2: " << v_time_chs.size() << " " << w_time_chs.size() << " " << time_ch_charge_map.size() << std::endl;
   }
+ 
+
+  // std::cout << "Test: Alt: " << u_time_chs.size() << " " << cluster->get_mcells().size() << std::endl;
 
   
   WCP2dToy::WCPHolder *WCholder = new WCPHolder();
@@ -225,6 +232,9 @@ WCP::PR3DCluster* WCP2dToy::Improve_PR3DCluster(WCP::PR3DCluster* cluster, ToyCT
   SMGCSet new_mcells_set;
   
   GeomCellSelection& temp_cells = WCholder->get_cells();
+
+  // std::cout <<"Test: Blobs: " << temp_cells.size() << std::endl;
+
   for (auto it = temp_cells.begin(); it!=temp_cells.end(); it++){
     SlimMergeGeomCell *mcell = (SlimMergeGeomCell*)(*it);
     int time_slice = mcell->GetTimeSlice();
@@ -362,7 +372,7 @@ WCP::PR3DCluster* WCP2dToy::Improve_PR3DCluster(WCP::PR3DCluster* cluster, ToyCT
       new_cluster->AddCell(mcell,time_slice);
     }
   }
-  
+  // std::cout << "Test: remove: " << cluster->get_mcells().size() << " " << new_cluster->get_mcells().size() << " " << WCholder->get_ncell() << std::endl;
   //std::cout << cluster->get_cluster_id() << " " << old_mcells.size() << " " << u_time_chs.size() << " " << WCholder->get_ncell() << " " << WCholder->get_nwire() << " " << new_mcells_set.size() << std::endl;
   
   
